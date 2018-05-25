@@ -27,6 +27,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
@@ -271,6 +272,16 @@ public class JasperReportRenderer {
             }
         }
 
+        JRDesignField thisField = new JRDesignField();
+        thisField.setName("THIS");
+        thisField.setValueClass(Bean.class);
+        jasperDesign.addField(thisField);
+
+        JRDesignField userField = new JRDesignField();
+        userField.setName("USER");
+        userField.setValueClass(User.class);
+        jasperDesign.addField(userField);
+
         for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
             // Field
             JRDesignField designField = new JRDesignField();
@@ -283,11 +294,11 @@ public class JasperReportRenderer {
             	// Aggregate field
             	JRDesignField aggregateField = new JRDesignField();
                 aggregateField.setName(column.getName());
-                aggregateField.setValueClass(AttributeType.date.equals(column.getAttributeType()) ? Date.class : Number.class);
+                aggregateField.setValueClass(isDateOrTimeAttribute(column.getAttributeType()) ? Date.class : Number.class);
                 jasperDesign.addField(aggregateField);
 
                 // Aggregation variable.
-                if (AttributeType.date.equals(column.getAttributeType())) {
+                if (isDateOrTimeAttribute((column.getAttributeType()))) {
                     final JRDesignVariable minDateVariable = new JRDesignVariable();
                     minDateVariable.setName(String.format("%s_minDate", column.getName()));
                     minDateVariable.setValueClass(Date.class);
@@ -378,14 +389,16 @@ public class JasperReportRenderer {
                     textField.setStretchWithOverflow(true);
                     textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                     expression = new JRDesignExpression();
-                    if (AttributeType.date.equals(column.getAttributeType())) {
-                        expression.setText(String.format("(($V{%s_minDate} == null) || ($V{%s_maxDate} == null)) ? \"\" : $V{%s_minDate} + \" - \" + $V{%s_maxDate}",
+                    if (isDateOrTimeAttribute(column.getAttributeType())) {
+                        expression.setText(String.format("(($V{%s_minDate} == null) || ($V{%s_maxDate} == null)) ? \"\" : org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_minDate}) + \" - \" + org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_maxDate})",
                         									column.getName(),
                         									column.getName(),
                         									column.getName(),
+                        									column.getName(),
+                                                            column.getName(),
                         									column.getName()));
                     } else {
-                        expression.setText(String.format("$V{%s_summary}", column.getName()));
+                        expression.setText(String.format("org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_summary})", column.getName(), column.getName()));
                     }
                     textField.setExpression(expression);
                     summaryBand.addElement(textField);
@@ -1272,6 +1285,16 @@ public class JasperReportRenderer {
                 attributeType == AttributeType.decimal2 ||
                 attributeType == AttributeType.decimal5 ||
                 attributeType == AttributeType.decimal10 ||
-                attributeType == AttributeType.date;
+                attributeType == AttributeType.date ||
+                attributeType == AttributeType.dateTime ||
+                attributeType == AttributeType.time ||
+                attributeType == AttributeType.timestamp;
+    }
+
+    protected boolean isDateOrTimeAttribute(AttributeType attributeType) {
+        return attributeType == AttributeType.date ||
+                attributeType == AttributeType.dateTime ||
+                attributeType == AttributeType.time ||
+                attributeType == AttributeType.timestamp;
     }
 }
