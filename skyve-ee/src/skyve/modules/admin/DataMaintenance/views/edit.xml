@@ -278,9 +278,13 @@
 				<column />
 				<column />
 				<column />
+				<column />
 				<row>
 					<item>
 						<combo binding="refreshOption"/>
+					</item>
+					<item>
+						<combo binding="evictOption"/>
 					</item>
 					<item>
 						<checkBox binding="notification" triState="false" />

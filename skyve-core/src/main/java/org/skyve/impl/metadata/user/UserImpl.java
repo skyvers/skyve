@@ -411,7 +411,7 @@ public class UserImpl implements User {
 		boolean result = roleNames.contains(SUPER_ROLE);
 
 		if (! result) {
-			DocumentPermission permission = documentPermissions.get(beanBizModule + '.' + beanBizDocument);
+			DocumentPermission permission = documentPermissions.get(String.format("%s.%s", beanBizModule, beanBizDocument));
 			if (permission != null) {
 				if (permission.canRead()) {
 					switch (permission.getScope()) {

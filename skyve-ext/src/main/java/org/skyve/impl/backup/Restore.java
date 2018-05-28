@@ -18,7 +18,6 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
@@ -219,8 +218,7 @@ public class Restore {
 									else if (AttributeType.content.equals(attributeType)) {
 										StringBuilder contentPath = new StringBuilder(128);
 										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
-										AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath, false);
-
+								
 										AttachmentContent content = ElasticContentManager.getFromFileSystem(contentPath, stringValue);
 										if (content == null) {
 											String message = "Could not find file associated with " + stringValue;

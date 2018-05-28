@@ -309,7 +309,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		
 		Map<String, Object> meta = new TreeMap<>();
 		meta.put(FILENAME, attachment.getFileName());
-		meta.put(LAST_MODIFIED, new Date());
+		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true));
 		MimeType contentType = attachment.getMimeType();
 		meta.put(CONTENT_TYPE, (contentType == null) ? MimeType.plain.toString() : contentType.toString());
 		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
@@ -433,6 +433,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath, String contentId) throws Exception {
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
 		String path = absoluteContentStoreFolderPath.toString();
+
 		File dir = new File(path);
 		if (! dir.exists()) {
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + path + ") - Dir DNE");
@@ -461,13 +462,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		String fileName = (String) meta.get(FILENAME);
 		Date lastModified = TimeUtil.parseISODate((String) meta.get(LAST_MODIFIED));
 
-		String bizCustomer = (String) meta.get(BEAN_CUSTOMER_NAME);
-		String bizModule = (String) meta.get(BEAN_MODULE_KEY);
-		String bizDocument = (String) meta.get(BEAN_DOCUMENT_KEY);
-		String bizDataGroupId = (String) meta.get(BEAN_DATA_GROUP_ID);
-		String bizUserId = (String) meta.get(BEAN_USER_ID);
-		String bizId = (String) meta.get(BEAN_DOCUMENT_ID);
-		String binding = (String) meta.get(BEAN_ATTRIBUTE_NAME);
+		String bizCustomer = (String) meta.get(Bean.CUSTOMER_NAME);
+		String bizModule = (String) meta.get(Bean.MODULE_KEY);
+		String bizDocument = (String) meta.get(Bean.DOCUMENT_KEY);
+		String bizDataGroupId = (String) meta.get(Bean.DATA_GROUP_ID);
+		String bizUserId = (String) meta.get(Bean.USER_ID);
+		String bizId = (String) meta.get(Bean.DOCUMENT_ID);
+		String binding = (String) meta.get(ATTRIBUTE_NAME);
 
 		AttachmentContent result = new AttachmentContent(bizCustomer,
 															bizModule,

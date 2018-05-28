@@ -230,7 +230,7 @@ isc.ReportDialog.addClassProperties({
 					else if ((value == 'html') || (value == 'xhtml')) {
 						form.getItem('isPaginated').setValue(false);
 						form.getItem('isPretty').setValue(true);
-                        form.getItem('showSummary').setValue(false);
+                        form.getItem('showSummary').setValue(true);
 					}
 					else {
 						form.getItem('isPaginated').setValue(false);
