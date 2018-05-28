@@ -19,7 +19,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ESClient;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -56,7 +56,7 @@ final class BackupUtil {
 							String databasePassword) 
 	throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
-		AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
+		AbstractContentManager.IMPLEMENTATION_CLASS = ElasticContentManager.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);
 		UtilImpl.DATA_STORE = new DataStore(databaseJdbcDriver, 

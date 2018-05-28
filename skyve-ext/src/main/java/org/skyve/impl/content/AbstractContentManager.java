@@ -40,10 +40,14 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param id The content ID
 	 * @param pathToAppendTo	The path to append to.
 	 */
-	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo) {
+	// TODO remove the olSkool parameter once we've transformed all content
+	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo, boolean olSkool) {
 		pathToAppendTo.append(id.substring(5, 7)).append('/');
 		pathToAppendTo.append(id.substring(10, 12)).append('/');
 		pathToAppendTo.append(id.substring(15, 17)).append('/');
+		if (! olSkool) {
+			pathToAppendTo.append(id).append('/');
+		}
 	}
 	
 	/**

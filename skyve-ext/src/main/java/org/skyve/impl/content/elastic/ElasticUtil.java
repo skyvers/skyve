@@ -181,7 +181,7 @@ public class ElasticUtil {
 	
 	static String analyze(Client client) throws Exception {
 		try (XContentBuilder xcb = XContentFactory.jsonBuilder()) {
-			AnalyzeRequest req = new AnalyzeRequest(ESClient.BEAN_INDEX_NAME, "this is a tests");//.analyzer("english");
+			AnalyzeRequest req = new AnalyzeRequest(ElasticContentManager.BEAN_INDEX_NAME, "this is a tests");//.analyzer("english");
 			AnalyzeResponse analyzeResponse = client.admin().indices().analyze(req).actionGet();
 			return analyzeResponse.toXContent(xcb, null).string();
 		}
@@ -216,8 +216,8 @@ public class ElasticUtil {
 		UtilImpl.CONTENT_DIRECTORY = "/C:/_/skyve/skyve-ee/content/";
 		try (Node n = localNode()) {
 			try (Client c = localClient(n)) {
-				ElasticUtil.prepareIndex(c, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
-				ElasticUtil.prepareIndex(c, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
+				ElasticUtil.prepareIndex(c, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
+				ElasticUtil.prepareIndex(c, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
 				Thread.sleep(10000);
 				System.out.println(analyze(c));
 			}

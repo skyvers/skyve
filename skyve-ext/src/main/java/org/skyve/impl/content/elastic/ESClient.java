@@ -294,7 +294,7 @@ public class ESClient extends AbstractContentManager {
 	throws IOException {
 		StringBuilder path = new StringBuilder(128);
 		path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		AbstractContentManager.appendBalancedFolderPathFromContentId(id, path);
+		AbstractContentManager.appendBalancedFolderPathFromContentId(id, path, true);
 		
 		new File(path.toString()).mkdirs();
 		
@@ -443,7 +443,7 @@ public class ESClient extends AbstractContentManager {
 		StringBuilder result = new StringBuilder(128);
 		
 		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		AbstractContentManager.appendBalancedFolderPathFromContentId(id, result);
+		AbstractContentManager.appendBalancedFolderPathFromContentId(id, result, true);
 		result.append(id);
 		
 		return result.toString();

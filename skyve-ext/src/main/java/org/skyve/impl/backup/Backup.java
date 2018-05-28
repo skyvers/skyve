@@ -1,12 +1,9 @@
 package org.skyve.impl.backup;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -22,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.io.FilenameUtils;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -31,6 +27,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
@@ -267,8 +264,8 @@ public class Backup {
 																	// See if the content file exists 
 																	final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
 																	final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
-																	AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
-																	final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
+																	AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
+																	final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
 																	if (contentFile.exists()) {
 																		problems.write(" but the matching file was found for this missing content at ");
 																		problems.write(contentFile.getAbsolutePath());
@@ -276,39 +273,9 @@ public class Backup {
 																	problems.newLine();
 																}
 																else {
-																	try (InputStream cis = content.getContentStream()) {
-																		StringBuilder contentPath = new StringBuilder(256);
-																		contentPath.append(directory.getAbsolutePath()).append('/');
-																		contentPath.append(content.getBizModule()).append('/');
-																		contentPath.append(content.getBizDocument()).append('/');
-																		AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath);
-																		contentPath.append(stringValue);
-																		File contentDirectory = new File(contentPath.toString());
-																		if (! contentDirectory.exists()) {
-																			contentDirectory.mkdirs();
-																		}
-																		String fileName = content.getFileName();
-																		if (fileName == null) {
-																			fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
-																		}
-																		else {
-																			// remove the path
-																			fileName = FilenameUtils.getName(fileName);
-																			// remove any invalid chars on all OSs (restricted by windows)
-																			fileName = fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
-																		}
-																		try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
-																															File.separator + fileName)) {
-																			try (BufferedOutputStream bos = new BufferedOutputStream(cos)) {
-																				byte[] bytes = new byte[1024]; // 1K
-																				int bytesRead = 0;
-																				while ((bytesRead = cis.read(bytes)) > 0) {
-																					bos.write(bytes, 0, bytesRead);
-																				}
-																				bos.flush();
-																			}
-																		}
-																	}
+																	StringBuilder contentPath = new StringBuilder(256);
+																	contentPath.append(directory.getAbsolutePath()).append('/');
+																	ElasticContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
 																}
 															}
 															catch (Exception e) {

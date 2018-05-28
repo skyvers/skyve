@@ -17,7 +17,9 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
@@ -30,8 +32,15 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class Restore {
+	public static enum ContentRestoreOption {
+		clearOrphanedContentIds,
+		saveOrphanedContentIds,
+		error
+	}
+	
 	public static void restore(String timestampFolderName,
-								boolean useBackupTables)
+								boolean useBackupTables,
+								ContentRestoreOption conentRestoreOption)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
@@ -51,13 +60,13 @@ public class Restore {
 			connection.setAutoCommit(false);
 
 			// restore normal tables
-			restoreData(backupDirectory, tables, connection, false, false);
+			restoreData(backupDirectory, tables, connection, false, false, conentRestoreOption);
 			// restore extension join tables
-			restoreData(backupDirectory, tables, connection, false, true);
+			restoreData(backupDirectory, tables, connection, false, true, conentRestoreOption);
 			// link foreign keys
 			restoreForeignKeys(backupDirectory, tables, connection);
 			// restore collection join tables
-			restoreData(backupDirectory, tables, connection, true, false);
+			restoreData(backupDirectory, tables, connection, true, false, conentRestoreOption);
 		}
 	}
 
@@ -70,7 +79,8 @@ public class Restore {
 										Collection<Table> tables,
 										Connection connection,
 										boolean joinTables,
-										boolean extensionTables) 
+										boolean extensionTables,
+										ContentRestoreOption contentRestoreOption) 
 	throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
@@ -207,44 +217,27 @@ public class Restore {
 										statement.setLong(index++, Long.parseLong(stringValue));
 									}
 									else if (AttributeType.content.equals(attributeType)) {
-										// check the relative content paths for the content file
-										File contentFile = null;
-										String moduleName = null;
-										String documentName = null;
-										final String fileName = stringValue;
-										for (String relativeContentPath : table.relativeContentPaths) {
-											StringBuilder contentPath = new StringBuilder(256);
-											contentPath.append(backupDirectory.getAbsolutePath()).append('/');
-											contentPath.append(relativeContentPath).append('/');
-											AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath);
-											contentPath.append(stringValue);
-											File candidateDirectory = new File(contentPath.toString());
-											File[] files = candidateDirectory.listFiles();
-											if ((files != null) && // directory exists
-													(files.length == 1)) { // has the file in it
-												contentFile = files[0];
-												int separatorIndex = relativeContentPath.indexOf(File.separatorChar);
-												moduleName = relativeContentPath.substring(0, separatorIndex);
-												documentName = relativeContentPath.substring(separatorIndex + 1);
-												break;
+										StringBuilder contentPath = new StringBuilder(128);
+										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
+										AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath, false);
+
+										AttachmentContent content = ElasticContentManager.getFromFileSystem(contentPath, stringValue);
+										if (content == null) {
+											String message = "Could not find file associated with " + stringValue;
+											if (ContentRestoreOption.error.equals(contentRestoreOption)) {
+												Util.LOGGER.severe(message);
+												throw new DomainException(message);
+											}
+											else if (ContentRestoreOption.clearOrphanedContentIds.equals(contentRestoreOption)) {
+												Util.LOGGER.info(message + " : Setting content to null");
+												statement.setString(index++, null);
+											}
+											else {
+												Util.LOGGER.info(message + " : Setting content ID regardless");
+												statement.setString(index++, stringValue);
 											}
 										}
-										if (contentFile == null) {
-											System.err.println("Could not find file associated with " + stringValue);
-											statement.setString(index++, null);
-										}
 										else {
-											String dataGroupId = UtilImpl.processStringValue(values.get(Bean.DATA_GROUP_ID));
-											AttachmentContent content = new AttachmentContent(values.get(Bean.CUSTOMER_NAME), 
-																								moduleName,
-																								documentName, 
-																								dataGroupId, 
-																								values.get(Bean.USER_ID), 
-																								values.get(Bean.DOCUMENT_ID),
-																								header,
-																								contentFile.getName(),
-																								contentFile);
-											content.setContentId(fileName);
 											cm.put(content);
 											statement.setString(index++, content.getContentId());
 										}
@@ -366,7 +359,7 @@ public class Restore {
 
 		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		try {
-			restore(args[8], true);
+			restore(args[8], true, ContentRestoreOption.error);
 		}
 		finally {
 			BackupUtil.finalise();

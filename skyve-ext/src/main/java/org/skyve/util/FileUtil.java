@@ -2,12 +2,14 @@ package org.skyve.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +72,24 @@ public class FileUtil {
 		}
 
 		return bytes;
+	}
+	
+	/**
+	 * Return the contents of a text file as a String.
+	 */
+	public static final String getFileAsString(File file) throws IOException {
+		StringBuilder result = new StringBuilder(1024);
+		
+		try (FileReader fr = new FileReader(file)) {
+			try (BufferedReader br = new BufferedReader(fr)) {
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					result.append(line).append('\n');
+				}
+			}
+		}
+		
+		return result.toString();
 	}
 
 	/**

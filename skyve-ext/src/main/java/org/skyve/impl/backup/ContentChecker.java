@@ -58,7 +58,7 @@ public class ContentChecker {
                                                     // Construct what would be the file path.
                                                     final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
                                                     final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
-                                                    AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
+                                                    AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, true);
                                                     final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
 
                                                     if (contentFile.exists()) {
@@ -120,9 +120,9 @@ public class ContentChecker {
 													// Construct what would be the file path.
 													final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
 													final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
-													AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
+													AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, true);
 													final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
-
+													
 													if (contentFile.exists()) {
 														String contentType = Files.probeContentType(contentFile.toPath());
 														if (contentType == null) {
@@ -130,13 +130,9 @@ public class ContentChecker {
 														}
 														LOGGER.error("Found matching file for missing content {} of type {}. Relink", contentFile.getAbsolutePath(), contentType);
 														MimeType mimeType = MimeType.fromMimeType(contentType);
-														String firstRelativeContentPath = table.relativeContentPaths.get(0);
-														int splitIndex = firstRelativeContentPath.indexOf(File.separatorChar);
-														String moduleName = firstRelativeContentPath.substring(0, splitIndex);
-														String documentName = firstRelativeContentPath.substring(splitIndex + 1);
 														content = new AttachmentContent(resultSet.getString(Bean.CUSTOMER_NAME),
-																							moduleName,
-																							documentName,
+																							resultSet.getString(Bean.MODULE_KEY),
+																							resultSet.getString(Bean.DOCUMENT_KEY),
 																							resultSet.getString(Bean.DATA_GROUP_ID),
 																							resultSet.getString(Bean.USER_ID),
 																							resultSet.getString(Bean.DOCUMENT_ID),

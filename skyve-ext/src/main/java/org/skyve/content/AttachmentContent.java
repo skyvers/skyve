@@ -10,6 +10,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.util.Date;
 
+import org.apache.commons.io.FilenameUtils;
 import org.skyve.content.MimeType;
 import org.skyve.util.FileUtil;
 
@@ -46,6 +47,12 @@ public class AttachmentContent extends Content {
 			else {
 				this.fileName = "content";
 			}
+		}
+		else {
+			// remove the path
+			this.fileName = FilenameUtils.getName(fileName);
+			// remove any invalid chars on all OSs (restricted by windows)
+			this.fileName = this.fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
 		}
 		this.mimeType = mimeType;
 		if ((fileName != null) && (mimeType == null)) {
