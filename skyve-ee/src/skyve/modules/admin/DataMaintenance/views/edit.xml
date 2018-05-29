@@ -164,12 +164,16 @@
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
 					<row>
 						<item>
 							<spacer />
 						</item>
 						<item align="right">
 							<button actionName="CheckContent" />
+						</item>
+						<item align="right">
+							<button actionName="MigrateContent" />
 						</item>
 						<item align="right">
 							<button actionName="RelinkContent" />
@@ -340,5 +344,6 @@
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
 		<action className="CheckContent" displayName="Check Content" inActionPanel="false" />
 		<action className="RelinkContent" displayName="Relink Content" inActionPanel="false" confirm="Sure?" />
+		<action className="MigrateContent" displayName="Migrate Content" inActionPanel="false" confirm="Sure?" />
 	</actions>
 </view>
