@@ -126,6 +126,15 @@
 				<value code="All" />
 			</values>
 		</enum>
+		<enum name="contentRestoreOption" persistent="false" trackChanges="false" audited="false">
+			<displayName>Content Restore</displayName>
+			<defaultValue>error</defaultValue>
+			<values>
+				<value code="error" description="Error" />
+				<value code="clearOrphanedContentIds" description="Clear Orphaned Content IDs" />
+				<value code="saveOrphanedContentIds" description="Save Orphaned Content IDs" />
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">

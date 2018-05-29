@@ -107,7 +107,8 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		}
 
 		Util.LOGGER.info("Restore " + extractDirName);
-		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup, ContentRestoreOption.error);
+		ContentRestoreOption cro = ContentRestoreOption.valueOf(bean.getContentRestoreOption().toCode());
+		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup, cro);
 		Util.LOGGER.info("DDL Sync");
 		if (sync) {
 			DDL.sync(true);

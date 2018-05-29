@@ -69,6 +69,11 @@
 						<column responsiveWidth="12" />
 						<column pixelWidth="110" responsiveWidth="12" />
 						<row>
+							<item>
+								<radio binding="contentRestoreOption" vertical="false" />
+							</item>
+						</row>
+						<row>
 							<item required="false">
 								<combo binding="restorePreProcess" >
 									<onChangedHandlers><rerender/></onChangedHandlers>
