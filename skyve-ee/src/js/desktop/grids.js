@@ -1104,11 +1104,16 @@ isc.BizListGrid.addMethods({
 			},
 			selectionUpdated: function(record, recordList) {
 				if (me.selectedIdBinding) {
-					// NB:- selection should not affect whether the form is dirty or not
-					var changes = me._view._vm.valuesHaveChanged();
-					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-					if (changes) {} else {
-						me._view._vm.rememberValues();
+					// NB:- trackChanges switches whether selection should affect the form's dirtiness or not
+					if (me.selectedIdTrackChanges) {
+						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+					}
+					else {
+						var changes = me._view._vm.valuesHaveChanged();
+						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+						if (changes) {} else {
+							me._view._vm.rememberValues();
+						}
 					}
 				}
 				if (me.bizSelected) {
@@ -1925,11 +1930,16 @@ isc.BizDataGrid.addMethods({
 			},
 			selectionUpdated: function(record, recordList) {
 				if (me.selectedIdBinding) {
-					// NB:- selection should not affect whether the form is dirty or not
-					var changes = me._view._vm.valuesHaveChanged();
-					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
-					if (changes) {} else {
-						me._view._vm.rememberValues();
+					// NB:- trackChanges switches whether selection should affect the form's dirtiness or not
+					if (me.selectedIdTrackChanges) {
+						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+					}
+					else {
+						var changes = me._view._vm.valuesHaveChanged();
+						me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+						if (changes) {} else {
+							me._view._vm.rememberValues();
+						}
 					}
 				}
 				if (me.bizSelected) {

@@ -998,6 +998,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
+			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
 		}
 		disabled(grid.getDisabledConditionName(), code);
 		editable(grid.getEditable(), code);
@@ -1256,6 +1258,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
+			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
 		}
 		disabled(grid.getDisabledConditionName(), code);
 		disableCRUD(grid, code);
