@@ -95,7 +95,6 @@ public class SmartClientEditServlet extends HttpServlet {
 	        Operation operation = Operation.valueOf(operationType);
 
 	        AbstractPersistence persistence = null;
-	        boolean commandSuccessful = true;
 	        try {
 				try {
 					// Start or continue a smartclient conversation
@@ -334,18 +333,12 @@ public class SmartClientEditServlet extends HttpServlet {
 		    	}
 	
 		    	produceErrorResponse(t, operation, true, pw);
-	
-		    	if (! (t instanceof MessageException)) {
-		    		commandSuccessful = false;
-		    	}
 			}
 		    finally {
-		    	if (commandSuccessful) {
-		    	    // commit and close (its already been serialized to the conversations cache if needed)
-		    		if (persistence != null) {
-		    			persistence.commit(true);
-		    		}
-		    	}
+	    	    // commit and close (its already been serialized to the conversations cache if needed)
+	    		if (persistence != null) {
+	    			persistence.commit(true);
+	    		}
 		    }
 		}
 	}
