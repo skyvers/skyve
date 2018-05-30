@@ -94,9 +94,15 @@ public class ESClient extends AbstractContentManager {
 	private static final Tika TIKA = new Tika();
 
 	private Client client = null;
+	private boolean migrating;
+	
+	public ESClient(boolean migrating) {
+		client = ElasticUtil.localClient(node);
+		this.migrating = migrating;
+	}
 	
 	public ESClient() {
-		client = ElasticUtil.localClient(node);
+		this(false);
 	}
 	
 	@Override
@@ -439,10 +445,14 @@ public class ESClient extends AbstractContentManager {
 		return result;
 	}
 	
-	private static String getFilePath(String id) {
+	private String getFilePath(String id) {
 		StringBuilder result = new StringBuilder(128);
 		
-		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
+		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME);
+		if (migrating) {
+			result.append("_BACKUP");
+		}
+		result.append('/');
 		AbstractContentManager.appendBalancedFolderPathFromContentId(id, result, true);
 		result.append(id);
 		
