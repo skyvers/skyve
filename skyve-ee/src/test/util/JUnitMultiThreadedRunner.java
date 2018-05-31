@@ -53,6 +53,7 @@ public class JUnitMultiThreadedRunner extends BlockJUnit4ClassRunner {
 		@SuppressWarnings("synthetic-access")
 		public void run() {
 			JUnitMultiThreadedRunner.super.runChild(method, notifier);
+			threadCount.decrementAndGet();
 		}
 	}
 }
