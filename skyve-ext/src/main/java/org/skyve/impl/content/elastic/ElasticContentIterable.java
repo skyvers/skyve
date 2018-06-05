@@ -1,4 +1,4 @@
-package org.skyve.impl.content.elasticsearch;
+package org.skyve.impl.content.elastic;
 
 import java.text.ParseException;
 import java.util.Iterator;
@@ -14,10 +14,10 @@ import org.skyve.content.SearchResult;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
-class ESIterable implements ContentIterable {
+class ElasticContentIterable implements ContentIterable {
 	private Client client = null;
 
-	ESIterable(Client client) {
+	ElasticContentIterable(Client client) {
 		this.client = client;
 	}
 	
@@ -29,21 +29,21 @@ class ESIterable implements ContentIterable {
 		private ESIterator() {
 			@SuppressWarnings("synthetic-access")
 			SearchResponse response = client.prepareSearch()
-										.setIndices(ESClient.ATTACHMENT_INDEX_NAME, ESClient.BEAN_INDEX_NAME)
-										.setTypes(ESClient.ATTACHMENT_INDEX_TYPE, ESClient.BEAN_INDEX_TYPE)
+										.setIndices(ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.BEAN_INDEX_NAME)
+										.setTypes(ElasticContentManager.ATTACHMENT_INDEX_TYPE, ElasticContentManager.BEAN_INDEX_TYPE)
 								        .setQuery(QueryBuilders.matchAllQuery())
 								        .setSize(1000)
 								        .setScroll(TimeValue.timeValueMinutes(2))
-										.addFields(ESClient.BEAN_CUSTOMER_NAME,
-													ESClient.BEAN_MODULE_KEY,
-													ESClient.BEAN_DOCUMENT_KEY,
-													ESClient.BEAN_DATA_GROUP_ID,
-													ESClient.BEAN_USER_ID,
-													ESClient.BEAN_DOCUMENT_ID,
-													ESClient.BEAN_ATTRIBUTE_NAME,
-													ESClient.LAST_MODIFIED,
-													ESClient.FILE_LAST_MODIFIED,
-													ESClient.CONTENT)
+										.addFields(ElasticContentManager.BEAN_CUSTOMER_NAME,
+													ElasticContentManager.BEAN_MODULE_KEY,
+													ElasticContentManager.BEAN_DOCUMENT_KEY,
+													ElasticContentManager.BEAN_DATA_GROUP_ID,
+													ElasticContentManager.BEAN_USER_ID,
+													ElasticContentManager.BEAN_DOCUMENT_ID,
+													ElasticContentManager.BEAN_ATTRIBUTE_NAME,
+													ElasticContentManager.LAST_MODIFIED,
+													ElasticContentManager.FILE_LAST_MODIFIED,
+													ElasticContentManager.CONTENT)
 								        .execute()
 								        .actionGet();
 			scrollId = response.getScrollId();
@@ -82,12 +82,12 @@ class ESIterable implements ContentIterable {
 		public SearchResult next() {
 			SearchHit searchHit = i.next();
 
-			String bizCustomer = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_CUSTOMER_NAME);
-			String bizModule = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_MODULE_KEY);
-			String bizDocument = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DOCUMENT_KEY);
-			String bizDataGroupId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DATA_GROUP_ID);
-			String bizUserId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_USER_ID);
-			String bizId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DOCUMENT_ID);
+			String bizCustomer = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_CUSTOMER_NAME);
+			String bizModule = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_MODULE_KEY);
+			String bizDocument = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_DOCUMENT_KEY);
+			String bizDataGroupId = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_DATA_GROUP_ID);
+			String bizUserId = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_USER_ID);
+			String bizId = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_DOCUMENT_ID);
 
 			SearchResult hit = new SearchResult();
 			
@@ -98,10 +98,10 @@ class ESIterable implements ContentIterable {
 			hit.setBizUserId(bizUserId);
 			hit.setBizId(bizId);
 
-			hit.setExcerpt((String) ESClient.fieldValue(searchHit, ESClient.CONTENT));
-			hit.setAttributeName((String) ESClient.fieldValue(searchHit, ESClient.BEAN_ATTRIBUTE_NAME));
+			hit.setExcerpt((String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.CONTENT));
+			hit.setAttributeName((String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_ATTRIBUTE_NAME));
 			
-			String lastModified = (String) ESClient.fieldValue(searchHit, ESClient.LAST_MODIFIED);
+			String lastModified = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.LAST_MODIFIED);
 			if (lastModified != null) {
 				try {
 					hit.setLastModified(TimeUtil.parseISODate(lastModified));
@@ -110,7 +110,7 @@ class ESIterable implements ContentIterable {
 					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + lastModified + " for content ID = " + searchHit.getId());
 				}
 			}
-			String fileLastModified = (String) ESClient.fieldValue(searchHit, ESClient.FILE_LAST_MODIFIED);
+			String fileLastModified = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.FILE_LAST_MODIFIED);
 			if (fileLastModified != null) {
 				try {
 					hit.setLastModified(TimeUtil.parseISODate(fileLastModified));

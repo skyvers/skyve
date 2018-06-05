@@ -8,7 +8,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
-import org.skyve.impl.content.elasticsearch.ESClient;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.StateUtil;
 import org.skyve.util.Util;
@@ -50,7 +50,7 @@ import org.skyve.util.Util;
  * 
  * @author mike
  */
-public class JDBCRemoteContentManagerServer extends ESClient {
+public class JDBCRemoteContentManagerServer extends ElasticContentManager {
 	static final String CONTENT_DATA_STORE_NAME = "CONTENT";
 	static final String PUT_BEAN_FUNCTION_NAME = "PUT_BEAN";
 	static final String PUT_ATTACHMENT_FUNCTION_NAME = "PUT_ATTACHMENT";

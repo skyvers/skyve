@@ -7,6 +7,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.backup.DDL;
+import org.skyve.impl.backup.Restore.ContentRestoreOption;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -106,7 +107,8 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		}
 
 		Util.LOGGER.info("Restore " + extractDirName);
-		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup);
+		ContentRestoreOption cro = ContentRestoreOption.valueOf(bean.getContentRestoreOption().toCode());
+		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup, cro);
 		Util.LOGGER.info("DDL Sync");
 		if (sync) {
 			DDL.sync(true);

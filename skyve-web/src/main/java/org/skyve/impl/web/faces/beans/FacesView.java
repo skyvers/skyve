@@ -338,7 +338,7 @@ public class FacesView<T extends Bean> extends Harness {
 	// Note - this is also called from EL in ListGrid tag
  	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule, 
 												final String queryName,
-												final Map<String, Object> parameters) {
+												final List<FilterParameter> parameters) {
  		List<BeanMapAdapter<Bean>> result = null;
  		
  		// these are ultimately web parameters that may not be present in the request
@@ -348,18 +348,18 @@ public class FacesView<T extends Bean> extends Harness {
  		else {
 	 		StringBuilder key = new StringBuilder(64).append(bizModule).append('.').append(queryName);
 	 		if (parameters != null) {
-	 			for (String parameterName : parameters.keySet()) {
-	 				key.append('.').append(parameterName).append('=').append(parameters.get(parameterName));
+	 			for (FilterParameter parameter : parameters) {
+	 				String valueOrBinding = parameter.getValue();
+	 				if (valueOrBinding == null) {
+	 					valueOrBinding = parameter.getBinding();
+	 				}
+	 				key.append('.').append(parameter.getName()).append(parameter.getOperator()).append(valueOrBinding);
 	 			}
 	 		}
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				List<Bean> interimBeans = new GetBeansAction(bizModule, queryName, parameters).execute();
-				result = new ArrayList<>(interimBeans.size());
-				for (Bean bean : interimBeans) {
-					result.add(new BeanMapAdapter<>(bean));
-				}
+				result = new GetBeansAction(bizModule, queryName, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -460,8 +460,27 @@ public class FacesView<T extends Bean> extends Harness {
 		String completeModule = (String) attributes.get("module");
 		String completeQuery = (String) attributes.get("query");
 		String displayBinding = (String) attributes.get("display");
-		Map<String, Object> parameters = new TreeMap<>();
-		parameters.put(displayBinding, query);
+
+		// Take a defensive copy of the parameters collection and add the query to the description binding
+		@SuppressWarnings("unchecked")
+		List<FilterParameter> parameters = (List<FilterParameter>) attributes.get("parameters");
+		if (parameters == null) {
+			parameters = new ArrayList<>();
+		}
+		else {
+			parameters = new ArrayList<>(parameters);
+		}
+		
+		// Add the query parameter if its defined
+		String parameterValue = Util.processStringValue(query);
+		if (parameterValue != null) {
+			FilterParameterImpl displayParameter = new FilterParameterImpl();
+			displayParameter.setName(displayBinding);
+			displayParameter.setOperator(FilterOperator.like);
+			displayParameter.setValue(parameterValue);
+			parameters.add(displayParameter);
+		}
+		
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 		return getBeans(completeModule, completeQuery, parameters);
 	}

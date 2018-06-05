@@ -24,6 +24,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - Operation
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
+ * @depend - - - ContentRestoreOption
  * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -94,6 +95,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String refreshOptionPropertyName = "refreshOption";
 	/** @hidden */
 	public static final String evictOptionPropertyName = "evictOption";
+	/** @hidden */
+	public static final String contentRestoreOptionPropertyName = "contentRestoreOption";
 
 	/**
 	 * Option
@@ -251,6 +254,84 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Content Restore
+	 **/
+	@XmlEnum
+	public static enum ContentRestoreOption implements Enumeration {
+		error("error", "Error"),
+		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
+		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private ContentRestoreOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static ContentRestoreOption fromCode(String code) {
+			ContentRestoreOption result = null;
+
+			for (ContentRestoreOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static ContentRestoreOption fromDescription(String description) {
+			ContentRestoreOption result = null;
+
+			for (ContentRestoreOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				ContentRestoreOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (ContentRestoreOption value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
 	 * Module.Document
 	 **/
 	private String modDocName;
@@ -354,6 +435,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * Cache Evict
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
+	/**
+	 * Content Restore
+	 **/
+	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
 
 	@Override
 	@XmlTransient
@@ -866,6 +951,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setEvictOption(EvictOption evictOption) {
 		this.evictOption = evictOption;
+	}
+
+	/**
+	 * {@link #contentRestoreOption} accessor.
+	 * @return	The value.
+	 **/
+	public ContentRestoreOption getContentRestoreOption() {
+		return contentRestoreOption;
+	}
+
+	/**
+	 * {@link #contentRestoreOption} mutator.
+	 * @param contentRestoreOption	The new value.
+	 **/
+	@XmlElement
+	public void setContentRestoreOption(ContentRestoreOption contentRestoreOption) {
+		this.contentRestoreOption = contentRestoreOption;
 	}
 
 	/**

@@ -88,4 +88,13 @@ public class SkyveDataSource implements JRDataSource {
 
 		return result;
 	}
+
+	public static Object getFormattedValue(User user, Bean currentBean, String binding, Object value) throws JRException {
+		try {
+			return BindUtil.getDisplay(user.getCustomer(), currentBean, binding, value);
+		}
+		catch (Exception e) {
+			throw new JRException(String.format("Could not format value %s for binding %s.", value, binding), e);
+		}
+	}
 }

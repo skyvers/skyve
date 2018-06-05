@@ -17,6 +17,10 @@
 			<displayName>Aggregated Association</displayName>
 			<documentName>AllAttributesPersistent</documentName>
 		</association>
+		<association name="composedAssociation" type="composition">
+			<displayName>Composed Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 		</boolean>

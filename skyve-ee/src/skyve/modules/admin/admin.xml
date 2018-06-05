@@ -299,6 +299,7 @@
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
+					<action name="MigrateContent" />
 					<action name="Reindex" />
 					<action name="RelinkContent" />
 					<action name="Restore" />

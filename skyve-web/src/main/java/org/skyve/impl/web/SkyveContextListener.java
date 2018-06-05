@@ -19,7 +19,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elasticsearch.ESClient;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -197,7 +197,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 		if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS == null) {
-			AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
+			AbstractContentManager.IMPLEMENTATION_CLASS = ElasticContentManager.class;
 		}
 		else {
 			try {

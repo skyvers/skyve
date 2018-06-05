@@ -414,7 +414,8 @@ public class ReportServlet extends HttpServlet {
 					designParams.setPageHeight(((Number) values.get("height")).intValue());
 					designParams.setPaginated(Boolean.TRUE.equals(values.get("isPaginated")));
 					designParams.setPretty(Boolean.TRUE.equals(values.get("isPretty")));
-		
+					designParams.setShowSummary(Boolean.TRUE.equals(values.get("showSummary")));
+
 					designParams.setTopMargin(((Number) values.get("top")).intValue());
 					designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
 					designParams.setBottomMargin(((Number) values.get("left")).intValue());

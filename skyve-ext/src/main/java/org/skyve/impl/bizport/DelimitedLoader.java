@@ -31,32 +31,6 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		return valueMap;
 	}
 
-	private String[] splitLine() throws Exception {
-		String line = fileReader.readLine();
-		if (null == line) {
-			return null;
-		}
-		String[] parts = line.split(seperator);
-
-		List<String> values = new ArrayList<>();
-		String part;
-		for (int cntr = 0; cntr < parts.length; ++cntr) {
-			part = parts[cntr];
-			if (part.startsWith("\"")) {
-				while (!part.endsWith("\"")) {
-					part += seperator + parts[++cntr];
-				}
-			}
-			values.add(part);
-		}
-
-		if (line.endsWith(seperator)) {
-			values.add("");
-		}
-
-		return values.toArray(new String[values.size()]);
-	}
-
 	public DelimitedLoader(LoaderActivityType activityType, InputStream fileInputStream, UploadException exception,
 			String moduleName, String documentName, String delimiter, String... bindings) throws Exception {
 
@@ -141,7 +115,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 					currentValue = replaceEscapedDoubleQuote(currentValue);
 
 					// trim the string after the quotes were stripped
-					currentValue = currentValue.trim();
+					currentValue = currentValue != null ? currentValue.trim() : null;
 				}
 			}
 
@@ -211,5 +185,37 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 			return string.replaceAll("\"\"", "\"");
 		}
 		return string;
+	}
+
+	static String[] splitLine(String line, String delimiter) {
+		if (null == line) {
+			return null;
+		}
+
+		String[] parts = line.split(delimiter);
+
+		List<String> values = new ArrayList<>();
+		String part;
+		for (int cntr = 0; cntr < parts.length; ++cntr) {
+			part = parts[cntr];
+			if (part.startsWith("\"")) {
+				while (!part.endsWith("\"")) {
+					part += delimiter + parts[++cntr];
+				}
+			}
+			values.add(part);
+		}
+
+		if (line.endsWith(delimiter)) {
+			values.add("");
+		}
+
+		return values.toArray(new String[values.size()]);
+	}
+
+	private String[] splitLine() throws Exception {
+		String line = fileReader.readLine();
+
+		return splitLine(line, seperator);
 	}
 }

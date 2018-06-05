@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.AfterClass;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
+
+import util.JUnitMultiThreadedRunnerWithParameters;
 
 public abstract class CrossBrowserTest {
 	private static final String CHROME_DRIVER_CLASS = "org.openqa.selenium.chrome.ChromeDriver";
@@ -132,5 +135,12 @@ public abstract class CrossBrowserTest {
 	protected void tearDownBrowser() {
 		driver.quit();
 //		Assert.assertEquals("", verificationErrors.toString());
+	}
+	
+	@AfterClass
+	public static void _waitForThreadsToComplete() throws Exception {
+		while (JUnitMultiThreadedRunnerWithParameters.THREAD_COUNT.get() > 0) {
+			Thread.sleep(100);
+		}
 	}
 }

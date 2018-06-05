@@ -2,6 +2,7 @@ package util;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -11,10 +12,13 @@ import java.util.List;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.TestUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
@@ -87,6 +91,84 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
+	public void testGetConstantDomainValues() throws Exception {
+		assumeTrue(getBizlet() != null);
+
+		// create the test data
+		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
+
+		// perform the method under test
+		for (Attribute attribute : allAttributes) {
+			AttributeType type = attribute.getAttributeType();
+
+			// skip updating content, an association or collection, try find a scalar attribute to update
+			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
+					|| AttributeType.association.equals(type)
+					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+				continue;
+			}
+
+			try {
+				getBizlet().getConstantDomainValues(attribute.getName());
+			} catch (ValidationException e) {
+				// pass - action handled incorrect input
+			}
+		}
+	}
+
+	@Test
+	public void testGetDynamicDomainValues() throws Exception {
+		assumeTrue(getBizlet() != null);
+
+		// create the test data
+		ArrayList<? extends Attribute> allAttributes = getAllAttributes(getBean());
+
+		// perform the method under test
+		for (Attribute attribute : allAttributes) {
+			AttributeType type = attribute.getAttributeType();
+
+			// skip updating content, an association or collection, try find a scalar attribute to update
+			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
+					|| AttributeType.association.equals(type)
+					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+				continue;
+			}
+
+			try {
+				getBizlet().getDynamicDomainValues(attribute.getName(), getBean());
+			} catch (ValidationException e) {
+				// pass - action handled incorrect input
+			}
+		}
+	}
+
+	@Test
+	public void testGetVariantDomainValues() throws Exception {
+		assumeTrue(getBizlet() != null);
+		// create the test data
+		T bean = getBean();
+		ArrayList<? extends Attribute> allAttributes = getAllAttributes(bean);
+
+		// perform the method under test
+		for (Attribute attribute : allAttributes) {
+			AttributeType type = attribute.getAttributeType();
+
+			// skip updating content, an association or collection, try find a scalar attribute to update
+			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
+					|| AttributeType.association.equals(type)
+					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+				continue;
+			}
+
+			try {
+				getBizlet().getVariantDomainValues(attribute.getName());
+			} catch (ValidationException e) {
+				// pass - action handled incorrect input
+			}
+		}
+	}
+
+	@Test
 	@SuppressWarnings("boxing")
 	public void testSave() throws Exception {
 		// create the test data
@@ -140,6 +222,22 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		} else {
 			Util.LOGGER.fine(String.format("Skipping update test for %s, no scalar attribute found", bean.getBizDocument()));
 		}
+	}
+
+	private ArrayList<? extends Attribute> getAllAttributes(T bean) {
+		Customer customer = CORE.getUser().getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes());
+		return allAttributes;
+	}
+
+	private Bizlet<T> getBizlet() throws Exception {
+		Customer customer = CORE.getUser().getCustomer();
+		Module module = customer.getModule(getBean().getBizModule());
+		Document document = module.getDocument(customer, getBean().getBizDocument());
+
+		return AbstractRepository.get().getBizlet(customer, document);
 	}
 
 	private Attribute getRandomAttribute(T bean) {

@@ -1,6 +1,5 @@
 package org.skyve.impl.backup;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.skyve.util.JSON;
 class Table {
 	String name;
 	LinkedHashMap<String, AttributeType> fields = new LinkedHashMap<>();
-	List<String> relativeContentPaths = new ArrayList<>();
 	
 	Table(String name) {
 		this.name = name;
@@ -41,8 +39,6 @@ class Table {
 	}
 
 	void addFieldsFromDocument(Document document) {
-		relativeContentPaths.add(document.getOwningModuleName() + File.separator + document.getName());
-
 		boolean joinedExtension = false;
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
@@ -115,7 +111,6 @@ class Table {
 			fieldList.add(field);
 		}
 		result.put("fields", fieldList);
-		result.put("relativeContentPaths", relativeContentPaths);
 		if (this instanceof JoinTable) {
 			JoinTable join = (JoinTable) this;
 			result.put("ownerTableName", join.ownerTableName);
@@ -139,7 +134,6 @@ class Table {
 				result.fields.put(key, AttributeType.valueOf((String) field.get(key)));
 			}
 		}
-		result.relativeContentPaths = (List<String>) map.get("relativeContentPaths");
 		
 		return result;
 	}

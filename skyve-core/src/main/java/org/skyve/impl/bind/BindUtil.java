@@ -590,11 +590,14 @@ public final class BindUtil {
 		
 		return result;
 	}
-	
+
 	public static String getDisplay(Customer customer, Bean bean, String binding) {
+		return getDisplay(customer, bean, binding, get(bean, binding));
+	}
+	
+	public static String getDisplay(Customer customer, Bean bean, String binding, Object value) {
 		Converter<?> converter = null;
 		List<DomainValue> domainValues = null;
-		Object value = get(bean, binding);
 
 		String documentName = bean.getBizDocument();
 		if (documentName != null) {

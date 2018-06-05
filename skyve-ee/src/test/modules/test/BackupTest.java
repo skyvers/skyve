@@ -6,6 +6,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.skyve.impl.backup.Backup;
 import org.skyve.impl.backup.Restore;
+import org.skyve.impl.backup.Restore.ContentRestoreOption;
 import org.skyve.util.Util;
 
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
@@ -42,7 +43,7 @@ public class BackupTest extends AbstractSkyveTest {
 			testBackup();
 		}
 		else {
-			Restore.restore(backupFile.getName(), false);
+			Restore.restore(backupFile.getName(), false, ContentRestoreOption.error);
 		}
 	}
 	
@@ -52,7 +53,7 @@ public class BackupTest extends AbstractSkyveTest {
 			testBackup();
 		}
 		else {
-			Restore.restore(backupFile.getName(), false);
+			Restore.restore(backupFile.getName(), false, ContentRestoreOption.error);
 		}
 	}
 	

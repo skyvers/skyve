@@ -7,7 +7,10 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.util.Util;
@@ -58,7 +61,7 @@ public class ContentChecker {
                                                     // Construct what would be the file path.
                                                     final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
                                                     final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
-                                                    AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
+                                                    AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, true);
                                                     final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
 
                                                     if (contentFile.exists()) {
@@ -120,9 +123,9 @@ public class ContentChecker {
 													// Construct what would be the file path.
 													final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
 													final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
-													AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
+													AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, true);
 													final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
-
+													
 													if (contentFile.exists()) {
 														String contentType = Files.probeContentType(contentFile.toPath());
 														if (contentType == null) {
@@ -130,13 +133,9 @@ public class ContentChecker {
 														}
 														LOGGER.error("Found matching file for missing content {} of type {}. Relink", contentFile.getAbsolutePath(), contentType);
 														MimeType mimeType = MimeType.fromMimeType(contentType);
-														String firstRelativeContentPath = table.relativeContentPaths.get(0);
-														int splitIndex = firstRelativeContentPath.indexOf(File.separatorChar);
-														String moduleName = firstRelativeContentPath.substring(0, splitIndex);
-														String documentName = firstRelativeContentPath.substring(splitIndex + 1);
 														content = new AttachmentContent(resultSet.getString(Bean.CUSTOMER_NAME),
-																							moduleName,
-																							documentName,
+																							resultSet.getString(Bean.MODULE_KEY),
+																							resultSet.getString(Bean.DOCUMENT_KEY),
 																							resultSet.getString(Bean.DATA_GROUP_ID),
 																							resultSet.getString(Bean.USER_ID),
 																							resultSet.getString(Bean.DOCUMENT_ID),
@@ -164,6 +163,109 @@ public class ContentChecker {
 					}
 				}
 				connection.commit();
+			}
+		}
+	}
+	
+	@SuppressWarnings("static-method")
+	public void migrateContent() throws Exception {
+		StringBuilder path = new StringBuilder(128);
+		path.append(UtilImpl.CONTENT_DIRECTORY).append(AbstractContentManager.FILE_STORE_NAME).append("_BACKUP/");
+		File backupFolder = new File(path.toString());
+		if (! backupFolder.exists()) {
+			throw new ValidationException(new Message("No backup file content folder at " + backupFolder.getAbsolutePath()));
+		}
+
+		Tika tika = new Tika();
+		
+		String customerName = CORE.getUser().getCustomerName();
+
+		try (Connection connection = EXT.getDataStoreConnection()) {
+			connection.setAutoCommit(false);
+
+			try (ContentManager ocm = new ESClient(true)) {
+				try (ContentManager cm = EXT.newContentManager()) {
+					for (Table table : BackupUtil.getTables()) {
+						StringBuilder sql = new StringBuilder(128);
+						try (Statement statement = connection.createStatement()) {
+							sql.append("select * from ").append(table.name);
+							BackupUtil.secureSQL(sql, table, customerName);
+							statement.execute(sql.toString());
+							try (ResultSet resultSet = statement.getResultSet()) {
+								LOGGER.info("Migrating content for " + table.name);
+	
+								while (resultSet.next()) {
+									for (String name : table.fields.keySet()) {
+										Attribute.AttributeType attributeType = table.fields.get(name);
+	
+										if (Attribute.AttributeType.content.equals(attributeType)) {
+											String stringValue = resultSet.getString(name);
+											if (! resultSet.wasNull()) {
+												AttachmentContent content;
+												try {
+													// Get the content using the old content manager
+													content = ocm.get(stringValue);
+													if (content == null) {
+														LOGGER.error("Missing content {} for field name {} for table {}",
+																		stringValue, name, table.name);
+													}
+													else {
+														if (content.getContentBytes() == null) {
+															LOGGER.error("Missing content bytes {} for field name {} for table {}",
+																			stringValue, name, table.name);
+															content = null;
+														}
+													}
+													if (content == null) {
+														path.setLength(0);
+														path.append(UtilImpl.CONTENT_DIRECTORY).append(AbstractContentManager.FILE_STORE_NAME).append("_BACKUP/");
+														AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, path, true);
+														path.append(stringValue);
+														File contentFile = new File(path.toString());
+														if (contentFile.exists()) {
+															String contentType = Files.probeContentType(contentFile.toPath());
+															if (contentType == null) {
+																contentType = tika.detect(contentFile);
+															}
+															LOGGER.info("Found matching file for missing content {} of type {}. Relink", contentFile.getAbsolutePath(), contentType);
+															MimeType mimeType = MimeType.fromMimeType(contentType);
+															content = new AttachmentContent(resultSet.getString(Bean.CUSTOMER_NAME),
+																								resultSet.getString(Bean.MODULE_KEY),
+																								resultSet.getString(Bean.DOCUMENT_KEY),
+																								resultSet.getString(Bean.DATA_GROUP_ID),
+																								resultSet.getString(Bean.USER_ID),
+																								resultSet.getString(Bean.DOCUMENT_ID),
+																								name,
+																								"content." + mimeType.getStandardFileSuffix(),
+																								mimeType,
+																								contentFile);
+														}
+														else {
+															LOGGER.error("Eerror migrating content {} - No matching file for missing content {}",
+																			stringValue, contentFile.getAbsolutePath());
+														}
+													}
+													if (content != null) {
+														cm.put(content);
+													}
+												}
+												catch (Exception e) {
+													LOGGER.error("Error migrating content {} for field name {} for table {}",
+																	stringValue, name, table.name, e);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						catch (SQLException e) {
+							Util.LOGGER.severe(sql.toString());
+							throw e;
+						}
+					}
+					connection.commit();
+				}
 			}
 		}
 	}

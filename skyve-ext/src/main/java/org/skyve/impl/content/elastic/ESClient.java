@@ -1,4 +1,4 @@
-package org.skyve.impl.content.elasticsearch;
+package org.skyve.impl.content.elastic;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -90,24 +90,30 @@ public class ESClient extends AbstractContentManager {
     static final String BEAN_DOCUMENT_ID = "bean." + Bean.DOCUMENT_ID;
     static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
 	
-	private static Node node = ESUtil.localNode();
+	private static Node node = ElasticUtil.localNode();
 	private static final Tika TIKA = new Tika();
 
 	private Client client = null;
+	private boolean migrating;
+	
+	public ESClient(boolean migrating) {
+		client = ElasticUtil.localClient(node);
+		this.migrating = migrating;
+	}
 	
 	public ESClient() {
-		client = ESUtil.localClient(node);
+		this(false);
 	}
 	
 	@Override
 	public void init() throws Exception {
-		ESUtil.prepareIndex(client, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
-		ESUtil.prepareIndex(client, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
+		ElasticUtil.prepareIndex(client, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
+		ElasticUtil.prepareIndex(client, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
 	}
 
 	@Override
 	public void dispose() throws Exception {
-		ESUtil.close(node);
+		ElasticUtil.close(node);
 	}
 
 	@Override
@@ -294,7 +300,7 @@ public class ESClient extends AbstractContentManager {
 	throws IOException {
 		StringBuilder path = new StringBuilder(128);
 		path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		AbstractContentManager.appendBalancedFolderPathFromContentId(id, path);
+		AbstractContentManager.appendBalancedFolderPathFromContentId(id, path, true);
 		
 		new File(path.toString()).mkdirs();
 		
@@ -439,11 +445,15 @@ public class ESClient extends AbstractContentManager {
 		return result;
 	}
 	
-	private static String getFilePath(String id) {
+	private String getFilePath(String id) {
 		StringBuilder result = new StringBuilder(128);
 		
-		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		AbstractContentManager.appendBalancedFolderPathFromContentId(id, result);
+		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME);
+		if (migrating) {
+			result.append("_BACKUP");
+		}
+		result.append('/');
+		AbstractContentManager.appendBalancedFolderPathFromContentId(id, result, true);
 		result.append(id);
 		
 		return result.toString();
@@ -665,7 +675,7 @@ public class ESClient extends AbstractContentManager {
 	
 	@Override
 	public ContentIterable all() throws Exception {
-		return new ESIterable(client);
+		return new ElasticContentIterable(client);
 	}
 
 	static List<String> complete(Client client, String query) {

@@ -63,7 +63,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 ### Detailed Instructions:
 
 #### Creating the Project
-* Go to https://www.bizhub.com.au/apps/project.xhtml
+* Go to https://apps.bizhub.com.au/apps/project.xhtml
 * Enter a valid email address
 * Enter project name (should be a single string like projectName)
 * Enter a customer name (should be a single string like myOrganisationName
