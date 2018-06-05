@@ -105,6 +105,10 @@
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents</converter-class>
 	</converter>
 	<converter>
+		<converter-id>Decimal2DollarsAndCentsAbsolute</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute</converter-class>
+	</converter>
+	<converter>
 		<converter-id>Decimal5DollarsAndCents</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents</converter-class>
 	</converter>

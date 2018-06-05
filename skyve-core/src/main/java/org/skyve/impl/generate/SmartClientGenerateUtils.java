@@ -23,6 +23,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
+import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.domain.types.converters.integer.IntegerSeparator;
 import org.skyve.domain.types.converters.integer.LongIntegerSeparator;
@@ -461,6 +462,9 @@ public class SmartClientGenerateUtils {
 				case decimal2:
 					type = "bizDecimal2";
 					if (converter instanceof Decimal2DollarsAndCents) {
+						type = "bizDollarsAndCents";
+					}
+					else if (converter instanceof Decimal2DollarsAndCentsAbsolute) {
 						type = "bizDollarsAndCents";
 					}
 					else if (converter instanceof Decimal2Integer) {
