@@ -10,6 +10,7 @@ pipeline {
       steps {
         git 'https://github.com/skyvers/skyve'
         sh 'mvn clean package'
+        sh 'mvn -f skyve-ee/pom.xml clean package'
       }
     }
   }
