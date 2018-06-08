@@ -16,11 +16,11 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'target/skyve-core-*.jar', fingerprint: true
-      archiveArtifacts artifacts: 'target/skyve-ee-*.jar', fingerprint: true
-      archiveArtifacts artifacts: 'target/skyve-ext-*.jar', fingerprint: true
-      archiveArtifacts artifacts: 'target/skyve-tools-*.jar', fingerprint: true
-      archiveArtifacts artifacts: 'target/skyve-web-*.jar', fingerprint: true
+      archiveArtifacts artifacts: 'skyve-core/target/skyve-core-*.jar', fingerprint: true
+      archiveArtifacts artifacts: 'skyve-ee/target/skyve-ee-*.jar', fingerprint: true
+      archiveArtifacts artifacts: 'skyve-ext/target/skyve-ext-*.jar', fingerprint: true
+      archiveArtifacts artifacts: 'skyve-tools/target/skyve-tools-*.jar', fingerprint: true
+      archiveArtifacts artifacts: 'skyve-web/target/skyve-web-*.jar', fingerprint: true
     }
   }
 }
