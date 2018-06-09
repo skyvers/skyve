@@ -18,11 +18,17 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.backup.RestoreOptions.ContentOption;
+import org.skyve.impl.backup.RestoreOptions.IndexingOption;
+import org.skyve.impl.backup.RestoreOptions.PreProcess;
 import org.skyve.impl.content.elastic.ElasticContentManager;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -30,28 +36,144 @@ import org.supercsv.prefs.CsvPreference;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
 
-public class Restore {
-	public static enum ContentRestoreOption {
-		clearOrphanedContentIds,
-		saveOrphanedContentIds,
-		error
+public class RestoreJob extends CancellableJob {
+	private static final long serialVersionUID = -4076693395300706664L;
+
+	@Override
+	public void execute() throws Exception {
+		Bean bean = getBean();
+		if (! (bean instanceof RestoreOptions)) {
+			getLog().add("Kick off the job with the appropriate options from the Data Maintenance page.");
+			return;
+		}
+		restore((RestoreOptions) bean);
+	}
+
+	private void restore(RestoreOptions options)
+	throws Exception {
+		String customerName = CORE.getUser().getCustomerName();
+		Collection<String> log = getLog();
+		String trace;
+		
+		String selectedBackupName = options.getSelectedBackupName();
+		File backup = new File(String.format("%sbackup_%s%s%s", 
+												Util.getContentDirectory(),
+												customerName,
+												File.separator,
+												selectedBackupName));
+		if (! backup.exists()) {
+			trace = "Backup " + backup.getAbsolutePath() + " does not exist.";
+			log.add(trace);
+			Util.LOGGER.warning(trace);
+			return;
+		}
+		
+		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
+		File extractDir = new File(backup.getParentFile(), extractDirName);
+		trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		if (extractDir.exists()) {
+			trace = String.format("    %s already exists - delete it.", extractDir.getAbsolutePath());
+			log.add(trace);
+			Util.LOGGER.info(trace);
+			FileUtil.delete(extractDir);
+			trace = String.format("    %s deleted.", extractDir.getAbsolutePath());
+			log.add(trace);
+			Util.LOGGER.info(trace);
+		}
+		FileUtil.extractZipArchive(backup, extractDir);
+		trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
+		log.add(trace);
+		Util.LOGGER.info(trace);
+
+		PreProcess restorePreProcess = options.getPreProcess();
+		ContentOption contrentRestoreOption =  options.getContentOption();
+		
+		boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
+		if (truncateDatabase) {
+			trace = "Truncate " + ((UtilImpl.SCHEMA == null) ? "default" : UtilImpl.SCHEMA) + " schema";
+			log.add(trace);
+			Util.LOGGER.info(trace);
+		}
+		Truncate.truncate(UtilImpl.SCHEMA, truncateDatabase, true);
+
+		boolean createUsingBackup = false;
+		boolean ddlSync = false;
+		if (PreProcess.createUsingBackup.equals(restorePreProcess)) {
+			createUsingBackup = true;
+			DDL.create(new File(extractDir, "create.sql"), true);
+			ddlSync = true;
+		}
+		else if (PreProcess.createUsingMetadata.equals(restorePreProcess)) {
+			DDL.create(null, true);
+			ddlSync = true;
+		}
+		else if (PreProcess.dropUsingBackupAndCreateUsingBackup.equals(restorePreProcess)) {
+			createUsingBackup = true;
+			DDL.drop(new File(extractDir, "drop.sql"), true);
+			DDL.create(new File(extractDir, "create.sql"), true);
+			ddlSync = true;
+		}
+		else if (PreProcess.dropUsingBackupAndCreateUsingMetadata.equals(restorePreProcess)) {
+			DDL.drop(new File(extractDir, "drop.sql"), true);
+			DDL.create(null, true);
+			ddlSync = true;
+		}
+		else if (PreProcess.dropUsingMetadataAndCreateUsingBackup.equals(restorePreProcess)) {
+			createUsingBackup = true;
+			DDL.drop(null, true);
+			DDL.create(new File(extractDir, "create.sql"), true);
+			ddlSync = true;
+		}
+		else if (PreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(restorePreProcess)) {
+			DDL.drop(null, true);
+			DDL.create(null, true);
+			ddlSync = true;
+		}
+
+		trace = "Restore " + extractDirName;
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		IndexingOption indexingOption = options.getIndexingOption();
+		restore(extractDirName, createUsingBackup, contrentRestoreOption, indexingOption);
+		if (ddlSync) {
+			trace = "DDL Sync";
+			log.add(trace);
+			Util.LOGGER.info(trace);
+			DDL.sync(true);
+		}
+		if (IndexingOption.both.equals(indexingOption) || IndexingOption.data.equals(indexingOption)) {
+			trace = "Reindex textual indexes.";
+			log.add(trace);
+			Util.LOGGER.info(trace);
+			Reindex.beans();
+		}
+		trace = "Delete extracted folder " + extractDir.getAbsolutePath();
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		FileUtil.delete(extractDir);
+		trace = "DONE";
+		log.add(trace);
+		Util.LOGGER.info(trace);
 	}
 	
-	public static void restore(String timestampFolderName,
-								boolean useBackupTables,
-								ContentRestoreOption conentRestoreOption)
+	private void restore(String extractDirName,
+							boolean createUsingBackup,
+							ContentOption contentRestoreOption,
+							IndexingOption indexingOption)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
 		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY + 
 										"backup_" + customerName + 
-										File.separator + timestampFolderName;
+										File.separator + extractDirName;
 		File backupDirectory = new File(backupDirectoryPath);
 		if ((! backupDirectory.exists()) || (! backupDirectory.isDirectory())) {
 			throw new IllegalArgumentException(backupDirectoryPath + " is not a directory");
 		}
 
-		Collection<Table> tables = useBackupTables ? 
+		Collection<Table> tables = createUsingBackup ? 
 										BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
 										BackupUtil.getTables();
 
@@ -59,13 +181,17 @@ public class Restore {
 			connection.setAutoCommit(false);
 
 			// restore normal tables
-			restoreData(backupDirectory, tables, connection, false, false, conentRestoreOption);
+			restoreData(backupDirectory, tables, connection, false, false, contentRestoreOption, indexingOption);
+			setPercentComplete(25);
 			// restore extension join tables
-			restoreData(backupDirectory, tables, connection, false, true, conentRestoreOption);
+			restoreData(backupDirectory, tables, connection, false, true, contentRestoreOption, indexingOption);
+			setPercentComplete(50);
 			// link foreign keys
 			restoreForeignKeys(backupDirectory, tables, connection);
+			setPercentComplete(75);
 			// restore collection join tables
-			restoreData(backupDirectory, tables, connection, true, false, conentRestoreOption);
+			restoreData(backupDirectory, tables, connection, true, false, contentRestoreOption, indexingOption);
+			setPercentComplete(100);
 		}
 	}
 
@@ -74,12 +200,13 @@ public class Restore {
 //	validate by updating bizLock and rolling back
 //	check commit points
 
-	private static void restoreData(File backupDirectory,
-										Collection<Table> tables,
-										Connection connection,
-										boolean joinTables,
-										boolean extensionTables,
-										ContentRestoreOption contentRestoreOption) 
+	private void restoreData(File backupDirectory,
+								Collection<Table> tables,
+								Connection connection,
+								boolean joinTables,
+								boolean extensionTables,
+								ContentOption contentRestoreOption,
+								IndexingOption indexingOption) 
 	throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
@@ -103,10 +230,15 @@ public class Restore {
 						}
 					}
 				}
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restore table " + table.name);
+				Collection<String> log = getLog();
+				String trace = "    restore table " + table.name;
+				log.add(trace);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
 				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 				if (! backupFile.exists()) {
-					System.err.println("***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist");
+					trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + table.name + ".csv does not exist";
+					log.add(trace);
+					System.err.println(trace);
 					continue;
 				}
 
@@ -146,6 +278,10 @@ public class Restore {
 						Map<String, String> values = null;
 						try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 							while ((values = reader.read(headers)) != null) {
+								if (isCancelled()) {
+									return;
+								}
+								
 								statement.clearParameters();
 
 								int index = 1;
@@ -221,22 +357,35 @@ public class Restore {
 								
 										AttachmentContent content = ElasticContentManager.getFromFileSystem(contentPath, stringValue);
 										if (content == null) {
-											String message = "Could not find file associated with " + stringValue;
-											if (ContentRestoreOption.error.equals(contentRestoreOption)) {
-												Util.LOGGER.severe(message);
-												throw new DomainException(message);
+											trace = "        Could not find file associated with " + stringValue;
+											if (ContentOption.error.equals(contentRestoreOption)) {
+												log.add(trace);
+												Util.LOGGER.severe(trace);
+												throw new DomainException(trace);
 											}
-											else if (ContentRestoreOption.clearOrphanedContentIds.equals(contentRestoreOption)) {
-												Util.LOGGER.info(message + " : Setting content to null");
+											else if (ContentOption.clearOrphanedContentIds.equals(contentRestoreOption)) {
+												trace += " : Setting content to null";
+												log.add(trace);
+												Util.LOGGER.info(trace);
 												statement.setString(index++, null);
 											}
 											else {
-												Util.LOGGER.info(message + " : Setting content ID regardless");
+												trace += " : Setting content ID regardless";
+												log.add(trace);
+												Util.LOGGER.info(trace);
 												statement.setString(index++, stringValue);
 											}
 										}
 										else {
-											cm.put(content);
+											IndexType indexType = table.indexes.get(header);
+											boolean textIndex = (indexType == null) ||
+																	IndexType.textual.equals(indexType) ||
+																	IndexType.both.equals(indexType);
+											if (textIndex) {
+												textIndex = IndexingOption.both.equals(indexingOption) ||
+																IndexingOption.content.equals(indexingOption);
+											}
+											cm.put(content, textIndex);
 											statement.setString(index++, content.getContentId());
 										}
 									}
@@ -252,9 +401,16 @@ public class Restore {
 							connection.commit();
 						}
 						catch (Throwable t) {
-							Util.LOGGER.severe(t.getLocalizedMessage());
-							Util.LOGGER.severe("AT LINE " + rowCount + " OF " + backupFile.getAbsolutePath());
-							Util.LOGGER.severe("CAUSED BY:- " + sql.toString());
+							trace = t.getLocalizedMessage();
+							log.add(trace);
+							Util.LOGGER.severe(trace);
+							trace = "AT LINE " + rowCount + " OF " + backupFile.getAbsolutePath();
+							log.add(trace);
+							Util.LOGGER.severe(trace);
+							trace = "CAUSED BY:- " + sql.toString();
+							log.add(trace);
+							Util.LOGGER.severe(trace);
+							
 							
 							StringBuilder sb = new StringBuilder(512);
 							sb.append("VALUES  :- ");
@@ -267,32 +423,45 @@ public class Restore {
 								}
 								sb.setLength(sb.length() - 1); // remove last comma
 							}
-							Util.LOGGER.severe(sb.toString());
+							trace = sb.toString();
+							log.add(trace);
+							Util.LOGGER.severe(trace);
 							
 							throw t;
 						}
 					}
 				}
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restored table " + table.name + " with " + rowCount + " rows.");
+				trace = "    restored table " + table.name + " with " + rowCount + " rows.";
+				log.add(trace);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
 			} // for (each table)
 		}
 	}
 
-	private static void restoreForeignKeys(File backupDirectory, 
-											Collection<Table> tables, 
-											Connection connection)
+	private void restoreForeignKeys(File backupDirectory, 
+										Collection<Table> tables, 
+										Connection connection)
 	throws Exception {
+		Collection<String> log = getLog();
+		String trace;
+		
 		for (Table table : tables) {
 			if (table instanceof JoinTable) {
 				continue;
 			}
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restore foreign keys for table " + table.name);
+			trace = "    restore foreign keys for table " + table.name;
+			log.add(trace);
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
 			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 			if (! backupFile.exists()) {
-				System.err.println("***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist");
+				trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist";
+				log.add(trace);
+				System.err.println(trace);
 				continue;
 			}
 			
+			long rowCount = 0;
+
 			try (FileReader fr = new FileReader(backupFile)) {
 				try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
 					String[] headers = reader.getHeader(true);
@@ -319,6 +488,10 @@ public class Restore {
 						try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 							Map<String, String> values = null;
 							while ((values = reader.read(headers)) != null) {
+								if (isCancelled()) {
+									return;
+								}
+								
 								statement.clearParameters();
 
 								int i = 1;
@@ -339,6 +512,7 @@ public class Restore {
 								// set the ID for the where clause
 								statement.setString(i, values.get(Bean.DOCUMENT_ID));
 								statement.executeUpdate();
+								rowCount++;
 							} // while (each CSV line)
 
 							connection.commit();
@@ -346,24 +520,9 @@ public class Restore {
 					}
 				}
 			}
+			trace = "    restored foreign keys for table " + table.name + " with " + rowCount + " rows.";
+			log.add(trace);
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
 		} // for (each table)
-	}
-
-	public static void main(String[] args) throws Exception {
-		if (args.length != 9) {
-			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <backup timestamp>");
-			System.exit(1);
-		}
-
-		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		try {
-			restore(args[8], true, ContentRestoreOption.error);
-		}
-		finally {
-			BackupUtil.finalise();
-			
-			// This is required to stop the process hanging at the end
-			System.exit(0);
-		}
 	}
 }

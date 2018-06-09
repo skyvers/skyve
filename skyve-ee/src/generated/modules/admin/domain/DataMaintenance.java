@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.DataMaintenance.DataMaintenanceExtension;
 import modules.admin.domain.Audit.Operation;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -21,10 +22,12 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 /**
  * Data Maintenance
  * 
+ * @depend - - - RestorePreProcess
+ * @depend - - - ContentRestoreOption
+ * @depend - - - RestoreIndexingOption
  * @depend - - - Operation
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
- * @depend - - - ContentRestoreOption
  * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -64,6 +67,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String restorePreProcessPropertyName = "restorePreProcess";
 	/** @hidden */
+	public static final String contentRestoreOptionPropertyName = "contentRestoreOption";
+	/** @hidden */
+	public static final String restoreIndexingOptionPropertyName = "restoreIndexingOption";
+	/** @hidden */
 	public static final String selectedBackupNamePropertyName = "selectedBackupName";
 	/** @hidden */
 	public static final String selectedContentIdPropertyName = "selectedContentId";
@@ -95,8 +102,246 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String refreshOptionPropertyName = "refreshOption";
 	/** @hidden */
 	public static final String evictOptionPropertyName = "evictOption";
-	/** @hidden */
-	public static final String contentRestoreOptionPropertyName = "contentRestoreOption";
+
+	/**
+	 * Pre-Process
+	 **/
+	@XmlEnum
+	public static enum RestorePreProcess implements Enumeration {
+		noProcessing("noProcessing", "No Processing"),
+		dropTablesUsingMetadataRecreateTablesFromBackupCreatesql("dropUsingMetadataAndCreateUsingBackup", "Drop tables using metadata & recreate tables from backup create.sql"),
+		dropTablesUsingBackupDropsqlRecreateTablesFromBackupCreatesql("dropUsingBackupAndCreateUsingBackup", "Drop tables using backup drop.sql & recreate tables from backup create.sql"),
+		dropTablesUsingMetadataRecreateTablesFromMetadata("dropUsingMetadataAndCreateUsingMetadata", "Drop tables using metadata & recreate tables from metadata"),
+		dropTablesUsingBackupDropsqlRecreateTablesFromMetadata("dropUsingBackupAndCreateUsingMetadata", "Drop tables using backup drop.sql & recreate tables from metadata"),
+		createTablesFromBackup("createUsingBackup", "Create tables from backup"),
+		createTablesFromMetadata("createUsingMetadata", "Create tables from metadata"),
+		deleteExistingTableDataUsingMetadata("deleteData", "Delete existing table data using metadata");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RestorePreProcess(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static RestorePreProcess fromCode(String code) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RestorePreProcess fromDescription(String description) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RestorePreProcess[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RestorePreProcess value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Content Option
+	 **/
+	@XmlEnum
+	public static enum ContentRestoreOption implements Enumeration {
+		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
+		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs"),
+		error("error", "Error");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private ContentRestoreOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static ContentRestoreOption fromCode(String code) {
+			ContentRestoreOption result = null;
+
+			for (ContentRestoreOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static ContentRestoreOption fromDescription(String description) {
+			ContentRestoreOption result = null;
+
+			for (ContentRestoreOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				ContentRestoreOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (ContentRestoreOption value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Indexing Option
+	 **/
+	@XmlEnum
+	public static enum RestoreIndexingOption implements Enumeration {
+		data("data", "Data"),
+		content("content", "Content"),
+		both("both", "Both"),
+		none("none", "None");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RestoreIndexingOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static RestoreIndexingOption fromCode(String code) {
+			RestoreIndexingOption result = null;
+
+			for (RestoreIndexingOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RestoreIndexingOption fromDescription(String description) {
+			RestoreIndexingOption result = null;
+
+			for (RestoreIndexingOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RestoreIndexingOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RestoreIndexingOption value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * Option
@@ -254,84 +499,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Content Restore
-	 **/
-	@XmlEnum
-	public static enum ContentRestoreOption implements Enumeration {
-		error("error", "Error"),
-		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
-		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues;
-
-		private ContentRestoreOption(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toDescription() {
-			return description;
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static ContentRestoreOption fromCode(String code) {
-			ContentRestoreOption result = null;
-
-			for (ContentRestoreOption value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static ContentRestoreOption fromDescription(String description) {
-			ContentRestoreOption result = null;
-
-			for (ContentRestoreOption value : values()) {
-				if (value.description.equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ContentRestoreOption[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ContentRestoreOption value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
-			return domainValues;
-		}
-	}
-
-	/**
 	 * Module.Document
 	 **/
 	private String modDocName;
@@ -368,9 +535,17 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	private Integer yearlyBackupRetention;
 	/**
-	 * Restore Pre-Process
+	 * Pre-Process
 	 **/
-	private String restorePreProcess;
+	private RestorePreProcess restorePreProcess;
+	/**
+	 * Content Option
+	 **/
+	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
+	/**
+	 * Indexing Option
+	 **/
+	private RestoreIndexingOption restoreIndexingOption = RestoreIndexingOption.both;
 	/**
 	 * Selected Backup Name
 	 **/
@@ -435,10 +610,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * Cache Evict
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
-	/**
-	 * Content Restore
-	 **/
-	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
 
 	@Override
 	@XmlTransient
@@ -452,7 +623,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 		return DataMaintenance.DOCUMENT_NAME;
 	}
 
-	public static DataMaintenance newInstance() {
+	public static DataMaintenanceExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -657,7 +828,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #restorePreProcess} accessor.
 	 * @return	The value.
 	 **/
-	public String getRestorePreProcess() {
+	public RestorePreProcess getRestorePreProcess() {
 		return restorePreProcess;
 	}
 
@@ -666,9 +837,45 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * @param restorePreProcess	The new value.
 	 **/
 	@XmlElement
-	public void setRestorePreProcess(String restorePreProcess) {
+	public void setRestorePreProcess(RestorePreProcess restorePreProcess) {
 		preset(restorePreProcessPropertyName, restorePreProcess);
 		this.restorePreProcess = restorePreProcess;
+	}
+
+	/**
+	 * {@link #contentRestoreOption} accessor.
+	 * @return	The value.
+	 **/
+	public ContentRestoreOption getContentRestoreOption() {
+		return contentRestoreOption;
+	}
+
+	/**
+	 * {@link #contentRestoreOption} mutator.
+	 * @param contentRestoreOption	The new value.
+	 **/
+	@XmlElement
+	public void setContentRestoreOption(ContentRestoreOption contentRestoreOption) {
+		preset(contentRestoreOptionPropertyName, contentRestoreOption);
+		this.contentRestoreOption = contentRestoreOption;
+	}
+
+	/**
+	 * {@link #restoreIndexingOption} accessor.
+	 * @return	The value.
+	 **/
+	public RestoreIndexingOption getRestoreIndexingOption() {
+		return restoreIndexingOption;
+	}
+
+	/**
+	 * {@link #restoreIndexingOption} mutator.
+	 * @param restoreIndexingOption	The new value.
+	 **/
+	@XmlElement
+	public void setRestoreIndexingOption(RestoreIndexingOption restoreIndexingOption) {
+		preset(restoreIndexingOptionPropertyName, restoreIndexingOption);
+		this.restoreIndexingOption = restoreIndexingOption;
 	}
 
 	/**
@@ -951,23 +1158,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setEvictOption(EvictOption evictOption) {
 		this.evictOption = evictOption;
-	}
-
-	/**
-	 * {@link #contentRestoreOption} accessor.
-	 * @return	The value.
-	 **/
-	public ContentRestoreOption getContentRestoreOption() {
-		return contentRestoreOption;
-	}
-
-	/**
-	 * {@link #contentRestoreOption} mutator.
-	 * @param contentRestoreOption	The new value.
-	 **/
-	@XmlElement
-	public void setContentRestoreOption(ContentRestoreOption contentRestoreOption) {
-		this.contentRestoreOption = contentRestoreOption;
 	}
 
 	/**

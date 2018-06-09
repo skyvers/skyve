@@ -7,7 +7,9 @@
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
 		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
-		<job name="jBackup" displayName="Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
+		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
+		<job name="jAdhocBackup" displayName="Adhoc Backup all data and content" className="org.skyve.impl.backup.BackupJob" />
+		<job name="jRestore" displayName="Restore all data and content" className="org.skyve.impl.backup.RestoreJob" />
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 	</jobs>
 	<documents>
@@ -300,7 +302,8 @@
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
 					<action name="MigrateContent" />
-					<action name="Reindex" />
+					<action name="ReindexData" />
+					<action name="ReindexContent" />
 					<action name="RelinkContent" />
 					<action name="Restore" />
 					<action name="Truncate" />

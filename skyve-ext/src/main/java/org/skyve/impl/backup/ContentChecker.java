@@ -1,5 +1,13 @@
 package org.skyve.impl.backup;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import org.apache.tika.Tika;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -13,17 +21,10 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class ContentChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentChecker.class);
@@ -37,6 +38,10 @@ public class ContentChecker {
 
             try (ContentManager cm = EXT.newContentManager()) {
                 for (Table table : BackupUtil.getTables()) {
+                	if (! hasContent(table)) {
+                		continue;
+                	}
+                	
                     StringBuilder sql = new StringBuilder(128);
                     try (Statement statement = connection.createStatement()) {
                         sql.append("select * from ").append(table.name);
@@ -98,7 +103,11 @@ public class ContentChecker {
 
 			try (ContentManager cm = EXT.newContentManager()) {
 				for (Table table : BackupUtil.getTables()) {
-					StringBuilder sql = new StringBuilder(128);
+                	if (! hasContent(table)) {
+                		continue;
+                	}
+
+                	StringBuilder sql = new StringBuilder(128);
 					try (Statement statement = connection.createStatement()) {
 						sql.append("select * from ").append(table.name);
 						BackupUtil.secureSQL(sql, table, customerName);
@@ -186,7 +195,11 @@ public class ContentChecker {
 			try (ContentManager ocm = new ESClient(true)) {
 				try (ContentManager cm = EXT.newContentManager()) {
 					for (Table table : BackupUtil.getTables()) {
-						StringBuilder sql = new StringBuilder(128);
+	                	if (! hasContent(table)) {
+	                		continue;
+	                	}
+
+	                	StringBuilder sql = new StringBuilder(128);
 						try (Statement statement = connection.createStatement()) {
 							sql.append("select * from ").append(table.name);
 							BackupUtil.secureSQL(sql, table, customerName);
@@ -241,12 +254,22 @@ public class ContentChecker {
 																								contentFile);
 														}
 														else {
-															LOGGER.error("Eerror migrating content {} - No matching file for missing content {}",
+															LOGGER.error("Error migrating content {} - No matching file for missing content {}",
 																			stringValue, contentFile.getAbsolutePath());
 														}
 													}
 													if (content != null) {
-														cm.put(content);
+														content.setContentId(null); // put new
+														cm.put(content, false);
+														
+														String update = String.format("update %s set %s = '%s' where bizId = '%s'",
+																						table.name,
+																						name,
+																						content.getContentId(),
+																						content.getBizId());
+														try (Statement s = connection.createStatement()) {
+															s.execute(update);
+														}
 													}
 												}
 												catch (Exception e) {
@@ -258,6 +281,7 @@ public class ContentChecker {
 									}
 								}
 							}
+							connection.commit();
 						}
 						catch (SQLException e) {
 							Util.LOGGER.severe(sql.toString());
@@ -268,5 +292,15 @@ public class ContentChecker {
 				}
 			}
 		}
+	}
+	
+	private static boolean hasContent(Table table) {
+		for (String name : table.fields.keySet()) {
+			AttributeType attributeType = table.fields.get(name);
+			if (AttributeType.content.equals(attributeType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -1,14 +1,17 @@
 package modules.admin.DataMaintenance.actions;
 
-import modules.admin.domain.DataMaintenance;
-
-import java.io.File;
-
+import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
-import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.JobMetaData;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
+
+import modules.admin.domain.DataMaintenance;
 
 public class Backup implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = -2943997026132660437L;
@@ -16,17 +19,13 @@ public class Backup implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
-		bean.setRefreshBackups(Boolean.TRUE);
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(DataMaintenance.MODULE_NAME);
 		
-		Util.LOGGER.info("Creating backup.");
-		File backupDir = org.skyve.impl.backup.Backup.backup();
-		Util.LOGGER.info("Created backup folder " + backupDir.getAbsolutePath());
-
-		File zip = new File(backupDir.getParentFile(), backupDir.getName() + ".zip");
-		FileUtil.createZipArchive(backupDir, zip);
-		Util.LOGGER.info("Compressed backup to " + zip.getAbsolutePath());
-		FileUtil.delete(backupDir);
-		Util.LOGGER.info("Deleted backup folder " + backupDir.getAbsolutePath());
+		JobMetaData job = m.getJob("jAdhocBackup");
+		EXT.runOneShotJob(job, bean, u);
+		webContext.growl(MessageSeverity.info, "Backup Job has been started");
 		
 		return new ServerSideActionResult<>(bean);
 	}

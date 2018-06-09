@@ -39,13 +39,8 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 		File backup_directory = new File(String.format("%sbackup_%s", 
 				Util.getContentDirectory(),
 				CORE.getUser().getCustomerName()));
-		if (!backup_directory.exists()) {
-		    try{
-		        backup_directory.mkdir();
-		    } 
-		    catch(SecurityException se){
-		        //handle it
-		    }        
+		if (! backup_directory.exists()) {
+	        backup_directory.mkdir();
 		}		
 		
 		// copy the input file to the backup location		

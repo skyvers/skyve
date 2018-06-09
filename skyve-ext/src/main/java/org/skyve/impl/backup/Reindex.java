@@ -1,27 +1,99 @@
 package org.skyve.impl.backup;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.content.elastic.ElasticContentManager;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.impl.backup.BackupUtil;
 
 public class Reindex {
 	private Reindex() {
 		// nothing to see here
 	}
+
+	@SuppressWarnings("resource")
+	public static void attachments() throws Exception {
+		String customerName = CORE.getUser().getCustomerName();
+		
+		try (Connection connection = EXT.getDataStoreConnection()) {
+			connection.setAutoCommit(false);
+
+			try (ContentManager cm = EXT.newContentManager()) {
+				ElasticContentManager ecm;
+				if (cm instanceof ElasticContentManager) {
+					ecm = (ElasticContentManager) cm;
+				}
+				else {
+					return;
+				}
+				for (Table table : BackupUtil.getTables()) {
+                	if (! hasContent(table)) {
+                		continue;
+                	}
+
+                	StringBuilder sql = new StringBuilder(128);
+					try (Statement statement = connection.createStatement()) {
+						sql.append("select * from ").append(table.name);
+						BackupUtil.secureSQL(sql, table, customerName);
+						statement.execute(sql.toString());
+						try (ResultSet resultSet = statement.getResultSet()) {
+							UtilImpl.LOGGER.info("Reindexing content for " + table.name);
+
+							while (resultSet.next()) {
+								for (String name : table.fields.keySet()) {
+									AttributeType attributeType = table.fields.get(name);
+									if (AttributeType.content.equals(attributeType)) {
+										String stringValue = resultSet.getString(name);
+										if (! resultSet.wasNull()) {
+											AttachmentContent content;
+											try {
+												content = cm.get(stringValue);
+												if (content == null) {
+													UtilImpl.LOGGER.severe(String.format("Error reindexing content %s for field name %s for table %s - content does not exist",
+																							stringValue, name, table.name));
+												}
+												else {
+													IndexType indexType = table.indexes.get(name);
+													boolean index = ((indexType == null) || 
+																		IndexType.textual.equals(indexType) ||
+																		IndexType.both.equals(indexType));
+													ecm.reindex(content, index);
+												}
+											}
+											catch (Exception e) {
+												UtilImpl.LOGGER.severe(String.format("Error reindexing content %s for field name %s for table %s - caused by %s",
+																						stringValue, name, table.name, e.getLocalizedMessage()));
+												e.printStackTrace();
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
-	public static void reindex() throws Exception {
+	public static void beans() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = persistence.getUser().getCustomer();
 
@@ -51,9 +123,11 @@ public class Reindex {
 								// (i.e. a document field used to be indexed but now is not)
 								if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Reindex document %s.%s", module.getName(), documentName));
 								DocumentQuery query = persistence.newDocumentQuery(document);
-								for (Bean bean : query.beanIterable()) {
-									persistence.reindex((PersistentBean) bean);
-									persistence.evictCached(bean);
+								try (AutoClosingIterable<PersistentBean> i = query.beanIterable()) {
+									for (PersistentBean bean : i) {
+										persistence.reindex(bean);
+										persistence.evictCached(bean);
+									}
 								}
 							}
 						}
@@ -66,20 +140,13 @@ public class Reindex {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
-		if (args.length != 8) {
-			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
-			System.exit(1);
+	private static boolean hasContent(Table table) {
+		for (String name : table.fields.keySet()) {
+			AttributeType attributeType = table.fields.get(name);
+			if (AttributeType.content.equals(attributeType)) {
+				return true;
+			}
 		}
-		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		try {
-			reindex();
-		}
-		finally {
-			BackupUtil.finalise();
-			
-			// This is required to stop the process hanging at the end
-			System.exit(0);
-		}
+		return false;
 	}
 }
