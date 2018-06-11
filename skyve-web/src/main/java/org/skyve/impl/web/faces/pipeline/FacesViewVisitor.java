@@ -117,6 +117,7 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal5TimeDuration;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
+import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
 import org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator;
@@ -1693,6 +1694,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	        else if ("Decimal2DollarsAndCents".equals(converterName)) {
 	            result = new Decimal2DollarsAndCents();
 	        }
+			else if ("Decimal2DollarsAndCentsAbsolute".equals(converterName)) {
+				result = new Decimal2DollarsAndCentsAbsolute();
+			}
 	        else if ("Decimal5DollarsAndCents".equals(converterName)) {
 	            result = new Decimal5DollarsAndCents();
 	        }

@@ -20,6 +20,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
+import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.domain.types.converters.integer.LongIntegerSeparator;
 import org.skyve.domain.types.converters.integer.SimplePercentage;
@@ -43,6 +44,7 @@ public enum ConverterName {
 	DD_MMM_YYYY_HH_MI(new DD_MMM_YYYY_HH_MI()),
 	DD_MMM_YYYY_HH24_MI(new DD_MMM_YYYY_HH24_MI()),
 	Decimal2DollarsAndCents(new Decimal2DollarsAndCents()),
+	Decimal2DollarsAndCentsAbsolute(new Decimal2DollarsAndCentsAbsolute()),
 	Decimal2Integer(new Decimal2Integer()),
 	Decimal2IntegerPercentage(new Decimal2IntegerPercentage()),
 	Decimal2OneDecimalPlace(new Decimal2OneDecimalPlace()),
