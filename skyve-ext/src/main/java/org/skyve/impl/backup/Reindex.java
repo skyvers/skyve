@@ -99,7 +99,7 @@ public class Reindex {
 
 		// truncate the bean content ready to reindex
 		try (ContentManager cm = EXT.newContentManager()) {
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Truncate Beans");
+			UtilImpl.LOGGER.info("Truncate Beans");
 			cm.truncateBeans(customer.getName());
 		}
 		
@@ -121,7 +121,7 @@ public class Reindex {
 								// Don't check if a document has indexable fields as we
 								// may need to have nodes deleted
 								// (i.e. a document field used to be indexed but now is not)
-								if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Reindex document %s.%s", module.getName(), documentName));
+								UtilImpl.LOGGER.info(String.format("Reindex document %s.%s", module.getName(), documentName));
 								DocumentQuery query = persistence.newDocumentQuery(document);
 								try (AutoClosingIterable<PersistentBean> i = query.beanIterable()) {
 									for (PersistentBean bean : i) {
