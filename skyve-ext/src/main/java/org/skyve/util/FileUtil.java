@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.skyve.content.MimeType;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.web.WebContext;
@@ -241,7 +242,7 @@ public class FileUtil {
 			String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
 																	file.getCanonicalPath().length());
 			zipFilePath = zipFilePath.replace('\\', '/');
-			Util.LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
 			ZipEntry zipEntry = new ZipEntry(zipFilePath);
 			zos.putNextEntry(zipEntry);
 
@@ -258,7 +259,7 @@ public class FileUtil {
 	private static void extractFile(ZipInputStream in, File outdir, String name)
 	throws IOException {
 		File file = new File(outdir, name);
-		Util.LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
+		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];
@@ -298,7 +299,7 @@ public class FileUtil {
 					String name = entry.getName();
 					if (entry.isDirectory()) {
 						mkdirs(outdir, name);
-						Util.LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("create dir " + name);
 						continue;
 					}
 					/* this part is necessary because file entry can come before
@@ -310,7 +311,7 @@ public class FileUtil {
 					String dir = dirpart(name);
 					if (dir != null) {
 						mkdirs(outdir, dir);
-						Util.LOGGER.info("create dir " + name);
+						if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("create dir " + name);
 					}
 					extractFile(zin, outdir, name);
 				}

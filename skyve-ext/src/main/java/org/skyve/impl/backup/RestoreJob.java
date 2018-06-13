@@ -233,7 +233,7 @@ public class RestoreJob extends CancellableJob {
 				Collection<String> log = getLog();
 				String trace = "    restore table " + table.name;
 				log.add(trace);
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
+				UtilImpl.LOGGER.info(trace);
 				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 				if (! backupFile.exists()) {
 					trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + table.name + ".csv does not exist";
@@ -433,7 +433,7 @@ public class RestoreJob extends CancellableJob {
 				}
 				trace = "    restored table " + table.name + " with " + rowCount + " rows.";
 				log.add(trace);
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
+				UtilImpl.LOGGER.info(trace);
 			} // for (each table)
 		}
 	}
@@ -451,7 +451,7 @@ public class RestoreJob extends CancellableJob {
 			}
 			trace = "    restore foreign keys for table " + table.name;
 			log.add(trace);
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
+			Util.LOGGER.info(trace);
 			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 			if (! backupFile.exists()) {
 				trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist";
@@ -522,7 +522,7 @@ public class RestoreJob extends CancellableJob {
 			}
 			trace = "    restored foreign keys for table " + table.name + " with " + rowCount + " rows.";
 			log.add(trace);
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(trace);
+			UtilImpl.LOGGER.info(trace);
 		} // for (each table)
 	}
 }
