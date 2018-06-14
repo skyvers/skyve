@@ -87,7 +87,8 @@ public class RestoreJob extends CancellableJob {
 		trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 		log.add(trace);
 		Util.LOGGER.info(trace);
-
+		setPercentComplete(50);
+		
 		PreProcess restorePreProcess = options.getPreProcess();
 		ContentOption contrentRestoreOption =  options.getContentOption();
 		
@@ -148,7 +149,7 @@ public class RestoreJob extends CancellableJob {
 			trace = "Reindex textual indexes.";
 			log.add(trace);
 			Util.LOGGER.info(trace);
-			Reindex.beans();
+			execute(new ReindexBeansJob());
 		}
 		trace = "Delete extracted folder " + extractDir.getAbsolutePath();
 		log.add(trace);
@@ -157,6 +158,7 @@ public class RestoreJob extends CancellableJob {
 		trace = "DONE";
 		log.add(trace);
 		Util.LOGGER.info(trace);
+		setPercentComplete(100);
 	}
 	
 	private void restore(String extractDirName,

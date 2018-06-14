@@ -173,6 +173,7 @@
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
 					<row>
 						<item>
 							<spacer />
@@ -191,6 +192,9 @@
 						</item>
 						<item align="right">
 							<button actionName="ReindexContent" />
+						</item>
+						<item align="right">
+							<button actionName="Reindex" />
 						</item>
 					</row>
 				</form>
@@ -326,6 +330,9 @@
 		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to delete this backup folder from the server filesystem?" 
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o"/>
+		<action className="Reindex" displayName="Reindex" inActionPanel="false" 
+			confirm="Are you sure you want to reindex all data and content in the database?"
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>
 		<action className="ReindexData" displayName="Reindex Data" inActionPanel="false" 
 			confirm="Are you sure you want to reindex all data in the database?"
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>

@@ -326,6 +326,7 @@ public class BackupJob extends CancellableJob {
 		trace = "Created backup folder " + directory.getAbsolutePath();
 		log.add(trace);
 		Util.LOGGER.info(trace);
+		setPercentComplete(50);
 
 		File zip = new File(directory.getParentFile(), directory.getName() + ".zip");
 		FileUtil.createZipArchive(directory, zip);
@@ -336,6 +337,7 @@ public class BackupJob extends CancellableJob {
 		trace = "Deleted backup folder " + directory.getAbsolutePath();
 		log.add(trace);
 		Util.LOGGER.info(trace);
+		setPercentComplete(100);
 		backupZip = zip;
 	}
 }
