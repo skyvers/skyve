@@ -280,7 +280,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	StringBuilder contentPath = new StringBuilder(256);
-																	contentPath.append(directory.getAbsolutePath()).append('/');
+																	contentPath.append(directory.getAbsolutePath()).append('/').append(AbstractContentManager.FILE_STORE_NAME).append('/');
 																	ElasticContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
 																}
 															}
