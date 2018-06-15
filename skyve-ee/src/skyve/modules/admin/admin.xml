@@ -10,6 +10,9 @@
 		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
 		<job name="jAdhocBackup" displayName="Adhoc Backup all data and content" className="org.skyve.impl.backup.BackupJob" />
 		<job name="jRestore" displayName="Restore all data and content" className="org.skyve.impl.backup.RestoreJob" />
+		<job name="jReindex" displayName="Reindex all data and attachments" className="org.skyve.impl.backup.ReindexJob" />
+		<job name="jReindexAttachments" displayName="Reindex all attachments" className="org.skyve.impl.backup.ReindexAttachmentsJob" />
+		<job name="jReindexBeans" displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" />
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 	</jobs>
 	<documents>
@@ -302,6 +305,7 @@
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
 					<action name="MigrateContent" />
+					<action name="Reindex" />
 					<action name="ReindexData" />
 					<action name="ReindexContent" />
 					<action name="RelinkContent" />
