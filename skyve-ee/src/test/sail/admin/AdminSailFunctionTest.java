@@ -1,4 +1,4 @@
-package sail;
+package sail.admin;
 
 import org.junit.Test;
 
