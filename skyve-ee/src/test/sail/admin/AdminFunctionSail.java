@@ -2,7 +2,7 @@ package sail.admin;
 
 import org.junit.Test;
 
-public class AdminSailFunctionTest extends AdminSailTest {
+public class AdminFunctionSail extends AdminSail {
 	@Test
 	public void test() throws Exception {
 		login("demo", "admin", "admin");

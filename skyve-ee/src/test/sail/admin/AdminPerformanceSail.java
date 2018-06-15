@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import util.JUnitMultiThreadedRunner;
 
 @RunWith(JUnitMultiThreadedRunner.class)
-public class AdminSailPerformanceTest extends AdminSailTest {
+public class AdminPerformanceSail extends AdminSail {
 	@Test
 	public void test1() throws Exception {
 		Thread.sleep(1000);
