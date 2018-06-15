@@ -111,7 +111,7 @@ public class ContentUpload extends Localisable {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
 			
-			AttachmentContent content = FacesContentUtil.handleFileUpload(event, bean, contentBinding);
+			AttachmentContent content = FacesContentUtil.handleFileUpload(event, bean, BindUtil.unsanitiseBinding(contentBinding));
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
