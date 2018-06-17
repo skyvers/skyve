@@ -217,6 +217,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		if (UtilImpl.DDL_SYNC) {
 			cfg.put("hibernate.hbm2ddl.auto", "update");
 		}
+		// The default of "grouped" may require hibernate.default_schema and/or hibernate.default_catalog to be provided.
+		// Will have more luck with "individually".
+		cfg.put("hibernate.hbm2ddl.jdbc_metadata_extraction_strategy", "individually");
 
 		// Keep stats on usage
 		cfg.put("hibernate.generate_statistics", "false");

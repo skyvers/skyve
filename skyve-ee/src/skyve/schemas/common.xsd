@@ -29,6 +29,7 @@
       <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
       <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
       <xs:enumeration value="Decimal2DollarsAndCents"/>
+      <xs:enumeration value="Decimal2DollarsAndCentsAbsolute"/>
       <xs:enumeration value="Decimal2Integer"/>
       <xs:enumeration value="Decimal2IntegerPercentage"/>
       <xs:enumeration value="Decimal2OneDecimalPlace"/>

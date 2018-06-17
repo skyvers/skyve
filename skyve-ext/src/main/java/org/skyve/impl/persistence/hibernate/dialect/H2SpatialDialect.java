@@ -3,6 +3,7 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import java.sql.Types;
 
 import org.geolatte.geom.jts.JTS;
+import org.hibernate.dialect.unique.UniqueDelegate;
 import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.h2geodb.GeoDBDialect;
@@ -15,6 +16,9 @@ import com.vividsolutions.jts.geom.Geometry;
 public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	private static final long serialVersionUID = 2491505869930720627L;
 
+	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
+	private UniqueDelegate uniqueDelegate = new H2NoOpUniqueDelegate(this);
+
 	/**
 	 * Set the H2 Geometry SQL type to BLOB.
 	 * It is set to GEOMETRY in the GeoDBDialect but this doesn't allow insert of JTS types.
@@ -23,8 +27,6 @@ public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 		registerColumnType(GeoDBGeometryTypeDescriptor.INSTANCE.getSqlType(), "BLOB");
 	}
 	
-	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
-
 	@Override
 	public int getGeometrySqlType() {
 		return GeoDBGeometryTypeDescriptor.INSTANCE.getSqlType();
@@ -82,5 +84,10 @@ public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	@Override
 	public String getModifyColumnString() {
 		return "alter column";
+	}
+	
+	@Override
+	public UniqueDelegate getUniqueDelegate() {
+		return uniqueDelegate;
 	}
 }

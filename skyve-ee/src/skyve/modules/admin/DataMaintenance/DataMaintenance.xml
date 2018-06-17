@@ -50,11 +50,39 @@
 		</integer>
 		
 		<!-- Restore parameters -->
-		<text name="restorePreProcess">
-			<displayName>Restore Pre-Process</displayName>
+		<enum name="restorePreProcess">
+			<displayName>Pre-Process</displayName>
 			<domain>constant</domain>
-			<length>50</length>
-		</text>
+			<values>
+				<value code="noProcessing" description="No Processing" />
+				<value code="dropUsingMetadataAndCreateUsingBackup" description="Drop tables using metadata &amp; recreate tables from backup create.sql" />
+				<value code="dropUsingBackupAndCreateUsingBackup" description="Drop tables using backup drop.sql &amp; recreate tables from backup create.sql" />
+				<value code="dropUsingMetadataAndCreateUsingMetadata" description="Drop tables using metadata &amp; recreate tables from metadata" />
+				<value code="dropUsingBackupAndCreateUsingMetadata" description="Drop tables using backup drop.sql &amp; recreate tables from metadata" />
+				<value code="createUsingBackup" description="Create tables from backup" />
+				<value code="createUsingMetadata" description="Create tables from metadata" />
+				<value code="deleteData" description="Delete existing table data using metadata" />
+			</values>
+		</enum>
+		<enum name="contentRestoreOption">
+			<displayName>Content Option</displayName>
+			<defaultValue>error</defaultValue>
+			<values>
+				<value code="clearOrphanedContentIds" description="Clear Orphaned Content IDs" />
+				<value code="saveOrphanedContentIds" description="Save Orphaned Content IDs" />
+				<value code="error" description="Error" />
+			</values>
+		</enum>
+		<enum name="restoreIndexingOption">
+			<displayName>Indexing Option</displayName>
+			<defaultValue>both</defaultValue>
+			<values>
+				<value code="data" description="Data" />
+				<value code="content" description="Content" />
+				<value code="both" description="Both" />
+				<value code="none" description="None" />
+			</values>
+		</enum>
 		<id name="selectedBackupName" persistent="false" trackChanges="false">
 			<displayName>Selected Backup Name</displayName>
 		</id>
@@ -124,15 +152,6 @@
 				<value code="Bean" />
 				<value code="None" />
 				<value code="All" />
-			</values>
-		</enum>
-		<enum name="contentRestoreOption" persistent="false" trackChanges="false" audited="false">
-			<displayName>Content Restore</displayName>
-			<defaultValue>error</defaultValue>
-			<values>
-				<value code="error" description="Error" />
-				<value code="clearOrphanedContentIds" description="Clear Orphaned Content IDs" />
-				<value code="saveOrphanedContentIds" description="Save Orphaned Content IDs" />
 			</values>
 		</enum>
 	</attributes>

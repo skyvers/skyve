@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.hibernate.engine.spi.SessionImplementor;
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -32,8 +31,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.document.Document;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -52,21 +52,21 @@ import com.vividsolutions.jts.io.WKTWriter;
  * that contains all the information needed to construct the path
  * of the content node - ie module name and document name are not known to the table.
  */
-public class Backup {
-	private Backup() {
-		// nothing to see here
-	}
+public class BackupJob extends CancellableJob {
+	private static final long serialVersionUID = 1590777761018078475L;
 
-	public static File backup() throws Exception {
-		return backup(BackupUtil.getTables());
-	}
-
-	public static File backupDocuments(Collection<Document> documents) throws Exception {
-		return backup(BackupUtil.getTables(documents));
-	}
+	private File backupZip;
 	
-	public static File backup(Collection<Table> tables) throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
+	public File getBackupZip() {
+		return backupZip;
+	}
+
+	@Override
+	public void execute() throws Exception {
+		List<String> log = getLog();
+		Collection<Table> tables = BackupUtil.getTables();
+		AbstractPersistence p = AbstractPersistence.get();
+		String customerName = p.getUser().getCustomerName();
 		
 		String backupDir = String.format("%sbackup_%s%s%s%s",
 											UtilImpl.CONTENT_DIRECTORY, 
@@ -76,11 +76,12 @@ public class Backup {
 											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();
-		UtilImpl.LOGGER.info("Backup to " + directory.getAbsolutePath());
+		String trace = "Backup to " + directory.getAbsolutePath();
+		log.add(trace);
+		UtilImpl.LOGGER.info(trace);
 
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
-		AbstractPersistence p = AbstractPersistence.get();
 		List<String> drops = new ArrayList<>();
 		List<String> creates = new ArrayList<>();
 		p.generateDDL(drops, creates, null);
@@ -100,7 +101,9 @@ public class Backup {
 								BackupUtil.secureSQL(sql, table, customerName);
 								statement.execute(sql.toString());
 								try (ResultSet resultSet = statement.getResultSet()) {
-									if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Backup " + table.name);
+									trace = "Backup " + table.name;
+									log.add(trace);
+									UtilImpl.LOGGER.info(trace);
 									try (FileWriter csv = new FileWriter(backupDir + File.separator + table.name + ".csv",
 																			false)) {
 										try (CsvMapWriter writer = new CsvMapWriter(csv, CsvPreference.STANDARD_PREFERENCE)) {
@@ -111,6 +114,9 @@ public class Backup {
 											writer.writeHeader(headers);
 			
 											while (resultSet.next()) {
+												if (isCancelled()) {
+													return;
+												}
 												values.clear();
 			
 												for (String name : table.fields.keySet()) {
@@ -274,7 +280,7 @@ public class Backup {
 																}
 																else {
 																	StringBuilder contentPath = new StringBuilder(256);
-																	contentPath.append(directory.getAbsolutePath()).append('/');
+																	contentPath.append(directory.getAbsolutePath()).append('/').append(AbstractContentManager.FILE_STORE_NAME).append('/');
 																	ElasticContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
 																}
 															}
@@ -305,7 +311,9 @@ public class Backup {
 								}
 							}
 							catch (SQLException e) {
-								Util.LOGGER.severe(sql.toString());
+								trace = sql.toString();
+								log.add(trace);
+								Util.LOGGER.severe(trace);
 								throw e;
 							}
 						}
@@ -315,23 +323,21 @@ public class Backup {
 			}
 		}
 		
-		return directory;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		if (args.length != 8) {
-			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
-			System.exit(1);
-		}
-		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		try {
-			backup();
-		}
-		finally {
-			BackupUtil.finalise();
-			
-			// This is required to stop the process hanging at the end
-			System.exit(0);
-		}
+		trace = "Created backup folder " + directory.getAbsolutePath();
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		setPercentComplete(50);
+
+		File zip = new File(directory.getParentFile(), directory.getName() + ".zip");
+		FileUtil.createZipArchive(directory, zip);
+		trace = "Compressed backup to " + zip.getAbsolutePath();
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		FileUtil.delete(directory);
+		trace = "Deleted backup folder " + directory.getAbsolutePath();
+		log.add(trace);
+		Util.LOGGER.info(trace);
+		setPercentComplete(100);
+		backupZip = zip;
 	}
 }

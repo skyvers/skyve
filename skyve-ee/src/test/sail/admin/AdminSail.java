@@ -1,4 +1,4 @@
-package sail;
+package sail.admin;
 
 import org.junit.After;
 import org.junit.Before;
@@ -7,7 +7,7 @@ import org.openqa.selenium.By;
 import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
-public class AdminSailTest extends PrimeFacesTest {
+public class AdminSail extends PrimeFacesTest {
 	private String pathToChromeDriver = "/Users/mike/chromedriver";
 //	private String pathToFirefoxDriver = "/usr/local/bin/geckodriver";
 	

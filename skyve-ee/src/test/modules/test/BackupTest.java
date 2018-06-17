@@ -4,11 +4,12 @@ import java.io.File;
 
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.skyve.impl.backup.Backup;
-import org.skyve.impl.backup.Restore;
-import org.skyve.impl.backup.Restore.ContentRestoreOption;
+import org.skyve.impl.backup.BackupJob;
+import org.skyve.impl.backup.RestoreJob;
 import org.skyve.util.Util;
 
+import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.DataMaintenance.ContentRestoreOption;
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
 import modules.test.domain.MappedExtensionJoinedStrategy;
@@ -17,7 +18,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class BackupTest extends AbstractSkyveTest {
-	private static File backupFile;
+	private static File backupZip;
 	
 	@Test
 	public void testBackup() throws Exception {
@@ -34,33 +35,38 @@ public class BackupTest extends AbstractSkyveTest {
 		MappedExtensionJoinedStrategyExtension mejse = Util.constructRandomInstance(u, m, mejsd, 3);
 		p.save(mejse);
 		p.commit(false);
-		backupFile = Backup.backup();
+		BackupJob job = new BackupJob();
+		job.setBean(new DataMaintenance());
+		job.execute();
+		backupZip = job.getBackupZip();
 	}
 	
 	@Test
 	public void testRestore() throws Exception {
-		if (backupFile == null) {
+		if (backupZip == null) {
 			testBackup();
 		}
 		else {
-			Restore.restore(backupFile.getName(), false, ContentRestoreOption.error);
+			RestoreJob job = new RestoreJob();
+			DataMaintenance bean = DataMaintenance.newInstance();
+			String backupName = backupZip.getName();
+			backupName = backupName.substring(0, backupName.length() - 4);
+			bean.setSelectedBackupName(backupName);
+			bean.setContentRestoreOption(ContentRestoreOption.error);
+			job.setBean(bean);
+			job.execute();
 		}
 	}
 	
 	@Test
 	public void testRestoreAgain() throws Exception {
-		if (backupFile == null) {
-			testBackup();
-		}
-		else {
-			Restore.restore(backupFile.getName(), false, ContentRestoreOption.error);
-		}
+		testRestore();
 	}
 	
 	@AfterClass
 	public static void afterClass() {
-		if (backupFile != null) {
-			backupFile.delete();
+		if (backupZip != null) {
+			backupZip.delete();
 		}
 	}
 }

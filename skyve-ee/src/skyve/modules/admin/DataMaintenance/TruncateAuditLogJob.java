@@ -59,7 +59,7 @@ public class TruncateAuditLogJob extends Job {
 			try {
 				CommunicationUtil.sendFailSafeSystemCommunication(JobsBizlet.SYSTEM_JOB_NOTIFICATION,
 						JobsBizlet.SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT, "Truncate Audit Log Job", ResponseMode.SILENT, null, dm);
-			} catch (Exception e) {
+			} catch (@SuppressWarnings("unused") Exception e) {
 				log.add("Email notification failed.");
 			}
 		}

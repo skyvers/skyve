@@ -6,12 +6,15 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
+import modules.admin.domain.Group;
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 
@@ -25,6 +28,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(AllAttributesPersistent.aggregatedAssociationPropertyName);
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
+		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
 
 		final Set<String> actualBindings = new TreeSet<>();
 
@@ -47,44 +51,37 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 	@Test
 	public void testNull() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
-		test.setAggregatedAssociation(null);
-		test.getAggregatedCollection().get(0).setAggregatedAssociation(null);
-		test.getAggregatedCollection().remove(1);
-
+		Module admin = c.getModule(Group.MODULE_NAME);
+		Document groupDoc =admin.getDocument(c, Group.DOCUMENT_NAME);
+		Group test = Util.constructRandomInstance(u, admin, groupDoc, 2);
+		
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
-		// aggregatedAssociation
-		String expectedBinding = AllAttributesPersistent.aggregatedAssociationPropertyName;
+		// roles[0]
+		String expectedBinding = Binder.createIndexedBinding(Group.rolesPropertyName, 0);
 		expectedBindings.add(expectedBinding);
-		// aggregatedAssociation.aggregatedCollection
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		// roles[0].parent
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// aggregatedAssociation.aggregatedCollection.aggregatedAssociation
-		expectedBindings
-				.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedAssociationPropertyName));
-		// aggregatedCollection[0]
-		expectedBinding = Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0);
+		// roles[0].parent.roles
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, Group.rolesPropertyName);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedAssociation
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedAssociationPropertyName);
+		// roles[0].parent.roles.parent
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedAssociation.aggregatedCollection
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		// roles[1]
+		expectedBinding = Binder.createIndexedBinding(Group.rolesPropertyName, 1);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedAssociation.aggregatedCollection.aggregatedAssociation
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedAssociationPropertyName);
+		// roles[1].parent
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedCollection
-		expectedBinding = Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0);
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		// roles[1].parent.roles
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, Group.rolesPropertyName);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedCollection.aggregatedAssociation
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedAssociationPropertyName);
+		// roles[1].parent.roles.paremnt
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// aggregatedCollection[0].aggregatedCollection.aggregatedAssociation.aggregatedCollection
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
-		expectedBindings.add(expectedBinding);
+		
 
 		final Set<String> actualBindings = new TreeSet<>();
 
@@ -100,7 +97,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 				return true;
 			}
 
-		}.visit(aapd, test, c);
+		}.visit(groupDoc, test, c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
@@ -116,6 +113,8 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add("");
 		// allAttributesPersistents[0]
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
+		// composedAssociation
+		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
 
 		final Set<String> actualBindings = new TreeSet<>();
 
@@ -139,6 +138,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 	@Test
 	public void testManyToOneInverses() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		
 		// Load inverses
 		test = p.save(test);
 		p.evictAllCached();
@@ -149,6 +149,8 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		// inverse[0]
 		String expectedBinding = Binder.createIndexedBinding(AllAttributesPersistent.inverseAggregatedAssociationPropertyName, 0);
 		expectedBindings.add(expectedBinding);
+		// inverse[0].composedAssociation
+		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedAssociationPropertyName));
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
 		// inverse[0].aggregatedCollection[0]
 		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
@@ -222,7 +224,9 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add("");
 		// aggregatedCollection[1]
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
-
+		// composedAssociation
+		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
+		
 		final Set<String> actualBindings = new TreeSet<>();
 
 		new BeanVisitor(false, false, false) {
@@ -255,6 +259,8 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
 		// aggregatedCollection[1]
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
+		// composedAssociation
+		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
 
 		final Set<String> actualBindings = new TreeSet<>();
 

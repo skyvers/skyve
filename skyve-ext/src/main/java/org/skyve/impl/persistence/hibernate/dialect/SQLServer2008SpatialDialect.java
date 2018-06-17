@@ -7,6 +7,7 @@ import java.sql.Types;
 import org.geolatte.geom.codec.db.sqlserver.Decoders;
 import org.geolatte.geom.codec.db.sqlserver.Encoders;
 import org.geolatte.geom.jts.JTS;
+import org.hibernate.dialect.unique.UniqueDelegate;
 import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.sqlserver.SqlServer2008GeometryTypeDescriptor;
@@ -19,7 +20,8 @@ public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect imp
 	private static final long serialVersionUID = 5463421110159264122L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(SqlServer2008GeometryTypeDescriptor.INSTANCE);
-
+	private UniqueDelegate uniqueDelegate = new SQLServer2008NullTolerantUniqueDelegate(this);
+	
 	@Override
 	public int getGeometrySqlType() {
 		return SqlServer2008GeometryTypeDescriptor.INSTANCE.getSqlType();
@@ -93,5 +95,10 @@ public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect imp
 	@Override
 	public String getModifyColumnString() {
 		return "alter column";
+	}
+	
+	@Override
+	public UniqueDelegate getUniqueDelegate() {
+		return uniqueDelegate;
 	}
 }

@@ -270,7 +270,7 @@ public class JobScheduler {
 			try {
 				JOB_SCHEDULER.scheduleJob(trigger);
 			}
-			catch (ObjectAlreadyExistsException e) {
+			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
 				throw new ValidationException(new Message("You are already running job " + job.getDisplayName() +
 															".  Look in the jobs list for more information."));
 			}

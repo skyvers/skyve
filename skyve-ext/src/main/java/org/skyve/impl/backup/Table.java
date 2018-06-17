@@ -10,6 +10,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -23,6 +25,7 @@ import org.skyve.util.JSON;
 class Table {
 	String name;
 	LinkedHashMap<String, AttributeType> fields = new LinkedHashMap<>();
+	TreeMap<String, IndexType> indexes = new TreeMap<>();
 	
 	Table(String name) {
 		this.name = name;
@@ -79,6 +82,7 @@ class Table {
 		
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes()) {
 			if (attribute.isPersistent()) {
+				String attributeName = attribute.getName();
 				AttributeType attributeType = attribute.getAttributeType();
 				if (attributeType == AttributeType.association) {
 					// Check if this is an arc and add the "type" field if so
@@ -87,15 +91,21 @@ class Table {
 					Document referencedDocument = c.getModule(document.getOwningModuleName()).getDocument(c, association.getDocumentName());
 					Persistent referencedPersistent = referencedDocument.getPersistent();
 					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-						fields.put(attribute.getName() + "_type", AttributeType.text);
+						fields.put(attributeName + "_type", AttributeType.text);
 					}
 					
-					fields.put(attribute.getName() + "_id", attribute.getAttributeType());
+					fields.put(attributeName + "_id", attribute.getAttributeType());
 				}
 				else if ((! AttributeType.collection.equals(attributeType)) && 
 							(! AttributeType.inverseOne.equals(attributeType)) &&
 							(! AttributeType.inverseMany.equals(attributeType))) {
-					fields.put(attribute.getName(), attributeType);
+					if (attribute instanceof Field) {
+						IndexType indexType = ((Field) attribute).getIndex();
+						if (indexType != null) {
+							indexes.put(attributeName, indexType);
+						}
+					}
+					fields.put(attributeName, attributeType);
 				}
 			}
 		}

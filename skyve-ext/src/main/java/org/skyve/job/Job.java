@@ -19,6 +19,16 @@ public abstract class Job extends AbstractSkyveJob {
 	public String cancel() {
 		return "Job cannot be cancelled.";
 	}
+
+	/**
+	 * execute another job as part of this job in the same thread.
+	 */
+	@Override
+	public final void execute(Job job) throws Exception {
+		job.setBean(getBean());
+		job.setLog(getLog());
+		job.execute();
+	}
 	
 	private static final String EVENT_BUS_FACTORY = "org.primefaces.push.EventBusFactory";
 	private static final String EVENT_BUS = "org.primefaces.push.EventBus";

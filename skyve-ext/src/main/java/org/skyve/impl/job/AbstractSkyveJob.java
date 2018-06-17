@@ -16,6 +16,7 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.job.Job;
 import org.skyve.job.JobStatus;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
@@ -70,6 +71,10 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public final List<String> getLog() {
 		return log;
 	}
+	
+	protected final void setLog(List<String> log) {
+		this.log = log;
+	}
 
 	public final String createLogDescriptionString() {
 		StringBuilder sb = new StringBuilder(256);
@@ -92,6 +97,8 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 	public abstract void execute() throws Exception;
 
+	public abstract void execute(Job job) throws Exception;
+	
 	public abstract String cancel();
 
 	@Override
@@ -175,7 +182,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 				try {
 					Thread.sleep(30000);
 				}
-				catch (InterruptedException e) {
+				catch (@SuppressWarnings("unused") InterruptedException e) {
 					// Do nothing - can't do anything here - its all too late
 				}
 			}

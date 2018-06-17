@@ -1,4 +1,4 @@
-package sail;
+package sail.admin;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +11,7 @@ import util.JUnitMultiTheadedRunnerParameterizedRunnerFactory;
 
 @RunWith(Parameterized.class)
 @UseParametersRunnerFactory(JUnitMultiTheadedRunnerParameterizedRunnerFactory.class)
-public class AdminSailParameterisedPerformanceTest extends AdminSailTest {
+public class AdminParameterisedPerformanceSail extends AdminSail {
 	@Parameters
 	public static String[][] params() {
 		return new String[][] {{"demo", "admin", "admin"}};

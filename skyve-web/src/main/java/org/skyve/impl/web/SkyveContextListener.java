@@ -107,7 +107,8 @@ public class SkyveContextListener implements ServletContextListener {
 		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
 		try {
 			testFile.createNewFile();
-		} catch (Exception e) {
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
 			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
 		} finally {
 			testFile.delete();

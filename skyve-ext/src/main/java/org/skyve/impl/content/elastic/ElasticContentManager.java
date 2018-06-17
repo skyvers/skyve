@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.apache.commons.codec.binary.Base64;
@@ -119,6 +120,11 @@ public class ElasticContentManager extends AbstractContentManager {
 
 	@Override
 	public void close() {
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic attachments index to disk");
+		}
+
 		client.close();
 	}
 	
@@ -158,16 +164,21 @@ public class ElasticContentManager extends AbstractContentManager {
 			client.prepareIndex(BEAN_INDEX_NAME, 
 									BEAN_INDEX_TYPE,
 									content.getBizId()).setSource(source).execute().actionGet();
-
-			FlushResponse flushResponse = client.admin().indices().prepareFlush(BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
-			if (flushResponse.getFailedShards() > 0) {
-				throw new DomainException("Could not flush the Elastic beans index to disk");
-			}
 		}
 	}
 	
 	@Override
 	public void put(AttachmentContent attachment, boolean index)
+	throws Exception {
+		put(attachment, index, true);
+	}
+	
+	public void reindex(AttachmentContent attachment, boolean index) 
+	throws Exception {
+		put(attachment, index, false);
+	}
+
+	private void put(AttachmentContent attachment, boolean index, boolean store)
 	throws Exception {
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
 		
@@ -231,9 +242,10 @@ public class ElasticContentManager extends AbstractContentManager {
 					source.field(CONTENT, parsedContent);
 			
 					// Doc as binary attachment, inlined
-					if (! UtilImpl.CONTENT_FILE_STORAGE) {
+					if (store && (! UtilImpl.CONTENT_FILE_STORAGE)) {
 						source.field(ATTACHMENT, new String(new Base64().encode(content)));
 					}
+					
 					// End of our document
 					source.endObject();
 				}
@@ -271,27 +283,24 @@ public class ElasticContentManager extends AbstractContentManager {
 						.endObject(); // Bean
 	
 				// Doc as binary attachment, inlined
-				if (! UtilImpl.CONTENT_FILE_STORAGE) {
+				if (store && (! UtilImpl.CONTENT_FILE_STORAGE)) {
 					source.field(ATTACHMENT, new String(new Base64().encode(content)));
 				}
+				
 				// End of our document
 				source.endObject();
 			}
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): " + source.string());
+			String contentId = attachment.getContentId();
 			IndexResponse indexResponse = client.prepareIndex(ATTACHMENT_INDEX_NAME, 
 																ATTACHMENT_INDEX_TYPE,
-																attachment.getContentId())
+																(contentId == null) ? UUID.randomUUID().toString() : contentId)
 													.setSource(source).execute().actionGet();
 			if (indexResponse.isCreated()) {
 				attachment.setContentId(indexResponse.getId());
 			}
 
-			FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
-			if (flushResponse.getFailedShards() > 0) {
-				throw new DomainException("Could not flush the Elastic attachments index to disk");
-			}
-
-			if (UtilImpl.CONTENT_FILE_STORAGE) {
+			if (store && UtilImpl.CONTENT_FILE_STORAGE) {
 				StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 				absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
 
@@ -345,6 +354,10 @@ public class ElasticContentManager extends AbstractContentManager {
 				}
 			}
 			throw e;
+		}
+		// Now delete the old file after success
+		if ((old != null) && old.exists()) {
+			old.delete();
 		}
 	}
 	
@@ -493,11 +506,6 @@ public class ElasticContentManager extends AbstractContentManager {
 		client.prepareDelete(BEAN_INDEX_NAME,
 								BEAN_INDEX_TYPE,
 								content.getBizId()).execute().actionGet();
-
-		FlushResponse flushResponse = client.admin().indices().prepareFlush(BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
-		if (flushResponse.getFailedShards() > 0) {
-			throw new DomainException("Could not flush the Elastic beans index to disk");
-		}
 	}
 
 	@Override
@@ -506,11 +514,6 @@ public class ElasticContentManager extends AbstractContentManager {
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
 								ATTACHMENT_INDEX_TYPE,
 								contentId).execute().actionGet();
-
-		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
-		if (flushResponse.getFailedShards() > 0) {
-			throw new DomainException("Could not flush the Elastic attachments index to disk");
-		}
 
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder path = new StringBuilder(128);

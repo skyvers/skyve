@@ -47,6 +47,7 @@ public class UtilTests extends AbstractSkyveTest {
 
 		test.originalValues().clear();
 		test.getAggregatedAssociation().originalValues().clear();
+		test.getComposedAssociation().originalValues().clear();
 
 		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
 

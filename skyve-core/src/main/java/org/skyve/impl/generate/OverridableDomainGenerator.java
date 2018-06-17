@@ -1260,9 +1260,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append("\" column=\"").append(association.getName());
 					if (AssociationType.composition.equals(type)) {
 						fw.append("_id\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
-					} else if (AssociationType.aggregation.equals(type)) {
+						fw.append("\" unique-key=\"");
+						fw.append(generateDataStoreName(DataStoreType.UK, persistent.getName(), association.getName()));
+					}
+					else if (AssociationType.aggregation.equals(type)) {
 						fw.append("_id\" cascade=\"persist,save-update,refresh,merge");
-					} else {
+					}
+					else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
 					}
 					if (shouldIndex(association.getDatabaseIndex())) {
@@ -1642,7 +1646,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private enum DataStoreType {
-		PK, FK, IDX
+		PK, FK, UK, IDX
 	}
 	private static String generateDataStoreName(DataStoreType type, String tableName, String columnName) {
 		StringBuilder result = new StringBuilder(128);
