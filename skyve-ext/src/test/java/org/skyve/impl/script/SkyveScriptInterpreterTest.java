@@ -1069,4 +1069,109 @@ public class SkyveScriptInterpreterTest {
 		assertThat(attribute.getLength(), is(4));
 	}
 
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarTextAttributeDisplayName() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- 'Address Line 1' text 4";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Text, is(true));
+
+		Text attribute = (Text) document.getAttributes().get(0);
+		assertThat(attribute.getName(), is("addressLine1"));
+		assertThat(attribute.getDisplayName(), is("Address Line 1"));
+		assertThat(attribute.getLength(), is(4));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSplitAttribute() throws Exception {
+		// setup the test data
+		String input = "postCode text 100";
+
+		// call the method under test
+		String[] results = SkyveScriptInterpreter.splitAttribute(input);
+
+		// verify the result
+		assertThat(Integer.valueOf(results.length), is(Integer.valueOf(3)));
+		assertThat(results[0], is("postCode"));
+		assertThat(results[1], is("text"));
+		assertThat(results[2], is("100"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSplitAttributeDisplayName() throws Exception {
+		// setup the test data
+		String input = "'Yes/No' boolean";
+
+		// call the method under test
+		String[] results = SkyveScriptInterpreter.splitAttribute(input);
+
+		// verify the result
+		assertThat(Integer.valueOf(results.length), is(Integer.valueOf(2)));
+		assertThat(results[0], is("'Yes/No'"));
+		assertThat(results[1], is("boolean"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSplitAttributeDisplayNameSpaces() throws Exception {
+		// setup the test data
+		String input = "'Post Code' text 100";
+
+		// call the method under test
+		String[] results = SkyveScriptInterpreter.splitAttribute(input);
+
+		// verify the result
+		assertThat(Integer.valueOf(results.length), is(Integer.valueOf(3)));
+		assertThat(results[0], is("'Post Code'"));
+		assertThat(results[1], is("text"));
+		assertThat(results[2], is("100"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSplitAttributeEnumShorthand() throws Exception {
+		// setup the test data
+		String input = "state (sa, vic)";
+
+		// call the method under test
+		String[] results = SkyveScriptInterpreter.splitAttribute(input);
+
+		// verify the result
+		assertThat(Integer.valueOf(results.length), is(Integer.valueOf(2)));
+		assertThat(results[0], is("state"));
+		assertThat(results[1], is("(sa, vic)"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSplitAttributeEnum() throws Exception {
+		// setup the test data
+		String input = "state enum (sa, vic)";
+
+		// call the method under test
+		String[] results = SkyveScriptInterpreter.splitAttribute(input);
+
+		// verify the result
+		assertThat(Integer.valueOf(results.length), is(Integer.valueOf(3)));
+		assertThat(results[0], is("state"));
+		assertThat(results[1], is("enum"));
+		assertThat(results[2], is("(sa, vic)"));
+	}
+
 }

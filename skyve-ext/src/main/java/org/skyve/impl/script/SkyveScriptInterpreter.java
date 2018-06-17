@@ -67,6 +67,10 @@ public class SkyveScriptInterpreter {
 
 	private static String DISPLAY_NAME_PATTERN = "['\"]([^'\"]+)['\"]";
 	/**
+	 * Same as display name pattern but captures the quotes or double quotes
+	 */
+	private static String CAPTURING_DISPLAY_NAME_PATTERN = "^(['\"][^'\"]+['\"])";
+	/**
 	 * Matches a markdown collection declaration using square brackets instead of backticks
 	 */
 	private static String COLLECTION_SHORTHAND_PATTERN = ".*\\s\\[\\w+\\]";
@@ -1072,26 +1076,46 @@ public class SkyveScriptInterpreter {
 	 * @param line The attribute line to be parsed
 	 * @return A String array of line parts
 	 */
-	private static String[] splitAttribute(final String line) {
-		String match = null, line2 = line;
+	static String[] splitAttribute(final String line) {
+		String matchDN = null, matchE = null, line2 = line;
 
-		// if this is an enum, treat that separately as a single part
-		Pattern p = Pattern.compile(ENUM_ATTRIBUTE_PATTERN);
+		// if this is a display name, treat that separately as a single part
+		Pattern p = Pattern.compile(CAPTURING_DISPLAY_NAME_PATTERN);
 		Matcher m = p.matcher(line2);
 
 		while (m.find()) {
-			match = m.group(1);
-			if (match != null) {
-				line2 = line2.replace(match, "");
+			matchDN = m.group(1);
+			if (matchDN != null) {
+				line2 = line2.replace(matchDN, "");
+			}
+		}
+
+		// if this is an enum, treat that separately as a single part
+		p = Pattern.compile(ENUM_ATTRIBUTE_PATTERN);
+		m = p.matcher(line2);
+
+		while (m.find()) {
+			matchE = m.group(1);
+			if (matchE != null) {
+				line2 = line2.replace(matchE, "");
 			}
 		}
 
 		String[] parts = line2.trim().split("\\s");
+		
+		// prepend the display name definition if one was found
+		if(matchDN != null) {
+			ArrayList<String> al = new ArrayList<>();
+			al.add(matchDN);
+			al.addAll(Arrays.asList(parts));
+			parts = new String[al.size()];
+			parts = al.toArray(parts);
+		}
 
 		// append the enum definition if one was found
-		if (match != null) {
+		if (matchE != null) {
 			parts = Arrays.copyOf(parts, parts.length + 1);
-			parts[parts.length - 1] = match;
+			parts[parts.length - 1] = matchE;
 		}
 
 		return parts;
