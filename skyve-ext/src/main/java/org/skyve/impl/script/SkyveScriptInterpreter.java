@@ -90,6 +90,10 @@ public class SkyveScriptInterpreter {
 	 * Matches a markdown required declaration missing the terminating asterisk
 	 */
 	private static String REQUIRED_SHORTHAND_PATTERN = "^[-|+]\\s(\\*{1}['\"]?\\w+['\"]?)\\s.*";
+	/**
+	 * Matches a markdown required display name declaration missing the terminating asterisk
+	 */
+	private static String REQUIRED_DISPLAY_SHORTHAND_PATTERN = "^[-|+]\\s(\\*{1}['\"].+['\"])\\s.*";
 
 	/**
 	 * Creates a new SkyveScriptInterpreter instance with the
@@ -178,14 +182,24 @@ public class SkyveScriptInterpreter {
 					line = line.replaceFirst("^-", "- ").replaceFirst("^\\+", "+ ");
 				}
 
-				// look for missing termimating asterisk
-				p = Pattern.compile(REQUIRED_SHORTHAND_PATTERN);
+				// look for missing terminating asterisk
+				p = Pattern.compile(REQUIRED_DISPLAY_SHORTHAND_PATTERN);
 				m = p.matcher(line);
 
-				while (m.find()) {
+				if (m.matches()) {
 					final String match = m.group(1);
 					if (match != null) {
 						line = line.replace(match, match + "*");
+					}
+				} else {
+					p = Pattern.compile(REQUIRED_SHORTHAND_PATTERN);
+					m = p.matcher(line);
+
+					while (m.find()) {
+						final String match = m.group(1);
+						if (match != null) {
+							line = line.replace(match, match + "*");
+						}
 					}
 				}
 

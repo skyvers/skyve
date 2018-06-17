@@ -559,6 +559,20 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
+	public void testPreProcessAddsMissingRequiredDeclarationDisplayName() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *'First Name' boolean";
+		i = new SkyveScriptInterpreter(script);
+
+		// perform the method under test
+		String result = i.preProcess();
+
+		// verify the result
+		String expected = "# Admin\n## Address\n- *'First Name'* boolean";
+		assertThat(result, is(expected));
+	}
+
+	@Test
 	public void testPreProcessReplacesCollectionTypeBrackets() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- country Country [composition]";
@@ -958,6 +972,56 @@ public class SkyveScriptInterpreterTest {
 	public void testScalarRequiredAttribute() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *completionDate* date";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Date, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("completionDate"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Completion Date"));
+		assertThat(document.getAttributes().get(0).isRequired(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarRequiredAttributeDisplayName() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *\"Completion Date\"* date";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Date, is(true));
+		assertThat(document.getAttributes().get(0).getName(), is("completionDate"));
+		assertThat(document.getAttributes().get(0).getDisplayName(), is("Completion Date"));
+		assertThat(document.getAttributes().get(0).isRequired(), is(true));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testScalarRequiredAttributeDisplayName2() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *'Completion Date'* date";
 
 		// perform the method under test
 		i = new SkyveScriptInterpreter(script);
