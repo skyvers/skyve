@@ -120,7 +120,13 @@ final class SQLRowSetDynaClass implements DynaClass, Serializable {
 				}
 				else if ((! name.equals(Bean.DOCUMENT_KEY)) && (! name.equals(Bean.MODULE_KEY))) {
 					try {
-						BindUtil.convertAndSet(bean, name, resultSet.getObject(name));
+						Object value = resultSet.getObject(name);
+						// handle boolean as byte[] from some mysql versions
+						if (bean.getDynaClass().getDynaProperty(name).getType().equals(Boolean.class) &&
+								(value instanceof byte[])) {
+							value = Boolean.valueOf(((byte[]) value)[0] == 1);
+						}
+						BindUtil.convertAndSet(bean, name, value);
 					}
 					catch (Exception e) {
 						throw new IllegalStateException("Could not convert and set value", e);
