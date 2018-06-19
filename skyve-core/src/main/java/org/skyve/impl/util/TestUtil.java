@@ -347,7 +347,7 @@ public class TestUtil {
 	@SuppressWarnings("boxing")
 	private static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
 		int x;
-		if (currentValue != null) {
+		if (currentValue != null && clazz.getEnumConstants().length > 1) {
 			do {
 				x = random.nextInt(clazz.getEnumConstants().length);
 			} while (x == currentValue);
