@@ -77,6 +77,7 @@
 		<property name="calendarStartTime" type="DateTime" />
 		<property name="calendarEndTime" type="DateTime" />
 		<property name="calendarDescriptionExpression" length="500" />
+		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_template" foreign-key="FK_ADM_Communication_template" />
 		<bag name="subscriptions" inverse="true">
 			<key column="communication_id" />
 			<one-to-many entity-name="adminSubscription" />
@@ -85,6 +86,24 @@
 		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminCommunicationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminCommunicationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.CommunicationTemplate" table="ADM_CommunicationTemplate" entity-name="adminCommunicationTemplate">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="50" />
+		<property name="description" length="255" />
+		<property name="template" type="text" />
+		<filter name="adminCommunicationTemplateNoneFilter" condition="1=0"/>
+		<filter name="adminCommunicationTemplateCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminCommunicationTemplateDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminCommunicationTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.admin.domain.Configuration" table="ADM_Configuration" entity-name="adminConfiguration">
@@ -521,6 +540,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminCommunicationUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateNoneFilter" />
+	<filter-def name="adminCommunicationTemplateCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminConfigurationNoneFilter" />

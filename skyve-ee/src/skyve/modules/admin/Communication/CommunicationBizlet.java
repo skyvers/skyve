@@ -3,10 +3,7 @@ package modules.admin.Communication;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.FormatType;
-import modules.admin.domain.Tag;
+import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -24,6 +21,11 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import modules.admin.domain.Communication;
+import modules.admin.domain.Communication.FormatType;
+import modules.admin.domain.CommunicationTemplate;
+import modules.admin.domain.Tag;
 
 public class CommunicationBizlet extends Bizlet<Communication> {
 
@@ -108,6 +110,12 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			for (Tag t : tags) {
 				result.add(new DomainValue(t.getBizId(), t.getName()));
 			}
+		} else if (Communication.templatePropertyName.equals(attributeName)) {
+			DocumentQuery q = pers.newDocumentQuery(CommunicationTemplate.MODULE_NAME, CommunicationTemplate.DOCUMENT_NAME);
+			List<CommunicationTemplate> templates = q.beanResults();
+			result.addAll(templates.stream()
+					.map(t -> new DomainValue(t.getBizId(), t.getBizKey()))
+					.collect(Collectors.toList()));
 		}
 
 		return result;

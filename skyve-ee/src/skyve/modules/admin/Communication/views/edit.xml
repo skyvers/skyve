@@ -164,6 +164,11 @@
 						<html binding="body" pixelHeight="300" pixelWidth="800" />
 					</item>
 				</row>
+				<row>
+					<item>
+						<default binding="template" />
+					</item>
+				</row>
 			</form>
 			<form border="true" borderTitle="Options">
 				<column percentageWidth="20"/>

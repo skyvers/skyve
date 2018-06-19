@@ -25,6 +25,7 @@
 		<document ref="Content" />
 		<document ref="UserDashboard" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
+		<document ref="CommunicationTemplate" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DataMaintenanceModuleDocument" />
@@ -67,6 +68,7 @@
 				</document>
 				<document name="Contact" permission="_RU_C" />
 				<document name="Communication" permission="_R__C"/>
+				<document name="CommunicationTemplate" permission="_R__C"/>
 				<document name="Configuration" permission="_R__C" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
@@ -172,6 +174,7 @@
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
 				</document>
+				<document name="CommunicationTemplate" permission="CRUDC"/>
 				<document name="Contact" permission="CRUDC" />
 			</privileges>
 		</role>
@@ -202,6 +205,7 @@
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
 				</document>
+				<document name="CommunicationTemplate" permission="CRUDC" />
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
@@ -265,6 +269,7 @@
 			<description>Can access publicly accessible pages anonymously.</description>
 			<privileges>
 				<document name="Communication" permission="_R__G"/>
+				<document name="CommunicationTemplate" permission="_R__G"/>
 				<document name="Subscription" permission="CRUDG"/>
 			</privileges>
 		</role>
@@ -345,12 +350,20 @@
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
+		<group name="Communication">
 		<list document="Communication" name="Communications">
 			<uxui name="desktop" />
 			<uxui name="tablet" />
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
+			<list document="CommunicationTemplate" name="Communication Templates">
+				<uxui name="desktop" />
+				<uxui name="tablet" />
+				<role name="ContactManager" />
+				<role name="SecurityAdministrator" />
+			</list>
+		</group>
 		<group name="Security Admin">
 			<list document="Group" name="Groups">
 				<role name="SecurityAdministrator" />

@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - ActionType
  * @depend - - - FormatType
+ * @navcomposed n template 0..1 CommunicationTemplate
  * @navhas n tag 0..1 Tag
  * @stereotype "persistent"
  */
@@ -103,6 +104,8 @@ public class Communication extends AbstractPersistentBean {
 	public static final String calendarDescriptionExpressionPropertyName = "calendarDescriptionExpression";
 	/** @hidden */
 	public static final String mailImagePropertyName = "mailImage";
+	/** @hidden */
+	public static final String templatePropertyName = "template";
 	/** @hidden */
 	public static final String subscriptionsPropertyName = "subscriptions";
 
@@ -437,6 +440,12 @@ public class Communication extends AbstractPersistentBean {
 	 * Image
 	 **/
 	private String mailImage;
+	/**
+	 * Communication Template
+	 * <br/>
+	 * <em>Optional</em> Select a communication template to use for this communication.
+	 **/
+	private CommunicationTemplate template = null;
 	/**
 	 * Subscriptions
 	 **/
@@ -1057,6 +1066,24 @@ public class Communication extends AbstractPersistentBean {
 	public void setMailImage(String mailImage) {
 		preset(mailImagePropertyName, mailImage);
 		this.mailImage = mailImage;
+	}
+
+	/**
+	 * {@link #template} accessor.
+	 * @return	The value.
+	 **/
+	public CommunicationTemplate getTemplate() {
+		return template;
+	}
+
+	/**
+	 * {@link #template} mutator.
+	 * @param template	The new value.
+	 **/
+	@XmlElement
+	public void setTemplate(CommunicationTemplate template) {
+		preset(templatePropertyName, template);
+		this.template = template;
 	}
 
 	/**

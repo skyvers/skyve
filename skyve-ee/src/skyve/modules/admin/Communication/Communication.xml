@@ -176,6 +176,16 @@
 		<content name="mailImage" persistent="false">
 			<displayName>Image</displayName>
 		</content>
+		<association name="template" type="composition">
+			<displayName>Communication Template</displayName>
+			<description>
+				<![CDATA[
+					<em>Optional</em> Select a communication template to use for this communication.
+				]]>
+			</description>
+			<domain>variant</domain>
+			<documentName>CommunicationTemplate</documentName>
+		</association>
 
 		<inverseMany name="subscriptions">
 			<displayName>Subscriptions</displayName>

@@ -25,6 +25,7 @@ import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -1061,4 +1062,15 @@ public class ModulesUtil {
 		return bean;
 	}
 
+	/**
+	 * Customised, do not overwrite.
+	 * Returns the persistent table name for the specified module and document.
+	 */
+	public static String getPersistentIdentifier(final String moduleName, final String documentName) {
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
+		Persistent p = document.getPersistent();
+		return p.getPersistentIdentifier();
+	}
 }

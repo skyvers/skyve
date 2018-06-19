@@ -33,6 +33,7 @@ import modules.ModulesUtil;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
+import modules.admin.domain.CommunicationTemplate;
 import modules.admin.domain.Subscription;
 
 public class CommunicationUtil {
@@ -159,8 +160,22 @@ public class CommunicationUtil {
 		}
 
 		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
+
+		// process email body
 		String emailBodyMain = communication.getBody();
-		emailBodyMain = htmlEnclose(formatCommunicationMessage(customer, emailBodyMain, beans));
+
+		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
+
+		if (communication.getTemplate() != null) {
+			// attempt to use the template if there is one
+			CommunicationTemplate template = communication.getTemplate();
+			if (template.getTemplate().indexOf("{body}") >= 0) {
+				emailBodyMain = template.getTemplate().replace("{body}", emailBodyMain);
+			}
+		} else {
+			// if not using a template, enclose the html
+			emailBodyMain = htmlEnclose(emailBodyMain);
+		}
 
 		// prioritise additional attachments first, then the usual
 		List<MailAttachment> attachmentList = new ArrayList<>();
@@ -613,7 +628,14 @@ public class CommunicationUtil {
 			}
 		}
 
-		sb.insert(0, "<html><body>").append("</body></html>");
+		// enclose the html if required
+		if (html.indexOf("<html") < 0) {
+			sb.insert(0, "<html><body>");
+		}
+		if (html.indexOf("</html>") < 0) {
+			sb.append("</body></html>");
+		}
+
 		return sb.toString();
 	}
 }
