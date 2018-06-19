@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.TestUtil;
 import org.skyve.metadata.customer.Customer;
@@ -259,6 +260,14 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 					|| AttributeType.association.equals(type)
 					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
 				continue;
+			}
+
+			// if this enum only has 1 value, use a different attribute
+			if (AttributeType.enumeration.equals(type)) {
+				Enumeration e = (Enumeration) attribute;
+				if (e.getValues().size() == 1) {
+					continue;
+				}
 			}
 
 			// try use a persistent attribute if we can
