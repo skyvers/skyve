@@ -313,7 +313,6 @@
 					<action name="Reindex" />
 					<action name="ReindexData" />
 					<action name="ReindexContent" />
-					<action name="RelinkContent" />
 					<action name="Restore" />
 					<action name="Truncate" />
 					<action name="DownloadBackup" />
