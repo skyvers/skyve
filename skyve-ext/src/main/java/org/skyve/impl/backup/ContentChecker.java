@@ -152,6 +152,7 @@ public class ContentChecker {
 																							"content." + mimeType.getStandardFileSuffix(),
 																							mimeType,
 																							contentFile);
+														content.setContentId(stringValue);
 														cm.put(content);
 													}
 												}
