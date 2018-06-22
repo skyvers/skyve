@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map.Entry;
 
 import org.apache.tika.Tika;
 import org.skyve.CORE;
@@ -20,8 +21,13 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,9 +164,10 @@ public class ContentChecker {
 															}
 															LOGGER.info("Found matching file for missing content {} of type {}. Relink", contentFile.getAbsolutePath(), contentType);
 															MimeType mimeType = MimeType.fromMimeType(contentType);
+															Document document = findDocumentForPersistentName(table.name);
 															content = new AttachmentContent(resultSet.getString(Bean.CUSTOMER_NAME),
-																								resultSet.getString(Bean.MODULE_KEY),
-																								resultSet.getString(Bean.DOCUMENT_KEY),
+																								document.getOwningModuleName(),
+																								document.getName(),
 																								resultSet.getString(Bean.DATA_GROUP_ID),
 																								resultSet.getString(Bean.USER_ID),
 																								resultSet.getString(Bean.DOCUMENT_ID),
@@ -218,5 +225,22 @@ public class ContentChecker {
 			}
 		}
 		return false;
+	}
+	
+	private static Document findDocumentForPersistentName(String tableName) {
+		Customer c = CORE.getUser().getCustomer();
+		for (Module m : c.getModules()) {
+			for (Entry<String, DocumentRef> entry : m.getDocumentRefs().entrySet()) {
+				DocumentRef documentRef = entry.getValue();
+				if (documentRef.getOwningModuleName().equals(m.getName())) {
+					Document d = m.getDocument(c, entry.getKey());
+					Persistent p = d.getPersistent();
+					if ((p != null) && tableName.equals(p.getName())) {
+						return d;
+					}
+				}
+			}
+		}
+		return null;
 	}
 }
