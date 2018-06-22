@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.By;
 
+import util.sail.BrowserConfiguration;
 import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
@@ -13,8 +14,8 @@ public class AdminSail extends PrimeFacesTest {
 	
 	@Before
 	public void setup() throws Exception {
-		setupChrome("http://localhost:8080/skyve/", pathToChromeDriver, Devices.ipad.userAgentString);
-//		setupFirefox("http://localhost:8080/skyve/", pathToFirefoxDriver, Devices.ipad.userAgentString);
+		setupChrome(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").pathToDriver(pathToChromeDriver).userAgentString(Devices.ipad.userAgentString));
+//		setupFirefox(new BrowserConfiguration().baseUrl("http://localhost:8080/skyve/").pathToDriver(pathToFirefoxDriver).userAgentString(Devices.ipad.userAgentString));
 	}
 	
 	@After

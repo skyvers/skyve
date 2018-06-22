@@ -30,20 +30,14 @@ public abstract class CrossBrowserTest {
 	/**
 	 * http://phantomjs.org/
 	 * 
-	 * @param baseUrl
-	 * @param pathToDriver
+	 * @param config
 	 * @throws Exception
 	 */
-	protected void setupPhantomJS(String baseUrl, String pathToDriver) throws Exception {
-		setupPhantomJS(baseUrl, pathToDriver, null, null);
-	}
-
-	protected void setupPhantomJS(String baseUrl, String pathToDriver, String userAgentString) throws Exception {
-		setupPhantomJS(baseUrl, pathToDriver, userAgentString, null);
-	}
-	
-	protected void setupPhantomJS(String baseUrl, String pathToDriver, String userAgentString, Dimension resolution) throws Exception {
-		System.setProperty("phantomjs.binary.path", pathToDriver);
+	protected void setupPhantomJS(BrowserConfiguration config) throws Exception {
+		String pathToDriver = config.getPathToDriver();
+		if (pathToDriver != null) {
+			System.setProperty("phantomjs.binary.path", pathToDriver);
+		}
 
 		// DesiredCapabilities capabilities = new DesiredCapabilities();
 		// capabilities.setJavascriptEnabled(true);
@@ -51,19 +45,20 @@ public abstract class CrossBrowserTest {
 		// driver = new PhantomJSDriver(capabilities);
 	
 		this.browser = Browsers.phantomJS;
-		setupBrowser(baseUrl, resolution);
+		setupBrowser(config);
 	}
 	
-	protected void setupChrome(String baseUrl, String pathToDriver) throws Exception {
-		setupChrome(baseUrl, pathToDriver, null, null);
-	}
-
-	protected void setupChrome(String baseUrl, String pathToDriver, String userAgentString) throws Exception {
-		setupChrome(baseUrl, pathToDriver, userAgentString, null);
-	}
-	
-	protected void setupChrome(String baseUrl, String pathToDriver, String userAgentString, Dimension resolution) throws Exception {
-		System.setProperty("webdriver.chrome.driver", pathToDriver);
+	/**
+	 * http://chromedriver.chromium.org/downloads
+	 * 
+	 * @param config
+	 * @throws Exception
+	 */
+	protected void setupChrome(BrowserConfiguration config) throws Exception {
+		String pathToDriver = config.getPathToDriver();
+		if (pathToDriver != null) {
+			System.setProperty("webdriver.chrome.driver", pathToDriver);
+		}
 
 		// ChromeOptions options = new ChromeOptions();
 		// options.addArguments("--user-agent=USER AGENT STRING");
@@ -71,6 +66,7 @@ public abstract class CrossBrowserTest {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Class<?> optionsClass = cl.loadClass(CHROME_OPTIONS_CLASS);
 		Object options = optionsClass.newInstance();
+		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			List<String> arguments = new ArrayList<>();
 			arguments.add("--user-agent=" + userAgentString);
@@ -78,27 +74,22 @@ public abstract class CrossBrowserTest {
 		}
 		Class<?> driverClass = cl.loadClass(CHROME_DRIVER_CLASS);
 		driver = (WebDriver) driverClass.getConstructor(optionsClass).newInstance(options);
-
+		
 		this.browser = Browsers.chrome;
-		setupBrowser(baseUrl, resolution);
+		setupBrowser(config);
 	}
 
 	/**
 	 * https://github.com/mozilla/geckodriver/releases
-	 * @param baseUrl
-	 * @param pathToDriver
+	 * 
+	 * @param config
 	 * @throws Exception
 	 */
-	protected void setupFirefox(String baseUrl, String pathToDriver) throws Exception {
-		setupFirefox(baseUrl, pathToDriver, null, null);
-	}
-
-	protected void setupFirefox(String baseUrl, String pathToDriver, String userAgentString) throws Exception {
-		setupFirefox(baseUrl, pathToDriver, userAgentString, null);
-	}
-	
-	protected void setupFirefox(String baseUrl, String pathToDriver, String userAgentString, Dimension resolution) throws Exception {
-		System.setProperty("webdriver.gecko.driver", pathToDriver);
+	protected void setupFirefox(BrowserConfiguration config) throws Exception {
+		String pathToDriver = config.getPathToDriver();
+		if (pathToDriver != null) {
+			System.setProperty("webdriver.gecko.driver", pathToDriver);
+		}
 		
 		// FirefoxOptions options = new FirefoxOptions();
 		// FirefoxProfile profile = new FirefoxProfile();
@@ -110,6 +101,7 @@ public abstract class CrossBrowserTest {
 		Object options = optionsClass.newInstance();
 		Class<?> profileClass = cl.loadClass(FIREFOX_PROFILE_CLASS);
 		Object profile = profileClass.newInstance();
+		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			profileClass.getMethod(FIREFOX_SET_PREFERENCE_METHOD, String.class, String.class).invoke(profile, "general.useragent.override", userAgentString);
 		}
@@ -118,15 +110,32 @@ public abstract class CrossBrowserTest {
 		driver = (WebDriver) driverClass.getConstructor(optionsClass).newInstance(options);
 
 		this.browser = Browsers.firefox;
-		setupBrowser(baseUrl, resolution);
+		setupBrowser(config);
 	}
 
-	private void setupBrowser(String baseUrl, Dimension resolution) {
-		this.baseUrl = baseUrl;
+	private void setupBrowser(BrowserConfiguration config) {
+		this.baseUrl = config.getBaseUrl();
 		Options manage = driver.manage();
 		Timeouts timeouts = manage.timeouts();
-		timeouts.pageLoadTimeout(30, TimeUnit.SECONDS);
-		timeouts.implicitlyWait(0, TimeUnit.MILLISECONDS);
+		TimeUnit unit = config.getPageLoadTimeoutUnit();
+		if (unit == null) {
+			timeouts.pageLoadTimeout(30, TimeUnit.SECONDS);
+		}
+		else {
+			timeouts.pageLoadTimeout(config.getPageLoadTimeout(), unit);
+		}
+		unit = config.getImplicitlyWaitUnit();
+		if (unit == null) {
+			timeouts.implicitlyWait(0, TimeUnit.MILLISECONDS);
+		}
+		else {
+			timeouts.implicitlyWait(config.getImplicitlyWait(), unit);
+		}
+		unit = config.getScriptTimeoutUnit();
+		if (unit != null) {
+			timeouts.setScriptTimeout(config.getScriptTimeout(), unit);
+		}
+		Dimension resolution = config.getResolution();
 		if (resolution != null) {
 			manage.window().setSize(resolution);
 		}
