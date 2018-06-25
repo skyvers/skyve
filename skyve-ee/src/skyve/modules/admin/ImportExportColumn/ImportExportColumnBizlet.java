@@ -85,7 +85,11 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 			Module module = customer.getModule(bean.getParent().getModuleName());
 			Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
-			String resolvedBinding = bean.getBindingExpression();
+			String resolvedBinding = bean.getBindingName();
+			if(bean.isShowExpression()) {
+				resolvedBinding = bean.getBindingExpression();
+			}
+
 			if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
 				resolvedBinding = bean.getBindingExpression().substring(1, bean.getBindingExpression().length() - 1);
 			}
@@ -95,6 +99,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 				//can we resolve the binding?
 				TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
+				@SuppressWarnings("unused")
 				Attribute attr = tm.getAttribute();
 
 			} catch (Exception e) {
@@ -102,7 +107,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				if (Mode.importData.equals(bean.getParent().getMode())) {
 
 					StringBuilder sb = new StringBuilder(64);
-					sb.append("The binding '").append(bean.getBindingExpression()).append("' is invalid or can't be processed");
+					sb.append("The binding '").append(resolvedBinding).append("' is invalid or can't be processed");
 
 					throw new ValidationException(new Message(sb.toString()));
 
@@ -112,6 +117,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				try {
 					// validate the compound Expression
 					Bean b = document.newInstance(CORE.getUser());
+					@SuppressWarnings("unused")
 					String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
 
 				} catch (Exception e2) {

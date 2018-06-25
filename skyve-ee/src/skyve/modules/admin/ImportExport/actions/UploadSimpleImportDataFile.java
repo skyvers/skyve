@@ -97,6 +97,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 							for(Attribute a: document.getAttributes()) {
 								if(a.getDisplayName().toLowerCase().equals(columnName.toLowerCase())) {
 									newCol.setBindingName(a.getName());
+									break;
 								}
 							}
 						} else {
