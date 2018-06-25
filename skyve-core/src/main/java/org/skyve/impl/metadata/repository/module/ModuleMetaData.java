@@ -39,8 +39,9 @@ import org.skyve.metadata.view.View.ViewType;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "module",
-			propOrder = {"documentation", 
-							"title",
+			propOrder = {"title",
+							"prototype",
+							"documentation", 
 							"homeRef",
 							"homeDocument",
 							"jobs",
@@ -52,6 +53,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private static final long serialVersionUID = -6257431975403255783L;
 
 	private String title;
+	private Boolean prototype;
 	private ViewType homeRef;
 	private String homeDocument;
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
@@ -68,6 +70,15 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	public Boolean getPrototype() {
+		return prototype;
+	}
+
+	@XmlAttribute
+	public void setPrototype(Boolean prototype) {
+		this.prototype = prototype;
 	}
 
 	public String getHomeDocument() {
@@ -148,6 +159,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 		result.setTitle(value);
 
+		result.setPrototype(Boolean.TRUE.equals(prototype));
+		
 		value = getHomeDocument();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The module [homeDocument] is required");

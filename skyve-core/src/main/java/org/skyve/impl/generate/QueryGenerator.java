@@ -93,7 +93,7 @@ public class QueryGenerator {
 	public static void main(String[] args) throws Exception {
 		String customerName = null;
 		String moduleName = null;
-		Boolean includeAssociationBizKeys = false;
+		boolean includeAssociationBizKeys = false;
 		
 		if (args.length == 2) {
 			customerName = args[0];
@@ -102,7 +102,7 @@ public class QueryGenerator {
 		else if (args.length == 3) {
 			customerName = args[0];
 			moduleName = args[1];
-			includeAssociationBizKeys = Boolean.valueOf(args[2]);
+			includeAssociationBizKeys = Boolean.parseBoolean(args[2]);
 		}
 		else {
 			System.err.println("Usage: org.skyve.impl.generate.QueryGenerator customerName moduleName");
