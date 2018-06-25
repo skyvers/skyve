@@ -37,7 +37,8 @@ public class DataFileField {
 	private Converter<?> converter;
 	
 	private Attribute attribute;
-		
+	
+
 	public Attribute getAttribute() {
 		return attribute;
 	}
