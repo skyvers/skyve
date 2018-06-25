@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ImportExportColumn"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_ImportExportColumn" />
+	<singularAlias>Import Export Column</singularAlias>
+	<pluralAlias>Import Export Columns</pluralAlias>
+	<parentDocument>ImportExport</parentDocument>
+	<bizKey expression="Column"/>
+	<attributes>
+		<text name="columnName" required="true">
+			<displayName>Column Title</displayName>
+			<length>100</length>
+		</text>
+		<text name="bindingName" >
+			<displayName>Binding</displayName>
+			<domain>dynamic</domain>
+			<length>100</length>
+		</text>
+		<text name="bindingExpression" >
+			<displayName>Expression</displayName>
+			<description><![CDATA[
+			<strong>An expression using bindings relative to the document.</strong>
+			For exports, you can use compound expressions using bindings and literals, for example:
+			<i>{name} ({mobile})</i>
+			]]></description>
+			<length>200</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="showExpression">
+			<description>Whether to show advanced binding strings</description>
+			<expression>
+				<![CDATA[
+				Boolean.TRUE.equals(parent.getAdvancedMode())
+				|| modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName)
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

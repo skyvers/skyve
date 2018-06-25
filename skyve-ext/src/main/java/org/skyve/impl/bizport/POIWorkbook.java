@@ -2,6 +2,8 @@ package org.skyve.impl.bizport;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,12 +19,19 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.Decimal5;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.impl.bizport.POISheet;
 
@@ -230,4 +239,98 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 		return result.replace('/', '|');
 	}
+	
+	/**
+	 * Put value into POI Cell
+	 * 
+	 * @param sheet
+	 * @param rowNum
+	 * @param colNum
+	 * @param cellType
+	 * @param value
+	 * @throws Exception
+	 */
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
+
+		
+		//microsoft counts from 1 not 0 - so offset rows and columns by 1 to be consistent when inspecting the resulting sheet
+		XSSFCellStyle style = sheet.getWorkbook().createCellStyle();
+		style.setBorderTop((short) 6); // double lines border
+		style.setBorderBottom((short) 1); // single line border
+		
+		XSSFFont font = sheet.getWorkbook().createFont();
+		font.setFontHeightInPoints((short) 15);
+		font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+		style.setFont(font);                 
+	
+		XSSFRow row = sheet.getRow(rowNum-1);
+		if(row==null){
+			row = sheet.createRow(rowNum-1);
+		}
+		XSSFCell cell = row.getCell(colNum-1);
+		if (cell == null){
+			cell = row.createCell(colNum-1);
+		}
+
+//		Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + "=" + value);
+		
+		if (value != null) {
+//			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NOT NULL");
+			cell.setCellType(cellType);
+			if(bold){
+				cell.setCellStyle(style);
+			}
+
+			switch (cellType) {
+			case Cell.CELL_TYPE_STRING:
+				cell.setCellValue((String) value);
+				break;
+			case Cell.CELL_TYPE_BOOLEAN:
+				break;
+			case Cell.CELL_TYPE_BLANK:
+				break;
+			case Cell.CELL_TYPE_NUMERIC:
+			default:
+				if (value instanceof Date) {
+					CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
+					CreationHelper createHelper = sheet.getWorkbook().getCreationHelper();
+					if(value instanceof DateOnly) {
+						cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy"));
+					} else {
+						cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy h:mm"));
+					}
+					cell.setCellValue((Date) value);
+					cell.setCellStyle(cellStyle);
+					
+				} else if (value instanceof Integer) {
+					cell.setCellValue((Integer) value);
+				} else if (value instanceof BigDecimal) {
+					cell.setCellValue(new Double(((BigDecimal) value).doubleValue()));
+				} else if (value instanceof Decimal5) {
+					cell.setCellValue(new Double(((Decimal5) value).doubleValue()));
+				} else {
+					cell.setCellValue(((Double) value).doubleValue());
+				}
+				break;
+			}
+		} else {
+			// empty value
+//			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NULL with cellType " + (Cell.CELL_TYPE_NUMERIC == cellType ));
+			if(Cell.CELL_TYPE_NUMERIC == cellType && forceNumericNullToZero){
+				cell.setCellValue(new Integer(0));
+			} 
+			else {
+				cell.setCellType(Cell.CELL_TYPE_BLANK);
+			}
+		}
+	}
+
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, Object value) throws Exception {
+		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
+	}
+	
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, String value, boolean bold) throws Exception {
+		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
+	}
+	
 }

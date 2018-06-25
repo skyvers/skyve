@@ -28,6 +28,8 @@
 		<document ref="CommunicationTemplate" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
+		<document ref="ImportExport" defaultQueryName="qImportExport"/>
+		<document ref="ImportExportColumn" />
 		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
 		<document ref="SystemDashboard" />
@@ -323,6 +325,12 @@
 					<action name="UploadBackup" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
+				<document name="ImportExport" permission="CRUDC">
+					<action name="RunExport"/>
+					<action name="RunImport"/>
+					<action name="UploadSimpleImportDataFile"/>
+				</document>
+				<document name="ImportExportColumn" permission="CRUDC"/>
 				<document name="DocumentCreator" permission="_____">
 					<action name="Submit" />
 					<action name="UpdatePreview" />
@@ -607,6 +615,14 @@
 					<filterExpression>Tag</filterExpression>
 				</column>
 				<column binding="subject" />
+			</columns>
+		</documentQuery>
+		<documentQuery documentName="ImportExport" name="qImportExport">
+			<description>Saved Import and Export Wizards</description>
+			<columns>
+				<column binding="mode"/>
+				<column binding="moduleName"/>
+				<column binding="documentName"/>
 			</columns>
 		</documentQuery>
 	</queries>
