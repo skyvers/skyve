@@ -288,7 +288,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 *            - assumes first column is 0
 	 * @return
 	 */
-	private static String getPOIWorksheetColumnName(int number) {
+	public static String getPOIWorksheetColumnName(int number) {
 		final StringBuilder sb = new StringBuilder();
 
 		int num = number;

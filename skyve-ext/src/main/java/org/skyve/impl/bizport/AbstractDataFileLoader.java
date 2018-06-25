@@ -231,7 +231,11 @@ public abstract class AbstractDataFileLoader {
 	 * @throws Exception
 	 */
 	public void addField(String binding) throws Exception {
-		DataFileField field = new DataFileField(binding, fields.size());
+		String fixedBinding = binding;
+		if(binding!=null && binding.startsWith("{") && binding.endsWith("}")) {
+			fixedBinding = binding.substring(1, binding.length()-1);
+		}		
+		DataFileField field = new DataFileField(fixedBinding, fields.size());
 		fields.add(finaliseField(field));
 	}
 
@@ -703,7 +707,10 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case enumeration:
-								// TODO lookup enumeration
+								operand = getStringFieldValue(fieldIndex, true);
+								if (operand != null) {
+									loadValue = operand;
+								}
 								break;
 							case geometry:
 								// TODO
@@ -813,7 +820,7 @@ public abstract class AbstractDataFileLoader {
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {
-									Binder.set(result, binding, loadValue);
+									Binder.convertAndSet(result, binding, loadValue);
 								}
 								break;
 							case FIND:
@@ -843,7 +850,7 @@ public abstract class AbstractDataFileLoader {
 									lookupBean(result, field, loadValue, what);
 									break;
 								} else if (LoadAction.SET_VALUE.equals(field.getLoadAction())) {
-									Binder.set(result, binding, loadValue);
+									Binder.convertAndSet(result, binding, loadValue);
 								}
 								break;
 							}

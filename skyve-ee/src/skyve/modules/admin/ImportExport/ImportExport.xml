@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ImportExport"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_ImportExport" />
+	<singularAlias>Import Export</singularAlias>
+	<pluralAlias>Imports Exports</pluralAlias>
+	<iconStyleClass>fa fa-cloud-upload</iconStyleClass>
+	<bizKey expression="{moduleName}.{documentName}"/>
+	<attributes>
+		<enum name="mode" required="true">
+			<displayName>Mode</displayName>
+			<defaultValue>importData</defaultValue>
+			<values>
+				<value code="importData" description="Import Data"/>
+				<value code="exportData" description="Export Data"/>
+			</values>
+		</enum>
+		<text name="moduleName">
+			<displayName>Module Name</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<text name="documentName" >
+			<displayName>Document</displayName>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="importFileAbsolutePath">
+			<displayName>File Absolute Path</displayName>
+			<length>500</length>
+		</text>
+		<text name="exportFileAbsolutePath">
+			<displayName>File Absolute Path</displayName>
+			<length>500</length>
+		</text>
+		<memo name="results" persistent="false" audited="false" trackChanges="false">
+			<displayName>Results</displayName>
+		</memo>
+		<boolean name="advancedMode">
+			<displayName>Advanced</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="columnTitlesOnly">
+			<displayName>Template only (no data)</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		
+		<!-- Quick Import -->
+		<boolean name="fileContainsHeaders">
+			<displayName>Column Headers</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<collection type="child" name="importExportColumns" ordered="true">
+			<displayName>Columns</displayName>
+			<documentName>ImportExportColumn</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+	<conditions>
+		<condition name="fileExists">
+			<description>Whether the upload file exists</description>
+			<expression>
+				<![CDATA[
+				Mode.importData.equals(mode) && importFileAbsolutePath!=null
+				]]>
+			</expression>
+		</condition>
+		<condition name="showAdvancedBindings">
+			<description>Whether to show advanced binding strings</description>
+			<expression>
+				<![CDATA[
+				Boolean.TRUE.equals(advancedMode)
+				]]>
+			</expression>
+		</condition>
+		<condition name="showResults">
+			<expression>
+				<![CDATA[
+				results!=null
+				]]>
+			</expression>
+		</condition>
+		<condition name="showExport">
+			<description>Whether to show the export mode view rather than the default import</description>
+			<expression>
+				<![CDATA[
+				Mode.exportData.equals(mode)
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

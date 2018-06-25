@@ -29,6 +29,9 @@
 					</item>
 				</row>
 			</form>
+			<vbox border="true" borderTitle="Quick Import/Export">
+				<listGrid continueConversation="false" query="qImportExport"></listGrid>
+			</vbox>
 		</tab>
 		<tab title="Backup/Restore">
 			<form border="true" borderTitle="Job">
