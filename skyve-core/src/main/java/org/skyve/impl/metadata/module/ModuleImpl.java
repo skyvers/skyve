@@ -40,6 +40,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String title;
 	
+	private boolean prototype;
+	
 	private Map<String, DocumentRef> documentRefs = new TreeMap<>();
 
 	/**
@@ -84,13 +86,22 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
+	public boolean isPrototype() {
+		return prototype;
+	}
+
+	public void setPrototype(boolean prototype) {
+		this.prototype = prototype;
+	}
+
+	@Override
 	public Map<String, DocumentRef> getDocumentRefs() {
 		return documentRefs;
 	}
 
 	@Override
 	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
-		return getDocumentDefaultQuery(customer, documentName, false);
+		return getDocumentDefaultQuery(customer, documentName, isPrototype());
 	}
 
 	@Override

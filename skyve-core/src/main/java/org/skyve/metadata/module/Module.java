@@ -108,6 +108,12 @@ public interface Module extends NamedMetaData {
 	 * 
 	 * @return
 	 */
+	public boolean isPrototype();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public Map<String, DocumentRef> getDocumentRefs();
 
 	/**

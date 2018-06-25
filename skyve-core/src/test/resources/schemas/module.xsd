@@ -71,6 +71,7 @@
           </xs:element>
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="prototype" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
