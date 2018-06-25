@@ -51,7 +51,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
 				for (Attribute a : document.getAttributes()) {
-					
+
 					// exclude unimplemented types - some of these can be handled later
 					if (!AttributeType.association.equals(a.getAttributeType())
 							&& !AttributeType.collection.equals(a.getAttributeType())
@@ -86,47 +86,49 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 			Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
 			String resolvedBinding = bean.getBindingName();
-			if(bean.isShowExpression()) {
+			if (bean.isShowExpression()) {
 				resolvedBinding = bean.getBindingExpression();
 			}
 
 			if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
 				resolvedBinding = bean.getBindingExpression().substring(1, bean.getBindingExpression().length() - 1);
 			}
-			
-			//evaluate whether this is a valid compound binding or a binding expression
-			try {
 
-				//can we resolve the binding?
-				TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
-				@SuppressWarnings("unused")
-				Attribute attr = tm.getAttribute();
-
-			} catch (Exception e) {
-				
-				if (Mode.importData.equals(bean.getParent().getMode())) {
-
-					StringBuilder sb = new StringBuilder(64);
-					sb.append("The binding '").append(resolvedBinding).append("' is invalid or can't be processed");
-
-					throw new ValidationException(new Message(sb.toString()));
-
-				}
-				
-				//for export Data compound Expressions are allowed
+			if (resolvedBinding != null) {
+				// evaluate whether this is a valid compound binding or a binding expression
 				try {
-					// validate the compound Expression
-					Bean b = document.newInstance(CORE.getUser());
+
+					// can we resolve the binding?
+					TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
 					@SuppressWarnings("unused")
-					String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
+					Attribute attr = tm.getAttribute();
 
-				} catch (Exception e2) {
-					StringBuilder sb = new StringBuilder(64);
-					sb.append("The expression '").append(bean.getBindingExpression()).append("' is invalid or can't be processed");
+				} catch (Exception e) {
 
-					throw new ValidationException(new Message(sb.toString()));
+					if (Mode.importData.equals(bean.getParent().getMode())) {
+
+						StringBuilder sb = new StringBuilder(64);
+						sb.append("The binding '").append(resolvedBinding).append("' is invalid or can't be processed");
+
+						throw new ValidationException(new Message(sb.toString()));
+
+					}
+
+					// for export Data compound Expressions are allowed
+					try {
+						// validate the compound Expression
+						Bean b = document.newInstance(CORE.getUser());
+						@SuppressWarnings("unused")
+						String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
+
+					} catch (Exception e2) {
+						StringBuilder sb = new StringBuilder(64);
+						sb.append("The expression '").append(bean.getBindingExpression()).append("' is invalid or can't be processed");
+
+						throw new ValidationException(new Message(sb.toString()));
+					}
+
 				}
-
 			}
 
 		}

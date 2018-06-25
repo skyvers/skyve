@@ -33,8 +33,7 @@
 			<description>Whether to show advanced binding strings</description>
 			<expression>
 				<![CDATA[
-				Boolean.TRUE.equals(parent.getAdvancedMode())
-				|| modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName)
+				modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName)
 				]]>
 			</expression>
 		</condition>
