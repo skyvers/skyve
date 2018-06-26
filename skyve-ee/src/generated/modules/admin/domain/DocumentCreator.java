@@ -66,7 +66,10 @@ public class DocumentCreator extends AbstractTransientBean {
 	/**
 	 * Default Module
 	 * <br/>
-	 * The module documents will be added to if none is specified in the script.
+	 * <p>This allows you to add documents to an existing module already in the system 
+					without having to declare the module again in the script.</p>
+					<p>I.e. you can go straight into document declarations (<code>##</code>) and they will
+					be added to the selected module.</p>
 	 **/
 	private String defaultModule;
 

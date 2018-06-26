@@ -162,8 +162,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	 */
 	@XmlTransient
 	public boolean isShowExpression() {
-		return (Boolean.TRUE.equals(parent.getAdvancedMode())
-				|| modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName));
+		return (modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName));
 	}
 
 	/**
