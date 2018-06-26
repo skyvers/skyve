@@ -58,7 +58,7 @@ public class SkyveScriptInterpreter {
 
 	private static DocumentMetaData currentDocument = null;
 	private int currentLine = 0;
-	private ModuleMetaData currentModule = null;
+	private static ModuleMetaData currentModule = null;
 
 	private static Map<String, String> parentDocuments = new HashMap<>();
 
@@ -345,6 +345,7 @@ public class SkyveScriptInterpreter {
 				ModuleDocument md = new ModuleDocument();
 				md.setRef(currentDocument.getName());
 				currentModule.getDocuments().add(md);
+
 				appendRole(currentModule, currentDocument);
 				appendMenu(currentModule, currentDocument);
 
@@ -490,7 +491,22 @@ public class SkyveScriptInterpreter {
 		association.setDisplayName(displayName);
 		association.setRequired(required);
 		association.setType(assocType);
-		association.setDocumentName(type);
+
+		// if the document name contains a module ref, add a new document to the module
+		if (type.contains(".")) {
+			String[] parts = type.split("\\.");
+			if (parts.length == 2) {
+				association.setDocumentName(parts[1]);
+
+				ModuleDocument md = new ModuleDocument();
+				md.setRef(parts[1]);
+				md.setModuleRef(parts[0]);
+				currentModule.getDocuments().add(md);
+			}
+		} else {
+			association.setDocumentName(type);
+		}
+
 		return association;
 	}
 
@@ -647,8 +663,23 @@ public class SkyveScriptInterpreter {
 		collection.setName(name);
 		collection.setDisplayName(displayName);
 		collection.setMinCardinality(required ? 1 : 0);
-		collection.setDocumentName(type);
 		collection.setType(collectionType);
+
+		// if the document name contains a module ref, add a new document to the module
+		if (type.contains(".")) {
+			String[] parts = type.split("\\.");
+			if (parts.length == 2) {
+				collection.setDocumentName(parts[1]);
+
+				ModuleDocument md = new ModuleDocument();
+				md.setRef(parts[1]);
+				md.setModuleRef(parts[0]);
+				currentModule.getDocuments().add(md);
+			}
+		} else {
+			collection.setDocumentName(type);
+		}
+
 		return collection;
 	}
 
@@ -856,7 +887,7 @@ public class SkyveScriptInterpreter {
 	 * Returns true if the specified type describes an association:
 	 * <ul>
 	 * <li>the attribute belongs to an unordered list
-	 * <li>the first letter is uppercase
+	 * <li>the first letter is uppercase <em>or</em> the type contains a period
 	 * <li>there are no following words on the line
 	 * </ul>
 	 * 
@@ -867,11 +898,21 @@ public class SkyveScriptInterpreter {
 	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
 		if (isChildOfDashMarkerList(line)) {
 			// if (isChildOfBulletList(line)) {
-			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
+			if (type != null && parts.length == 1 && (Character.isUpperCase(type.charAt(0)) || type.contains("."))) {
 				return true;
 			}
 		}
 
+		return false;
+	}
+
+	/**
+	 * Returns true if the specified node is a {@link BulletList}.
+	 */
+	private static boolean isBulletList(Node node) {
+		if (node instanceof BulletList) {
+			return true;
+		}
 		return false;
 	}
 
@@ -910,20 +951,10 @@ public class SkyveScriptInterpreter {
 	}
 
 	/**
-	 * Returns true if the specified node is a {@link BulletList}.
-	 */
-	private static boolean isBulletList(Node node) {
-		if (node instanceof BulletList) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true if the specified type describes a acollection:
+	 * Returns true if the specified type describes a a collection:
 	 * <ul>
 	 * <li>the attribute belongs to an ordered list
-	 * <li>the first letter is uppercase
+	 * <li>the first letter is uppercase <em>or</em> the type contains a period
 	 * <li>there are no following words on the line
 	 * </ul>
 	 * 
@@ -931,7 +962,7 @@ public class SkyveScriptInterpreter {
 	 */
 	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
 		if (isChildOfPlusMarkerList(line)) {
-			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
+			if (type != null && parts.length == 1 && (Character.isUpperCase(type.charAt(0)) || type.contains("."))) {
 				return true;
 			}
 		}
