@@ -176,7 +176,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String documentName = document.getName();
 					DomainClass domainClass = new DomainClass();
 					domainClass.attributes = generateDocumentPropertyNames(document);
-					domainClass.isAbstract = document.isAbstract();
 					documentClasses.put(documentName, domainClass);
 
 					populateModocDerivations(repository, module, document, null);
@@ -2860,7 +2859,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName == null) {
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());
 			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
-			if ((domainClass != null) && (domainClass.isAbstract)) {
+			if (document.isAbstract() || ((domainClass != null) && (domainClass.isAbstract))) {
+				fw.append("abstract ");
+			}
+		}
+		else {
+			if (document.isAbstract()) {
 				fw.append("abstract ");
 			}
 		}
