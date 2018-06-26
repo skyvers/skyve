@@ -392,6 +392,28 @@ public class SkyveScriptInterpreter {
 		getErrors().add(new SkyveScriptException(ExceptionType.error, message, currentLine));
 	}
 
+	/**
+	 * Adds a ModuleDocument with a reference to another module to the current module if
+	 * it has not already been added to this module.
+	 * 
+	 * @param module The module the related document is in, e.g. admin
+	 * @param document The name of the related document, e.g. User
+	 */
+	private static void addModuleRef(String module, String document) {
+		// don't add if this has already been added to the module
+		for (ModuleDocument md : currentModule.getDocuments()) {
+			if (md.getModuleRef() != null && md.getModuleRef().equals(module) && md.getRef().equals(document)) {
+				return;
+			}
+		}
+
+		// add a new module reference
+		ModuleDocument md = new ModuleDocument();
+		md.setRef(document);
+		md.setModuleRef(module);
+		currentModule.getDocuments().add(md);
+	}
+
 	private void addWarning(String message) {
 		Util.LOGGER.info(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.warning, message, currentLine));
@@ -498,10 +520,7 @@ public class SkyveScriptInterpreter {
 			if (parts.length == 2) {
 				association.setDocumentName(parts[1]);
 
-				ModuleDocument md = new ModuleDocument();
-				md.setRef(parts[1]);
-				md.setModuleRef(parts[0]);
-				currentModule.getDocuments().add(md);
+				addModuleRef(parts[0], parts[1]);
 			}
 		} else {
 			association.setDocumentName(type);
@@ -671,10 +690,7 @@ public class SkyveScriptInterpreter {
 			if (parts.length == 2) {
 				collection.setDocumentName(parts[1]);
 
-				ModuleDocument md = new ModuleDocument();
-				md.setRef(parts[1]);
-				md.setModuleRef(parts[0]);
-				currentModule.getDocuments().add(md);
+				addModuleRef(parts[0], parts[1]);
 			}
 		} else {
 			collection.setDocumentName(type);

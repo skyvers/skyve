@@ -312,6 +312,56 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testAssociationRelatedDocumentMultipleReferences() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *user* admin.User\n## Contact\n- user admin.User";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(2));
+
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getModules().get(0).getDocuments().size(), is(3));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getModuleRef(), is(nullValue()));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getRef(), is("Address"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getModuleRef(), is("admin"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getRef(), is("User"));
+		assertThat(i.getModules().get(0).getDocuments().get(2).getModuleRef(), is(nullValue()));
+		assertThat(i.getModules().get(0).getDocuments().get(2).getRef(), is("Contact"));
+
+		DocumentMetaData document1 = i.getDocuments().get(0);
+		DocumentMetaData document2 = i.getDocuments().get(1);
+
+		assertThat(document1, is(notNullValue()));
+		assertThat(document1.getAttributes().size(), is(1));
+		assertThat(document1.getAttributes().get(0) instanceof Association, is(true));
+
+		assertThat(document2, is(notNullValue()));
+		assertThat(document2.getAttributes().size(), is(1));
+		assertThat(document2.getAttributes().get(0) instanceof Association, is(true));
+
+		Association a1 = (Association) document1.getAttributes().get(0);
+		Association a2 = (Association) document2.getAttributes().get(0);
+
+		assertThat(a1.getName(), is("user"));
+		assertThat(a1.getDisplayName(), is("User"));
+		assertThat(a1.isRequired(), is(true));
+		assertThat(a1.getDocumentName(), is("User"));
+		assertThat(a1.getType(), is(AssociationType.aggregation));
+
+		assertThat(a2.getName(), is("user"));
+		assertThat(a2.getDisplayName(), is("User"));
+		assertThat(a2.isRequired(), is(false));
+		assertThat(a2.getDocumentName(), is("User"));
+		assertThat(a2.getType(), is(AssociationType.aggregation));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testAssociationRequiredComposition() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *country* Country `composition`";
