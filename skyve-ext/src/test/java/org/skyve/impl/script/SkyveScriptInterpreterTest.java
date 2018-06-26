@@ -63,6 +63,43 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testModuleSetsPrototypeByDefault() throws Exception {
+		// setup the test data
+		String script = "# admin";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+
+		ModuleMetaData module = i.getModules().get(0);
+
+		assertThat(module.getPrototype(), is(Boolean.TRUE));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testModuleDoesntSetPrototypeWhenRequested() throws Exception {
+		// setup the test data
+		String script = "# admin";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.setPrototypeModules(false);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+
+		ModuleMetaData module = i.getModules().get(0);
+
+		assertThat(module.getPrototype(), is(Boolean.FALSE));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testDocumentHeading() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address";

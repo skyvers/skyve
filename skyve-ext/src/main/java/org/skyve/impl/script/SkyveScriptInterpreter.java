@@ -55,9 +55,14 @@ public class SkyveScriptInterpreter {
 	private Parser parser;
 	private Node document;
 	private String script;
+	private int currentLine = 0;
+
+	/**
+	 * Controls whether modules are created in prototype mode or not
+	 */
+	private boolean prototypeModules = true;
 
 	private static DocumentMetaData currentDocument = null;
-	private int currentLine = 0;
 	private static ModuleMetaData currentModule = null;
 
 	private static Map<String, String> parentDocuments = new HashMap<>();
@@ -138,6 +143,10 @@ public class SkyveScriptInterpreter {
 
 	public List<ModuleMetaData> getModules() {
 		return modules;
+	}
+
+	public boolean isPrototypeModules() {
+		return prototypeModules;
 	}
 
 	public Node parse() {
@@ -259,6 +268,10 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
+	public void setPrototypeModules(boolean prototypeModules) {
+		this.prototypeModules = prototypeModules;
+	}
+
 	@SuppressWarnings("boxing")
 	private void process(Node node) {
 		if (isHeading(node)) {
@@ -267,6 +280,7 @@ public class SkyveScriptInterpreter {
 				currentLine++;
 				// new module
 				currentModule = new ModuleMetaData();
+				currentModule.setPrototype(prototypeModules);
 
 				if (heading.getFirstChild() != null && heading.getFirstChild() instanceof Text) {
 					Text text = (Text) heading.getFirstChild();
