@@ -58,6 +58,38 @@
 					</item>
 				</row>
 			</form>
+			<form visible="showExport">
+				<column />
+				<column />			
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="RunExport"/>
+					</item>
+				</row>
+			</form>
+			<form invisible="showExport">
+				<column />
+				<column />			
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="UploadSimpleImportDataFile"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="RunImport"/>
+					</item>
+				</row>
+			</form>
 		</vbox>
 	</vbox>
 	<form>
@@ -90,8 +122,8 @@
 	</vbox>
 	<actions>
 		<defaults />
-		<upload className="UploadSimpleImportDataFile" displayName="Upload Data" invisible="showExport" />
-		<action className="RunImport" displayName="Import Data" iconStyleClass="fa fa-gear" visible="fileExists" />
-		<download className="RunExport" displayName="Download Data" visible="showExport" />
+		<upload className="UploadSimpleImportDataFile" displayName="Upload Data" invisible="showExport" inActionPanel="false"/>
+		<action className="RunImport" displayName="Import Data" iconStyleClass="fa fa-gear" visible="fileExists" inActionPanel="false"/>
+		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false"/>
 	</actions>
 </view>

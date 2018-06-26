@@ -121,7 +121,7 @@ public class POISheetGenerator {
 	 * @param binding
 	 */
 	public void addField(String fieldTitle, String binding) throws Exception {
-		fields.add(new DataFileExportField(fieldTitle, binding));		
+		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 
 	public void generateFile() throws Exception {
@@ -163,75 +163,77 @@ public class POISheetGenerator {
 						// attempt to find attribute with the binding
 						// if not assume it is a compound expression and use binder.formatMessage
 						String resolvedBinding = f.getBindingExpression();
-						if (resolvedBinding!=null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
+						if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
 							resolvedBinding = f.getBindingExpression().substring(1, f.getBindingExpression().length() - 1);
 						}
-						try {
-							TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
-							Attribute attr = tm.getAttribute();
-							Object value = Binder.get(b, resolvedBinding);
-							
-							Util.LOGGER.info("Putting resolved Binding " + resolvedBinding);
+						if (resolvedBinding != null) {
+							try {
+								TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
+								Attribute attr = tm.getAttribute();
+								Object value = Binder.get(b, resolvedBinding);
 
-							switch (attr.getAttributeType()) {
-							case association:
-								// Not required - handled by use of BizKey above
-								break;
-							case bool:
-								// TODO
-								break;
-							case collection:
-								// not supported
-								break;
-							case colour:
-								// TODO
-								break;
-							case content:
-								// not supported
-								break;
-							case date:
-							case dateTime:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
-								break;
-							case decimal10:
-							case decimal2:
-							case decimal5:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
-								break;
-							case enumeration:
+								Util.LOGGER.info("Putting resolved Binding " + resolvedBinding);
+
+								switch (attr.getAttributeType()) {
+								case association:
+									// Not required - handled by use of BizKey above
+									break;
+								case bool:
+									// TODO
+									break;
+								case collection:
+									// not supported
+									break;
+								case colour:
+									// TODO
+									break;
+								case content:
+									// not supported
+									break;
+								case date:
+								case dateTime:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									break;
+								case decimal10:
+								case decimal2:
+								case decimal5:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									break;
+								case enumeration:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
+									break;
+								case geometry:
+									// TODO
+									break;
+								case id:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
+									break;
+								case integer:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									break;
+								case inverseOne:
+								case inverseMany:
+									// not supported
+									break;
+								case longInteger:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									break;
+								case markup:
+								case memo:
+								case text:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
+									break;
+								case time:
+								case timestamp:
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									break;
+								default:
+									break;
+								}
+							} catch (Exception e) {
+								Util.LOGGER.info("Putting compound expression " + f.getBindingExpression());
 								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
-								break;
-							case geometry:
-								// TODO
-								break;
-							case id:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
-								break;
-							case integer:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
-								break;
-							case inverseOne:
-							case inverseMany:
-								// not supported
-								break;
-							case longInteger:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
-								break;
-							case markup:
-							case memo:
-							case text:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
-								break;
-							case time:
-							case timestamp:
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
-								break;
-							default:
-								break;
 							}
-						} catch (Exception e) {
-							Util.LOGGER.info("Putting compound expression " + f.getBindingExpression());
-							POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
 						}
 
 						colNum++;

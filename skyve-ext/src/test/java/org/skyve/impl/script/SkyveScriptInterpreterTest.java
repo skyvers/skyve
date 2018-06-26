@@ -275,6 +275,43 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testAssociationRelatedDocument() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *user* admin.User";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof Association, is(true));
+
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getModules().get(0).getDocuments().size(), is(2));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getModuleRef(), is(nullValue()));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getRef(), is("Address"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getModuleRef(), is("admin"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getRef(), is("User"));
+
+		Association a = (Association) document.getAttributes().get(0);
+
+		assertThat(a.getName(), is("user"));
+		assertThat(a.getDisplayName(), is("User"));
+		assertThat(a.isRequired(), is(true));
+		assertThat(a.getDocumentName(), is("User"));
+		assertThat(a.getType(), is(AssociationType.aggregation));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testAssociationRequiredComposition() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *country* Country `composition`";
@@ -386,6 +423,41 @@ public class SkyveScriptInterpreterTest {
 		assertThat(collection.getMinCardinality(), is(1));
 		assertThat(collection.getDocumentName(), is("Role"));
 		assertThat(collection.getType(), is(CollectionType.composition));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testCollectionRelatedDocument() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n+ users admin.User";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(1));
+
+		assertThat(document.getAttributes().get(0) instanceof Collection, is(true));
+
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getModules().get(0).getDocuments().size(), is(2));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getModuleRef(), is(nullValue()));
+		assertThat(i.getModules().get(0).getDocuments().get(0).getRef(), is("Address"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getModuleRef(), is("admin"));
+		assertThat(i.getModules().get(0).getDocuments().get(1).getRef(), is("User"));
+
+		Collection collection = (Collection) document.getAttributes().get(0);
+		assertThat(collection.getName(), is("users"));
+		assertThat(collection.getDisplayName(), is("Users"));
+		assertThat(collection.getMinCardinality(), is(0));
+		assertThat(collection.getDocumentName(), is("User"));
 	}
 
 	@Test
