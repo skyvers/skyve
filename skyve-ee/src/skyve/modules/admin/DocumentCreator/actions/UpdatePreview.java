@@ -52,7 +52,8 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 					}
 				}
 				// escape html and set the document preview
-				bean.setDocumentPreview(out.toString().replace("<", "&lt;").replace(">", "&gt;"));
+				bean.setDocumentPreview(
+						out.toString().replace("<", "&lt;").replace(">", "&gt;").replace("{", "&#123;").replace("}", "&#125;"));
 			} else {
 				throw new ValidationException(new Message(DocumentCreator.defaultModulePropertyName,
 						"No module was specified in the script, a default module is required."));

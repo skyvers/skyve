@@ -674,6 +674,14 @@ public class SkyveScriptInterpreter {
 			if (field != null) {
 				currentDocument.getAttributes().add(field);
 			}
+
+			// update the bizKey if this is the first required attribute
+			if (required) {
+				if (!currentDocument.getBizKey().getExpression().contains("{")) {
+					currentDocument.getBizKey().setExpression(String.format("%s - {%s}", currentDocument.getSingularAlias(), name));
+				}
+			}
+
 		} else {
 			addWarning(String.format("Unsupported attribute definition: %s",
 					Arrays.toString(parts).replace(",,", ",").replace("[", "").replace("]", "")));

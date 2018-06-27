@@ -1128,6 +1128,27 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testScalarMultipleReqiredAttributesSetsBizKey() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## Address\n- *addressLine1* text 50\n- *suburb* text 50";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+		assertThat(document.getBizKey().getExpression(), is(("Address - {addressLine1}")));
+
+		assertThat(document, is(notNullValue()));
+		assertThat(document.getAttributes().size(), is(2));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testScalarRequiredAttribute() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *completionDate* date";
@@ -1143,6 +1164,8 @@ public class SkyveScriptInterpreterTest {
 		DocumentMetaData document = i.getDocuments().get(0);
 
 		assertThat(document, is(notNullValue()));
+		assertThat(document.getBizKey().getExpression(), is(("Address - {completionDate}")));
+
 		assertThat(document.getAttributes().size(), is(1));
 
 		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Date, is(true));
@@ -1168,6 +1191,8 @@ public class SkyveScriptInterpreterTest {
 		DocumentMetaData document = i.getDocuments().get(0);
 
 		assertThat(document, is(notNullValue()));
+		assertThat(document.getBizKey().getExpression(), is(("Address - {completionDate}")));
+
 		assertThat(document.getAttributes().size(), is(1));
 
 		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Date, is(true));
@@ -1218,8 +1243,9 @@ public class SkyveScriptInterpreterTest {
 		DocumentMetaData document = i.getDocuments().get(0);
 
 		assertThat(document, is(notNullValue()));
-		assertThat(document.getAttributes().size(), is(1));
+		assertThat(document.getBizKey().getExpression(), is(("Address")));
 
+		assertThat(document.getAttributes().size(), is(1));
 		assertThat(document.getAttributes().get(0) instanceof org.skyve.impl.metadata.model.document.field.Text, is(true));
 
 		Text attribute = (Text) document.getAttributes().get(0);
