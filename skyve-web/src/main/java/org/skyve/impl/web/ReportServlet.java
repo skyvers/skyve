@@ -183,6 +183,13 @@ public class ReportServlet extends HttpServlet {
 							format,
 							baos);
 				} else {
+					// Manually load the bean if an id is specified but there is no appropriate bean to load from
+					// the conversation.
+					final String id = request.getParameter(AbstractWebContext.ID_NAME);
+					if (id != null && (bean == null || (contextKey != null && !contextKey.endsWith(id)))) {
+						bean = AbstractPersistence.get().retrieve(document, id, false);
+					}
+
 					jasperPrint = ReportUtil.runReport(user,
 							document,
 							reportName,
