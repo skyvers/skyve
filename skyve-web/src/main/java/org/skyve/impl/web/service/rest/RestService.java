@@ -17,13 +17,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.codec.binary.Base64;
+import org.elasticsearch.common.Preconditions;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
@@ -374,5 +378,69 @@ public class RestService {
 		}
 			
 		return result;
+	}
+
+	@POST
+	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{mimeType}/{encodedContent}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String insertContent(@PathParam("customer") String customer,
+								@PathParam("module") String module,
+								@PathParam("document") String document,
+								@PathParam("id") String id,
+								@PathParam("attributeName") String attributeName,
+								@PathParam("mimeType") String mimeType,
+								@PathParam("encodedContent") String encodedContent) {
+		try {
+			Preconditions.checkNotNull(customer);
+			Preconditions.checkNotNull(module);
+			Preconditions.checkNotNull(document);
+			Preconditions.checkNotNull(id);
+			Preconditions.checkNotNull(attributeName);
+			Preconditions.checkNotNull(mimeType);
+			Preconditions.checkNotNull(encodedContent);
+
+			response.setContentType(MediaType.APPLICATION_JSON);
+			final User u = CORE.getUser();
+			if (!u.canAccessContent(id,
+					module,
+					document,
+					customer,
+					u.getDataGroupId(),
+					id,
+					attributeName)) {
+				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
+			}
+
+			final PersistentBean bean = CORE.getPersistence().retrieve(module, document, id, true);
+			if (bean == null) {
+			    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			    return null;
+			}
+
+			try (final ContentManager cm = EXT.newContentManager()) {
+				final Base64 base64Codec = new Base64();
+				final AttachmentContent content = new AttachmentContent(
+						customer,
+						module,
+						document,
+						u.getDataGroupId(),
+						u.getId(),
+						id,
+						attributeName,
+						MimeType.valueOf(mimeType),
+						base64Codec.decode(encodedContent));
+
+				cm.put(content);
+				BindUtil.set(bean, attributeName, content.getContentId());
+				CORE.getPersistence().save(bean);
+
+				return content.getContentId();
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+		}
+
+		return null;
 	}
 }
