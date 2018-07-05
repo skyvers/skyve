@@ -71,7 +71,7 @@ public interface Attribute extends NamedMetaData {
 	
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public enum UsageType {
-		domain, view
+		domain, view, both
 	}
 	
 	/**

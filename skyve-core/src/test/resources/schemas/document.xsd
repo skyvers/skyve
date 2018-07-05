@@ -664,6 +664,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="domain"/>
       <xs:enumeration value="view"/>
+      <xs:enumeration value="both"/>
     </xs:restriction>
   </xs:simpleType>
 
