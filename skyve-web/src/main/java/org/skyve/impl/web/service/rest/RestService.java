@@ -380,16 +380,17 @@ public class RestService {
 		return result;
 	}
 
-	@POST
-	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{mimeType}/{encodedContent}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@PUT
+	@Path("/content/insert/{customer}/{module}/{document}/{id}/{attributeName}/{mimeType}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.TEXT_PLAIN)
 	public String insertContent(@PathParam("customer") String customer,
 								@PathParam("module") String module,
 								@PathParam("document") String document,
 								@PathParam("id") String id,
 								@PathParam("attributeName") String attributeName,
 								@PathParam("mimeType") String mimeType,
-								@PathParam("encodedContent") String encodedContent) {
+								String encodedContent) {
 		try {
 			Preconditions.checkNotNull(customer);
 			Preconditions.checkNotNull(module);
