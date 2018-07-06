@@ -31,7 +31,6 @@ public class LoginServlet extends HttpServlet {
 
 	private static final String LOGIN_PATH = "/login";
 	private static final String LOGGED_OUT_PATH = "/loggedOut";
-	private static final String LOGIN_ERROR_PATH = "/loginError";
 	private static final String SMART_CLIENT_JAVASCRIPT_LOGIN = "/smartClientJavascriptLogin";
 	
 	@Override
@@ -89,20 +88,6 @@ public class LoginServlet extends HttpServlet {
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
 					String value = customer.getLoginResources().getLoggedOutPageURL();
-					if (value != null) {
-						url = value;
-					}
-				}
-
-				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher(url);
-				rd.forward(request, response);
-			}
-			else if (LOGIN_ERROR_PATH.equals(servletPath)) {
-				String url = "/pages/loginError.jsp";
-				if (customerName != null) {
-					Customer customer = repository.getCustomer(customerName);
-					String value = customer.getLoginResources().getLoginErrorPageURL();
 					if (value != null) {
 						url = value;
 					}
