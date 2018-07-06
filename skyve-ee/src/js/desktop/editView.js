@@ -568,6 +568,12 @@ isc.EditView.addMethods({
 	deleteInstance: function(validate, successCallback) { // a function  to callback on when the operation is successful
 		var instance = this.gather(validate); // validate
 		if (instance) {
+			// We get the web context out of the bean in the response and put it
+			// as a post parameter in its own right.
+			// The server needs to reconstruct the bean before it parses and applies the JSON.
+			var context = instance._c;
+			delete instance._c;
+
 			isc.EditView._DATA_SOURCE.removeData(
 				instance,
 				function(dsResponse, // metadata about the returned data
@@ -584,7 +590,7 @@ isc.EditView.addMethods({
 						isc.warn(data, null, {title: 'Problems'});
 					}
 				},
-				{params:{_mod: this._mod, _doc: this._doc, _c: instance._c}, willHandleError: true}
+				{params:{_mod: this._mod, _doc: this._doc, _c: context}, willHandleError: true}
 			);
 		}
 	},
@@ -1400,7 +1406,7 @@ isc.BizButton.addMethods({
 			}
 			else if (this.type == "S") { // Save on edit view
 				this._view.saveInstance(validate, this.actionName, function() {
-//					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
+					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
 				});
 			}
 			else if (this.type == "A") { // Add on child edit view
