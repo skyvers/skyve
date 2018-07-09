@@ -1209,6 +1209,7 @@ public class SkyveScriptInterpreterTest {
 
 		// perform the method under test
 		i = new SkyveScriptInterpreter(script);
+		i.preProcess();
 		i.process();
 
 		// verify the result
