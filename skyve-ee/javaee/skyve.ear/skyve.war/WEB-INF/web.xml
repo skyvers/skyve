@@ -358,10 +358,6 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
-		<url-pattern>/loginError</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>/smartClientJavascriptLogin</url-pattern>
 	</servlet-mapping>
 
