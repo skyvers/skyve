@@ -252,6 +252,19 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testPluraliseEndsWithSion() throws Exception {
+		// setup the test data
+		final String singular = "decision";
+
+		// perform the method under test
+		final String result1 = PluralUtil.pluralise(singular);
+
+		// verify the result
+		assertThat(result1, is("decisions"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testPluraliseEndsWithSCHXZSH() throws Exception {
 		// setup the test data
 		final String singular1 = "truss", singular2 = "blitz", singular3 = "fox", singular4 = "church", singularException = "ox";

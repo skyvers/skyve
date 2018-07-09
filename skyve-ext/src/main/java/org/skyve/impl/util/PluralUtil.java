@@ -462,8 +462,13 @@ public class PluralUtil {
 				out.setLength(out.length() - 1);
 				out.append("ae");
 			}
-			// ends with 'on'
+			// ends with 'on' but not 'sion'
 			else if (str.endsWith("on")) {
+				// not ending is 'ion'
+				if (str.endsWith("sion")) {
+					out.append("s");
+					return replaceWithMatchingCase(singular, out.toString());
+				}
 				// look for exceptions first onExceptions
 				for (int i = 0; i < onExceptions.length; i++) {
 					if (str.equals(onExceptions[i][0])) {
