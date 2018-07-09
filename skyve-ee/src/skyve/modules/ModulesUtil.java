@@ -1063,7 +1063,6 @@ public class ModulesUtil {
 	}
 
 	/**
-	 * Customised, do not overwrite.
 	 * Returns the persistent table name for the specified module and document.
 	 */
 	public static String getPersistentIdentifier(final String moduleName, final String documentName) {
