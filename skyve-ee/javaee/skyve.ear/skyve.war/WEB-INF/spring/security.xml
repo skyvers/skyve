@@ -34,10 +34,12 @@
 						remember-me-cookie="remember"
 						token-repository-ref="tokenRepository" />
 
-		<!-- Permit the login resources -->
+		<!-- Permit the login and reset resources -->
 		<intercept-url pattern="/login" access="permitAll" />
 		<intercept-url pattern="/loggedOut" access="permitAll" />
 		<intercept-url pattern="/smartClientJavascriptLogin" access="permitAll" />
+		<intercept-url pattern="/pages/requestPasswordReset.jsp" access="permitAll" />
+		<intercept-url pattern="/pages/resetPassword.jsp" access="permitAll" />
 
 		<!-- Secure the system JSPs and HTMLs -->
 		<intercept-url pattern="/home.jsp" access="authenticated" />
