@@ -451,7 +451,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (MappingException | IllegalArgumentException e) {
+				catch (@SuppressWarnings("unused") MappingException | IllegalArgumentException e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
@@ -463,7 +463,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (MappingException | IllegalArgumentException e) {
+				catch (@SuppressWarnings("unused") MappingException | IllegalArgumentException e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
@@ -680,7 +680,7 @@ t.printStackTrace();
 				}
 			}
 		}
-		catch (RollbackException e) {
+		catch (@SuppressWarnings("unused") RollbackException e) {
 			UtilImpl.LOGGER.warning("Cannot commit as transaction was rolled back earlier....");
 		}
 		finally {
@@ -1546,7 +1546,7 @@ t.printStackTrace();
 				}
 			}
 		}
-		catch (StaleObjectStateException e) // thrown from session.load() with LockMode.UPGRADE
+		catch (@SuppressWarnings("unused") StaleObjectStateException e) // thrown from session.load() with LockMode.UPGRADE
 		{
 			// Database was updated by another user.
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
@@ -1968,7 +1968,8 @@ public void doWorkOnConnection(Session session) {
 				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getBizParentId(), false);
 			}
 			else {
-				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId(), false);
+				Bean parent = ((ChildBean<?>) bean).getParent();
+				sql.putParameter(CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
 			}
 		}
 
