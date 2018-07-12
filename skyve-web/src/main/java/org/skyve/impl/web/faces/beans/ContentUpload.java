@@ -15,6 +15,7 @@ import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -129,8 +130,8 @@ public class ContentUpload extends Localisable {
 			js.append("}else if(top.SKYVE){top.SKYVE.afterContentUpload('").append(sanitisedContentBinding);
 			js.append("','").append(contentId).append("','");
 			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
-			js.append(content.getFileName()).append("')}");
-	        rc.execute(js.toString());
+			js.append(SmartClientGenerateUtils.processString(content.getFileName(), false, false)).append("')}");
+			rc.execute(js.toString());
 		}
 		catch (Exception e) {
 			persistence.rollback();
