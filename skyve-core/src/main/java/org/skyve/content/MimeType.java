@@ -209,13 +209,7 @@ public enum MimeType {
 	 * @return
 	 */
 	public static MimeType fromMimeType(String mimeType) {
-		MimeType result = mimeTypes.get(mimeType);
-
-		if (result == null) {
-			result = MimeType.plain;
-		}
-
-		return result;
+		return mimeTypes.get(mimeType);
 	}
 
 	/**
@@ -237,9 +231,6 @@ public enum MimeType {
 		int dotIndex = fileName.lastIndexOf('.');
 		if (dotIndex >= 0) {
 			result = fromFileSuffix(fileName.substring(dotIndex + 1).toLowerCase());
-		}
-		if (result == null) {
-			result = MimeType.plain;
 		}
 		
 		return result;

@@ -20,7 +20,7 @@ public class AttachmentContent extends Content {
 	private String attributeName;
 	private String contentId;
 	private String fileName;
-	private MimeType mimeType = MimeType.plain;
+	private MimeType mimeType;
 	protected Date lastModified;
 	private transient File file;
 	private byte[] bytes;
@@ -179,7 +179,7 @@ public class AttachmentContent extends Content {
 		try {
 			return new FileInputStream(file);
 		}
-		catch (FileNotFoundException e) {
+		catch (@SuppressWarnings("unused") FileNotFoundException e) {
 			return new ByteArrayInputStream(new byte[0]);
 		}
 	}

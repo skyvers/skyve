@@ -320,7 +320,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		meta.put(FILENAME, attachment.getFileName());
 		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true));
 		MimeType contentType = attachment.getMimeType();
-		meta.put(CONTENT_TYPE, (contentType == null) ? MimeType.plain.toString() : contentType.toString());
+		meta.put(CONTENT_TYPE, (contentType == null) ? null : contentType.toString());
 		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
 		meta.put(Bean.DATA_GROUP_ID, attachment.getBizDataGroupId());
 		meta.put(Bean.USER_ID, attachment.getBizUserId());
@@ -329,7 +329,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		meta.put(Bean.DOCUMENT_ID, attachment.getBizId());
 		meta.put(ATTRIBUTE_NAME, attachment.getAttributeName());
 
-		File file = new File(dir, attachment.getFileName());
+		File file = new File(dir, CONTENT);
 		File old = null;
 		if (file.exists()) {
 			old = new File(file.getPath() + "_old");
@@ -391,7 +391,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		}
 
 		GetField field = response.getField(FILE_CONTENT_TYPE);
-		MimeType mimeType = MimeType.plain;
+		MimeType mimeType = null;
 		if (field != null) {
 			String content_type = (String) field.getValue();
 			mimeType = MimeType.fromMimeType(content_type);
@@ -460,13 +460,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(metaFile));
 
-		File file = new File(dir, (String) meta.get(FILENAME));
+		File file = new File(dir, CONTENT);
 		if (! file.exists()) {
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + file.getPath() + ") - File DNE");
 			return null;
 		}
 		
-		MimeType mimeType = MimeType.plain;
+		MimeType mimeType = null;
 		String contentType = (String) meta.get(CONTENT_TYPE);
 		if (contentType != null) {
 			mimeType = MimeType.fromMimeType(contentType);

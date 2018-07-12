@@ -6,10 +6,14 @@ import java.util.Map;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -49,8 +53,7 @@ public class ReindexBeansJob extends CancellableJob {
 				// is the document defined in this module?
 				if (moduleName.equals(ref.getOwningModuleName())) {
 					Document document = module.getDocument(customer, documentName);
-					Persistent persistent = document.getPersistent(); 
-					if ((persistent != null) && (persistent.getName() != null)) { // is persistent
+					if (needsIndexing(document)) {
 						try {
 							persistence.begin();
 							try (ContentManager cm = EXT.newContentManager()) {
@@ -73,10 +76,39 @@ public class ReindexBeansJob extends CancellableJob {
 							persistence.commit(false);
 						}
 					}
+					else {
+						trace = String.format("Skipping document %s.%s", document.getOwningModuleName(), document.getName());
+						getLog().add(trace);
+						UtilImpl.LOGGER.info(trace);
+					}
 				}
 			}
 			setPercentComplete((int) (i / l * 100f));
 		}
+		trace = "Reindex beans complete";
+		log.add(trace);
+		UtilImpl.LOGGER.info(trace);
 		setPercentComplete(100);
+	}
+	
+	private static boolean needsIndexing(Document document) {
+		Persistent persistent = document.getPersistent();
+		if ((persistent != null) && (persistent.getName() != null)) { // is persistent
+			for (Attribute attribute : document.getAllAttributes()) {
+				if (attribute instanceof Field) {
+					Field field = (Field) attribute;
+					IndexType index = field.getIndex();
+					// text indexing is required on this attribute
+					if (IndexType.both.equals(index) || IndexType.textual.equals(index)) {
+						return true;
+					}
+					// text indexing defaults to on for Memo (and Markup)
+					if ((index == null) && (attribute instanceof Memo)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

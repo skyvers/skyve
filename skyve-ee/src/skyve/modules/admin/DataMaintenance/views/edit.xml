@@ -176,12 +176,16 @@
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
 					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
 					<row>
 						<item>
 							<spacer />
 						</item>
 						<item align="right">
 							<button actionName="CheckContent" />
+						</item>
+						<item align="right">
+							<button actionName="MigrateContentFiles" />
 						</item>
 						<item align="right">
 							<button actionName="MigrateContent" />
@@ -365,5 +369,6 @@
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
 		<action className="CheckContent" displayName="Check Content" inActionPanel="false" />
 		<action className="MigrateContent" displayName="Migrate Content" inActionPanel="false" confirm="Sure?" />
+		<action className="MigrateContentFiles" displayName="Migrate Content Files" inActionPanel="false" confirm="Sure?" />
 	</actions>
 </view>

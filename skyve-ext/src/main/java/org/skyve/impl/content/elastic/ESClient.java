@@ -53,6 +53,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
+@Deprecated
 public class ESClient extends AbstractContentManager {
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
 	static final String ATTACHMENT_INDEX_TYPE = "attachment";

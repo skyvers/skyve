@@ -42,6 +42,9 @@ public class ReindexAttachmentsJob extends CancellableJob {
 				for (Table table : tables) {
 					i++;
 					if (! hasContent(table)) {
+						trace = "Skipping table " + table.name;
+						getLog().add(trace);
+						UtilImpl.LOGGER.info(trace);
                 		continue;
                 	}
 
@@ -98,6 +101,9 @@ public class ReindexAttachmentsJob extends CancellableJob {
 				}
 			}
 		}
+		trace = "Reindexing content complete";
+		log.add(trace);
+		UtilImpl.LOGGER.info(trace);
 		setPercentComplete(100);
 	}
 	
@@ -108,6 +114,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 				return true;
 			}
 		}
+
 		return false;
 	}
 }

@@ -1,12 +1,16 @@
 package org.skyve.impl.backup;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.tika.Tika;
@@ -20,6 +24,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ESClient;
+import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -28,6 +33,8 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.util.FileUtil;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +50,9 @@ public class ContentChecker {
             connection.setAutoCommit(false);
 
             try (ContentManager cm = EXT.newContentManager()) {
-                for (Table table : BackupUtil.getTables()) {
+            	int missingContentCount = 0;
+            	
+            	for (Table table : BackupUtil.getTables()) {
                 	if (! hasContent(table)) {
                 		continue;
                 	}
@@ -78,6 +87,7 @@ public class ContentChecker {
                                                     if (contentFile.exists()) {
                                                         LOGGER.error("Found matching file for missing content {}.", contentFile.getAbsolutePath());
                                                     }
+                                                    missingContentCount++;
                                                 }
                                             } catch (Exception e) {
                                                 LOGGER.error("Error checking content {} for field name {} for table {}", stringValue, name, table.name, e);
@@ -93,11 +103,12 @@ public class ContentChecker {
                     }
                 }
                 connection.commit();
+                LOGGER.info("MISSING CONTENT COUNT = " + missingContentCount);
             }
-
         }
     }
     
+    @Deprecated
 	@SuppressWarnings("static-method")
 	public void migrateContent() throws Exception {
 		StringBuilder path = new StringBuilder(128);
@@ -216,6 +227,51 @@ public class ContentChecker {
 			}
 		}
 	}
+
+    @Deprecated
+	public static void migrateContentFiles()
+	throws Exception {
+		File storeDir = new File(UtilImpl.CONTENT_DIRECTORY + AbstractContentManager.FILE_STORE_NAME);
+		for (File firstDir : storeDir.listFiles()) {
+			if (firstDir.isDirectory()) {
+				for (File secondDir : firstDir.listFiles()) {
+					if (secondDir.isDirectory()) {
+						for (File thirdDir : secondDir.listFiles()) {
+							if (thirdDir.isDirectory()) {
+								for (File fourthDir : thirdDir.listFiles()) {
+									if (fourthDir.isDirectory()) {
+										for (File file : fourthDir.listFiles()) {
+											String fileName = file.getName();
+											// rewrite JSON with the correct content type
+											if ("meta.json".equals(fileName)) {
+												@SuppressWarnings("unchecked")
+												Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(file));
+												String contentType = (String) meta.get("content_type");
+												if (MimeType.plain.toString().equals(contentType)) {
+													MimeType mimeType = MimeType.fromFileName((String) meta.get("filename"));
+													meta.put("content_type", (mimeType == null) ? null : mimeType.toString());
+													try (FileWriter fw = new FileWriter(file)) {
+														fw.write(JSON.marshall(null, meta, null));
+														fw.flush();
+													}
+												}
+											}
+											else if (! fileName.endsWith("_old")) {
+												File newFile = new File(fourthDir, ElasticContentManager.CONTENT);
+												if (Files.move(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
+													throw new IOException("Could not rename " + file + " to " + newFile);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
@@ -227,6 +283,7 @@ public class ContentChecker {
 		return false;
 	}
 	
+	@Deprecated
 	private static Document findDocumentForPersistentName(String tableName) {
 		Customer c = CORE.getUser().getCustomer();
 		for (Module m : c.getModules()) {

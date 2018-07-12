@@ -312,6 +312,7 @@
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
 					<action name="MigrateContent" />
+					<action name="MigrateContentFiles" />
 					<action name="Reindex" />
 					<action name="ReindexData" />
 					<action name="ReindexContent" />

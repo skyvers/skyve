@@ -133,7 +133,7 @@ public class CustomerResourceServlet extends HttpServlet {
 		}
 
 		public MimeType getMimeType() {
-			MimeType result = MimeType.plain;
+			MimeType result = null;
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				result = MimeType.png;
@@ -319,7 +319,10 @@ public class CustomerResourceServlet extends HttpServlet {
 				RESOURCES.set(resource);
 			}
 
-			response.setContentType(resource.getMimeType().toString());
+			MimeType mimeType = resource.getMimeType();
+			if (mimeType != null) {
+				response.setContentType(mimeType.toString());
+			}
 			response.setCharacterEncoding(Util.UTF8);
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
