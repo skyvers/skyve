@@ -21,14 +21,14 @@ SKYVE = function() {
 			top.PF(binding + 'Overlay').hide();
 		},
 		
-		clearContentImage: function(id, binding) {
-			SKYVE.getById(id + '_' + binding).val('');
-			SKYVE.getById(id + '_' + binding + '_image').attr('src','images/blank.gif');
+		clearContentImage: function(binding) {
+			$('[id$="_' + binding + '"]').val('');
+			$('[id$="_' + binding + '_image"]').attr('src','images/blank.gif');
 		},
 		
-		clearContentLink: function(id, binding) {
-			SKYVE.getById(id + '_' + binding).val('');
-			SKYVE.getById(id + '_' + binding + '_link').attr('href','javascript:void(0)').text('<Empty>');
+		clearContentLink: function(binding) {
+			$('[id$="_' + binding + '"]').val('');
+			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>');
 		},
 		
 		getTextElement: function(id) {

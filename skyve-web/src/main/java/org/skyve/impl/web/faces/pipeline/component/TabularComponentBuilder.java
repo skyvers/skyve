@@ -1377,10 +1377,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		clearButton.setTitle("Clear Content");
 		clearButton.setType("button");
 		if (image) {
-			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s','%s')", id, sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s')", sanitisedBinding));
 		}
 		else {
-			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s','%s')", id, sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s')", sanitisedBinding));
 		}
 		toAddTo.add(clearButton);
 	}
