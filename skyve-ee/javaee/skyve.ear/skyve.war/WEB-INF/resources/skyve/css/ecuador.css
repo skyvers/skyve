@@ -1,0 +1,119 @@
+@CHARSET "UTF-8";
+
+/* Skyve-specific Ecuador theme classes */
+body .ui-datatable thead th:last-child {
+	width: 57px !important;
+}
+
+#footer-menu .footer-box span, .layout-footer .logo-container-outer {
+    text-align: center !important;
+}
+
+#topbar-appname {    
+    float: left;
+    top: 0;
+    height: 60px;
+    padding: 20px 5px;
+}
+#topbar-appname img {
+	position: absolute;
+	max-height: 36px;
+	top: 12px;
+}
+#topbar-appname .app-name {
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	left: 120px;
+	position: absolute;
+	vertical-align: middle;
+}
+
+/* skyve alignment styles */
+.left {
+	text-align: left;
+}
+span.left {
+	display: block;
+}
+.center {
+	text-align: center;
+}
+span.left {
+	display: block;
+}
+.right {
+	text-align: right;
+}
+span.right {
+	display: block;
+}
+
+/* skyve form label alignment (left always on phone) */
+.leftFormLabel {
+	text-align: left;
+}
+@media (min-width: 641px) {
+	.rightFormLabel {
+		text-align: right;
+	}
+	.centerFormLabel {
+		text-align: center;
+	}
+}
+@media (max-width: 640px) {
+	.rightFormLabel {
+		text-align: left;
+	}
+	.centerFormLabel {
+		text-align: left;
+	}
+}
+
+/* data tables */
+.ui-datatable tbody td {
+	text-align: center;
+}
+
+@media (max-width: 1024px) {
+	#topbar-appname .app-name {
+		font-size: 16px;
+		left: 120px;
+	}
+	
+	.layout-wrapper .layout-topbar .logo-container {
+		display: none;
+	}
+}
+
+@media (min-width: 641px) {
+	.topbar-title {
+		font-size: 16px;
+		font-weight: bold;
+		vertical-align: middle;
+		color: white;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		position: absolute;
+		top: 30px;
+		left: 290px;
+		width: 50%;
+	}
+
+}
+@media (max-width: 640px) {
+	.topbar-title {
+		display: none;
+	}
+}
+
+.topbar-menu li a span {
+	display: inline !important;
+} 
+
+@media(max-width: 1024px) {
+	.topbar-menu-tooltip {
+		display: none !important;
+	}	
+}

@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:f="http://java.sun.com/jsf/core"
+					xmlns:h="http://java.sun.com/jsf/html"
+					xmlns:ui="http://java.sun.com/jsf/facelets"
+					xmlns:p="http://primefaces.org/ui"
+					xmlns:pt="http://primefaces.org/ecuador"
+					xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<div class="layout-topbar">
+        <a href="#" id="topbar-menu-button">
+            <i class="fa fa-angle-left arrow"></i>
+            <i class="fa fa-angle-up mobile"></i>
+        </a>
+
+        <!-- <div class="search-input">
+            <i class="fa fa-search icon-search"></i>
+            <input type="text"></input>
+        </div> -->
+        <div id="topbar-appname">
+            <p:graphicImage name="images/bizhub_logo_reversed_logo_only.png" library="foundry" />
+            <span class="app-name">${project.description}</span>
+        </div>
+
+        <!-- <h:link outcome="/" styleClass="logo-container">
+            <p:graphicImage name="images/skyve_reversed.png" library="skyve" style="height:20px;" />
+        </h:link> -->
+
+        <a id="topbar-profile-menu-button" href="#">
+            <span>#{user.name}</span>
+            <!-- <p:graphicImage name="images/avatar.png" library="ecuador-layout" styleClass="topbar-profile" /> -->
+            <i class="fa fa-angle-down"></i>
+        </a>
+
+        <ul id="topbar-usermenu">
+        	<li>
+        		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
+					<i class="fa fa-power-off"></i>
+					<span class="topbar-item-name">Logout</span>
+				</a>
+			</li>
+        </ul>
+
+        <!-- <a href="#" id="right-panel-button">
+            <i class="fa fa-angle-double-left"></i>
+        </a> -->
+    </div>
+</ui:composition>

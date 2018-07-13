@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://primefaces.org/ecuador"
+		dir="#{bean.dir}">
+	<f:view contentType="text/html" encoding="UTF-8">
+		<h:head>
+			<f:facet name="first">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            	<meta name="apple-mobile-web-app-capable" content="yes" />
+			</f:facet>
+	
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+	
+			<base href="#{bean.baseHref}" />
+			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
+			<h:outputStylesheet name="css/ecuador.css" library="skyve" />
+			<h:outputStylesheet name="css/foundry.css" library="foundry" />
+			<title>${project.name}</title>
+<!-- normally commented out for security reasons
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
+-->	
+			<h:outputScript name="js/nanoscroller.js" library="ecuador-layout" />
+			<h:outputScript name="js/layout.js" library="ecuador-layout" />
+	
+			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<ui:insert name="head" />
+		</h:head>
+	
+		<h:body styleClass="main-body layout-compact">
+			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<div class="#{leftMenu ? 'layout-wrapper layout-menu-static layout-menu-light' : 'layout-wrapper layout-menu-light'}">
+	
+				<ui:include src="./topbar.xhtml">
+					<ui:param name="leftMenu" value="#{leftMenu}" />
+					<ui:param name="topMenu" value="#{topMenu}" />
+					<ui:param name="title" value="#{bean.title}" />
+				</ui:include>
+	
+				<div class="layout-sidebar">
+					<div class="nano">
+						<div class="nano-content menu-scroll-content">
+							<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
+								<pt:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
+							</h:form>
+						</div>
+					</div>
+				</div>
+				
+				<div class="layout-main">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
+					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
+					<p:confirmDialog id="confirm" global="true">
+						<p:commandButton id="confirmCancel" 
+											value="Cancel" 
+											type="button"
+											styleClass="ui-confirmdialog-no" 
+											style="float:right;"
+											icon="ui-icon-close" />
+						<p:commandButton id="confirmOK" 
+											value="OK" 
+											type="button"
+											styleClass="ui-confirmdialog-yes" 
+											style="float:right;"
+											icon="ui-icon-check" />
+					</p:confirmDialog>
+					
+					<div class="layout-content" style="min-height:300px">
+						<ui:insert name="body" />
+					</div>
+					
+					<div class="layout-footer">
+                    	<ui:include src="./footer.xhtml"></ui:include>
+                	</div>
+				</div>
+			</div>
+	
+			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+				<f:facet name="start">
+					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
+	
+			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
+			<h:outputStylesheet name="css/layout-indigo.css" library="ecuador-layout" />
+		</h:body>
+	</f:view>
+</html>
