@@ -693,6 +693,15 @@ public class ModulesUtil {
 	}
 
 	/**
+     * Wrapper for getNextDocumentNumber, specifically for long only
+     * sequences
+     */
+    public static Long getNextLongDocumentNumber(String moduleName, String documentName, String fieldName) throws Exception {
+
+        return new Long(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
+    }
+
+	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
 	 * 
 	 * @param prefix
