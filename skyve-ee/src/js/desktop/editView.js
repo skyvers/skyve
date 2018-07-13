@@ -1400,13 +1400,11 @@ isc.BizButton.addMethods({
 
 			// New and Edit are list view actions
 			if (this.type == "O") { // OK on edit view
-				this._view.saveInstance(validate, this.actionName, function() {
-//					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
-				});
+				this._view.saveInstance(validate, this.actionName);
 			}
 			else if (this.type == "S") { // Save on edit view
 				this._view.saveInstance(validate, this.actionName, function() {
-					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
+					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}], 3000);
 				});
 			}
 			else if (this.type == "A") { // Add on child edit view
