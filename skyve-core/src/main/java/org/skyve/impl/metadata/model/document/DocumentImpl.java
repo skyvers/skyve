@@ -29,6 +29,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Condition;
@@ -431,27 +432,34 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
 			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attribute.getName());
-			AbstractDocumentQuery referenceQuery = null;
-			String queryName = reference.getQueryName();
-			if (queryName != null) {
-				Module module = customer.getModule(getOwningModuleName());
-				DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-				referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
-				referenceQuery.clearProjections();
-				referenceQuery.clearOrderings();
+			// Query only if persistent
+			Persistent persistent = referencedDocument.getPersistent();
+			if ((persistent != null) && (persistent.getName() != null)) { // persistent referenced document
+				AbstractDocumentQuery referenceQuery = null;
+				String queryName = reference.getQueryName();
+				if (queryName != null) {
+					Module module = customer.getModule(getOwningModuleName());
+					DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+					referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
+					referenceQuery.clearProjections();
+					referenceQuery.clearOrderings();
+				}
+				else {
+					referenceQuery = (AbstractDocumentQuery) AbstractPersistence.get().newDocumentQuery(referencedDocument);
+				}
+				
+				referenceQuery.addBoundProjection(Bean.DOCUMENT_ID);
+				referenceQuery.addBoundProjection(Bean.BIZ_KEY);
+				referenceQuery.addBoundOrdering(Bean.BIZ_KEY);
+	
+				List<Bean> beans = referenceQuery.projectedResults();
+				result = new ArrayList<>(beans.size());
+				for (Bean bean : beans) {
+					result.add(new DomainValue(bean.getBizId(), (String) BindUtil.get(bean, Bean.BIZ_KEY)));
+				}
 			}
-			else {
-				referenceQuery = (AbstractDocumentQuery) AbstractPersistence.get().newDocumentQuery(referencedDocument);
-			}
-			
-			referenceQuery.addBoundProjection(Bean.DOCUMENT_ID);
-			referenceQuery.addBoundProjection(Bean.BIZ_KEY);
-			referenceQuery.addBoundOrdering(Bean.BIZ_KEY);
-
-			List<Bean> beans = referenceQuery.projectedResults();
-			result = new ArrayList<>(beans.size());
-			for (Bean bean : beans) {
-				result.add(new DomainValue(bean.getBizId(), (String) BindUtil.get(bean, Bean.BIZ_KEY)));
+			else { // transient referenced document
+				result = Collections.EMPTY_LIST;
 			}
 		}
 
