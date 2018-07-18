@@ -53,8 +53,8 @@ public abstract class AbstractRepository implements Repository {
 	public final String MODULES_NAME = "modules";
 	public final String MODULES_NAMESPACE = MODULES_NAME + '/';
 	protected final String CONVERTERS_NAMESPACE = "converters/";
-	protected final String VIEWS_NAME = "views";
-	protected final String VIEWS_NAMESPACE = VIEWS_NAME + '/';
+	public final String VIEWS_NAME = "views";
+	public final String VIEWS_NAMESPACE = VIEWS_NAME + '/';
 	protected final String MODELS_NAME = "models";
 	protected final String MODELS_NAMESPACE = MODELS_NAME + '/';
 	protected final String ACTIONS_NAME = "actions";
