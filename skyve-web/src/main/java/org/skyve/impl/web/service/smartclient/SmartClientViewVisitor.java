@@ -2980,7 +2980,7 @@ pickListFields:[{name:'value'}],
 		}
 		String help = (visitedItem == null) ? null : visitedItem.getHelp();
 		if (help != null) {
-			def.setTitle(Util.i18n(help, locale));
+			def.setHelpText(Util.i18n(help, locale));
 		}
 		
 		code.append(def.toJavascript());
