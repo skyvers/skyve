@@ -60,6 +60,8 @@ public class FormItem implements DecoratedMetaData {
 	private HorizontalAlignment labelHorizontalAlignment;
 	// is the help rendered?
 	private Boolean showHelp;
+	// override help to be different from an attribute's description
+	private String help;
 	// is the field required or not - regardless of whether its required in data
 	private Boolean required;
 	
@@ -166,6 +168,15 @@ public class FormItem implements DecoratedMetaData {
 		this.showHelp = showHelp;
 	}
 	
+	public String getHelp() {
+		return help;
+	}
+
+	@XmlAttribute(required = false)
+	public void setHelp(String help) {
+		this.help = help;
+	}
+
 	public Boolean getRequired() {
 		return required;
 	}

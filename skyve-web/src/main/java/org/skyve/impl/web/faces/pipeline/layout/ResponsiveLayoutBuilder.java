@@ -284,6 +284,9 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		
 		// Create a grid
 		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
+		if (currentFormItem.getHelp() != null) {
+			helpText = currentFormItem.getHelp();
+		}
 		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(pg, null);
 		pg.setCellpadding("0"); //Don't pad cells

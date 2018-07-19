@@ -1041,6 +1041,7 @@
       </xs:choice>
     </xs:sequence>
     <xs:attribute name="colspan" type="xs:int"/>
+    <xs:attribute name="help" type="xs:string"/>
     <xs:attribute name="align" type="tns:horizontalAlignment"/>
     <xs:attribute name="label" type="xs:string"/>
     <xs:attribute name="labelAlign" type="tns:horizontalAlignment"/>

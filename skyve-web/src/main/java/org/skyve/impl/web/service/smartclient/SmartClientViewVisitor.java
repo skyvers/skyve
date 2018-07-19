@@ -2978,6 +2978,10 @@ pickListFields:[{name:'value'}],
 		if (required != null) {
 			def.setRequired(required.booleanValue());
 		}
+		String help = (visitedItem == null) ? null : visitedItem.getHelp();
+		if (help != null) {
+			def.setTitle(Util.i18n(help, locale));
+		}
 		
 		code.append(def.toJavascript());
 		code.append(',');
