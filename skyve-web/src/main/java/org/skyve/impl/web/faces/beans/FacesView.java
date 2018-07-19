@@ -359,7 +359,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				result = new GetBeansAction(bizModule, queryName, parameters).execute();
+				result = new GetBeansAction(this, bizModule, queryName, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
