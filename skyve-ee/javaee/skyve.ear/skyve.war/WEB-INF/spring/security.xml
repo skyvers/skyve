@@ -116,10 +116,11 @@
 		<!-- We don't use Spring's CSRF tokens -->
 		<csrf disabled="true" />
 		
-		<!-- We don't use Spring's HSTS headers or X-Frame-Options as these are handled in the web.xml -->
+		<!-- We don't use Spring's HSTS headers or X-Frame-Options or X-Content-Type-Options as these are handled in the web.xml -->
 		<headers>
 			<hsts disabled="true" />
 			<frame-options disabled="true" />
+			<content-type-options disabled="true" />
 		</headers>
 	</http>
 
