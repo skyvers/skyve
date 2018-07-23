@@ -132,17 +132,20 @@ public class CustomerResourceServlet extends HttpServlet {
 			return file;
 		}
 
-		public MimeType getMimeType() {
-			MimeType result = null;
+		public String getContentType() {
+			String result = null;
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
-				result = MimeType.png;
+				result = MimeType.png.toString();
 			}
 			else if (file != null) {
-				result = MimeType.fromFileName(file.getName());
+				MimeType mimeType = MimeType.fromFileName(file.getName());
+				if (mimeType != null) {
+					result = mimeType.toString();
+				}
 			}
 			else if (content != null) {
-				result = content.getMimeType();
+				result = content.getContentType();
 			}
 			
 			return result;
@@ -197,7 +200,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					imageHeight = Integer.parseInt(imageHeightParam);
 				}
 			}
-			catch (NumberFormatException e) {
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				imageWidth = 0;
 				imageHeight = 0;
 				System.err.println("Width/Height is malformed in the URL");
@@ -319,9 +322,9 @@ public class CustomerResourceServlet extends HttpServlet {
 				RESOURCES.set(resource);
 			}
 
-			MimeType mimeType = resource.getMimeType();
-			if (mimeType != null) {
-				response.setContentType(mimeType.toString());
+			String contentType = resource.getContentType();
+			if (contentType != null) {
+				response.setContentType(contentType);
 			}
 			response.setCharacterEncoding(Util.UTF8);
 			if (resource.isContent()) {
