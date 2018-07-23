@@ -31,7 +31,7 @@ public class IntegerSeparator extends org.skyve.domain.types.converters.integer.
 		try {
 			return toDisplayValue((Integer) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

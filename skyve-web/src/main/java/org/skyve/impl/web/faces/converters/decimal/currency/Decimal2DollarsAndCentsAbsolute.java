@@ -32,7 +32,7 @@ public class Decimal2DollarsAndCentsAbsolute extends org.skyve.domain.types.conv
 		try {
 			return toDisplayValue((Decimal2) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

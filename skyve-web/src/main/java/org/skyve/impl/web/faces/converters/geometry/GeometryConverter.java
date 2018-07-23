@@ -35,7 +35,7 @@ public class GeometryConverter implements Converter {
 		try {
 			return new WKTWriter().write((Geometry) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

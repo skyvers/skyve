@@ -32,7 +32,7 @@ public class DD_MMM_YYYY extends org.skyve.domain.types.converters.date.DD_MMM_Y
 		try {
 			return toDisplayValue((DateOnly) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

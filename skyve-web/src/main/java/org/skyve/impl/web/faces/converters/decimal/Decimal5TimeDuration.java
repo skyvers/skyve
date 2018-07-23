@@ -32,7 +32,7 @@ public class Decimal5TimeDuration extends org.skyve.domain.types.converters.deci
 		try {
 			return toDisplayValue((Decimal5) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

@@ -32,7 +32,7 @@ public class Decimal2Integer extends org.skyve.domain.types.converters.decimal.D
 		try {
 			return toDisplayValue((Decimal2) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

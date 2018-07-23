@@ -101,7 +101,7 @@ public class SelectItemsBeanConverter implements Converter {
 		public SelectItem next() {
 			try {
 				return (items[index++]);
-			} catch (IndexOutOfBoundsException e) {
+			} catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 				throw new NoSuchElementException();
 			}
 		}

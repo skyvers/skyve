@@ -32,7 +32,7 @@ public class Decimal5TwoDecimalPlaces extends org.skyve.domain.types.converters.
 		try {
 			return toDisplayValue((Decimal5) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

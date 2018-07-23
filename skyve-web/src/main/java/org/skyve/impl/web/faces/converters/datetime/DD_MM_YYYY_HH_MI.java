@@ -32,7 +32,7 @@ public class DD_MM_YYYY_HH_MI extends org.skyve.domain.types.converters.datetime
 		try {
 			return toDisplayValue((DateTime) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

@@ -31,7 +31,7 @@ public class LongIntegerSeparator extends org.skyve.domain.types.converters.inte
 		try {
 			return toDisplayValue((Long) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

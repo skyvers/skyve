@@ -32,7 +32,7 @@ public class HH_MI extends org.skyve.domain.types.converters.time.HH_MI implemen
 		try {
 			return toDisplayValue((TimeOnly) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

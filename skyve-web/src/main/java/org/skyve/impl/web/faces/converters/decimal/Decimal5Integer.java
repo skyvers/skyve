@@ -32,7 +32,7 @@ public class Decimal5Integer extends org.skyve.domain.types.converters.decimal.D
 		try {
 			return toDisplayValue((Decimal5) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

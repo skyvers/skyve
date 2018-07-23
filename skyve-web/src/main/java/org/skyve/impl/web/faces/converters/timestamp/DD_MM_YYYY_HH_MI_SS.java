@@ -32,7 +32,7 @@ public class DD_MM_YYYY_HH_MI_SS extends org.skyve.domain.types.converters.times
 		try {
 			return toDisplayValue((Timestamp) value);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}

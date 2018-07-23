@@ -43,6 +43,8 @@ public enum ConverterName {
 	DD_MM_YYYY_HH24_MI(new DD_MM_YYYY_HH24_MI()),
 	DD_MMM_YYYY_HH_MI(new DD_MMM_YYYY_HH_MI()),
 	DD_MMM_YYYY_HH24_MI(new DD_MMM_YYYY_HH24_MI()),
+	DD_MM_YYYY_DateTime(new org.skyve.domain.types.converters.datetime.DD_MM_YYYY()),
+	DD_MMM_YYYY_DateTime(new org.skyve.domain.types.converters.datetime.DD_MMM_YYYY()),
 	Decimal2DollarsAndCents(new Decimal2DollarsAndCents()),
 	Decimal2DollarsAndCentsAbsolute(new Decimal2DollarsAndCentsAbsolute()),
 	Decimal2Integer(new Decimal2Integer()),
@@ -66,7 +68,9 @@ public enum ConverterName {
 	DD_MM_YYYY_HH_MI_SS(new DD_MM_YYYY_HH_MI_SS()),
 	DD_MM_YYYY_HH24_MI_SS(new DD_MM_YYYY_HH24_MI_SS()),
 	DD_MMM_YYYY_HH_MI_SS(new DD_MMM_YYYY_HH_MI_SS()),
-	DD_MMM_YYYY_HH24_MI_SS(new DD_MMM_YYYY_HH24_MI_SS());
+	DD_MMM_YYYY_HH24_MI_SS(new DD_MMM_YYYY_HH24_MI_SS()),
+	DD_MM_YYYY_Timestamp(new org.skyve.domain.types.converters.timestamp.DD_MM_YYYY()),
+	DD_MMM_YYYY_Timestamp(new org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY());
 	
 	private Converter<?> converter;
 	private ConverterName(Converter<?> converter) {

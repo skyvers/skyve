@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.converters.time;
+package org.skyve.impl.web.faces.converters.datetime;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -6,10 +6,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 
-public class HH24_MI extends org.skyve.domain.types.converters.time.HH24_MI implements Converter {
+public class DD_MM_YYYY extends org.skyve.domain.types.converters.datetime.DD_MM_YYYY implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -19,18 +19,18 @@ public class HH24_MI extends org.skyve.domain.types.converters.time.HH24_MI impl
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid time (use HH24:MI format)",
-																"Invalid time (use HH24:MI format)"),
+																"Invalid date/time (use DD-MM-YYYY format)",
+																"Invalid date/time (use DD-MM-YYYY format)"),
 												e);
 			}
-    	}
-    	return null;
+		}
+		return null;
 	}
 
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Object value) {
 		try {
-			return toDisplayValue((TimeOnly) value);
+			return toDisplayValue((DateTime) value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return null;
