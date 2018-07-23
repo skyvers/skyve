@@ -1890,11 +1890,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setPattern("dd/MM/yyyy HH:mm");
 			result.setMask("99/99/9999 99:99");
 		} 
-		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
+		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm");
 			result.setMask("99-aaa-9999 99:99");
 		} 
-		else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
+		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm");
 			result.setMask("99-aaa-9999 99:99");
 		} 
@@ -1906,11 +1906,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setPattern("dd/MM/yyyy HH:mm:ss");
 			result.setMask("99/99/9999 99:99:99");
 		} 
-		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
+		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm:ss");
 			result.setMask("99-aaa-9999 99:99:99");
 		} 
-		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
+		else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm:ss");
 			result.setMask("99-aaa-9999 99:99:99");
 		}

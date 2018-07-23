@@ -1674,10 +1674,26 @@ public class FacesViewVisitor extends ViewVisitor {
 	    if (converter != null) {
 		    String converterName = converter.getClass().getSimpleName();
 		    if ("DD_MM_YYYY".equals(converterName)) {
-		        result = new DD_MM_YYYY();
+		    	if (AttributeType.date.equals(type)) {
+		    		result = new DD_MM_YYYY();
+		    	}
+		    	else if (AttributeType.dateTime.equals(type)) {
+		    		result = new org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY();
+		    	}
+		    	else if (AttributeType.timestamp.equals(type)) {
+		    		result = new org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY();
+		    	}
 		    }
 		    else if ("DD_MMM_YYYY".equals(converterName)) {
-	            result = new DD_MMM_YYYY();
+		    	if (AttributeType.date.equals(type)) {
+		    		result = new DD_MMM_YYYY();
+		    	}
+		    	else if (AttributeType.dateTime.equals(type)) {
+		    		result = new org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY();
+		    	}
+		    	else if (AttributeType.timestamp.equals(type)) {
+		    		result = new org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY();
+		    	}
 	        }
 	        else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
 	            result = new DD_MM_YYYY_HH_MI();
