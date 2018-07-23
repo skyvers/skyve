@@ -228,9 +228,12 @@ public class ContentChecker {
 		}
 	}
 
+    
     @Deprecated
 	public static void migrateContentFiles()
 	throws Exception {
+		Tika tika = new Tika();
+		
 		File storeDir = new File(UtilImpl.CONTENT_DIRECTORY + AbstractContentManager.FILE_STORE_NAME);
 		for (File firstDir : storeDir.listFiles()) {
 			if (firstDir.isDirectory()) {
@@ -240,26 +243,40 @@ public class ContentChecker {
 							if (thirdDir.isDirectory()) {
 								for (File fourthDir : thirdDir.listFiles()) {
 									if (fourthDir.isDirectory()) {
+										File metaFile = null;
+										File contentFile = null;
+										
 										for (File file : fourthDir.listFiles()) {
 											String fileName = file.getName();
-											// rewrite JSON with the correct content type
+											
 											if ("meta.json".equals(fileName)) {
-												@SuppressWarnings("unchecked")
-												Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(file));
-												String contentType = (String) meta.get("content_type");
-												if (MimeType.plain.toString().equals(contentType)) {
-													MimeType mimeType = MimeType.fromFileName((String) meta.get("filename"));
-													meta.put("content_type", (mimeType == null) ? null : mimeType.toString());
-													try (FileWriter fw = new FileWriter(file)) {
-														fw.write(JSON.marshall(null, meta, null));
-														fw.flush();
-													}
-												}
+												metaFile = file;
 											}
 											else if (! fileName.endsWith("_old")) {
 												File newFile = new File(fourthDir, ElasticContentManager.CONTENT);
 												if (Files.move(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
 													throw new IOException("Could not rename " + file + " to " + newFile);
+												}
+												contentFile = newFile;
+											}
+										}
+
+										// rewrite JSON with the correct content type
+										@SuppressWarnings("unchecked")
+										Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(metaFile));
+										String contentType = (String) meta.get("content_type");
+										if ((contentType == null) || MimeType.plain.toString().equals(contentType)) {
+											contentType = tika.detect(contentFile);
+											if ((contentType != null) && (! MimeType.plain.toString().equals(contentType))) {
+												meta.put("content_type", contentType);
+												UtilImpl.LOGGER.info(String.format("Sniffed new content type of %s for content m=%s,d=%s,i=%s",
+																					contentType,
+																					meta.get(Bean.MODULE_KEY),
+																					meta.get(Bean.DOCUMENT_KEY),
+																					meta.get(Bean.DOCUMENT_ID)));
+												try (FileWriter fw = new FileWriter(metaFile)) {
+													fw.write(JSON.marshall(null, meta, null));
+													fw.flush();
 												}
 											}
 										}
