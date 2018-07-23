@@ -20,7 +20,7 @@ public class AttachmentContent extends Content {
 	private String attributeName;
 	private String contentId;
 	private String fileName;
-	private MimeType mimeType;
+	private String contentType;
 	protected Date lastModified;
 	private transient File file;
 	private byte[] bytes;
@@ -33,7 +33,7 @@ public class AttachmentContent extends Content {
 								String bizId,
 								String attributeName,
 								String fileName,
-								MimeType mimeType) {
+								String contentType) {
 		super(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId);
 		if ((attributeName == null) || (attributeName.indexOf('.') >= 0)) {
 			throw new IllegalArgumentException("No complex/compound bindings allowed in AttachmentContent - use the correct Document and attribute combination");
@@ -41,8 +41,14 @@ public class AttachmentContent extends Content {
 		this.attributeName = attributeName;
 		this.fileName = fileName;
 		if (fileName == null) {
-			if (mimeType != null) {
-				this.fileName = "content." + mimeType.getStandardFileSuffix();
+			if (contentType != null) {
+				MimeType mimeType = MimeType.fromContentType(contentType);
+				if (mimeType != null) {
+					this.fileName = "content." + mimeType.getStandardFileSuffix();
+				}
+				else {
+					this.fileName = "content";
+				}
 			}
 			else {
 				this.fileName = "content";
@@ -54,9 +60,12 @@ public class AttachmentContent extends Content {
 			// remove any invalid chars on all OSs (restricted by windows)
 			this.fileName = this.fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
 		}
-		this.mimeType = mimeType;
-		if ((fileName != null) && (mimeType == null)) {
-			this.mimeType = MimeType.fromFileName(fileName);
+		this.contentType = contentType;
+		if ((this.fileName != null) && (this.contentType == null)) {
+			MimeType mimeType = MimeType.fromFileName(fileName);
+			if (mimeType != null) {
+				this.contentType = mimeType.toString();
+			}
 		}
 	}
 
@@ -70,7 +79,15 @@ public class AttachmentContent extends Content {
 								String fileName,
 								MimeType mimeType,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, mimeType);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(mimeType == null) ? null : mimeType.toString());
 		this.bytes = bytes;
 	}
 
@@ -83,7 +100,15 @@ public class AttachmentContent extends Content {
 								String attributeName,
 								MimeType mimeType,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, null, mimeType);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				null,
+				(mimeType == null) ? null : mimeType.toString());
 		this.bytes = bytes;
 	}
 
@@ -96,7 +121,15 @@ public class AttachmentContent extends Content {
 								String attributeName,
 								String fileName,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, (MimeType) null);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(String) null);
 		this.bytes = bytes;
 	}
 	
@@ -110,7 +143,15 @@ public class AttachmentContent extends Content {
 								String fileName,
 								MimeType mimeType,
 								File file) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, mimeType);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(mimeType == null) ? null : mimeType.toString());
 		this.file = file;
 	}
 	
@@ -123,7 +164,15 @@ public class AttachmentContent extends Content {
 								String attributeName,
 								MimeType mimeType,
 								File file) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, null, mimeType);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				null,
+				(mimeType == null) ? null : mimeType.toString());
 		this.file = file;
 	}
 	
@@ -136,7 +185,15 @@ public class AttachmentContent extends Content {
 								String attributeName,
 								String fileName,
 								File file) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, (MimeType) null);
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(String) null);
 		this.file = file;
 	}
 
@@ -157,7 +214,15 @@ public class AttachmentContent extends Content {
 	}
 
 	public final MimeType getMimeType() {
-		return mimeType;
+		return (contentType == null) ? null : MimeType.fromContentType(contentType);
+	}
+	
+	public final String getContentType() {
+		return contentType;
+	}
+	
+	public final void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 	
 	public final Date getLastModified() {

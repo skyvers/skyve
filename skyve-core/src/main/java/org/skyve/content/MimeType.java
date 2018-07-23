@@ -158,10 +158,10 @@ public enum MimeType {
 
 	// Enum values are constructed before the statics
 	private static Map<String, MimeType> fileExtensions = new TreeMap<>();
-	private static Map<String, MimeType> mimeTypes = new TreeMap<>();
+	private static Map<String, MimeType> contentTypes = new TreeMap<>();
 	static {
 		for (MimeType mimeType : values()) {
-			mimeTypes.put(mimeType.type, mimeType);
+			contentTypes.put(mimeType.contentType, mimeType);
 			fileExtensions.put(mimeType.standardFileSuffix, mimeType);
 			for (String otherFileSuffix : mimeType.otherFileSuffixes) {
 				fileExtensions.put(otherFileSuffix, mimeType);
@@ -169,20 +169,20 @@ public enum MimeType {
 		}
 	}
 	
-	private String type;
+	private String contentType;
 	private String standardFileSuffix;
 	private String[] otherFileSuffixes;
 
 	/**
 	 * 
-	 * @param type
+	 * @param contentType
 	 * @param standardFileSuffix
 	 * @param otherFileSuffixes
 	 */
-	private MimeType(String type, 
+	private MimeType(String contentType, 
 						String standardFileSuffix,
 						String... otherFileSuffixes) {
-		this.type = type;
+		this.contentType = contentType;
 		this.standardFileSuffix = standardFileSuffix;
 		this.otherFileSuffixes = otherFileSuffixes;
 	}
@@ -192,7 +192,7 @@ public enum MimeType {
 	 */
 	@Override
 	public String toString() {
-		return type;
+		return contentType;
 	}
 
 	/**
@@ -208,8 +208,8 @@ public enum MimeType {
 	 * @param mimeType
 	 * @return
 	 */
-	public static MimeType fromMimeType(String mimeType) {
-		return mimeTypes.get(mimeType);
+	public static MimeType fromContentType(String contentType) {
+		return contentTypes.get(contentType);
 	}
 
 	/**

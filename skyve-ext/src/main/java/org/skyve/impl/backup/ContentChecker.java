@@ -174,7 +174,7 @@ public class ContentChecker {
 																contentType = tika.detect(contentFile);
 															}
 															LOGGER.info("Found matching file for missing content {} of type {}. Relink", contentFile.getAbsolutePath(), contentType);
-															MimeType mimeType = MimeType.fromMimeType(contentType);
+															MimeType mimeType = MimeType.fromContentType(contentType);
 															Document document = findDocumentForPersistentName(table.name);
 															content = new AttachmentContent(resultSet.getString(Bean.CUSTOMER_NAME),
 																								document.getOwningModuleName(),

@@ -369,7 +369,7 @@ public class ESClient extends AbstractContentManager {
 		MimeType mimeType = MimeType.plain;
 		if (field != null) {
 			String content_type = (String) field.getValue();
-			mimeType = MimeType.fromMimeType(content_type);
+			mimeType = MimeType.fromContentType(content_type);
 		}
 
 		// content is null when we are storing content on the file system, 

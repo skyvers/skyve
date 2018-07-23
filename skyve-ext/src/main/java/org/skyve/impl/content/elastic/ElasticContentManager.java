@@ -182,13 +182,27 @@ public class ElasticContentManager extends AbstractContentManager {
 	throws Exception {
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
 		
-			// Set the maximum length of strings returned by the parseToString method, -1 sets no limit
 			byte[] content = attachment.getContentBytes();
+
+			// Sniff content type if necessary
+			String contentType = attachment.getContentType();
+			if (contentType == null) {
+				String fileName = attachment.getFileName();
+				if (fileName == null) {
+					contentType = TIKA.detect(content);
+				}
+				else {
+					contentType = TIKA.detect(content, fileName);
+				}
+				attachment.setContentType(contentType);
+			}
+			
 			if (index) {
 				try (BytesStreamInput contentStream = new BytesStreamInput(content, false)) {
 					Metadata metadata = new Metadata();
 					String parsedContent = "";
 					try {
+						// Set the maximum length of strings returned by the parseToString method, -1 sets no limit
 						parsedContent = TIKA.parseToString(contentStream, metadata, 100000);
 					}
 					catch (TikaException e) {
@@ -198,13 +212,12 @@ public class ElasticContentManager extends AbstractContentManager {
 					}
 					
 					// File
-					MimeType contentType = attachment.getMimeType();
 					source.startObject(FILE)
 							.field(FILENAME, attachment.getFileName())
 							.field(LAST_MODIFIED, new Date())
 							.field(CONTENT_TYPE,
 									(contentType != null) ? 
-										contentType.toString() : 
+										contentType : 
 										metadata.get(HttpHeaders.CONTENT_TYPE));
 					if (metadata.get(HttpHeaders.CONTENT_LENGTH) != null) {
 						// We try to get CONTENT_LENGTH from Tika first
@@ -252,13 +265,10 @@ public class ElasticContentManager extends AbstractContentManager {
 			}
 			else {
 				// File
-				MimeType contentType = attachment.getMimeType();
 				source.startObject(FILE)
 						.field(FILENAME, attachment.getFileName())
 						.field(LAST_MODIFIED, new Date())
-						.field(CONTENT_TYPE, (contentType != null) ? 
-												contentType.toString() : 
-												null);
+						.field(CONTENT_TYPE, contentType);
 				// No indexing, so we use our byte[] length
 				source.field(FILESIZE, content.length);
 				source.endObject(); // File
@@ -319,8 +329,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		Map<String, Object> meta = new TreeMap<>();
 		meta.put(FILENAME, attachment.getFileName());
 		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true));
-		MimeType contentType = attachment.getMimeType();
-		meta.put(CONTENT_TYPE, (contentType == null) ? null : contentType.toString());
+		meta.put(CONTENT_TYPE, attachment.getContentType());
 		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
 		meta.put(Bean.DATA_GROUP_ID, attachment.getBizDataGroupId());
 		meta.put(Bean.USER_ID, attachment.getBizUserId());
@@ -392,9 +401,10 @@ public class ElasticContentManager extends AbstractContentManager {
 
 		GetField field = response.getField(FILE_CONTENT_TYPE);
 		MimeType mimeType = null;
+		String contentType = null;
 		if (field != null) {
-			String content_type = (String) field.getValue();
-			mimeType = MimeType.fromMimeType(content_type);
+			contentType = (String) field.getValue();
+			mimeType = MimeType.fromContentType(contentType);
 		}
 
 		// content is a base64 encoded stream straight out of the index.
@@ -437,6 +447,7 @@ public class ElasticContentManager extends AbstractContentManager {
 															mimeType,
 															new Base64().decode(content));
 		result.setLastModified(lastModified);
+		result.setContentType(contentType);
 		result.setContentId(response.getId());
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
 
@@ -469,7 +480,7 @@ public class ElasticContentManager extends AbstractContentManager {
 		MimeType mimeType = null;
 		String contentType = (String) meta.get(CONTENT_TYPE);
 		if (contentType != null) {
-			mimeType = MimeType.fromMimeType(contentType);
+			mimeType = MimeType.fromContentType(contentType);
 		}
 
 		String fileName = (String) meta.get(FILENAME);
@@ -494,6 +505,7 @@ public class ElasticContentManager extends AbstractContentManager {
 															mimeType,
 															file);
 		result.setLastModified(lastModified);
+		result.setContentType(contentType);
 		result.setContentId(contentId);
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
 
