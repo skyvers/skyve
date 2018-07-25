@@ -2,7 +2,8 @@
 <view name="edit" title="Document Creator" iconStyleClass="fa fa-pencil-square-o" 
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 	xmlns="http://www.skyve.org/xml/view" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.skyve.org/xml/common">
     
     <tabPane>
     	<tab title="Input">
@@ -14,7 +15,12 @@
 		            <item colspan="2">
 		            	<textArea binding="script" minPixelHeight="500">
 		            		<onBlurHandlers>
-		            			<server action="UpdatePreview" />
+		            			<server action="UpdatePreview">
+									<properties>
+										<c:property key="process">@this</c:property>
+										<c:property key="update">markdownPreview,documentPreview</c:property>
+									</properties>
+		            			</server>
 		            		</onBlurHandlers>
 		            	</textArea>
 		            </item>
@@ -32,7 +38,7 @@
 		    </form>
     	</tab>
     	<tab title="Markdown Preview">
-    		<form>
+    		<form widgetId="markdownPreview">
     			<column />
     			<row>
     				<item>
@@ -50,7 +56,7 @@
     		</form>
     	</tab>
     	<tab title="Document Preview">
-    		<form>
+    		<form widgetId="documentPreview">
     			<column />
     			<row>
     				<item>
