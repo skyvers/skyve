@@ -170,7 +170,8 @@ public class WebUtil {
 			String bizId = request.getParameter(Bean.DOCUMENT_ID); 
 	    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
     		if (formBinding != null) { // sub-form
-        		// find the process bean
+    			formBinding = BindUtil.unsanitiseBinding(formBinding);
+    			// find the process bean
         		Object referenceValue = BindUtil.get(result, formBinding);
         		if (referenceValue instanceof List<?>) {
         			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
