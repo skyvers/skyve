@@ -55,7 +55,7 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 		
 		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			if(bean.getUserSelfRegistrationGroup()==null) {
-				bean.setAllowUserSelfRegisgtration(Boolean.FALSE);
+				bean.setAllowUserSelfRegistration(Boolean.FALSE);
 			}
 		}
 		

@@ -17,6 +17,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Setup
  * 
  * @depend - - - PasswordComplexityModel
+ * @navhas n userInvitationGroups 0..n Group
+ * @navhas n userSelfRegistrationGroup 0..1 Group
  * @stereotype "persistent"
  */
 @XmlType
@@ -41,6 +43,14 @@ public class Configuration extends AbstractPersistentBean {
 	public static final String passwordResetEmailSubjectPropertyName = "passwordResetEmailSubject";
 	/** @hidden */
 	public static final String passwordResetEmailBodyPropertyName = "passwordResetEmailBody";
+	/** @hidden */
+	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
+	/** @hidden */
+	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	/** @hidden */
+	public static final String userInvitationGroupsPropertyName = "userInvitationGroups";
+	/** @hidden */
+	public static final String userInvitiationEmailListPropertyName = "userInvitiationEmailList";
 
 	/**
 	 * Password Complexity
@@ -146,6 +156,34 @@ public class Configuration extends AbstractPersistentBean {
 	 * The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
 	 **/
 	private String passwordResetEmailBody;
+	/**
+	 * User Self Registration Group
+	 * <br/>
+	 * The user group which specifies role-access for self-registering users.
+			<br/>
+			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
+	 **/
+	private Group userSelfRegistrationGroup = null;
+	/**
+	 * Allow User Self Registration
+	 * <br/>
+	 * Master switch to allow or disallow self registration.
+	 **/
+	private Boolean allowUserSelfRegistration;
+	/**
+	 * User Invitation Groups
+	 * <br/>
+	 * The collection of groups that invited users are assigned.
+	 **/
+	private List<Group> userInvitationGroups = new ArrayList<>();
+	/**
+	 * User Invitation Email List
+	 * <br/>
+	 * The list of emails for users to invite. 
+			<br/>
+			Users will be created with the email address as username with the assigned groups.
+	 **/
+	private String userInvitiationEmailList;
 
 	@Override
 	@XmlTransient
@@ -260,5 +298,86 @@ public class Configuration extends AbstractPersistentBean {
 	public void setPasswordResetEmailBody(String passwordResetEmailBody) {
 		preset(passwordResetEmailBodyPropertyName, passwordResetEmailBody);
 		this.passwordResetEmailBody = passwordResetEmailBody;
+	}
+
+	/**
+	 * {@link #userSelfRegistrationGroup} accessor.
+	 * @return	The value.
+	 **/
+	public Group getUserSelfRegistrationGroup() {
+		return userSelfRegistrationGroup;
+	}
+
+	/**
+	 * {@link #userSelfRegistrationGroup} mutator.
+	 * @param userSelfRegistrationGroup	The new value.
+	 **/
+	@XmlElement
+	public void setUserSelfRegistrationGroup(Group userSelfRegistrationGroup) {
+		preset(userSelfRegistrationGroupPropertyName, userSelfRegistrationGroup);
+		this.userSelfRegistrationGroup = userSelfRegistrationGroup;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getAllowUserSelfRegistration() {
+		return allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} mutator.
+	 * @param allowUserSelfRegistration	The new value.
+	 **/
+	@XmlElement
+	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
+		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
+		this.allowUserSelfRegistration = allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #userInvitationGroups} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Group> getUserInvitationGroups() {
+		return userInvitationGroups;
+	}
+
+	/**
+	 * {@link #userInvitationGroups} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Group getUserInvitationGroupsElementById(String bizId) {
+		return getElementById(userInvitationGroups, bizId);
+	}
+
+	/**
+	 * {@link #userInvitationGroups} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setUserInvitationGroupsElementById(String bizId, Group element) {
+		 setElementById(userInvitationGroups, element);
+	}
+
+	/**
+	 * {@link #userInvitiationEmailList} accessor.
+	 * @return	The value.
+	 **/
+	public String getUserInvitiationEmailList() {
+		return userInvitiationEmailList;
+	}
+
+	/**
+	 * {@link #userInvitiationEmailList} mutator.
+	 * @param userInvitiationEmailList	The new value.
+	 **/
+	@XmlElement
+	public void setUserInvitiationEmailList(String userInvitiationEmailList) {
+		preset(userInvitiationEmailListPropertyName, userInvitiationEmailList);
+		this.userInvitiationEmailList = userInvitiationEmailList;
 	}
 }

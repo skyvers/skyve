@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Setup" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <form border="true" borderTitle="Password Complexity">
+        <column responsiveWidth="4"/>
+        <column/>
+        <row>
+            <item>
+                <default binding="passwordComplexityModel"/>
+            </item>
+        </row>
+    </form>
+    <form border="true" borderTitle="Password Reset">
+        <column responsiveWidth="4"/>
+        <column/>
+        <row>
+            <item>
+                <default binding="fromEmail"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="passwordResetEmailSubject"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="passwordResetEmailBody"/>
+            </item>
+        </row>
+    </form>
+    <form border="true" borderTitle="User Self-Registration">
+        <column responsiveWidth="4"/>
+        <column/>
+        <row>
+            <item>
+                <default binding="userSelfRegistrationGroup"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="allowUserSelfRegistration"/>
+            </item>
+        </row>
+    </form>
+	<vbox border="true" borderTitle="User Invitations" >
+		<hbox>
+			<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
+			<form percentageWidth="40">
+				<column/>
+				<row>
+					<item >
+						<label for="userInvitiationEmailList"/>
+					</item>
+				</row>
+				<row>
+					<item showLabel="false">
+						<default binding="userInvitiationEmailList"/>
+					</item>
+				</row>
+				<row>
+					<item align="centre">
+						<button actionName="InviteUsers" pixelWidth="150"/>
+					</item>
+				</row>
+			</form>
+		</hbox>
+	</vbox>
+    
+    <actions>
+        <defaults/>
+        <action className="InviteUsers" displayName="Invite Users"  iconStyleClass="fa fa-user-plus"
+        confirm="Ok to invite the users?"/>
+    </actions>
+    <newParameters/>
+</view>

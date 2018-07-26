@@ -208,7 +208,9 @@
 					<action name="ZipBatch" />
 				</document>
 				<document name="CommunicationTemplate" permission="CRUDC" />
-				<document name="Configuration" permission="CRUDC" />
+				<document name="Configuration" permission="CRUDC" >
+					<action name="InviteUsers"/>
+				</document>
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
 				<document name="DataGroup" permission="CRUDC" />
