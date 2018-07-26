@@ -177,11 +177,13 @@ public class Configuration extends AbstractPersistentBean {
 	 **/
 	private List<Group> userInvitationGroups = new ArrayList<>();
 	/**
-	 * User Invitation Email List
+	 * User Emails
 	 * <br/>
 	 * The list of emails for users to invite. 
 			<br/>
 			Users will be created with the email address as username with the assigned groups.
+			<br/>
+			Provide a list separated by either comma or semicolon.
 	 **/
 	private String userInvitiationEmailList;
 
