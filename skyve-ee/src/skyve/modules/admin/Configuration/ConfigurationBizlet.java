@@ -19,6 +19,11 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 	 */
 	private static final long serialVersionUID = -1282437688681930236L;
 	
+	public static final String SYSTEM_USER_INVITATION = "SYSTEM User Invitation";
+	public static final String SYSTEM_USER_INVITATION_DEFAULT_SUBJECT = "Invitation to join";
+	public static final String SYSTEM_USER_INVITATION_DEFAULT_BODY = "Hi {contact.name}, a user account has been created for you.";
+	
+	
 	@Override
 	public Configuration newInstance(Configuration bean) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -55,7 +60,7 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 		
 		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			if(bean.getUserSelfRegistrationGroup()==null) {
-				bean.setAllowUserSelfRegisgtration(Boolean.FALSE);
+				bean.setAllowUserSelfRegistration(Boolean.FALSE);
 			}
 		}
 		
