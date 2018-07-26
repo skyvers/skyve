@@ -5,10 +5,13 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.web.WebContext;
 
 public class ConfigurationBizlet extends Bizlet<Configuration> {
 	/**
@@ -46,4 +49,18 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 
 		return result;
 	}
+
+	@Override
+	public Configuration preExecute(ImplicitActionName actionName, Configuration bean, Bean parentBean, WebContext webContext) throws Exception {
+		
+		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
+			if(bean.getUserSelfRegistrationGroup()==null) {
+				bean.setAllowUserSelfRegisgtration(Boolean.FALSE);
+			}
+		}
+		
+		return super.preExecute(actionName, bean, parentBean, webContext);
+	}
+	
+	
 }

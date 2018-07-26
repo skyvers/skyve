@@ -35,5 +35,18 @@
 			<displayName>Password Reset Email Body</displayName>
 			<description>The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.</description>
 		</markup>
+		<association type="aggregation" name="userSelfRegistrationGroup">
+			<displayName>User Self Registration Group</displayName>
+			<description><![CDATA[
+			The user group which specifies role-access for self-registering users.
+			<br/>
+			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
+			]]></description>
+			<documentName>Group</documentName>
+		</association>
+		<boolean name="allowUserSelfRegisgtration">
+			<displayName>Allow User Self Registration</displayName>
+			<description>Master switch to allow or disallow self registration.</description>
+		</boolean>
 	</attributes>
 </document>
