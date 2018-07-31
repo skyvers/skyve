@@ -70,6 +70,7 @@
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 		<spring.version>5.0.4.RELEASE</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
+		<fst.version>2.56</fst.version>
 	</properties>
 
 	<distributionManagement>
@@ -457,6 +458,11 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-jdbc</artifactId>
 				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>de.ruedigermoeller</groupId>
+			    <artifactId>fst</artifactId>
+			    <version>${fst.version}</version>
 			</dependency>
 
 			<!-- Test dependencies -->
