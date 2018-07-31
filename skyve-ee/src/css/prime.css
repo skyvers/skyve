@@ -167,3 +167,7 @@ table td i.help {
 .ui-tooltip {
 	max-width: 300px;
 }
+
+.hiddenFilter {
+	display: none;
+}

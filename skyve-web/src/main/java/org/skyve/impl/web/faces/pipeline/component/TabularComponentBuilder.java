@@ -544,6 +544,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String disabledConditionName = grid.getDisabledConditionName();
 
+			// Show a button to toggle filtering
+			final CommandButton toggleFilterButton = createDataGridToggleFilterButton(current, grid);
+			col.getFacets().put("header", toggleFilterButton);
+
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
 				CommandButton button = createDataGridAddButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
 				col.getFacets().put("header", button);
@@ -573,6 +577,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		
 		return current;
+	}
+
+	protected CommandButton createDataGridToggleFilterButton(UIComponent parent, DataGrid grid) {
+		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Toggle filters");
+		button.setIcon("fa fa-toggle-on");
+		button.setAjax(false);
+		button.setOnclick(String.format("toggleFilters('%s')", parent.getId()));
+		return button;
 	}
 
 	protected CommandButton createDataGridAddButton(DataGrid grid, String listVar, String singularDocumentAlias,
