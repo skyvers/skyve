@@ -118,6 +118,9 @@ import org.skyve.web.WebAction;
 
 public class TabularComponentBuilder extends ComponentBuilder {
 
+	public static final String DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_WIDTH = "40";
+	public static final String DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_HEIGHT = "5";
+
 	@Override
 	public UIComponent view(UIComponent component, String invisibleConditionName) {
 		if (component != null) {
@@ -544,9 +547,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String disabledConditionName = grid.getDisabledConditionName();
 
+			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+			col.getFacets().put("header", columnHeader);
+
+
+			// Show a button to toggle filtering
+			final UIComponent filterToggle = createDataTableFilterToggle(current.getId());
+			columnHeader.getChildren().add(filterToggle);
+
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
 				CommandButton button = createDataGridAddButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
-				col.getFacets().put("header", button);
+				columnHeader.getChildren().add(createSpacer(DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_WIDTH,
+						DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_HEIGHT));
+				columnHeader.getChildren().add(button);
 			}
 			
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
@@ -573,6 +586,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		
 		return current;
+	}
+
+	private Spacer createSpacer(String width, String height) {
+		final Spacer spacer = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
+		spacer.setWidth(width);
+		spacer.setHeight(height);
+		return spacer;
+	}
+
+	protected UIComponent createDataTableFilterToggle(String dataTableId) {
+		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Toggle filters");
+		button.setIcon("fa fa-filter");
+		button.setOnclick(String.format("SKYVE.toggleFilters('%s'); return false;", dataTableId));
+		return button;
 	}
 
 	protected CommandButton createDataGridAddButton(DataGrid grid, String listVar, String singularDocumentAlias,
@@ -789,6 +819,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									        								createDisabled,
 									        								zoomRendered,
 									        								grid.getDisableZoomConditionName(),
+																			result.getId(),
 																			grid.getProperties());
 			children.add(actionColumn);
         }
@@ -900,6 +931,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(column, null);
 			column.setHeaderText(displayName);
 			column.setPriority(columnPriority);
+			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
 				columnPriority++;
 			}
@@ -990,11 +1022,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   String[] createDisabledConditionNames,
 													   boolean zoomRendered,
 													   String zoomDisabledConditionName,
+													   String parentId,
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
 		column.setWidth("40");
 		column.setStyle("text-align:center !important");
+
+		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		column.getFacets().put("header", columnHeader);
+
+		final UIComponent filterToggle = createDataTableFilterToggle(parentId);
+		columnHeader.getChildren().add(filterToggle);
+
 		if (canCreateDocument && createRendered) {
 			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 			setId(button, null);
@@ -1010,7 +1050,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("&d=").append(documentName);
 			button.setHref(value.toString());
 
-			column.getFacets().put("header", button);
+			columnHeader.getChildren().add(createSpacer(DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_WIDTH,
+					DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_HEIGHT));
+			columnHeader.getChildren().add(button);
 		}
 		else {
 			column.setHeaderText("");

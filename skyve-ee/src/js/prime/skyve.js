@@ -115,6 +115,23 @@ SKYVE = function() {
 				innerDiv.removeClass('ui-state-active');
 				innerSpan.removeClass('ui-icon ui-icon-check')
 			}
+		},
+
+        toggleFilters: function(dataTableId) {
+            var hiddenClass = 'hiddenFilter';
+			var dataTable = $('#' + dataTableId);
+			if (dataTable != null) {
+				var toggleClass = function() {
+                    var filter = $(this);
+                    if (filter.hasClass(hiddenClass)) {
+                        filter.removeClass(hiddenClass);
+                    } else {
+                        filter.addClass(hiddenClass);
+                    }
+				};
+				dataTable.find('.ui-filter-column').each(toggleClass);
+				dataTable.find('.ui-column-customfilter').each(toggleClass);
+			}
 		}
 	};
 }();
