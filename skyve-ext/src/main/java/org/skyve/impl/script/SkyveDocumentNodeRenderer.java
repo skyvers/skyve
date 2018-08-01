@@ -1,5 +1,7 @@
 package org.skyve.impl.script;
 
+import static org.skyve.impl.script.SkyveScriptInterpreter.toTitleCase;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,7 +21,6 @@ import org.commonmark.node.Text;
 import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
-import org.skyve.impl.bind.BindUtil;
 
 public class SkyveDocumentNodeRenderer implements NodeRenderer {
 
@@ -457,45 +458,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				html.text("\t");
 			}
 		}
-	}
-
-	/**
-	 * Fashion a title case identifier from the given string.
-	 * 
-	 * @param string The string to convert
-	 * @return A valid java static identifier. First letter upper case words with spaces between.
-	 */
-	private static String toTitleCase(String string) {
-		String javaIdentifierName = BindUtil.toJavaTypeIdentifier(string);
-		StringBuilder sb = new StringBuilder(javaIdentifierName.length() + 5);
-
-		for (int i = 0, l = javaIdentifierName.length(); i < l; i++) {
-			char ch = javaIdentifierName.charAt(i);
-			if (Character.isUpperCase(ch)) {
-				boolean nextCharLowerCase = false;
-				boolean prevCharLowerCase = false;
-				int nextIndex = i + 1;
-				int prevIndex = i - 1;
-				if (nextIndex < l) {
-					char nextChar = javaIdentifierName.charAt(nextIndex);
-					nextCharLowerCase = Character.isLowerCase(nextChar);
-				}
-				if (prevIndex >= 0) {
-					char prevChar = javaIdentifierName.charAt(prevIndex);
-					prevCharLowerCase = Character.isLowerCase(prevChar);
-				}
-
-				// if the previous char was upper case then don't add a space
-				if ((prevCharLowerCase || nextCharLowerCase) && (i > 0)) {
-					sb.append(' ');
-				}
-				sb.append(ch);
-			} else {
-				sb.append(ch);
-			}
-		}
-
-		return sb.toString();
 	}
 
 	private void writeAssociation(final String type, final String attributeName, final boolean required) {
