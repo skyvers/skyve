@@ -464,7 +464,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		setId(result, null);
 		result.setVar("row");
         result.setLazy(true);
-        result.setEmptyMessage("No Items to show");
+		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
 
 		Document drivingDocument = model.getDrivingDocument();
 		String moduleName = drivingDocument.getOwningModuleName();

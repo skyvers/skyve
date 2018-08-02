@@ -171,3 +171,7 @@ table td i.help {
 th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilter {
 	display: none !important;
 }
+
+.skyveEmptyListAddIcon {
+	color: rgb(5, 116, 218);
+}

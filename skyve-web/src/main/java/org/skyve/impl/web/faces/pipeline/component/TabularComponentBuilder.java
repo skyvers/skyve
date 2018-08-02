@@ -120,6 +120,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	public static final String DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_WIDTH = "40";
 	public static final String DATA_TABLE_ACTION_COLUMN_BUTTON_SPACER_HEIGHT = "5";
+	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
+	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 
 	@Override
 	public UIComponent view(UIComponent component, String invisibleConditionName) {
@@ -353,17 +355,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomConditionName} : 
 															new String[] {disableZoomConditionName, disabledConditionName});
 
-		return dataTable(grid.getBinding(),
-							listVar,
-							grid.getTitle(),
-							grid.getInvisibleConditionName(),
-							((! Boolean.TRUE.equals(grid.getInline())) && 
-								(! Boolean.FALSE.equals(grid.getShowZoom())) &&
-								(! Boolean.FALSE.equals(grid.getEditable()))),
-							clickToZoomDisabledConditionNames,
-							grid.getSelectedIdBinding(),
-							grid.getSelectedActions(),
-							grid.getWidgetId());
+		final DataTable dataTable = dataTable(grid.getBinding(),
+				listVar,
+				grid.getTitle(),
+				grid.getInvisibleConditionName(),
+				((! Boolean.TRUE.equals(grid.getInline())) &&
+						(! Boolean.FALSE.equals(grid.getShowZoom())) &&
+						(! Boolean.FALSE.equals(grid.getEditable()))),
+				clickToZoomDisabledConditionNames,
+				grid.getSelectedIdBinding(),
+				grid.getSelectedActions(),
+				grid.getWidgetId());
+
+		final String emptyMessage;
+		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
+			emptyMessage = EMPTY_DATA_TABLE_CAN_ADD_MESSAGE;
+		} else {
+			emptyMessage = EMPTY_DATA_TABLE_MESSAGE;
+		}
+		dataTable.setEmptyMessage(emptyMessage);
+
+		return dataTable;
 	}
 
 	/*
@@ -738,9 +750,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         result.setLazy(true);
     	result.setRows(50);
-        result.setEmptyMessage("No Items to show");
-        result.setSortMode("multiple");
-        
+		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+		result.setSortMode("multiple");
+
         setId(result, null);
     	result.setWidgetVar(result.getId());
     	
