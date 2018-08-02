@@ -113,7 +113,7 @@ public class WebUtil {
 		if (statistics != null) {
 			UtilImpl.LOGGER.info("Count in memory = " + statistics.getLocalHeapSize());
 			UtilImpl.LOGGER.info("Count on disk = " + statistics.getLocalDiskSize());
-			// This method takes a long time of large object graphs, so dont use it on prod systems.
+			// NB - This method takes a long time for large object graphs, so don't use it on prod systems.
 			//UtilImpl.LOGGER.info("In-Memory (MB) = " + (statistics.getLocalHeapSizeInBytes() / 1048576.0));
 		}
 		UtilImpl.LOGGER.info("**************************************************************");

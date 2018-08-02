@@ -176,7 +176,7 @@
 		<content name="mailImage" persistent="false">
 			<displayName>Image</displayName>
 		</content>
-		<association name="template" type="composition">
+		<association name="template" type="aggregation">
 			<displayName>Communication Template</displayName>
 			<description>
 				<![CDATA[
