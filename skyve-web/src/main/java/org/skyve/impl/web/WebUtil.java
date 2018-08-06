@@ -51,7 +51,7 @@ public class WebUtil {
 	}
 
 	public static void initConversationsCache() {
-		CacheManager singletonManager = CacheManager.create();
+		CacheManager singletonManager = CacheManager.getInstance();
 		Cache conversations = new Cache(CONVERSATIONS_CACHE_NAME, 
 											UtilImpl.MAX_CONVERSATIONS_IN_MEMORY, 
 											true, 
