@@ -78,7 +78,7 @@ public class InviteUsers implements ServerSideAction<Configuration> {
 			// create a user - not with a generated password
 			final User newUser = User.newInstance();
 			newUser.setUserName(contact.getEmail1());
-			newUser.setPassword(token);
+			newUser.setPassword(EXT.hashPassword(token));
 			newUser.setPasswordExpired(true);
 			newUser.setPasswordResetToken(token);
 			newUser.setContact(contact);
