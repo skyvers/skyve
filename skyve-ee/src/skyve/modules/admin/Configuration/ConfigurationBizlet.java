@@ -3,7 +3,6 @@ package modules.admin.Configuration;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.User;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -11,6 +10,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ConfigurationBizlet extends Bizlet<Configuration> {
@@ -21,7 +21,12 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 	
 	public static final String SYSTEM_USER_INVITATION = "SYSTEM User Invitation";
 	public static final String SYSTEM_USER_INVITATION_DEFAULT_SUBJECT = "Invitation to join";
-	public static final String SYSTEM_USER_INVITATION_DEFAULT_BODY = "Hi {contact.name}, a user account has been created for you.";
+	public static final String SYSTEM_USER_INVITATION_DEFAULT_BODY = String.format("Hi {%s}, a user account has been created for you.<br /><br />" +
+			"Please click below to reset your password.<br />" +
+			"<a href=\"%s/pages/resetPassword.jsp?t={%s}\">Reset Password</a>",
+			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName),
+			Util.getSkyveContextUrl(),
+			User.passwordResetTokenPropertyName);
 	
 	
 	@Override
@@ -44,7 +49,7 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 		}
 		if (result.getPasswordResetEmailBody() == null) {
 			String body = String.format("<html><head/><body>Hi {%s},<p/>" +
-												"Please click below to reset you password.<p/>" +
+												"Please click below to reset your password.<p/>" +
 												"<a href=\"{url}/pages/resetPassword.jsp?t={%s}\">" +
 												"Reset Password</a></body></html>",
 											Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName),
