@@ -273,7 +273,7 @@ public class WebUtil {
 			q.getFilter().addEquals(Binder.createCompoundBinding(SQLMetaDataUtil.CONTACT_PROPERTY_NAME, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME), email);
 			PersistentBean user = q.beanResult();
 			if (user != null) { // this is a user
-				String passwordResetToken = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
+				String passwordResetToken = generatePasswordResetToken();
 				Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
 				p.upsertBeanTuple(user);
 
@@ -296,6 +296,10 @@ public class WebUtil {
 		finally {
 			p.commit(true);
 		}
+	}
+
+	public static String generatePasswordResetToken() {
+		return UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 	}
 
 	/**

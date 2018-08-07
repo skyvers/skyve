@@ -43,7 +43,7 @@
         </row>
     </form>
 	<vbox border="true" borderTitle="User Invitations" >
-		<hbox>
+		<vbox>
 			<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
 			<form percentageWidth="40">
 				<column/>
@@ -63,7 +63,7 @@
 					</item>
 				</row>
 			</form>
-		</hbox>
+		</vbox>
 	</vbox>
     
     <actions>
