@@ -10,7 +10,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-//import org.nustaq.serialization.FSTConfiguration;
+import org.hibernate.internal.util.SerializationHelper;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -34,7 +34,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.StateUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -45,7 +44,6 @@ import net.sf.ehcache.statistics.StatisticsGateway;
 
 public class WebUtil {
 	private static final String CONVERSATIONS_CACHE_NAME = "conversations";
-//	private static FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 	
 	private WebUtil() {
 		// Disallow instantiation.
@@ -73,9 +71,7 @@ public class WebUtil {
 	public static void putConversationInCache(AbstractWebContext webContext)
 	throws Exception {
 		if (webContext != null) {
-			getConversations().put(new Element(webContext.getKey(), StateUtil.encode64(webContext)));
-			//getConversations().put(new Element(webContext.getKey(), conf.asByteArray(webContext)));
-			//getConversations().put(new Element(webContext.getKey(), SerializationHelper.serialize(webContext)));
+			getConversations().put(new Element(webContext.getKey(), SerializationHelper.serialize(webContext)));
 		}
 	}
 	
@@ -97,9 +93,7 @@ public class WebUtil {
 				throw new ConversationEndedException();
 			}
 
-        	result = StateUtil.decode64((String) element.getObjectValue());
-			//result =  (AbstractWebContext) conf.asObject((byte[]) element.getObjectValue());
-			//result =  (AbstractWebContext) SerializationHelper.deserialize((byte[]) element.getObjectValue());
+			result = (AbstractWebContext) SerializationHelper.deserialize((byte[]) element.getObjectValue());
 			result.setHttpServletRequest(request);
             result.setHttpServletResponse(response);
             result.setKey(conversationKey);

@@ -100,7 +100,7 @@
 							<tasks>
 								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
 									<fileset dir="${ear-path}/lib" 
-												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar,fst-*.jar" />
+												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
 								</move>
 								<move file="${ear-path}/lib/skyve-core-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-core.jar" />
 								<move file="${ear-path}/lib/skyve-ext-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-ext.jar" />
@@ -520,11 +520,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>de.ruedigermoeller</groupId>
-		    <artifactId>fst</artifactId>
-		    <version>${fst.version}</version>
 		</dependency>
 
 		<!-- Test dependencies -->

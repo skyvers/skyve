@@ -67,11 +67,6 @@
 			<artifactId>spring-security-config</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-		    <groupId>de.ruedigermoeller</groupId>
-		    <artifactId>fst</artifactId>
-			<scope>compile</scope>
-		</dependency>
 		
 		<!-- test dependencies -->
 		<dependency>
