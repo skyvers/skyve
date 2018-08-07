@@ -3,24 +3,21 @@ package modules.admin.JobSchedule;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-
-import modules.admin.domain.JobSchedule;
 
 import org.quartz.CronExpression;
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.job.JobScheduler;
-import org.skyve.domain.messages.Message;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
+
+import modules.admin.domain.JobSchedule;
 
 public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	/**
