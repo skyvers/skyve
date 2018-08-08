@@ -302,13 +302,16 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 				continue;
 			}
 
+			String replacedExpression = null;
+			
 			if (column.isProjected()) {
 				if (summaryType == null) {
 					if (binding != null) {
 						result.addBoundProjection(binding, alias);
 					}
 					else {
-						result.addExpressionProjection(expression, alias);
+						replacedExpression = replaceImplicitExpressions(expression, implicitParameters, user, customer);
+						result.addExpressionProjection(replacedExpression, alias);
 					}
 				}
 				else {
@@ -499,7 +502,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						}
 					}
 					else {
-						result.addExpressionOrdering(expression, sortDirection);
+						result.addExpressionOrdering(replacedExpression, sortDirection);
 					}
 				}
 			}

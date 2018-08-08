@@ -1240,19 +1240,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-/* TODO Why don't tri state checkboxes work???
-		UIComponentBase c = Boolean.FALSE.equals(checkBox.getTriState()) ?
-								b.checkbox(listVar,
-										checkBox.getBinding(), 
-										def.getTitle(),
-										def.isRequired(),
-										checkBox.getDisabledConditionName()) :
-								b.triStateCheckbox(listVar,
-													checkBox.getBinding(), 
-													def.getTitle(),
-													def.isRequired(),
-													checkBox.getDisabledConditionName());
-*/
 		return checkbox(listVar,
 							checkBox.getBinding(), 
 							title,
