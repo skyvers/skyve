@@ -10,7 +10,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 /**
  * 
  */
-public interface DocumentQueryDefinition extends QueryDefinition {
+public interface MetaDataQueryDefinition extends QueryDefinition {
 	/**
 	 * 
 	 * @return
@@ -47,7 +47,7 @@ public interface DocumentQueryDefinition extends QueryDefinition {
 	 * 
 	 * @return
 	 */
-	public List<QueryColumn> getColumns();
+	public List<MetaDataQueryColumn> getColumns();
 	
 	/**
 	 * 

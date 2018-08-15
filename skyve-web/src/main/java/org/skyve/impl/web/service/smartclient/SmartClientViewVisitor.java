@@ -104,7 +104,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -1207,7 +1207,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
 		if (queryName != null) { // its a query
-			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
 			dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
 			code.insert(0, ds);
@@ -1226,7 +1226,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 				code.insert(0, ds);
 			}
 			else {
-				DocumentQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
+				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
 				dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
 				code.insert(0, ds);
@@ -1611,7 +1611,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 		code.append(",_view:view,");
 		appendFilterParameters(lookup.getParameters(), code);
 
-		DocumentQueryDefinition query = def.getLookup().getQuery();
+		MetaDataQueryDefinition query = def.getLookup().getQuery();
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();

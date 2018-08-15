@@ -26,8 +26,8 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.report.ReportFormat;
@@ -1223,7 +1223,7 @@ public class JasperReportRenderer {
 
         final DocumentQueryListModel<Bean> listModel = getListModel(designSpecification);
         final Document drivingDocument = listModel.getDrivingDocument();
-        for (QueryColumn queryColumn : listModel.getColumns()) {
+        for (MetaDataQueryColumn queryColumn : listModel.getColumns()) {
             ReportDesignParameters.ReportColumn reportColumn = new ReportDesignParameters.ReportColumn();
             reportColumn.setLine(1);
             reportColumn.setName(queryColumn.getBinding());
@@ -1254,9 +1254,9 @@ public class JasperReportRenderer {
         final Customer customer = CORE.getCustomer();
         final Module module = designSpecification.getModule();
 
-        DocumentQueryDefinition query = null;
+        MetaDataQueryDefinition query = null;
         if (designSpecification.getQueryName() != null) {
-            query = module.getDocumentQuery(designSpecification.getQueryName());
+            query = module.getMetaDataQuery(designSpecification.getQueryName());
         }
         if (query == null) {
             query = module.getDocumentDefaultQuery(customer, designSpecification.getDocumentName());

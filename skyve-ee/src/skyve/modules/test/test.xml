@@ -24,55 +24,55 @@
 	</documents>
 	<menu />
 	<queries>
-		<documentQuery name="qH" documentName="Hierarchical">
+		<query name="qH" documentName="Hierarchical">
 			<description>Test Hierarchical Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qHPoly" documentName="Hierarchical" polymorphic="true">
+		</query>
+		<query name="qHPoly" documentName="Hierarchical" polymorphic="true">
 			<description>Test Hierarchical Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMB" documentName="MappedBase">
+		</query>
+		<query name="qMB" documentName="MappedBase">
 			<description>Test MappedBase Document</description>
 			<columns>
 				<column binding="text" sortable="false" filterable="false" editable="false" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMEJS" documentName="MappedExtensionJoinedStrategy">
+		</query>
+		<query name="qMEJS" documentName="MappedExtensionJoinedStrategy">
 			<description>Test MappedExtensionJoinedStrategy Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMEJSNotPoly" documentName="MappedExtensionJoinedStrategy" polymorphic="false">
+		</query>
+		<query name="qMEJSNotPoly" documentName="MappedExtensionJoinedStrategy" polymorphic="false">
 			<description>Test MappedExtensionJoinedStrategy Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMESS" documentName="MappedExtensionSingleStrategy">
+		</query>
+		<query name="qMESS" documentName="MappedExtensionSingleStrategy">
 			<description>Test MappedExtensionSingleStrategy Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMSJS" documentName="MappedSubclassedJoinedStrategy">
+		</query>
+		<query name="qMSJS" documentName="MappedSubclassedJoinedStrategy">
 			<description>Test MappedSubclassedJoinedStrategy Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMSSS" documentName="MappedSubclassedSingleStrategy">
+		</query>
+		<query name="qMSSS" documentName="MappedSubclassedSingleStrategy">
 			<description>Test MappedSubclassedSingleStrategy Document</description>
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMetaDataQueryColumnBinding" documentName="MappedSubclassedSingleStrategy">
+		</query>
+		<query name="qMetaDataQueryColumnBinding" documentName="MappedSubclassedSingleStrategy">
 			<description>Test MappedSubclassedSingleStrategy Document</description>
 			<columns>
 				<column binding="text">
@@ -80,8 +80,8 @@
 					<filterExpression>{TEST}</filterExpression>
 				</column>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qMetaDataQueryFromAndFilterBinding" documentName="MappedSubclassedSingleStrategy">
+		</query>
+		<query name="qMetaDataQueryFromAndFilterBinding" documentName="MappedSubclassedSingleStrategy">
 			<description>Test MappedSubclassedSingleStrategy Document</description>
 			<from>{test.MappedSubclassedSingleStrategy} as bean</from>
 			<filter>
@@ -90,6 +90,6 @@
 			<columns>
 				<column binding="text" />
 			</columns>
-		</documentQuery>
+		</query>
 	</queries>
 </module>

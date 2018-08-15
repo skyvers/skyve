@@ -35,7 +35,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
@@ -105,7 +105,7 @@ public class Desktop extends Harness {
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						result.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
-						QueryDefinition query = ActionUtil.getDocumentQuery(bizModule, getQueryNameParameter());
+						QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
 						result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 					} 
 					else {
@@ -145,6 +145,9 @@ public class Desktop extends Harness {
     	result.append("<td><div class=\"titleBar\">{title}</div></td>");
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
+/*
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><img src=\"images/menu_logout.png\"/></a></td>");
+*/
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");
@@ -355,7 +358,7 @@ public class Desktop extends Harness {
 			if (ViewType.list.equals(module.getHomeRef())) {
 				String homeDocumentName = module.getHomeDocumentName();
 				if (homeDocumentName != null) {
-					DocumentQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
+					MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
 					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 			}
@@ -385,13 +388,13 @@ public class Desktop extends Harness {
 			else if ((item instanceof ListItem) || (item instanceof TreeItem)) {
 				ListItem grid = (ListItem) item;
 				
-				DocumentQueryDefinition query = null;
+				MetaDataQueryDefinition query = null;
 				String queryName = grid.getQueryName();
 				String modelName = grid.getModelName();
 				String documentName = grid.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					query = module.getDocumentQuery(queryName);
+					query = module.getMetaDataQuery(queryName);
 					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 				else {
@@ -466,7 +469,7 @@ public class Desktop extends Harness {
 							result.append(itemDocumentName).append("__").append(modelName);
 						}
 						else {
-		                    DocumentQueryDefinition query = deriveDocumentQuery(customer,
+		                    MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 													                                module,
 													                                item,
 													                                itemQueryName,
@@ -497,7 +500,7 @@ public class Desktop extends Harness {
 							result.append(itemDocumentName).append("__").append(modelName);
 						}
 						else {
-							DocumentQueryDefinition query = deriveDocumentQuery(customer,
+							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 													                                module,
 													                                item,
 													                                itemQueryName,
@@ -521,7 +524,7 @@ public class Desktop extends Harness {
 					else if (item instanceof CalendarItem) {
 	                    CalendarItem calendarItem = (CalendarItem) item;
 	                    itemDocumentName = calendarItem.getDocumentName();
-						DocumentQueryDefinition query = deriveDocumentQuery(customer,
+						MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 												                                module,
 												                                item,
 												                                calendarItem.getQueryName(),
@@ -545,7 +548,7 @@ public class Desktop extends Harness {
 		                    result.append('_').append(mapItem.getGeometryBinding());
 						}
 						else {
-							DocumentQueryDefinition query = deriveDocumentQuery(customer,
+							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
 													                                module,
 													                                item,
 													                                itemQueryName,

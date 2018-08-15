@@ -16,7 +16,7 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
@@ -133,7 +133,7 @@ System.out.println(visitModules(args[0]));
 						Document d = null;
 						
 						if (queryName != null) {
-							DocumentQueryDefinition query = m.getDocumentQuery(queryName);
+							MetaDataQueryDefinition query = m.getMetaDataQuery(queryName);
 							if (query == null) {
 								navigate.setDocumentName(queryName);
 								query = m.getDocumentDefaultQuery(c, queryName);

@@ -9,7 +9,9 @@
 
   <xs:element name="calendar" type="tns:calendar"/>
 
-  <xs:element name="documentQuery" type="tns:documentQuery"/>
+  <xs:element name="column" type="tns:metaDataQueryProjectedColumnMetaData"/>
+
+  <xs:element name="content" type="tns:metaDataQueryContentColumnMetaData"/>
 
   <xs:element name="edit" type="tns:edit"/>
 
@@ -24,6 +26,8 @@
   <xs:element name="map" type="tns:map"/>
 
   <xs:element name="module" type="tns:module"/>
+
+  <xs:element name="query" type="tns:query"/>
 
   <xs:element name="sql" type="tns:sql"/>
 
@@ -62,7 +66,7 @@
             <xs:complexType>
               <xs:sequence>
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
-                  <xs:element ref="tns:documentQuery"/>
+                  <xs:element ref="tns:query"/>
                   <xs:element ref="tns:bizQL"/>
                   <xs:element ref="tns:sql"/>
                 </xs:choice>
@@ -273,16 +277,19 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="documentQuery">
+  <xs:complexType name="query">
     <xs:complexContent>
-      <xs:extension base="tns:query">
+      <xs:extension base="tns:abstractQuery">
         <xs:sequence>
           <xs:element name="from" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="filter" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="columns" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="column" type="tns:column" form="qualified" maxOccurs="unbounded"/>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:column"/>
+                  <xs:element ref="tns:content"/>
+                </xs:choice>
               </xs:sequence>
             </xs:complexType>
           </xs:element>
@@ -293,7 +300,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="query" abstract="true">
+  <xs:complexType name="abstractQuery" abstract="true">
     <xs:complexContent>
       <xs:extension base="ns2:namedMetaData">
         <xs:sequence>
@@ -304,11 +311,23 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="column">
+  <xs:complexType name="metaDataQueryProjectedColumnMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:metaDataQueryColumnMetaData">
+        <xs:sequence>
+          <xs:element name="projected" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="expression" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="sortable" type="xs:boolean"/>
+        <xs:attribute name="filterable" type="xs:boolean"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="metaDataQueryColumnMetaData" abstract="true">
     <xs:sequence>
       <xs:element name="name" type="xs:string" form="qualified" minOccurs="0"/>
-      <xs:element name="expression" type="xs:string" form="qualified" minOccurs="0"/>
-      <xs:element name="projected" type="xs:boolean" form="qualified" minOccurs="0"/>
       <xs:element name="filterOperator" type="ns2:filterOperator" form="qualified" minOccurs="0"/>
       <xs:element name="filterExpression" type="xs:string" form="qualified" minOccurs="0"/>
     </xs:sequence>
@@ -316,16 +335,24 @@
     <xs:attribute name="displayName" type="xs:string"/>
     <xs:attribute name="sortOrder" type="ns2:sortDirection"/>
     <xs:attribute name="hidden" type="xs:boolean"/>
-    <xs:attribute name="sortable" type="xs:boolean"/>
-    <xs:attribute name="filterable" type="xs:boolean"/>
-    <xs:attribute name="editable" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="alignment" type="ns1:horizontalAlignment"/>
   </xs:complexType>
 
+  <xs:complexType name="metaDataQueryContentColumnMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:metaDataQueryColumnMetaData">
+        <xs:sequence/>
+        <xs:attribute name="display" type="tns:displayType" use="required"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="emptyThumbnailRelativeFile" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="bizQL">
     <xs:complexContent>
-      <xs:extension base="tns:query">
+      <xs:extension base="tns:abstractQuery">
         <xs:sequence>
           <xs:element name="query" type="xs:string" form="qualified"/>
         </xs:sequence>
@@ -335,7 +362,7 @@
 
   <xs:complexType name="sql">
     <xs:complexContent>
-      <xs:extension base="tns:query">
+      <xs:extension base="tns:abstractQuery">
         <xs:sequence>
           <xs:element name="query" type="xs:string" form="qualified"/>
         </xs:sequence>
@@ -377,6 +404,13 @@
       <xs:enumeration value="_RUDU"/>
       <xs:enumeration value="_R_DU"/>
       <xs:enumeration value="CR_DU"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="displayType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="thumbnail"/>
+      <xs:enumeration value="link"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

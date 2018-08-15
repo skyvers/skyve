@@ -33,7 +33,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
@@ -134,7 +134,7 @@ public class Menu extends Harness {
 				if (documentName == null) {
 					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
 						AbstractDocumentOrQueryOrModelMenuItem aggregateItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
-						DocumentQueryDefinition query = deriveDocumentQuery(customer, 
+						MetaDataQueryDefinition query = deriveDocumentQuery(customer, 
 																				module, 
 																				aggregateItem, 
 																				aggregateItem.getQueryName(), 

@@ -31,7 +31,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebAction;
@@ -525,8 +526,10 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											String zoomDisabledConditionName) {
 		StringBuilder value = new StringBuilder(128);
 		
-		for (QueryColumn column : model.getColumns()) {
-			if (column.isHidden() || (! column.isProjected())) {
+		for (MetaDataQueryColumn column : model.getColumns()) {
+			if (column.isHidden() || 
+					((column instanceof MetaDataQueryProjectedColumn) && 
+							(! ((MetaDataQueryProjectedColumn) column).isProjected()))) {
 				continue;
 			}
 			

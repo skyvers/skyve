@@ -19,7 +19,7 @@ import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.map.DefaultCollectionMapModel;
@@ -123,7 +123,7 @@ public class MapServlet extends HttpServlet {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
 		}

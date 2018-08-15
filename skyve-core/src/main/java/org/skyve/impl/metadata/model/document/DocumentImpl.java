@@ -40,7 +40,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -439,7 +439,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				String queryName = reference.getQueryName();
 				if (queryName != null) {
 					Module module = customer.getModule(getOwningModuleName());
-					DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 					referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
 					referenceQuery.clearProjections();
 					referenceQuery.clearOrderings();

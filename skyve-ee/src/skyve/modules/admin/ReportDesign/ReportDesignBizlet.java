@@ -20,7 +20,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
@@ -254,8 +254,8 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 
 			// Currently only document queries are supported.
 			final List<QueryDefinition> documentQueries = module.getMetadataQueries().stream()
-					.filter(q -> q instanceof DocumentQueryDefinition)
-					.map(q -> (DocumentQueryDefinition) q)
+					.filter(q -> q instanceof MetaDataQueryDefinition)
+					.map(q -> (MetaDataQueryDefinition) q)
 					.collect(Collectors.toList());
 			for (QueryDefinition queryDefinition : documentQueries) {
 				result.add(new DomainValue(queryDefinition.getName(), queryDefinition.getDescription()));
@@ -307,7 +307,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 			bean.setDefinitionSource(DefinitionSource.query);
 
 			final Module module = customer.getModule(bean.getModuleName());
-			final DocumentQueryDefinition query = module.getDocumentQuery(bean.getQueryName());
+			final MetaDataQueryDefinition query = module.getMetaDataQuery(bean.getQueryName());
 
 			if (query != null) {
 				bean.setDocumentName(query.getDocumentName());

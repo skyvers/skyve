@@ -29,7 +29,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
@@ -74,7 +74,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
-		DocumentQueryDefinition query = null;
+		MetaDataQueryDefinition query = null;
 		ListModel<Bean> model = null;
 
 		// model type of request
@@ -87,7 +87,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		// query type of request
 		else {
 			if (queryName != null) {
-				query = m.getDocumentQuery(queryName);
+				query = m.getMetaDataQuery(queryName);
 				if (query == null) {
 					query = m.getDocumentDefaultQuery(c, documentName);
 				}

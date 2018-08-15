@@ -15,7 +15,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
@@ -162,14 +162,14 @@ public abstract class Harness extends Localisable {
 		}
 	}
 	
-	public static DocumentQueryDefinition deriveDocumentQuery(Customer customer,
+	public static MetaDataQueryDefinition deriveDocumentQuery(Customer customer,
 																Module module,
 																MenuItem item,
 																String queryName,
 																String documentName) {
-        DocumentQueryDefinition query = null;
+        MetaDataQueryDefinition query = null;
 		if (queryName != null) {
-            query = module.getDocumentQuery(queryName);
+            query = module.getMetaDataQuery(queryName);
             if ((query == null) || (query.getName() == null)) {
                 MetaDataException me = new MetaDataException("The target query " + queryName + " for menu action " +
                                                                 item.getName() + " is invalid in module " + module.getName());

@@ -6,29 +6,29 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeSet;
 
-import modules.admin.DownloadFolder.DownloadFolderBizlet;
-import modules.admin.domain.Communication;
-import modules.admin.domain.DownloadFolder;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.Util;
 
+import modules.admin.DownloadFolder.DownloadFolderBizlet;
+import modules.admin.domain.Communication;
+import modules.admin.domain.DownloadFolder;
+
 public class BatchesModel extends ListModel<Communication> {
 	private static final long serialVersionUID = -7192916420761744760L;
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
-	private List<QueryColumn> columns = new ArrayList<>(1);
+	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 
 	public BatchesModel() throws Exception {
 		Customer c = CORE.getUser().getCustomer();
@@ -41,7 +41,7 @@ public class BatchesModel extends ListModel<Communication> {
 		projections.add(Bean.BIZ_KEY);
 		projections.add(DownloadFolder.namePropertyName);
 
-		QueryColumnImpl column = new QueryColumnImpl();
+		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(DownloadFolder.namePropertyName);
 		column.setSortable(false);
 		columns.add(column);
@@ -58,7 +58,7 @@ public class BatchesModel extends ListModel<Communication> {
 	}
 
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 

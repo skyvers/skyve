@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -15,10 +15,10 @@ public class DefaultQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	 */
 	private static final long serialVersionUID = 5182580858481923068L;
 
-	private DocumentQueryDefinition query;
+	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
 
-	public DefaultQueryMapModel(DocumentQueryDefinition query) {
+	public DefaultQueryMapModel(MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 

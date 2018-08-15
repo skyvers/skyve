@@ -39,7 +39,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -365,7 +365,7 @@ public class ReportServlet extends HttpServlet {
 					drivingDocument = model.getDrivingDocument();
 				}
 				else {
-					DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryOrModelName);
+					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 					if (query == null) {
 						query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 					}
@@ -500,7 +500,7 @@ public class ReportServlet extends HttpServlet {
 
 	public static DocumentQueryListModel<Bean> getDocumentQueryListModel(Module module, String documentOrQueryOrModelName) {
 		final Customer customer = CORE.getCustomer();
-		DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryOrModelName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 		}

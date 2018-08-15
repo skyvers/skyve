@@ -439,7 +439,7 @@
 		</edit>
 	</menu>
 	<queries>
-		<documentQuery name="qContacts" documentName="Contact">
+		<query name="qContacts" documentName="Contact">
 			<description>All Contact Details</description>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
@@ -447,8 +447,8 @@
 				<column binding="email1" sortOrder="ascending" />
 				<column binding="mobile" sortOrder="ascending" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qUsers" documentName="User">
+		</query>
+		<query name="qUsers" documentName="User">
 			<description>All Users</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending" />
@@ -457,8 +457,8 @@
 				<column binding="userName" sortOrder="ascending" />
 				<column binding="passwordExpired" hidden="true"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qUserTokens" documentName="UserToken">
+		</query>
+		<query name="qUserTokens" documentName="UserToken">
 			<description>All User Tokens</description>
 			<columns>
 				<column binding="userName" />
@@ -466,8 +466,8 @@
 				<column binding="token" />
 				<column binding="lastUsed" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qActiveUsers" documentName="User">
+		</query>
+		<query name="qActiveUsers" documentName="User">
 			<description>All Active Users</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending" />
@@ -479,8 +479,8 @@
 					<filterExpression>false</filterExpression>
 				</column>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qUsersInGroup" documentName="User">
+		</query>
+		<query name="qUsersInGroup" documentName="User">
 			<description>Group Users</description>
 			<from>
 				<![CDATA[
@@ -499,8 +499,8 @@
 				<column binding="contact.mobile" sortOrder="ascending" />
 				<column binding="userName" sortOrder="ascending" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qCompletedJobs" documentName="Job">
+		</query>
+		<query name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
 				<column binding="startTime" sortOrder="descending" />
@@ -509,8 +509,8 @@
 				<column binding="status" />
 				<column binding="percentComplete" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qDashboardJobs" documentName="Job">
+		</query>
+		<query name="qDashboardJobs" documentName="Job">
 			<description>All completed jobs for display on a dashboard.</description>
 			<columns>
 				<column binding="displayName" />
@@ -519,53 +519,53 @@
 				<column binding="startTime" sortOrder="descending" />
 				<column binding="endTime" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qAllSchedules" documentName="JobSchedule">
+		</query>
+		<query name="qAllSchedules" documentName="JobSchedule">
 			<description>The list of all job schedule entries</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending" />
 				<column binding="startTime" sortOrder="ascending" />
 				<column binding="endTime" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qExistingHits" documentName="UserMonthlyHits">
+		</query>
+		<query name="qExistingHits" documentName="UserMonthlyHits">
 			<description>The existing hits record for a user, month and year</description>
 			<columns>
 				<column binding="userName" />
 				<column binding="numberOfHits" />
 				<column binding="userName">
-					<projected>false</projected>
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
+					<projected>false</projected>
 				</column>
 				<column binding="year">
-					<projected>false</projected>
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
+					<projected>false</projected>
 				</column>
 				<column binding="month">
-					<projected>false</projected>
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
+					<projected>false</projected>
 				</column>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qSnapshots" documentName="Snapshot">
+		</query>
+		<query name="qSnapshots" documentName="Snapshot">
 			<description>The list of all Snapshots.</description>
 			<columns>
 				<column binding="moduleName" sortOrder="ascending" />
 				<column binding="queryName" sortOrder="ascending" />
 				<column binding="name" sortOrder="ascending" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qTags" documentName="Tag">
+		</query>
+		<query name="qTags" documentName="Tag">
 			<description>The list of all Tags.</description>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
 				<column binding="visible" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qAudits" documentName="Audit">
+		</query>
+		<query name="qAudits" documentName="Audit">
 			<description>The list of all Audits.</description>
 			<columns>
 				<column binding="timestamp" />
@@ -578,8 +578,8 @@
 					<projected>false</projected>
 				</column>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qCommunications" documentName="Communication">
+		</query>
+		<query name="qCommunications" documentName="Communication">
 			<description>Communications</description>
 			<columns>
 				<column binding="description" sortOrder="ascending" />
@@ -587,16 +587,16 @@
 				<column binding="subject" />
 				<column binding="tag.name" />
 			</columns>
-		</documentQuery>
-		<documentQuery name="qSubscriptions" documentName="Subscription">
+		</query>
+		<query name="qSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />
 				<column binding="declined" />
 				<column binding="formatType"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qUserSubscriptions" documentName="Subscription">
+		</query>
+		<query name="qUserSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="communication.bizKey" sortOrder="ascending" />
@@ -604,8 +604,8 @@
 				<column binding="formatType"/>
 				<column binding="preferredReceiverIdentifier"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qTagCommunications" documentName="Communication">
+		</query>
+		<query name="qTagCommunications" documentName="Communication">
 			<description>Communications</description>
 			<columns>
 				<column binding="description" sortOrder="ascending" />
@@ -619,14 +619,14 @@
 				</column>
 				<column binding="subject" />
 			</columns>
-		</documentQuery>
-		<documentQuery documentName="ImportExport" name="qImportExport">
+		</query>
+		<query documentName="ImportExport" name="qImportExport">
 			<description>Saved Import and Export Wizards</description>
 			<columns>
 				<column binding="mode"/>
 				<column binding="moduleName"/>
 				<column binding="documentName"/>
 			</columns>
-		</documentQuery>
+		</query>
 	</queries>
 </module>

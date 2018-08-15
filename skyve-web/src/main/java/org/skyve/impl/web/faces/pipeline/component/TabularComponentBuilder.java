@@ -105,7 +105,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
@@ -893,8 +894,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		columnPriority = 1;
 
-		for (QueryColumn queryColumn : model.getColumns()) {
-			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
+			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn) ?
+																	(MetaDataQueryProjectedColumn) queryColumn :
+																	null;
+			if (queryColumn.isHidden() || 
+					((projectedQueryColumn != null) && (! projectedQueryColumn.isProjected()))) {
 				continue;
 			}
 			
@@ -929,7 +934,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					if (displayName == null) {
 						displayName = bindingAttribute.getDisplayName();
 					}
-					if (showFilter && queryColumn.isFilterable()) {
+					if (showFilter && 
+							(projectedQueryColumn != null) &&
+							projectedQueryColumn.isFilterable()) {
 						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
 																							binding,
 																							bindingAttribute,
@@ -950,12 +957,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			column.setField((name != null) ? name : binding);
 			
 			// Unbound columns or unsortable columns should be set unsortable
-			if ((binding == null) || (! queryColumn.isSortable())) {
+			if ((binding == null) || 
+					((projectedQueryColumn != null) && (! projectedQueryColumn.isSortable()))) {
 				column.setSortable(false);
 			}
 
 			// Unbound columns or unfilterable columns should be set unfilterable
-			if ((binding != null) && showFilter && queryColumn.isFilterable()) {
+			if ((binding != null) && 
+					showFilter && 
+					(projectedQueryColumn != null) && 
+					projectedQueryColumn.isFilterable()) {
 				if (specialFilterComponent != null) {
 					column.getFacets().put("filter", specialFilterComponent);
 				}

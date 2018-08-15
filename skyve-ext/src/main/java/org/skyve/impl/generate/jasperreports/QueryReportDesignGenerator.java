@@ -1,8 +1,8 @@
 package org.skyve.impl.generate.jasperreports;
 
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
 import java.util.List;
 
@@ -17,10 +17,10 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
 
-        final DocumentQueryDefinition queryDefinition = design.getModule().getDocumentQuery(design.getQueryName());
+        final MetaDataQueryDefinition queryDefinition = design.getModule().getMetaDataQuery(design.getQueryName());
 
         final List<? extends Attribute> documentAttributes = design.getDocument().getAttributes();
-        for (QueryColumn queryColumn : queryDefinition.getColumns()) {
+        for (MetaDataQueryColumn queryColumn : queryDefinition.getColumns()) {
             final Attribute attribute = documentAttributes.stream()
                     .filter(a -> a.getName().equals(queryColumn.getBinding()))
                     .findFirst()

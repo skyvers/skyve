@@ -8,7 +8,7 @@ import org.skyve.metadata.SortDirection;
 /**
  * 
  */
-public interface QueryColumn extends NamedMetaData {
+public interface MetaDataQueryColumn extends NamedMetaData {
 	/**
 	 * 
 	 * @return
@@ -20,12 +20,6 @@ public interface QueryColumn extends NamedMetaData {
 	 * @return
 	 */
 	public String getBinding();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getExpression();
 	
 	/**
 	 * 
@@ -49,31 +43,7 @@ public interface QueryColumn extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public boolean isProjected();
-
-	/**
-	 * 
-	 * @return
-	 */
 	public boolean isHidden();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isFilterable();
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isSortable();
-
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isEditable();
 	
 	public Integer getPixelWidth();
 	

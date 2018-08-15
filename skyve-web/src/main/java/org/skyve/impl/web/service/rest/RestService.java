@@ -34,7 +34,7 @@ import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.persistence.DocumentQuery;
@@ -304,8 +304,8 @@ public class RestService {
 			Customer c = u.getCustomer();
 			Module m = c.getModule(module);
 	
-			DocumentQueryDefinition q = null;
-			q = m.getDocumentQuery(documentOrQuery);
+			MetaDataQueryDefinition q = null;
+			q = m.getMetaDataQuery(documentOrQuery);
 			// not a query, could be a document
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentOrQuery);

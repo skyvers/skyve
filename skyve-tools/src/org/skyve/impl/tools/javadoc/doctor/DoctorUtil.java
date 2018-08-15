@@ -29,10 +29,11 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 
@@ -152,7 +153,7 @@ public class DoctorUtil {
 
 			for (QueryDefinition q : module.getMetadataQueries()) {
 				table.setRowValues(q.getName(),
-									(q instanceof DocumentQueryDefinition) ? ((DocumentQueryDefinition) q).getDocumentName() : null, 
+									(q instanceof MetaDataQueryDefinition) ? ((MetaDataQueryDefinition) q).getDocumentName() : null, 
 									q.getDescription(),
 									q.getDocumentation());
 			}
@@ -407,7 +408,7 @@ public class DoctorUtil {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
 		section.setSectionType(SectionType.SubChapter);
-		if (q instanceof DocumentQueryDefinition) {
+		if (q instanceof MetaDataQueryDefinition) {
 			section.setSectionTitle("Document Query " + q.getName());
 		}
 		else if (q instanceof SQLDefinition) {
@@ -421,15 +422,16 @@ public class DoctorUtil {
 		out.println(section.toHTML());
 
 		// Field List
-		if (q instanceof DocumentQueryDefinition) {
-			DocumentQueryDefinition dq = (DocumentQueryDefinition) q;
+		if (q instanceof MetaDataQueryDefinition) {
+			MetaDataQueryDefinition dq = (MetaDataQueryDefinition) q;
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), q.getName() + "queryFieldList"));
 			table.setTitle("Columns");
 			table.setHeaderValues("Field", "Description", "Expression", "Filter", "Order");
-			for (QueryColumn c : dq.getColumns()) {
+			for (MetaDataQueryColumn c : dq.getColumns()) {
 	
 				// See if we can find the document binding
 				String binding = null;
+				String expression = null;
 				Document d = module.getDocument(customer, dq.getDocumentName());
 				String name = c.getBinding();
 				if (name == null) {
@@ -441,8 +443,11 @@ public class DoctorUtil {
 				} else {
 					binding = name;
 				}
-	
-				table.setRowValues(binding, c.getDisplayName(), c.getExpression(), c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
+				if (c instanceof MetaDataQueryProjectedColumn) {
+					expression = ((MetaDataQueryProjectedColumn) c).getExpression();
+				}
+				
+				table.setRowValues(binding, c.getDisplayName(), expression, c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
 			}
 			out.println(table.toHTML(true));
 		}

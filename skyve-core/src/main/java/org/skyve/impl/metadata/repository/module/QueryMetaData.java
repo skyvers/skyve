@@ -8,7 +8,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
-			name = "query",
+			name = "abstractQuery",
 			propOrder = {"documentation", "description"})
 public abstract class QueryMetaData extends NamedMetaData {
 	private static final long serialVersionUID = 3163827058170250318L;

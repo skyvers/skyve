@@ -7,7 +7,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
@@ -38,7 +38,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	public JRDataSource createDatasource() 
 	throws JRException {
 		try {
-			DocumentQueryDefinition query = getQuery(moduleDotQuery);
+			MetaDataQueryDefinition query = getQuery(moduleDotQuery);
 			DocumentQuery documentQuery = query.constructDocumentQuery(null, null);
 			Persistence persistence = CORE.getPersistence();
 			return new SkyveDataSource(persistence.getUser(),
@@ -49,7 +49,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
         }
 	}
 	
-	public static DocumentQueryDefinition getQuery(String moduleDotQuery) {
+	public static MetaDataQueryDefinition getQuery(String moduleDotQuery) {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		UserImpl user = new UserImpl();
 		user.setCustomerName("bizhub");
@@ -60,7 +60,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
 		Module module = customer.getModule(moduleDotQuery.substring(0, dotIndex));
 		String queryName = moduleDotQuery.substring(dotIndex + 1);
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 		if (query == null) {
     		query = module.getDocumentDefaultQuery(customer, queryName);
 		}

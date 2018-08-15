@@ -19,31 +19,31 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	public void testHierarchical() {
-		DocumentQuery q = m.getDocumentQuery("qH").constructDocumentQuery(null, null);
+		DocumentQuery q = m.getMetaDataQuery("qH").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
 	public void testHierarchicalNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qH").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qH").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testHierarchicalPolymorphic() {
-		Assert.assertTrue((((AbstractQuery) m.getDocumentQuery("qHPoly").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertTrue((((AbstractQuery) m.getMetaDataQuery("qHPoly").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateHierarchicalNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qH").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qH").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateHierarchicalPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qHPoly").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qHPoly").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
@@ -55,32 +55,32 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	public void testMEJS() {
-		DocumentQuery q = m.getDocumentQuery("qMEJS").constructDocumentQuery(null, null);
+		DocumentQuery q = m.getMetaDataQuery("qMEJS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
 	public void testMEJSPolymorphic() {
-		Assert.assertTrue((((AbstractQuery) m.getDocumentQuery("qMEJS").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertTrue((((AbstractQuery) m.getMetaDataQuery("qMEJS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testMEJSNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMEJSNotPoly").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMEJSNotPoly").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateMEJSPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMEJS").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMEJS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateMEJSNotPolymorphic() {
 		Assert.assertFalse(
-				(((AbstractQuery) m.getDocumentQuery("qMEJSNotPoly").constructDocumentQuery(AggregateFunction.Count, null))
+				(((AbstractQuery) m.getMetaDataQuery("qMEJSNotPoly").constructDocumentQuery(AggregateFunction.Count, null))
 						.toQueryString().contains("bean as bean")));
 	}
 
@@ -92,19 +92,19 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	public void testMESS() {
-		DocumentQuery q = m.getDocumentQuery("qMESS").constructDocumentQuery(null, null);
+		DocumentQuery q = m.getMetaDataQuery("qMESS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
 	public void testMESSPolymorphic() {
-		Assert.assertTrue((((AbstractQuery) m.getDocumentQuery("qMESS").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertTrue((((AbstractQuery) m.getMetaDataQuery("qMESS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateMESSPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMESS").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMESS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
@@ -116,19 +116,19 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	public void testMSJS() {
-		DocumentQuery q = m.getDocumentQuery("qMSJS").constructDocumentQuery(null, null);
+		DocumentQuery q = m.getMetaDataQuery("qMSJS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
 	public void testMSJSNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMSJS").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMSJS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateMSJSNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMSJS").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMSJS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
@@ -140,19 +140,19 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 	@Test
 	public void testMSSS() {
-		DocumentQuery q = m.getDocumentQuery("qMSSS").constructDocumentQuery(null, null);
+		DocumentQuery q = m.getMetaDataQuery("qMSSS").constructDocumentQuery(null, null);
 		q.tupleResults();
 	}
 
 	@Test
 	public void testMSSSNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMSSS").constructDocumentQuery(null, null)).toQueryString()
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMSSS").constructDocumentQuery(null, null)).toQueryString()
 				.contains("bean as bean")));
 	}
 
 	@Test
 	public void testAggregateMSSSNotPolymorphic() {
-		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMSSS").constructDocumentQuery(AggregateFunction.Count, null))
+		Assert.assertFalse((((AbstractQuery) m.getMetaDataQuery("qMSSS").constructDocumentQuery(AggregateFunction.Count, null))
 				.toQueryString().contains("bean as bean")));
 	}
 
@@ -163,7 +163,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 		// If binding evaluates to null, then no filter criteria is added
 		Assert.assertEquals(1,
-				m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+				m.getMetaDataQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
 	}
 
 	@Test
@@ -174,7 +174,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 		CORE.getStash().put("TEST", "ICAL");
 		Assert.assertEquals(1,
-				m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+				m.getMetaDataQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
 	}
 
 	@Test
@@ -185,7 +185,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 
 		CORE.getUser().getAttributes().put("TEST", "ICAL");
 		Assert.assertEquals(1,
-				m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+				m.getMetaDataQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 		test = p.save(test);
 
 		// If binding evaluates to null, null is bound to a query parameter
-		Assert.assertEquals(0, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
+		Assert.assertEquals(0, m.getMetaDataQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
 				.projectedResults().size());
 	}
 
@@ -205,7 +205,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 		test = p.save(test);
 
 		CORE.getStash().put("TEST", "ICAL");
-		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
+		Assert.assertEquals(1, m.getMetaDataQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
 				.projectedResults().size());
 	}
 
@@ -216,7 +216,7 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 		test = p.save(test);
 
 		CORE.getUser().getAttributes().put("TEST", "ICAL");
-		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
+		Assert.assertEquals(1, m.getMetaDataQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
 				.projectedResults().size());
 	}
 }

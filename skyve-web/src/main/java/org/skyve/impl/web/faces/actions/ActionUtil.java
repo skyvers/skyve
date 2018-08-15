@@ -11,7 +11,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 
@@ -85,11 +85,11 @@ public class ActionUtil {
 		ec.redirect(outcome.toString());
     }
     
-    public static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName) {
+    public static MetaDataQueryDefinition getMetaDataQuery(final String bizModule, final String queryName) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bizModule);
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
 		}

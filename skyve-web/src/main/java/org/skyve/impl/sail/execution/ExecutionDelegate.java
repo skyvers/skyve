@@ -10,7 +10,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
@@ -33,7 +33,7 @@ public class ExecutionDelegate {
 		String modelName = push.getModelName();
 		
 		if (queryName != null) {
-			DocumentQueryDefinition q = m.getDocumentQuery(queryName);
+			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
 			if (q == null) {
 				q = m.getDocumentDefaultQuery(c, documentName);
 			}

@@ -8,7 +8,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Util;
 
@@ -28,7 +28,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter<Bean>>> {
 	public List<BeanMapAdapter<Bean>> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetBeansAction - bizModule=" + bizModule + " : queryName=" + queryName);
 
-		DocumentQueryDefinition query = ActionUtil.getDocumentQuery(bizModule, queryName);
+		MetaDataQueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, query.getDocumentName(), queryName, null, parameters);
 		return model.load(0, 250, null, null);
 	}

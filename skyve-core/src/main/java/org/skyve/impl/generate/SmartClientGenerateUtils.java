@@ -49,6 +49,7 @@ import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -69,8 +70,10 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -93,7 +96,7 @@ public class SmartClientGenerateUtils {
         private List<String> pickListFields = new ArrayList<>();
         // Filter fields for option data source
         private List<String> filterFields = new ArrayList<>();
-        private DocumentQueryDefinition query;
+        private MetaDataQueryDefinition query;
         private boolean canCreate;
         private boolean canUpdate;
         
@@ -116,7 +119,7 @@ public class SmartClientGenerateUtils {
             	queryName = query.getName();
             }
             else {
-            	query = module.getDocumentQuery(queryName);
+            	query = module.getMetaDataQuery(queryName);
             }
             
             StringBuilder sb = new StringBuilder(128);
@@ -139,13 +142,14 @@ public class SmartClientGenerateUtils {
             	pickListFields.add(displayField);
             }
             else {
-                for (QueryColumn column : query.getColumns()) {
+                for (MetaDataQueryColumn column : query.getColumns()) {
                 	String alias = column.getName();
                 	if (alias == null) {
                 		alias = column.getBinding();
                 	}
                 	if (dropDownColumns.contains(alias)) {
-                		if (column.isProjected()) {
+                		if ((column instanceof MetaDataQueryProjectedColumn) &&
+                				((MetaDataQueryProjectedColumn) column).isProjected()) {
                             SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(user,
                         																					customer, 
 																	                                        module,
@@ -187,11 +191,11 @@ public class SmartClientGenerateUtils {
             return filterFields;
         }
 
-        public DocumentQueryDefinition getQuery() {
+        public MetaDataQueryDefinition getQuery() {
             return query;
         }
 
-        public void setQuery(DocumentQueryDefinition query) {
+        public void setQuery(MetaDataQueryDefinition query) {
             this.query = query;
         }
 
@@ -625,13 +629,49 @@ public class SmartClientGenerateUtils {
 		//		but including this has unexpected results also
 		// 2) get the filter row to be a text field bound to the description binding of the field
 		//		this hangs the UI when trying to display the list
-		void appendEditorProperties(StringBuilder result, boolean forDataGrid) {
+		void appendEditorProperties(StringBuilder result,
+										boolean forDataGrid,
+										Integer pixelWidth,
+										Integer pixelHeight,
+										String emptyThumbnailRelativeFile) {
 			if (lookup == null) {
 				if ((! required) && ("select".equals(type) || "enum".equals(type))) {
 					result.append(",editorProperties:{allowEmptyValue:true}");
 				}
 				else if ("geometry".equals(type)) {
 	            	result.append(",formatCellValue:function(v){return isc.GeometryItem.format(v)}");
+				}
+				else if ("image".equals(type)) { // content thumbnail column
+	            	result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+            		result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
+            		result.append("&_w=").append((pixelWidth == null) ? 
+													((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+													pixelWidth.toString());
+            		result.append("&_h=").append((pixelHeight == null) ? 
+													((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+													pixelHeight.toString());
+            		result.append("\"/></a>'}if(rec && rec.bizId){return '");
+            		if (emptyThumbnailRelativeFile == null) {
+            			result.append("'}");
+            		}
+            		else {
+            			result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
+    	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
+                		result.append("'&_w=").append((pixelWidth == null) ? 
+    													((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+    													pixelWidth.toString());
+                		result.append("&_h=").append((pixelHeight == null) ? 
+    													((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+    													pixelHeight.toString());
+            			result.append("\"'}");
+            		}
+            		result.append("return ''}");
+				}
+				else if ("link".equals(type)) {
+        			result.append(",formatCellValue:function(v,rec,row,col){return (v ? '<a href=\"content?_n='+v+'");
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+	            	result.append("\" target=\"_blank\">Content</a>' : '')}");
 				}
 				else {
 					if ((mask != null) || (textBoxStyle != null)) {
@@ -843,7 +883,7 @@ public class SmartClientGenerateUtils {
             if (editorType != null) {
                 result.append(",editorType:'").append(editorType).append('\'');
             }
-            appendEditorProperties(result, true);
+            appendEditorProperties(result, true, pixelWidth, null, null);
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
             	result.append(processString(Util.i18n("is required", locale))).append(".'");
@@ -994,13 +1034,15 @@ public class SmartClientGenerateUtils {
 		private boolean onlyEqualsFilterOperators = false;
 		private boolean hasTextFilterOperators = false;
 		protected Integer pixelWidth;
+		protected Integer pixelHeight;
+		protected String emptyThumbnailRelativeFile;
 		protected HorizontalAlignment align;
 		
 		SmartClientQueryColumnDefinition(User user,
 											Customer customer, 
 											Module module, 
 											Document document, 
-											QueryColumn column) {
+											MetaDataQueryColumn column) {
 			super(customer, 
 					module,
 					document,
@@ -1060,10 +1102,28 @@ public class SmartClientGenerateUtils {
 				}
 			}
 
-			canFilter = column.isFilterable();
 			detail = column.isHidden();
-			canSortClientOnly = (! column.isSortable());
-			canSave = canSave && column.isEditable();
+			if (column instanceof MetaDataQueryProjectedColumn) {
+				MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+				canFilter = projectedColumn.isFilterable();
+				canSortClientOnly = (! projectedColumn.isSortable());
+				canSave = canSave && projectedColumn.isEditable();
+			}
+			else if (column instanceof MetaDataQueryContentColumn) {
+				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) column;
+				canFilter = false;
+				canSortClientOnly = false;
+				canSave = false;
+				if (DisplayType.thumbnail.equals(contentColumn.getDisplay())) {
+					type = "image";
+				}
+				else {
+					type = "link";
+				}
+				pixelWidth = contentColumn.getPixelWidth();
+				pixelHeight = contentColumn.getPixelHeight();
+				emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
+			}
 		}
 
 		public boolean isCanFilter() {
@@ -1114,6 +1174,22 @@ public class SmartClientGenerateUtils {
 			this.pixelWidth = pixelWidth;
 		}
 
+		public Integer getPixelHeight() {
+			return pixelHeight;
+		}
+
+		public void setPixelHeight(Integer pixelHeight) {
+			this.pixelHeight = pixelHeight;
+		}
+
+		public String getEmptyThumbnailRelativeFile() {
+			return emptyThumbnailRelativeFile;
+		}
+
+		public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+			this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
+		}
+
 		public String getMask() {
 			return mask;
 		}
@@ -1143,7 +1219,7 @@ public class SmartClientGenerateUtils {
 			else {
 				result.append('\'');
 			}
-			appendEditorProperties(result, false);
+			appendEditorProperties(result, false, pixelWidth, pixelHeight, emptyThumbnailRelativeFile);
 			if (valueMap != null) {
 				result.append(",valueMap:").append(valueMap);
 			}
@@ -1168,7 +1244,15 @@ public class SmartClientGenerateUtils {
             	result.append(",align:'").append(align.toAlignmentString()).append('\'');
             }
             if (pixelWidth != null) {
-            	result.append(",width:").append(pixelWidth);
+            	result.append(",width:").append("image".equals(type) ? pixelWidth.intValue() + 8 : pixelWidth.intValue());
+            }
+            else if ("image".equals(type)) {
+            	if (pixelHeight != null) {
+                	result.append(",width:").append(pixelHeight.intValue() + 8);
+            	}
+            	else {
+            		result.append(",width:40");
+            	}
             }
 			if (onlyEqualsFilterOperators) {
 				result.append(",validOperators:['equals','notEqual','isNull','notNull']");
@@ -1193,7 +1277,8 @@ public class SmartClientGenerateUtils {
 				AttributeType.longInteger.equals(attributeType)) {
 			return HorizontalAlignment.right;
 		}
-		if (AttributeType.bool.equals(attributeType)) {
+		if (AttributeType.bool.equals(attributeType) || 
+				AttributeType.content.equals(attributeType)) {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;
@@ -1338,7 +1423,7 @@ public class SmartClientGenerateUtils {
 																	Customer customer,
 																	Module module,
 																	Document document,
-																	QueryColumn column) {
+																	MetaDataQueryColumn column) {
 		return new SmartClientQueryColumnDefinition(user, customer, module, document, column);
 	}
 
@@ -1426,7 +1511,7 @@ public class SmartClientGenerateUtils {
      */
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
-														DocumentQueryDefinition query,
+														MetaDataQueryDefinition query,
 														String dataSourceIDOverride,
 														Lookup forLookup,
 														boolean config,
@@ -1463,7 +1548,7 @@ public class SmartClientGenerateUtils {
 														String queryName,
 														String modelName,
 														String description,
-														List<QueryColumn> columns,
+														List<MetaDataQueryColumn> columns,
 														String dataSourceIDOverride,
 														Lookup forLookup,
 														// indicates that this is for configuration in the harness page
@@ -1560,8 +1645,9 @@ public class SmartClientGenerateUtils {
 			}
 		}
 		
-		for (QueryColumn column : columns) {
-			if (! column.isProjected()) {
+		for (MetaDataQueryColumn column : columns) {
+			if ((column instanceof MetaDataQueryProjectedColumn) && 
+					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
 				continue;
 			}
 

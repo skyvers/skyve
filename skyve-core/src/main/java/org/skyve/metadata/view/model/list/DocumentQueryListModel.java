@@ -17,8 +17,9 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -34,9 +35,9 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private Customer customer;
 	private Module module;
 	private Document drivingDocument;
-	private DocumentQueryDefinition query;
+	private MetaDataQueryDefinition query;
 
-	public void setQuery(DocumentQueryDefinition query) {
+	public void setQuery(MetaDataQueryDefinition query) {
 		customer = CORE.getUser().getCustomer();
 		this.query = query;
 		description = query.getDescription();
@@ -50,8 +51,12 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		projections.put(Bean.BIZ_KEY, null);
 
 		drivingDocument = module.getDocument(customer, query.getDocumentName());
-		for (QueryColumn column : query.getColumns()) {
-			if (column.isProjected()) {
+		for (MetaDataQueryColumn column : query.getColumns()) {
+			MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ?
+																(MetaDataQueryProjectedColumn) column :
+																null;
+			boolean projected = (projectedColumn != null) ? projectedColumn.isProjected() : true;
+			if (projected) {
 				String binding = column.getBinding();
 				// if this binding is to an association, 
 				// add the bizId as the column value and bizKey as the column displayValue
@@ -67,8 +72,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 					}
 					projections.put(binding, null);
 				}
-				else {
-					projections.put(column.getName(), column.getExpression());
+				else if (projectedColumn != null) {
+					projections.put(column.getName(), projectedColumn.getExpression());
 				}
 			}
 		}
@@ -84,10 +89,10 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		return drivingDocument;
 	}
 
-	private List<QueryColumn> columns;
+	private List<MetaDataQueryColumn> columns;
 	
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
@@ -187,7 +192,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	public static Bean update(String bizId, 
 								SortedMap<String, Object> properties, 
 								Document drivingDocument,
-								DocumentQueryDefinition query,
+								MetaDataQueryDefinition query,
 								String selectedTagId)
 	throws Exception {
 		Persistence p = CORE.getPersistence();

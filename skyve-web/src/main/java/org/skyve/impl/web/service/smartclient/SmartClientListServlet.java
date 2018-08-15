@@ -47,8 +47,9 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
@@ -139,7 +140,7 @@ public class SmartClientListServlet extends HttpServlet {
 			        Module module = null;
 			        Document drivingDocument = null;
 			        ListModel<Bean> model = null;
-					DocumentQueryDefinition query = null;
+					MetaDataQueryDefinition query = null;
 					
 			        if (dataSource != null) {
 			        	// '_' split could be 2, 3 or 4 tokens
@@ -162,7 +163,7 @@ public class SmartClientListServlet extends HttpServlet {
 						// query type of request
 						else {
 							String documentOrQueryName = tokens[1];
-							query = module.getDocumentQuery(documentOrQueryName);
+							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
@@ -1221,13 +1222,14 @@ public class SmartClientListServlet extends HttpServlet {
 		properties.remove("criteria");
 		
 		// remove parameters that are not editable
-		for (QueryColumn column : model.getColumns()) {
+		for (MetaDataQueryColumn column : model.getColumns()) {
 			String columnBinding = column.getBinding();
 			if (columnBinding == null) {
 				columnBinding = column.getName();
 			}
 			
-			if (! column.isEditable()) {
+			if ((! (column instanceof MetaDataQueryProjectedColumn)) ||
+					(! ((MetaDataQueryProjectedColumn) column).isEditable())) {
 				properties.remove(columnBinding);
 			}
 			else {

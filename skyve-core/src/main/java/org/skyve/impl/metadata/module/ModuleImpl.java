@@ -9,10 +9,13 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
+import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.module.query.DocumentQueryDefinitionImpl;
-import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -26,8 +29,8 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.query.BizQLDefinition;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
@@ -100,19 +103,19 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
+	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
 		return getDocumentDefaultQuery(customer, documentName, isPrototype());
 	}
 
 	@Override
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys) {
-		DocumentQueryDefinition result = null;
+	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys) {
+		MetaDataQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
 		if (documentRef != null) {
 			String queryName = documentRef.getDefaultQueryName();
 			if (queryName != null) {
-				result = getDocumentQuery(queryName);
+				result = getMetaDataQuery(queryName);
 				if (result == null) {
 					throw new MetaDataException("The default query of " + queryName + 
 													" does not exist for document " + documentName);
@@ -124,7 +127,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				if ((persistent == null) || (persistent.getName() == null)) {
 					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
 				}
-				DocumentQueryDefinitionImpl query = new DocumentQueryDefinitionImpl();
+				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
 
 				String queryTitle = "All " + document.getPluralAlias();
 				query.setDescription(queryTitle);
@@ -141,7 +144,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		return result;
 	}
 
-	private void processColumns(Customer customer, Document document, List<QueryColumn> columns, boolean includeAssociationBizKeys) {
+	private void processColumns(Customer customer, Document document, List<MetaDataQueryColumn> columns, boolean includeAssociationBizKeys) {
 		// NB We have to manually traverse the document inheritence hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
@@ -158,8 +161,17 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute.isPersistent() && (! attribute.isDeprecated())) {
 				// Note - collections not included in generated queries
-				if (attribute instanceof Field) {
-					QueryColumnImpl column = new org.skyve.impl.metadata.module.query.QueryColumnImpl();
+				if (attribute instanceof Content) {
+					MetaDataQueryContentColumnImpl column = new MetaDataQueryContentColumnImpl();
+					column.setDisplayName(attribute.getDisplayName());
+					column.setBinding(attribute.getName());
+					column.setDisplay(DisplayType.thumbnail);
+					column.setPixelWidth(Integer.valueOf(32));
+					column.setPixelHeight(Integer.valueOf(32));
+					columns.add(column);
+				}
+				else if (attribute instanceof Field) {
+					MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 					column.setEditable(false);
 					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());
@@ -169,10 +181,10 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					}
 					columns.add(column);
 				}
-				if (includeAssociationBizKeys && attribute instanceof Association) {
+				else if (includeAssociationBizKeys && attribute instanceof Association) {
 					final Association association = (Association) attribute;
 
-					final QueryColumnImpl column = new QueryColumnImpl();
+					final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 					column.setEditable(false);
 					column.setDisplayName(String.format("%s BizKey", association.getDisplayName()));
 					column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
@@ -239,9 +251,9 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 	
 	@Override
-	public DocumentQueryDefinition getDocumentQuery(String queryName) {
+	public MetaDataQueryDefinition getMetaDataQuery(String queryName) {
 		// NB Cannot throw if null as QueryCommand tests it
-		return (DocumentQueryDefinition) getMetaData(queryName);
+		return (MetaDataQueryDefinition) getMetaData(queryName);
 	}
 
 	@Override

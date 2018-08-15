@@ -17,13 +17,16 @@ import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
 import org.skyve.impl.metadata.module.menu.MenuGroup;
+import org.skyve.impl.metadata.module.query.AbstractMetaDataQueryColumn;
 import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
-import org.skyve.impl.metadata.module.query.DocumentQueryDefinitionImpl;
-import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -112,7 +115,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queries")
-	@XmlElementRefs({@XmlElementRef(type = DocumentQueryMetaData.class),
+	@XmlElementRefs({@XmlElementRef(type = MetaDataQueryMetaData.class),
 						@XmlElementRef(type = BizQLMetaData.class),
 						@XmlElementRef(type = SQLMetaData.class)})
 	public List<QueryMetaData> getQueries() {
@@ -260,9 +263,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 												documentNames);
 					bizQLImpl.setQuery(bizQLMetaData.getQuery());
 				}
-				else if (queryMetaData instanceof DocumentQueryMetaData) {
-					DocumentQueryMetaData documentQueryMetaData = (DocumentQueryMetaData) queryMetaData;
-					DocumentQueryDefinitionImpl documentQueryImpl = new DocumentQueryDefinitionImpl();
+				else if (queryMetaData instanceof MetaDataQueryMetaData) {
+					MetaDataQueryMetaData documentQueryMetaData = (MetaDataQueryMetaData) queryMetaData;
+					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl();
 					populateQueryProperties(queryMetaData,
 												documentQueryImpl,
 												metaDataName,
@@ -284,33 +287,57 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
 					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
 
-					List<Column> repositoryQueryColumns = documentQueryMetaData.getColumns();
+					List<MetaDataQueryColumnMetaData> repositoryQueryColumns = documentQueryMetaData.getColumns();
 					if (repositoryQueryColumns != null) {
-						for (Column column : repositoryQueryColumns) {
-							QueryColumnImpl queryColumn = new QueryColumnImpl();
-							queryColumn.setName(column.getName());
-							String binding = column.getBinding();
-							String expression = column.getExpression();
-							if ((binding == null) && (expression == null)) {
-								throw new MetaDataException(metaDataName + 
-																" : The [binding] and [expression] for a query column is missing in query " + 
-																documentQueryImpl.getName());
+						for (MetaDataQueryColumnMetaData repositoryColumn : repositoryQueryColumns) {
+							MetaDataQueryProjectedColumnMetaData projectedRepositoryColumn = null;
+							MetaDataQueryContentColumnMetaData contentRepositoryColumn = null;
+							AbstractMetaDataQueryColumn column = null;
+							MetaDataQueryProjectedColumnImpl projectedColumn = null;
+							MetaDataQueryContentColumnImpl contentColumn = null;
+							if (repositoryColumn instanceof MetaDataQueryProjectedColumnMetaData) {
+								projectedRepositoryColumn = (MetaDataQueryProjectedColumnMetaData) repositoryColumn;
+								projectedColumn = new MetaDataQueryProjectedColumnImpl();
+								column = projectedColumn;
 							}
-							if ((binding != null) && (expression != null)) {
-								throw new MetaDataException(metaDataName + 
-																" : Both the [binding] and [expression] for a query column are entered in query " + 
-																documentQueryImpl.getName());
+							else {
+								contentRepositoryColumn = (MetaDataQueryContentColumnMetaData) repositoryColumn;
+								contentColumn = new MetaDataQueryContentColumnImpl();
+								column = contentColumn;
 							}
-							if ((expression != null) && (column.getName() == null)) {
-								throw new MetaDataException(metaDataName + 
-																" : An [expression] query column requires the [name] to be entered in query " + 
-																documentQueryImpl.getName());
+							
+							column.setName(repositoryColumn.getName());
+							String binding = repositoryColumn.getBinding();
+							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
+								String expression = projectedRepositoryColumn.getExpression();
+								if ((binding == null) && (expression == null)) {
+									throw new MetaDataException(metaDataName + 
+																	" : The [binding] and [expression] for a query column is missing in query " + 
+																	documentQueryImpl.getName());
+								}
+								if ((binding != null) && (expression != null)) {
+									throw new MetaDataException(metaDataName + 
+																	" : Both the [binding] and [expression] for a query column are entered in query " + 
+																	documentQueryImpl.getName());
+								}
+								if ((expression != null) && (column.getName() == null)) {
+									throw new MetaDataException(metaDataName + 
+																	" : An [expression] query column requires the [name] to be entered in query " + 
+																	documentQueryImpl.getName());
+								}
+								projectedColumn.setExpression(expression);
 							}
-							queryColumn.setBinding(binding);
-							queryColumn.setExpression(expression);
-							queryColumn.setDisplayName(column.getDisplayName());
-							FilterOperator filterOperator = column.getFilterOperator();
-							String filterExpression = column.getFilterExpression();
+							else if (contentColumn != null) {
+								if (binding == null) {
+									throw new MetaDataException(metaDataName + 
+																	" : The [binding] for a content query column is missing in query " + 
+																	documentQueryImpl.getName());
+								}
+							}
+							column.setBinding(binding);
+							column.setDisplayName(repositoryColumn.getDisplayName());
+							FilterOperator filterOperator = repositoryColumn.getFilterOperator();
+							String filterExpression = repositoryColumn.getFilterExpression();
 							if ((filterOperator != null) && 
 									(! filterOperator.equals(FilterOperator.isNull)) &&
 									(! filterOperator.equals(FilterOperator.notNull)) && 
@@ -329,33 +356,49 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 																" in query " + documentQueryImpl.getName() +
 																" does not require an [expression].");
 							}
-							queryColumn.setFilterOperator(filterOperator);
-							queryColumn.setFilterExpression(filterExpression);
-							queryColumn.setSortOrder(column.getSortOrder());
-							Boolean projected = column.getProjected();
-							if (projected != null) {
-								queryColumn.setSelected(projected.booleanValue());
-							}
-							Boolean hidden = column.getHidden();
+							column.setFilterOperator(filterOperator);
+							column.setFilterExpression(filterExpression);
+							column.setSortOrder(repositoryColumn.getSortOrder());
+							Boolean hidden = repositoryColumn.getHidden();
 							if (hidden != null) {
-								queryColumn.setHidden(hidden.booleanValue());
+								column.setHidden(hidden.booleanValue());
 							}
-							Boolean sortable = column.getSortable();
-							if (sortable != null) {
-								queryColumn.setSortable(sortable.booleanValue());
+							column.setPixelWidth(repositoryColumn.getPixelWidth());
+							column.setAlignment(repositoryColumn.getAlignment());
+
+							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
+								Boolean projected = projectedRepositoryColumn.getProjected();
+								if (projected != null) {
+									projectedColumn.setSelected(projected.booleanValue());
+								}
+								Boolean sortable = projectedRepositoryColumn.getSortable();
+								if (sortable != null) {
+									projectedColumn.setSortable(sortable.booleanValue());
+								}
+								Boolean filterable = projectedRepositoryColumn.getFilterable();
+								if (filterable != null) {
+									projectedColumn.setFilterable(filterable.booleanValue());
+								}
+								Boolean editable = projectedRepositoryColumn.getEditable();
+								if (editable != null) {
+									projectedColumn.setEditable(editable.booleanValue());
+								}
 							}
-							Boolean filterable = column.getFilterable();
-							if (filterable != null) {
-								queryColumn.setFilterable(filterable.booleanValue());
+							else if ((contentColumn != null) && (contentRepositoryColumn != null)) {
+								DisplayType display = contentRepositoryColumn.getDisplay();
+								contentColumn.setDisplay(display);
+								contentColumn.setPixelHeight(contentRepositoryColumn.getPixelHeight());
+								String emptyThumbnailRelativeFile = contentRepositoryColumn.getEmptyThumbnailRelativeFile();
+								if ((emptyThumbnailRelativeFile != null) && 
+										(! DisplayType.thumbnail.equals(display))) {
+									throw new MetaDataException(metaDataName + " : An [emptyThumbnailRelativeFile] should not be defined on content column " +
+																	column.getBinding() + " in query " + documentQueryImpl.getName() + 
+																	" as it is not a thumbnail content column");
+								}
+								contentColumn.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
 							}
-							Boolean editable = column.getEditable();
-							if (editable != null) {
-								queryColumn.setEditable(editable.booleanValue());
-							}
-							queryColumn.setPixelWidth(column.getPixelWidth());
-							queryColumn.setAlignment(column.getAlignment());
 							
-							documentQueryImpl.getColumns().add(queryColumn);
+							documentQueryImpl.getColumns().add(column);
 						}
 					}
 

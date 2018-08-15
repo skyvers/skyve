@@ -16,17 +16,12 @@ import org.skyve.metadata.SortDirection;
 							"displayName",
 							"sortOrder", 
 							"hidden", 
-							"sortable", 
-							"filterable", 
-							"editable",
 							"name", 
-							"expression", 
-							"projected",
 							"filterOperator", 
 							"filterExpression",
 							"pixelWidth",
 							"alignment"})
-public class Column implements MetaData {
+public abstract class MetaDataQueryColumnMetaData implements MetaData {
 	private static final long serialVersionUID = 7831641243591117311L;
 
 	// The name of the property within the bean list. Can be null.
@@ -34,9 +29,6 @@ public class Column implements MetaData {
 
 	// The attribute name, or binding for the column
 	private String binding;
-
-	// The projection expression
-	private String expression;
 
 	// The display name or title
 	private String displayName;
@@ -50,21 +42,9 @@ public class Column implements MetaData {
 	// The conditional expression to filter with
 	private String filterExpression;
 
-	// Indicates whether the column is selected - appears in the projection.
-	private Boolean projected;
-
 	// Indicates if the column is hidden in list view by default (can be shown by the user)
 	private Boolean hidden;
 
-	// Indicates if the user can sort this column in list view
-	private Boolean sortable;
-
-	// Indicates if the user can filter this column in list view
-	private Boolean filterable;
-
-	// Indicates if the user can edit the values in this column in list view
-	private Boolean editable;
-	
 	// If defined, the overridden pixel width of the column
 	private Integer pixelWidth;
 
@@ -87,15 +67,6 @@ public class Column implements MetaData {
 	@XmlAttribute
 	public void setBinding(String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
-	}
-
-	public String getExpression() {
-		return expression;
-	}
-
-	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setExpression(String expression) {
-		this.expression = UtilImpl.processStringValue(expression);
 	}
 
 	public String getDisplayName() {
@@ -134,15 +105,6 @@ public class Column implements MetaData {
 		this.sortOrder = sortOrder;
 	}
 
-	public Boolean getProjected() {
-		return projected;
-	}
-
-	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setProjected(Boolean projected) {
-		this.projected = projected;
-	}
-
 	public Boolean getHidden() {
 		return hidden;
 	}
@@ -150,33 +112,6 @@ public class Column implements MetaData {
 	@XmlAttribute
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
-	}
-
-	public Boolean getFilterable() {
-		return filterable;
-	}
-
-	@XmlAttribute
-	public void setFilterable(Boolean filterable) {
-		this.filterable = filterable;
-	}
-
-	public Boolean getSortable() {
-		return sortable;
-	}
-
-	@XmlAttribute
-	public void setSortable(Boolean sortable) {
-		this.sortable = sortable;
-	}
-
-	public Boolean getEditable() {
-		return editable;
-	}
-
-	@XmlAttribute
-	public void setEditable(Boolean editable) {
-		this.editable = editable;
 	}
 
 	public Integer getPixelWidth() {

@@ -15,8 +15,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
 import com.jaspersoft.ireport.designer.FieldsProvider;
 import com.jaspersoft.ireport.designer.FieldsProviderEditor;
@@ -40,16 +40,16 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
 	throws JRException, UnsupportedOperationException {
     	try {
     		String moduleDotQuery = dataset.getQuery().getText();
-    		DocumentQueryDefinition query = SkyveQueryExecuter.getQuery(moduleDotQuery);
+    		MetaDataQueryDefinition query = SkyveQueryExecuter.getQuery(moduleDotQuery);
     		
     		Customer customer = CORE.getUser().getCustomer();
     		Module owningModule = query.getOwningModule();
     		Document document = owningModule.getDocument(customer, query.getDocumentName());
     		
-    		List<QueryColumn> columns = query.getColumns();
+    		List<MetaDataQueryColumn> columns = query.getColumns();
     		JRField[] result = new JRField[columns.size()];
     		for (int i = 0, l = columns.size(); i < l; i++) {
-    			QueryColumn column = columns.get(i);
+    			MetaDataQueryColumn column = columns.get(i);
     			JRDesignField field = new JRDesignField();
     			String binding = column.getBinding();
     			field.setName(BindUtil.sanitiseBinding(binding));

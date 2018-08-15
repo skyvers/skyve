@@ -28,17 +28,19 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
 
-public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements DocumentQueryDefinition {
+public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements MetaDataQueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 
 	private static final String USER_EXPRESSION = "{USER}";
@@ -57,7 +59,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 	private String filterClause;
 
-	private List<QueryColumn> columns = new ArrayList<>();
+	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 
 	@Override
 	public Module getDocumentModule(Customer customer) {
@@ -108,7 +110,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
@@ -149,14 +151,22 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			result.addBoundProjection(PersistentBean.FLAG_COMMENT_NAME);
 		}
 
-		// This is used to determine if we need to add the "this" projection to the query or not
+		// These are used to determine if we need to add the "this" projection to the query or not
 		// If we have any transient binding, then we need to load the bean too to resolve the value.
-		boolean anyTransientBindingInQuery = false;
+		// OR
+		// If we have any binding with dynamic domain values, then we need to load the bean to get the domain values.
+		boolean anyTransientBindingOrDynamicDomainInQuery = false;
 		
-		for (QueryColumn column : getColumns()) {
+		for (MetaDataQueryColumn column : getColumns()) {
+			MetaDataQueryProjectedColumn projectedColumn = null;
+			if (column instanceof MetaDataQueryProjectedColumn) {
+				projectedColumn = (MetaDataQueryProjectedColumn) column;
+			}
+
 			Attribute attribute = null;
 			String binding = column.getBinding();
-			String expression = column.getExpression();
+			String expression = (projectedColumn == null) ? null : projectedColumn.getExpression();
+			boolean projected = (projectedColumn == null) ? true : projectedColumn.isProjected();
 			String alias = column.getName();
 			if (binding != null) {
 				if (alias == null) {
@@ -176,6 +186,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					// determine if the projected value is transient
 					// NB check each token of the binding and if ANY is transient, the lot is transient
 					boolean transientBinding = false;
+
 					int dotIndex = associationBinding.indexOf('.');
 					if (dotIndex < 0) {
 						dotIndex = associationBinding.length();
@@ -188,7 +199,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						if (attribute != null) {
 							if (! attribute.isPersistent()) {
 								transientBinding = true;
-								anyTransientBindingInQuery = true;
+								anyTransientBindingOrDynamicDomainInQuery = true;
 							}
 							Relation relation = (Relation) attribute;
 							if (! relation.isRequired()) {
@@ -214,7 +225,11 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					attribute = target.getAttribute();
 					if (attribute != null) {
 						if (transientBinding || (! attribute.isPersistent())) {
-							anyTransientBindingInQuery = true;
+							anyTransientBindingOrDynamicDomainInQuery = true;
+							continue;
+						}
+						if (projected && DomainType.dynamic.equals(attribute.getDomainType())) {
+							anyTransientBindingOrDynamicDomainInQuery = true;
 							continue;
 						}
 						// If we have a reference directly to a mapped document, don't process it coz it can't be joined.
@@ -229,12 +244,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 								Persistent associatedPersistent = associatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {
-									anyTransientBindingInQuery = true;
+									anyTransientBindingOrDynamicDomainInQuery = true;
 									continue;
 								}
 								// Not a proper database relation, its just mapped so it can't be resolved in a query
 								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
-									anyTransientBindingInQuery = true;
+									anyTransientBindingOrDynamicDomainInQuery = true;
 									continue;
 								}
 							}
@@ -247,12 +262,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						Persistent targetPersistent = targetDocument.getPersistent();
 						// Not a persistent document
 						if (targetPersistent == null) {
-							anyTransientBindingInQuery = true;
+							anyTransientBindingOrDynamicDomainInQuery = true;
 							continue;
 						}
 						// Not a proper relation, its just mapped so it can't be resolved
 						if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
-							anyTransientBindingInQuery = true;
+							anyTransientBindingOrDynamicDomainInQuery = true;
 							continue;
 						}
 					}
@@ -268,7 +283,11 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					attribute = target.getAttribute();
 					if (attribute != null) {
 						if (! attribute.isPersistent()) {
-							anyTransientBindingInQuery = true;
+							anyTransientBindingOrDynamicDomainInQuery = true;
+							continue;
+						}
+						if (projected && DomainType.dynamic.equals(attribute.getDomainType())) {
+							anyTransientBindingOrDynamicDomainInQuery = true;
 							continue;
 						}
 
@@ -280,12 +299,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 								Persistent associatedPersistent = associatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {
-									anyTransientBindingInQuery = true;
+									anyTransientBindingOrDynamicDomainInQuery = true;
 									continue;
 								}
 								// Not a proper database relation, its just mapped so it can't be resolved in a query
 								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
-									anyTransientBindingInQuery = true;
+									anyTransientBindingOrDynamicDomainInQuery = true;
 									continue;
 								}
 							}
@@ -304,7 +323,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 			String replacedExpression = null;
 			
-			if (column.isProjected()) {
+			if (projected) {
 				if (summaryType == null) {
 					if (binding != null) {
 						result.addBoundProjection(binding, alias);
@@ -511,11 +530,13 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		// Add the "this" projection if this is not a summary query
 		// AND (
 		//		we have transient column bindings to load
+		//  OR
+		//		we have an attribute that has a dynamic domain
 		// 	OR
 		//		The driving document is polymorphic or the query has been specifically declared polymorphic
 		// )
 		if (summaryType == null) {
-			if (anyTransientBindingInQuery) {
+			if (anyTransientBindingOrDynamicDomainInQuery) {
 				result.addThisProjection();
 			}
 			else {

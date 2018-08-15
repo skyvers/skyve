@@ -3,16 +3,14 @@ package org.skyve.impl.metadata.module.query;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
-public class QueryColumnImpl implements QueryColumn {
+public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn {
 	private static final long serialVersionUID = 5165779649604451833L;
 
 	private String name;
 
 	private String binding;
-
-	private String expression;
 
 	private FilterOperator filterOperator;
 
@@ -22,16 +20,8 @@ public class QueryColumnImpl implements QueryColumn {
 
 	private String displayName;
 
-	private boolean projected = true;
-
 	private boolean hidden = false;
 
-	private boolean sortable = true;
-
-	private boolean filterable = true;
-
-	private boolean editable = true;
-	
 	private Integer pixelWidth;
 	
 	private HorizontalAlignment alignment;
@@ -64,15 +54,6 @@ public class QueryColumnImpl implements QueryColumn {
 	}
 
 	@Override
-	public String getExpression() {
-		return expression;
-	}
-
-	public void setExpression(String expression) {
-		this.expression = expression;
-	}
-
-	@Override
 	public FilterOperator getFilterOperator() {
 		return filterOperator;
 	}
@@ -100,15 +81,6 @@ public class QueryColumnImpl implements QueryColumn {
 	}
 
 	@Override
-	public boolean isProjected() {
-		return projected;
-	}
-
-	public void setSelected(boolean projected) {
-		this.projected = projected;
-	}
-
-	@Override
 	public boolean isHidden() {
 		return hidden;
 	}
@@ -117,33 +89,6 @@ public class QueryColumnImpl implements QueryColumn {
 		this.hidden = hidden;
 	}
 
-	@Override
-	public boolean isFilterable() {
-		return filterable;
-	}
-
-	public void setFilterable(boolean filterable) {
-		this.filterable = filterable;
-	}
-
-	@Override
-	public boolean isSortable() {
-		return sortable;
-	}
-
-	public void setSortable(boolean sortable) {
-		this.sortable = sortable;
-	}
-
-	@Override
-	public boolean isEditable() {
-		return editable;
-	}
-
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
-	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

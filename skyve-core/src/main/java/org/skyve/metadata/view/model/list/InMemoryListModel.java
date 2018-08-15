@@ -19,7 +19,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
@@ -52,24 +53,26 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		projections.add(PersistentBean.FLAG_COMMENT_NAME);
 		projections.add(Bean.BIZ_KEY);
 
-		for (QueryColumn column : getColumns()) {
-			if (column.isProjected()) {
-				String binding = column.getBinding();
-				if (binding != null) {
-					// if this binding is to an association, 
-					// add the bizId as the column value and bizKey as the column displayValue
-					TargetMetaData target = Binder.getMetaDataForBinding(customer,
-																			module,
-																			drivingDocument,
-																			binding);
-					if (target.getAttribute() instanceof Association) {
-						StringBuilder sb = new StringBuilder(64);
-						sb.append(binding).append('.').append(Bean.BIZ_KEY);
-						projections.add(sb.toString());
-					}
-				}
-				projections.add((binding != null) ? binding : column.getName());
+		for (MetaDataQueryColumn column : getColumns()) {
+			if ((column instanceof MetaDataQueryProjectedColumn) && 
+					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+				continue;
 			}
+			String binding = column.getBinding();
+			if (binding != null) {
+				// if this binding is to an association, 
+				// add the bizId as the column value and bizKey as the column displayValue
+				TargetMetaData target = Binder.getMetaDataForBinding(customer,
+																		module,
+																		drivingDocument,
+																		binding);
+				if (target.getAttribute() instanceof Association) {
+					StringBuilder sb = new StringBuilder(64);
+					sb.append(binding).append('.').append(Bean.BIZ_KEY);
+					projections.add(sb.toString());
+				}
+			}
+			projections.add((binding != null) ? binding : column.getName());
 		}
 	}
 	
@@ -143,7 +146,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 
 		if (AggregateFunction.Count.equals(summary)) {
 			for (Bean row : rows) {
-				for (QueryColumn column : getColumns()) {
+				for (MetaDataQueryColumn column : getColumns()) {
 					String binding = column.getBinding();
 					Object value = Binder.get(row, binding);
 					if (value != null) {
@@ -167,7 +170,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			sum(summaryData);
 
 			// Now compute the average
-			for (QueryColumn column : getColumns()) {
+			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
 				Number sum = (Number) summaryData.get(binding);
 				if (sum != null) {
@@ -182,7 +185,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	
 	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {
 		for (Bean row : rows) {
-			for (QueryColumn column : getColumns()) {
+			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
 				@SuppressWarnings("unchecked")
 				Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
@@ -205,7 +208,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	
 	private void sum(Map<String, Object> summaryData) throws Exception {
 		for (Bean row : rows) {
-			for (QueryColumn column : getColumns()) {
+			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
 				Object value = Binder.get(row, binding);
 				if (value instanceof Number) {
@@ -217,7 +220,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			}
 		}
 		// Round to 5dp
-		for (QueryColumn column : getColumns()) {
+		for (MetaDataQueryColumn column : getColumns()) {
 			String binding = column.getBinding();
 			Object value = Binder.get(summaryData, binding);
 			if (value instanceof Number) {

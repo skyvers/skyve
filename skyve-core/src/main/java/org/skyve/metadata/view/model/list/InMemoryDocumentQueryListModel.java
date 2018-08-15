@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.DocumentQuery;
 
 public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryListModel<T> {
 	private static final long serialVersionUID = 7072903544810000605L;
 
+	@SuppressWarnings("unused")
 	private DocumentQuery query;
 	
 	public InMemoryDocumentQueryListModel(DocumentQuery query) {
@@ -29,7 +30,7 @@ public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryList
 	}
 
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		// TODO Auto-generated method stub
 		return null;
 	}

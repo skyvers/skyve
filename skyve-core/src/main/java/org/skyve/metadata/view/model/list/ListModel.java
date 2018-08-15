@@ -17,7 +17,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -254,7 +254,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	
 	public abstract Document getDrivingDocument();
 	
-	public abstract List<QueryColumn> getColumns();
+	public abstract List<MetaDataQueryColumn> getColumns();
 	
 	public abstract Set<String> getProjections();
 	

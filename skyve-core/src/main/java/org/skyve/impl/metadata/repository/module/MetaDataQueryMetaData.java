@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -12,18 +14,18 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documentQuery")
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "query")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
-			name = "documentQuery",
+			name = "query",
 			propOrder = {"documentName", "polymorphic", "from", "filter", "columns"})
-public class DocumentQueryMetaData extends QueryMetaData {
+public class MetaDataQueryMetaData extends QueryMetaData {
 	private static final long serialVersionUID = -7717015766195112054L;
 
 	private String documentName;
 	private Boolean polymorphic;
 	private String from;
 	private String filter;
-	private List<Column> columns = new ArrayList<>();
+	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
 
 	public String getDocumentName() {
 		return documentName;
@@ -62,8 +64,9 @@ public class DocumentQueryMetaData extends QueryMetaData {
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "columns")
-	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column", required = true)
-	public List<Column> getColumns() {
+	@XmlElementRefs({@XmlElementRef(type = MetaDataQueryProjectedColumnMetaData.class),
+						@XmlElementRef(type = MetaDataQueryContentColumnMetaData.class)})
+	public List<MetaDataQueryColumnMetaData> getColumns() {
 		return columns;
 	}
 }

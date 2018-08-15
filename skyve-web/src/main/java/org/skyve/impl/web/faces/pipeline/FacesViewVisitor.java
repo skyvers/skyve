@@ -140,7 +140,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -964,7 +964,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			listWidgetDrivingDocument = listWidgetModel.getDrivingDocument();
 		}
 		else {
-			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			if (query == null) {
 				query = module.getDocumentDefaultQuery(customer, queryName);
 			}

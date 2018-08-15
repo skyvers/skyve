@@ -20,7 +20,7 @@ import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -118,7 +118,7 @@ public class ListGrid extends HtmlPanelGroup {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		if (queryName != null) {
-			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			if (query == null) {
 				query = module.getDocumentDefaultQuery(customer, queryName);
 			}

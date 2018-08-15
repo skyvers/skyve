@@ -60,8 +60,9 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -569,7 +570,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						for (String referenceName : result.getReferenceNames()) {
 							String queryName = result.getReferenceByName(referenceName).getQueryName();
 								Module documentModule = getModule(customer, documentModuleName);
-								if ((queryName != null) && (documentModule.getDocumentQuery(queryName) == null)) {
+								if ((queryName != null) && (documentModule.getMetaDataQuery(queryName) == null)) {
 									StringBuilder mde = new StringBuilder(documentName);
 									mde.append(" : The reference ");
 								mde.append(referenceName);
@@ -973,11 +974,11 @@ public class LocalDesignRepository extends AbstractRepository {
 		
 		// check query columns
 		for (QueryDefinition query : module.getMetadataQueries()) {
-			if (query instanceof DocumentQueryDefinition) {
-				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
+			if (query instanceof MetaDataQueryDefinition) {
+				MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
 				Module queryDocumentModule = documentQuery.getDocumentModule(customer);
 				Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
-				for (QueryColumn column : documentQuery.getColumns()) {
+				for (MetaDataQueryColumn column : documentQuery.getColumns()) {
 					String binding = column.getBinding();
 					if (binding != null) {
 						TargetMetaData target = null;
@@ -1001,11 +1002,14 @@ public class LocalDesignRepository extends AbstractRepository {
 								((targetAttribute != null) && 
 									(! BindUtil.isImplicit(targetAttribute.getName())) &&
 									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
-							if (column.isSortable() || column.isFilterable() || column.isEditable()) {
-								throw new MetaDataException("Query " + query.getName() + 
-															" in module " + query.getOwningModule().getName() +
-															" with column binding " + binding +
-															" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+							if (column instanceof MetaDataQueryProjectedColumn) {
+								MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+								if (projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable()) {
+									throw new MetaDataException("Query " + query.getName() + 
+																" in module " + query.getOwningModule().getName() +
+																" with column binding " + binding +
+																" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+								}
 							}
 						}
 						
@@ -1059,9 +1063,9 @@ public class LocalDesignRepository extends AbstractRepository {
 					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
 						AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
 						String queryName = dataItem.getQueryName();
-						DocumentQueryDefinition query = null;
+						MetaDataQueryDefinition query = null;
 						if (queryName != null) {
-							query = module.getDocumentQuery(queryName);
+							query = module.getMetaDataQuery(queryName);
 							if (query == null) {
 								throw new MetaDataException("Menu [" + item.getName() + 
 																"] in module " + module.getName() +
@@ -1185,7 +1189,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				// Check the query (if defined) points to a query of the required document type
 				String queryName = reference.getQueryName();
 				if (queryName != null) {
-					DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 					if (query == null) {
 						throw new MetaDataException("The target [queryName] of " + 
 														queryName + " in Reference " +

@@ -26,7 +26,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -581,7 +581,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			}
 			Customer c = CORE.getUser().getCustomer();
 			Module m = c.getModule(context.getModuleName());
-			DocumentQueryDefinition q = m.getDocumentQuery(key);
+			MetaDataQueryDefinition q = m.getMetaDataQuery(key);
 			if (q != null) {
 				result.setModuleName(q.getDocumentModule(c).getName());
 				result.setDocumentName(q.getDocumentName());

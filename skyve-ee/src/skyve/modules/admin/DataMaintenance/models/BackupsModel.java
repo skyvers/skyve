@@ -9,10 +9,10 @@ import java.util.TreeSet;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
@@ -28,7 +28,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
-	private List<QueryColumn> columns = new ArrayList<>(1);
+	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 	
 	public BackupsModel() throws Exception {
 		Customer c = CORE.getUser().getCustomer();
@@ -41,7 +41,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		projections.add(Bean.BIZ_KEY);
 		projections.add(DownloadFolder.namePropertyName);
 
-		QueryColumnImpl column = new QueryColumnImpl();
+		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(DownloadFolder.namePropertyName);
 		column.setSortable(false);
 		columns.add(column);
@@ -58,7 +58,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	}
 
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 

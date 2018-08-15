@@ -9,36 +9,36 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import modules.admin.domain.Content;
-import modules.admin.domain.DataMaintenance;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.content.ContentIterable.ContentIterator;
 import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResult;
-import org.skyve.content.ContentIterable.ContentIterator;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.Util;
 
+import modules.admin.domain.Content;
+import modules.admin.domain.DataMaintenance;
+
 public class ContentModel extends ListModel<DataMaintenance> {
 	private static final long serialVersionUID = -5285830669475992183L;
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
-	private List<QueryColumn> columns = new ArrayList<>(1);
+	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 	
 	public ContentModel() throws Exception {
 		Customer c = CORE.getUser().getCustomer();
@@ -58,35 +58,35 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		projections.add(Content.moduleNamePropertyName);
 		projections.add(Content.contentPropertyName);
 		
-		QueryColumnImpl column = new QueryColumnImpl();
+		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.customerNamePropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.moduleNamePropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.documentNamePropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.attributeNamePropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.contentBizIdPropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.contentIdPropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.lastModifiedPropertyName);
 		column.setSortable(false);
 		columns.add(column);
-		column = new QueryColumnImpl();
+		column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(Content.contentPropertyName);
 		column.setSortable(false);
 		columns.add(column);
@@ -103,7 +103,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	}
 
 	@Override
-	public List<QueryColumn> getColumns() {
+	public List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 

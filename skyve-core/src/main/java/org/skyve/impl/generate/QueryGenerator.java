@@ -9,9 +9,12 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.module.BizQLMetaData;
-import org.skyve.impl.metadata.repository.module.Column;
-import org.skyve.impl.metadata.repository.module.DocumentQueryMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryColumnMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryProjectedColumnMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.module.QueryMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -20,8 +23,9 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 
@@ -48,25 +52,38 @@ public class QueryGenerator {
 	public static String generateQueryXML(Customer customer, Module module, boolean includeAssociationBizKeys) {
 		ModuleMetaData newModule = new ModuleMetaData();
 
+		List<QueryMetaData> metaDataQueries = newModule.getQueries();
 		List<QueryDefinition> queries = generate(customer, module, includeAssociationBizKeys);
 		for (QueryDefinition query : queries) {
-			if (query instanceof DocumentQueryDefinition) {
-				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
-				DocumentQueryMetaData documentQueryMetaData = new DocumentQueryMetaData();
+			if (query instanceof MetaDataQueryDefinition) {
+				MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
+				MetaDataQueryMetaData documentQueryMetaData = new MetaDataQueryMetaData();
 				documentQueryMetaData.setName(documentQuery.getName());
 				documentQueryMetaData.setDescription(documentQuery.getDescription());
 				documentQueryMetaData.setDocumentName(documentQuery.getDocumentName());
 				documentQueryMetaData.setDocumentation(documentQuery.getDocumentation());
 	
-				for (QueryColumn queryColumn : documentQuery.getColumns()) {
-					Column metaDataColumn = new Column();
+				List<MetaDataQueryColumnMetaData> metaDataColumns = documentQueryMetaData.getColumns();
+				for (MetaDataQueryColumn queryColumn : documentQuery.getColumns()) {
+					MetaDataQueryColumnMetaData metaDataColumn = null;
+					if (queryColumn instanceof MetaDataQueryContentColumn) {
+						MetaDataQueryContentColumn contentQueryColumn = (MetaDataQueryContentColumn) queryColumn;
+						MetaDataQueryContentColumnMetaData metaDataContentColumn = new MetaDataQueryContentColumnMetaData();
+						metaDataColumn = metaDataContentColumn;
+						metaDataContentColumn.setDisplay(contentQueryColumn.getDisplay());
+						metaDataContentColumn.setPixelWidth(contentQueryColumn.getPixelWidth());
+						metaDataContentColumn.setPixelHeight(contentQueryColumn.getPixelHeight());
+					}
+					else {
+						metaDataColumn = new MetaDataQueryProjectedColumnMetaData();
+					}
 					metaDataColumn.setBinding(queryColumn.getBinding());
 					metaDataColumn.setDisplayName(queryColumn.getDisplayName());
 					metaDataColumn.setName(queryColumn.getName());
 					metaDataColumn.setSortOrder(queryColumn.getSortOrder());
-					documentQueryMetaData.getColumns().add(metaDataColumn);
+					metaDataColumns.add(metaDataColumn);
 				}
-				newModule.getQueries().add(documentQueryMetaData);
+				metaDataQueries.add(documentQueryMetaData);
 			}
 			else if (query instanceof SQLDefinition) {
 				SQLDefinition sql = (SQLDefinition) query;
@@ -75,7 +92,7 @@ public class QueryGenerator {
 				sqlMetaData.setDescription(sql.getDescription());
 				sqlMetaData.setDocumentation(sql.getDocumentation());
 				sqlMetaData.setQuery(sql.getQuery());
-				newModule.getQueries().add(sqlMetaData);
+				metaDataQueries.add(sqlMetaData);
 			}
 			else if (query instanceof BizQLDefinition) {
 				BizQLDefinition bizQL = (BizQLDefinition) query;
@@ -84,7 +101,7 @@ public class QueryGenerator {
 				bizQLMetaData.setDescription(bizQL.getDescription());
 				bizQLMetaData.setDocumentation(bizQL.getDocumentation());
 				bizQLMetaData.setQuery(bizQL.getQuery());
-				newModule.getQueries().add(bizQLMetaData);
+				metaDataQueries.add(bizQLMetaData);
 			}
 		}
 		return XMLMetaData.marshalModule(newModule, false);

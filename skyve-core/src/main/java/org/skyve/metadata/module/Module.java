@@ -8,7 +8,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.query.BizQLDefinition;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
@@ -122,7 +122,7 @@ public interface Module extends NamedMetaData {
 	 * @param documentName
 	 * @return
 	 */
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName);
+	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName);
 
 	/**
 	 *
@@ -131,7 +131,7 @@ public interface Module extends NamedMetaData {
 	 * @param includeAssociationBizKeys
 	 * @return
 	 */
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys);
+	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys);
 
 	/**
 	 * 
@@ -159,7 +159,7 @@ public interface Module extends NamedMetaData {
 	 * @param queryName
 	 * @return
 	 */
-	public DocumentQueryDefinition getDocumentQuery(String queryName);
+	public MetaDataQueryDefinition getMetaDataQuery(String queryName);
 	
 	/**
 	 * 

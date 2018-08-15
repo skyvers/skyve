@@ -66,7 +66,7 @@
 		</map>
 	</menu>
 	<queries>
-		<documentQuery name="qStaff" documentName="Staff">
+		<query name="qStaff" documentName="Staff">
 			<description>All Staff</description>
 			<columns>
 				<column displayName="Image" editable="false" filterable="false" sortable="false" alignment="centre" pixelWidth="70">
@@ -89,8 +89,8 @@
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qStaffMobile" documentName="Staff">
+		</query>
+		<query name="qStaffMobile" documentName="Staff">
 			<description>All Staff</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending"/>
@@ -101,18 +101,19 @@
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>
 			</columns>
-		</documentQuery>		<documentQuery name="qOfficeForPhone" documentName="Office">
+		</query>
+		<query name="qOfficeForPhone" documentName="Office">
 			<description>All Offices</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qPositions" documentName="Position">
+		</query>
+		<query name="qPositions" documentName="Position">
 			<description>Organisation Structure</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending"/>
 				<column binding="reportsTo" sortOrder="ascending" editable="false" filterable="false" sortable="false"/>
 			</columns>
-		</documentQuery>
+		</query>
 	</queries>
 </module>

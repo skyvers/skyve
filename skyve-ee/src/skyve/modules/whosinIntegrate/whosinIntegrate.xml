@@ -60,7 +60,7 @@
 		</map>
 	</menu>
 	<queries>
-		<documentQuery name="qStaff" documentName="Staff">
+		<query name="qStaff" documentName="Staff">
 			<description>All Staff</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending"/>
@@ -71,12 +71,12 @@
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>
 			</columns>
-		</documentQuery>
-		<documentQuery name="qOfficeForPhone" documentName="Office">
+		</query>
+		<query name="qOfficeForPhone" documentName="Office">
 			<description>All Offices</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending"/>
 			</columns>
-		</documentQuery>
+		</query>
 	</queries>
 </module>

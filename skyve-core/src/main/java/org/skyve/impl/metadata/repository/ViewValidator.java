@@ -94,8 +94,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -308,7 +309,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	private void validateQueryName(String queryName, String widgetIdentifier) {
-		if ((queryName != null) && (module.getDocumentQuery(queryName) == null)) {
+		if ((queryName != null) && (module.getMetaDataQuery(queryName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
 		}
 	}
@@ -986,9 +987,9 @@ class ViewValidator extends ViewVisitor {
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used
-		DocumentQueryDefinition query = null;
+		MetaDataQueryDefinition query = null;
 		if (lookup.getQuery() != null) {
-    		query = module.getDocumentQuery(lookup.getQuery());
+    		query = module.getMetaDataQuery(lookup.getQuery());
     	}
 		else {
 			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
@@ -1005,7 +1006,7 @@ class ViewValidator extends ViewVisitor {
     		Relation relation = (Relation) target.getAttribute();
     		String queryName = (relation instanceof Reference) ? ((Reference) relation).getQueryName() : null;
     		if (queryName != null) {
-        		query = module.getDocumentQuery(queryName);
+        		query = module.getMetaDataQuery(queryName);
     		}
     		else {
     			query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
@@ -1019,19 +1020,22 @@ class ViewValidator extends ViewVisitor {
 												new LinkedHashSet<>(dropDownColumns);
 		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
 		
-		for (QueryColumn column : query.getColumns()) {
+		for (MetaDataQueryColumn column : query.getColumns()) {
     		String alias = column.getName();
     		if (alias == null) {
     			alias = column.getBinding();
     		}
-            if ((testColumns != null) && testColumns.contains(alias)) {
-        		if (! column.isProjected()) {
+    		MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ? 
+    															(MetaDataQueryProjectedColumn) column : 
+																null;
+    		if ((testColumns != null) && testColumns.contains(alias)) {
+        		if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
 					throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query.");
         		}
         		testColumns.remove(alias);
             }
             if ((! foundLookupDescription) && descriptionBinding.equals(alias)) {
-        		if (! column.isProjected()) {
+        		if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
         			throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " has a description binding of " + alias + " which is not projected in the query.");
         		}
             	foundLookupDescription = true;
@@ -1344,7 +1348,7 @@ class ViewValidator extends ViewVisitor {
 			@SuppressWarnings("synthetic-access")
 			public void processQueryListViewReference(QueryListViewReference reference) {
 				try {
-					if (module.getDocumentQuery(reference.getQueryName()) == null) {
+					if (module.getMetaDataQuery(reference.getQueryName()) == null) {
 						throw new IllegalStateException("No such query");
 					}
 				}

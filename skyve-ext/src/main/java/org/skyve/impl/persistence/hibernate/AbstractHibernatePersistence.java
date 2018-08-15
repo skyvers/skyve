@@ -98,7 +98,7 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
@@ -2193,13 +2193,13 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
 	@Override
 	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
