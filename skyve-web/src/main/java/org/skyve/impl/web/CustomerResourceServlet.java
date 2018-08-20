@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.coobird.thumbnailator.Thumbnails;
 
+import org.apache.commons.io.FilenameUtils;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -35,6 +36,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 		
@@ -50,6 +52,8 @@ public class CustomerResourceServlet extends HttpServlet {
 		private File file;
 		int imageWidth = 0;
 		int imageHeight = 0;
+		private boolean svg = false;
+		private byte[] bytes;
 
 		void dispose() throws Exception {
 			if (cm != null) {
@@ -71,55 +75,93 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 
-		public byte[] getBytes() 
+		public byte[] getBytes()
 		throws FileNotFoundException, IOException {
-			byte[] result = null;
-
-			if (file != null) {
-				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+			load();
+			return bytes;
+		}
+		
+		private void load()
+		throws FileNotFoundException, IOException {
+			if (bytes == null) {
+				if (file != null) {
+					try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+						// A thumbnail image
+						if ((imageWidth > 0) && (imageHeight > 0)) {
+							BufferedImage image = ImageIO.read(bis);
+							if (image == null) { // not an image or can't be read
+								svg(file.getName());
+							}
+							else {
+								image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
+								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
+									bytes = baos.toByteArray();
+								}
+							}
+						}
+						// Full content
+						else {
+							try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+								bytes = new byte[1024]; // 1K
+								int bytesRead = 0;
+								while ((bytesRead = bis.read(bytes)) > 0) {
+									baos.write(bytes, 0, bytesRead);
+								}
+								bytes = baos.toByteArray();
+							}
+						}
+					}
+				}
+				else if (content != null) {
 					// A thumbnail image
 					if ((imageWidth > 0) && (imageHeight > 0)) {
-						BufferedImage image = ImageIO.read(bis);
-						image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
-						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-							Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
-							result = baos.toByteArray();
+						try (InputStream stream = content.getContentStream()) {
+							BufferedImage image = ImageIO.read(stream);
+							if (image == null) {
+								svg(content.getFileName());
+							}
+							else {
+								image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
+								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
+									bytes = baos.toByteArray();
+								}
+							}
 						}
 					}
 					// Full content
 					else {
-						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-							result = new byte[1024]; // 1K
-							int bytesRead = 0;
-							while ((bytesRead = bis.read(result)) > 0) {
-								baos.write(result, 0, bytesRead);
-							}
-							result = baos.toByteArray();
-						}
+						bytes = content.getContentBytes();
 					}
 				}
 			}
-			else if (content != null) {
-				// A thumbnail image
-				if ((imageWidth > 0) && (imageHeight > 0)) {
-					try (InputStream stream = content.getContentStream()) {
-						BufferedImage image = ImageIO.read(stream);
-						image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
-						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-							Thumbnails.of(image).scale(1.0).outputFormat("jpg").toOutputStream(baos);
-							result = baos.toByteArray();
-						}
-					}
-				}
-				// Full content
-				else {
-					result = content.getContentBytes();
-				}
-			}
-
-			return result;
 		}
 
+		private void svg(String fileName) throws IOException {
+			String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
+			svg = true;
+			AbstractRepository repository = AbstractRepository.get();
+			File svgFile = null;
+			if (suffix == null) {
+				svgFile = repository.findResourceFile("files/blank.svg", null, null);
+			}
+			else {
+				svgFile = repository.findResourceFile(String.format("files/%s.svg", suffix) , null, null);
+				if (! svgFile.exists()) {
+					svgFile = repository.findResourceFile("files/blank.svg", null, null);
+				}
+			}
+			// Add the requested width and height to the SVG so that it can be scaled 
+			//and keep its aspect ratio in the browser <img/>.
+			String xml = FileUtil.getFileAsString(svgFile);
+			xml = String.format("<svg width=\"%dpx\" height=\"%dpx\" %s",
+									Integer.valueOf(imageWidth),
+									Integer.valueOf(imageHeight),
+									xml.substring(5));
+			bytes = xml.getBytes(Util.UTF8);
+		}
+		
 		public boolean isContent() {
 			return (content != null);
 		}
@@ -132,11 +174,17 @@ public class CustomerResourceServlet extends HttpServlet {
 			return file;
 		}
 
-		public String getContentType() {
+		public String getContentType() throws IOException {
 			String result = null;
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
-				result = MimeType.png.toString();
+				load();
+				if (svg) {
+					result = MimeType.svg.toString();
+				}
+				else {
+					result = MimeType.png.toString();
+				}
 			}
 			else if (file != null) {
 				MimeType mimeType = MimeType.fromFileName(file.getName());
@@ -151,11 +199,17 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 		
-		public String getFileName() {
+		public String getFileName() throws IOException {
 			String result = null;
 			
 			if ((imageWidth > 0) && (imageHeight > 0)) {
-				result = "thumbnail.png";
+				load();
+				if (svg) {
+					result = "thumbnail.svg";
+				}
+				else {
+					result = "thumbnail.png";
+				}
 			}
 			else if (file != null) {
 				result = file.getName();
