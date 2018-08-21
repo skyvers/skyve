@@ -62,6 +62,7 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -106,6 +107,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
@@ -956,13 +958,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			column.setField((name != null) ? name : binding);
 			
-			// Unbound columns or unsortable columns should be set unsortable
-			if ((binding == null) || 
-					((projectedQueryColumn != null) && (! projectedQueryColumn.isSortable()))) {
+			// Unbound columns or content columns or unsortable columns should be set unsortable
+			if ((binding == null) || (projectedQueryColumn == null) || (! projectedQueryColumn.isSortable())) {
 				column.setSortable(false);
 			}
 
-			// Unbound columns or unfilterable columns should be set unfilterable
+			// Unbound columns, content columns or unfilterable columns should be set unfilterable
 			if ((binding != null) && 
 					showFilter && 
 					(projectedQueryColumn != null) && 
@@ -994,9 +995,54 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
 			}
+
+			String value = null;
+			if (projectedQueryColumn != null) { // projected column
+				value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
+			}
+			else { // content column
+				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) queryColumn;
+				DisplayType display = contentColumn.getDisplay();
+				String emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
+				Integer pixelHeight = contentColumn.getPixelHeight();
+				String href = String.format("'content?_n='.concat(row['%s']).concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_b=%s')",
+												binding, 
+												Bean.MODULE_KEY,
+												Bean.DOCUMENT_KEY,
+												binding);
+
+				if (DisplayType.thumbnail.equals(display)) {
+					String width = (pixelWidth == null) ? 
+			    						((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+										pixelWidth.toString();
+					String height = (pixelHeight == null) ? 
+										((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+										pixelHeight.toString();
+					String empty = "''";
+					if (emptyThumbnailRelativeFile != null) {
+						empty = String.format("'<img src=\"resources?_n=%s'.concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_w=%s&_h=%s\"/>')",
+												emptyThumbnailRelativeFile,
+												Bean.MODULE_KEY,
+												Bean.DOCUMENT_KEY,
+												width,
+												height);
+					}
+					value = String.format("#{(empty row['%s']) ? %s : '<a href=\"'.concat(%s).concat('\" target=\"_blank\"><img src=\"').concat(%s).concat('&_w=%s&_h=%s\"/></a>')}",
+											binding,
+											empty,
+											href,
+											href,
+					                		width,
+					                		height);
+				}
+				else if (DisplayType.link.equals(display)) {
+					value = String.format("#{(empty row['%s']) ? '' : '<a href=\"'.concat(%s).concat('\" target=\"_blank\">Content</a>')}",
+											binding,
+											href);
+					
+				}
+			}
 			
-			// Add the EL expression
-			String value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
 			column.getChildren().add(outputText);
