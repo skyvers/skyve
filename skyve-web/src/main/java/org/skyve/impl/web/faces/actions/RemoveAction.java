@@ -1,14 +1,23 @@
 package org.skyve.impl.web.faces.actions;
 
 import java.util.List;
+import java.util.logging.Level;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 /**
  * Remove an element from an array.
@@ -78,6 +87,23 @@ public class RemoveAction extends FacesAction<Void> {
 			@SuppressWarnings("unchecked")
 			List<Bean> list = (List<Bean>) BindUtil.get(bean, viewBinding.substring(0, lastCollectionindex));
 			Bean beanToRemove = (Bean) BindUtil.get(bean, viewBinding);
+			
+			// Run preExecute after the copy is taken, in case we rollback
+			WebContext webContext = facesView.getWebContext();
+			CustomerImpl internalCustomer = (CustomerImpl) CORE.getPersistence().getUser().getCustomer();
+			Module module = internalCustomer.getModule(beanToRemove.getBizModule());
+			Document document = module.getDocument(internalCustomer, beanToRemove.getBizDocument());
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Remove + ", " + beanToRemove + ", null, " + ", " + webContext);
+					beanToRemove = bizlet.preExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + beanToRemove);
+				}
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, beanToRemove, null, webContext);
+			}
+
 			list.remove(beanToRemove);
 			if (beanToRemove instanceof ChildBean<?>) {
 				((ChildBean<?>) beanToRemove).setParent(null);
