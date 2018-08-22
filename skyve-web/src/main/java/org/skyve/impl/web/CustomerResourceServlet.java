@@ -138,6 +138,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			}
 		}
 
+		// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-ee/src/skyve/resources/files/
 		private void svg(String fileName) throws IOException {
 			String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
 			svg = true;
