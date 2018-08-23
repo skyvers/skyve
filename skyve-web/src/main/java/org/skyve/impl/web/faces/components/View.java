@@ -19,6 +19,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
+import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.pipeline.FacesViewVisitor;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
@@ -90,9 +91,20 @@ public class View extends HtmlPanelGroup {
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
 	    	Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
-	    	final UxUi uxui = (UxUi) requestMap.get(FacesUtil.UX_UI_KEY);
-	    	final UserAgentType userAgentType = (UserAgentType) requestMap.get(FacesUtil.USER_AGENT_TYPE_KEY);
+	    	UxUi uxui = (UxUi) requestMap.get(FacesUtil.UX_UI_KEY);
+	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(FacesUtil.USER_AGENT_TYPE_KEY);
+	    	if ((uxui == null) || (userAgentType == null)) {
+	    		FacesView<?> fv = FacesUtil.getManagedBean(managedBeanName);
+	    		if (uxui == null) {
+	    			uxui = fv.getUxUi();
+	    		}
+	    		if (userAgentType == null) {
+	    			userAgentType = fv.getUserAgentType();
+	    		}
+	    	}
 	    	
+	    	final String uxuiName = uxui.getName();
+	    	final UserAgentType finalUAT = userAgentType;
 	    	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
@@ -100,8 +112,8 @@ public class View extends HtmlPanelGroup {
 																documentName,
 																widgetId,
 																managedBeanName,
-																uxui.getName(),
-																userAgentType,
+																uxuiName,
+																finalUAT,
 																process,
 																update,
 																componentBuilder,

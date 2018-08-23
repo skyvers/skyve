@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
@@ -60,6 +61,10 @@ public class FacesView<T extends Bean> extends Harness {
 	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
 	// NNB hydrate/dehydrate does not clear/set this property
 	private UxUi uxui;
+	// This is set from a request attribute (the attribute is set in home.jsp)
+	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
+	// NNB hydrate/dehydrate does not clear/set this property
+	private UserAgentType userAgentType;
 	// The view binding - where we are zoomed into within the conversation bean.
 	// This could be the same as zoom in binding or it could be deeper.
 	private String viewBinding;
@@ -80,6 +85,7 @@ public class FacesView<T extends Bean> extends Harness {
 	@PostConstruct
 	protected void postConstruct() {
 		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+		this.userAgentType = (UserAgentType) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 	}
 	
 	public void preRender() {
@@ -103,7 +109,15 @@ public class FacesView<T extends Bean> extends Harness {
 		this.uxui = uxui;
 		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.UX_UI_KEY, uxui);
 	}
-	
+
+ 	public UserAgentType getUserAgentType() {
+		return userAgentType;
+	}
+	public void setUserAgentType(UserAgentType userAgentType) {
+		this.userAgentType = userAgentType;
+		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
+	}
+
 	public String getViewBinding() {
 		return viewBinding;
 	}
