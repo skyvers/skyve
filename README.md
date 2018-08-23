@@ -13,7 +13,6 @@ This repository is the Java implementation of the Skyve framework specification.
   * [Overview](#overview)
   * [Detailed Instructions](#detailed-instructions) 
  * [Skyve Maven commands](#skyve-maven-commands)
- * [Example Security Domains](#example-security-domains)
 
 ## What is Skyve?
 
@@ -63,7 +62,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 ### Detailed Instructions:
 
 #### Creating the Project
-* Go to https://apps.bizhub.com.au/apps/project.xhtml
+* Go to https://foundry.skyve.org/foundry/project.xhtml
 * Enter a valid email address
 * Enter project name (should be a single string like projectName)
 * Enter a customer name (should be a single string like myOrganisationName
@@ -85,12 +84,9 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 * To configure Wildfly to deploy your application:
 	* Copy the contents of the deployments folder to `wildfly/standalone/deployments/`
 		* The deployments folder contains a data source file (projectName-ds.xml) and a json instance settings file (projectName.json).
-		* The datasource file declares the data source connection name to the nominated database engine. The JDBC connection string and associated credentials settings must be valid for the selected database engine. Skyve will create all required tables, so an empty database is required.
+		* The datasource file declares the data source connection name to the nominated database engine. The JDBC connection string and associated credentials settings must be valid for the selected database engine. Skyve will create all required tables, so an empty database is required. For an H2 database, this will specify the path to the database file's location.
 		* The json settings file contains the settings specific to the application instance and includes credentials for a boostrap user to get your started.
 		* You may need to configure the content directory path within your JSON to be a valid directory on your filesystem. This is where an uploaded files will be stored and indexed by Elastic Search.
-	* Declare a Wildfly security domain matching the name of your application (case sensitive), and referencing the skyve Jndi name.
-		* To declare a Wildfly security domain, open the file `wildfly/standalone/configuration/standalone.xml` and add a security domain stanza within the `<security-domains>`.
-		* The `principalsQuery` and `rolesQuery` needs to use the correct string concatentation syntax for the database engine you are using. An example [H2](#h2-security-domain) and [SQL Server](#sql-server-security-domain) stanza is included at the bottom.
 	* If you selected a database engine other than H2, you'll need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you'll need to modify the projectName-ds.xml file in the deployments folder accordingly.
 		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
@@ -126,37 +122,3 @@ Depending on how you configure your Wildfly, if you are not publishing changes d
 #### Local Deploy
 `man compile war:exploded skyve:touch`
 This refreshes your project’s `/deployments’ directory and creates a ‘projectName.dodeploy’ file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
-
-## Example Security Domains
-A security domain is required to be added to your Wildfly installation to tell the application server how to authenticate users to the application. This is performed by editing the `wildfly/standalone/
-configuration/standalone.xml` file. The `hashAlgorithm` property should match the property in your project .json file.
-
-#### H2 Security Domain
-```xml
-<security-domain name="<projectName>" cache-type="default">
-	<authentication>
-		<login-module code="Database" flag="required">
-			<module-option name="dsJndiName" value="java:/<projectName>DB"/>
-			<module-option name="principalsQuery" value="select password from ADM_SecurityUser where bizCustomer || '/' || userName = ?;"/>
-			<module-option name="rolesQuery" value="select 'Nobody', 'Roles' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"/>
-			<module-option name="hashAlgorithm" value="SHA1"/>
-			<module-option name="hashEncoding" value="base64"/>
-		</login-module>
-	</authentication>
-</security-domain>
-```
-
-#### SQL Server Security Domain
-```xml
-<security-domain name="<projectName>" cache-type="default">
-	<authentication>
-		<login-module code="Database" flag="required">
-			<module-option name="dsJndiName" value="java:/<projectName>DB"/>
-			<module-option name="principalsQuery" value="select password from ADM_SecurityUser where bizCustomer + '/' + userName = ?;"/>
-			<module-option name="rolesQuery" value="select 'Nobody', 'Roles' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"/>
-			<module-option name="hashAlgorithm" value="SHA1"/>
-			<module-option name="hashEncoding" value="base64"/>
-		</login-module>
-	</authentication>
-</security-domain>
-```
