@@ -92,6 +92,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 		* To declare a Wildfly security domain, open the file `wildfly/standalone/configuration/standalone.xml` and add a security domain stanza within the `<security-domains>`.
 		* The `principalsQuery` and `rolesQuery` needs to use the correct string concatentation syntax for the database engine you are using. An example [H2](#h2-security-domain) and [SQL Server](#sql-server-security-domain) stanza is included at the bottom.
 	* If you selected a database engine other than H2, you'll need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you'll need to modify the projectName-ds.xml file in the deployments folder accordingly.
+		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
 #### Log in
