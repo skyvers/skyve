@@ -13,6 +13,10 @@ This repository is the Java implementation of the Skyve framework specification.
   * [Overview](#overview)
   * [Detailed Instructions](#detailed-instructions) 
  * [Skyve Maven commands](#skyve-maven-commands)
+ * [Configuring Spring Security](#configuring-spring-security)
+   * [MSSQL](#mssql)
+   * [MySQL](#mysql)
+   * [H2](#h2)
 
 ## What is Skyve?
 
@@ -122,3 +126,35 @@ Depending on how you configure your Wildfly, if you are not publishing changes d
 #### Local Deploy
 `man compile war:exploded skyve:touch`
 This refreshes your project’s `/deployments’ directory and creates a ‘projectName.dodeploy’ file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
+
+## Configuring Spring Security
+If you used the Skyve Project Creator with the correct database dialect selected, the spring security settings will already be correct. However, if you are manually changing dialect, you will need to review and modify the spring security settings at `WEB-INF/spring/security.xml` within the `<authentication-provider>` tag.
+
+Modify the sql statements to reflect your chosen dialect.
+
+### MSSQL
+```
+<jdbc-user-service data-source-ref="dataSource"
+                    users-by-username-query="select bizCustomer + '/' + userName, password, case when inactive = 1 then 0 else 1 end from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
+                    authorities-by-username-query="select bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
+                    group-authorities-by-username-query="select bizCustomer + '/' + userName, bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
+                    role-prefix="none" />
+```
+
+### MySQL
+```
+<jdbc-user-service data-source-ref="dataSource"
+                    users-by-username-query="select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
+                    authorities-by-username-query="select concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
+                    group-authorities-by-username-query="select concat(bizCustomer, '/', userName), concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
+                    role-prefix="none" />
+```
+		    
+### H2
+```
+<jdbc-user-service data-source-ref="dataSource" 
+		users-by-username-query="select bizCustomer || '/' || userName, password, not ifNull(inactive, false) from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+		authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+		group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+		role-prefix="none" />
+```			
