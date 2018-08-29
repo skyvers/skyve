@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
@@ -209,5 +210,20 @@ public abstract class Harness extends Localisable {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
+	}
+	
+	/**
+	 * Sets the UX/UI preference in the session.
+	 * @param uxui	The UX/UI name.
+	 */
+	@SuppressWarnings("static-method")
+	public void setUxUi(String uxui) {
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		if (uxui == null) {
+			ec.getSessionMap().remove(AbstractWebContext.UXUI);
+		}
+		else {
+			ec.getSessionMap().put(AbstractWebContext.UXUI, uxui);
+		}
 	}
 }

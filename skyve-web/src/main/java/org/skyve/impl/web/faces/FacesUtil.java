@@ -21,8 +21,6 @@ public class FacesUtil {
 
 	// used to place a bean temporarily in the session when a redirect is done during navigate
 	public static String MANAGED_BEAN_NAME_KEY = "skyveFacesBean";
-	// used to place the uxui (renderer) at play during this request as a request attribute
-	public static String UX_UI_KEY = "skyveUxUi";
 	// used to place the user agent type of the requesting as a request attribute
 	public static String USER_AGENT_TYPE_KEY = "skyveUserAgentType";
 	// used to get the responsive form grid out of the view root when required

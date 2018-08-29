@@ -98,7 +98,7 @@
 		request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 		Router router = repository.getRouter();
 		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-		request.setAttribute(FacesUtil.UX_UI_KEY, uxui);
+		request.setAttribute(AbstractWebContext.UXUI, uxui);
 		
 		// Determine the route
 		RouteCriteria criteria = new RouteCriteria();

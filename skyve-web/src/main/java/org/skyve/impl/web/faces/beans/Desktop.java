@@ -145,10 +145,8 @@ public class Desktop extends Harness {
     	result.append("<td><div class=\"titleBar\">{title}</div></td>");
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
-/*
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><img src=\"images/menu_logout.png\"/></a></td>");
-*/
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch\"><img src=\"images/menu_search.png\"/></a></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/menu_home.png\"/></a></td>");

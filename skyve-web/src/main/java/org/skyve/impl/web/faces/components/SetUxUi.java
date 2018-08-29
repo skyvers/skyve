@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.router.Router;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -39,6 +40,6 @@ public class SetUxUi extends UIComponentBase {
 		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		request.setAttribute(FacesUtil.UX_UI_KEY, uxui);
+		request.setAttribute(AbstractWebContext.UXUI, uxui);
 	}
 }

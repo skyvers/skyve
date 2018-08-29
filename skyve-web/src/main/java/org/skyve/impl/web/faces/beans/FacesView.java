@@ -84,7 +84,7 @@ public class FacesView<T extends Bean> extends Harness {
 
 	@PostConstruct
 	protected void postConstruct() {
-		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(AbstractWebContext.UXUI);
 		this.userAgentType = (UserAgentType) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 	}
 	
@@ -107,7 +107,7 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setUxUi(UxUi uxui) {
 		this.uxui = uxui;
-		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.UX_UI_KEY, uxui);
+		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.UXUI, uxui);
 	}
 
  	public UserAgentType getUserAgentType() {

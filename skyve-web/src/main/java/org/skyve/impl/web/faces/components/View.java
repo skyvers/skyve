@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -91,7 +92,7 @@ public class View extends HtmlPanelGroup {
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
 	    	Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
-	    	UxUi uxui = (UxUi) requestMap.get(FacesUtil.UX_UI_KEY);
+	    	UxUi uxui = (UxUi) requestMap.get(AbstractWebContext.UXUI);
 	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(FacesUtil.USER_AGENT_TYPE_KEY);
 	    	if ((uxui == null) || (userAgentType == null)) {
 	    		FacesView<?> fv = FacesUtil.getManagedBean(managedBeanName);

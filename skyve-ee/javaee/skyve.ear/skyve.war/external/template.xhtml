@@ -49,6 +49,11 @@
 							</div>
 						</td>
 						<td width="40px">
+							<a href="javascript:setUxUi()" title="Switch">
+								<i style="color:whitesmoke" class="fa fa-share-square-o fa-2x" />
+							</a>
+						</td>
+						<td width="40px">
 							<a href="loggedOut" title="Logout">
 								<i style="color:whitesmoke" class="fa fa-power-off fa-2x" />
 							</a>
@@ -58,6 +63,7 @@
 						<td style="height:100%;vertical-align:top">
 							<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
 							<h:form id="menuform" prependId="false"> 
+								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
 								<p:panelMenu model="#{menu.menu}" />
 							</h:form>
 						</td>
