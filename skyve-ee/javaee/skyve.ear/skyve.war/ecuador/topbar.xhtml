@@ -31,6 +31,12 @@
         </a>
 
         <ul id="topbar-usermenu">
+			<li>
+				<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+					<i class="fa fa-share-square-o"></i>
+					<span class="topbar-item-name">Switch</span>
+				</p:commandLink>
+			</li>
         	<li>
         		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
 					<i class="fa fa-power-off"></i>

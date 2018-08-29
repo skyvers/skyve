@@ -569,23 +569,23 @@ public class LocalDesignRepository extends AbstractRepository {
 						// check each document reference query name links to a module query
 						for (String referenceName : result.getReferenceNames()) {
 							String queryName = result.getReferenceByName(referenceName).getQueryName();
-								Module documentModule = getModule(customer, documentModuleName);
-								if ((queryName != null) && (documentModule.getMetaDataQuery(queryName) == null)) {
-									StringBuilder mde = new StringBuilder(documentName);
-									mde.append(" : The reference ");
+							Module documentModule = getModule(customer, documentModuleName);
+							if ((queryName != null) && (documentModule.getMetaDataQuery(queryName) == null)) {
+								StringBuilder mde = new StringBuilder(documentName);
+								mde.append(" : The reference ");
 								mde.append(referenceName);
-									mde.append(" has a query ");
-									mde.append(queryName);
-									mde.append(" that does not exist in module ");
-									if (customer != null) {
-										mde.append(customer.getName());
-										mde.append(".");
-									}
-									mde.append(documentModuleName);
-									
-									throw new MetaDataException(mde.toString());
+								mde.append(" has a query ");
+								mde.append(queryName);
+								mde.append(" that does not exist in module ");
+								if (customer != null) {
+									mde.append(customer.getName());
+									mde.append(".");
 								}
+								mde.append(documentModuleName);
+								
+								throw new MetaDataException(mde.toString());
 							}
+						}
 
 						// Add actions in privileges to the document to enable good view generation
 						for (Role role : module.getRoles()) {
