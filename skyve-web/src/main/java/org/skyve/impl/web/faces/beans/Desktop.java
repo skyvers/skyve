@@ -146,11 +146,11 @@ public class Desktop extends Harness {
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch\"><img src=\"images/menu_search.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/menu_home.png\"/></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><img src=\"images/menu_logout.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch\"><i class=\"fa fa-3x fa-share-square-o\" style=\"color:#BEC4C9\"></i></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"fa fa-3x fa-search\" style=\"color:#BEC4C9\"></i></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"fa fa-3x fa-info-circle\" style=\"color:#BEC4C9\"></i></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"fa fa-3x fa-home\" style=\"color:#BEC4C9\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><i class=\"fa fa-3x fa-power-off\" style=\"color:#BEC4C9\"></i></a></td>");
     	result.append("</tr></table>");
     	result.append("</div>");
     	
