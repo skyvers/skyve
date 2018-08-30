@@ -22,7 +22,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.1.jar"/>
 	<classpathentry kind="lib" path="lib/weld-se-2.4.4.Final.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
@@ -150,5 +149,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlschema-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-5.1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xz-1.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

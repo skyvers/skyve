@@ -110,7 +110,7 @@
 			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
-			<h:outputStylesheet name="css/layout-indigo.css" library="ultima-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>
