@@ -24,8 +24,7 @@
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ecuador.css" library="skyve" />
-			<h:outputStylesheet name="css/foundry.css" library="foundry" />
-			<title>${project.name}</title>
+			<title>Skyve</title>
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->	
@@ -97,7 +96,7 @@
 			</p:ajaxStatus>
 	
 			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
-			<h:outputStylesheet name="css/layout-indigo.css" library="ecuador-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ecuador-layout" />
 		</h:body>
 	</f:view>
 </html>

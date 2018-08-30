@@ -47,8 +47,8 @@
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<!--This is the version tika 1.5 requires -->
 		<poi.version>3.10.1</poi.version>
-		<primefaces.version>6.1</primefaces.version>
-		<primefaces-extensions.version>6.1.0</primefaces-extensions.version>
+		<primefaces.version>6.2</primefaces.version>
+		<primefaces-extensions.version>6.2.8</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>
