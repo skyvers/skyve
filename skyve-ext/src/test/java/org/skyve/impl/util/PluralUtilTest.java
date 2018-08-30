@@ -239,15 +239,17 @@ public class PluralUtilTest {
 	@SuppressWarnings("static-method")
 	public void testPluraliseEndsWithOn() throws Exception {
 		// setup the test data
-		final String singular = "criterion", singularException = "carton";
+		final String singular = "criterion", singular2 = "location", singularException = "carton";
 
 		// perform the method under test
 		final String result1 = PluralUtil.pluralise(singular);
-		final String result2 = PluralUtil.pluralise(singularException);
+		final String result2 = PluralUtil.pluralise(singular2);
+		final String result3 = PluralUtil.pluralise(singularException);
 
 		// verify the result
 		assertThat(result1, is("criteria"));
-		assertThat(result2, is("cartons"));
+		assertThat(result2, is("locations"));
+		assertThat(result3, is("cartons"));
 	}
 
 	@Test

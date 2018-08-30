@@ -30,10 +30,14 @@ public class PluralUtil {
 	private static ArticleNode articleRoot = null;
 
 	private static final String[][] aExceptions = new String[][] { { "agenda", "agendas" },
+			{ "adenoma", "adenomata" },
 			{ "alfalfa", "alfalfas" },
+			{ "anathema", "anathemata" },
 			{ "aurora", "auroras" },
+			{ "axioma", "axiomata" },
 			{ "banana", "bananas" },
 			{ "barracuda", "barracudas" },
+			{ "chasma", "chasmata" },
 			{ "cornea", "corneas" },
 			{ "nova", "novas" },
 			{ "phobia", "phobias" } };
@@ -91,10 +95,28 @@ public class PluralUtil {
 			{ "yo", "yos" },
 			{ "zoo", "zoos" } };
 	private static final String[][] onExceptions = new String[][] {
-			{ "balloon", "balloons" },
-			{ "carton", "cartons" },
-			{ "formation", "formations" } };
-	private static final String[][] umExceptions = new String[][] { { "album", "albums" }, { "stadium", "stadiums" } };
+			{ "automaton", "automata" },
+			{ "criterion", "criteria" } };
+	private static final String[][] umExceptions = new String[][] {
+			{ "aecium", "aecia" },
+			{ "antiserum", "antisera" },
+			{ "appressorium", "appressoria" },
+			{ "aquarium", "aquaria" },
+			{ "arboretum", "arboreta" },
+			{ "atrium", "atria" },
+			{ "bacterium", "bacteria" },
+			{ "baculum", "bacula" },
+			{ "biennium", "biennia" },
+			{ "bottomonium", "bottomonia" },
+			{ "cambium", "cambia" },
+			{ "cerebrum", "cerebra" },
+			{ "compactum", "compacta" },
+			{ "compendium", "compendia" },
+			{ "cranium", "crania" },
+			{ "culture medium", "culture media" },
+			{ "curriculum", "curricula" },
+			{ "millenium", "millenia" },
+	};
 	private static final String[][] usExceptions = new String[][] {
 			{ "abacus", "abacuses" },
 			{ "bus", "buses" },
@@ -441,9 +463,8 @@ public class PluralUtil {
 						return replaceWithMatchingCase(singular, umExceptions[i][1]);
 					}
 				}
-				// change final 'um' to 'a'
-				out.setLength(out.length() - 2);
-				out.append("a");
+				// append 's'
+				out.append("s");
 			}
 			// ends with 'a' but not 'ia'
 			else if (str.endsWith("a")) {
@@ -462,22 +483,16 @@ public class PluralUtil {
 				out.setLength(out.length() - 1);
 				out.append("ae");
 			}
-			// ends with 'on' but not 'sion'
+			// ends with 'on'
 			else if (str.endsWith("on")) {
-				// not ending is 'ion'
-				if (str.endsWith("sion")) {
-					out.append("s");
-					return replaceWithMatchingCase(singular, out.toString());
-				}
 				// look for exceptions first onExceptions
 				for (int i = 0; i < onExceptions.length; i++) {
 					if (str.equals(onExceptions[i][0])) {
 						return replaceWithMatchingCase(singular, onExceptions[i][1]);
 					}
 				}
-				// change final 'on' to 'a'
-				out.setLength(out.length() - 2);
-				out.append("a");
+				// append s
+				out.append("s");
 			} else {
 				out.append("s");
 			}
