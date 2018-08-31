@@ -1,10 +1,5 @@
 @CHARSET "UTF-8";
 
-/* Skyve-specific Ecuador theme classes */
-body .ui-datatable thead th:last-child {
-	width: 57px !important;
-}
-
 #footer-menu .footer-box span, .layout-footer .logo-container-outer {
     text-align: center !important;
 }
@@ -27,6 +22,10 @@ body .ui-datatable thead th:last-child {
 	left: 120px;
 	position: absolute;
 	vertical-align: middle;
+}
+
+.ui-panel-content {
+	border-top: 1px solid #dedede !important;
 }
 
 /* skyve alignment styles */
