@@ -12,7 +12,12 @@
         </a>
 
         <div id="topbar-appname">
-            <span class="app-name"><p:outputPanel id="title" layout="inline" autoUpdate="true">#{title}</p:outputPanel></span>
+            <span class="app-name">
+            	<p:outputPanel id="title" layout="inline">
+            		#{title}
+            		<p:autoUpdate />
+           		</p:outputPanel>
+       		</span>
         </div>
 
         <a id="topbar-profile-menu-button" href="#">

@@ -59,8 +59,12 @@
 					</div>
 				</h:form>
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
-					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+					<p:messages id="messages" widgetVar="messages" globalOnly="true">
+						<p:autoUpdate />
+					</p:messages>
+					<p:growl id="growl" widgetVar="growl" globalOnly="true">
+						<p:autoUpdate />
+					</p:growl>
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 					<p:confirmDialog id="confirm" global="true">
 						<p:commandButton id="confirmCancel" 

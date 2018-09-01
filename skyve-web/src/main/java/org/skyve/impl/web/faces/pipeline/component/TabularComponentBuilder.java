@@ -588,7 +588,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			if (! children.isEmpty()) {
 				if (children.size() > 1) {
-					col.setStyle("width:95px !important;text-align:center !important");
+					col.setWidth("95");
+					col.setStyle("text-align:center !important");
 				}
 				current.getChildren().add(col);
 			}
@@ -1082,7 +1083,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
-		column.setWidth("40");
+		column.setWidth("60");
 		column.setStyle("text-align:center !important");
 
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed

@@ -70,8 +70,12 @@ public abstract class FacesAction<T> {
 	 * If the message is not bound, just add it globally.
 	 * The approach relies on the template.xhtmls having something like...
 	 * 
-	 * <p:messages id="messages" globalOnly="true" autoUpdate="true" />
-	 * <p:growl id="growl" globalOnly="true" showDetail="false" autoUpdate="true" />
+	 * <p:messages id="messages" globalOnly="true">
+	 * 		<p:autoUpdate />
+	 * </p:messages>
+	 * <p:growl id="growl" globalOnly="true" showDetail="false">
+	 * 		<p:autoUpdate />
+	 * </p:growl>
 	 * 
 	 * and
 	 * 
