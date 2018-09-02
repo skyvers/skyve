@@ -28,7 +28,9 @@
 						<p:button value="#{skyve.i18n['page.phone.logout']}" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
 					</pm:header>
 					<pm:content>
-						<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
+						<p:messages id="messages" widgetVar="messages" globalOnly="true">
+							<p:autoUpdate />
+						</p:messages>
 						<h:form prependId="false">
 							<s:listGrid module="#{skyve.bizModuleParameter}"
 										query="#{skyve.queryNameParameter}"

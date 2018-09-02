@@ -33,7 +33,9 @@
 				<p:fileUpload fileUploadListener="#{_skyveUpload.handleFileUpload}" 
 								update="problems" 
 								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
-			    <p:growl id="messages" showDetail="true" escape="false" autoUpdate="true"/>
+			    <p:growl id="messages" showDetail="true" escape="false">
+					<p:autoUpdate />
+			    </p:growl>
 			    <p/>
 			    <h:panelGroup id="problems" >
 				    <p:dataTable value="#{_skyveUpload.problems}" var="problem" rendered="#{not empty _skyveUpload.problems}">

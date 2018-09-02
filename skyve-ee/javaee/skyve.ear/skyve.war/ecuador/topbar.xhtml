@@ -11,18 +11,14 @@
             <i class="fa fa-angle-up mobile"></i>
         </a>
 
-        <!-- <div class="search-input">
-            <i class="fa fa-search icon-search"></i>
-            <input type="text"></input>
-        </div> -->
         <div id="topbar-appname">
-            <p:graphicImage name="images/bizhub_logo_reversed_logo_only.png" library="foundry" />
-            <span class="app-name">${project.description}</span>
+            <span class="app-name">
+            	<p:outputPanel id="title" layout="inline">
+            		#{title}
+            		<p:autoUpdate />
+           		</p:outputPanel>
+       		</span>
         </div>
-
-        <!-- <h:link outcome="/" styleClass="logo-container">
-            <p:graphicImage name="images/skyve_reversed.png" library="skyve" style="height:20px;" />
-        </h:link> -->
 
         <a id="topbar-profile-menu-button" href="#">
             <span>#{user.name}</span>
@@ -44,9 +40,5 @@
 				</a>
 			</li>
         </ul>
-
-        <!-- <a href="#" id="right-panel-button">
-            <i class="fa fa-angle-double-left"></i>
-        </a> -->
     </div>
 </ui:composition>

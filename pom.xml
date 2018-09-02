@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20180815-SNAPSHOT</version>
+	<version>20180830</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20180815-SNAPSHOT</skyve.version>
+		<skyve.version>20180830</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
@@ -47,8 +47,8 @@
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<!--This is the version tika 1.5 requires -->
 		<poi.version>3.10.1</poi.version>
-		<primefaces.version>6.1</primefaces.version>
-		<primefaces-extensions.version>6.1.0</primefaces-extensions.version>
+		<primefaces.version>6.2</primefaces.version>
+		<primefaces-extensions.version>6.2.8</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>

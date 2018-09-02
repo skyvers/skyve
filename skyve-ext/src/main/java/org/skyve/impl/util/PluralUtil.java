@@ -96,7 +96,8 @@ public class PluralUtil {
 			{ "zoo", "zoos" } };
 	private static final String[][] onExceptions = new String[][] {
 			{ "automaton", "automata" },
-			{ "criterion", "criteria" } };
+			{ "criterion", "criteria" },
+			{ "dodecahedron", "dodecahedra" } };
 	private static final String[][] umExceptions = new String[][] {
 			{ "aecium", "aecia" },
 			{ "antiserum", "antisera" },
@@ -115,8 +116,17 @@ public class PluralUtil {
 			{ "cranium", "crania" },
 			{ "culture medium", "culture media" },
 			{ "curriculum", "curricula" },
+			{ "datum", "data" },
+			{ "desideratum", "desiderata" },
+			{ "erratum", "errata" },
+			{ "growth medium", "growth media" },
+			{ "halobacterium", "halobacteria" },
 			{ "millenium", "millenia" },
-	};
+			{ "modicum", "modica" },
+			{ "optimum", "optima" },
+			{ "perineum", "perinea" },
+			{ "quorum", "quora" },
+			{ "stratum", "strata" } };
 	private static final String[][] usExceptions = new String[][] {
 			{ "abacus", "abacuses" },
 			{ "bus", "buses" },

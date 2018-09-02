@@ -24,8 +24,7 @@
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ecuador.css" library="skyve" />
-			<h:outputStylesheet name="css/foundry.css" library="foundry" />
-			<title>${project.name}</title>
+			<title>Skyve</title>
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->	
@@ -48,7 +47,7 @@
 					<ui:param name="bean" value="#{bean}" />
 				</ui:include>
 	
-				<div class="layout-sidebar">
+				<h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{leftMenu}">
 					<div class="nano">
 						<div class="nano-content menu-scroll-content">
 							<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
@@ -56,11 +55,15 @@
 							</h:form>
 						</div>
 					</div>
-				</div>
+				</h:panelGroup>
 				
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
-					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+					<p:messages id="messages" widgetVar="messages" globalOnly="true">
+						<p:autoUpdate />
+					</p:messages>
+					<p:growl id="growl" widgetVar="growl" globalOnly="true">
+						<p:autoUpdate />
+					</p:growl>
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 					<p:confirmDialog id="confirm" global="true">
 						<p:commandButton id="confirmCancel" 
@@ -82,14 +85,34 @@
 					</div>
 					
 					<div class="layout-footer">
-                    	<ui:include src="./footer.xhtml"></ui:include>
+						<div class="ui-g">
+							<div class="ui-g-12">
+					            <div id="footer-menu">
+					            	<div class="ui-g-12 ui-md-12 ui-lg-3 logo-container-outer">
+							            <a href="#{bean.baseHref}" styleClass="logo-container">
+							                <h:graphicImage name="images/skyve_inv.png" library="skyve" />
+							            </a>
+							        </div>
+							        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							        	<span class="app-name">${project.description}</span>
+							        </div>
+							        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							        	<span>Version ${project.version}</span>
+							        </div>
+							        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
+							        	<span class="fa fa-copyright" aria-hidden="true" style="display: inline;"></span>
+							        	<span style="display: inline;">All Rights Reserved</span>   
+							        </div>
+					            </div>
+							</div>
+						</div>
                 	</div>
 				</div>
 			</div>
 	
 			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
 				<f:facet name="start">
-					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i id="busy" class="fa fa-2x fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />
@@ -97,7 +120,7 @@
 			</p:ajaxStatus>
 	
 			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
-			<h:outputStylesheet name="css/layout-indigo.css" library="ecuador-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ecuador-layout" />
 		</h:body>
 	</f:view>
 </html>

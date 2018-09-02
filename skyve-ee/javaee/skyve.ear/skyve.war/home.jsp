@@ -59,10 +59,10 @@
 			sb.append("?m=").append(m);
 			sb.append("&d=").append(d);
 			if (a != null) {
-				sb.append("&a").append(a);
+				sb.append("&a=").append(a);
 			}
 			if (q != null) {
-				sb.append("&q").append(q);
+				sb.append("&q=").append(q);
 			}
 			if (i != null) {
 				sb.append("&i=").append(i);

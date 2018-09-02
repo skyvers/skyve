@@ -17,23 +17,36 @@
 					<i></i>
 				</a>
 			</c:if>
-			<span class="topbar-title"><p:outputPanel id="title" layout="inline" autoUpdate="true">#{title}</p:outputPanel></span>
+			<span class="topbar-title">
+				<p:outputPanel id="title" layout="inline">
+					#{title}
+					<p:autoUpdate />
+				</p:outputPanel>
+			</span>
 			<c:if test="#{topMenu}">
 				<a id="topbar-menu-button" href="#">
 					<i class="material-icons">menu</i>
 				</a>
-				<ul class="topbar-items fadeInDown animated">
+				<ul class="topbar-items">
 					<li>
-						<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
-							<i class="fa fa-share-square-o"></i>
-							<span class="topbar-item-name">Switch</span>
-						</p:commandLink>
-					</li>
-					<li>
-						<a href="#" onclick="window.location = 'loggedOut'">
-							<i class="topbar-icon material-icons">&#xE8AC;</i>
-							<span class="topbar-item-name">Logout</span>
+						<a href="#">
+							<span style="font-size:1.5em;" class="topbar-icon">#{user.name}</span>
+							<i style="font-size:1.5em;" class="topbar-icon fa fa-angle-down"></i>
 						</a>
+						<ul class="ultima-menu fadeInDown animated topbar-menu">
+							<li role="menuitem">
+								<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+									<i class="fa fa-share-square-o"></i>
+									<span>Switch</span>
+								</p:commandLink>
+							</li>
+							<li role="menuitem">
+								<a href="loggedOut"> 
+									<i class="fa fa-power-off"></i>
+									<span>Logout</span>
+								</a>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</c:if>

@@ -59,8 +59,12 @@
 					</div>
 				</h:form>
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
-					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+					<p:messages id="messages" widgetVar="messages" globalOnly="true">
+						<p:autoUpdate />
+					</p:messages>
+					<p:growl id="growl" widgetVar="growl" globalOnly="true">
+						<p:autoUpdate />
+					</p:growl>
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 					<p:confirmDialog id="confirm" global="true">
 						<p:commandButton id="confirmCancel" 
@@ -110,7 +114,7 @@
 			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
-			<h:outputStylesheet name="css/layout-indigo.css" library="ultima-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>

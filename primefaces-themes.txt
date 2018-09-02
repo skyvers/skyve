@@ -1,0 +1,20 @@
+To install the ultima theme on skyve.
+
+1) Drop ultima-theme-*.jar into WEB-INF/lib/
+2) Drop ultima-layout/ folder into WEB-INF/resources/
+3) Drop primefaces-ultima-*/ folder into WEB-INF/resources/
+4) Drop primefaces-ultima.taglib.xml into WEB-INF/
+5) Change router.DefaultUxUiSelector to use "ultima" for the theme name 
+	and a theme colour matching the theme colour if there is one eg "indigo"
+6) change the router.xml to use route outcomes from the ultima folder ie /ultima/list.xhtml
+
+ To install the ecuador theme on skyve.
+ 
+1) Drop ecuador-theme-*.jar into WEB-INF/lib/
+2) Drop ecuador-layout/ folder into WEB-INF/resources/
+3) Drop primefaces-ecuador-*/ folder into WEB-INF/resources/
+4) Drop primefaces-ecuador.taglib.xml into WEB-INF/
+5) Add org/primefaces/ecuador/component/*.java to the source path to be compiled to WEB-INF/classes/
+6) Change router.DefaultUxUiSelector to use "ecuador" for the theme name 
+	and a theme colour matching the theme colour if there is one eg "indigo"
+7) change the router.xml to use route outcomes from the ecuador folder ie /ecuador/list.xhtml

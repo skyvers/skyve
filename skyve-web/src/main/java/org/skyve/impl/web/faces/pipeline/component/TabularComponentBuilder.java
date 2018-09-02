@@ -62,6 +62,7 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -105,7 +106,9 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
@@ -117,6 +120,9 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
 public class TabularComponentBuilder extends ComponentBuilder {
+
+	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
+	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 
 	@Override
 	public UIComponent view(UIComponent component, String invisibleConditionName) {
@@ -350,17 +356,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomConditionName} : 
 															new String[] {disableZoomConditionName, disabledConditionName});
 
-		return dataTable(grid.getBinding(),
-							listVar,
-							grid.getTitle(),
-							grid.getInvisibleConditionName(),
-							((! Boolean.TRUE.equals(grid.getInline())) && 
-								(! Boolean.FALSE.equals(grid.getShowZoom())) &&
-								(! Boolean.FALSE.equals(grid.getEditable()))),
-							clickToZoomDisabledConditionNames,
-							grid.getSelectedIdBinding(),
-							grid.getSelectedActions(),
-							grid.getWidgetId());
+		final DataTable dataTable = dataTable(grid.getBinding(),
+				listVar,
+				grid.getTitle(),
+				grid.getInvisibleConditionName(),
+				((! Boolean.TRUE.equals(grid.getInline())) &&
+						(! Boolean.FALSE.equals(grid.getShowZoom())) &&
+						(! Boolean.FALSE.equals(grid.getEditable()))),
+				clickToZoomDisabledConditionNames,
+				grid.getSelectedIdBinding(),
+				grid.getSelectedActions(),
+				grid.getWidgetId());
+
+		final String emptyMessage;
+		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
+			emptyMessage = EMPTY_DATA_TABLE_CAN_ADD_MESSAGE;
+		} else {
+			emptyMessage = EMPTY_DATA_TABLE_MESSAGE;
+		}
+		dataTable.setEmptyMessage(emptyMessage);
+
+		return dataTable;
 	}
 
 	/*
@@ -544,11 +560,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String disabledConditionName = grid.getDisabledConditionName();
 
-			// TODO: Add button to show/hide sort fields.
+			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
+			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+			columnHeader.setLayout("block");
+			columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+			col.getFacets().put("header", columnHeader);
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
 				CommandButton button = createDataGridAddButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
-				col.getFacets().put("header", button);
+				columnHeader.getChildren().add(button);
 			}
 			
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
@@ -568,13 +588,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			if (! children.isEmpty()) {
 				if (children.size() > 1) {
-					col.setStyle("width:90px;text-align:center !important");
+					col.setWidth("95");
+					col.setStyle("text-align:center !important");
 				}
 				current.getChildren().add(col);
 			}
 		}
 		
 		return current;
+	}
+
+	protected UIComponent createDataTableFilterToggle(String dataTableId) {
+		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Toggle filters");
+		button.setIcon("fa fa-filter");
+		button.setOnclick(String.format("SKYVE.toggleFilters('%s'); return false;", dataTableId));
+		return button;
 	}
 
 	protected CommandButton createDataGridAddButton(DataGrid grid, String listVar, String singularDocumentAlias,
@@ -710,9 +741,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         result.setLazy(true);
     	result.setRows(50);
-        result.setEmptyMessage("No Items to show");
-        result.setSortMode("multiple");
-        
+		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+		result.setSortMode("multiple");
+
         setId(result, null);
     	result.setWidgetVar(result.getId());
     	
@@ -791,6 +822,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									        								createDisabled,
 									        								zoomRendered,
 									        								grid.getDisableZoomConditionName(),
+																			result.getId(),
 																			grid.getProperties());
 			children.add(actionColumn);
         }
@@ -852,8 +884,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		columnPriority = 1;
 
-		for (QueryColumn queryColumn : model.getColumns()) {
-			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
+			MetaDataQueryProjectedColumn projectedQueryColumn = (queryColumn instanceof MetaDataQueryProjectedColumn) ?
+																	(MetaDataQueryProjectedColumn) queryColumn :
+																	null;
+			if (queryColumn.isHidden() || 
+					((projectedQueryColumn != null) && (! projectedQueryColumn.isProjected()))) {
 				continue;
 			}
 			
@@ -888,7 +924,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					if (displayName == null) {
 						displayName = bindingAttribute.getDisplayName();
 					}
-					if (showFilter && queryColumn.isFilterable()) {
+					if (showFilter && 
+							(projectedQueryColumn != null) &&
+							projectedQueryColumn.isFilterable()) {
 						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
 																							binding,
 																							bindingAttribute,
@@ -902,18 +940,22 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(column, null);
 			column.setHeaderText(displayName);
 			column.setPriority(columnPriority);
+			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
 				columnPriority++;
 			}
 			column.setField((name != null) ? name : binding);
 			
-			// Unbound columns or unsortable columns should be set unsortable
-			if ((binding == null) || (! queryColumn.isSortable())) {
+			// Unbound columns or content columns or unsortable columns should be set unsortable
+			if ((binding == null) || (projectedQueryColumn == null) || (! projectedQueryColumn.isSortable())) {
 				column.setSortable(false);
 			}
 
-			// Unbound columns or unfilterable columns should be set unfilterable
-			if ((binding != null) && showFilter && queryColumn.isFilterable()) {
+			// Unbound columns, content columns or unfilterable columns should be set unfilterable
+			if ((binding != null) && 
+					showFilter && 
+					(projectedQueryColumn != null) && 
+					projectedQueryColumn.isFilterable()) {
 				if (specialFilterComponent != null) {
 					column.getFacets().put("filter", specialFilterComponent);
 				}
@@ -941,9 +983,54 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
 			}
+
+			String value = null;
+			if (projectedQueryColumn != null) { // projected column
+				value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
+			}
+			else { // content column
+				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) queryColumn;
+				DisplayType display = contentColumn.getDisplay();
+				String emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
+				Integer pixelHeight = contentColumn.getPixelHeight();
+				String href = String.format("'content?_n='.concat(row['%s']).concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_b=%s')",
+												binding, 
+												Bean.MODULE_KEY,
+												Bean.DOCUMENT_KEY,
+												binding);
+
+				if (DisplayType.thumbnail.equals(display)) {
+					String width = (pixelWidth == null) ? 
+			    						((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+										pixelWidth.toString();
+					String height = (pixelHeight == null) ? 
+										((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+										pixelHeight.toString();
+					String empty = "''";
+					if (emptyThumbnailRelativeFile != null) {
+						empty = String.format("'<img src=\"resources?_n=%s'.concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_w=%s&_h=%s\"/>')",
+												emptyThumbnailRelativeFile,
+												Bean.MODULE_KEY,
+												Bean.DOCUMENT_KEY,
+												width,
+												height);
+					}
+					value = String.format("#{(empty row['%s']) ? %s : '<a href=\"'.concat(%s).concat('\" target=\"_blank\"><img src=\"').concat(%s).concat('&_w=%s&_h=%s\"/></a>')}",
+											binding,
+											empty,
+											href,
+											href,
+					                		width,
+					                		height);
+				}
+				else if (DisplayType.link.equals(display)) {
+					value = String.format("#{(empty row['%s']) ? '' : '<a href=\"'.concat(%s).concat('\" target=\"_blank\">Content</a>')}",
+											binding,
+											href);
+					
+				}
+			}
 			
-			// Add the EL expression
-			String value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
 			column.getChildren().add(outputText);
@@ -992,11 +1079,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   String[] createDisabledConditionNames,
 													   boolean zoomRendered,
 													   String zoomDisabledConditionName,
+													   String parentId,
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
-		column.setWidth("40");
+		column.setWidth("60");
 		column.setStyle("text-align:center !important");
+
+		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
+		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		columnHeader.setLayout("block");
+		columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+		column.getFacets().put("header", columnHeader);
+		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
+
+		final UIComponent filterToggle = createDataTableFilterToggle(parentId);
+		columnHeaderChildren.add(filterToggle);
+
 		if (canCreateDocument && createRendered) {
 			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 			setId(button, null);
@@ -1011,8 +1110,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
 			value.append("&d=").append(documentName);
 			button.setHref(value.toString());
-
-			column.getFacets().put("header", button);
+			columnHeaderChildren.add(button);
 		}
 		else {
 			column.setHeaderText("");
@@ -1188,19 +1286,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-/* TODO Why don't tri state checkboxes work???
-		UIComponentBase c = Boolean.FALSE.equals(checkBox.getTriState()) ?
-								b.checkbox(listVar,
-										checkBox.getBinding(), 
-										def.getTitle(),
-										def.isRequired(),
-										checkBox.getDisabledConditionName()) :
-								b.triStateCheckbox(listVar,
-													checkBox.getBinding(), 
-													def.getTitle(),
-													def.isRequired(),
-													checkBox.getDisabledConditionName());
-*/
 		return checkbox(listVar,
 							checkBox.getBinding(), 
 							title,
