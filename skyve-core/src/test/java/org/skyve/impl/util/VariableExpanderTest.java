@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,9 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.skyve.CORE;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.util.JSON;
 
 public class VariableExpanderTest {
 
@@ -96,5 +100,22 @@ public class VariableExpanderTest {
 
 		final String expandedProperty = (String) expandedConfig.get(propertyKey);
 		Assert.assertThat(expandedProperty, is(propertyDefaultValue));
+	}
+
+	/**
+	 * Tests that the default value of null is used when the variable is not defined.
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testNullDefaultUsedWhenVariableNotDefined() throws Exception {
+		final String propertyKey = "testKey";
+		//final String json = String.format("{ \"%s\" : \"${TEST:null}\" }", propertyKey);
+		final String json = String.format("{ \"%s\" : \"${TEST:0}\" }", propertyKey);
+		properties = (Map<String, Object>) JSON.unmarshall(null, json);
+
+		final Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
+
+		final String expandedProperty = (String) expandedConfig.get(propertyKey);
+		Assert.assertThat(expandedProperty, is(nullValue()));
 	}
 }
