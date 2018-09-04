@@ -326,6 +326,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		message.setShowDetail(true);
 		message.setShowSummary(false);
 		message.setDisplay("icon");
+		message.setEscape(false);
 
 		return message;
 	}

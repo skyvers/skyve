@@ -476,6 +476,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			message.setShowDetail(true);
 			message.setShowSummary(false);
 			message.setDisplay("icon");
+			message.setEscape(false);
 			message.setStyle("float:left");
 
 			// If a div was not required (no input control), insert the message into the column
@@ -1001,10 +1002,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 				if (DisplayType.thumbnail.equals(display)) {
 					String width = (pixelWidth == null) ? 
-			    						((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+			    						((pixelHeight == null) ? "64" : pixelHeight.toString()) :
 										pixelWidth.toString();
 					String height = (pixelHeight == null) ? 
-										((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+										((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 										pixelHeight.toString();
 					String empty = "''";
 					if (emptyThumbnailRelativeFile != null) {
