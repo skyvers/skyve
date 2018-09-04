@@ -32,7 +32,7 @@
 			<link rel="stylesheet" type="text/css" href="#{desktop.cssRelativeFileNameUrl}" />
 		</h:head>
 		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-			<p:growl id="growl" widgetVar="growl" globalOnly="true" />
+			<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false" />
 			<h:form prependId="false">
 				<p:remoteCommand name="setUxUi" actionListener="#{desktop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
 			</h:form>

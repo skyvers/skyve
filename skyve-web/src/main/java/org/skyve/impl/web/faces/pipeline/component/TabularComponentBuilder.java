@@ -476,6 +476,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			message.setShowDetail(true);
 			message.setShowSummary(false);
 			message.setDisplay("icon");
+			message.setEscape(false);
 			message.setStyle("float:left");
 
 			// If a div was not required (no input control), insert the message into the column
