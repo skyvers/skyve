@@ -1538,8 +1538,11 @@ public final class BindUtil {
 		int i = 0;
 		boolean whiteSpaceOrUnderscore = false;
 		while (i < sb.length()) {
+			char charAt = sb.charAt(i);
 			if (i == 0) {
-				if (Character.isJavaIdentifierStart(sb.charAt(0)) && (sb.charAt(0) != '_')) {
+				// Allow java start char except '_' which is reserved in skyve
+				// plus digits which are converted to words below.
+				if ((Character.isJavaIdentifierStart(charAt) && (charAt != '_')) || Character.isDigit(charAt)) {
 					i++;
 				}
 				else {
@@ -1547,19 +1550,53 @@ public final class BindUtil {
 				}
 			}
 			else {
-				if (Character.isJavaIdentifierPart(sb.charAt(i)) && (sb.charAt(i) != '_')) {
+				if (Character.isJavaIdentifierPart(charAt) && (charAt != '_')) {
 					if (whiteSpaceOrUnderscore) {
-						sb.setCharAt(i, Character.toUpperCase(sb.charAt(i)));
+						sb.setCharAt(i, Character.toUpperCase(charAt));
 					}
 					whiteSpaceOrUnderscore = false;
 					i++;
 				}
 				else {
-					if (Character.isWhitespace(sb.charAt(i)) || (sb.charAt(i) == '_')) {
+					if (Character.isWhitespace(charAt) || (charAt == '_')) {
 						whiteSpaceOrUnderscore = true;
 					}
 					sb.deleteCharAt(i);
 				}
+			}
+		}
+		
+		if (sb.length() > 0) {
+			char firstChar = sb.charAt(0);
+			if (firstChar == '0') {
+				sb.replace(0, 1, "zero");
+			}
+			else if (firstChar == '1') {
+				sb.replace(0, 1, "one");
+			}
+			else if (firstChar == '2') {
+				sb.replace(0, 1, "two");
+			}
+			else if (firstChar == '3') {
+				sb.replace(0, 1, "three");
+			}
+			else if (firstChar == '4') {
+				sb.replace(0, 1, "four");
+			}
+			else if (firstChar == '5') {
+				sb.replace(0, 1, "five");
+			}
+			else if (firstChar == '6') {
+				sb.replace(0, 1, "six");
+			}
+			else if (firstChar == '7') {
+				sb.replace(0, 1, "seven");
+			}
+			else if (firstChar == '8') {
+				sb.replace(0, 1, "eight");
+			}
+			else if (firstChar == '9') {
+				sb.replace(0, 1, "nine");
 			}
 		}
 	}

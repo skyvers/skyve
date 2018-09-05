@@ -34,4 +34,45 @@ public class BindTests {
 		Assert.assertEquals("test[100].test[0].test[1]", BindUtil.unsanitiseBinding("test_100__test_0__test_1_"));
 		Assert.assertEquals("test1[100].test2[0].test3[1]", BindUtil.unsanitiseBinding("test1_100__test2_0__test3_1_"));
 	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testGeneratedJavaIdentifier() throws Exception {
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("1"), "one");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("2"), "two");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("3"), "three");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("4"), "four");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("5"), "five");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("6"), "six");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("7"), "seven");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("8"), "eight");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("9"), "nine");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_1"), "one");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_2"), "two");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_3"), "three");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_4"), "four");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_5"), "five");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_6"), "six");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_7"), "seven");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_8"), "eight");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("_9"), "nine");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("11"), "one1");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("22"), "two2");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("33"), "three3");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("44"), "four4");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("55"), "five5");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("66"), "six6");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("77"), "seven7");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("88"), "eight8");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("99"), "nine9");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v1"), "v1");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v2"), "v2");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v3"), "v3");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v4"), "v4");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v5"), "v5");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v6"), "v6");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v7"), "v7");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v8"), "v8");
+		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v9"), "v9");
+	}
 }
