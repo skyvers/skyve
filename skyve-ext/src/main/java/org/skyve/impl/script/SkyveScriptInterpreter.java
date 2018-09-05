@@ -515,14 +515,14 @@ public class SkyveScriptInterpreter {
 		if (viewer != null) {
 			DocumentPrivilege p = new DocumentPrivilege();
 			p.setDocumentName(document.getName());
-			p.setPermission(document.getPersistent() != null ? DocumentPermission._R__D : DocumentPermission._____);
+			p.setPermission(document.getPersistent() != null ? DocumentPermission._R__C : DocumentPermission._____);
 			viewer.getPrivileges().add(p);
 		}
 
 		if (maintainer != null) {
 			DocumentPrivilege p = new DocumentPrivilege();
 			p.setDocumentName(document.getName());
-			p.setPermission(document.getPersistent() != null ? DocumentPermission.CRUDD : DocumentPermission._____);
+			p.setPermission(document.getPersistent() != null ? DocumentPermission.CRUDC : DocumentPermission._____);
 			maintainer.getPrivileges().add(p);
 		}
 	}

@@ -32,13 +32,13 @@ At any time, branch out into "traditional" development without restriction, but 
 
 Skyve supports spatial concepts natively with MySQL, SQL Server and H2 - Oracle and Postgres coming soon. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
 
-For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](www.skyve.org).
+For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
-Skyve is created by [Biz Hub Australia](http://www.bizhub.com.au/) and we offer a range of support agreements if required. Or use it for free, no obligation.
+Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer a range of support agreements if required. Or use it for free, no obligation.
 
 ## Getting Started
 
-In addition to the [Skyve platform website](www.skyve.org) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
+In addition to the [Skyve platform website](https://skyve.org/) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
 
 ### Development Guide
 
