@@ -946,10 +946,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				columnPriority++;
 			}
 			column.setField((name != null) ? name : binding);
-			
+
 			// Unbound columns or content columns or unsortable columns should be set unsortable
 			if ((binding == null) || (projectedQueryColumn == null) || (! projectedQueryColumn.isSortable())) {
 				column.setSortable(false);
+			}
+			else {
+				column.setValueExpression("sortBy", 
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
 			}
 
 			// Unbound columns, content columns or unfilterable columns should be set unfilterable
@@ -957,6 +961,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					showFilter && 
 					(projectedQueryColumn != null) && 
 					projectedQueryColumn.isFilterable()) {
+				column.setValueExpression("filterBy", 
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
 				if (specialFilterComponent != null) {
 					column.getFacets().put("filter", specialFilterComponent);
 				}
