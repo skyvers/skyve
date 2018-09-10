@@ -46,8 +46,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -184,7 +184,7 @@ public final class BindUtil {
 							}
 							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 						}
-						catch (Exception e) {
+						catch (@SuppressWarnings("unused") Exception e) {
 							valid = false;
 						}
 					}
@@ -576,7 +576,7 @@ public final class BindUtil {
 						}
 					}
 				}
-				catch (MetaDataException e) {
+				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// The binding may be a column alias with no metadata, so do nothing when this occurs
 				}
 			}
@@ -596,6 +596,14 @@ public final class BindUtil {
 	}
 	
 	public static String getDisplay(Customer customer, Bean bean, String binding, Object value) {
+		if (value instanceof Bean) {
+			if (value instanceof PersistentBean) {
+				return ((PersistentBean) value).getBizKey();
+			}
+			Bean valueBean = (Bean) value;
+			return String.format("Transient Document Instance %s.%s#%s", valueBean.getBizModule(), valueBean.getBizDocument(), valueBean.getBizId());
+		}
+
 		Converter<?> converter = null;
 		List<DomainValue> domainValues = null;
 
@@ -609,7 +617,7 @@ public final class BindUtil {
 				target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				attribute = target.getAttribute();
 			}
-			catch (MetaDataException e) {
+			catch (@SuppressWarnings("unused") MetaDataException e) {
 				// do nothing
 			}
 			
@@ -952,7 +960,7 @@ public final class BindUtil {
 					try {
 						valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
 					}
-					catch (NoSuchMethodException e) {
+					catch (@SuppressWarnings("unused") NoSuchMethodException e) {
 						valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
 					}
 				}
@@ -1147,7 +1155,7 @@ public final class BindUtil {
 			try {
 				key = propName.substring(j + 1, k);
 			}
-			catch (IndexOutOfBoundsException e) {
+			catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 				// do nothing
 			}
 			propName = propName.substring(0, j);
@@ -1167,7 +1175,7 @@ public final class BindUtil {
 			try {
 				type = getPropertyType(targetBean, propName);
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				return;
 			}
 
@@ -1425,7 +1433,7 @@ public final class BindUtil {
 				try {
 					value = BindUtil.get(owner, bindingPart);
 				}
-				catch (IndexOutOfBoundsException e) {
+				catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 					if (attribute != null) {
 						Document collectionDocument = module.getDocument(customer, ((Relation) attribute).getDocumentName());
 	
@@ -1444,7 +1452,7 @@ public final class BindUtil {
 								try {
 									((ChildBean<Bean>) fillerElement).setParent((Bean) owner);
 								}
-								catch (ClassCastException cce) {
+								catch (@SuppressWarnings("unused") ClassCastException cce) {
 									// continue on - this child bean is being linked to
 									// by some other document as an "aggregation"
 									// IE the owner variable above is not the parent document
