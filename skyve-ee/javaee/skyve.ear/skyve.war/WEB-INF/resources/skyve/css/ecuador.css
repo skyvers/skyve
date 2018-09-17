@@ -1,6 +1,7 @@
 @CHARSET "UTF-8";
 
 #footer-menu .footer-box span, .layout-footer .logo-container-outer {
+	padding-top: 5px;
     text-align: center !important;
 }
 
