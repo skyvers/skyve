@@ -1,11 +1,8 @@
-package modules.admin.Configuration.actions;
+package modules.admin.UserList.actions;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Configuration.ConfigurationBizlet;
-import modules.admin.domain.Configuration;
-import modules.admin.domain.Contact;
-import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.User;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
@@ -20,34 +17,37 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.UserList.UserListUtil;
+import modules.admin.domain.Contact;
+import modules.admin.domain.Contact.ContactType;
+import modules.admin.domain.User;
+import modules.admin.domain.UserList;
 
-public class InviteUsers implements ServerSideAction<Configuration> {
+public class InviteUsers implements ServerSideAction<UserList> {
 
 	private static final String SPACE_COMMA_OR_SEMICOLON = "[\\s,;]+";
 	
 	private static final long serialVersionUID = -4884065778373508731L;
 
 	@Override
-	public ServerSideActionResult<Configuration> execute(Configuration bean, WebContext webContext)
+	public ServerSideActionResult<UserList> execute(UserList bean, WebContext webContext)
 			throws Exception {
 
 		// validate that some groups are selected
 		if(bean.getUserInvitationGroups().isEmpty()) {
-			throw new ValidationException(new Message(Configuration.userInvitationGroupsPropertyName, "You must select at least one permission group for invited users."));
+			throw new ValidationException(new Message("You must select at least one permission group for invited users."));
 		}
 		
 		if(bean.getUserInvitiationEmailList()==null) {
-			throw new ValidationException(new Message(Configuration.userInvitiationEmailListPropertyName, "Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
+			throw new ValidationException(new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
 		}
 		
 		// all emails need to be validated prior to any sending
 		// (comma separated or semicolon separated list is provided)
 		Persistence pers = CORE.getPersistence();
 		Customer customer = pers.getUser().getCustomer();
-		Module module = customer.getModule(Configuration.MODULE_NAME);
+		Module module = customer.getModule(UserList.MODULE_NAME);
 		
 		Document docContact = module.getDocument(customer, Contact.DOCUMENT_NAME);
 		List<Contact> validatedContacts = new ArrayList<>();
@@ -79,18 +79,19 @@ public class InviteUsers implements ServerSideAction<Configuration> {
 			final User newUser = User.newInstance();
 			newUser.setUserName(contact.getEmail1());
 			newUser.setPassword(EXT.hashPassword(token));
-			newUser.setPasswordExpired(true);
+			newUser.setPasswordExpired(Boolean.TRUE);
 			newUser.setPasswordResetToken(token);
 			newUser.setContact(contact);
+			
 			// assign groups as selected
 			newUser.getGroups().addAll(bean.getUserInvitationGroups());
 
 			CORE.getPersistence().save(newUser);
 
 			// send invitation email
-			CommunicationUtil.sendFailSafeSystemCommunication(ConfigurationBizlet.SYSTEM_USER_INVITATION,
-					ConfigurationBizlet.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
-					ConfigurationBizlet.SYSTEM_USER_INVITATION_DEFAULT_BODY,
+			CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
+					UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
+					UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
 					CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 		}
 

@@ -22,7 +22,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - ActionType
  * @depend - - - FormatType
- * @navcomposed n template 0..1 CommunicationTemplate
+ * @navhas n template 0..1 CommunicationTemplate
  * @navhas n tag 0..1 Tag
  * @stereotype "persistent"
  */

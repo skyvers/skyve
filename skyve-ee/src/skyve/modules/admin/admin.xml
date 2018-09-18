@@ -54,7 +54,7 @@
 	</documents>
 	<roles>
 		<role name="Anonymous">
-			<description>Anonymous (not logged in) access public features</description>
+			<description>Access anonymous (not logged in) public features</description>
 			<privileges>
 				<document name="Communication" permission="_R__G"/>
 				<document name="CommunicationTemplate" permission="_R__G"/>
