@@ -131,8 +131,9 @@ public class UserBizlet extends Bizlet<User> {
 			for (Module module : customer.getModules()) {
 				for (Role role : module.getRoles()) {
 					String roleName = role.getName();
+					String roleDescription  = role.getDescription();
 					result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName), 
-												String.format("%s - %s", module.getTitle(), roleName)));
+												String.format("%s - %s (%s)", module.getTitle(), roleName, roleDescription)));
 				}
 			}
 		}
