@@ -74,7 +74,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param invisible
 	 * @return
 	 */
-	public abstract UIComponent tabPane(UIComponent component, TabPane tabPane);
+	public abstract UIComponent tabPane(UIComponent component,
+											TabPane tabPane,
+											String moduleName,
+											String documentName,
+											StringBuilder stickyTabScript);
 	
 	public abstract UIComponent tab(UIComponent component, Tab tab);
 	

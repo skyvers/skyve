@@ -54,7 +54,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component,
+								TabPane tabPane,
+								String moduleName,
+								String documentName,
+								StringBuilder stickyTabScript) {
 		return component;
 	}
 

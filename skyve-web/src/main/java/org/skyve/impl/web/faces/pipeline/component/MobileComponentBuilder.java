@@ -49,7 +49,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component,
+								TabPane tabPane,
+								String moduleName,
+								String documentName,
+								StringBuilder stickyTabScript) {
 		if (component != null) {
 			return component;
 		}

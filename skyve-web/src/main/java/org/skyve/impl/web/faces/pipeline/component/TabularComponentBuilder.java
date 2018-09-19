@@ -149,14 +149,33 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component,
+								TabPane tabPane,
+								String moduleName,
+								String documentName,
+								StringBuilder stickyTabScript) {
 		if (component != null) {
 			return component;
 		}
 
-		return tabView(tabPane.getInvisibleConditionName(), 
-						tabPane.getSelectedTabIndexBinding(),
-						tabPane.getWidgetId());
+		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
+		setInvisible(result, tabPane.getInvisibleConditionName(), null);
+		setId(result, tabPane.getWidgetId());
+		String id = result.getId();
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class));
+		}
+		else {
+			result.setWidgetVar(id);
+			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
+
+			stickyTabScript.append(String.format("if(sessionStorage.tab_%s_%s_%s)PF('%s').select(sessionStorage.tab_%s_%s_%s);",
+													moduleName, documentName, id,
+													id,
+													moduleName, documentName, id));
+		}
+		return result;
 	}
 	
 	@Override
@@ -2035,16 +2054,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setMaxlength(maxLength.intValue());
 		}
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null);
-		return result;
-	}
-
-	private TabView tabView(String invisible, String activeIndexBinding, String widgetId) {
-		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
-		setInvisible(result, invisible, null);
-		setId(result, widgetId);
-		if (activeIndexBinding != null) {
-			result.setValueExpression("activeIndex", createValueExpressionFromFragment(activeIndexBinding, true, null, Number.class));
-		}
 		return result;
 	}
 
