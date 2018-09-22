@@ -1280,13 +1280,16 @@ public final class BindUtil {
 		for (final Attribute attribute : d.getAllAttributes()) {
 			final String attributeName = attribute.getName();
 
-			if (attribute.getAttributeType() == AttributeType.collection) {
-				copyCollection(from, to, attributeName);
+			if (AttributeType.collection.equals(attribute.getAttributeType())) {
+				copyCollection(from,
+								to,
+								attributeName,
+								CollectionType.child.equals(((Collection) attribute).getType()));
 				continue;
 			}
 
-			if (attribute.getAttributeType() == AttributeType.inverseMany) {
-				copyCollection(from, to, attributeName);
+			if (AttributeType.inverseMany.equals(attribute.getAttributeType())) {
+				copyCollection(from, to, attributeName, false);
 				continue;
 			}
 
@@ -1296,11 +1299,17 @@ public final class BindUtil {
 
 	// TODO clearing colTo issues a delete statement in hibernate, this method should process each collection item.
 	@SuppressWarnings("unchecked")
-	private static void copyCollection(final Bean from, final Bean to, final String attributeName) {
+	private static void copyCollection(final Bean from,
+										final Bean to,
+										final String attributeName,
+										boolean reparent) {
 		List<Bean> colFrom = (List<Bean>) BindUtil.get(from, attributeName);
 		List<Bean> colTo = (List<Bean>) BindUtil.get(to, attributeName);
 		colTo.clear();
 		colTo.addAll(colFrom);
+		if (reparent) {
+			colTo.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
+		}
 	}
 
 	

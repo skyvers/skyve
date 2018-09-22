@@ -3,8 +3,15 @@ package modules.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.util.Binder;
+import org.skyve.util.Util;
 
-public class BindTests {
+import modules.admin.domain.User;
+import modules.admin.domain.UserRole;
+import modules.test.domain.AllAttributesPersistent;
+
+public class BindTests extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testSanitizeBinding() throws Exception {
@@ -74,5 +81,28 @@ public class BindTests {
 		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v7"), "v7");
 		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v8"), "v8");
 		Assert.assertEquals(BindUtil.toJavaInstanceIdentifier("v9"), "v9");
+	}
+	
+	@Test
+	public void testCopyProperties() throws Exception {
+		AllAttributesPersistent from = Util.constructRandomInstance(u, m, aapd, 2);
+		AllAttributesPersistent to = AllAttributesPersistent.newInstance();
+		Binder.copy(from, to);
+		for (Attribute a: aapd.getAttributes()) {
+			String name = a.getName();
+			Assert.assertEquals(Binder.get(from, name), Binder.get(to, name));
+		}
+	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCopyPropertiesWithChildCollection() throws Exception {
+		User from = User.newInstance();
+		UserRole role = UserRole.newInstance();
+		from.getRoles().add(role);
+		role.setParent(from);
+		User to = User.newInstance();
+		Binder.copy(from, to);
+		Assert.assertEquals(role.getParent(), to);
 	}
 }
