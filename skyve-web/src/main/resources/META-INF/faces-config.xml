@@ -200,4 +200,11 @@
 		<converter-id>Geometry</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.geometry.GeometryConverter</converter-class>
 	</converter>
+	<render-kit>
+		<renderer>
+			<component-family>org.primefaces.component</component-family>
+			<renderer-type>org.primefaces.component.TabViewRenderer</renderer-type>
+			<renderer-class>org.skyve.impl.web.faces.renderers.TabViewRenderer</renderer-class>
+		</renderer>
+	</render-kit>
 </faces-config>
