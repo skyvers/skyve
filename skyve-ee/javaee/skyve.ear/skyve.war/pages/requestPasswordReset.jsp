@@ -43,149 +43,172 @@
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title><%=Util.i18n("page.requestPasswordReset.title", locale)%></title>
-		<base href="<%=basePath%>" />
-
+		<!-- Standard Meta -->
+	    <meta charset="utf-8" />
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta http-equiv="refresh" content="300; url=<%=basePath%>loggedOut" />
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta http-equiv="cache-control" content="private,no-cache,no-store" />
 		<meta http-equiv="expires" content="0" />
-
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	    
+	    <!-- Site Properties -->
+		<title><%=Util.i18n("page.requestPasswordReset.title", locale)%></title>
+		<base href="<%=basePath%>" />
+		
 		<% if (mobile) { %>
 			<meta name="format-detection" content="telephone=no" />
-			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+			<meta name="format-detection" content="email=no">
 		<% } %>
-
+		
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
-		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
-		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">
+		
 		<style type="text/css">
-			.instructions {
+			body {
+				background-color: #eee;
+			}
+			body > .grid {
+				height: 100%;
+				/* background: url('/img/bg-image-login.jpg') no-repeat; */
+			    background-size: cover;
+			    background-position: center;
+			    margin-top: 0px !important;
+			}
+			.image {
+				margin-top: -100px;
+			}
+			.column {
 				max-width: 450px;
-				font-size: 1.0rem;
 			}
-			.instructions a {
-				font-size: 1.0rem;
+			.ui.white.header {
+				color: white !important;
 			}
+			.footer {
+			    color: white;
+			    font-size: 80%;
+			    margin-top: -20px;
+			    margin-right: 10px;
+			    text-align: right;
+		    }
+		    .footer a {
+		    	color: #cdcdcd;
+		    }
 		</style>
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/form.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/transition.min.js"></script>
 		
 		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
-				if (form.customer.value.length < 1) {
-					alert('<%=Util.i18n("page.login.customer.error.required", locale)%>');
-					form.customer.focus();
-					return false;
-				}
-				else if (form.email.value.length < 1) {
-					alert('<%=Util.i18n("page.requestPasswordReset.email.error.required", locale)%>');
-					form.email.focus();
-					return false;
-				}
-				else {
+				if($('.ui.form').form('is valid')) {
 					form.action = '<%=basePath + "pages/requestPasswordReset.jsp"%>';
 					return true;
 				}
+				
+				return false;
 			}
+			
+			$(document)
+			.ready(function() {
+			    $('.ui.form')
+			    .form({
+			        fields: {
+			        	customer: {
+			        		identifier: 'customer',
+			        		rules: [
+			        			{
+			        				type: 'empty',
+			        				prompt: '<%=Util.i18n("page.login.customer.error.required", locale)%>'
+			        			}
+			        		]
+			        	},
+			            email: {
+			                identifier  : 'email',
+			                rules: [
+			                    {
+			                        type   : 'empty',
+			                        prompt : '<%=Util.i18n("page.requestPasswordReset.email.error.required", locale)%>'
+			                    },
+			                ]
+			            }
+			        }
+			    });
+			});
 			-->
 		</script>
 		<script src='https://www.google.com/recaptcha/api.js'></script>
 	</head>
-	<body style="background:white">
-		<div class="container">
-			<%@include file="fragments/logo.html" %>
-			<div class="row">
-				<div class="col-3 col-2-md hidden-sm"></div>
-				<div class="col-6 col-8-md col-12-sm">
-					<% if (postback) { %>
-						<div class="loginTable" style="width:100%;">
-							<div class="row">
-								<div class="col-12 center">
-									<span class="subhead"><%=Util.i18n("page.requestPasswordReset.complete.banner", locale)%></span>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-12 center">
-									<span class="instructions"><%=Util.i18n("page.requestPasswordReset.complete.message", locale)%></span>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-1 col-2-sm"></div>
-								<div class="col-10 col-8-sm center">
-									<div class="buttonDiv">
-										<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
+	<body>
+		<div class="ui middle aligned center aligned grid">
+		    <div class="column">
+		    	<%@include file="fragments/logo.html" %>
+		    	
+		    	<% if (postback) { %>
+			    	<form class="ui large form">
+			            <div class="ui segment">
+			            	<div class="ui header">
+			            		<%=Util.i18n("page.requestPasswordReset.complete.banner", locale)%>
+			            	</div>
+			            	<div class="field">
+			            		<%=Util.i18n("page.requestPasswordReset.complete.message", locale)%>
+			            	</div>
+			            	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+			            </div>
+			        </form>
+		    	<% } else { %>
+		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
+			    		<div class="ui segment">
+				    		<div class="ui header">
+				    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
+				    		</div>
+			    			<div class="field">
+								<%=Util.i18n("page.requestPasswordReset.message", locale)%>
+			    			</div>
+							<% if (customer == null) { %>
+								<div class="field">
+									<div class="ui left icon input">
+										<i class="building icon"></i>
+										<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.customer.label", locale)%>">
 									</div>
 								</div>
-							</div>
-						</div>
-					<% } else { %>
-						<form method="post" onsubmit="return testMandatoryFields(this)">
-							<div class="loginTable" style="width:100%;">
-								<div class="row">
-									<div class="col-12 center">
-										<span class="subhead"><%=Util.i18n("page.requestPasswordReset.banner", locale)%></span>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-12">
-										<div class="instructions">
-											<%=Util.i18n("page.requestPasswordReset.message", locale)%>
-										</div>
-									</div>
-								</div>
-								<% if (customer == null) { %>
-								<div class="row">
-									<div class="col-4-sm right">
-										<label for="customer"><%=Util.i18n("page.login.customer.label", locale)%></label>
-									</div>
-									<div class="col-7-sm">
-										<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="customer">
-									</div>
-								</div>
-								<% } %>
-								<div class="row">
-									<div class="col-4-sm right">
-										<label for="email"><%=Util.i18n("page.requestPasswordReset.email.label", locale)%></label>
-									</div>
-									<div class="col-7-sm">
-										<% if (customer != null) { %>
-											<input type="hidden" name="customer" value="<%=customer%>" />
-										<% } %>
-										<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="email">
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-12">
-										<!-- A table to brute force the captcha to centre as it is an iframe -->
-										<table>
-											<tr>
-												<td style="width:50%" />
-												<td>
-													<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
-												</td>
-												<td style="width:50%" />
-											</tr>
-										</table>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-1 col-2-sm"></div>
-									<div class="col-10 col-8-sm center">
-										<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" />
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-1 col-2-sm"></div>
-									<div class="col-10 col-8-sm center" style="font-size: 11px;">
-										<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
-									</div>
-								</div>
-							</div>
-						</form>
-					<% } %>
-				</div>
-			</div>
+							<% } %>
+							<div class="field">
+			                    <div class="ui left icon input">
+			                        <i class="user icon"></i>
+			                        <input type="text" name="email" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.requestPasswordReset.email.label", locale)%>">
+			                        <% if (customer != null) { %>
+										<input type="hidden" name="customer" value="<%=customer%>" />
+									<% } %>
+			                    </div>
+			                </div>
+			                <div class="field">
+			                	<!-- A table to brute force the captcha to centre as it is an iframe -->
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
+			                </div>
+		                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
+			                <div style="margin-top: 5px;">
+			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+			                </div>
+		                </div>
+		                
+		                <div class="ui error message">
+			            	<%-- javascript form validation is inserted here --%> 
+			            </div>
+					</form>
+		    	<% } %>
+		    </div>
 		</div>
 	</body>
 </html>

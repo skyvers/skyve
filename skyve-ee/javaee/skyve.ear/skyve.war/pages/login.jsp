@@ -43,50 +43,69 @@
 	String userFieldName = "user";
 
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String fontSize = (mobile ? "18px" : "18px");
-	String fieldWidth = (mobile ? "120px" : "120px");
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+		<!-- Standard Meta -->
+	    <meta charset="utf-8" />
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta http-equiv="refresh" content="300; url=<%=basePath%>loggedOut" />
-		<title><%=Util.i18n("page.login.title", locale)%></title>
-		<base href="<%=basePath%>" />
-		
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta http-equiv="cache-control" content="private,no-cache,no-store" />
 		<meta http-equiv="expires" content="0" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	    
+	    <!-- Site Properties -->
+		<title><%=Util.i18n("page.login.title", locale)%></title>
+		<base href="<%=basePath%>" />
 		
 		<% if (mobile) { %>
 			<meta name="format-detection" content="telephone=no" />
-			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+			<meta name="format-detection" content="email=no">
 		<% } %>
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
-		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
-		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
+	    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">
+		
+		<style type="text/css">
+			body {
+				background-color: #eee;
+			}
+			body > .grid {
+				height: 100%;
+				/* background: url('/img/bg-image-login.jpg') no-repeat; */
+			    background-size: cover;
+			    background-position: center;
+			    margin-top: 0px !important;
+			}
+			.image {
+				margin-top: -100px;
+			}
+			.column {
+				max-width: 450px;
+			}
+			.footer {
+			    color: white;
+			    font-size: 80%;
+			    margin-top: -20px;
+			    margin-right: 10px;
+			    text-align: right;
+		    }
+		    .footer a {
+		    	color: #cdcdcd;
+		    }
+		</style>
+		
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/form.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/transition.min.js"></script>
 
 		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
-				if (form.customer.value.length < 1) {
-					alert('<%=Util.i18n("page.login.customer.error.required", locale)%>');
-					form.customer.focus();
-					return false;
-				}
-				else if (form.user.value.length < 1) {
-					alert('<%=Util.i18n("page.login.user.error.required", locale)%>');
-					form.user.focus();
-					return false;
-				}
-				else if (form.password.value.length < 1) {
-					alert('<%=Util.i18n("page.login.password.error.required", locale)%>');
-					form.password.focus();
-					return false;
-				}
-				else {
+				if($('.ui.form').form('is valid')) {
 					var hidden = document.createElement('input');
 					hidden.setAttribute('type', 'hidden');
 					hidden.setAttribute('name', 'username');
@@ -95,7 +114,45 @@
 					form.action = 'login';
 					return true;
 				}
+				
+				return false;
 			}
+			
+			$(document)
+			.ready(function() {
+			    $('.ui.form')
+			    .form({
+			        fields: {
+			        	customer: {
+			        		identifier: 'customer',
+			        		rules: [
+			        			{
+			        				type: 'empty',
+			        				prompt: '<%=Util.i18n("page.login.customer.error.required", locale)%>'
+			        			}
+			        		]
+			        	},
+			            username: {
+			                identifier  : 'user',
+			                rules: [
+			                    {
+			                        type   : 'empty',
+			                        prompt : '<%=Util.i18n("page.login.user.error.required", locale)%>'
+			                    },
+			                ]
+			            },
+			            password: {
+			                identifier  : 'password',
+			                rules: [
+			                    {
+			                        type   : 'empty',
+			                        prompt : '<%=Util.i18n("page.login.password.error.required", locale)%>'
+			                    }
+			                ]
+			            }
+			        }
+			    });
+			});
 			-->
 		</script>
 	</head>
@@ -128,101 +185,68 @@
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
 
-		<div class="container">
-			<%@include file="fragments/logo.html" %>
-			<%@include file="fragments/noscript.html" %>
-			<div class="row">
-				<div class="col-3 col-2-md hidden-sm"></div>
-				<div class="col-6 col-8-md col-12-sm">
-					<form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)">
-						<div class="loginTable" style="width:100%;">
-							<% if (loginError) { %>
-								<div class="row">
-									<div class="col-12 center">
-										<span class="subhead">
-											<%=Util.i18n("page.loginError.banner", locale)%>
-											<br/>
-										</span>
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-12 center">
-										<%=Util.i18n("page.loginError.invalid", locale)%>
-									</div>
-								</div>
+		<div class="ui middle aligned center aligned grid">
+		    <div class="column">
+		    	<%@include file="fragments/logo.html" %>
+		    	
+            	<%@include file="fragments/noscript.html" %>
+		        <% if (loginError) { %>
+            		<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+	            		<p><%=Util.i18n("page.loginError.invalid", locale)%></p>
+            		</div>
+				<% } %>
+		        <form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
+		            <div class="ui segment">
+		            	<div class="ui header">
+		            		<% if (request.getUserPrincipal() != null) { %>
+								<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
+							<% } else { %>
+								<%=Util.i18n("page.login.banner", locale)%>
 							<% } %>
-							<div class="row">
-								<div class="col-12 center">
-									<span class="subhead">
-										<% if (request.getUserPrincipal() != null) { %>
-											<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
-										<% } else { %>
-											<%=Util.i18n("page.login.banner", locale)%>
-										<% } %>
-									</span>
+		            	</div>
+						<% if (customer == null) { %>
+							<div class="field">
+								<div class="ui left icon input">
+									<i class="building icon"></i>
+									<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.customer.label", locale)%>">
 								</div>
 							</div>
-							<% if (customer == null) { %>
-							<div class="row">
-								<div class="col-4-sm right">
-									<label for="customer"><%=Util.i18n("page.login.customer.label", locale)%></label>
-								</div>
-								<div class="col-7-sm">
-									<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
-								</div>
-							</div>
-							<% } %>
-							<div class="row">
-								<div class="col-4-sm right">
-									<label for="user"><%=Util.i18n("page.login.user.label", locale)%></label>
-								</div>
-								<div class="col-7-sm">
-									<% if (customer != null) { %>
-										<input type="hidden" name="customer" value="<%=customer%>" />
-									<% } %>
-									<input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-4-sm right">
-									<label for="password"><%=Util.i18n("page.login.password.label", locale)%></label>
-								</div>
-								<div class="col-7-sm">
-									<input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
+						<% } %>
+		                <div class="field">
+		                    <div class="ui left icon input">
+		                        <i class="user icon"></i>
+		                        <input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.user.label", locale)%>">
+		                        <% if (customer != null) { %>
+									<input type="hidden" name="customer" value="<%=customer%>" />
+								<% } %>
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <div class="ui left icon input">
+		                        <i class="lock icon"></i>
+		                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
+		                    </div>
+		                </div>
+		                <div class="equal width fields">
+			                <div class="field" style="text-align: left">
+			                	<div class="ui checkbox">
+			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember">
+									<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
 								</div>
 							</div>
-							<div class="row">
-								<div class="col-4-sm right"></div>
-								<div class="col-7-sm center">
-									<table>
-										<tr>
-											<td>
-												<input type="checkbox" style="width:16px;height:16px" id="remember" name="remember" />
-											</td>
-											<td>
-												<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
-											</td>
-										</tr>
-									</table>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-1 col-2-sm"></div>
-								<div class="col-10 col-8-sm center">
-									<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" />
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-1 col-2-sm"></div>
-								<div class="col-10 col-8-sm center" style="font-size: 11px;">
-									<%=Util.i18n("page.login.reset.label", locale)%>
-									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.link.label", locale)%></a>
-								</div>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
+							<div class="field" style="text-align: right;">
+								<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+	    					</div>
+    					</div>
+						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
+		            </div>
+		            
+		            <div class="ui error message">
+		            	<%-- javascript form validation is inserted here --%> 
+		            </div>
+		        </form>
+		    </div>
 		</div>
 	</body>
 </html>
