@@ -1891,6 +1891,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
+		boolean tranzient = reference.isTransient();
 
 		if (overriddenReference) { // overridden reference to concrete implementation
 			return; // this already exists on the base class - don't override it.
@@ -1924,7 +1925,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				attributes.append("\t@Deprecated\n");
 			}
-			attributes.append("\tprivate List<").append(propertyClassName).append("> ").append(name);
+			attributes.append("\tprivate ");
+			if (tranzient) {
+				attributes.append("transient ");
+			}
+			attributes.append("List<").append(propertyClassName).append("> ").append(name);
 			attributes.append(" = new ArrayList<>();\n");
 
 			// Accessor method
@@ -1966,12 +1971,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					.append(" element) {\n");
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
-		} else { // this is an association Attribute
+		}
+		else { // this is an association Attribute
 			attributeJavadoc(reference, attributes);
 			if (deprecated) {
 				attributes.append("\t@Deprecated\n");
 			}
-			attributes.append("\tprivate ").append(propertyClassName).append(" ").append(name);
+			attributes.append("\tprivate ");
+			if (tranzient) {
+				attributes.append("transient ");
+			}
+			attributes.append(propertyClassName).append(" ").append(name);
 			attributes.append(" = null;\n");
 
 			// Accessor method
@@ -2018,6 +2028,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String name = inverse.getName();
 		boolean many = (!InverseRelationship.oneToOne.equals(inverse.getRelationship()));
 		boolean deprecated = inverse.isDeprecated();
+		boolean tranzient = inverse.isTransient();
 
 		String propertyPackagePath = "modules." + propertyPackageName + ".domain";
 		// Check for overridden only in customer folder (ie no vanilla document) and change package path accordingly
@@ -2049,10 +2060,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			attributes.append("\t@Deprecated\n");
 		}
 		if (many) {
-			attributes.append("\tprivate List<").append(propertyClassName).append("> ").append(name);
+			attributes.append("\tprivate ");
+			if (tranzient) {
+				attributes.append("transient ");
+			}
+			attributes.append("List<").append(propertyClassName).append("> ").append(name);
 			attributes.append(" = new ArrayList<>();\n");
-		} else {
-			attributes.append("\tprivate ").append(propertyClassName).append(" ").append(name).append(";\n");
+		}
+		else {
+			attributes.append("\tprivate ");
+			if (tranzient) {
+				attributes.append("transient ");
+			}
+			attributes.append(propertyClassName).append(" ").append(name).append(";\n");
 		}
 
 		// Accessor method
@@ -2066,7 +2086,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		methods.append("\n\t@XmlElement");
 		if (many) {
 			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
-		} else {
+		}
+		else {
 			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
 		}
 		methods.append("\t\treturn ").append(name).append(";\n");
@@ -2372,6 +2393,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			String name = attribute.getName();
 			boolean deprecated = attribute.isDeprecated();
+			boolean tranzient = attribute.isTransient();
 			// Add if
 			// 1) not the bizKey attribute
 			// AND
@@ -2456,7 +2478,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (deprecated) {
 					attributes.append("\t@Deprecated\n");
 				}
-				attributes.append("\tprivate ").append(propertySimpleClassName).append(' ').append(name);
+				attributes.append("\tprivate ");
+				if (tranzient) {
+					attributes.append("transient ");
+				}
+				attributes.append(propertySimpleClassName).append(' ').append(name);
 
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
@@ -2740,7 +2766,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
 				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n");
-			} else {
+			}
+			else {
 				attributes.append("\tprivate ").append(parentClassName).append(" parent;\n\n");
 
 				// Accessor method
