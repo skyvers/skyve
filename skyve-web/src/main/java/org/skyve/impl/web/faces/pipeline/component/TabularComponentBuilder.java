@@ -170,9 +170,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
-			stickyTabScript.append(String.format("if(sessionStorage.tab_%s_%s_%s)PF('%s').select(sessionStorage.tab_%s_%s_%s);",
-													moduleName, documentName, id,
+			stickyTabScript.append(String.format("PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);",
 													id,
+													moduleName, documentName, id,
 													moduleName, documentName, id));
 		}
 		return result;
