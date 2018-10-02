@@ -17,6 +17,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
@@ -574,11 +575,12 @@ public class XMLMetaData {
 
 			// detect any empty document elements which require children
 			if (uri.equals(DOCUMENT_NAMESPACE)) {
-				if (node.getParent() == null) {
+				Element parent = node.getParent();
+				if (parent == null) {
 					removeEmptyChildElements(node, new String[] { "conditions", "implements", "uniqueConstraints" });
 				}
 
-				if (node.getParent() != null && node.getParent().getName().equals("attributes")) {
+				if (parent != null && parent.getName().equals("attributes")) {
 					if (node.attributeCount() > 0) {
 						Map<String, Boolean> attributesToRemove = new HashMap<>();
 						attributesToRemove.put("deprecated", Boolean.FALSE);
@@ -586,6 +588,15 @@ public class XMLMetaData {
 						attributesToRemove.put("required", Boolean.FALSE);
 
 						removeDefaultAttributes(node, attributesToRemove);
+					}
+					
+					// remove transient element from attributes where transient is false
+					ListIterator<?> childNodes = node.elements().listIterator();
+					while (childNodes.hasNext()) {
+						Element child = (Element) childNodes.next();
+						if ("transient".equals(child.getName()) && "false".equals(child.getText())) {
+							childNodes.remove();
+						}
 					}
 				}
 			}
@@ -623,11 +634,13 @@ public class XMLMetaData {
 		}
 
 		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
+			List<String> nodesToRemoveList = Arrays.asList(nodesToRemove);
+			
 			ListIterator<?> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
 				Element child = (Element) childNodes.next();
 
-				if (Arrays.asList(nodesToRemove).contains(child.getName())) {
+				if (nodesToRemoveList.contains(child.getName())) {
 					if (child.isTextOnly() && child.elements().size() == 0) {
 						childNodes.remove();
 					}
