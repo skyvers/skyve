@@ -63,7 +63,7 @@
 		
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">
+		<link rel="stylesheet" href="semantic24/semantic.min.css">
 		
 		<style type="text/css">
 			body {
@@ -97,9 +97,9 @@
 		    }
 		</style>
 		
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.slim.min.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/form.min.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/components/transition.min.js"></script>
+		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
 		
 		<script type="text/javascript">
 			<!--
