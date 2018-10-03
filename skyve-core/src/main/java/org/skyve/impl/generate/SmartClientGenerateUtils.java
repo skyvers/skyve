@@ -51,6 +51,7 @@ import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -238,6 +239,7 @@ public class SmartClientGenerateUtils {
 		protected String validation;
 		protected String valueMap;
 		protected boolean required = false;
+		protected boolean triStateCheckBox = false;
 		protected TargetMetaData target;
 		
 		@SuppressWarnings("synthetic-access")
@@ -441,7 +443,7 @@ public class SmartClientGenerateUtils {
 					converter = field.getConverterForCustomer(customer);
 				}
 				else if (bindingAttribute instanceof Collection) {
-					name = Bean.DOCUMENT_ID;
+					this.name = Bean.DOCUMENT_ID;
 					type = "enum";
 				}
 
@@ -458,6 +460,10 @@ public class SmartClientGenerateUtils {
 					break;
 				case bool:
 					type = "boolean";
+					InputWidget diw = bindingAttribute.getDefaultInputWidget();
+					if (diw instanceof CheckBox) {
+						triStateCheckBox = (! Boolean.FALSE.equals(((CheckBox) diw).getTriState()));
+					}
 					break;
 				case colour:
 					type = "text";
@@ -635,6 +641,9 @@ public class SmartClientGenerateUtils {
 										Integer pixelHeight,
 										String emptyThumbnailRelativeFile) {
 			if (lookup == null) {
+				if (triStateCheckBox) {
+					result.append(",editorProperties:{allowEmptyValue:true}");
+				}
 				if ((! required) && ("select".equals(type) || "enum".equals(type))) {
 					result.append(",editorProperties:{allowEmptyValue:true}");
 				}
