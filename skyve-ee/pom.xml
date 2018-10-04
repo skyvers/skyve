@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20180830</version>
+		<version>20180901-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -73,6 +73,36 @@
 -->
 				</executions>
 			</plugin> 		
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- Generate javadoc package HTMLs: mvn exec:java@generate-javadoc-package-htmls -->
+                        <id>generate-javadoc-package-htmls</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.skyve.impl.tools.javadoc.doctor.DoctorUtil</mainClass>
+                            <arguments>
+                                <argument>src/main/java/</argument> <!-- source path -->
+                                <argument>bizhub</argument>            <!-- customerName -->
+                                <!-- list all modules as arguments here -->
+                                <argument>admin</argument>
+                            </arguments>
+                            <includePluginDependencies>true</includePluginDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.skyve</groupId>
+                        <artifactId>skyve-tools</artifactId>
+                        <version>${skyve.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -204,6 +234,23 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Create javadoc (run after mvn exec:java@generate-javadoc-package-htmls)
+					mvn javadoc:javadoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+                    <docletArtifact>
+                        <groupId>org.umlgraph</groupId>
+                        <artifactId>umlgraph</artifactId>
+                        <version>5.6.6</version>
+                    </docletArtifact>
+                    <doclint>none</doclint>
+                    <additionalOptions><additionalOption>-hide org.skyve.*|java.*|org.skyve.impl.* -link http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/ -link http://docs.oracle.com/javase/8/docs/api/</additionalOption></additionalOptions>
+                </configuration>
+            </plugin>
  		</plugins>
  	</build>
 

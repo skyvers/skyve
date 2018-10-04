@@ -420,7 +420,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentRemovesDefaultAttributes() throws Exception {
+	public void testMarshalDocumentRemovesDefaultAttributeAndElements() throws Exception {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -437,6 +437,9 @@ public class XMLMetaDataTest {
 		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
+
+		// transient element should have been removed as it is the default value of false
+		assertThat(result.contains("<transient>"), is(false));
 
 		Pattern p1 = Pattern.compile("<boolean.*persistent");
 		Matcher m1 = p1.matcher(result);
@@ -454,7 +457,7 @@ public class XMLMetaDataTest {
 
 	@Test
 	@SuppressWarnings({ "boxing", "static-method" })
-	public void testMarshalDocumentKeepsNonDefaultAttributes() throws Exception {
+	public void testMarshalDocumentKeepsNonDefaultAttributeAndElements() throws Exception {
 		// setup the test data
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("Test");
@@ -463,6 +466,7 @@ public class XMLMetaDataTest {
 		field.setRequired(true);
 		field.setPersistent(false);
 		field.setDeprecated(true);
+		field.setTransient(true);
 
 		document.getAttributes().add(field);
 
@@ -474,6 +478,9 @@ public class XMLMetaDataTest {
 		// System.out.println(result);
 
 		assertThat(result.contains("name=\"Test\""), is(true));
+
+		// transient element should not have been removed as it is not the default value of false
+		assertThat(result.contains("<transient>true</transient>"), is(true));
 
 		Pattern p1 = Pattern.compile("<boolean.*persistent");
 		Matcher m1 = p1.matcher(result);

@@ -35,7 +35,7 @@
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">
+		<link rel="stylesheet" href="semantic24/semantic.min.css">
 		
 		<style type="text/css">
 			body {
