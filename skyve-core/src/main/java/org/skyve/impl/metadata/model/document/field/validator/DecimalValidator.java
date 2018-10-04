@@ -13,6 +13,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DecimalValidator extends RangeValidator<Decimal> {
+	private static final long serialVersionUID = -8883741869433458702L;
+
 	private Integer precision;
 
 	public Integer getPrecision() {

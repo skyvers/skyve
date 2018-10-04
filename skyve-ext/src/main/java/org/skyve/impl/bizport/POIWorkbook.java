@@ -2,7 +2,6 @@ package org.skyve.impl.bizport;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,9 +30,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Decimal5;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.impl.bizport.POISheet;
 
 /**
  * Adapts an Excel workbook.
@@ -260,7 +257,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		
 		XSSFFont font = sheet.getWorkbook().createFont();
 		font.setFontHeightInPoints((short) 15);
-		font.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
 		style.setFont(font);                 
 	
 		XSSFRow row = sheet.getRow(rowNum-1);
@@ -302,14 +299,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 					cell.setCellValue((Date) value);
 					cell.setCellStyle(cellStyle);
 					
-				} else if (value instanceof Integer) {
-					cell.setCellValue((Integer) value);
-				} else if (value instanceof BigDecimal) {
-					cell.setCellValue(new Double(((BigDecimal) value).doubleValue()));
-				} else if (value instanceof Decimal5) {
-					cell.setCellValue(new Double(((Decimal5) value).doubleValue()));
-				} else {
-					cell.setCellValue(((Double) value).doubleValue());
+				} else if (value instanceof Number) {
+					cell.setCellValue(((Number) value).doubleValue());
 				}
 				break;
 			}
@@ -317,7 +308,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 			// empty value
 //			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NULL with cellType " + (Cell.CELL_TYPE_NUMERIC == cellType ));
 			if(Cell.CELL_TYPE_NUMERIC == cellType && forceNumericNullToZero){
-				cell.setCellValue(new Integer(0));
+				cell.setCellValue(0.0);
 			} 
 			else {
 				cell.setCellType(Cell.CELL_TYPE_BLANK);

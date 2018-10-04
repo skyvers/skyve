@@ -93,10 +93,10 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 				error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
 						"Unable to authenticate with the provided credentials");
 			}
-		} catch (SecurityException e) {
+		} catch (@SuppressWarnings("unused") SecurityException e) {
 			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
 					"Unable to authenticate with the provided credentials");
-		} catch (MetaDataException e) {
+		} catch (@SuppressWarnings("unused") MetaDataException e) {
 			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm,
 					"Unable to authenticate with the provided credentials");
 		} catch (Throwable t) {

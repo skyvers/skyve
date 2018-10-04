@@ -36,7 +36,7 @@ public class Container {
 	
 	public static enum ContainerType {
 		tab, hbox, vbox, form, column, subreport
-	};
+	}
 	
 	public Container() {
 		horizontal = false;

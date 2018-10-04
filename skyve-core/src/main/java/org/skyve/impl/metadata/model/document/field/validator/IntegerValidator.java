@@ -11,6 +11,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class IntegerValidator extends RangeValidator<Integer> {
+	private static final long serialVersionUID = -4605898071552499592L;
+
 	@Override
 	public void validate(Integer value,
 							String binding,

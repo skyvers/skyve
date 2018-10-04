@@ -155,7 +155,7 @@ public class FileUpload extends Localisable {
 			try {
 				MimeType.valueOf(file.getContentType());
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 			}
 			try{

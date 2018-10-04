@@ -223,7 +223,7 @@ public final class ComparisonJSONManipulator {
 		    			item.put(OLD_VALUE_KEY, property.getOldValue());
 		            }
 				}
-				catch (MetaDataException e) { // not a real property, so bake something
+				catch (@SuppressWarnings("unused") MetaDataException e) { // not a real property, so bake something
 	    			item.put(NEW_VALUE_KEY, property.getNewValue());
 	    			item.put(OLD_VALUE_KEY, property.getOldValue());
 					item.put(TYPE_KEY, "text");

@@ -801,7 +801,7 @@ public class LocalDesignRepository extends AbstractRepository {
 																	documentName,
 																	documentName));
 			}
-			catch (MetaDataException e) {
+			catch (@SuppressWarnings("unused") MetaDataException e) {
 				// overridden customer data factory class doesn't exist, so continue
 			}
 			if (factoryClass == null) {
@@ -811,7 +811,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				result = factoryClass.newInstance();
 			}
 		}
-		catch (MetaDataException e) {
+		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// module data factory class doesn't exist
 		}
 		catch (Exception e) {
@@ -1083,7 +1083,7 @@ public class LocalDesignRepository extends AbstractRepository {
 								try {
 									getMapModel(customer, document, modelName, false);
 								}
-								catch (Exception e) {
+								catch (@SuppressWarnings("unused") Exception e) {
 									throw new MetaDataException("Menu [" + item.getName() + 
 																	"] in module " + module.getName() +
 																	" is for model " + modelName +
@@ -1117,7 +1117,7 @@ public class LocalDesignRepository extends AbstractRepository {
 																		" which is not a geometry.");
 									}
 								}
-								catch (Exception e) {
+								catch (@SuppressWarnings("unused") Exception e) {
 									throw new MetaDataException("Map Menu [" + item.getName() + 
 																	"] in module " + module.getName() + 
 																	" has a geometryBinding of " + binding + 
@@ -1160,7 +1160,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		try {
 			document.getParentDocument(customer);
 		}
-		catch (MetaDataException e) {
+		catch (@SuppressWarnings("unused") MetaDataException e) {
 			throw new MetaDataException("The document " + documentIdentifier + 
 											" has a parent document of " +
 											document.getParentDocumentName() + " that does not exist in this module.");

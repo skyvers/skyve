@@ -63,17 +63,18 @@ public class XMLMetaDataTest {
 		DocumentMetaData document = createDocument();
 		org.skyve.impl.metadata.model.document.field.Integer field = createIntegerAttribute();
 		IntegerValidator v = new IntegerValidator();
-		v.setMin(0);
-		v.setMax(10);
-		v.setValidationMessage("Value must be between 0 and 10");
-
-		// TODO: remove setXml when implemented
-		v.setXmlMax("10");
 		v.setXmlMin("0");
+		v.setXmlMax("10");
+		v.setValidationMessage("Value must be between 0 and 10");
 
 		field.setValidator(v);
 
 		document.getAttributes().add(field);
+
+		document.convert("Test Document");
+		
+		assertThat(v.getMin(), is(0));
+		assertThat(v.getMax(), is(10));
 
 		// validate the test data
 		assertThat(document.getAttributes().size(), is(1));
@@ -98,16 +99,17 @@ public class XMLMetaDataTest {
 		DocumentMetaData document = createDocument();
 		LongInteger field = createLongIntegerAttribute();
 		LongValidator v = new LongValidator();
-		v.setMin(0L);
-		v.setMax(10L);
-
-		// TODO: remove setXml when implemented
 		v.setXmlMax("10");
 		v.setXmlMin("0");
 
 		field.setValidator(v);
 
 		document.getAttributes().add(field);
+
+		document.convert("TestMetaData");
+
+		assertThat(v.getMin(), is(0L));
+		assertThat(v.getMax(), is(10L));
 
 		// validate the test data
 		assertThat(document.getAttributes().size(), is(1));
@@ -131,11 +133,13 @@ public class XMLMetaDataTest {
 		DocumentMetaData document = createDocument();
 		org.skyve.impl.metadata.model.document.field.Date field = createDateAttribute();
 
-		field.setConverter(ConverterName.DD_MM_YYYY.getConverter());
-		// TODO: remove setConverterName when implemented
 		field.setConverterName(ConverterName.DD_MM_YYYY);
 
 		document.getAttributes().add(field);
+
+		document.convert("TestDocument");
+		
+		assertThat(field.getConverter(), is(notNullValue()));
 
 		// validate the test data
 		assertThat(document.getAttributes().size(), is(1));

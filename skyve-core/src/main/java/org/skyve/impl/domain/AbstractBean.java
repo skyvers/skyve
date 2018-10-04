@@ -80,7 +80,7 @@ public abstract class AbstractBean implements Bean {
 				}
 			}
 		} 
-		catch (MetaDataException e) {
+		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// do nothing - we can continue
 		}
 
@@ -116,7 +116,7 @@ public abstract class AbstractBean implements Bean {
 										attribute = target.getAttribute();
 									}
 								}
-								catch (MetaDataException e) {
+								catch (@SuppressWarnings("unused") MetaDataException e) {
 									// nothing to really do here
 								}
 								if (attribute == null) {
@@ -126,7 +126,7 @@ public abstract class AbstractBean implements Bean {
 									trackChanges = attribute.isTrackChanges(); // leave it up to the metadata
 								}
 							}
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								// if we get here, leave trackChanges on
 							}
 						}

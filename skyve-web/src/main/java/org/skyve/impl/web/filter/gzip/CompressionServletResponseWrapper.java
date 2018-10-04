@@ -164,7 +164,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
                 if (stream != null)
                     stream.close();
             }
-        } catch (IOException e) {
+        } catch (@SuppressWarnings("unused") IOException e) {
         	// do nothing - not much we can do
         }
     }

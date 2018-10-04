@@ -133,27 +133,27 @@ public class ViewGenerator {
 			try {
 				repository.getServerSideAction(customer, document, actionName, false);
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				try {
 					repository.getUploadAction(customer, document, actionName, false);
 					action.setImplicitName(ImplicitActionName.Upload);
 				}
-				catch (Exception e1) {
+				catch (@SuppressWarnings("unused") Exception e1) {
 					try {
 						repository.getDownloadAction(customer, document, actionName, false);
 						action.setImplicitName(ImplicitActionName.Download);
 					}
-					catch (Exception e2) {
+					catch (@SuppressWarnings("unused") Exception e2) {
 						try {
 							repository.getBizExportAction(customer, document, actionName, false);
 							action.setImplicitName(ImplicitActionName.BizExport);
 						}
-						catch (Exception e3) {
+						catch (@SuppressWarnings("unused") Exception e3) {
 							try {
 								repository.getBizImportAction(customer, document, actionName, false);
 								action.setImplicitName(ImplicitActionName.BizImport);
 							}
-							catch (Exception e4) {
+							catch (@SuppressWarnings("unused") Exception e4) {
 								throw new MetaDataException(actionName + " cannot be found");
 							}
 						}

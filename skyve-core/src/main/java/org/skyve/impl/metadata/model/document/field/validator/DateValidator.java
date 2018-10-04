@@ -13,6 +13,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DateValidator extends RangeValidator<Date> {
+	private static final long serialVersionUID = 2052940948388013357L;
+
 	@Override
 	public void validate(Date value,
 							String binding,

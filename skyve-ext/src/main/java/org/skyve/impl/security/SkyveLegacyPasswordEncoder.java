@@ -36,7 +36,7 @@ public class SkyveLegacyPasswordEncoder implements PasswordEncoder {
 			Base64 base64Codec = new Base64();
 			return new String(base64Codec.encode(md.digest(rawPassword.toString().getBytes())));
 		}
-		catch (NoSuchAlgorithmException e) {
+		catch (@SuppressWarnings("unused") NoSuchAlgorithmException e) {
 			return null;
 		}
 	}

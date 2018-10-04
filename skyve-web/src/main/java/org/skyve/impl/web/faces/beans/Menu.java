@@ -233,7 +233,7 @@ public class Menu extends Harness {
 				if (new URI(href).isAbsolute()) {
 					return href;
 				}
-			} catch (URISyntaxException e) {
+			} catch (@SuppressWarnings("unused") URISyntaxException e) {
 				// do nothing here if its not know to be absolute
 			}
         	

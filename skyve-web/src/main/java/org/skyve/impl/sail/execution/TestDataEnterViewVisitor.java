@@ -192,7 +192,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 							index++;
 						}
 					}
-					catch (Exception e) {
+					catch (@SuppressWarnings("unused") Exception e) {
 						String message = String.format("WARNING: Can't set value for combo [%s] in document %s.%s as there were no domain values.",
 														binding,
 														bean.getBizModule(),

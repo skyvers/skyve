@@ -51,7 +51,7 @@ public class HomeServlet extends HttpServlet {
 			try {
 				CORE.getRepository().getCustomer(customerName);
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				customerName = null;
 			}
 		}

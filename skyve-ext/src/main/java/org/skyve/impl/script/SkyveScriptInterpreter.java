@@ -661,7 +661,7 @@ public class SkyveScriptInterpreter {
 							org.skyve.impl.metadata.model.document.field.Text text = createFieldText(required, name, displayName,
 									length);
 							currentDocument.getAttributes().add(text);
-						} catch (NumberFormatException nfe) {
+						} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
 							addError(
 									String.format("Text attribute: %s length [%s] was not an integer", attributeName, parts[1]));
 						}

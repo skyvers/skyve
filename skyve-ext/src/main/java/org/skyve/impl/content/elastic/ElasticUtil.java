@@ -75,7 +75,7 @@ public class ElasticUtil {
 				createIndex(client, index);
 			}
 			// doesIndexExist doesn't seem to work in the current version of elastic search
-			catch (IndexAlreadyExistsException e) {
+			catch (@SuppressWarnings("unused") IndexAlreadyExistsException e) {
 				// be silent
 			}
 		}
@@ -155,7 +155,7 @@ public class ElasticUtil {
 				}
 			}
 		}
-		catch (Exception e){
+		catch (@SuppressWarnings("unused") Exception e){
 			return null;
 		}
 

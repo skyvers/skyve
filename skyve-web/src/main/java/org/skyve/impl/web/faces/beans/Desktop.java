@@ -578,7 +578,7 @@ public class Desktop extends Harness {
 								result.append(href);
 								relative = false;
 							}
-						} catch (URISyntaxException e) {
+						} catch (@SuppressWarnings("unused") URISyntaxException e) {
 							// do nothing here if its not know to be absolute
 						}
 			        	

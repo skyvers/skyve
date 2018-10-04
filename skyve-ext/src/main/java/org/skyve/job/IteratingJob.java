@@ -13,7 +13,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
         getLog().add(String.format("Commencing job %s.", getDisplayName()));
 
         final Collection<T> elementsToProcess = getElements();
-        getLog().add(String.format("Found %d element(s) to process.", elementsToProcess.size()));
+        getLog().add(String.format("Found %d element(s) to process.", Integer.valueOf(elementsToProcess.size())));
         int numProcessedElements = 0;
         for (T element : elementsToProcess) {
             if (!isCancelled()) {
@@ -22,14 +22,13 @@ public abstract class IteratingJob<T> extends CancellableJob {
                 } catch (final Exception e) {
                     if (!continueOnFailure()) {
                         throw e;
-                    } else {
-                        getLog().add(String.format("Exception processing element %d: %s", numProcessedElements, e.getMessage()));
                     }
+					getLog().add(String.format("Exception processing element %d: %s", Integer.valueOf(numProcessedElements), e.getMessage()));
                 } finally {
                     numProcessedElements++;
                 }
             } else {
-                getLog().add(String.format("Job was cancelled after processing %d elements.", numProcessedElements));
+                getLog().add(String.format("Job was cancelled after processing %d elements.", Integer.valueOf(numProcessedElements)));
                 return;
             }
             setPercentComplete((int) (100.0 * numProcessedElements / elementsToProcess.size()));
@@ -52,7 +51,8 @@ public abstract class IteratingJob<T> extends CancellableJob {
     /**
      * @return Boolean that determines whether processing should continue if the operation fails.
      */
-    protected boolean continueOnFailure() {
+    @SuppressWarnings("static-method")
+	protected boolean continueOnFailure() {
         return false;
     }
 }

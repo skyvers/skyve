@@ -159,7 +159,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			className.append(packagePath).append(documentName).append('.').append(documentName).append("Extension");
 			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 		}
-		catch (ClassNotFoundException e) {
+		catch (@SuppressWarnings("unused") ClassNotFoundException e) {
 			if (packagePath.startsWith(repository.CUSTOMERS_NAME)) {
 				// Look for an extension first and if not found look for a base class
 				try {
@@ -167,13 +167,13 @@ public final class DocumentImpl extends ModelImpl implements Document {
 					className.append(packagePath).append(repository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
 					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 				}
-				catch (ClassNotFoundException e1) { // no extension class
+				catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no extension class
 					// Look for the base class in the customer area
 					try {
 						className.setLength(className.length() - 3); // remove "Ext"
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					}
-					catch (ClassNotFoundException e2) { // no extension or base class in customer area
+					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
 						// Look for the base class in the modules area
 						className.setLength(0);
 						className.append(repository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);

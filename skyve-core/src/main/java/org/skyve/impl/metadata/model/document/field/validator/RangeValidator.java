@@ -9,6 +9,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class RangeValidator<T> extends FieldValidator<T> {
+	private static final long serialVersionUID = 1703003606474596114L;
+
 	private String xmlMin;
 	private String xmlMax;
 	private T min;

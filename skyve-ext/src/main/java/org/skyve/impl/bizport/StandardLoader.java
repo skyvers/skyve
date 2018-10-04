@@ -240,7 +240,7 @@ public class StandardLoader {
 			try {
 				result = persistence.retrieve(document, id, true);
 			} 
-			catch (Exception e) { // could not be retrieved, must be new
+			catch (@SuppressWarnings("unused") Exception e) { // could not be retrieved, must be new
 				result = document.newInstance(user);
 			}
 		}
@@ -605,7 +605,7 @@ public class StandardLoader {
 							}
 						}
 					}
-				} catch (Exception e) {
+				} catch (@SuppressWarnings("unused") Exception e) {
 					// do nothing here - we'll end up with a wrong "Problem.where" attribute down below anyway.
 				}
 			}

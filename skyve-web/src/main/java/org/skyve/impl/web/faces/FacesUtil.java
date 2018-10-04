@@ -60,7 +60,7 @@ public class FacesUtil {
 													expectedReturnType,
 													expectedParamTypes);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			throw new FacesException("Method expression '" + expression + "' could not be created.");
 		}
 	}

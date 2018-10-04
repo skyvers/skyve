@@ -409,7 +409,7 @@ public class TestUtil {
 				return StringUtils.substringBetween(result, "^", "$");
 			}
 			return result;
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
@@ -480,7 +480,7 @@ public class TestUtil {
 								}
 							}
 						}
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						// couldn't find the extension file on the classpath
 					}	
 				}
