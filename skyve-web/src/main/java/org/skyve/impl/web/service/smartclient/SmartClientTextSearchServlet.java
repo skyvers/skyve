@@ -151,9 +151,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 			throw new ServletException("Could not search the content repository", e);
 		}
 		finally {
-			if (persistence != null) {
-				persistence.commit(true);
-			}
+			persistence.commit(true);
 		}
     }
 }
