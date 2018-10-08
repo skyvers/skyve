@@ -16,8 +16,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -45,6 +47,7 @@ import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveDualListModelMap;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -309,6 +312,25 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 	}
 	
+	/**
+	 * Ajax call from DataTable (data grid implementation) when rows are drag reordered in the UI.
+	 * @param event
+	 */
+	public void onRowReorder(ReorderEvent event) {
+		if (event != null) {
+			final String collectionBinding = (String) event.getComponent().getAttributes().get(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY);
+			if (collectionBinding != null) {
+				@SuppressWarnings("unchecked")
+				final List<ChildBean<Bean>> list = (List<ChildBean<Bean>>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
+				list.add(event.getToIndex(), list.remove(event.getFromIndex()));
+
+				for (int i = 0, l = list.size(); i < l; i++) {
+					list.get(i).setBizOrdinal(Integer.valueOf(i));
+				}
+			}
+		}
+	}
+
 	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
 												String documentName, 
 												String queryName,

@@ -126,7 +126,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
 		return component;
 	}
 

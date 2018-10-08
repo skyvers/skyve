@@ -142,7 +142,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}

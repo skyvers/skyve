@@ -56,6 +56,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
+	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
+
 	/**
 	 * Used to create a visible/invisible panel for a view based to switch between create and edit views.
 	 * @param invisibleConditionName
@@ -121,7 +123,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String binding,
 										Label label);
 
-	public abstract UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid);
+	public abstract UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid);
 
 	/*
 	 * Data Repeater is just like a data grid but...

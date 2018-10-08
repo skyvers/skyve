@@ -62,6 +62,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 			if (bizlet != null) {
 				ValidationUtil.validateBeanAgainstBizlet(bizlet, currentBean);
 			}
+			// TODO ActionUtil.setTargetBeanForViewAndCollectionBinding and then sort collection
 	
 			zoomOut(facesView);
 		}
@@ -76,7 +77,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 
 		// remove the zoom out binding expression from the view binding
 		if (viewBinding != null) {
-        	// if no zoom out binding, remove the last binding term if there is a dot
+        	// if no zoom in binding, remove the last binding term if there is a dot
     		if (zoomInBinding == null) {
 	    		int lastDotIndex = viewBinding.lastIndexOf('.');
 				if (lastDotIndex > 0) {

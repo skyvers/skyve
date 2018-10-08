@@ -358,7 +358,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -376,16 +376,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomConditionName, disabledConditionName});
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
-				listVar,
-				grid.getTitle(),
-				grid.getInvisibleConditionName(),
-				((! Boolean.TRUE.equals(grid.getInline())) &&
-						(! Boolean.FALSE.equals(grid.getShowZoom())) &&
-						(! Boolean.FALSE.equals(grid.getEditable()))),
-				clickToZoomDisabledConditionNames,
-				grid.getSelectedIdBinding(),
-				grid.getSelectedActions(),
-				grid.getWidgetId());
+												listVar,
+												grid.getTitle(),
+												grid.getInvisibleConditionName(),
+												((! Boolean.TRUE.equals(grid.getInline())) &&
+														(! Boolean.FALSE.equals(grid.getShowZoom())) &&
+														(! Boolean.FALSE.equals(grid.getEditable()))),
+												clickToZoomDisabledConditionNames,
+												grid.getSelectedIdBinding(),
+												grid.getSelectedActions(),
+												ordered,
+												grid.getWidgetId());
 
 		final String emptyMessage;
 		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
@@ -420,6 +421,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										null,
 										null,
 										null,
+										false,
 										repeater.getWidgetId());
 		result.setEmptyMessage("");
 		result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
@@ -2708,6 +2710,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String[] clickToZoomDisabledConditionNames,
 									String selectedIdBinding,
 									List<EventAction> selectedActions,
+									boolean ordered,
 									String widgetId) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result, widgetId);
@@ -2744,6 +2747,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				ajax.setValueExpression("disabled", disabled);
 			}
 			result.addClientBehavior("rowSelect", ajax);
+		}
+		if (ordered) {
+            result.setDraggableRows(true);
+            result.getAttributes().put(COLLECTION_BINDING_ATTRIBUTE_KEY, binding);
+
+            final AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+            final MethodExpression me = ef.createMethodExpression(elc, String.format("#{%s.onRowReorder}", managedBeanName), null, new Class[0]);
+            ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+            result.addClientBehavior("rowReorder", ajax);
+
+            final Column dragHandleColumn = (Column) a.createComponent(Column.COMPONENT_TYPE);
+            setId(dragHandleColumn, null);
+            dragHandleColumn.setWidth("10");
+            dragHandleColumn.setPriority(1);
+
+            final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+			dragHandle.setStyleClass("fa fa-sort");
+            dragHandleColumn.getChildren().add(dragHandle);
+
+            result.getChildren().add(dragHandleColumn);
 		}
 
 		return result;
