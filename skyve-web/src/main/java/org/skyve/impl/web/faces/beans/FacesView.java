@@ -321,11 +321,14 @@ public class FacesView<T extends Bean> extends Harness {
 			final String collectionBinding = (String) event.getComponent().getAttributes().get(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY);
 			if (collectionBinding != null) {
 				@SuppressWarnings("unchecked")
-				final List<ChildBean<Bean>> list = (List<ChildBean<Bean>>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
+				final List<Bean> list = (List<Bean>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
 				list.add(event.getToIndex(), list.remove(event.getFromIndex()));
 
 				for (int i = 0, l = list.size(); i < l; i++) {
-					list.get(i).setBizOrdinal(Integer.valueOf(i));
+					Bean element = list.get(i);
+					if (element instanceof ChildBean<?>) {
+						((ChildBean<?>) element).setBizOrdinal(Integer.valueOf(i));
+					}
 				}
 			}
 		}
