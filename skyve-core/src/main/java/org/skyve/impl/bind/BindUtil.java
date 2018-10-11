@@ -789,8 +789,10 @@ public final class BindUtil {
 			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, lastDotIndex));
 		}
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
-		Collection targetCollection = (Collection) target.getAttribute();
-		sortCollectionByMetaData(owningBean, targetCollection);
+		Attribute targetCollection = target.getAttribute();
+		if (targetCollection instanceof Collection) {
+			sortCollectionByMetaData(owningBean, (Collection) targetCollection);
+		}
 	}
 
 	/**
@@ -1144,7 +1146,7 @@ public final class BindUtil {
 			try {
 				index = Integer.parseInt(propName.substring(i + 1, k));
 			}
-			catch (NumberFormatException e) {
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				// do nothing
 			}
 			propName = propName.substring(0, i);

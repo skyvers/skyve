@@ -17,53 +17,69 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 /**
  * Strip the last term off the view binding
  */
-public class ZoomOutAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
-	public ZoomOutAction(FacesView<? extends Bean> facesView) {
+public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
+	private FacesView<T> facesView;
+	public ZoomOutAction(FacesView<T> facesView) {
 		this.facesView = facesView;
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction by zoom in binding of " + facesView.getZoomInBinding() + " with view binding of " + facesView.getViewBinding());
 
 		if (FacesAction.validateRequiredFields()) {
 			// Call the bizlet
-			Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+			Bean elementBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
-			Module module = customer.getModule(currentBean.getBizModule());
-			Document document = module.getDocument(customer, currentBean.getBizDocument());
-			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			Module elementModule = customer.getModule(elementBean.getBizModule());
+			Document elementDocument = elementModule.getDocument(customer, elementBean.getBizDocument());
+			Bizlet<Bean> bizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
 
 			WebContext webContext = facesView.getWebContext();
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
 			if (! vetoed) {
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " + webContext);
-					currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + elementBean + ", null, " + webContext);
+					elementBean = bizlet.preExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + elementBean);
 				}
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
 			}
 	
-			if (currentBean.isNotPersisted() && (! user.canCreateDocument(document))) {
+			if (elementBean.isNotPersisted() && (! user.canCreateDocument(elementDocument))) {
 				throw new SecurityException("create this data", user.getName());
 			}
 	
-			ValidationUtil.validateBeanAgainstDocument(document, currentBean);
+			ValidationUtil.validateBeanAgainstDocument(elementDocument, elementBean);
 			if (bizlet != null) {
-				ValidationUtil.validateBeanAgainstBizlet(bizlet, currentBean);
+				ValidationUtil.validateBeanAgainstBizlet(bizlet, elementBean);
 			}
-			// TODO ActionUtil.setTargetBeanForViewAndCollectionBinding and then sort collection
-	
+			// Set the current bean back in the collection
+			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) elementBean);
+
+			// Sort the owning collection
+			String viewBinding = facesView.getViewBinding();
+			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
+			String collectionBinding = viewBinding.substring(0, lastCollectionindex);
+			Bean currentBean = facesView.getWebContext().getCurrentBean();
+			Module currentModule = customer.getModule(currentBean.getBizModule());
+			Binder.sortCollectionByMetaData(currentBean,
+												customer,
+												currentModule,
+												currentModule.getDocument(customer, currentBean.getBizDocument()),
+												collectionBinding);
+
+			// now zoom out to owning view
 			zoomOut(facesView);
 		}
 		
