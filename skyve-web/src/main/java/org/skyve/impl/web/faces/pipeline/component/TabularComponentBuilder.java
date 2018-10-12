@@ -491,13 +491,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			
 			// The message to the left
-			Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
-			setId(message, null);
-			message.setFor(forId);
-			message.setShowDetail(true);
-			message.setShowSummary(false);
-			message.setDisplay("icon");
-			message.setEscape(false);
+			Message message = message(forId);
 			message.setStyle("float:left");
 
 			// If a div was not required (no input control), insert the message into the column

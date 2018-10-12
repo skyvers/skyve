@@ -319,18 +319,6 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		return result;
 	}
 
-	protected Message message(String forId) {
-		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
-		setId(message, null);
-		message.setFor(forId);
-		message.setShowDetail(true);
-		message.setShowSummary(false);
-		message.setDisplay("icon");
-		message.setEscape(false);
-
-		return message;
-	}
-
 	protected PanelGrid panelGrid(Integer pixelWidth, 
 									Integer responsiveWidth,
 									Integer percentageWidth, 
