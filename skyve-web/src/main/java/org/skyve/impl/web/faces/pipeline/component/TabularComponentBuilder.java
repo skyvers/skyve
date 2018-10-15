@@ -483,7 +483,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			UIComponent contents = currentChildren.get(0);
 			String forId = contents.getId();
 			
-			// If we hae an input control in the column, surround it with the div
+			// If we have an input control in the column, surround it with the div
 			HtmlPanelGroup div = null;
 			if (contents instanceof UIInput) {
 				div = panelGroup(true, true, true, null, null);
