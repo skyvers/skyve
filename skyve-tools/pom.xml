@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20181009</version>
+		<version>20181010-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-tools</artifactId>
 
