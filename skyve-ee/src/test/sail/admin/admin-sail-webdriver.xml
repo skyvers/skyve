@@ -5,13 +5,6 @@
 				xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../src/skyve/schemas/sail.xsd" 
 				xmlns="http://www.skyve.org/xml/sail" 
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <interaction name="Crapola">
-        <method>
-            <navigateList document="User" module="admin"/>
-			<listGridSelect row="1" />
-			<lookupDescriptionAutoComplete search="adm" binding="contact" />
-        </method>
-    </interaction>
     <interaction name="Menu Password">
         <method>
             <navigateEdit document="ChangePassword" module="admin"/>
@@ -108,26 +101,26 @@
             <testDataEnter/>
             <save/>
             <tabSelect path="Export/Import"/>
-            <action name="DataMaintenanceExportAction"/>
-            <action name="DataMaintenanceImportAction"/>
+            <!-- <action name="DataMaintenanceExportAction"/> -->
+            <!-- <action name="DataMaintenanceImportAction"/>-->
             <tabSelect path="Backup/Restore"/>
-            <action name="Restore" confirm="true"/>
+            <!-- <action name="Restore" confirm="true"/> -->
             <action name="Backup"/>
             <action name="DownloadBackup" confirm="true"/>
-            <action name="UploadBackup"/>
-            <action name="DeleteBackup" confirm="true"/>
+            <!-- <action name="UploadBackup"/> -->
+            <!-- <action name="DeleteBackup" confirm="true"/> -->
             <tabSelect path="Data"/>
-            <action name="Truncate" confirm="true"/>
+            <!-- <action name="Truncate" confirm="true"/> -->
             <action name="Create"/>
             <action name="Drop"/>
             <action name="Sync"/>
             <tabSelect path="Content"/>
             <action name="CheckContent"/>
-            <action name="RelinkContent" confirm="true"/>
+            <!-- <action name="RelinkContent" confirm="true"/> -->
             <action name="Reindex"/>
             <tabSelect path="Manage Audits"/>
             <action name="CheckAuditMatches"/>
-            <action name="TruncateAuditLog" confirm="true"/>
+            <!-- <action name="TruncateAuditLog" confirm="true"/> -->
             <tabSelect path="Refresh"/>
             <action name="RefreshDocumentTuples" confirm="true"/>
             <save/>

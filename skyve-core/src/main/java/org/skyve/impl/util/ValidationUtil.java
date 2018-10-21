@@ -292,7 +292,7 @@ public class ValidationUtil {
 				String display = ((Format) format).toDisplayValue(value);
 				format.fromDisplayValue(display);
 			}
-			catch (Exception e1) {
+			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
 													displayName + " value " + value + " does not match the format " + format.getMask() + " (A = alphanumeric, L = alpha, # = numeric)"));
 			}

@@ -149,14 +149,33 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component,
+								TabPane tabPane,
+								String moduleName,
+								String documentName,
+								StringBuilder stickyTabScript) {
 		if (component != null) {
 			return component;
 		}
 
-		return tabView(tabPane.getInvisibleConditionName(), 
-						tabPane.getSelectedTabIndexBinding(),
-						tabPane.getWidgetId());
+		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
+		setInvisible(result, tabPane.getInvisibleConditionName(), null);
+		setId(result, tabPane.getWidgetId());
+		String id = result.getId();
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class));
+		}
+		else {
+			result.setWidgetVar(id);
+			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
+
+			stickyTabScript.append(String.format("PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);",
+													id,
+													moduleName, documentName, id,
+													moduleName, documentName, id));
+		}
+		return result;
 	}
 	
 	@Override
@@ -339,7 +358,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -357,16 +376,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomConditionName, disabledConditionName});
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
-				listVar,
-				grid.getTitle(),
-				grid.getInvisibleConditionName(),
-				((! Boolean.TRUE.equals(grid.getInline())) &&
-						(! Boolean.FALSE.equals(grid.getShowZoom())) &&
-						(! Boolean.FALSE.equals(grid.getEditable()))),
-				clickToZoomDisabledConditionNames,
-				grid.getSelectedIdBinding(),
-				grid.getSelectedActions(),
-				grid.getWidgetId());
+												listVar,
+												grid.getTitle(),
+												grid.getInvisibleConditionName(),
+												((! Boolean.TRUE.equals(grid.getInline())) &&
+														(! Boolean.FALSE.equals(grid.getShowZoom())) &&
+														(! Boolean.FALSE.equals(grid.getEditable()))),
+												clickToZoomDisabledConditionNames,
+												grid.getSelectedIdBinding(),
+												grid.getSelectedActions(),
+												ordered,
+												grid.getWidgetId());
 
 		final String emptyMessage;
 		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
@@ -401,6 +421,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										null,
 										null,
 										null,
+										false,
 										repeater.getWidgetId());
 		result.setEmptyMessage("");
 		result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
@@ -462,7 +483,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			UIComponent contents = currentChildren.get(0);
 			String forId = contents.getId();
 			
-			// If we hae an input control in the column, surround it with the div
+			// If we have an input control in the column, surround it with the div
 			HtmlPanelGroup div = null;
 			if (contents instanceof UIInput) {
 				div = panelGroup(true, true, true, null, null);
@@ -470,12 +491,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			
 			// The message to the left
-			Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
-			setId(message, null);
-			message.setFor(forId);
-			message.setShowDetail(true);
-			message.setShowSummary(false);
-			message.setDisplay("icon");
+			Message message = message(forId);
 			message.setStyle("float:left");
 
 			// If a div was not required (no input control), insert the message into the column
@@ -945,10 +961,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				columnPriority++;
 			}
 			column.setField((name != null) ? name : binding);
-			
+
 			// Unbound columns or content columns or unsortable columns should be set unsortable
 			if ((binding == null) || (projectedQueryColumn == null) || (! projectedQueryColumn.isSortable())) {
 				column.setSortable(false);
+			}
+			else {
+				column.setValueExpression("sortBy", 
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
 			}
 
 			// Unbound columns, content columns or unfilterable columns should be set unfilterable
@@ -956,6 +976,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					showFilter && 
 					(projectedQueryColumn != null) && 
 					projectedQueryColumn.isFilterable()) {
+				column.setValueExpression("filterBy", 
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
 				if (specialFilterComponent != null) {
 					column.getFacets().put("filter", specialFilterComponent);
 				}
@@ -1001,10 +1023,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 				if (DisplayType.thumbnail.equals(display)) {
 					String width = (pixelWidth == null) ? 
-			    						((pixelHeight == null) ? "32" : pixelHeight.toString()) :
+			    						((pixelHeight == null) ? "64" : pixelHeight.toString()) :
 										pixelWidth.toString();
 					String height = (pixelHeight == null) ? 
-										((pixelWidth == null) ? "32" : pixelWidth.toString()) : 
+										((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 										pixelHeight.toString();
 					String empty = "''";
 					if (emptyThumbnailRelativeFile != null) {
@@ -2031,16 +2053,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private TabView tabView(String invisible, String activeIndexBinding, String widgetId) {
-		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
-		setInvisible(result, invisible, null);
-		setId(result, widgetId);
-		if (activeIndexBinding != null) {
-			result.setValueExpression("activeIndex", createValueExpressionFromFragment(activeIndexBinding, true, null, Number.class));
-		}
-		return result;
-	}
-
 	protected CommandButton actionButton(String title, 
 											String iconStyleClass,
 											String tooltip, 
@@ -2692,6 +2704,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String[] clickToZoomDisabledConditionNames,
 									String selectedIdBinding,
 									List<EventAction> selectedActions,
+									boolean ordered,
 									String widgetId) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result, widgetId);
@@ -2728,6 +2741,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				ajax.setValueExpression("disabled", disabled);
 			}
 			result.addClientBehavior("rowSelect", ajax);
+		}
+		if (ordered) {
+            result.setDraggableRows(true);
+            result.getAttributes().put(COLLECTION_BINDING_ATTRIBUTE_KEY, binding);
+
+            final AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+            final MethodExpression me = ef.createMethodExpression(elc, String.format("#{%s.onRowReorder}", managedBeanName), null, new Class[0]);
+            ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+            result.addClientBehavior("rowReorder", ajax);
+
+            final Column dragHandleColumn = (Column) a.createComponent(Column.COMPONENT_TYPE);
+            setId(dragHandleColumn, null);
+            dragHandleColumn.setWidth("10");
+            dragHandleColumn.setPriority(1);
+
+            final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+			dragHandle.setStyleClass("fa fa-sort");
+            dragHandleColumn.getChildren().add(dragHandle);
+
+            result.getChildren().add(dragHandleColumn);
 		}
 
 		return result;

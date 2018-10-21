@@ -38,7 +38,7 @@ public class InMemoryFilter implements Filter {
 			try {
 				return evaluate(object, binding, value, start, end);
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				return false;
 			}
 		}

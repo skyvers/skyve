@@ -90,15 +90,15 @@ public class MailUtil {
 	}
 	
 	private static final MimeMessage createMail(String[] recipientEmailAddresses,
-													String[] ccEmailAddresses,
-													String[] bccEmailAddresses,
-													String senderEmailAddress,
-													String subject,
-													String body,
-													MimeType contentType,
-													boolean forWriting,
-													MailAttachment... attachments)
-	throws AddressException, MessagingException {
+			String[] ccEmailAddresses,
+			String[] bccEmailAddresses,
+			String senderEmailAddress,
+			String subject,
+			String body,
+			MimeType contentType,
+			boolean forWriting,
+			MailAttachment... attachments) throws AddressException, MessagingException {
+
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		UtilImpl.LOGGER.info("TO:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
@@ -188,6 +188,9 @@ public class MailUtil {
 		Multipart multipart = new MimeMultipart();
 		messageBodyPart.setContent(body, contentType.toString());
 		multipart.addBodyPart(messageBodyPart);
+
+		// set the unsent header if required for sending (default to true)
+		message.setHeader("X-Unsent", "1");
 
 		// add attachments
 		for(MailAttachment attachment: attachments){

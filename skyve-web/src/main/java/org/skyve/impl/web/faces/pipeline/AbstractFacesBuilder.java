@@ -9,6 +9,7 @@ import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.component.column.Column;
+import org.primefaces.component.message.Message;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
@@ -290,5 +291,17 @@ public abstract class AbstractFacesBuilder {
 		setSize(result, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null);
 
 		return result;
+	}
+	
+	protected Message message(String forId) {
+		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
+		setId(message, null);
+		message.setFor(forId);
+		message.setShowDetail(true);
+		message.setShowSummary(false);
+		message.setDisplay("icon");
+		message.setEscape(false);
+
+		return message;
 	}
 }

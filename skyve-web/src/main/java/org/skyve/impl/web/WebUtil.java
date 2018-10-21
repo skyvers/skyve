@@ -243,7 +243,7 @@ public class WebUtil {
 				errorMessage = messages.get(0).getErrorMessage();
 			}
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			persistence.rollback();
 		}
 		finally {

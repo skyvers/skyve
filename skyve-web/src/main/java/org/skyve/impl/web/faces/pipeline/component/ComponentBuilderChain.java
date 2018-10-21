@@ -123,10 +123,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component,
+								TabPane tabPane,
+								String moduleName,
+								String documentName,
+								StringBuilder stickyTabScript) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.tabPane(result, tabPane);
+			result = builder.tabPane(result, tabPane, moduleName, documentName, stickyTabScript);
 		}
 		return result;
 	}
@@ -239,10 +243,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataGrid(result, listVar, grid);
+			result = builder.dataGrid(result, listVar, ordered, grid);
 		}
 		return result;
 	}

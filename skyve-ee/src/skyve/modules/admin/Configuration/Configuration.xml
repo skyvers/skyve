@@ -48,31 +48,5 @@
 			<displayName>Allow User Self Registration</displayName>
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
-		<collection name="userInvitationGroups" type="aggregation">
-			<displayName>User Invitation Groups</displayName>
-			<description>The collection of groups that invited users are assigned.</description>
-			<domain>variant</domain>
-			<documentName>Group</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order by="name" sort="ascending" />
-			</ordering>
-			<unique name="UniqueGroupName">
-				<message>Membership of group {name} has already been assigned to this user.</message>
-				<fieldReferences>
-					<ref>bizId</ref>
-				</fieldReferences>
-			</unique>
-		</collection>
-		<memo name="userInvitiationEmailList">
-			<displayName>User Emails</displayName>
-			<description><![CDATA[
-			The list of emails for users to invite. 
-			<br/>
-			Users will be created with the email address as username with the assigned groups.
-			<br/>
-			Provide a list separated by either comma or semicolon.
-			]]></description>
-		</memo>
 	</attributes>
 </document>

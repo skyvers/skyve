@@ -58,7 +58,9 @@ public abstract class ActionVisitor {
 	public abstract void visitUploadAction(ActionImpl action);
 	public abstract void visitNewAction(ActionImpl action);
 	public abstract void visitEditAction(ActionImpl action);
-	public void visitPrintAction(ActionImpl action) { }
+	public void visitPrintAction(@SuppressWarnings("unused") ActionImpl action) {
+		// nothing to see here
+	}
 	public abstract void visitParameter(Parameter parameter,
 											boolean parentVisible,
 											boolean parentEnabled);

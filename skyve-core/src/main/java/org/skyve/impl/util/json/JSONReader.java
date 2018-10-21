@@ -217,7 +217,7 @@ public class JSONReader {
 							UUID.fromString((String) value);
 							BindUtil.set(result, propertyName, value);
 						}
-						catch (Exception e) {
+						catch (@SuppressWarnings("unused") Exception e) {
 							// do nothing - ie leave the generate UUID in place
 						}
 					}

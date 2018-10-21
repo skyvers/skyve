@@ -515,14 +515,14 @@ public class SkyveScriptInterpreter {
 		if (viewer != null) {
 			DocumentPrivilege p = new DocumentPrivilege();
 			p.setDocumentName(document.getName());
-			p.setPermission(document.getPersistent() != null ? DocumentPermission._R__D : DocumentPermission._____);
+			p.setPermission(document.getPersistent() != null ? DocumentPermission._R__C : DocumentPermission._____);
 			viewer.getPrivileges().add(p);
 		}
 
 		if (maintainer != null) {
 			DocumentPrivilege p = new DocumentPrivilege();
 			p.setDocumentName(document.getName());
-			p.setPermission(document.getPersistent() != null ? DocumentPermission.CRUDD : DocumentPermission._____);
+			p.setPermission(document.getPersistent() != null ? DocumentPermission.CRUDC : DocumentPermission._____);
 			maintainer.getPrivileges().add(p);
 		}
 	}
@@ -661,7 +661,7 @@ public class SkyveScriptInterpreter {
 							org.skyve.impl.metadata.model.document.field.Text text = createFieldText(required, name, displayName,
 									length);
 							currentDocument.getAttributes().add(text);
-						} catch (NumberFormatException nfe) {
+						} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
 							addError(
 									String.format("Text attribute: %s length [%s] was not an integer", attributeName, parts[1]));
 						}

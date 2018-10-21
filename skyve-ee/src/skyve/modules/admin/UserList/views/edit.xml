@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Users" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Users">
+			<listGrid continueConversation="false" query="qUsers"></listGrid>
+		</tab>
+		<tab title="Invite Users">
+			<vbox border="true" borderTitle="User Invitations" percentageWidth="60" shrinkWrap="height">
+				<vbox percentageHeight="40">
+					<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
+				</vbox>
+				<form>
+					<column />
+					<row>
+						<item>
+							<label for="userInvitiationEmailList" />
+						</item>
+					</row>
+					<row>
+						<item showLabel="false">
+							<textArea binding="userInvitiationEmailList" pixelHeight="200"/>
+						</item>
+					</row>
+					<row>
+						<item align="centre">
+							<button actionName="InviteUsers" pixelWidth="150" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="InviteUsers" displayName="Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to invite the users?" />
+	</actions>
+</view>

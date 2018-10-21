@@ -8,7 +8,7 @@ import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.skyve.impl.web.faces.beans.FacesView;
 
 public class FacesUtil {
@@ -60,7 +60,7 @@ public class FacesUtil {
 													expectedReturnType,
 													expectedParamTypes);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			throw new FacesException("Method expression '" + expression + "' could not be created.");
 		}
 	}
@@ -77,6 +77,6 @@ public class FacesUtil {
     }
     
     public static void jsRedirect(String url) {
-		RequestContext.getCurrentInstance().execute(String.format("window.location='%s'", url));
+		PrimeFaces.current().executeScript(String.format("window.location='%s'", url));
     }
 }

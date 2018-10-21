@@ -159,9 +159,9 @@ public final class ReportUtil {
 		return result;
 	}
 
+	@SuppressWarnings("resource")
 	private static JasperPrint fillSqlReport(JasperReport jasperReport, Map<String, Object> parameters, ReportFormat format, OutputStream out) throws JRException {
 		JasperPrint result;
-		@SuppressWarnings("resource")
 		Connection connection = EXT.getDataStoreConnection();
 		try {
             UtilImpl.LOGGER.info("FILL REPORT");

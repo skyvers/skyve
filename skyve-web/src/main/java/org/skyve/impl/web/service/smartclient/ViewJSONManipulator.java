@@ -391,7 +391,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					attribute = (target != null) ? target.getAttribute() : null;
 				}
-				catch (MetaDataException e) {
+				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// not an attribute
 				}
 				if ((attribute != null) && (attribute.getDomainType() != null)) {

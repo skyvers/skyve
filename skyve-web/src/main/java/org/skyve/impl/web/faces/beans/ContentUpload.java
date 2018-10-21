@@ -9,7 +9,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
@@ -119,7 +119,6 @@ public class ContentUpload extends Localisable {
 			WebUtil.putConversationInCache(webContext);
 			
 			// update the content UUID value on the client and popoff the window on the stack
-			RequestContext rc = RequestContext.getCurrentInstance();
 			StringBuilder js = new StringBuilder(128);
 			String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBinding);
 			// if top.isc is defined then we are using smart client, set the value in the values manager
@@ -131,7 +130,7 @@ public class ContentUpload extends Localisable {
 			js.append("','").append(contentId).append("','");
 			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
 			js.append(SmartClientGenerateUtils.processString(content.getFileName(), false, false)).append("')}");
-			rc.execute(js.toString());
+			PrimeFaces.current().executeScript(js.toString());
 		}
 		catch (Exception e) {
 			persistence.rollback();

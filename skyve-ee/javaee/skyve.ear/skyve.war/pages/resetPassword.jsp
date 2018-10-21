@@ -37,44 +37,104 @@
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title><%=Util.i18n("page.resetPassword.title", locale)%></title>
-		<base href="<%=basePath%>" />
-		
+		<!-- Standard Meta -->
+	    <meta charset="utf-8" />
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta http-equiv="refresh" content="300; url=<%=basePath%>loggedOut" />
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta http-equiv="cache-control" content="private,no-cache,no-store" />
 		<meta http-equiv="expires" content="0" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	    
+	    <!-- Site Properties -->
+		<title><%=Util.i18n("page.resetPassword.title", locale)%></title>
+		<base href="<%=basePath%>" />
 		
 		<% if (mobile) { %>
 			<meta name="format-detection" content="telephone=no" />
-			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+			<meta name="format-detection" content="email=no">
 		<% } %>
-
+		
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
-		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
-		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
+		<link rel="stylesheet" href="semantic24/semantic.min.css">
+		
+		<style type="text/css">
+			body {
+				background-color: #eee;
+			}
+			body > .grid {
+				height: 100%;
+				/* background: url('/img/bg-image-login.jpg') no-repeat; */
+			    background-size: cover;
+			    background-position: center;
+			    margin-top: 0px !important;
+			}
+			.image {
+				margin-top: -100px;
+			}
+			.column {
+				max-width: 450px;
+			}
+			.ui.white.header {
+				color: white !important;
+			}
+			.footer {
+			    color: white;
+			    font-size: 80%;
+			    margin-top: -20px;
+			    margin-right: 10px;
+			    text-align: right;
+		    }
+		    .footer a {
+		    	color: #cdcdcd;
+		    }
+		</style>
+
+		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
+		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+
 		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
-				var newPasswordValue = form.<%=newPasswordFieldName%>.value;
-				var confirmPasswordValue = form.<%=confirmPasswordFieldName%>.value;
-				if (newPasswordValue.length < 1) {
-					alert('<%=Util.i18n("page.changePassword.newPassword.error.required", locale)%>');
-					form.<%=newPasswordFieldName%>.focus();
-					return false;
+				if($('.ui.form').form('is valid')) {
+					return true;
 				}
-				else if (confirmPasswordValue.length < 1) {
-					alert('<%=Util.i18n("page.changePassword.confirmPassword.error.required", locale)%>');
-					form.<%=confirmPasswordFieldName%>.focus();
-					return false;
-				}
-				else if (newPasswordValue != confirmPasswordValue) {
-					alert('<%=Util.i18n("page.changePassword.noPasswordMatch.error.required", locale)%>');
-					form.<%=confirmPasswordFieldName%>.focus();
-					return false;
-				}
+				
+				return false;
 			}
+			
+			$(document)
+			.ready(function() {
+			    $('.ui.form')
+			    .form({
+			        fields: {
+			        	<%=newPasswordFieldName%>: {
+			        		identifier: '<%=newPasswordFieldName%>',
+			        		rules: [
+			        			{
+			        				type: 'empty',
+			        				prompt: '<%=Util.i18n("page.changePassword.newPassword.error.required", locale)%>'
+			        			}
+			        		]
+			        	},
+			        	<%=confirmPasswordFieldName%>: {
+			        		identifier: '<%=confirmPasswordFieldName%>',
+			        		rules: [
+			        			{
+			        				type: 'empty',
+			        				prompt: '<%=Util.i18n("page.changePassword.confirmPassword.error.required", locale)%>'
+			        			},
+			        			{
+			        				type: 'match[<%=newPasswordFieldName%>]',
+			        				prompt: '<%=Util.i18n("page.changePassword.noPasswordMatch.error.required", locale)%>'
+			        			}
+			        		]
+			        	}
+			        }
+			    });
+			});
 			-->
 		</script>
 	</head>
@@ -83,52 +143,41 @@
 	<% } else { %>
 	<body style="background:white" onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
 	<% } %>
-		<div class="container">
-			<%@include file="fragments/logo.html" %>
-			<%@include file="fragments/noscript.html" %>
-			<div class="row">
-				<div class="col-3 col-2-md hidden-sm"></div>
-				<div class="col-6 col-8-md col-12-sm">
-					<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)">
-						<input type="hidden" name="t" value="<%=passwordResetToken%>">
-						<div class="loginTable" style="width:100%;">
-							<div class="row">
-								<div class="col-12 center">
-									<span class="subhead"><%=Util.i18n("page.changePassword.message", locale)%></span>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-4-sm right">
-									<label for="newPassword"><%=Util.i18n("page.changePassword.newPassword.label", locale)%></label>
-								</div>
-								<div class="col-6-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="<%=newPasswordFieldName%>">
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-4-sm right">
-									<label for="confirmPassword"><%=Util.i18n("page.changePassword.confirmPassword.label", locale)%></label>
-								</div>
-								<div class="col-6-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="<%=confirmPasswordFieldName%>">
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-1 col-2-sm"></div>
-								<div class="col-10 col-8-sm center">
-									<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-1 col-2-sm"></div>
-								<div class="col-10 col-8-sm center">
-									<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" />
-								</div>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
+		<div class="ui middle aligned center aligned grid">
+		    <div class="column">
+		    	<%@include file="fragments/logo.html" %>
+		    	<%@include file="fragments/noscript.html" %>
+		    	
+		    	<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
+					<input type="hidden" name="t" value="<%=passwordResetToken%>">
+		    	
+		    		<div class="ui segment">
+			    		<div class="ui header">
+			    			<%=Util.i18n("page.changePassword.message", locale)%>
+			    		</div>
+		    			<div class="field">
+		                    <div class="ui left icon input">
+		                        <i class="lock icon"></i>
+		                        <input type="password" name="<%=newPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>">
+		                    </div>
+		                </div>
+		                <div class="field">
+		                    <div class="ui left icon input">
+		                        <i class="lock icon"></i>
+		                        <input type="password" name="<%=confirmPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.confirmPassword.label", locale)%>">
+		                    </div>
+		                </div>
+		                <div class="field">
+							<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
+		                </div>
+	                	<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" class="ui fluid large blue submit button" />
+	                </div>
+	                
+	                <div class="ui error message">
+		            	<%-- javascript form validation is inserted here --%> 
+		            </div>
+				</form>
+		    </div>
 		</div>
 	</body>
 </html>

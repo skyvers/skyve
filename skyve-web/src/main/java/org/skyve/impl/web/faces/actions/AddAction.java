@@ -78,7 +78,11 @@ public class AddAction extends FacesAction<Void> {
 			throw new SecurityException("create this data", user.getName());
 		}
 
-		Bean newBean = collectionDocument.newInstance(user);
+    	// Create the new bean
+    	Bean newBean = collectionDocument.newInstance(user);
+		// Get the list (collection or inverse many)
+		@SuppressWarnings("unchecked")
+		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 
 		// Set the parent of a child bean, if applicable
 		if (newBean instanceof ChildBean<?>) {
@@ -111,6 +115,11 @@ public class AddAction extends FacesAction<Void> {
     				}
 				}
 			}
+
+			// set bizOrdinal if this is an ordered child collection
+			if (Boolean.TRUE.equals(targetCollection.getOrdered())) {
+				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
+			}
 		}
 
 		// Call the bizlet and interceptors
@@ -128,8 +137,6 @@ public class AddAction extends FacesAction<Void> {
 		}
 
 		// Add the new element to the collection
-		@SuppressWarnings("unchecked")
-		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 		beans.add(newBean);
 
 		if (! inline) {

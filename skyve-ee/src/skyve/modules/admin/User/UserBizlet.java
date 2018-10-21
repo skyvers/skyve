@@ -119,24 +119,35 @@ public class UserBizlet extends Bizlet<User> {
 
 	public static List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) {
 		List<DomainValue> result = new ArrayList<>();
-		
+
 		Customer customer = user.getCustomer();
-		
+
 		// Add customer roles
 		for (CustomerRole role : customer.getRoles()) {
 			result.add(new DomainValue(role.getName()));
 		}
-		
+
 		if (customer.isAllowModuleRoles()) {
 			for (Module module : customer.getModules()) {
 				for (Role role : module.getRoles()) {
+					
 					String roleName = role.getName();
-					result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName), 
-												String.format("%s - %s", module.getTitle(), roleName)));
+					String roleDescription = role.getDescription();
+					
+					if (roleDescription != null) {
+						if (roleDescription.length() > 50) {
+							roleDescription = roleDescription.substring(0, 47) + "...";
+						}
+						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
+								String.format("%s - %s (%s)", module.getTitle(), roleName, roleDescription)));
+					} else {
+						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName), 
+								String.format("%s - %s", module.getTitle(), roleName)));
+					}
 				}
 			}
 		}
-		
+
 		return result;
 	}
 

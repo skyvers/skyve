@@ -190,7 +190,7 @@ final class SQLRowSetDynaClass implements DynaClass, Serializable {
 			try {
 				className = metadata.getColumnClassName(i);
 			}
-			catch (SQLException e) {
+			catch (@SuppressWarnings("unused") SQLException e) {
 				// this is a patch for HsqlDb to ignore exceptions thrown by its metadata implementation
 			}
 

@@ -7,7 +7,7 @@ WILDCAT depends upon the following libraries:
 		http://www.oracle.com/
 		See http://www-content.oracle.com/technetwork/java/javaee/downloads/366879
 
-	* Java 7
+	* Java 8
 		http://www.oracle.com/
 		See http://www.oracle.com/technetwork/java/javase/terms/license/index.html
 
@@ -238,3 +238,7 @@ WILDCAT depends upon the following libraries:
 	* Generex
 		https://github.com/mifmif/Generex
 		See https://www.apache.org/licenses/LICENSE-2.0
+		
+	* Spring Security
+		https://spring.io/projects/spring-security
+		https://github.com/spring-projects/spring-security/blob/master/license.txt (Apache v2)

@@ -22,6 +22,10 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class TextValidator extends FieldValidator<String> {
+
+	private static final long serialVersionUID = -1957608134362029502L;
+	private static final String PATTERN_EMAIL = "^[^@]+@[^@]+$";
+
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ValidatorType {
 		creditCard,
@@ -39,18 +43,21 @@ public class TextValidator extends FieldValidator<String> {
 	}
 	
 	private String regularExpression;
+	private ValidatorType type;
+
 	public String getRegularExpression() {
 		return regularExpression;
 	}
+
 	@XmlAttribute
 	public void setRegularExpression(String regularExpression) {
 		this.regularExpression = UtilImpl.processStringValue(regularExpression);
 	}
 
-	private ValidatorType type;
 	public ValidatorType getType() {
 		return type;
 	}
+
 	@XmlAttribute
 	public void setType(ValidatorType type) {
 		this.type = type;
@@ -58,7 +65,7 @@ public class TextValidator extends FieldValidator<String> {
 		// for client-side (if applicable)
 		if (regularExpression == null) {
 			if (ValidatorType.email.equals(type)) {
-				regularExpression = "^([a-zA-Z0-9_\\.\\-\\'])+@([a-zA-Z0-9_\\.\\-])+$";
+				regularExpression = PATTERN_EMAIL;
 			}
 			else if (ValidatorType.creditCard.equals(type)) {
 				regularExpression = "^\\d{16}$";
@@ -83,45 +90,46 @@ public class TextValidator extends FieldValidator<String> {
 			
 			if (valid && (type != null)) {
 				switch (type) {
-				case creditCard:
-					valid = GenericValidator.isCreditCard(value);
-					break;
-				case ean13CheckDigit:
-					valid = new EAN13CheckDigit().isValid(value);
-					break;
-				case email:
-// NB The commons email validator doesn't handle registered domain suffixes correctly - ie poo@wee - it expects poo@wee.com
-//					valid = GenericValidator.isEmail(value);
-					break;
-				case ibanCheckDigit:
-					valid = new IBANCheckDigit().isValid(value);
-					break;
-				case internetDomain:
-					valid = DomainValidator.getInstance().isValid(value);
-					break;
-				case ipAddress:
-					valid = InetAddressValidator.getInstance().isValid(value);
-					break;
-				case ipv4Address:
-					valid = InetAddressValidator.getInstance().isValidInet4Address(value);
-					break;
-				case isbnCheckDigit:
-					valid = ISBNValidator.getInstance().isValid(value);
-					break;
-				case isinCheckDigit:
-					valid = new ISINCheckDigit().isValid(value);
-					break;
-				case luhnCheckDigit:
-					valid = new LuhnCheckDigit().isValid(value);
-					break;
-				case url:
-					valid = GenericValidator.isUrl(value);
-					break;
-				case verhoeffCheckDigit:
-					valid = new VerhoeffCheckDigit().isValid(value);
-					break;
-				default:
-					throw new IllegalStateException("TextValidation type " + type + " is not catered for.");
+					case creditCard:
+						valid = GenericValidator.isCreditCard(value);
+						break;
+					case ean13CheckDigit:
+						valid = new EAN13CheckDigit().isValid(value);
+						break;
+					case email:
+						// NB The commons email validator doesn't handle registered domain suffixes
+						// correctly - ie poo@wee - it expects poo@wee.com
+						valid = GenericValidator.matchRegexp(value, PATTERN_EMAIL);
+						break;
+					case ibanCheckDigit:
+						valid = new IBANCheckDigit().isValid(value);
+						break;
+					case internetDomain:
+						valid = DomainValidator.getInstance().isValid(value);
+						break;
+					case ipAddress:
+						valid = InetAddressValidator.getInstance().isValid(value);
+						break;
+					case ipv4Address:
+						valid = InetAddressValidator.getInstance().isValidInet4Address(value);
+						break;
+					case isbnCheckDigit:
+						valid = ISBNValidator.getInstance().isValid(value);
+						break;
+					case isinCheckDigit:
+						valid = new ISINCheckDigit().isValid(value);
+						break;
+					case luhnCheckDigit:
+						valid = new LuhnCheckDigit().isValid(value);
+						break;
+					case url:
+						valid = GenericValidator.isUrl(value);
+						break;
+					case verhoeffCheckDigit:
+						valid = new VerhoeffCheckDigit().isValid(value);
+						break;
+					default:
+						throw new IllegalStateException("TextValidation type " + type + " is not catered for.");
 				}
 			}
 			

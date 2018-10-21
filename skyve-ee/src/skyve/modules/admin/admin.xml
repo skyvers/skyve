@@ -17,41 +17,76 @@
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
-		<document ref="DownloadFolder" />
 		<document ref="ChangePassword" />
-		<document ref="Configuration" />
-		<document ref="Contact" defaultQueryName="qContacts" />
-		<document ref="ControlPanel" />
-		<document ref="Content" />
-		<document ref="UserDashboard" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="CommunicationTemplate" />
+		<document ref="Configuration" />
+		<document ref="Contact" defaultQueryName="qContacts" />
+		<document ref="Content" />
+		<document ref="ControlPanel" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
-		<document ref="ImportExport" defaultQueryName="qImportExport"/>
-		<document ref="ImportExportColumn" />
 		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
-		<document ref="SystemDashboard" />
 		<document ref="DocumentNumber" />
+		<document ref="DownloadFolder" />
 		<document ref="Group" />
 		<document ref="GroupRole" />
+		<document ref="ImportExport" defaultQueryName="qImportExport"/>
+		<document ref="ImportExportColumn" />
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
-		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="Jobs" />
+		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="ReportDesign" />
+		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Subscription"/>
+		<document ref="SystemDashboard" />
+		<document ref="Tag" defaultQueryName="qTags" />
+		<document ref="Tagged" />
 		<document ref="User" defaultQueryName="qUsers" />
 		<document ref="UserCandidateContact" />
+		<document ref="UserDashboard" />
+		<document ref="UserList" />
 		<document ref="UserLoginRecord" />
 		<document ref="UserMonthlyHits" />
 		<document ref="UserRole" />
 		<document ref="UserToken" defaultQueryName="qUserTokens" />
-		<document ref="Snapshot" defaultQueryName="qSnapshots" />
-		<document ref="Tag" defaultQueryName="qTags" />
-		<document ref="Tagged" />
 	</documents>
 	<roles>
+		<role name="Anonymous">
+			<description>Access anonymous (not logged in) public features</description>
+			<privileges>
+				<document name="Communication" permission="_R__G"/>
+				<document name="CommunicationTemplate" permission="_R__G"/>
+				<document name="Subscription" permission="CRUDG"/>
+			</privileges>
+		</role>
+		<role name="AppUser">
+			<documentation>
+				The App User role is intended for retail and public users interacting through the "front office". 
+				These users are assumed to operate within their own scope and have only visibility to their own data.
+				
+				App Users can create their own contacts, and change their own passwords.			
+			</documentation>
+			<description>Manage own contact details and password</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="CRUDU" />
+				<document name="User" permission="_RU_U" />
+			</privileges>
+		</role>
+		<role name="AuditManager">
+			<description>Manage the activity audit log</description>
+			<privileges>
+				<document name="Audit" permission="_R_DC"/>
+				<document name="DataMaintenance" permission="CRUDC">
+					<action name="CheckAuditMatches"/>
+					<action name="TruncateAuditLog"/>
+				</document>
+			</privileges>
+		</role>
 		<role name="BasicUser">
 			<documentation>
 				The intention of Basic User role is to provide basic capability to back-office users.
@@ -61,25 +96,21 @@
 				For example, shared contact management, common document number serials 
 				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.			
 			</documentation>
-			<description>
-				Enough privileges and permissions to login and operate Skyve with access to the admin module only.
-			</description>
+			<description>General access to the administration module</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_RU_C" />
 				<document name="Communication" permission="_R__C"/>
 				<document name="CommunicationTemplate" permission="_R__C"/>
 				<document name="Configuration" permission="_R__C" />
-				<document name="UserDashboard" permission="CR__U">
-					<action name="UpdateMyDetails" />
-				</document>
-				<document name="Job" permission="_R__U" />
+				<document name="Contact" permission="_RU_C" />
 				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="Job" permission="_R__U" />
 				<document name="Snapshot" permission="CRUDU">
 					<action name="CopySnapshotToUser" />
 				</document>
+				<document name="Subscription" permission="CRUDU"/>
 				<document name="Tag" permission="CRUDU">
 					<action name="Clear" />
 					<action name="TagAll" />
@@ -97,67 +128,20 @@
 					<action name="CopyTagToUser" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
-				<document name="Subscription" permission="CRUDU"/>
 				<document name="User" permission="_R__C" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
-			</privileges>
-		</role>
-		<role name="ViewUser">
-			<documentation>
-			The view user is intended as a read-only office user, with visibility as per Basic User role.
-			</documentation>
-			<description>
-				Enough privileges and permissions to login, change password and update own contact details.
-			</description>
-			<privileges>
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
-				<document name="Contact" permission="_RU_C" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
-				<document name="Job" permission="_R__U" />
-				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU" />
-				<document name="Tag" permission="CRUDU">
-					<action name="Clear" />
-					<action name="TagAll" />
-					<action name="ExceptTag" />
-					<action name="IntersectTag" />
-					<action name="UnionTag" />
-					<action name="UpdateActionModule" />
-					<action name="UpdateActionDocument" />
-					<action name="UpdateUploadModule" />
-					<action name="UpdateUploadDocument" />
-					<action name="UploadTagCriteria" />
-					<action name="BulkDocumentAction" />
-					<action name="PerformCombination" />
-					<action name="PrepareExplanation" />
-				</document>
-				<document name="Tagged" permission="CRUDU" />
-				<document name="Subscription" permission="CRUDU"/>
-			</privileges>
-		</role>
-		<role name="ContactViewer">
-			<documentation>
-				Allows atomic control over visibility of contacts.
-			</documentation>
-			<description>Can only view contacts.</description>
-			<privileges>
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
-				<document name="Contact" permission="_R__C" />
 			</privileges>
 		</role>
 		<role name="ContactManager">
 			<documentation>
 				Allows atomic control over management of, and interaction with, contacts.
 			</documentation>
-			<description>Can manage contacts.</description>
+			<description>Manage contact details and interactions</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -180,120 +164,24 @@
 				<document name="Contact" permission="CRUDC" />
 			</privileges>
 		</role>
-		<role name="SecurityAdministrator">
+		<role name="ContactViewer">
 			<documentation>
-				Allows atomic control over administration of users and permissions.
+				Allows atomic control over visibility of contacts.
 			</documentation>
-			<description>Allows administration of Users and Groups.</description>
-			<privileges>
-				<document name="Audit" permission="_R__C">
-					<action name="SourceVersionChanged" />
-				</document>
-				<document name="DownloadFolder" permission="_R__C" />
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
-				<document name="Communication" permission="CRUDC">
-					<action name="AddUnsubscribeLink" />
-					<action name="AddImage" />
-					<action name="CreateFiles" />
-					<action name="GetCount" />
-					<action name="GetResults" />
-					<action name="SendNow" />
-					<action name="TestSend" />
-					<action name="UpdateModule" />
-					<action name="UpdateDocument" />
-					<action name="BatchSelected" />
-					<action name="DeleteBatch" />
-					<action name="ZipBatch" />
-				</document>
-				<document name="CommunicationTemplate" permission="CRUDC" />
-				<document name="Configuration" permission="CRUDC" >
-					<action name="InviteUsers"/>
-				</document>
-				<document name="Contact" permission="CRUDC" />
-				<document name="Content" permission="_R__C" />
-				<document name="DataGroup" permission="CRUDC" />
-				<document name="SystemDashboard" permission="_____" />
-				<document name="Job" permission="_R__C" />
-				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Group" permission="CRUDC" />
-				<document name="GroupRole" permission="CRUDC" />
-				<document name="User" permission="CRUDC">
-					<action name="Check" />
-					<action name="GeneratePassword" />
-					<action name="GenerateUniqueUserName" />
-					<action name="New" />
-					<action name="Next" />
-					<action name="Back" />
-				</document>
-				<document name="Subscription" permission="CRUDC"/>
-				<document name="UserCandidateContact" permission="_____">
-				</document>
-				<document name="UserRole" permission="CRUDC" />
-			</privileges>
-		</role>
-		<role name="JobMaintainer">
-			<documentation>
-				Allows atomic control over the ability to schedule jobs and review job progress.
-			</documentation>
-			<description>Maintain customer Jobs.</description>
+			<description>View-only access to contact details</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Job" permission="CRUDC" />
-				<document name="JobSchedule" permission="CRUDC">
-					<action name="RunJobNow" />
-				</document>
-				<document name="Jobs" permission="_____">
-					<action name="DeleteCompletedJobs" />
-					<action name="Refresh" />
-				</document>
-			</privileges>
-		</role>
-		<role name="AppUser">
-			<documentation>
-				The App User role is intended for retail and public users interacting through the "front office". These users are assumed to operate within their own scope and have only visibility to their own data.
-				
-				App Users can create their own contacts, and change their own passwords.			
-			</documentation>
-			<description>
-				Privileges and permissions to login but no native visibility of the admin module.
-			</description>
-			<privileges>
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
-				<document name="Contact" permission="CRUDU" />
-				<document name="User" permission="_RU_U" />
-			</privileges>
-		</role>
-		<role name="Anonymous">
-			<description>Can access publicly accessible pages anonymously.</description>
-			<privileges>
-				<document name="Communication" permission="_R__G"/>
-				<document name="CommunicationTemplate" permission="_R__G"/>
-				<document name="Subscription" permission="CRUDG"/>
-			</privileges>
-		</role>
-		<role name="AuditManager">
-			<description>
-				Ability to truncate the audit log.
-			</description>
-			<privileges>
-				<document name="Audit" permission="_R_DC"/>
-				<document name="DataMaintenance" permission="CRUDC">
-					<action name="CheckAuditMatches"/>
-					<action name="TruncateAuditLog"/>
-				</document>
+				<document name="Contact" permission="_R__C" />
 			</privileges>
 		</role>
 		<role name="DevOps">
-			<description>
-				Generate skyve designs and metadata and administer technical aspects of the skyve runtime.
-			</description>
+			<description>Generate Skyve designs and metadata and administer technical aspects of the Skyve runtime</description>
 			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>			
 				<document name="ControlPanel" permission="_____">
 					<action name="EvictFromCache" />
 					<action name="ExecuteQuery" />
@@ -328,21 +216,128 @@
 					<action name="UploadBackup" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
+				<document name="DocumentCreator" permission="_____">
+					<action name="Submit" />
+					<action name="UpdatePreview" />
+				</document>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="RunExport"/>
 					<action name="RunImport"/>
 					<action name="UploadSimpleImportDataFile"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
-				<document name="DocumentCreator" permission="_____">
-					<action name="Submit" />
-					<action name="UpdatePreview" />
-				</document>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
 					<action name="Preview" />
 				</document>
 				<document name="UserToken" permission="CRUDC" />
+			</privileges>
+		</role>
+		<role name="JobMaintainer">
+			<documentation>
+				Allows atomic control over the ability to schedule jobs and review job progress.
+			</documentation>
+			<description>Maintain Jobs</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Job" permission="CRUDC" />
+				<document name="Jobs" permission="_____">
+					<action name="DeleteCompletedJobs" />
+					<action name="Refresh" />
+				</document>
+				<document name="JobSchedule" permission="CRUDC">
+					<action name="RunJobNow" />
+				</document>
+			</privileges>
+		</role>
+		<role name="SecurityAdministrator">
+			<documentation>
+				Administration of users and permissions.
+			</documentation>
+			<description>Allows administration of Users and Groups</description>
+			<privileges>
+				<document name="Audit" permission="_R__C">
+					<action name="SourceVersionChanged" />
+				</document>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Communication" permission="CRUDC">
+					<action name="AddUnsubscribeLink" />
+					<action name="AddImage" />
+					<action name="CreateFiles" />
+					<action name="GetCount" />
+					<action name="GetResults" />
+					<action name="SendNow" />
+					<action name="TestSend" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
+					<action name="BatchSelected" />
+					<action name="DeleteBatch" />
+					<action name="ZipBatch" />
+				</document>
+				<document name="CommunicationTemplate" permission="CRUDC" />
+				<document name="Configuration" permission="CRUDC" />
+				<document name="Contact" permission="CRUDC" />
+				<document name="Content" permission="_R__C" />
+				<document name="DataGroup" permission="CRUDC" />
+				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="DownloadFolder" permission="_R__C" />
+				<document name="Group" permission="CRUDC" />
+				<document name="GroupRole" permission="CRUDC" />
+				<document name="Job" permission="_R__C" />
+				<document name="Subscription" permission="CRUDC"/>
+				<document name="SystemDashboard" permission="_____" />
+				<document name="User" permission="CRUDC">
+					<action name="Check" />
+					<action name="GeneratePassword" />
+					<action name="GenerateUniqueUserName" />
+					<action name="New" />
+					<action name="Next" />
+					<action name="Back" />
+				</document>
+				<document name="UserCandidateContact" permission="_____"/>
+				<document name="UserList" permission="_____">
+					<action name="InviteUsers"/>
+				</document>
+				<document name="UserRole" permission="CRUDC" />
+			</privileges>
+		</role>
+		<role name="ViewUser">
+			<documentation>
+			The view user is intended as a read-only office user, with visibility as per Basic User role.
+			</documentation>
+			<description>View-only access to the administration module</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="_R__C" />
+				<document name="DocumentNumber" permission="_R__C" />
+				<document name="Job" permission="_R__U" />
+				<document name="Snapshot" permission="CRUDU" />
+				<document name="Subscription" permission="CRUDU"/>
+				<document name="Tag" permission="CRUDU">
+					<action name="Clear" />
+					<action name="TagAll" />
+					<action name="ExceptTag" />
+					<action name="IntersectTag" />
+					<action name="UnionTag" />
+					<action name="UpdateActionModule" />
+					<action name="UpdateActionDocument" />
+					<action name="UpdateUploadModule" />
+					<action name="UpdateUploadDocument" />
+					<action name="UploadTagCriteria" />
+					<action name="BulkDocumentAction" />
+					<action name="PerformCombination" />
+					<action name="PrepareExplanation" />
+				</document>
+				<document name="Tagged" permission="CRUDU" />
+				<document name="UserDashboard" permission="CR__U">
+					<action name="UpdateMyDetails" />
+				</document>
 			</privileges>
 		</role>
 	</roles>
@@ -378,9 +373,9 @@
 			<list document="Group" name="Groups">
 				<role name="SecurityAdministrator" />
 			</list>
-			<list document="User" name="Users">
+			<edit document="UserList" name="Users">
 				<role name="SecurityAdministrator" />
-			</list>
+			</edit>
 			<list document="DataGroup" name="Data Groups">
 				<uxui name="desktop" />
 				<uxui name="tablet" />

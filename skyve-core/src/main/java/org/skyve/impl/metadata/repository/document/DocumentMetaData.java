@@ -446,7 +446,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						try {
 							BindUtil.fromString(null, null, implementingType, defaultValue, true);
 						} 
-						catch (Exception e) {
+						catch (@SuppressWarnings("unused") Exception e) {
 							throw new MetaDataException(metaDataName + " : The default value of " + defaultValue + " for field " + field.getName() + " is not coercible to type " + type + ".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
 						}
 					}
@@ -523,7 +523,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								dateValidator.setMin((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
 							} 
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
 																" is not coercible to type " + type + 
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
@@ -533,7 +533,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								dateValidator.setMax((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							} 
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 																" is not coercible to type " + type + 
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
@@ -550,7 +550,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								decimalValidator.setMin((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
 							} 
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
@@ -559,7 +559,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								decimalValidator.setMax((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
@@ -575,7 +575,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								integerValidator.setMin((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
 							} 
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
@@ -584,7 +584,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								integerValidator.setMax((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
@@ -600,7 +600,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								longValidator.setMin((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
 							} 
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}
@@ -609,7 +609,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							try {
 								longValidator.setMax((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
-							catch (Exception e) {
+							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}

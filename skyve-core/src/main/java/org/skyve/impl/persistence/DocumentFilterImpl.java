@@ -434,7 +434,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 				}
 			}
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing - it'll return false below
 		}
 		

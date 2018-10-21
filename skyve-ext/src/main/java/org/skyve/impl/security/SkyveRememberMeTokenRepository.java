@@ -77,10 +77,10 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 						},
 						seriesId);
 		}
-		catch (EmptyResultDataAccessException zeroResults) {
+		catch (@SuppressWarnings("unused") EmptyResultDataAccessException zeroResults) {
 			Util.LOGGER.warning("Querying token for series " + seriesId + " returned no result");
 		}
-		catch (IncorrectResultSizeDataAccessException moreThanOne) {
+		catch (@SuppressWarnings("unused") IncorrectResultSizeDataAccessException moreThanOne) {
 			Util.LOGGER.warning("Querying token for series " + seriesId + " returned many results");
 		}
 		catch (DataAccessException e) {

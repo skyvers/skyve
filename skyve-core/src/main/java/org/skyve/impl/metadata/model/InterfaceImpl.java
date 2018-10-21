@@ -8,6 +8,7 @@ import org.skyve.metadata.model.document.Interface;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class InterfaceImpl implements Interface {
+	private static final long serialVersionUID = 5670142647312527597L;
 
 	private String name;
 

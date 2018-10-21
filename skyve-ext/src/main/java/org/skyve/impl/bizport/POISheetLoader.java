@@ -177,12 +177,12 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			} else {
 				result = null;
 			}
-		} catch (Exception de) {
+		} catch (@SuppressWarnings("unused") Exception de) {
 			// get a debug value
 			String raw = "";
 			try {
 				raw = getStringFieldValue(col, true);
-			} catch (Exception e) {
+			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 			}
 			throw new Exception("The " + getPOICellTypeDescription(cell) + " value '" + raw + "' is not numeric.");
@@ -259,7 +259,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			if (cell != null) {
 				result = cell.getDateCellValue();
 			}
-		} catch (Exception de) {
+		} catch (@SuppressWarnings("unused") Exception de) {
 			StringBuilder problem = new StringBuilder(128);
 			Converter<DateTime> converter = CORE.getPersistence().getUser().getCustomer().getDefaultDateTimeConverter();
 			// get a debug value
@@ -268,7 +268,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				//try again using the default converter
 				raw = getStringFieldValue(col, true);
 				result = converter.fromDisplayValue(raw);
-			} catch (Exception e) {
+			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 				problem.append("The value '").append(raw).append("' is not a valid date");
 				if(converter!=null){

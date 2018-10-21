@@ -30,7 +30,8 @@ import org.skyve.metadata.model.document.DomainType;
 							"defaultWidgetReference",
 							"deprecatedBool",
 							"trackChangesBool",
-							"auditedBool"})
+							"auditedBool",
+							"transientBool"})
 public abstract class AbstractAttribute extends NamedMetaData implements Attribute {
 	private static final long serialVersionUID = -6632233770237276819L;
 
@@ -45,6 +46,7 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private Boolean trackChanges;
 	private boolean audited = true;
 	private Boolean auditedBool = null;
+	private boolean tranzient;
 	private String documentation;
 	
 	@Override
@@ -213,6 +215,25 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	public void setAuditedBool(Boolean audited) {
 		this.auditedBool = audited;
 		this.audited = audited.booleanValue();
+	}
+
+	@Override
+	public boolean isTransient() {
+		return tranzient;
+	}
+
+	@XmlTransient
+	public void setTransient(boolean value) {
+		tranzient = value;
+	}
+
+	public Boolean getTransientBool() {
+		return Boolean.valueOf(tranzient);
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name="transient", required = false)
+	public void setTransientBool(Boolean value) {
+		tranzient = value.booleanValue();
 	}
 
 	@Override

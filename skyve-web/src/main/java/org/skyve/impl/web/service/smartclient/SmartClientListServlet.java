@@ -417,7 +417,7 @@ public class SmartClientListServlet extends HttpServlet {
     		try {
     			compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
     		}
-    		catch (Exception e) {
+    		catch (@SuppressWarnings("unused") Exception e) {
     			// NB Smart Client sometimes sends extraneous half-arsed requests 
     			// through the advanced filter builder with a compound filter parameter of 'equals'.
     			// Ignore these and leave compound filter criteria set to 'and'.

@@ -93,7 +93,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					element.sendKeys((value == null) ? "" : value);
 					success = true;
 				}
-				catch (StaleElementReferenceException e) {
+				catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
 					// do nothing - we'll try again
 				}
 			}
@@ -105,7 +105,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			waitForAjaxResponse();
 		}
 	}
-	
+
 	protected void selectOne(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -116,17 +116,29 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					click(element);
 
 					// Wait for pick list drop down
-					By xpath = By.id(String.format("%s_panel", id));
+					By panelXpath = By.id(String.format("%s_panel", id));
 					WebDriverWait wait = new WebDriverWait(driver, 1);
-					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
-														ExpectedConditions.visibilityOfElementLocated(xpath)));
+					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath), 
+														ExpectedConditions.visibilityOfElementLocated(panelXpath),
+														ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
 
 					// Value here should be an index in the drop down starting from 0
 					element = byId(String.format("%s_%s", id, String.valueOf(index)));
 					if ((element != null) && element.isEnabled()) { // NB it may not be displayed
 						// Scroll the drop down panel so the item is visible
 						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
+
+						// Wait for pick list element to scroll into view
+						wait = new WebDriverWait(driver, 1);
+						wait.until(ExpectedConditions.visibilityOf(element));
+
 						click(element);
+
+						// Wait for pick list drop down to disappear (opacity is taken into account)
+						wait = new WebDriverWait(driver, 1);
+						wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath), 
+															ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
+						
 						waitForAjaxResponse();
 					}
 				}
@@ -178,7 +190,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				}
 				try {
 					Thread.sleep(250);
-				} catch (InterruptedException e) {
+				} catch (@SuppressWarnings("unused") InterruptedException e) {
 					// nothing to do here
 				}
 				waitForFullPageResponse(viewState);
@@ -292,7 +304,6 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
-	// TODO cater for error message icon with class ui-message-error or ui-message-fatal
 	protected boolean verifySuccess() {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
@@ -410,7 +421,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 		// This could occur when the control is behind a floating element
 		// So scroll to the top of the page and see if the element can be made visible 
-		catch (WebDriverException e) {
+		catch (@SuppressWarnings("unused") WebDriverException e) {
 			JavascriptExecutor js = (JavascriptExecutor) driver;
 			try {
 				trace("    Could not click on the element - scroll to the top of the page and try again");
@@ -418,7 +429,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				element.click();
 			}
 			// Scroll to the bottom of the page and try again in case the floating element is at the bottom
-			catch (WebDriverException e1) {
+			catch (@SuppressWarnings("unused") WebDriverException e1) {
 				trace("    Could not click on the element - scroll to the bottom of the page and try again");
 				js.executeScript("javascript:window.scrollTo(0, 999999)");
 				element.click();
@@ -429,7 +440,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		try {
 			return driver.findElements(By.className(className));
 		}
-		catch (NoSuchElementException e) {
+		catch (@SuppressWarnings("unused") NoSuchElementException e) {
 			return null;
 		}
 	}
@@ -438,7 +449,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		try {
 			return driver.findElements(By.cssSelector(selector));
 		}
-		catch (NoSuchElementException e) {
+		catch (@SuppressWarnings("unused") NoSuchElementException e) {
 			return null;
 		}
 	}
@@ -450,14 +461,14 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			result.isEnabled(); // check for stale element
 			return result;
 		}
-		catch (NoSuchElementException e) {
+		catch (@SuppressWarnings("unused") NoSuchElementException e) {
 			return null;
 		}
-		catch (StaleElementReferenceException e) {
+		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
 			try {
 				Thread.sleep(50);
 			}
-			catch (InterruptedException ie) {
+			catch (@SuppressWarnings("unused") InterruptedException ie) {
 				// do nothing here
 			}
 			return byId(id);
@@ -471,14 +482,14 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			result.isEnabled(); // check for stale element
 			return result;
 		}
-		catch (NoSuchElementException e) {
+		catch (@SuppressWarnings("unused") NoSuchElementException e) {
 			return null;
 		}
-		catch (StaleElementReferenceException e) {
+		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
 			try {
 				Thread.sleep(10);
 			}
-			catch (InterruptedException ie) {
+			catch (@SuppressWarnings("unused") InterruptedException ie) {
 				// do nothing here
 			}
 			return byXpath(xpath);
@@ -492,14 +503,14 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			result.isEnabled(); // check for stale element
 			return result;
 		}
-		catch (NoSuchElementException e) {
+		catch (@SuppressWarnings("unused") NoSuchElementException e) {
 			return null;
 		}
-		catch (StaleElementReferenceException e) {
+		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
 			try {
 				Thread.sleep(10);
 			}
-			catch (InterruptedException ie) {
+			catch (@SuppressWarnings("unused") InterruptedException ie) {
 				// do nothing here
 			}
 			return byName(name);

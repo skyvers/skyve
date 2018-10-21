@@ -106,7 +106,7 @@ class ElasticContentIterable implements ContentIterable {
 				try {
 					hit.setLastModified(TimeUtil.parseISODate(lastModified));
 				}
-				catch (ParseException e) {
+				catch (@SuppressWarnings("unused") ParseException e) {
 					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + lastModified + " for content ID = " + searchHit.getId());
 				}
 			}
@@ -115,7 +115,7 @@ class ElasticContentIterable implements ContentIterable {
 				try {
 					hit.setLastModified(TimeUtil.parseISODate(fileLastModified));
 				}
-				catch (ParseException e) {
+				catch (@SuppressWarnings("unused") ParseException e) {
 					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO file last modified date of " + fileLastModified + " for content ID = " + searchHit.getId());
 				}
 			}

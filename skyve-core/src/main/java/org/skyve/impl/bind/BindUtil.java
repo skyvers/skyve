@@ -46,8 +46,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -184,7 +184,7 @@ public final class BindUtil {
 							}
 							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 						}
-						catch (Exception e) {
+						catch (@SuppressWarnings("unused") Exception e) {
 							valid = false;
 						}
 					}
@@ -576,7 +576,7 @@ public final class BindUtil {
 						}
 					}
 				}
-				catch (MetaDataException e) {
+				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// The binding may be a column alias with no metadata, so do nothing when this occurs
 				}
 			}
@@ -596,6 +596,14 @@ public final class BindUtil {
 	}
 	
 	public static String getDisplay(Customer customer, Bean bean, String binding, Object value) {
+		if (value instanceof Bean) {
+			if (value instanceof PersistentBean) {
+				return ((PersistentBean) value).getBizKey();
+			}
+			Bean valueBean = (Bean) value;
+			return String.format("Transient Document Instance %s.%s#%s", valueBean.getBizModule(), valueBean.getBizDocument(), valueBean.getBizId());
+		}
+
 		Converter<?> converter = null;
 		List<DomainValue> domainValues = null;
 
@@ -609,7 +617,7 @@ public final class BindUtil {
 				target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				attribute = target.getAttribute();
 			}
-			catch (MetaDataException e) {
+			catch (@SuppressWarnings("unused") MetaDataException e) {
 				// do nothing
 			}
 			
@@ -781,8 +789,10 @@ public final class BindUtil {
 			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, lastDotIndex));
 		}
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
-		Collection targetCollection = (Collection) target.getAttribute();
-		sortCollectionByMetaData(owningBean, targetCollection);
+		Attribute targetCollection = target.getAttribute();
+		if (targetCollection instanceof Collection) {
+			sortCollectionByMetaData(owningBean, (Collection) targetCollection);
+		}
 	}
 
 	/**
@@ -952,7 +962,7 @@ public final class BindUtil {
 					try {
 						valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
 					}
-					catch (NoSuchMethodException e) {
+					catch (@SuppressWarnings("unused") NoSuchMethodException e) {
 						valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
 					}
 				}
@@ -1136,7 +1146,7 @@ public final class BindUtil {
 			try {
 				index = Integer.parseInt(propName.substring(i + 1, k));
 			}
-			catch (NumberFormatException e) {
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				// do nothing
 			}
 			propName = propName.substring(0, i);
@@ -1147,7 +1157,7 @@ public final class BindUtil {
 			try {
 				key = propName.substring(j + 1, k);
 			}
-			catch (IndexOutOfBoundsException e) {
+			catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 				// do nothing
 			}
 			propName = propName.substring(0, j);
@@ -1167,7 +1177,7 @@ public final class BindUtil {
 			try {
 				type = getPropertyType(targetBean, propName);
 			}
-			catch (Exception e) {
+			catch (@SuppressWarnings("unused") Exception e) {
 				return;
 			}
 
@@ -1272,13 +1282,16 @@ public final class BindUtil {
 		for (final Attribute attribute : d.getAllAttributes()) {
 			final String attributeName = attribute.getName();
 
-			if (attribute.getAttributeType() == AttributeType.collection) {
-				copyCollection(from, to, attributeName);
+			if (AttributeType.collection.equals(attribute.getAttributeType())) {
+				copyCollection(from,
+								to,
+								attributeName,
+								CollectionType.child.equals(((Collection) attribute).getType()));
 				continue;
 			}
 
-			if (attribute.getAttributeType() == AttributeType.inverseMany) {
-				copyCollection(from, to, attributeName);
+			if (AttributeType.inverseMany.equals(attribute.getAttributeType())) {
+				copyCollection(from, to, attributeName, false);
 				continue;
 			}
 
@@ -1288,11 +1301,17 @@ public final class BindUtil {
 
 	// TODO clearing colTo issues a delete statement in hibernate, this method should process each collection item.
 	@SuppressWarnings("unchecked")
-	private static void copyCollection(final Bean from, final Bean to, final String attributeName) {
+	private static void copyCollection(final Bean from,
+										final Bean to,
+										final String attributeName,
+										boolean reparent) {
 		List<Bean> colFrom = (List<Bean>) BindUtil.get(from, attributeName);
 		List<Bean> colTo = (List<Bean>) BindUtil.get(to, attributeName);
 		colTo.clear();
 		colTo.addAll(colFrom);
+		if (reparent) {
+			colTo.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
+		}
 	}
 
 	
@@ -1425,7 +1444,7 @@ public final class BindUtil {
 				try {
 					value = BindUtil.get(owner, bindingPart);
 				}
-				catch (IndexOutOfBoundsException e) {
+				catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 					if (attribute != null) {
 						Document collectionDocument = module.getDocument(customer, ((Relation) attribute).getDocumentName());
 	
@@ -1444,7 +1463,7 @@ public final class BindUtil {
 								try {
 									((ChildBean<Bean>) fillerElement).setParent((Bean) owner);
 								}
-								catch (ClassCastException cce) {
+								catch (@SuppressWarnings("unused") ClassCastException cce) {
 									// continue on - this child bean is being linked to
 									// by some other document as an "aggregation"
 									// IE the owner variable above is not the parent document
@@ -1538,8 +1557,11 @@ public final class BindUtil {
 		int i = 0;
 		boolean whiteSpaceOrUnderscore = false;
 		while (i < sb.length()) {
+			char charAt = sb.charAt(i);
 			if (i == 0) {
-				if (Character.isJavaIdentifierStart(sb.charAt(0)) && (sb.charAt(0) != '_')) {
+				// Allow java start char except '_' which is reserved in skyve
+				// plus digits which are converted to words below.
+				if ((Character.isJavaIdentifierStart(charAt) && (charAt != '_')) || Character.isDigit(charAt)) {
 					i++;
 				}
 				else {
@@ -1547,19 +1569,53 @@ public final class BindUtil {
 				}
 			}
 			else {
-				if (Character.isJavaIdentifierPart(sb.charAt(i)) && (sb.charAt(i) != '_')) {
+				if (Character.isJavaIdentifierPart(charAt) && (charAt != '_')) {
 					if (whiteSpaceOrUnderscore) {
-						sb.setCharAt(i, Character.toUpperCase(sb.charAt(i)));
+						sb.setCharAt(i, Character.toUpperCase(charAt));
 					}
 					whiteSpaceOrUnderscore = false;
 					i++;
 				}
 				else {
-					if (Character.isWhitespace(sb.charAt(i)) || (sb.charAt(i) == '_')) {
+					if (Character.isWhitespace(charAt) || (charAt == '_')) {
 						whiteSpaceOrUnderscore = true;
 					}
 					sb.deleteCharAt(i);
 				}
+			}
+		}
+		
+		if (sb.length() > 0) {
+			char firstChar = sb.charAt(0);
+			if (firstChar == '0') {
+				sb.replace(0, 1, "zero");
+			}
+			else if (firstChar == '1') {
+				sb.replace(0, 1, "one");
+			}
+			else if (firstChar == '2') {
+				sb.replace(0, 1, "two");
+			}
+			else if (firstChar == '3') {
+				sb.replace(0, 1, "three");
+			}
+			else if (firstChar == '4') {
+				sb.replace(0, 1, "four");
+			}
+			else if (firstChar == '5') {
+				sb.replace(0, 1, "five");
+			}
+			else if (firstChar == '6') {
+				sb.replace(0, 1, "six");
+			}
+			else if (firstChar == '7') {
+				sb.replace(0, 1, "seven");
+			}
+			else if (firstChar == '8') {
+				sb.replace(0, 1, "eight");
+			}
+			else if (firstChar == '9') {
+				sb.replace(0, 1, "nine");
 			}
 		}
 	}

@@ -148,6 +148,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				svgFile = repository.findResourceFile("files/blank.svg", null, null);
 			}
 			else {
+				suffix = suffix.toLowerCase();
 				svgFile = repository.findResourceFile(String.format("files/%s.svg", suffix) , null, null);
 				if (! svgFile.exists()) {
 					svgFile = repository.findResourceFile("files/blank.svg", null, null);

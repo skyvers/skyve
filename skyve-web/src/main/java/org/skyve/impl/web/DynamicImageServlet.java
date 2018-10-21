@@ -111,7 +111,7 @@ public class DynamicImageServlet extends HttpServlet {
 					response.setContentType(format.getMimeType().toString());
 					b.toOutputStream(out);
 				}
-				catch (Exception e) {
+				catch (@SuppressWarnings("unused") Exception e) {
 					image.flush();
 				}
 			}

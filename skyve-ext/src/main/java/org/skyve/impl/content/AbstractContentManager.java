@@ -78,12 +78,12 @@ public abstract class AbstractContentManager implements ContentManager {
 				return false;
 			}
 		}
-		catch (MetaDataException e) {
+		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// This can happen when a document was indexed but then the customer access was taken away
 			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not get the document for " + bizModule + '.' + bizDocument);
 			return false;
 		}
-		catch (DomainException e) {
+		catch (@SuppressWarnings("unused") DomainException e) {
 			// This happens when the data was deleted but the CMS was not kept in sync
 			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
 			return false;

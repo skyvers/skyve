@@ -59,16 +59,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 			if (projected) {
 				String binding = column.getBinding();
 				// if this binding is to an association, 
-				// add the bizId as the column value and bizKey as the column displayValue
+				// add the association as the column value and bizKey as the column displayValue
 				if (binding != null) {
 					TargetMetaData target = Binder.getMetaDataForBinding(customer,
 																			module,
 																			drivingDocument,
 																			binding);
 					if (target.getAttribute() instanceof Association) {
-						StringBuilder sb = new StringBuilder(64);
-						sb.append(binding).append('.').append(Bean.BIZ_KEY);
-						projections.put(sb.toString(), null);
+						projections.put(String.format("%s.%s", binding, Bean.BIZ_KEY), null);
 					}
 					projections.put(binding, null);
 				}

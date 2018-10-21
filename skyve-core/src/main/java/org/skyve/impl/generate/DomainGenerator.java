@@ -137,7 +137,7 @@ public abstract class DomainGenerator {
 		if (args.length >= 6) {
 			try {
 				DIALECT_OPTIONS = DialectOptions.valueOf(args[5]);
-			} catch (IllegalArgumentException e) {
+			} catch (@SuppressWarnings("unused") IllegalArgumentException e) {
 				System.err.println("The sixth argument DIALECT_OPTIONS should be one of the following "
 						+ StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);

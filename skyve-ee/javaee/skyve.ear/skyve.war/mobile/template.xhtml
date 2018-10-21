@@ -33,7 +33,7 @@
 		<h:body>
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<p:growl id="growl" widgetVar="growl" globalOnly="true" showDetail="false">
+			<p:growl id="growl" widgetVar="growl" globalOnly="true" showDetail="false" escape="false">
 				<p:autoUpdate />
 			</p:growl>
 			<ui:insert name="pages" />

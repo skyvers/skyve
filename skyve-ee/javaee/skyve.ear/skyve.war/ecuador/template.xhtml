@@ -58,10 +58,10 @@
 				</h:panelGroup>
 				
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:messages>
-					<p:growl id="growl" widgetVar="growl" globalOnly="true">
+					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:growl>
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
@@ -100,8 +100,7 @@
 							        	<span>Version ${project.version}</span>
 							        </div>
 							        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-							        	<span class="fa fa-copyright" aria-hidden="true" style="display: inline;"></span>
-							        	<span style="display: inline;">All Rights Reserved</span>   
+							        	<span><i class="fa fa-copyright"></i> All Rights Reserved</span>   
 							        </div>
 					            </div>
 							</div>
@@ -120,7 +119,10 @@
 			</p:ajaxStatus>
 	
 			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
-			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ecuador-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(not empty request.getAttribute('skyveUxUi' 
+				and not empty request.getAttribute('skyveUxUi').getPfThemeColour()) ? 
+				request.getAttribute('skyveUxUi').getPfThemeColour() : 'indigo')
+				.concat('.css')}" library="ecuador-layout" />
 		</h:body>
 	</f:view>
 </html>

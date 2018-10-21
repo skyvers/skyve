@@ -77,7 +77,7 @@
 		<property name="calendarStartTime" type="DateTime" />
 		<property name="calendarEndTime" type="DateTime" />
 		<property name="calendarDescriptionExpression" length="500" />
-		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_template" foreign-key="FK_ADM_Communication_template" />
+		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_template" />
 		<bag name="subscriptions" inverse="true">
 			<key column="communication_id" />
 			<one-to-many entity-name="adminSubscription" />
@@ -125,11 +125,6 @@
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup" />
 		<property name="allowUserSelfRegistration" />
-		<bag name="userInvitationGroups" table="ADM_Configuration_userInvitationGroups" cascade="persist,save-update,refresh,merge">
-			<key column="owner_id" foreign-key="FK_ADM_Configuration_userInvitationGroups_owner_id" />
-			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_Configuration_userInvitationGroups_element_id" column="element_id" />
-		</bag>
-		<property name="userInvitiationEmailList" type="text" />
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminConfigurationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -24,6 +24,9 @@
 	<!-- Do not secure the H2 database servlet -->
 	<http auto-config="true" use-expressions="true" security="none" pattern="/h2/**" />
 
+	<!-- Do not secure push notifications. -->
+	<http pattern="/primepush/**" security="none" />
+
 	<!-- Secure everything else -->
 	<http auto-config="true" use-expressions="true">
 		<form-login default-target-url="/" login-page="/login" />

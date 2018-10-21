@@ -51,7 +51,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 			if (fileReader != null) {
 				fileReader.close();
 			}
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.log(Level.SEVERE, "Exception thrown closing input file");
 		}
 	}

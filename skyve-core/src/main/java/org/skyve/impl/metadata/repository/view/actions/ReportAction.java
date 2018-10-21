@@ -124,7 +124,7 @@ public class ReportAction extends ParameterizableAction {
 		if (listReport != null) {
 			p = new ParameterImpl();
 			p.setName(AbstractWebContext.IS_LIST);
-			p.setValue(Boolean.toString(listReport));
+			p.setValue(listReport.toString());
 			parameters.add(p);
 		}
 		if (queryName != null) {

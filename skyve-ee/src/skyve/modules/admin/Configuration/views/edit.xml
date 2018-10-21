@@ -41,35 +41,9 @@
                 <default binding="allowUserSelfRegistration"/>
             </item>
         </row>
-    </form>
-	<vbox border="true" borderTitle="User Invitations" >
-		<vbox>
-			<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
-			<form percentageWidth="40">
-				<column/>
-				<row>
-					<item >
-						<label for="userInvitiationEmailList"/>
-					</item>
-				</row>
-				<row>
-					<item showLabel="false">
-						<default binding="userInvitiationEmailList"/>
-					</item>
-				</row>
-				<row>
-					<item align="centre">
-						<button actionName="InviteUsers" pixelWidth="150"/>
-					</item>
-				</row>
-			</form>
-		</vbox>
-	</vbox>
-    
+    </form>    
     <actions>
         <defaults/>
-        <action className="InviteUsers" displayName="Invite Users"  iconStyleClass="fa fa-user-plus"
-        confirm="Ok to invite the users?"/>
     </actions>
     <newParameters/>
 </view>

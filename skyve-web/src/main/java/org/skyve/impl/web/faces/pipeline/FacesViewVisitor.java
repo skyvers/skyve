@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UIOutput;
 
 import org.primefaces.component.calendar.Calendar;
 import org.skyve.CORE;
@@ -138,6 +139,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -239,11 +241,13 @@ public class FacesViewVisitor extends ViewVisitor {
     	}
 	}
 
+	private StringBuilder stickyTabScript = new StringBuilder(128);
+	
 	@Override
 	public void visitTabPane(TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		UIComponent component = cb.tabPane(null, tabPane);
+		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName(), stickyTabScript);
         addToContainer(component, 
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
@@ -262,13 +266,29 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled) {
 		addedToContainer();
 
+        // remember tab unless the tab selection is being controlled by the view.
+		UIOutput script = null;
+		if ((stickyTabScript.length() > 0) && (tabPane.getSelectedTabIndexBinding() == null)) {
+			script = new UIOutput();
+			script.setValue(String.format("<script type=\"text/javascript\">%s</script>", stickyTabScript));
+        }
+		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
 			current.getChildren().remove(fragment);
 			fragment.setParent(null);
 			facesView.getChildren().add(fragment);
 			fragment = null;
+			if (script != null) {
+				facesView.getChildren().add(script);
+			}
 		}
+		else {
+			if (script != null) {
+				current.getChildren().add(script);
+			}
+		}
+		stickyTabScript.setLength(0);
 	}
 	
 	@Override
@@ -1023,10 +1043,20 @@ public class FacesViewVisitor extends ViewVisitor {
 	
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-		// Create the datagrid faces component
+		// Determine if the grid collection is ordered
 		listBinding = grid.getBinding();
+		boolean ordered = false;
+		final TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, listBinding);
+		if (target != null) {
+			Relation targetRelation = (Relation) target.getAttribute();
+			if (targetRelation instanceof Collection) {
+				ordered = Boolean.TRUE.equals(((Collection) targetRelation).getOrdered());
+			}
+		}
+		
+		// Create the datagrid faces component
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent g = cb.dataGrid(null, listVar, grid);
+		UIComponent g = cb.dataGrid(null, listVar, ordered, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		currentGrid = grid;
 		gridColumnExpression = new StringBuilder(512);

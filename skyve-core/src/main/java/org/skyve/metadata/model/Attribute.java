@@ -137,6 +137,14 @@ public interface Attribute extends NamedMetaData {
 	public boolean isAudited();
 
 	/**
+	 * Should the attribute have the transient java modifier added to its definition.
+	 * This affects Java Serialization and thus its inclusion in the conversation, EJB remoting etc. 
+	 * 
+	 * @return
+	 */
+	public boolean isTransient();
+
+	/**
 	 * 
 	 * @return
 	 */

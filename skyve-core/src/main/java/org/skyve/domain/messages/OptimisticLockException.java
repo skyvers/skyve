@@ -43,7 +43,7 @@ public class OptimisticLockException extends DomainException implements MessageE
 		try {
 			timeStampDisplay = customer.getDefaultTimestampConverter().toDisplayValue(new Timestamp(persistentLock.getTimestamp().getTime()));
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			timeStampDisplay = persistentLock.getTimestamp().toString();
 		}
 

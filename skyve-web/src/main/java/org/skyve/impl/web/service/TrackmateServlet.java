@@ -257,7 +257,7 @@ public class TrackmateServlet extends HttpServlet {
 					pw.append(jsonString);
 				}
 
-			} catch (MetaDataException e) {
+			} catch (@SuppressWarnings("unused") MetaDataException e) {
 				// do nothing -just wait
 			} finally {
 				if (persistence != null) {

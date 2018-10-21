@@ -59,10 +59,10 @@
 					</div>
 				</h:form>
 				<div class="layout-main">
-					<p:messages id="messages" widgetVar="messages" globalOnly="true">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:messages>
-					<p:growl id="growl" widgetVar="growl" globalOnly="true">
+					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:growl>
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
@@ -114,7 +114,10 @@
 			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
-			<h:outputStylesheet name="#{'css/layout-'.concat(empty request.getAttribute('skyveUxUi') ? 'indigo' : request.getAttribute('skyveUxUi').getPfThemeColour()).concat('.css')}" library="ultima-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(not empty request.getAttribute('skyveUxUi' 
+				and not empty request.getAttribute('skyveUxUi').getPfThemeColour()) ? 
+				request.getAttribute('skyveUxUi').getPfThemeColour() : 'indigo')
+				.concat('.css')}" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>
