@@ -184,6 +184,8 @@ public class POISheetGenerator {
 								case markup:
 								case memo:
 								case text:
+								case time:
+								case timestamp:
 									value = Binder.formatMessage(customer, "{" + resolvedBinding + "}", b);
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
 									break;
@@ -192,8 +194,6 @@ public class POISheetGenerator {
 								case decimal5:
 								case integer:
 								case longInteger:
-								case time:
-								case timestamp:
 									value = Binder.get(b, resolvedBinding); //allow excel to interpret from type
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
 									break;
