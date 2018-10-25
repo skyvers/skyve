@@ -18,6 +18,11 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH24_MI;
+import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
+import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.metadata.customer.Customer;
@@ -628,7 +633,9 @@ public abstract class AbstractDataFileLoader {
 					Util.LOGGER.info("No binding provided for field " + field.getIndex());
 				}
 			} else {
-
+				if(debugMode) {
+					Util.LOGGER.info("Loading binding " + binding);
+				}
 				boolean treatEmptyNumericAsZero = treatAllEmptyNumericAsZero || field.isTreatEmptyNumericAsZero();
 
 				Object loadValue = null;
@@ -643,8 +650,52 @@ public abstract class AbstractDataFileLoader {
 							// use Skyve converter
 							operand = getStringFieldValue(fieldIndex, true);
 							String displayValue = (String) operand;
+							if(debugMode) {
+								Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString());
+							}
 							if (displayValue != null && displayValue.trim().length() > 0) {
-								loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
+								if(this instanceof POISheetLoader) {
+									//handle rubbish values from Excel, ignore converter and use default constructor
+									switch(field.getAttribute().getAttributeType()) {
+									case date:
+										break;
+									case dateTime:
+										//process of elimination based on whatever excel thinks it should send in
+										DD_MM_YYYY_HH24_MI_SS c1 = new DD_MM_YYYY_HH24_MI_SS();
+										loadValue = c1.fromDisplayValue(displayValue);
+										if(loadValue==null) {
+											DD_MM_YYYY_HH_MI_SS c2 = new DD_MM_YYYY_HH_MI_SS(); 
+											loadValue = c2.fromDisplayValue(displayValue);
+										} 
+										if(loadValue==null) {
+											DD_MM_YYYY_HH24_MI c2 = new DD_MM_YYYY_HH24_MI(); 
+											loadValue = c2.fromDisplayValue(displayValue);
+										} 
+										if(loadValue==null) {
+											DD_MM_YYYY_HH_MI_SS c2 = new DD_MM_YYYY_HH_MI_SS(); 
+											loadValue = c2.fromDisplayValue(displayValue);
+										} 
+										if(loadValue==null) {
+											DD_MMM_YYYY_HH24_MI_SS c2 = new DD_MMM_YYYY_HH24_MI_SS(); 
+											loadValue = c2.fromDisplayValue(displayValue);
+										} 
+										if(loadValue==null) {
+											DD_MMM_YYYY_HH24_MI c2 = new DD_MMM_YYYY_HH24_MI(); 
+											loadValue = c2.fromDisplayValue(displayValue);
+										} 
+										
+										loadValue = new DateTime(getDateFieldValue(fieldIndex));
+										break;
+									default:
+										loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
+										break;
+									}
+								} else {
+									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
+								}
+								if(debugMode) {
+									Util.LOGGER.info("Converted value =  " + loadValue);
+								}
 							}
 						} catch (Exception e) {
 							what.append(" The value ");
@@ -661,113 +712,119 @@ public abstract class AbstractDataFileLoader {
 						try {
 							// simplistic conversion making assumptions based on the attribute type
 							switch (field.getAttribute().getAttributeType()) {
-							case association:
-								// Not required - handled by use of BizKey above
-								break;
 							case bool:
-								// TODO
-								break;
-							case collection:
-								// not supported
+								operand = getStringFieldValue(fieldIndex,true);
+								if (operand != null) {
+									if("1".equals(operand) || "-1".equals(operand) || "yes".equals(operand.toString().toLowerCase())) {
+										loadValue = Boolean.TRUE;
+									} else {
+										loadValue = Boolean.valueOf((String) operand);
+									}
+									if(debugMode) {
+										Util.LOGGER.info("Boolean field value " + loadValue);
+									}
+								}
 								break;
 							case colour:
-								// TODO
-								break;
-							case content:
-								// not supported
+							case enumeration:
+							case geometry:
+							case id:
+							case markup:
+							case memo:
+							case text:
+								operand = getStringFieldValue(fieldIndex, true);
+								if (operand != null) {
+									loadValue = operand;
+									if(debugMode) {
+										Util.LOGGER.info("String field value " + loadValue);
+									}
+								}
 								break;
 							case date:
 								operand = getDateFieldValue(fieldIndex);
 								if (operand != null) {
 									loadValue = new DateOnly((Date) operand);
+									if(debugMode) {
+										Util.LOGGER.info("DateOnly field value " + loadValue);
+									}
 								}
 								break;
 							case dateTime:
 								operand = getDateFieldValue(fieldIndex);
 								if (operand != null) {
 									loadValue = new DateTime((Date) operand);
+									if(debugMode) {
+										Util.LOGGER.info("DateTime field value " + loadValue);
+									}
 								}
 								break;
 							case decimal10:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
 									loadValue = new Decimal10(((Double) operand).doubleValue());
+									if(debugMode) {
+										Util.LOGGER.info("Decimal10 field value " + loadValue);
+									}
 								}
 								break;
 							case decimal2:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
 									loadValue = new Decimal2(((Double) operand).doubleValue());
+									if(debugMode) {
+										Util.LOGGER.info("Decimal2 field value " + loadValue);
+									}									
 								}
 								break;
 							case decimal5:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
 									loadValue = new Decimal5(((Double) operand).doubleValue());
-								}
-								break;
-							case enumeration:
-								operand = getStringFieldValue(fieldIndex, true);
-								if (operand != null) {
-									loadValue = operand;
-								}
-								break;
-							case geometry:
-								// TODO
-								break;
-							case id:
-								operand = getStringFieldValue(fieldIndex, true);
-								if (operand != null) {
-									loadValue = operand;
+									if(debugMode) {
+										Util.LOGGER.info("Decimal5 field value " + loadValue);
+									}									
 								}
 								break;
 							case integer:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
 									loadValue = new Integer(((Double) operand).intValue());
+									if(debugMode) {
+										Util.LOGGER.info("Integer field value " + loadValue);
+									}									
 								}
-								break;
-							case inverseOne:
-							case inverseMany:
-								// not supported
 								break;
 							case longInteger:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
 									loadValue = new Long(((Double) operand).longValue());
-								}
-								break;
-							case markup:
-								operand = getStringFieldValue(fieldIndex, true);
-								if (operand != null) {
-									loadValue = operand;
-								}
-								break;
-							case memo:
-								operand = getStringFieldValue(fieldIndex, true);
-								if (operand != null) {
-									loadValue = operand;
-								}
-								break;
-							case text:
-								operand = getStringFieldValue(fieldIndex, true);
-								if (operand != null) {
-									loadValue = operand;
+									if(debugMode) {
+										Util.LOGGER.info("Long field value " + loadValue);
+									}									
 								}
 								break;
 							case time:
 								operand = getDateFieldValue(fieldIndex);
 								if (operand != null) {
 									loadValue = new TimeOnly((Date) operand);
+									if(debugMode) {
+										Util.LOGGER.info("TimeOnly field value " + loadValue);
+									}									
 								}
 								break;
 							case timestamp:
 								operand = getDateFieldValue(fieldIndex);
 								if (operand != null) {
 									loadValue = new Timestamp((Date) operand);
+									if(debugMode) {
+										Util.LOGGER.info("Timestamp field value " + loadValue);
+									}									
 								}
 								break;
 							default:
+								if(debugMode) {
+									Util.LOGGER.info("Attribute type " + field.getAttribute().getAttributeType().toString() + " not supported.");
+								}								
 								break;
 							}
 
