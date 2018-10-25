@@ -230,7 +230,7 @@ public class POISheetGenerator {
 								default:
 									break;
 								}
-							} catch (@SuppressWarnings("unused") Exception e) {
+							} catch (Exception e) {
 								Util.LOGGER.info("Putting compound expression " + f.getBindingExpression());
 								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
 							}

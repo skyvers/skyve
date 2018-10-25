@@ -2,8 +2,8 @@
 <view title="Data Maintenance" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Export/Import">
-			<form border="true" responsiveWidth="12">
+		<tab title="Import/Export">
+			<form border="true" responsiveWidth="12" borderTitle="Bizport">
 				<column responsiveWidth="1" />
 				<column responsiveWidth="3" />
 				<column />

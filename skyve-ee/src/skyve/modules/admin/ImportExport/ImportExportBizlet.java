@@ -65,50 +65,67 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 	@Override
 	public void preRerender(String source, ImportExport bean, WebContext webContext) throws Exception {
 		
-		//switching into advanced mode, prepare binding expression equivalents
-		if(ImportExport.advancedModePropertyName.equals(source) && Boolean.TRUE.equals(bean.getAdvancedMode())) {
-			for(ImportExportColumn c: bean.getImportExportColumns()) {
-				if(c.getBindingName()!=null && !ImportExportColumnBizlet.ADVANCED.equals(c.getBindingName())) {
-					c.setBindingExpression("{" + c.getBindingName() + "}");
-				}
-			}
-		}
-		
-		//if changing document name, recreate default import export column config 
-		if(ImportExport.documentNamePropertyName.equals(source)) {
-			bean.getImportExportColumns().clear();
-			if(Mode.exportData.equals(bean.getMode())) {
-				
-				//generate column configs from scalar attributes
-				Persistence pers = CORE.getPersistence();
-				User user = pers.getUser();
-				Customer customer = user.getCustomer();
-				Module module = customer.getModule(bean.getModuleName());
-				Document document = module.getDocument(customer, bean.getDocumentName());
-
-				for (Attribute a : document.getAttributes()) {
-					//exclude unsupported types
-					if (!AttributeType.association.equals(a.getAttributeType())
-							&& !AttributeType.collection.equals(a.getAttributeType())
-							&& !AttributeType.content.equals(a.getAttributeType())
-							&& !AttributeType.geometry.equals(a.getAttributeType())
-							&& !AttributeType.inverseMany.equals(a.getAttributeType())
-							&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
-						
-						//also exclude non persistent fields
-						if(a.isPersistent()) {
-							ImportExportColumn col = ImportExportColumn.newInstance();
-							col.setParent(bean);
-							bean.getImportExportColumns().add(col);
-							col.setBindingName(a.getName());
-							col.setColumnName(a.getDisplayName());
+		switch (source) {
+			case ImportExport.advancedModePropertyName:
+				// switching into advanced mode, prepare binding expression equivalents
+				if (Boolean.TRUE.equals(bean.getAdvancedMode())) {
+					for (ImportExportColumn c : bean.getImportExportColumns()) {
+						if (c.getBindingName() != null && !ImportExportColumnBizlet.ADVANCED.equals(c.getBindingName())) {
+							c.setBindingExpression("{" + c.getBindingName() + "}");
 						}
 					}
 				}
-			}
+				break;
+			case ImportExport.documentNamePropertyName:
+				// if changing document name, recreate default import export column config
+				bean.getImportExportColumns().clear();
+				if (Mode.exportData.equals(bean.getMode())) {
+					generateColumns(bean);
+				}
+				break;
+			case ImportExport.modePropertyName:
+				if (Mode.exportData.equals(bean.getMode()) && bean.getImportExportColumns().size() == 0) {
+					if (bean.getModuleName() != null && bean.getDocumentName() != null) {
+						generateColumns(bean);
+					}
+				}
+				break;
+			default:
+				break;
 		}
 		
 		super.preRerender(source, bean, webContext);
+	}
+
+	/**
+	 * Generate column configs from scalar attributes
+	 */
+	private static void generateColumns(ImportExport bean) {
+		Persistence pers = CORE.getPersistence();
+		User user = pers.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(bean.getModuleName());
+		Document document = module.getDocument(customer, bean.getDocumentName());
+
+		for (Attribute a : document.getAttributes()) {
+			//exclude unsupported types
+			if (!AttributeType.association.equals(a.getAttributeType())
+					&& !AttributeType.collection.equals(a.getAttributeType())
+					&& !AttributeType.content.equals(a.getAttributeType())
+					&& !AttributeType.geometry.equals(a.getAttributeType())
+					&& !AttributeType.inverseMany.equals(a.getAttributeType())
+					&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
+				
+				//also exclude non persistent fields
+				if(a.isPersistent()) {
+					ImportExportColumn col = ImportExportColumn.newInstance();
+					col.setParent(bean);
+					bean.getImportExportColumns().add(col);
+					col.setBindingName(a.getName());
+					col.setColumnName(a.getDisplayName());
+				}
+			}
+		}
 	}
 
 }
