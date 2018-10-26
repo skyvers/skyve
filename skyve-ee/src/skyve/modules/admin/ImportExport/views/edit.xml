@@ -79,6 +79,14 @@
 				<column />		
 				<row>
 					<item>
+						<spacer/>
+					</item>
+					<item>
+						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+					</item>
+				</row>
+				<row>
+					<item>
 						<spacer></spacer>
 					</item>
 					<item>

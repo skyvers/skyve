@@ -52,7 +52,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					sb.append(" ");
 					if (Boolean.TRUE.equals(bean.getAdvancedMode()) || ImportExportColumnBizlet.ADVANCED.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
-							Util.LOGGER.info("adding " + col.getBindingExpression());
+//							Util.LOGGER.info("adding " + col.getBindingExpression());
 							loader.addField(col.getBindingExpression());
 
 							// prepare debug
@@ -62,7 +62,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 					} else {
 						if (col.getBindingName() != null) {
-							Util.LOGGER.info("adding " + col.getBindingName());
+//							Util.LOGGER.info("adding " + col.getBindingName());
 							loader.addField(col.getBindingName());
 
 							// prepare debug

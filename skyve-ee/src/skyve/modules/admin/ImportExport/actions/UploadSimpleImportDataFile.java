@@ -69,6 +69,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				}
 			} 
 			Files.copy(file.getInputStream(), Paths.get(importFile.getAbsolutePath()));
+			bean.setImportFileName(file.getFileName());
 			bean.setImportFileAbsolutePath(importFile.getAbsolutePath());				
 
 			// load the columns from the file
