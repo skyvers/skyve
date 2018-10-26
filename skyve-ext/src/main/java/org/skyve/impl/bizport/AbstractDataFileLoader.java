@@ -128,7 +128,6 @@ public abstract class AbstractDataFileLoader {
 	}
 
 	protected LoaderActivityType activityType;
-	protected boolean createMissingAssociations;
 	protected boolean treatAllEmptyNumericAsZero;
 	protected UploadException exception;
 	protected Persistence pers;
@@ -207,10 +206,6 @@ public abstract class AbstractDataFileLoader {
 	 */
 	public void setDataIndex(int dataIndex) {
 		this.dataIndex = dataIndex;
-	}
-
-	public void setCreateMissingAssocations(boolean create) {
-		this.createMissingAssociations = create;
 	}
 
 	public void setEmptyAsZero(boolean emptyAsZero) {
@@ -510,6 +505,9 @@ public abstract class AbstractDataFileLoader {
 			TargetMetaData drivingMD = Binder.getMetaDataForBinding(customer, module, document, firstLevelBinding);
 			Document drivingDoc = drivingMD.getDocument();
 			DocumentQuery lookup = pers.newDocumentQuery(drivingDoc.getOwningModuleName(), drivingDoc.getName());
+			if(debugMode) {
+				Util.LOGGER.info(field.getLoadAction().name()  + " searching " + restBinding + " in document " + drivingDoc.getName() + " for value " + loadValue );
+			}
 			switch (field.getLoadAction()) {
 			case LOOKUP_EQUALS:
 			case CONFIRM_VALUE:
@@ -524,9 +522,13 @@ public abstract class AbstractDataFileLoader {
 			default:
 				break;
 			}
+//			Util.LOGGER.info("LOOKUP FILTER " + lookup.getFilter().toString());
 
 			Bean foundBean = lookup.beanResult();
-			if (foundBean != null) {
+			if (!LoaderActivityType.CREATE_ALL.equals(activityType) && foundBean != null) {
+				if(debugMode) {
+					Util.LOGGER.info("Matching bean found " + foundBean.getBizId());
+				}				
 				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
 					// check if the found bean matches the bean we have already found
 					Object resultValue = Binder.get(contextBean, searchBinding);
@@ -537,8 +539,16 @@ public abstract class AbstractDataFileLoader {
 
 						throw new Exception(what.toString());
 					}
+				} else {
+					//for FIND OR CREATE_FIND, if the bean is found - set the reference
+					
+					//set the bean as the reference
+					Binder.set(contextBean, searchBinding, foundBean);
 				}
-			} else if (LoaderActivityType.CREATE_ALL.equals(activityType) || createMissingAssociations) {
+			} else if (LoaderActivityType.CREATE_ALL.equals(activityType) || LoaderActivityType.CREATE_FIND.equals(activityType)) {
+				if(debugMode) {
+					Util.LOGGER.info("No matching bean found - attempting to create a " + drivingDoc.getName() + " with " + restBinding + " = " + loadValue);
+				}				
 				// first check the creationCache to establish if this bean has already been created
 				StringBuilder mapReference = new StringBuilder(128);
 				mapReference.append(binding).append(',').append((String) loadValue);
@@ -904,6 +914,7 @@ public abstract class AbstractDataFileLoader {
 							default:
 								// check for compound binding
 								if (binding.indexOf('.') > 0) {
+									Util.LOGGER.info("Compound Binding " + binding);
 									lookupBean(result, field, loadValue, what);
 									break;
 								} else if (LoadAction.SET_VALUE.equals(field.getLoadAction())) {
