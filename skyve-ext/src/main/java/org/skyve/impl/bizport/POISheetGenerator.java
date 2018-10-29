@@ -186,7 +186,7 @@ public class POISheetGenerator {
 								case text:
 								case time:
 								case timestamp:
-									value = Binder.formatMessage(customer, "{" + resolvedBinding + "}", b);
+									value = Binder.formatMessage(customer, String.format("{%s}", resolvedBinding), b);
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
 									break;
 								case decimal10:

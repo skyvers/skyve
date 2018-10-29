@@ -43,6 +43,8 @@ public class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String importFileAbsolutePathPropertyName = "importFileAbsolutePath";
 	/** @hidden */
+	public static final String importFileNamePropertyName = "importFileName";
+	/** @hidden */
 	public static final String exportFileAbsolutePathPropertyName = "exportFileAbsolutePath";
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
@@ -148,6 +150,10 @@ public class ImportExport extends AbstractPersistentBean {
 	 * File Absolute Path
 	 **/
 	private String importFileAbsolutePath;
+	/**
+	 * Imported File
+	 **/
+	private String importFileName;
 	/**
 	 * File Absolute Path
 	 **/
@@ -286,6 +292,24 @@ public class ImportExport extends AbstractPersistentBean {
 	public void setImportFileAbsolutePath(String importFileAbsolutePath) {
 		preset(importFileAbsolutePathPropertyName, importFileAbsolutePath);
 		this.importFileAbsolutePath = importFileAbsolutePath;
+	}
+
+	/**
+	 * {@link #importFileName} accessor.
+	 * @return	The value.
+	 **/
+	public String getImportFileName() {
+		return importFileName;
+	}
+
+	/**
+	 * {@link #importFileName} mutator.
+	 * @param importFileName	The new value.
+	 **/
+	@XmlElement
+	public void setImportFileName(String importFileName) {
+		preset(importFileNamePropertyName, importFileName);
+		this.importFileName = importFileName;
 	}
 
 	/**
