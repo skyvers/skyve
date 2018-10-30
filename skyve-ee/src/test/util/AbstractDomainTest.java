@@ -111,7 +111,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getConstantDomainValues(attribute.getName());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}
@@ -137,7 +137,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getDynamicDomainValues(attribute.getName(), getBean());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}
@@ -163,7 +163,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getVariantDomainValues(attribute.getName());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}

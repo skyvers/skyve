@@ -329,7 +329,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 				continue;
 			}
 
-			String replacedExpression = null;
+			String replacedExpression = replaceImplicitExpressions(expression, implicitParameters, user, customer);
 			
 			if (projected) {
 				if (summaryType == null) {
@@ -337,7 +337,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						result.addBoundProjection(binding, alias);
 					}
 					else {
-						replacedExpression = replaceImplicitExpressions(expression, implicitParameters, user, customer);
 						result.addExpressionProjection(replacedExpression, alias);
 					}
 				}

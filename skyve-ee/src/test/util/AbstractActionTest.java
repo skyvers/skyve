@@ -15,7 +15,7 @@ public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAct
 	public void testExecute() throws Exception {
 		try {
 			getAction().execute(getBean(), null);
-		} catch (ValidationException e) {
+		} catch (@SuppressWarnings("unused") ValidationException e) {
 			// pass - action handled incorrect input
 		}
 	}
