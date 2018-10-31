@@ -130,5 +130,12 @@
 				</column>
 			</columns>
 		</query>
+		<query name="qAssociations" documentName="AllAttributesPersistent">
+			<description>Test Associations and association of association work</description>
+			<columns>
+				<column binding="aggregatedAssociation" displayName="aggregatedAssociation" />
+				<column binding="aggregatedAssociation.aggregatedAssociation" displayName="aggregatedAssociation.aggregatedAssociation" />
+			</columns>
+		</query>
 	</queries>
 </module>
