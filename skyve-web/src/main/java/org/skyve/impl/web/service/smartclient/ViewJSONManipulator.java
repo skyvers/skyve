@@ -363,6 +363,11 @@ class ViewJSONManipulator extends ViewVisitor {
 				json.put(BindUtil.sanitiseBinding(bindingPrefix), values);
 			}
 			else {
+				if (value == null) {
+					UtilImpl.LOGGER.warning(String.format("Careful - the value of binding %s for %s yields null",
+														bindingPrefix, 
+														bean));
+				}
 				Bean currentBean = (Bean) value;
 				Map<String, Object> beanValues = new TreeMap<>();
 				addBindingsAndFormatValues(bindings, currentBean, beanValues, webId);
