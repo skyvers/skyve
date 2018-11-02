@@ -211,7 +211,7 @@ public class Mail implements Serializable {
 	 * Set the mail to be text/plain
 	 * @return this
 	 */
-	public Mail textPlainContentType() {
+	public Mail textPlain() {
 		this.contentType = MimeType.plain;
 		return this;
 	}
@@ -220,7 +220,7 @@ public class Mail implements Serializable {
 	 * Set the mail to be html - this is the default.
 	 * @return this
 	 */
-	public Mail htmlContentType() {
+	public Mail html() {
 		this.contentType = MimeType.html;
 		return this;
 	}
@@ -265,6 +265,17 @@ public class Mail implements Serializable {
 			}
 		}
 		return this;
+	}
+	
+	/**
+	 * Add attachment
+	 * @param attachmentFileName
+	 * @param attachment
+	 * @param attachmentMimeType
+	 * @return this
+	 */
+	public Mail attach(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
+		return attach(new MailAttachment(attachmentFileName, attachment, attachmentMimeType));
 	}
 
 	public List<MailAttachment> getAttachments() {

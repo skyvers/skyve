@@ -3,6 +3,7 @@ package org.skyve.impl.util;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -71,6 +72,7 @@ public class MailUtil {
 		String subject = mail.getSubject();
 		String body = mail.getBody();
 		MimeType contentType = mail.getContentType();
+		Map<String, String> headers = mail.getHeaders();
 		List<MailAttachment> attachments = mail.getAttachments();
 		
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
@@ -163,17 +165,23 @@ public class MailUtil {
 		messageBodyPart.setContent(body, contentType.toString());
 		multipart.addBodyPart(messageBodyPart);
 
-		// set the unsent header if required for sending (default to true)
-		message.setHeader("X-Unsent", "1");
-
-		// add attachments
-		for (MailAttachment attachment: attachments) {
-			MimeBodyPart bodyPart = addAttachment(attachment);
-			if (bodyPart != null) {
-				multipart.addBodyPart(bodyPart);
+		// add headers
+		if (headers != null) {
+			for (Entry<String, String> header : headers.entrySet()) {
+				message.setHeader(header.getKey(), header.getValue());
 			}
 		}
 
+		// add attachments
+		if (attachments != null) {
+			for (MailAttachment attachment: attachments) {
+				MimeBodyPart bodyPart = addAttachment(attachment);
+				if (bodyPart != null) {
+					multipart.addBodyPart(bodyPart);
+				}
+			}
+		}
+		
 		// Put all parts into the message
 		message.setContent(multipart);
 
