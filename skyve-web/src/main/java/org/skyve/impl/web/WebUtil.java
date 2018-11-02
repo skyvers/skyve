@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.internal.util.SerializationHelper;
 import org.skyve.EXT;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -34,6 +33,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -283,7 +283,7 @@ public class WebUtil {
 				body = body.replace("{url}", Util.getSkyveContextUrl());
 				body = Binder.formatMessage(c, body, user);
 				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
-				EXT.sendMail(new String[] {email}, null, null, fromEmail, subject, body, MimeType.html);
+				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}
 		}
 		catch (Exception t) {

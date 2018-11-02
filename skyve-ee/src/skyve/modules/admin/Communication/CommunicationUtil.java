@@ -25,6 +25,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
+import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -225,7 +226,7 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
 					case email:
-						EXT.writeMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
+						EXT.writeMail(new Mail().addTo(sendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
 						break;
 					default:
 						break;
@@ -245,7 +246,7 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					EXT.sendMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					EXT.sendMail(new Mail().addTo(sendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
 					
 					if(webContext!=null) {
 						webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);

@@ -45,6 +45,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -135,39 +136,20 @@ public class EXT {
 	 * outlook displays a from addresses something like
 	 * "mailer@skyve.com (on behalf of sender@foo.com)".
 	 * 
-	 * @param recipientEmailAddresses
-	 *            An array of email addresses to send to.
-	 * @param ccEmailAddresses
-	 *            An array of email addresses to carbon copy in.
-	 * @param senderEmailAddress
-	 *            Address from which email will be sent (on behalf of rules
-	 *            apply here - see method description above).
-	 * @param subject
-	 *            The subject description shown in an email client.
-	 * @param body
-	 *            The email textual content (usually plain text or html).
-	 * @param contentType
-	 *            The mime type of the email body.
-	 * @param attachmentFileName
+	 * @param mail	The email to write.
+	 * @param out	The stream to write to.
 	 */
-	public static void writeMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, OutputStream out, MailAttachment... attachments) {
-		MailUtil.writeMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, out, attachments);
+	public static void writeMail(Mail mail, OutputStream out) {
+		MailUtil.writeMail(mail, out);
 	}
 
 	/**
+	 * Send an email.
 	 * 
-	 * @param recipientEmailAddresses
-	 * @param ccEmailAddresses
-	 * @param senderEmailAddress
-	 * @param subject
-	 * @param body
-	 * @param contentType
-	 * @param attachmentFileName
-	 * @param attachment
-	 * @param attachmentType
+	 * @param mail	The email to send.
 	 */
-	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) {
-		MailUtil.sendMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, attachments);
+	public static void sendMail(Mail mail) {
+		MailUtil.sendMail(mail);
 	}
 
 	/**

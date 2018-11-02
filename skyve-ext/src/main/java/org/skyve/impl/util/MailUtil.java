@@ -1,8 +1,11 @@
 package org.skyve.impl.util;
 
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.activation.DataHandler;
@@ -23,6 +26,7 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
 
 public class MailUtil {
@@ -30,25 +34,9 @@ public class MailUtil {
 		// no-op
 	}
 
-	public static final void writeMail(String[] recipientEmailAddresses,
-											String[] ccEmailAddresses,
-											String[] bccEmailAddresses,
-											String senderEmailAddress,
-											String subject,
-											String body,
-											MimeType contentType, 
-											OutputStream out,
-											MailAttachment... attachments) {
+	public static final void writeMail(Mail mail, OutputStream out) {
 		try {
-			MimeMessage message = createMail(recipientEmailAddresses,
-												ccEmailAddresses,
-												bccEmailAddresses,
-												senderEmailAddress,
-												subject,
-												body,
-												contentType,
-												true,
-												attachments);
+			MimeMessage message = createMail(mail, true);
 			// Write the message
 			if (! UtilImpl.SMTP_TEST_BOGUS_SEND) {
 				message.writeTo(out);
@@ -60,24 +48,9 @@ public class MailUtil {
 		}
 	}
 
-	public static final void sendMail(String[] recipientEmailAddresses,
-										String[] ccEmailAddresses,
-										String[] bccEmailAddresses,
-										String senderEmailAddress,
-										String subject,
-										String body,
-										MimeType contentType, 
-										MailAttachment... attachments) {
+	public static final void sendMail(Mail mail) {
 		try {
-			MimeMessage message = createMail(recipientEmailAddresses,
-												ccEmailAddresses,
-												bccEmailAddresses,
-												senderEmailAddress,
-												subject,
-												body,
-												contentType,
-												false,
-												attachments);
+			MimeMessage message = createMail(mail, false);
 			// Send the message
 			if (! UtilImpl.SMTP_TEST_BOGUS_SEND) { // if we are not in test mode
 				Transport.send(message);
@@ -89,16 +62,17 @@ public class MailUtil {
 		}
 	}
 	
-	private static final MimeMessage createMail(String[] recipientEmailAddresses,
-			String[] ccEmailAddresses,
-			String[] bccEmailAddresses,
-			String senderEmailAddress,
-			String subject,
-			String body,
-			MimeType contentType,
-			boolean forWriting,
-			MailAttachment... attachments) throws AddressException, MessagingException {
-
+	private static final MimeMessage createMail(Mail mail, boolean forWriting)
+	throws AddressException, MessagingException {
+		Set<String> recipientEmailAddresses = mail.getRecipientEmailAddresses();
+		Set<String> ccEmailAddresses = mail.getCcEmailAddresses();
+		Set<String> bccEmailAddresses = mail.getBccEmailAddresses();
+		String senderEmailAddress = mail.getSenderEmailAddress();
+		String subject = mail.getSubject();
+		String body = mail.getBody();
+		MimeType contentType = mail.getContentType();
+		List<MailAttachment> attachments = mail.getAttachments();
+		
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		UtilImpl.LOGGER.info("TO:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
@@ -172,7 +146,7 @@ public class MailUtil {
 		message.setSender(forWriting ? senderAddress : new InternetAddress(UtilImpl.SMTP_SENDER));
 		
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
-			addAddresses(message, new String[] {UtilImpl.SMTP_TEST_RECIPIENT}, Message.RecipientType.TO);
+			addAddresses(message, Collections.singleton(UtilImpl.SMTP_TEST_RECIPIENT), Message.RecipientType.TO);
 		}
 		else {
 			addAddresses(message, bccEmailAddresses, Message.RecipientType.BCC);
@@ -193,9 +167,9 @@ public class MailUtil {
 		message.setHeader("X-Unsent", "1");
 
 		// add attachments
-		for(MailAttachment attachment: attachments){
+		for (MailAttachment attachment: attachments) {
 			MimeBodyPart bodyPart = addAttachment(attachment);
-			if(null != bodyPart) {
+			if (bodyPart != null) {
 				multipart.addBodyPart(bodyPart);
 			}
 		}
@@ -206,33 +180,32 @@ public class MailUtil {
 		return message;
 	}
 
-	private static final void addAddresses(MimeMessage message, String[] addresses, 
-			Message.RecipientType type) throws AddressException, MessagingException {
-		
-		if(null == addresses) {
-			return;
-		}
-		
-		for(String address : addresses) {
-			message.addRecipient(type, new InternetAddress(address));
+	private static final void addAddresses(MimeMessage message, Set<String> addresses, Message.RecipientType type)
+	throws AddressException, MessagingException {
+		if (addresses != null) {
+			for (String address : addresses) {
+				message.addRecipient(type, new InternetAddress(address));
+			}
 		}
 	}
 	
-	private static final MimeBodyPart addAttachment(MailAttachment mailAttachment) throws MessagingException {
+	private static final MimeBodyPart addAttachment(MailAttachment mailAttachment)
+	throws MessagingException {
+		MimeBodyPart result = null;
 		
-		// if there is an attachement to send 
-		if(null != mailAttachment && mailAttachment.getAttachment()!=null) {
-			
-			// add attachment
-			MimeBodyPart messageBodyPart = new MimeBodyPart();
-			DataSource source = new ByteArrayDataSource(mailAttachment.getAttachment(),
-					mailAttachment.getAttachmentMimeType().toString());
-			messageBodyPart.setDataHandler(new DataHandler(source));
-			messageBodyPart.setFileName(mailAttachment.getAttachmentFileName());
-			return messageBodyPart;
+		// if there is an attachment to send 
+		if (mailAttachment != null) {
+			byte[] bytes = mailAttachment.getAttachment();
+			if (bytes != null) {
+				// add attachment
+				result = new MimeBodyPart();
+				DataSource source = new ByteArrayDataSource(bytes, mailAttachment.getAttachmentMimeType().toString());
+				result.setDataHandler(new DataHandler(source));
+				result.setFileName(mailAttachment.getAttachmentFileName());
+			}
 		}
 		
-		return  null;
+		return result;
 	}
 
 	private static class Authenticator extends javax.mail.Authenticator {
@@ -248,4 +221,5 @@ public class MailUtil {
 		protected PasswordAuthentication getPasswordAuthentication() {
 			return authentication;
 		}
-	}}
+	}
+}

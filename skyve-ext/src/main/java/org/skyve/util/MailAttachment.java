@@ -1,5 +1,7 @@
 package org.skyve.util;
 
+import java.io.Serializable;
+
 import org.skyve.content.MimeType;
 
 /**
@@ -7,17 +9,37 @@ import org.skyve.content.MimeType;
  * 
  * @author RB
  * 
- *         attachmentFileName: the name of the attachment as it will appear
- *         attachment: the byte array attachmentMimeType: the mimetype for the
- *         attachment
- * 
+ * attachmentFileName: the name of the attachment as it will appear
+ * attachment: the byte array 
+ * attachmentMimeType: the mimetype for the attachment
  */
-public class MailAttachment {
+public class MailAttachment implements Serializable {
+	private static final long serialVersionUID = 8103370634731869625L;
 
 	private String attachmentFileName;
 	private byte[] attachment;
 	private MimeType attachmentMimeType;
 
+	/**
+	 * Default constructor
+	 */
+	public MailAttachment() {
+		// nothing to see here
+	}
+
+	/**
+	 * Simple constructor
+	 * 
+	 * @param attachmentFileName
+	 * @param attachment
+	 * @param attachmentMimeType
+	 */
+	public MailAttachment(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
+		this.attachmentFileName = attachmentFileName;
+		this.attachment = attachment;
+		this.attachmentMimeType = attachmentMimeType;
+	}
+	
 	public String getAttachmentFileName() {
 		return attachmentFileName;
 	}
@@ -40,23 +62,5 @@ public class MailAttachment {
 
 	public void setAttachmentMimeType(MimeType attachmentMimeType) {
 		this.attachmentMimeType = attachmentMimeType;
-	}
-
-	/**
-	 * Simple constructor
-	 * 
-	 * @param attachmentFileName
-	 * @param attachment
-	 * @param attachmentMimeType
-	 */
-	public MailAttachment(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
-		super();
-		this.attachmentFileName = attachmentFileName;
-		this.attachment = attachment;
-		this.attachmentMimeType = attachmentMimeType;
-	}
-
-	public MailAttachment() {
-
 	}
 }
