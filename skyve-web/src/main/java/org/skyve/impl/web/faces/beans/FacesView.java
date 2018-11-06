@@ -73,7 +73,8 @@ public class FacesView<T extends Bean> extends Harness {
 	private String viewBinding;
 	// The zoomed in binding of the list (this could be compound)
 	// This could be the same as the view binding or it could be shallower.
-	private String zoomInBinding;
+	// There is one entry per zoom in.
+	private Stack<String> zoomInBindings = new Stack<>();
 	// The page title
 	private String title;
 	private AbstractWebContext webContext;
@@ -128,11 +129,8 @@ public class FacesView<T extends Bean> extends Harness {
 		this.viewBinding = viewBinding;
 	}
 
-	public String getZoomInBinding() {
-		return zoomInBinding;
-	}
-	public void setZoomInBinding(String zoomInBinding) {
-		this.zoomInBinding = zoomInBinding;
+	public Stack<String> getZoomInBindings() {
+		return zoomInBindings;
 	}
 
 	public String getTitle() {
@@ -251,7 +249,7 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	public void zoomout() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoomout");
-		new ZoomOutAction(this).execute();
+		new ZoomOutAction<>(this).execute();
 	}
 
 	/**
