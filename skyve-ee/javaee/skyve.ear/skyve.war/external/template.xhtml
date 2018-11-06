@@ -84,8 +84,18 @@
 							</p:growl>
 							<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 							<p:confirmDialog id="confirm" global="true">
-								<p:commandButton id="confirmCancel" value="Cancel" type="button" styleClass="ui-confirmdialog-no" style="float:right;" icon="ui-icon-close"/>
-								<p:commandButton id="confirmOK" value="OK" type="button" styleClass="ui-confirmdialog-yes" style="float:right;" icon="ui-icon-check"/>
+								<p:commandButton id="confirmCancel" 
+													value="Cancel" 
+													type="button"
+													styleClass="ui-confirmdialog-no" 
+													style="float:right;"
+													icon="fa fa-remove" />
+								<p:commandButton id="confirmOK" 
+													value="OK" 
+													type="button"
+													styleClass="ui-confirmdialog-yes" 
+													style="float:right;"
+													icon="fa fa-check" />
 							</p:confirmDialog>
 							
 							<ui:insert name="body" />
