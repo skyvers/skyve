@@ -1,10 +1,12 @@
 package org.skyve.impl.web.faces.actions;
 
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.logging.Level;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -18,6 +20,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.FacesWebContext;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.service.smartclient.SmartClientEditServlet;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -69,6 +72,16 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			}
 			else {
 				bean = document.newInstance(user);
+				
+				SortedMap<String, Object> parameters = SmartClientEditServlet.collectRequestParameters((HttpServletRequest) ec.getRequest());
+				SmartClientEditServlet.applyNewParameters(customer,
+															user,
+															AbstractPersistence.get(), 
+															module, 
+															document, 
+															bean, 
+															parameters,
+															facesView.getUxUi().getName());
 				
 				// this is for the cancel, ok and delete buttons
 				String referer = ec.getRequestHeaderMap().get("referer");

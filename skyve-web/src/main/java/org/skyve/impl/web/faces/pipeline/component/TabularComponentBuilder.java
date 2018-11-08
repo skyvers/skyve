@@ -787,37 +787,45 @@ public class TabularComponentBuilder extends ComponentBuilder {
     	}
     	
         // Write out getLazyDataModel call as the value
-        StringBuilder value = new StringBuilder(64);
-		value.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
+        StringBuilder modelExpression = new StringBuilder(128);
+		modelExpression.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
 		if (model instanceof DocumentQueryListModel) {
-			value.append(drivingDocumentName).append("','").append(modelName).append("',null,");
+			modelExpression.append(drivingDocumentName).append("','").append(modelName).append("',null,");
 		}
 		else {
-			value.append(modelDocumentName).append("',null,'").append(modelName).append("',");
+			modelExpression.append(modelDocumentName).append("',null,'").append(modelName).append("',");
 		}
 
 		// Add filter parameters to getLazyDataModel call
+		StringBuilder createUrlParams = null;
 		if ((grid.getParameters() != null) && (! grid.getParameters().isEmpty())) {
-			value.append('[');
+			createUrlParams = new StringBuilder(64);
+			modelExpression.append('[');
 			for (FilterParameter param : grid.getParameters()) {
-				value.append("['").append(param.getName()).append("','");
-				value.append(param.getOperator()).append("','");
+				String name = param.getName();
 				String binding = param.getBinding();
+				String value = param.getValue();
+				
+				createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+				modelExpression.append("['").append(name).append("','");
+				modelExpression.append(param.getOperator()).append("','");
 				if (binding != null) {
-					value.append('{').append(binding).append("}'],");
+					createUrlParams.append('{').append(binding).append("}']}");
+					modelExpression.append('{').append(binding).append("}'],");
 				}
 				else {
-					value.append(param.getValue()).append("'],");
+					createUrlParams.append(binding).append("']}");
+					modelExpression.append(value).append("'],");
 				}
 			}
-			value.setLength(value.length() - 1); // remove last comma
-			value.append("])}");
+			modelExpression.setLength(modelExpression.length() - 1); // remove last comma
+			modelExpression.append("])}");
 		}
 		else {
-			value.append("null)}");
+			modelExpression.append("null)}");
 		}
 		
-		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
+		result.setValueExpression("value", ef.createValueExpression(elc, modelExpression.toString(), SkyveLazyDataModel.class));
 
 		if (grid.getTitle() != null) {
 			addListGridHeader(grid.getTitle(), result);
@@ -836,6 +844,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									        								canCreateDocument,
 									        								createRendered, 
 									        								createDisabled,
+									        								(createUrlParams == null) ? null : createUrlParams.toString(),
 									        								zoomRendered,
 									        								grid.getDisableZoomConditionName(),
 																			result.getId(),
@@ -1099,6 +1108,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   boolean canCreateDocument,
 													   boolean createRendered,
 													   String[] createDisabledConditionNames,
+													   String createUrlParams,
 													   boolean zoomRendered,
 													   String zoomDisabledConditionName,
 													   String parentId,
@@ -1131,7 +1141,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			StringBuilder value = new StringBuilder(128);
 			value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
 			value.append("&d=").append(documentName);
-			button.setHref(value.toString());
+			if (createUrlParams != null) {
+				value.append(createUrlParams);
+				button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+			}
+			else {
+				button.setHref(value.toString());
+			}
 			columnHeaderChildren.add(button);
 		}
 		else {

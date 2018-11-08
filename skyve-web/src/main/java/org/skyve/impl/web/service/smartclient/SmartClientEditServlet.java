@@ -142,29 +142,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	String editIdCounter = request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER);
 			    	String createIdCounter = request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER);
 	
-			    	// Collect the parameters
-			    	SortedMap<String, Object> parameters = new TreeMap<>();
-					Enumeration<String> names = request.getParameterNames();
-					while (names.hasMoreElements()) {
-						String name = names.nextElement();
-						if (SmartClientListServlet.ISC_META_DATA_PREFIX.equals(name) || 
-								SmartClientListServlet.ISC_DATA_FORMAT.equals(name)) {
-							continue;
-						}
-						String value = request.getParameter(name);
-						if (name.charAt(0) != '_') {
-							// no '.' allowed in smart client field names
-							name = BindUtil.unsanitiseBinding(name);
-							
-							// "null" can be sent by Smart Client
-							if (value != null) {
-								if ((value.length() == 0) || "null".equals(value)) {
-									value = null;
-								}
-							}
-							parameters.put(name, value);
-						}
-					}
+			    	SortedMap<String, Object> parameters = collectRequestParameters(request);
 					
 					String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 					
@@ -696,7 +674,50 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
     }
     
-    private static void applyNewParameters(Customer customer, 
+    /**
+     * Collect the request parameters filtering out system parameters unsanitising bindings and converting nulls etc
+     * @param request
+     * @return sorted map of parameters
+     */
+    public static SortedMap<String, Object> collectRequestParameters(HttpServletRequest request) {
+    	SortedMap<String, Object> result = new TreeMap<>();
+		Enumeration<String> names = request.getParameterNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			if (SmartClientListServlet.ISC_META_DATA_PREFIX.equals(name) || 
+					SmartClientListServlet.ISC_DATA_FORMAT.equals(name)) {
+				continue;
+			}
+			String value = request.getParameter(name);
+			if (name.charAt(0) != '_') {
+				// no '.' allowed in smart client field names
+				name = BindUtil.unsanitiseBinding(name);
+				
+				// "null" can be sent by Smart Client
+				if (value != null) {
+					if ((value.length() == 0) || "null".equals(value)) {
+						value = null;
+					}
+				}
+				result.put(name, value);
+			}
+		}
+		return result;
+    }
+
+    /**
+     * Set the declared view parameters into its backing bean.
+     * @param customer
+     * @param user
+     * @param persistence
+     * @param processModule	The backing bean's module
+     * @param processDocument	The backing bean's document
+     * @param processBean	The backing bean
+     * @param parameters	The map of parameters to potentially apply
+     * @param uxui	Used to get the view
+     * @throws Exception
+     */
+    public static void applyNewParameters(Customer customer, 
 	    									User user, 
 	    									AbstractPersistence persistence, 
 	    									Module processModule,
