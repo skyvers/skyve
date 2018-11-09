@@ -2,6 +2,7 @@ package org.skyve.impl.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 
@@ -38,6 +39,9 @@ public class VariableExpander {
 			Object value = property.getValue();
 			if (value instanceof String) {
 				value = strSubstitutor.replace(value);
+				if (Objects.equals(value, "null")) {
+					value = null;
+				}
 			} else if (value instanceof Map) {
 				value = expand((Map<String, Object>) value, variables);
 			}

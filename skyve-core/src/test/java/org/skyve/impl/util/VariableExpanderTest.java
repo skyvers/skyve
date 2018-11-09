@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,5 +97,29 @@ public class VariableExpanderTest {
 
 		final String expandedProperty = (String) expandedConfig.get(propertyKey);
 		Assert.assertThat(expandedProperty, is(propertyDefaultValue));
+	}
+
+	/**
+	 * Tests that a quoted string is replaced appropriately.
+	 */
+	@Test
+	public void testExpandQuotedValueWithNullDefault() {
+		final String propertyKey = "testKey";
+		final String propertyValue = "${TEST:null}";
+		properties.put(propertyKey, propertyValue);
+
+		Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
+
+		String expandedProperty = (String) expandedConfig.get(propertyKey);
+		Assert.assertThat(expandedProperty, is(nullValue()));
+
+		final String variableKey = "TEST";
+		final String variableValue = "\"testValue\"";
+		variables.put(variableKey, variableValue);
+
+		expandedConfig = variableExpander.expand(properties, variables);
+
+		expandedProperty = (String) expandedConfig.get(propertyKey);
+		Assert.assertThat(expandedProperty, is(variableValue));
 	}
 }
