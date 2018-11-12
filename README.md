@@ -13,6 +13,7 @@ This repository is the Java implementation of the Skyve framework specification.
   * [Overview](#overview)
   * [Detailed Instructions](#detailed-instructions) 
  * [Skyve Maven commands](#skyve-maven-commands)
+ * [Updating Skyve version](#updating-skyve-version)
  * [Configuring Spring Security](#configuring-spring-security)
    * [MSSQL](#mssql)
    * [MySQL](#mysql)
@@ -126,6 +127,19 @@ Depending on how you configure your Wildfly, if you are not publishing changes d
 #### Local Deploy
 `man compile war:exploded skyve:touch`
 This refreshes your project’s `/deployments’ directory and creates a ‘projectName.dodeploy’ file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
+
+## Updating Skyve version
+To update your project with a specific Skyve version, you'll need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved.
+
+### Configuring the assemble target
+- Create a new Run Configuration target, setting the base directory to your project's workspace, and setting the goal to `skyve:assemble`
+- Update your project's pom.xml with a relative or absolute path to the Skyve project local drive location (where you pulled to)
+	- find the Skyve plugin (search for artifactId `skyve-maven-plugin`) and configure the `<skyveDir></skyveDir>` setting
+	- save your pom.xml
+- Run the assemble target you have just created, resolving any reported issues
+- When successful, run your project's generate domain target, resolving any reported issues 
+- When successful, run your project's generated tests, resolving report issues as required
+- When successful, commit the changes to your project
 
 ## Configuring Spring Security
 If you used the Skyve Project Creator with the correct database dialect selected, the spring security settings will already be correct. However, if you are manually changing dialect, you will need to review and modify the spring security settings at `WEB-INF/spring/security.xml` within the `<authentication-provider>` tag.
