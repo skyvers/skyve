@@ -143,7 +143,7 @@ These instructions apply to projects created using the [Creating a new Skyve Pro
     - Save your `pom.xml`
 - Run the assemble target you have just created, resolving any reported issues
 - When successful, run your project's generate domain target, resolving any reported issues
-- When successful, run your project's unit tests, checking the upgrade did not integere with any expected behaviour
+- When successful, run your project's unit tests, checking the upgrade did not interfere with any expected behaviour
 - When successful, run your project's generated tests
 - Deploy your project locally and sanity check everything still works correctly
 - When satisified, commit the changes to your project
