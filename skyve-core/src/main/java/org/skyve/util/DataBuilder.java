@@ -818,7 +818,7 @@ public class DataBuilder {
 				return StringUtils.substringBetween(result, "^", "$");
 			}
 			return result;
-		} catch (@SuppressWarnings("unused") Exception e) {
+		} catch (Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
@@ -860,7 +860,8 @@ public class DataBuilder {
 					fileName = DATA_MAP_CACHE.get(key);
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
-					String className = String.format("modules.%s.util.%sFactoryExtension", module.getName(), document.getName());
+					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
+					Util.LOGGER.fine("Looking for factory class " + className);
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
@@ -888,7 +889,7 @@ public class DataBuilder {
 								}
 							}
 						}
-					} catch (@SuppressWarnings("unused") Exception e) {
+					} catch (Exception e) {
 						// couldn't find the extension file on the classpath
 					}	
 				}

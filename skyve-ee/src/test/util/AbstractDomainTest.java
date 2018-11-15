@@ -215,6 +215,13 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			Document document = module.getDocument(customer, getBean().getBizDocument());
 
 			TestUtil.updateAttribute(module, document, result, attributeToUpdate);
+			
+			if (Binder.get(result, attributeToUpdate.getName()).equals(originalValue)) {
+				// skip this test if we couldn't generate a new value to save
+				Util.LOGGER.warning(String.format("Skipping testUpdate() for attribute %s, original and updated values were the same", attributeToUpdate.getName()));
+				return;
+			}
+			
 			T uResult = CORE.getPersistence().save(result);
 
 			// verify the results

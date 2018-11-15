@@ -341,14 +341,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-		final File factoryPath = new File(GENERATED_PATH + modulePath + "/util/");
 		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
-		if (factoryPath.exists()) {
-			for (File testFile : factoryPath.listFiles()) {
-				testFile.delete();
-			}
-			factoryPath.delete();
-		}
+
 		if (domainTestPath.exists()) {
 			for (File testFile : domainTestPath.listFiles()) {
 				testFile.delete();
