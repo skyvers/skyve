@@ -385,17 +385,17 @@ public class SmartClientListServlet extends HttpServlet {
 																		Integer.valueOf(page.getRows().size())));
 		Set<String> projections = model.getProjections();
 
-		message.append("{response:{");
-		message.append("status:0,");
+		message.append("{\"response\":{");
+		message.append("\"status\":0,");
 		// If SmartClient requests a start row > what we have in the set
 		// (maybe a criteria has constrained the set such that a page we were at doesn't exist any more)
 		// then just send back a start row of 0.
-		message.append("startRow:").append((startRow > totalRows) ? 0 : startRow);
-		message.append(",endRow:");
+		message.append("\"startRow\":").append((startRow > totalRows) ? 0 : startRow);
+		message.append(",\"endRow\":");
 		message.append(Math.min(totalRows, endRow));
-		message.append(",totalRows:");
+		message.append(",\"totalRows\":");
 		message.append(totalRows);
-		message.append(",data:");
+		message.append(",\"data\":");
 		message.append(JSON.marshall(customer, beans, projections));
 		message.append("}}");
 		pw.append(message);
@@ -1176,7 +1176,7 @@ public class SmartClientListServlet extends HttpServlet {
 			BeanUtils.populate(bean, parameters);
 
 			persistence.persist(bean);
-			message.append("{response:{status:0,data:");
+			message.append("{\"response\":{\"status\":0,\"data\":");
 			message.append(JSONUtil.marshall(bean));
 			message.append("}}");
 		}
@@ -1192,7 +1192,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 				AWDDomainRelationship<?, ?> relationship = BindUtil.newInstance(propertyName, parentBean, childBean);
 				rels.add(relationship);
-				message.append("{response:{status:0,data:");
+				message.append("{\"response\":{\"status\":0,\"data\":");
 				message.append(JSONUtil.marshall(relationship));
 				message.append("}}");
 			}
@@ -1301,7 +1301,7 @@ public class SmartClientListServlet extends HttpServlet {
 												boolean rowIstagged)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
-		message.append("{response:{status:0,data:");
+		message.append("{\"response\":{\"status\":0,\"data\":");
 
 		// reinstate whether the record is tagged or not.
 		String json = JSON.marshall(customer, bean, model.getProjections());
@@ -1321,7 +1321,7 @@ public class SmartClientListServlet extends HttpServlet {
 													boolean tagging)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
-		message.append("{response:{status:0,data:[");
+		message.append("{\"response\":{\"status\":0,\"data\":[");
 
 		Set<String> projections = model.getProjections();
 		Map<String, Object> properties = new TreeMap<>();
@@ -1349,6 +1349,6 @@ public class SmartClientListServlet extends HttpServlet {
 								PrintWriter pw)
 	throws Exception {
 		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
-		pw.append("{response:{status:0}}");
+		pw.append("{\"response\":{\"status\":0}}");
 	}
 }

@@ -335,26 +335,26 @@ public class SmartClientEditServlet extends HttpServlet {
 			
     		// We need keys to send a -4 message back
 	    	StringBuilder sb = new StringBuilder(128);
-	    	sb.append("{response:{status:-4,errors:{");
+	    	sb.append("{\"response\":{\"status\":-4,\"errors\":{");
 	    	if (includeBindings && pumpOutValidationErrors(ms, sb)) { // are there any keys in the message?
 		    	sb.setLength(sb.length() - 1); // remove the comma
 		    	pw.append(sb);
                 pw.append('}');
 	    	}
 	    	else {
-                pw.append("{response:{status:-1,");
+                pw.append("{\"response\":{\"status\":-1,");
                 if (Operation.fetch.equals(operation)) {
-                    pw.append("startRow:0,endRow:0,totalRows:0,");
+                    pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
                 }
-                pw.append("data:\"");
+                pw.append("\"data\":\"");
                 appendErrorText("The action you requested cannot be performed because: ", ms, pw);
                 pw.append('"');
 	    	}
     	}
     	else {
-            pw.append("{response:{status:-1,");
+            pw.append("{\"response\":{\"status\":-1,");
             if (Operation.fetch.equals(operation)) {
-                pw.append("startRow:0,endRow:0,totalRows:0,");
+                pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
             }
             pw.append("data:\"An error occured while processing your request.<br/>");
     	
@@ -393,7 +393,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    	for (String binding : m.getBindings()) {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
-	    		sb.append(BindUtil.sanitiseBinding(binding)).append(":\"");
+	    		sb.append('"').append(BindUtil.sanitiseBinding(binding)).append("\":\"");
 	    		String message = m.getErrorMessage();
 	    		if (message == null) {
 	    			sb.append("An error has occurred");
@@ -646,7 +646,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	}
 		try {
 			StringBuilder message = new StringBuilder(256);
-	    	message.append("{response:{status:0,startRow:0,endRow:0,totalRows:1,data:[");
+	    	message.append("{\"response\":{\"status\":0,\"startRow\":0,\"endRow\":0,\"totalRows\":1,\"data\":[");
 			ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
 																		processModule, 
 																		processDocument, 
@@ -969,7 +969,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																	false);
 		manipulator.visit();
 		try {
-			result.append("{response:{status:0,data:");
+			result.append("{\"response\":{\"status\":0,\"data\":");
 			result.append(manipulator.toJSON(webContext));
 			result.append("}}");
 
@@ -1047,6 +1047,6 @@ public class SmartClientEditServlet extends HttpServlet {
 
 		WebUtil.putConversationInCache(webContext);
 
-		pw.append("{response:{status:0}}");
+		pw.append("{\"response\":{\"status\":0}}");
 	}
 }
