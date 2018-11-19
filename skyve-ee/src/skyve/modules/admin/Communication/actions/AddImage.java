@@ -1,17 +1,15 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.domain.Communication;
-
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Communication;
+
 public class AddImage extends UploadAction<Communication> {
-	/**
-	 * For Serialization
-	 */
+
 	private static final long serialVersionUID = -8154709480999519405L;
 
 

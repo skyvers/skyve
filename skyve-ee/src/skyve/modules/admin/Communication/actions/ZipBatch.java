@@ -2,15 +2,16 @@ package modules.admin.Communication.actions;
 
 import java.io.File;
 
-import modules.admin.domain.Communication;
-
 import org.skyve.CORE;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Communication;
+
 public class ZipBatch extends DownloadAction<Communication> {
+
 	private static final long serialVersionUID = 4544317770456317465L;
 
 	@Override
