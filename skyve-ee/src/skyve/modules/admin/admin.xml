@@ -154,8 +154,6 @@
 					<action name="GetResults" />
 					<action name="SendNow" />
 					<action name="TestSend" />
-					<action name="UpdateModule" />
-					<action name="UpdateDocument" />
 					<action name="BatchSelected" />
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
@@ -272,8 +270,6 @@
 					<action name="GetResults" />
 					<action name="SendNow" />
 					<action name="TestSend" />
-					<action name="UpdateModule" />
-					<action name="UpdateDocument" />
 					<action name="BatchSelected" />
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />

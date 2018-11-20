@@ -21,18 +21,14 @@
 					<item colspan="3">
 						<combo binding="moduleName" disabled="locked">
 							<onChangedHandlers>
-								<server action="UpdateModule" />
+								<rerender clientValidation="false" />
 							</onChangedHandlers>
 						</combo>
 					</item>
 				</row>
 				<row>
 					<item colspan="3">
-						<combo binding="documentName" disabled="locked">
-							<onChangedHandlers>
-								<server action="UpdateDocument" />
-							</onChangedHandlers>
-						</combo>
+						<combo binding="documentName" disabled="locked" />
 					</item>
 				</row>
 				<row>
@@ -273,9 +269,6 @@
 		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" 
 		relativeIconFileName="shared/icons/Globe.gif" iconStyleClass="fa fa-file-photo-o" />
 
-		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
-		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
-		
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
 		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" 
 		confirm="Are you sure you want to delete this batch folder from the server filesystem?" 

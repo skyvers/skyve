@@ -449,6 +449,11 @@ public class CommunicationUtil {
 
 		String results = GetResults.getResults(communication);
 
+		// save this communication if it has not been saved yet
+		if (communication.isNotPersisted()) {
+			communication = CORE.getPersistence().save(communication);
+		}
+
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
