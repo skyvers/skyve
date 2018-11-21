@@ -13,9 +13,9 @@ import org.skyve.metadata.router.UxUiSelector;
 
 public class DefaultUxUiSelector implements UxUiSelector {
 	private static final UxUi PHONE = new UxUi("phone", "water");
-	private static final UxUi TABLET = new UxUi("tablet", "omega");
+	private static final UxUi TABLET = new UxUi("tablet", "admin");
 	private static final UxUi DESKTOP = new UxUi("desktop", "casablanca");
-	public static final UxUi EXTERNAL = new UxUi("external", "omega");
+	public static final UxUi EXTERNAL = new UxUi("external", "admin");
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);

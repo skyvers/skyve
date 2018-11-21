@@ -90,8 +90,9 @@ public class Menu extends Harness {
 			
 			@Override
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module module, boolean open) {
-				Submenu moduleSub = new DefaultSubMenu(module.getTitle());
+				DefaultSubMenu moduleSub = new DefaultSubMenu(module.getTitle());
 				result.addElement(moduleSub);
+				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
 			}
 
