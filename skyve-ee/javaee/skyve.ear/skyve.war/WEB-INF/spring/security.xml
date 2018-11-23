@@ -85,6 +85,9 @@
 		<!-- Secure SC text search servlet -->
 		<intercept-url pattern="/smartsearch" access="authenticated" />
 		
+		<!-- Secure Prime initialisation servlet -->
+		<intercept-url pattern="/primeinit" access="authenticated" />
+
 		<!-- Secure map servlet -->
 		<intercept-url pattern="/map" access="authenticated" />
 		

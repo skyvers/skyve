@@ -862,7 +862,8 @@ class ViewJSONManipulator extends ViewVisitor {
                 for (DomainValue domainValue : targetDocument.getDomainValues(customer, 
     																			domainType, 
     																			attribute, 
-    																			null)) {
+    																			null,
+    																			true)) {
                     values.put(domainValue.getCode(), domainValue.getDescription());
                 }
                 valueMaps.put(safeBinding, values);
@@ -890,11 +891,12 @@ class ViewJSONManipulator extends ViewVisitor {
 						domainValues = targetDocument.getDomainValues(customer,
 																		domainType,
 																		attribute,
-																		owningBean);
+																		owningBean,
+																		true);
 					}
 				}
 				else {
-					domainValues = document.getDomainValues(customer, domainType, attribute, bean);						
+					domainValues = document.getDomainValues(customer, domainType, attribute, bean, true);						
 				}
                 
 				if (domainValues != null) {

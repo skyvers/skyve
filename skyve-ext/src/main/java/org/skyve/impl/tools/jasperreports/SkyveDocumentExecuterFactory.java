@@ -49,7 +49,7 @@ public class SkyveDocumentExecuterFactory implements JRQueryExecuterFactory {
 			AbstractRepository repository = new LocalDesignRepository() {
 				// Don't use bizlets for reporting
 				@Override
-				public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) {
+				public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 					return null;
 				}
 			};

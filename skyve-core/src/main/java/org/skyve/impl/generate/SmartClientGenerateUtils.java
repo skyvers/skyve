@@ -98,8 +98,8 @@ public class SmartClientGenerateUtils {
         // Filter fields for option data source
         private List<String> filterFields = new ArrayList<>();
         private MetaDataQueryDefinition query;
-        private boolean canCreate;
-        private boolean canUpdate;
+        private boolean canCreate = true;
+        private boolean canUpdate = true;
         
 		SmartClientLookupDefinition(boolean bindingToDataGrid,
         								User user,
@@ -107,7 +107,8 @@ public class SmartClientGenerateUtils {
         								Module module,
         								Document document,
         								Relation relation,
-        								LookupDescription lookup) {
+        								LookupDescription lookup,
+        								boolean runtime) {
             this.bindingToDataGrid = bindingToDataGrid;
             String queryName = (lookup == null) ? null : lookup.getQuery();
             // Use reference query name if none provided in lookup
@@ -135,8 +136,10 @@ public class SmartClientGenerateUtils {
 
             Document queryDocument = module.getDocument(customer, query.getDocumentName());
             
-            canCreate = user.canCreateDocument(queryDocument);
-            canUpdate = user.canUpdateDocument(queryDocument);
+            if (user != null) {
+	            canCreate = user.canCreateDocument(queryDocument);
+	            canUpdate = user.canUpdateDocument(queryDocument);
+            }
             
             Set<String> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
             if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
@@ -155,7 +158,8 @@ public class SmartClientGenerateUtils {
                         																					customer, 
 																	                                        module,
 																	                                        queryDocument,
-																	                                        column);
+																	                                        column,
+																	                                        runtime);
 
                         	pickListFields.add(def.getName());
                         	// only add fields that can use the substring operator
@@ -248,7 +252,8 @@ public class SmartClientGenerateUtils {
 													Document document,
 													Locale locale,
 													String binding,
-													String name) {
+													String name,
+													boolean runtime) {
 			this.locale = locale;
 			this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 			title = this.name;
@@ -284,7 +289,7 @@ public class SmartClientGenerateUtils {
 				if (domainType != null) {
 					// constant domain types
 					if (DomainType.constant.equals(domainType)) {
-						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale);
+						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale, runtime);
 					}
 					else { // variant or dynamic
 						// this valueMap will be replaced in client logic but this defn ensures that the
@@ -794,13 +799,15 @@ public class SmartClientGenerateUtils {
                                             Module module, 
                                             Document document, 
                                             InputWidget widget,
-                                            String dataGridBindingOverride) {
+                                            String dataGridBindingOverride,
+                                            boolean runtime) {
             super(customer,
                     module, 
                     document, 
                     user.getLocale(),
                     (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
-            		null);
+            		null,
+            		runtime);
             // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 			if ("enum".equals(type)) {
 				type = "text";
@@ -834,7 +841,8 @@ public class SmartClientGenerateUtils {
             												module,
             												document,
             												(Relation) attribute,
-            												(LookupDescription) widget);
+            												(LookupDescription) widget,
+            												runtime);
             }
 
             // By default a SmartClientDataGridDefinition sets memo fields to a text area.
@@ -927,8 +935,9 @@ public class SmartClientGenerateUtils {
 									Customer customer, 
 									Module module, 
 									Document document, 
-									InputWidget widget) {
-			super(user, customer, module, document, widget, null);
+									InputWidget widget,
+									boolean runtime) {
+			super(user, customer, module, document, widget, null, runtime);
 			Attribute attribute = target.getAttribute();
 			if (attribute != null) {
 				helpText = attribute.getDescription();
@@ -1051,13 +1060,15 @@ public class SmartClientGenerateUtils {
 											Customer customer, 
 											Module module, 
 											Document document, 
-											MetaDataQueryColumn column) {
+											MetaDataQueryColumn column,
+											boolean runtime) {
 			super(customer, 
 					module,
 					document,
-					user.getLocale(),
+					(user == null) ? null : user.getLocale(),
 					column.getBinding(),
-					column.getName());
+					column.getName(),
+					runtime);
 			String displayName = column.getDisplayName();
 			if (displayName != null) {
 				title = displayName;
@@ -1106,7 +1117,8 @@ public class SmartClientGenerateUtils {
 																	module,
 																	document,
 																	(Relation) attribute,
-																	null);
+																	null,
+																	runtime);
 					}
 				}
 			}
@@ -1316,11 +1328,13 @@ public class SmartClientGenerateUtils {
 	private static String getConstantDomainValueMapString(Customer customer,
 															Document document,
 															Attribute attribute,
-															Locale locale) {
+															Locale locale,
+															boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 
 																				attribute, 
-																				null);
+																				null,
+																				runtime);
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append('{');
@@ -1340,12 +1354,14 @@ public class SmartClientGenerateUtils {
 
 	public static Map<String, String> getConstantDomainValueMap(User user,
 																	Document document,
-																	Attribute attribute) {
+																	Attribute attribute,
+																	boolean runtime) {
 		Locale locale = user.getLocale();
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) user.getCustomer(), 
 																				DomainType.constant, 
 																				attribute, 
-																				null);
+																				null,
+																				runtime);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
 			result.put(value.getCode(), processString(Util.i18n(value.getDescription(), locale)));
@@ -1432,8 +1448,9 @@ public class SmartClientGenerateUtils {
 																	Customer customer,
 																	Module module,
 																	Document document,
-																	MetaDataQueryColumn column) {
-		return new SmartClientQueryColumnDefinition(user, customer, module, document, column);
+																	MetaDataQueryColumn column,
+																	boolean runtime) {
+		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime);
 	}
 
 	/**
@@ -1453,8 +1470,9 @@ public class SmartClientGenerateUtils {
 														Customer customer, 
 														Module module, 
 														Document document, 
-														InputWidget widget) {
-		return new SmartClientFieldDefinition(user, customer, module, document, widget);
+														InputWidget widget,
+														boolean runtime) {
+		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime);
 	}
 	
     public static SmartClientDataGridFieldDefinition getDataGridField(User user,
@@ -1462,8 +1480,9 @@ public class SmartClientGenerateUtils {
                                                                         Module module, 
                                                                         Document document, 
                                                                         InputWidget widget,
-                                                                        String dataGridBinding) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding);
+                                                                        String dataGridBinding,
+                                                                        boolean runtime) {
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, runtime);
     }
 
     /**
@@ -1660,7 +1679,7 @@ public class SmartClientGenerateUtils {
 				continue;
 			}
 
-			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column);
+			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {

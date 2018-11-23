@@ -612,11 +612,11 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) {
+	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		StringBuilder fullyQualifiedBizletName = new StringBuilder(64);
 		fullyQualifiedBizletName.append(document.getOwningModuleName()).append('.');
 		fullyQualifiedBizletName.append(document.getName()).append("Bizlet");
-		return getJavaCode(customer, fullyQualifiedBizletName.toString(), false, true);
+		return getJavaCode(customer, fullyQualifiedBizletName.toString(), false, runtime);
 	}
 
 	

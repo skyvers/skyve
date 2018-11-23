@@ -333,7 +333,7 @@ public abstract class AbstractRepository implements Repository {
 	 */
 	public abstract Document getDocument(Customer customer, Module module, String documentName);
 
-	public abstract <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document);
+	public abstract <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime);
 
 	public abstract Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration);
 

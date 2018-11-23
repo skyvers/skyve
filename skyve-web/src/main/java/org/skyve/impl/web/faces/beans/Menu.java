@@ -122,7 +122,7 @@ public class Menu extends Harness {
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void renderLinkItem(LinkItem item, boolean relative) {
+			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
 				subs.peek().getElements().add(createMenuItem(item, null, customer, null));
 			}
 			
@@ -168,7 +168,7 @@ public class Menu extends Harness {
 			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module module, boolean open) {
 				subs.pop();
 			}
-		}.render();
+		}.render(getUser());
 		
 		return result;
 	}

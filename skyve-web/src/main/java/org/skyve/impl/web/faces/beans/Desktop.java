@@ -343,16 +343,8 @@ public class Desktop extends Harness {
 			}
 			
 			@Override
-			public void renderLinkItem(LinkItem item, boolean relative) {
-				result.append("{name:'");
-				String href = item.getHref();
-				if (relative) {
-					result.append(Util.getSkyveContextUrl());
-		    		if (href.charAt(0) != '/') {
-		    			result.append('/');
-		    		}
-		    		result.append(href);
-				}
+			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
+				result.append("{name:'").append(absoluteHref);
 				renderItem(item.getName(), null, null, null, "link", null, null);
 			}
 			
@@ -465,7 +457,7 @@ public class Desktop extends Harness {
 			public void renderedModuleMenu(Menu menu, Module module, boolean open) {
 				result.append(",open:").append(open).append("},");
 			}
-		}.render();
+		}.render(getUser());
 
 		// finish up menu defs
 		result.setLength(result.length() - 1); // remove last comma from menu

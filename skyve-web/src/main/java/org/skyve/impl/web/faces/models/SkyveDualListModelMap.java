@@ -89,7 +89,8 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				List<DomainValue> source = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
 																							domainType, 
 																							targetAttribute,
-																							owningBean);
+																							owningBean,
+																							true);
 
 				// If the domain value exists in the target collection, 
 				// move it from the source to the target in the DualListModel

@@ -245,7 +245,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Module module = customer.getModule(getBean().getBizModule());
 		Document document = module.getDocument(customer, getBean().getBizDocument());
 
-		return AbstractRepository.get().getBizlet(customer, document);
+		return AbstractRepository.get().getBizlet(customer, document, true);
 	}
 
 	private Attribute getRandomAttribute(T bean) {

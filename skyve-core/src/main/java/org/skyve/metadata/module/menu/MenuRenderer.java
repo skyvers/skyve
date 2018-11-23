@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -19,6 +18,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 
 public class MenuRenderer {
 	protected String uxui;
@@ -90,7 +91,8 @@ public class MenuRenderer {
 	}
 	
 	public void renderLinkItem(@SuppressWarnings("unused") LinkItem item,
-								@SuppressWarnings("unused") boolean relative) {
+								@SuppressWarnings("unused") boolean relative,
+								@SuppressWarnings("unused") String absoluteHref) {
 		// nothing to do
 	}
 
@@ -108,23 +110,32 @@ public class MenuRenderer {
 		// nothing to do
 	}
 
-	public void render() {
-		UserImpl user = (UserImpl) CORE.getUser();
-		Customer customer = user.getCustomer();
-		
+	public void render(Customer customer) {
+		render(customer, null);
+	}
+	
+	public void render(User user) {
+		render(user.getCustomer(), user);
+	}
+	
+	private void render(Customer customer, User user) {
 		// determine if the first menu should be open - ie no default
-		Menu chosenMenu = (selectedModuleName == null) ? null : user.getModuleMenu(selectedModuleName);
+		Menu chosenMenu = (selectedModuleName == null) ? 
+							null : 
+							((user == null) ? 
+								customer.getModule(selectedModuleName).getMenu() :
+								((UserImpl) user).getModuleMenu(selectedModuleName));
 		final boolean setFirstModuleOpen = (chosenMenu == null) || chosenMenu.getItems().isEmpty();
 		final AtomicBoolean first = new AtomicBoolean(true);
 
 		// render each module menu
-		List<Module> modules = customer.getModules();
-		for (int i = 0, l = modules.size(); i < l; i++) {
-			Module module = modules.get(i);
+		for (Module module : customer.getModules()) {
 			String moduleName = module.getName();
 
-			Menu menu = user.getModuleMenu(moduleName);
-			if (menu.isApplicable(uxui)) {
+			Menu menu = (user == null) ?
+							customer.getModule(moduleName).getMenu() :
+							((UserImpl) user).getModuleMenu(moduleName);
+			if ((uxui == null) || menu.isApplicable(uxui)) {
 				boolean open = false;
 				if (setFirstModuleOpen) {
 					open = first.get();
@@ -147,7 +158,7 @@ public class MenuRenderer {
 									Module module, 
 									List<MenuItem> items) {
 		for (MenuItem item : items) {
-			if (item.isApplicable(uxui)) {
+			if ((uxui == null) || item.isApplicable(uxui)) {
 				if (item instanceof MenuGroup) {
 					MenuGroup group = (MenuGroup) item;
 					renderMenuGroup(group);
@@ -264,8 +275,17 @@ public class MenuRenderer {
 						catch (@SuppressWarnings("unused") URISyntaxException e) {
 							// do nothing here if its not know to be absolute
 						}
-			        	
-						renderLinkItem(linkItem, relative);
+
+						if (relative) {
+				    		if (href.charAt(0) != '/') {
+				    			href = String.format("%s/%s", Util.getSkyveContextUrl(), href);
+				    		}
+				    		else {
+				    			href = String.format("%s%s", Util.getSkyveContextUrl(), href);
+				    		}
+						}
+
+						renderLinkItem(linkItem, relative, href);
 					}
 				}
 			}

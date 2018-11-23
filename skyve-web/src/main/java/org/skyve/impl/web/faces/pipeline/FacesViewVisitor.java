@@ -2190,17 +2190,17 @@ public class FacesViewVisitor extends ViewVisitor {
 		ModuleImpl targetModule = module;
 
 		if (listBinding == null) {
-			result = SmartClientGenerateUtils.getField(user, customer, targetModule, targetDocument, inputWidget);
+			result = SmartClientGenerateUtils.getField(user, customer, targetModule, targetDocument, inputWidget, true);
 		}
 		else {
 			if (inputWidget.getBinding() == null) {
-				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, listBinding);
+				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, listBinding, true);
 			}
 			else {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, targetModule, targetDocument, listBinding);
 				targetDocument = (DocumentImpl) module.getDocument(customer, ((Relation) target.getAttribute()).getDocumentName());
 				targetModule = (ModuleImpl) customer.getModule(targetDocument.getOwningModuleName());
-				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, null);
+				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, null, true);
 			}
 		}
 		

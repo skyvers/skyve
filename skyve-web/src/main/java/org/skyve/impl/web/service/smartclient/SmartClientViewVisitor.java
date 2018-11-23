@@ -1102,7 +1102,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 																	module, 
 																	document, 
 																	dataWidgetColumnInputWidget, 
-																	dataWidgetBinding);
+																	dataWidgetBinding,
+																	true);
 			} 
 			else {
 				def = SmartClientGenerateUtils.getDataGridField(user,
@@ -1110,7 +1111,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 																	module, 
 																	dataWidgetDocument, 
 																	dataWidgetColumnInputWidget, 
-																	null);
+																	null,
+																	true);
 			}
 
 			String title = column.getTitle();
@@ -2966,7 +2968,8 @@ pickListFields:[{name:'value'}],
 																			customer,
 																			module,
 																			document,
-																			widget);
+																			widget,
+																			true);
 		if (typeOverride != null) {
 			def.setType(typeOverride);
 		}
