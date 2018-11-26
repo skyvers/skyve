@@ -41,6 +41,10 @@ Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer
 
 In addition to the [Skyve platform website](https://skyve.org/) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
 
+### User Guide
+
+The user guide is available at [https://skyvers.github.io/skyve-user-guide/](https://skyvers.github.io/skyve-user-guide/). The user guide is for end users of Skyve applications and describes how to navigate around the user interface and make use of the built in functions that ship with Skyve.
+
 ### Development Guide
 
 The development guide is available at [github.com/skyvers/skyve-dev-guide](https://github.com/skyvers/skyve-dev-guide). This contains detailed documentation covering the architecture and guiding principles of the framework, as well as explaining all the features and how to get started.
