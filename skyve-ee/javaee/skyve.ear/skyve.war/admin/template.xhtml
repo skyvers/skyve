@@ -100,6 +100,14 @@
 								style="float:right;"
 								icon="fa fa-check" />
 		</p:confirmDialog>
+		<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+			<f:facet name="start">
+				<i id="busy" class="fa fa-2x fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+			</f:facet>
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
 	</ui:define>
 
 	<ui:define name="footer">
