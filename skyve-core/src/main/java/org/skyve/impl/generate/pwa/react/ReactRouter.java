@@ -78,6 +78,7 @@ public class ReactRouter {
 					Document d = m.getDocument(generator.customer, documentName);
 					ReactEditView view = new ReactEditView(generator, moduleName, documentName);
 					view.setViews(m, d);
+					processItem(view, null);
 					processItem(view, EDIT_VIEW_PARAMS);
 				}
 			}
@@ -111,6 +112,7 @@ public class ReactRouter {
 				String componentName = itemDocument.getName();
 				ReactEditView view = new ReactEditView(generator, moduleName, componentName);
 				view.setViews(itemModule, itemDocument);
+				processItem(view, null);
 				processItem(view, EDIT_VIEW_PARAMS);
 			}
 
@@ -186,7 +188,7 @@ public class ReactRouter {
 		imports.add(String.format(format, moduleName, componentName, moduleName, componentName));
 
 		StringBuilder route = new StringBuilder(128);
-		route.append("\t\t\t\t<Route path=\"/").append(moduleName).append('/').append(componentName);
+		route.append("\t\t\t\t<Route exact path=\"/").append(moduleName).append('/').append(componentName);
 		if (params != null) {
 			for (String param : params) {
 				route.append("/:").append(param);

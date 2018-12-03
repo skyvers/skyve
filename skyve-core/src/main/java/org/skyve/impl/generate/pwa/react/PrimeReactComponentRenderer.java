@@ -525,7 +525,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		if (ImplicitActionName.Cancel.equals(name)) {
-			output.append("<Button label=\"Cancel\" onClick={(e) => this.props.history.goBack()} />\n");
+			output.append("<Button label=\"Cancel\" onClick={(e) => this.props.history.goBack()} />");
 		}
 		else {
 			output.append("action " + name);
