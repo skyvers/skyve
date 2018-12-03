@@ -71,26 +71,24 @@ public abstract class DomainGenerator {
 	 * <dl>
 	 * <dt>sourcePath</dt>
 	 * <dd>path to source files where modules are located</dd>
+	 * <dt>generatedPath</dt>
+	 * <dd>path to place generated source files
 	 * <dt>testPath</dt>
 	 * <dd>path to test files</dd>
 	 * <dt>generatedTestPath</dt>
-	 * <dd>path to place generated tests</dd>
+	 * <dd>path to place generated tests (can be same as <code>generatedPath</code>)</dd>
 	 * <dt>debug</dt>
 	 * <dd>optional, true or false to enable debug mode</dd>
-	 * <dt>data store index foreign keys by default</dt>
-	 * <dd>optional, true or false to index foreign keys by default in the data store</dd>
-	 * <dt>data store index names in global namespace</dt>
-	 * <dd>optional, true or false if data store index names are part of the global namespace</dd>
-	 * <dt>data store identifier character limit</dt>
-	 * <dd>optional, size of allowed data store identifiers</dd>
+	 * <dt>dialect</dt>
+	 * <dd>optional, select which database dialect to use, defaults to H2 by default</dd>
 	 * <dt>excludedModules</dt>
 	 * <dd>optional, comma separated list of modules not to generate unit tests for</dd>
 	 * </dl>
 	 * 
-	 * E.g. src/skyve src/test src/generatedTest,
-	 * src/skyve src/test src/generatedTest true,
-	 * src/skyve src/test src/generatedTest false false test,whosin
-	 * src/skyve src/test src/generatedTest false true whosin
+	 * E.g. src/skyve src/generated src/test src/generatedTest,
+	 * src/skyve src/generated src/test src/generatedTest true
+	 * src/skyve src/generated src/test src/generatedTest true MYSQL test,whosin
+	 * src/skyve src/generated src/test src/generatedTest false MYSQL whosin
 	 * 
 	 * @param args
 	 * @throws Exception
@@ -137,7 +135,7 @@ public abstract class DomainGenerator {
 		if (args.length >= 6) {
 			try {
 				DIALECT_OPTIONS = DialectOptions.valueOf(args[5]);
-			} catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				System.err.println("The sixth argument DIALECT_OPTIONS should be one of the following "
 						+ StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);
