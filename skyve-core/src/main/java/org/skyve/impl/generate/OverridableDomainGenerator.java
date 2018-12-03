@@ -3179,6 +3179,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private static void validateDocumentAttributeNames(final Document document) {
 		if (document != null) {
 			for (Attribute attribute : document.getAttributes()) {
+				// attribute names cannot contain underscore
+				if (attribute.getName().contains("_")) {
+					throw new MetaDataException(
+							String.format(
+									"Document %s.%s cannot contain attribute named %s because it contains an underscore. Try using %s instead.",
+									document.getOwningModuleName(), document.getName(), attribute.getName(),
+									attribute.getName().replaceAll("_", "-")));
+				}
+
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
 					System.out.println(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
@@ -3191,7 +3200,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					case MSSQL_2016:
 						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									String.format("Document %s.%s cannot contain attribute named %s because it is a reserved word.",
+									String.format(
+											"Document %s.%s cannot contain attribute named %s because it is a reserved word.",
 											document.getOwningModuleName(), document.getName(), attribute.getName()));
 						}
 						break;
