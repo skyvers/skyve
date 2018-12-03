@@ -23,7 +23,7 @@ export class HBox extends VBox {
 		);
 	}
 }
-export class Form extends HBox {
+export class Form extends VBox {
 }
 export class Cell extends Component {
 	static propTypes = {
