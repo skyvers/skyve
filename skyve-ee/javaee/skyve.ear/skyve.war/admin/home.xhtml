@@ -29,12 +29,14 @@
 								document="#{skyve.bizDocumentParameter}" 
 								managedBean="skyve"
 								update="@form"
+								componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.AdminFacesComponentBuilderChain"
 								rendered="#{'e' eq skyve.webActionParameter}" />
 					<s:listGrid module="#{skyve.bizModuleParameter}"
 									query="#{skyve.queryNameParameter}"
 									managedBean="skyve"
 									paginator="true" 
 									update="@form"
+									componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.AdminFacesComponentBuilderChain"
 									rendered="#{'l' eq skyve.webActionParameter}" />
 				</h:form>
 			</ui:define>
