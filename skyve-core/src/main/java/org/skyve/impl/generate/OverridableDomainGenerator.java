@@ -3188,6 +3188,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									attribute.getName().replaceAll("_", "-")));
 				}
 
+				AttributeType type = attribute.getAttributeType();
+
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
 					System.out.println(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
@@ -3195,21 +3197,25 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					return;
 				}
 
+				// skip checking association or collections as their persistent field name will be modified
+				if (AttributeType.collection.equals(type) || AttributeType.association.equals(type)
+						|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+					return;
+				}
+
+				// check not using a reserved word
 				switch (DIALECT_OPTIONS) {
 					case MSSQL_2014:
 					case MSSQL_2016:
 						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									String.format(
-											"Document %s.%s cannot contain attribute named %s because it is a reserved word.",
-											document.getOwningModuleName(), document.getName(), attribute.getName()));
+									createDialectError(document, attribute));
 						}
 						break;
-					case MYSQL:
+					case MYSQL_5:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									String.format("Document %s.%s cannot contain attribute named %s because it is a reserved word.",
-											document.getOwningModuleName(), document.getName(), attribute.getName()));
+									createDialectError(document, attribute));
 						}
 						break;
 					case H2:
@@ -3219,12 +3225,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						if (H2_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							System.err.println("Reserved word: " + attribute.getName());
 							throw new MetaDataException(
-									String.format("Document %s.%s cannot contain attribute named %s because it is a reserved word.",
-											document.getOwningModuleName(), document.getName(), attribute.getName()));
+									createDialectError(document, attribute));
 						}
 						break;
 				}
 			}
 		}
+	}
+
+	private static String createDialectError(final Document document, Attribute attribute) {
+		return String.format(
+				"Document %s.%s cannot contain attribute named \"%s\" because it is a reserved word in database dialect %s.",
+				document.getOwningModuleName(), document.getName(), attribute.getName(),
+				DIALECT_OPTIONS.getDescription());
 	}
 }
