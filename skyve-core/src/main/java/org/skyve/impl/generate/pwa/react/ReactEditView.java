@@ -36,17 +36,21 @@ public class ReactEditView extends ReactComponent {
 	@Override
 	protected void create(FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
-		StringBuilder editJsx = new StringBuilder(2096);
-		StringBuilder createJsx = new StringBuilder(2096);
+		String editJsx = null;
+		String createJsx = null;
 
 		// Wrap edit and create views in a Fragment if necessary
 		boolean bothViews = (editView != null) && (createView != null);
 
 		if (editView != null) {
-			new PrimeReactViewVisitor(generator.customer, module, document, editView, imports, editJsx, bothViews).visit();
+			ReactViewVisitor v = new PrimeReactViewVisitor(generator.customer, module, document, editView, null, imports, bothViews);
+			v.visit();
+			editJsx = v.getResult().toString();
 		}
 		if (createView != null) {
-			new PrimeReactViewVisitor(generator.customer, module, document, createView, imports, createJsx, bothViews).visit();
+			ReactViewVisitor v = new PrimeReactViewVisitor(generator.customer, module, document, createView, null, imports, bothViews);
+			v.visit();
+			createJsx = v.getResult().toString();
 		}
 
 		fw.write("import React from 'react';\n");
@@ -73,22 +77,22 @@ public class ReactEditView extends ReactComponent {
 		if (bothViews) {
 			fw.write("\t\tif (this.state.created) {\n");
 			fw.write("\t\t\treturn (\n");
-			fw.write(editJsx.toString());
+			fw.write((editJsx == null) ? "" : editJsx.toString());
 			fw.write("\t\t\t);\n");
 			fw.write("\t\t}\n");
 			fw.write("\t\telse {\n");
 			fw.write("\t\t\treturn (\n");
-			fw.write(createJsx.toString());
+			fw.write((createJsx == null) ? "" : createJsx.toString());
 			fw.write("\t\t\t);\n");
 			fw.write("\t\t}\n");
 		}
 		else {
 			fw.write("\t\treturn (\n");
 			if (editView != null) {
-				fw.write(editJsx.toString());
+				fw.write((editJsx == null) ? "" : editJsx.toString());
 			}
 			if (createView != null) {
-				fw.write(createJsx.toString());
+				fw.write((createJsx == null) ? "" : createJsx.toString());
 			}
 			fw.write("\t\t);\n");
 		}
