@@ -37,8 +37,9 @@ public class ReactRouter {
 		try (FileWriter fw = new FileWriter(router)) {
 			fw.write("import React, {Component, Fragment} from 'react';\n");
 			fw.write("import axios from 'axios';\n");
-			fw.write("import {Route} from 'react-router-dom';\n\n");
-			
+			fw.write("import {Route} from 'react-router-dom';\n");
+			fw.write("import {View} from './View';\n\n");
+
 			menuImportsAndRoutes();
 			viewImportsAndRoutes();
 			
@@ -49,7 +50,8 @@ public class ReactRouter {
 			fw.write("\nexport class Router extends Component {\n");
 			fw.write("\tstatic createAppMenu(callback) {\n");
 			fw.write("\t\taxios.get('/skyve/primeinit', {params: {mod: 'admin'}})\n");
-			fw.write("\t\t\t\t.then(res => callback(eval(res.data)));\n");
+			fw.write("\t\t\t\t.then(res => callback(eval(res.data)))\n");
+			fw.write("\t\t\t\t.catch(error => View.processError(error));\n");
 			fw.write("\t}\n\n");
 			
 			fw.write("\trender() {\n");
