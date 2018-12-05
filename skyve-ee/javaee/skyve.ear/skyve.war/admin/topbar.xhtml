@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ul class="nav navbar-nav">
+        <li class="dropdown user user-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <!-- <img class="hidden-xs" src="content?_n=&amp;_doc=admin.Contact&amp;_b=image" style="height: 30px;"/> -->
+                <span style="padding-left: 3px;">#{user.contactName}</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="dropdown-menu">
+            	<li>
+            		<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+						<i class="fa fa-share-square-o"></i>
+						<span class="topbar-item-name">Switch Mode</span>
+					</p:commandLink>
+            	</li>
+            	<li>
+	        		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
+						<i class="fa fa-power-off"></i>
+						<span class="topbar-item-name">Logout</span>
+					</a>
+				</li>
+            </ul>
+        </li>
+<!--
+        <li>
+            <a id="layout-setup" href="#" class="#{adminConfig.controlSidebar.showOnMobile ? '':'hidden-sm hidden-xs'}" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+        </li>
+-->
+    </ul>
+</ui:composition>
