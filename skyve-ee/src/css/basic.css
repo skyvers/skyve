@@ -159,9 +159,9 @@ body {
 }
 
 /*
-    Page and Table Headings.
+	Text search highlight style.
 */
-strong {
+.highlight {
     font-size: 16px;
     font-weight: bold;
     color: steelblue;
@@ -169,6 +169,9 @@ strong {
     margin: 3px;
 }
 
+/*
+    Page and Table Headings.
+*/
 .dataGridTitle {
 	font-size: 12px;
 	font-weight: bold;
