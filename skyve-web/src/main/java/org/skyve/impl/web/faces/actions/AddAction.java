@@ -144,7 +144,12 @@ public class AddAction extends FacesAction<Void> {
 			zoomInBinding.append("ElementById(").append(newBean.getBizId()).append(')');
 			
 	    	facesView.setViewBinding(newViewBinding.toString());
-	    	facesView.setZoomInBinding(zoomInBinding.toString());
+	    	facesView.getZoomInBindings().push(zoomInBinding.toString());
+			if (UtilImpl.FACES_TRACE) { 
+				Util.LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
+				Util.LOGGER.info("Set ViewBinding " + newViewBinding.toString());
+			}
+
 	    	ActionUtil.redirect(facesView, newBean);
 		}
 		

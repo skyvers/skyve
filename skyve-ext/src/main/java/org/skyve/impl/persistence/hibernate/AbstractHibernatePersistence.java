@@ -2017,7 +2017,7 @@ public void doWorkOnConnection(Session session) {
 					List<DomainValue> domainValues = null;
 					DomainType domainType = attribute.getDomainType();
 					if (domainType != null) {
-						domainValues = ((DocumentImpl) document).getDomainValues(customer, domainType, attribute, bean);
+						domainValues = ((DocumentImpl) document).getDomainValues(customer, domainType, attribute, bean, true);
 					}
 					Object value = BindUtil.get(bean, attributeName);
 					if (domainValues != null) {

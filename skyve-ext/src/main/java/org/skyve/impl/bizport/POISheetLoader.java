@@ -54,7 +54,6 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		setDocumentContext(moduleName, documentName);
 
 		// defaults
-		this.createMissingAssociations = false;
 		this.treatAllEmptyNumericAsZero = false;
 		this.dataIndex = 0;
 		this.fieldIndex = 0;

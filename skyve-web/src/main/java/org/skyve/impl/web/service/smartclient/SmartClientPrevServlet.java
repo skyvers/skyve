@@ -119,14 +119,14 @@ public class SmartClientPrevServlet extends HttpServlet {
 					List<Bean> values = persistence.newBizQL(bizQL.toString()).setFirstResult(startRow).setMaxResults(endRow - startRow).projectedResults();
 					
 					StringBuilder message = new StringBuilder(1024);
-					message.append("{response:{");
-			        message.append("status:0,");
-			        message.append("startRow:").append(startRow);
-			        message.append(",endRow:");
+					message.append("{\"response\":{");
+			        message.append("\"status\":0,");
+			        message.append("\"startRow\":").append(startRow);
+			        message.append(",\"endRow\":");
 			        message.append(Math.min(totalRows, endRow));
-			        message.append(",totalRows:");
+			        message.append(",\"totalRows\":");
 			        message.append(totalRows);
-			        message.append(",data:");
+			        message.append(",\"data\":");
 			        Set<String> propertyNames = new TreeSet<>();
 			        propertyNames.add("value");
 			        message.append(JSON.marshall(customer, values, propertyNames));

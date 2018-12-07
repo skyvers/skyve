@@ -143,6 +143,16 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		super.preDelete(bean);
 	}
 
+	@Override
+	public void preRerender(String source, Communication bean, WebContext webContext) throws Exception {
+
+		if (Communication.moduleNamePropertyName.equals(source)) {
+			bean.setDocumentName(null);
+		}
+
+		super.preRerender(source, bean, webContext);
+	}
+
 	/**
 	 * anonymously check whether a communication exists for a customer
 	 * 

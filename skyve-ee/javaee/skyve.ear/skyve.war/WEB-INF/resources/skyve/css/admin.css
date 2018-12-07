@@ -1,0 +1,33 @@
+@CHARSET "UTF-8";
+
+/* Customisations to the Admin Faces theme */
+
+#layout-menu_menu {
+	z-index: 9997 !important;
+}
+
+#layout-menu_menu span.ui-menuitem-text {
+	margin-left: 2px;
+}
+
+.navbar-nav>.user-menu>.dropdown-menu {
+	width: 240px;
+}
+
+.navbar-nav>.user-menu>.dropdown-menu li a {
+	border: 1px solid transparent;
+	display: block;
+	text-align: left;
+	text-decoration: none;
+	padding: 10px 20px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+
+@media (max-width: 767px) {
+	.skin-blue .main-header .navbar .dropdown-menu li a {
+	    color: inherit;
+	}
+}
+

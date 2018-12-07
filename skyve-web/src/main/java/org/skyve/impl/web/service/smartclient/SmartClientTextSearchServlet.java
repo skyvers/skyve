@@ -62,7 +62,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 	            try (PrintWriter pw = response.getWriter()) {
 		            StringBuilder message = new StringBuilder(512);
 			    	message.append(SmartClientListServlet.ISC_JSON_PREFIX);
-		            message.append("{response:{data:[");
+		            message.append("{\"response\":{\"data\":[");
 		
 		            Iterator<SearchResult> resultIterator = results.getResults().iterator();
 		            StringBuilder url = new StringBuilder(128);
@@ -124,7 +124,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 					}
 	
 					// append summary row
-					message.append("{time:").append(results.getSearchTimeInSecs()).append(",suggestion:");
+					message.append("{\"time\":").append(results.getSearchTimeInSecs()).append(",\"suggestion\":");
 					String suggestion = results.getSuggestion();
 					if (suggestion != null) {
 						message.append('\'').append(suggestion).append('\'');
@@ -133,11 +133,11 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 						message.append("null");
 					}
 				
-					message.append("}],status:0,");
-					message.append("startRow:0,endRow:");
+					message.append("}],\"status\":0,");
+					message.append("\"startRow\":0,\"endRow\":");
 					// rows could have been removed above if the bizkey couldn't be found
 					message.append(results.getResults().size());
-					message.append(",totalRows:");
+					message.append(",\"totalRows\":");
 					message.append(results.getResults().size());
 					message.append("}}");
 			    	message.append(SmartClientListServlet.ISC_JSON_SUFFIX);

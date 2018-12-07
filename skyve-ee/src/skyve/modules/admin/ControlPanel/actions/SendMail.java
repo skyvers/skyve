@@ -1,9 +1,9 @@
 package modules.admin.ControlPanel.actions;
 
-import org.skyve.content.MimeType;
-import org.skyve.impl.util.MailUtil;
+import org.skyve.EXT;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.util.Mail;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
@@ -23,16 +23,11 @@ public class SendMail implements ServerSideAction<ControlPanelExtension> {
 				emailTo = emailToContact.getEmail1();
 			}
 			if (emailTo != null) {
-				MailUtil.sendMail(new String[] {emailTo},
-									null, 
-									null, 
-									bean.getEmailFrom(), 
-									bean.getEmailSubject(),
-									"<html><head/><body>" + bean.getEmailContent() + "</body></html>",
-									MimeType.html, 
-									null, 
-									null, 
-									null);
+				EXT.sendMail(new Mail()
+									.addTo(emailTo)
+									.from(bean.getEmailFrom())
+									.subject(bean.getEmailSubject())
+									.body("<html><head/><body>" + bean.getEmailContent() + "</body></html>"));
 			}
 		}
 		catch (Exception e) {

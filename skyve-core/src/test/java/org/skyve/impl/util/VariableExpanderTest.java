@@ -9,9 +9,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.skyve.CORE;
-import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.util.JSON;
 
 public class VariableExpanderTest {
 
@@ -103,19 +100,26 @@ public class VariableExpanderTest {
 	}
 
 	/**
-	 * Tests that the default value of null is used when the variable is not defined.
+	 * Tests that a quoted string is replaced appropriately.
 	 */
 	@Test
-	@SuppressWarnings("unchecked")
-	public void testNullDefaultUsedWhenVariableNotDefined() throws Exception {
+	public void testExpandQuotedValueWithNullDefault() {
 		final String propertyKey = "testKey";
-		//final String json = String.format("{ \"%s\" : \"${TEST:null}\" }", propertyKey);
-		final String json = String.format("{ \"%s\" : \"${TEST:0}\" }", propertyKey);
-		properties = (Map<String, Object>) JSON.unmarshall(null, json);
+		final String propertyValue = "${TEST:null}";
+		properties.put(propertyKey, propertyValue);
 
-		final Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
+		Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
 
-		final String expandedProperty = (String) expandedConfig.get(propertyKey);
+		String expandedProperty = (String) expandedConfig.get(propertyKey);
 		Assert.assertThat(expandedProperty, is(nullValue()));
+
+		final String variableKey = "TEST";
+		final String variableValue = "\"testValue\"";
+		variables.put(variableKey, variableValue);
+
+		expandedConfig = variableExpander.expand(properties, variables);
+
+		expandedProperty = (String) expandedConfig.get(propertyKey);
+		Assert.assertThat(expandedProperty, is(variableValue));
 	}
 }

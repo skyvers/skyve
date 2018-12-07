@@ -84,7 +84,8 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
 																	                            domainType,
 																	                            targetAttribute,
-																	                            owningBean);
+																	                            owningBean,
+																	                            true);
             if (includeEmptyItem) {
 	            result = new ArrayList<>(domainValues.size() + 1);
 	        	// add an empty select item so that a null value 

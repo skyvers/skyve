@@ -102,12 +102,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
 
 	/**
-	 * Array or Java reserved words. When determining variable names for generated tests,
-	 * checks this array to see if the variable could be a reserved word. E.g. a Return document.
+	 * Array of Java reserved words. Used to checks if an attribute name is valid, e.g. <code>return</code>.
 	 */
-	private static final Set<String> RESERVED_WORDS;
+	public static final Set<String> JAVA_RESERVED_WORDS;
+
+	/**
+	 * Array of H2 database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> H2_RESERVED_WORDS;
+
+	/**
+	 * Array of MySQL 5.x database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> MYSQL_5_RESERVED_WORDS;
+
+	/**
+	 * Array of SqlServer T-SQL reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
+
 	static {
-		String reserved[] = {
+		String javaReserved[] = {
 				"abstract", "assert", "boolean", "break", "byte", "case",
 				"catch", "char", "class", "const", "continue",
 				"default", "do", "double", "else", "extends",
@@ -120,7 +135,66 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"transient", "true", "try", "void", "volatile",
 				"while"
 		};
-		RESERVED_WORDS = new HashSet<>(Arrays.asList(reserved));
+		JAVA_RESERVED_WORDS = new HashSet<>(Arrays.asList(javaReserved));
+
+		String h2Reserved[] = {
+				"all", "check", "constraint", "cross", "current_date", "current_time", "current_timestamp",
+				"distinct", "except", "exists", "false", "fetch", "for", "foreign", "from", "full", "group",
+				"having", "inner", "intersect", "is", "join", "like", "limit", "minus", "natural", "not", "null",
+				"offset", "on", "order", "primary", "rownum", "select", "sysdate", "systime", "systimestamp",
+				"today", "true", "union", "unique", "where", "with"
+		};
+		H2_RESERVED_WORDS = new HashSet<>(Arrays.asList(h2Reserved));
+
+		String mysql5Reserved[] = {
+				"accessible", "add", "all", "alter", "analyze", "and", "as", "asc", "asensitive", "before", "between", "bigint",
+				"binary", "blob", "both", "by", "call", "cascade", "case", "change", "char", "character", "check", "collate",
+				"column", "condition", "constraint", "continue", "convert", "create", "cross", "current_date", "current_time",
+				"current_timestamp", "current_user", "cursor", "database", "databases",
+				"day_hour", "day_microsecond", "day_minute", "day_second", "dec", "decimal", "declare", "default", "delayed",
+				"delete", "desc", "describe", "deterministic", "distinct", "distinctrow", "div", "double", "drop", "dual", "each",
+				"else", "elseif", "enclosed", "escaped", "exists", "exit", "explain", "false", "fetch", "float", "float4", "float8",
+				"for", "force", "foreign", "from", "fulltext", "get", "grant", "group", "having", "high_priority",
+				"hour_microsecond", "hour_minute", "hour_second", "if", "ignore", "in", "index", "infile", "inner", "inout",
+				"insensitive", "insert", "int", "int1", "int2", "int3", "int4", "int8", "integer", "interval", "into",
+				"io_after_gtids", "io_before_gtids", "is", "iterate", "join", "key", "keys", "kill", "leading", "leave", "left",
+				"like", "limit", "linear", "lines", "load", "localtime", "localtimestamp", "lock", "long", "longblob", "longtext",
+				"loop", "low_priority", "master_bind", "master_ssl_verify_server_cert", "match", "maxvalue", "mediumblob",
+				"mediumint", "mediumtext", "middleint", "minute_microsecond", "minute_second", "mod", "modifies", "natural", "not",
+				"no_write_to_binlog", "null", "numeric", "on", "optimize", "optimizer_costs", "option", "optionally", "or", "order",
+				"out", "outer", "outfile", "partition", "precision", "primary", "procedure", "purge", "range", "read", "reads",
+				"read_write", "real", "references", "regexp", "release", "rename", "repeat", "replace", "require", "resignal",
+				"restrict", "return", "revoke", "right", "rlike", "schema", "schemas", "second_microsecond", "select", "sensitive",
+				"separator", "set", "show", "signal", "smallint", "spatial", "specific", "sql", "sqlexception", "sqlstate",
+				"sqlwarning", "sql_big_result", "sql_calc_found_rows", "sql_small_result", "ssl", "starting", "stored",
+				"straight_join", "table", "terminated", "then", "tinyblob", "tinyint", "tinytext", "to", "trailing", "trigger",
+				"true", "undo", "union", "unique", "unlock", "unsigned", "update", "usage", "use", "using", "utc_date", "utc_time",
+				"utc_timestamp", "values", "varbinary", "varchar", "varcharacter", "varying", "virtual", "when", "where", "while",
+				"with", "write", "xor", "year_month", "generated"
+		};
+		MYSQL_5_RESERVED_WORDS = new HashSet<>(Arrays.asList(mysql5Reserved));
+
+		String sqlServerReserved[] = {
+				"add", "external", "procedure", "all", "fetch", "public", "alter", "file", "raiserror", "and", "fillfactor", "read",
+				"any", "for", "readtext", "as", "foreign", "reconfigure", "asc", "freetext", "references", "authorization",
+				"freetexttable", "replication", "backup", "from", "restore", "begin", "full", "restrict", "between", "function",
+				"return", "break", "goto", "revert", "browse", "grant", "revoke", "bulk", "group", "right", "by", "having",
+				"rollback", "cascade", "holdlock", "rowcount", "case", "identity", "rowguidcol", "check", "identity_insert", "rule",
+				"checkpoint", "identitycol", "save", "close", "if", "schema", "clustered", "in", "securityaudit", "coalesce",
+				"index", "select", "collate", "inner", "semantickeyphrasetable", "column", "insert",
+				"semanticsimilaritydetailstable", "commit", "intersect", "semanticsimilaritytable", "compute", "into",
+				"session_user", "constraint", "is", "set", "contains", "join", "setuser", "containstable", "key", "shutdown",
+				"continue", "kill", "some", "convert", "left", "statistics", "create", "like", "system_user", "cross", "lineno",
+				"table", "current", "load", "tablesample", "current_date", "merge", "textsize", "current_time", "national", "then",
+				"current_timestamp", "nocheck", "to", "current_user", "nonclustered", "top", "cursor", "not", "tran", "database",
+				"null", "transaction", "dbcc", "nullif", "trigger", "deallocate", "of", "truncate", "declare", "off", "try_convert",
+				"default", "offsets", "tsequal", "delete", "on", "union", "deny", "open", "unique", "desc", "opendatasource",
+				"unpivot", "disk", "openquery", "update", "distinct", "openrowset", "updatetext", "distributed", "openxml", "use",
+				"double", "option", "user", "drop", "or", "values", "dump", "order", "varying", "else", "outer", "view", "end",
+				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
+				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc",
+		};
+		SQL_SERVER_RESERVED_WORDS = new HashSet<>(Arrays.asList(sqlServerReserved));
 	}
 
 	OverridableDomainGenerator() {
@@ -172,6 +246,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			new ModuleDocumentVisitor() {
 				@Override
 				public void accept(Document document) throws Exception {
+					validateDocumentAttributeNames(document);
 					populatePropertyLengths(repository, null, module, document, null);
 					String documentName = document.getName();
 					DomainClass domainClass = new DomainClass();
@@ -341,14 +416,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-		final File factoryPath = new File(GENERATED_PATH + modulePath + "/util/");
 		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
-		if (factoryPath.exists()) {
-			for (File testFile : factoryPath.listFiles()) {
-				testFile.delete();
-			}
-			factoryPath.delete();
-		}
+
 		if (domainTestPath.exists()) {
 			for (File testFile : domainTestPath.listFiles()) {
 				testFile.delete();
@@ -3080,7 +3149,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
 
 		// check this is not a Java reserved word
-		if (RESERVED_WORDS.contains(variableName)) {
+		if (JAVA_RESERVED_WORDS.contains(variableName)) {
 			return "_" + variableName;
 		}
 
@@ -3099,5 +3168,75 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				GENERATED_TEST_PATH.replace("\\", "/"),
 				TEST_PATH.replace("\\", "/")));
 		return testFile.exists();
+	}
+
+	/**
+	 * Validates the attribute names of the specified document are valid and not a
+	 * reserved word of the dialect passed into this domain generator.
+	 * 
+	 * @param document The document containing the attributes to be visited
+	 */
+	private static void validateDocumentAttributeNames(final Document document) {
+		if (document != null) {
+			for (Attribute attribute : document.getAttributes()) {
+				// attribute names cannot contain underscore
+				if (attribute.getName().contains("_")) {
+					throw new MetaDataException(
+							String.format(
+									"Document %s.%s cannot contain attribute named %s because it contains an underscore. Try using %s instead.",
+									document.getOwningModuleName(), document.getName(), attribute.getName(),
+									attribute.getName().replaceAll("_", "-")));
+				}
+
+				AttributeType type = attribute.getAttributeType();
+
+				if (document.getPersistent() == null || attribute.isPersistent() == false) {
+					// return, attribute is transient
+					System.out.println(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
+							document.getName()));
+					return;
+				}
+
+				// skip checking association or collections as their persistent field name will be modified
+				if (AttributeType.collection.equals(type) || AttributeType.association.equals(type)
+						|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+					return;
+				}
+
+				// check not using a reserved word
+				switch (DIALECT_OPTIONS) {
+					case MSSQL_2014:
+					case MSSQL_2016:
+						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case MYSQL_5:
+						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case H2:
+					case H2_NO_INDEXES:
+					default:
+						// H2 is the default dialect
+						if (H2_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							System.err.println("Reserved word: " + attribute.getName());
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	private static String createDialectError(final Document document, Attribute attribute) {
+		return String.format(
+				"Document %s.%s cannot contain attribute named \"%s\" because it is a reserved word in database dialect %s.",
+				document.getOwningModuleName(), document.getName(), attribute.getName(),
+				DIALECT_OPTIONS.getDescription());
 	}
 }

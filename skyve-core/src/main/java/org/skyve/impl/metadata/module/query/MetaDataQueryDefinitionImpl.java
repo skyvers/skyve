@@ -255,8 +255,13 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									anyTransientBindingOrDynamicDomainInQuery = true;
 									continue;
 								}
+								// NOTE:-
+								// Selecting bizKey on associations stops things from working - use a fetch join instead
+								// SQLServer ends up doing a cross join with the bizKey and muffing up the join raising 
+								// "multipart identifier cannot be resolved" syntax error
+								//
 								// Persistent document, add the projection to the association's bizKey
-								result.addBoundProjection(String.format("%s.%s", binding, Bean.BIZ_KEY));
+								// result.addBoundProjection(String.format("%s.%s", binding, Bean.BIZ_KEY));
 							}
 						}
 					}
@@ -313,8 +318,13 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									continue;
 								}
 
+								// NOTE:-
+								// Selecting bizKey on associations stops things from working - use a fetch join instead
+								// SQLServer ends up doing a cross join with the bizKey and muffing up the join raising 
+								// "multipart identifier cannot be resolved" syntax error
+								//
 								// Persistent document, add the projection to the association's bizKey
-								result.addBoundProjection(String.format("%s.%s", binding, Bean.BIZ_KEY));
+								//result.addBoundProjection(String.format("%s.%s", binding, Bean.BIZ_KEY));
 							}
 							
 							// Outer join if this attribute is not required
@@ -329,7 +339,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 				continue;
 			}
 
-			String replacedExpression = null;
+			String replacedExpression = replaceImplicitExpressions(expression, implicitParameters, user, customer);
 			
 			if (projected) {
 				if (summaryType == null) {
@@ -337,7 +347,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						result.addBoundProjection(binding, alias);
 					}
 					else {
-						replacedExpression = replaceImplicitExpressions(expression, implicitParameters, user, customer);
 						result.addExpressionProjection(replacedExpression, alias);
 					}
 				}

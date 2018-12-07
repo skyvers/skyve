@@ -37,11 +37,13 @@ public class ZoomInAction extends FacesAction<Void> {
 			
 			StringBuilder sb = new StringBuilder(64);
 			sb.append(listBinding).append("ElementById(").append(bizId).append(')');
-			facesView.setZoomInBinding(sb.toString());
+			facesView.getZoomInBindings().push(sb.toString());
+			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("Push ZoomInBinding " + sb.toString());
 			if (viewBinding != null) {
 				sb.insert(0, '.').insert(0, viewBinding);
 			}
 			facesView.setViewBinding(sb.toString());
+			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("Set ViewBinding " + sb.toString());
 	
 			Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 	

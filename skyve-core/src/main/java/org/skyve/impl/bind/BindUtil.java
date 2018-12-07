@@ -641,15 +641,15 @@ public final class BindUtil {
 							Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
 							if ((owningBean != null) && (target != null)) {
 								internalDocument = (DocumentImpl) target.getDocument();
-								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean);
+								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
 							}
 						}
 						else {
-							domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean);							
+							domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
 						}
 					}
 					else {
-						domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, null);
+						domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, null, true);
 					}
 				}
 			}

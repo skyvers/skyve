@@ -290,7 +290,7 @@ public final class StandardGenerator {
 
 				if (DomainType.constant.equals(attribute.getDomainType())) {
 					if (bizlet == null) {
-						bizlet = AbstractRepository.get().getBizlet(customer, currentDocument);
+						bizlet = AbstractRepository.get().getBizlet(customer, currentDocument, true);
 					}
 					if (bizlet == null) { // metadata has an error
 						bizlet = new Bizlet<Bean>() {

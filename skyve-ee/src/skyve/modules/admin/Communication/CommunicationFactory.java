@@ -6,13 +6,14 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.Communication.actions.CreateFiles;
+import modules.admin.Communication.actions.GetCount;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.Communication.actions.SendNow;
 import modules.admin.Communication.actions.TestSend;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
 
-@SkyveFactory(excludedActions = { CreateFiles.class, GetResults.class, SendNow.class, TestSend.class })
+@SkyveFactory(excludedActions = { CreateFiles.class, GetCount.class, GetResults.class, SendNow.class, TestSend.class })
 public class CommunicationFactory {
 
 	@SkyveFixture(types = FixtureType.crud)

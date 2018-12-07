@@ -1,8 +1,5 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -35,6 +32,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
@@ -88,7 +86,7 @@ public class Desktop extends Harness {
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 
-					constructMenu(customer, user, bizModule, uxui.getName(), result);
+					constructMenu(bizModule, uxui.getName(), result);
 					listDataSources(customer, user, result);
 	
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
@@ -294,51 +292,172 @@ public class Desktop extends Harness {
 		}
 	}
 	
-	private void constructMenu(Customer customer, 
-								UserImpl user, 
-								String moduleName,
+	private void constructMenu(String chosenModuleName,
 								String uxui,
-								StringBuilder result)
-	throws IOException {
+								StringBuilder result) {
 		result.append("isc.BizUtil.init('").append(getHeaderTemplate());
 		result.append("','../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
 
-		// process each menu
-
-		// determine if the first menu should be open - ie no default
-		Menu menu = user.getModuleMenu(moduleName);
-		boolean setFirstModuleOpen = (menu == null) || menu.getItems().isEmpty();
-
 		// render each module menu
-		List<Module> modules = customer.getModules();
-		for (int i = 0, l = modules.size(); i < l; i++) {
-			Module thisModule = modules.get(i);
-			String thisModuleName = thisModule.getName();
-
-			menu = user.getModuleMenu(thisModuleName);
-			if (menu.isApplicable(uxui)) {
+		new MenuRenderer(uxui, getLocale(), chosenModuleName) {
+			@Override
+			public void renderModuleMenu(Menu menu, Module module, boolean open) {
 				result.append("{name:'");
-				result.append(thisModuleName);
+				result.append(module.getName());
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(thisModule.getTitle(), getLocale())));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getTitle(), getLocale())));
 				result.append("',");
-
-				renderMenuStructure(customer, thisModule, menu.getItems(), uxui, result);
-
-				if (setFirstModuleOpen) {
-					result.append(",open:");
-					result.append(i == 0);
-				} 
-				else {
-					result.append(",open:");
-					result.append(thisModuleName.equals(moduleName));
-				}
-				// close the definition
-				result.append("},");
 			}
-		}
+			
+			@Override
+			public void renderMenuRoot(Menu menu, Module module) {
+				result.append("root:{name:'");
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getName(), getLocale())));
+				result.append("',sub:[");
+			}
+			
+			@Override
+			public void renderMenuGroup(MenuGroup group) {
+				result.append("{desc:'");
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName(), locale)));
+				result.append("', sub:[");
+			}
+			
+			@Override
+			public void renderCalendarItem(CalendarItem item,
+											Module itemModule,
+											Document itemDocument,
+											String itemQueryName,
+											String icon16,
+											String iconStyleClass) {
+				result.append("{name:'").append(itemQueryName);
+				renderItem(item.getName(), icon16, iconStyleClass, null, "cal", itemModule, itemDocument);
+			}
+			
+			@Override
+			public void renderEditItem(EditItem item, Module itemModule, Document itemDocument, String icon16, String iconStyleClass) {
+				result.append("{name:'").append(itemDocument.getName());
+				renderItem(item.getName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
+			}
+			
+			@Override
+			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
+				result.append("{name:'").append(absoluteHref);
+				renderItem(item.getName(), null, null, null, "link", null, null);
+			}
+			
+			@Override
+			public void renderListItem(ListItem item,
+										Module itemModule,
+										Document itemDocument,
+										String itemQueryName,
+										String icon16,
+										String iconStyleClass) {
+				result.append("{name:'");
+				String modelName = item.getModelName();
+				if (modelName != null) {
+					result.append(itemDocument.getName()).append("__").append(modelName);
+				}
+				else {
+					result.append(itemQueryName);
+				}
+				renderItem(item.getName(),
+							icon16,
+							iconStyleClass,
+							item.isAutoPopulate() ? "{}" : "{autoPopulate:false}",
+							"grid",
+							itemModule,
+							itemDocument);
+			}
+			
+			@Override
+			public void renderMapItem(MapItem item,
+										Module itemModule,
+										Document itemDocument,
+										String itemQueryName, 
+										String icon16,
+										String iconStyleClass) {
+				result.append("{name:'");
+				String modelName = item.getModelName();
+				if (modelName != null) {
+					result.append(itemDocument.getName()).append("__").append(modelName);
+                    result.append('_').append(item.getGeometryBinding());
+				}
+				else {
+					result.append(itemQueryName).append('_').append(item.getGeometryBinding());
+				}
+				renderItem(item.getName(), icon16, iconStyleClass, null, "map", itemModule, itemDocument);
+			}
+			
+			@Override
+			public void renderTreeItem(TreeItem item,
+										Module itemModule,
+										Document itemDocument,
+										String itemQueryName,
+										String icon16,
+										String iconStyleClass) {
+				result.append("{name:'");
+				String modelName = item.getModelName();
+				if (modelName != null) {
+					result.append(itemDocument.getName()).append("__").append(modelName);
+				}
+				else {
+					result.append(itemQueryName);
+				}
+				renderItem(item.getName(),
+							icon16,
+							iconStyleClass, 
+							item.isAutoPopulate() ? "{}" : "{autoPopulate:false}",
+							"tree",
+							itemModule,
+							itemDocument);
+			}
+			
+			private void renderItem(String name,
+										String icon16,
+										String iconStyleClass,
+										String config,
+										String ref,
+										Module itemModule,
+										Document itemDocument) {
+				result.append("',desc:'");
+				if ((icon16 == null) && (iconStyleClass != null)) {
+					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+				}
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
+				if (config != null) {
+					result.append(",config:").append(config);
+				}
+				result.append(",ref:'").append(ref);
+				if (icon16 != null) {
+					result.append("',icon:'../resources?");
+					if ((itemModule != null) && (itemDocument != null)) { // NB link items have no document
+						result.append("_doc=").append(itemModule.getName()).append('.').append(itemDocument.getName()).append('&');
+					}
+					result.append("_n=").append(icon16);
+				}
+				result.append("'},");
+			}
+			
+			@Override
+			public void renderedMenuGroup(MenuGroup group) {
+				result.setLength(result.length() - 1);
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderedMenuRoot(Menu menu, Module module) {
+				result.setLength(result.length() -1); // remove the last comma
+				result.append("]}");
+			}
+
+			@Override
+			public void renderedModuleMenu(Menu menu, Module module, boolean open) {
+				result.append(",open:").append(open).append("},");
+			}
+		}.render(getUser());
 
 		// finish up menu defs
 		result.setLength(result.length() - 1); // remove last comma from menu
@@ -411,203 +530,6 @@ public class Desktop extends Harness {
 						query = module.getDocumentDefaultQuery(customer, documentName);
 						SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 					}
-				}
-			}
-		}
-	}
-
-	private void renderMenuStructure(Customer customer,
-										Module module, 
-										List<MenuItem> items, 
-										String uxui,
-										StringBuilder result) 
-	throws IOException {
-		result.append("root:{name:'");
-		result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getName(), getLocale())));
-		result.append("',sub:[");
-		renderMenuItems(customer, module, items, uxui, result);
-		result.append("]}");
-	}
-
-	private void renderMenuItems(Customer customer,
-									Module module, 
-									List<MenuItem> items, 
-									String uxui,
-									StringBuilder result)
-	throws IOException {
-		Locale locale = getLocale();
-		
-		for (int i = 0, l = items.size(); i < l; i++) {
-			MenuItem item = items.get(i);
-			if (item.isApplicable(uxui)) {
-				if (item instanceof MenuGroup) {
-					MenuGroup group = (MenuGroup) item;
-					result.append("{desc:'");
-					result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName(), locale)));
-					result.append("', sub:[");
-					renderMenuItems(customer, module, group.getItems(), uxui, result);
-					// print a comma if not the last module being processed
-					result.append((i < (l - 1)) ? "]}," : "]}");
-				}
-				else {
-					result.append("{name:'");
-					String ref = null;
-					String icon16 = null;
-					String iconStyleClass = null;
-					Module itemModule = null;
-					String itemDocumentName = null;
-					String config = null;
-	                if (item instanceof TreeItem) {
-	                    TreeItem treeItem = (TreeItem) item;
-	                    itemDocumentName = treeItem.getDocumentName();
-						String itemQueryName = treeItem.getQueryName();
-						String modelName = treeItem.getModelName();
-						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
-							result.append(itemDocumentName).append("__").append(modelName);
-						}
-						else {
-		                    MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
-													                                item,
-													                                itemQueryName,
-													                                itemDocumentName);
-							itemDocumentName = query.getDocumentName();
-							result.append(query.getName());
-							itemModule = query.getDocumentModule(customer);
-						}
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
-						icon16 = itemDocument.getIcon16x16RelativeFileName();
-						iconStyleClass = itemDocument.getIconStyleClass();
-	                    ref = "tree";
-	                    boolean autoPopulate = treeItem.isAutoPopulate();
-	                    if (autoPopulate) {
-	                    	config = "{}";
-	                    }
-	                    else {
-	                    	config = "{autoPopulate:false}";
-	                    }
-	                }
-	                else if (item instanceof ListItem) {
-						ListItem gridItem = (ListItem) item;
-						itemDocumentName = gridItem.getDocumentName();
-						String itemQueryName = gridItem.getQueryName();
-						String modelName = gridItem.getModelName();
-						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
-							result.append(itemDocumentName).append("__").append(modelName);
-						}
-						else {
-							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
-													                                item,
-													                                itemQueryName,
-													                                itemDocumentName);
-							itemDocumentName = query.getDocumentName();
-							result.append(query.getName());
-							itemModule = query.getDocumentModule(customer);
-						}
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
-						icon16 = itemDocument.getIcon16x16RelativeFileName();
-						iconStyleClass = itemDocument.getIconStyleClass();
-						ref = "grid";
-	                    boolean autoPopulate = gridItem.isAutoPopulate();
-	                    if (autoPopulate) {
-	                    	config = "{}";
-	                    }
-	                    else {
-	                    	config = "{autoPopulate:false}";
-	                    }
-					}
-					else if (item instanceof CalendarItem) {
-	                    CalendarItem calendarItem = (CalendarItem) item;
-	                    itemDocumentName = calendarItem.getDocumentName();
-						MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-												                                module,
-												                                item,
-												                                calendarItem.getQueryName(),
-												                                itemDocumentName);
-						itemDocumentName = query.getDocumentName();
-						result.append(query.getName());
-						itemModule = query.getDocumentModule(customer);
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
-						icon16 = itemDocument.getIcon16x16RelativeFileName();
-						iconStyleClass = itemDocument.getIconStyleClass();
-	                    ref = "cal";
-	                }
-	                else if (item instanceof MapItem) {
-	                    MapItem mapItem = (MapItem) item;
-	                    itemDocumentName = mapItem.getDocumentName();
-						String itemQueryName = mapItem.getQueryName();
-						String modelName = mapItem.getModelName();
-						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
-							result.append(itemDocumentName).append("__").append(modelName);
-		                    result.append('_').append(mapItem.getGeometryBinding());
-						}
-						else {
-							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
-													                                item,
-													                                itemQueryName,
-													                                itemDocumentName);
-							result.append(query.getName());
-		                    result.append('_').append(mapItem.getGeometryBinding());
-							itemModule = query.getDocumentModule(customer);
-						}
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
-						icon16 = itemDocument.getIcon16x16RelativeFileName();
-						iconStyleClass = itemDocument.getIconStyleClass();
-	                    ref = "map";
-	                }
-					else if (item instanceof EditItem) {
-						itemDocumentName = ((EditItem) item).getDocumentName();
-						result.append(itemDocumentName);
-						itemModule = module;
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
-						icon16 = itemDocument.getIcon16x16RelativeFileName();
-						iconStyleClass = itemDocument.getIconStyleClass();
-						ref = "edit";
-					}
-					else if (item instanceof LinkItem) {
-						ref = "link";
-						String href = ((LinkItem) item).getHref();
-						boolean relative = true;
-						try {
-							if (new URI(href).isAbsolute()) {
-								result.append(href);
-								relative = false;
-							}
-						} catch (@SuppressWarnings("unused") URISyntaxException e) {
-							// do nothing here if its not know to be absolute
-						}
-			        	
-						if (relative) {
-							result.append(Util.getSkyveContextUrl());
-				    		if (href.charAt(0) != '/') {
-				    			result.append('/');
-				    		}
-				    		result.append(href);
-						}
-					}
-					result.append("',desc:'");
-					if ((icon16 == null) && (iconStyleClass != null)) {
-						result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
-					}
-					result.append(SmartClientGenerateUtils.processString(Util.i18n(item.getName(), locale))).append('\'');
-					if (config != null) {
-						result.append(",config:").append(config);
-					}
-					result.append(",ref:'").append(ref);
-					if (icon16 != null) {
-						result.append("',icon:'../resources?");
-						if ((itemModule != null) && (itemDocumentName != null)) { // NB link items have no document
-							result.append("_doc=").append(itemModule.getName()).append('.').append(itemDocumentName).append('&');
-						}
-						result.append("_n=").append(icon16);
-					}
-					// print a comma if not the last module being processed
-					result.append((i < (l - 1)) ? "'},\n" : "'}\n");
 				}
 			}
 		}

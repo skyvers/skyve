@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20181010-SNAPSHOT</version>
+	<version>20181206</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20181010-SNAPSHOT</skyve.version>
+		<skyve.version>20181206</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
@@ -50,6 +50,7 @@
 		<primefaces.version>6.2</primefaces.version>
 		<primefaces-extensions.version>6.2.8</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
+        <adminfaces.version>1.0.0-RC19</adminfaces.version>
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
@@ -300,6 +301,11 @@
 				<groupId>org.primefaces.themes</groupId>
 				<artifactId>all-themes</artifactId>
 				<version>${primefaces-allthemes.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.adminfaces</groupId>
+				<artifactId>admin-template</artifactId>
+				<version>${adminfaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.atmosphere</groupId>

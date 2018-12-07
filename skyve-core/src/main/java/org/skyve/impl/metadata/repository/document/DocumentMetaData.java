@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.OverridableDomainGenerator;
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.metadata.model.InterfaceImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -405,6 +406,11 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				value = attribute.getDisplayName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
+				}
+				
+				if (OverridableDomainGenerator.JAVA_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+					throw new MetaDataException(String.format("%s : %s is a reserved word and cannot be used as an attribute name.",
+							metaDataName, attribute.getName()));
 				}
 				
 				// Default auditing to off for view attributes 

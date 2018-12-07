@@ -111,7 +111,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getConstantDomainValues(attribute.getName());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}
@@ -137,7 +137,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getDynamicDomainValues(attribute.getName(), getBean());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}
@@ -163,7 +163,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			try {
 				getBizlet().getVariantDomainValues(attribute.getName());
-			} catch (ValidationException e) {
+			} catch (@SuppressWarnings("unused") ValidationException e) {
 				// pass - action handled incorrect input
 			}
 		}
@@ -215,6 +215,13 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			Document document = module.getDocument(customer, getBean().getBizDocument());
 
 			TestUtil.updateAttribute(module, document, result, attributeToUpdate);
+			
+			if (Binder.get(result, attributeToUpdate.getName()).equals(originalValue)) {
+				// skip this test if we couldn't generate a new value to save
+				Util.LOGGER.warning(String.format("Skipping testUpdate() for attribute %s, original and updated values were the same", attributeToUpdate.getName()));
+				return;
+			}
+			
 			T uResult = CORE.getPersistence().save(result);
 
 			// verify the results
@@ -238,7 +245,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Module module = customer.getModule(getBean().getBizModule());
 		Document document = module.getDocument(customer, getBean().getBizDocument());
 
-		return AbstractRepository.get().getBizlet(customer, document);
+		return AbstractRepository.get().getBizlet(customer, document, true);
 	}
 
 	private Attribute getRandomAttribute(T bean) {

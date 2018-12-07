@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
+import java.util.Stack;
 import java.util.logging.Level;
 
 import org.skyve.CORE;
@@ -33,8 +34,10 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction by zoom in binding of " + facesView.getZoomInBinding() + " with view binding of " + facesView.getViewBinding());
-
+		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
+																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
+																	facesView.getViewBinding()));
 		if (FacesAction.validateRequiredFields()) {
 			// Call the bizlet
 			Bean elementBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
@@ -88,8 +91,13 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 	
 	static void zoomOut(FacesView<? extends Bean> facesView) throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		String zoomInBinding = facesView.getZoomInBinding();
+		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
 		String newViewBinding = null;
+
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("zoomOut - popped zoomInBinding = %s, viewBinding = %s",
+																	zoomInBinding,
+																	viewBinding));
 
 		// remove the zoom out binding expression from the view binding
 		if (viewBinding != null) {
@@ -106,15 +114,18 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
     		}
     		else { // there is a zoom in binding, remove the binding
     			if (viewBinding.endsWith(zoomInBinding)) {
-    				newViewBinding = viewBinding.substring(0, viewBinding.length() - zoomInBinding.length());
-    				if (newViewBinding.isEmpty()) {
-    					newViewBinding = null;
+    				// if we have some view binding left, there must be a dot between, we need to remove the dot too,
+    				// so take an extra char away
+    				if (viewBinding.length() > zoomInBinding.length()) {
+    					newViewBinding = viewBinding.substring(0, viewBinding.length() - zoomInBinding.length() - 1);
     				}
+    				// else zoom in binding and view bindings are the same length, so leave the new view binding null
     			}
-    			// otherwise remove the view binding altogether as we are at the outer-most level.
+    			// otherwise leave the new view binding null as we are at the outer-most level.
     		}
     	}
-    	facesView.setViewBinding(newViewBinding);
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("zoomOut - newViewBinding = " + newViewBinding);
+		facesView.setViewBinding(newViewBinding);
 
     	Bean parentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 		ActionUtil.redirect(facesView, parentBean);

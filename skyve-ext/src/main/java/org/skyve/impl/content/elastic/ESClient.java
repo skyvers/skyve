@@ -581,8 +581,8 @@ public class ESClient extends AbstractContentManager {
 											.addHighlightedField(META_TITLE)
 											.addHighlightedField(META_KEYWORDS)
 											.addHighlightedField(META_AUTHOR)
-											.setHighlighterPreTags("<strong>")
-											.setHighlighterPostTags("</strong>")
+											.setHighlighterPreTags("<span class=\"highlight\">")
+											.setHighlighterPostTags("</span>")
 											.addFields(BEAN_CUSTOMER_NAME,
 														BEAN_MODULE_KEY,
 														BEAN_DOCUMENT_KEY,

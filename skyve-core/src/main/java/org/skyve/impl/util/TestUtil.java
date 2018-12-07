@@ -86,7 +86,7 @@ public class TestUtil {
 
 	/**
 	 * Update an attribute on the given bean with a random value. Note: this method will
-	 * not make use of any {@link DataMap} annotations present on the bean FactoryExtension. Please use
+	 * not make use of any {@link DataMap} annotations present on the bean Factory. Please use
 	 * {@link #updateAttribute(Module, Document, PersistentBean, Attribute)} instead.
 	 * 
 	 * @param bean The bean containing the to update
@@ -409,7 +409,7 @@ public class TestUtil {
 				return StringUtils.substringBetween(result, "^", "$");
 			}
 			return result;
-		} catch (@SuppressWarnings("unused") Exception e) {
+		} catch (Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
@@ -451,8 +451,7 @@ public class TestUtil {
 					fileName = DATA_MAP_CACHE.get(key);
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
-					String className = String.format("modules.%1$s.%2$s.%2$sFactoryExtension", module.getName(),
-							document.getName());
+					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
@@ -480,7 +479,7 @@ public class TestUtil {
 								}
 							}
 						}
-					} catch (@SuppressWarnings("unused") Exception e) {
+					} catch (Exception e) {
 						// couldn't find the extension file on the classpath
 					}	
 				}

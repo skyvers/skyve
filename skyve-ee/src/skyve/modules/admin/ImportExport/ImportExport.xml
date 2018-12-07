@@ -31,6 +31,10 @@
 			<displayName>File Absolute Path</displayName>
 			<length>500</length>
 		</text>
+		<text name="importFileName">
+			<displayName>Imported File</displayName>
+			<length>200</length>
+		</text>
 		<text name="exportFileAbsolutePath">
 			<displayName>File Absolute Path</displayName>
 			<length>500</length>

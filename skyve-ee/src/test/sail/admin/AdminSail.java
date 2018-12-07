@@ -9,7 +9,7 @@ import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
 public class AdminSail extends PrimeFacesTest {
-	private String pathToChromeDriver = "C:/Users/RBB/chromedriver.exe";
+	private String pathToChromeDriver = "/Users/mike/chromedriver";
 //	private String pathToFirefoxDriver = "/usr/local/bin/geckodriver";
 	
 	@Before
@@ -98,27 +98,28 @@ public class AdminSail extends PrimeFacesTest {
 	protected void testMenuContacts() throws Exception {
 		trace("List for default query of [admin.Contact]");
 		get("?a=l&m=admin&q=Contact");
+		trace("New row on list grid [admin.Contact] (s0)");
 		listGridButton("s0", "s0:s8", false);
 		trace("set name (s9) if it exists and is not disabled");
-		text("s9", "In placerat interdum vulputate. In id nisl elit. Suspendisse varius sit amet lorem vitae efficitur. Aenean ut odio hendrerit, consequat orci a, ultrices massa.");
+		text("s9", "Mauris sagittis. Nulla risus libero, pharetra ut nisi luctus, commodo vestibulum velit.");
 		trace("set contactType (s16) if it exists and is not disabled");
-		selectOne("s16", 1);
+		selectOne("s16", 2);
 		trace("set email1 (s24) if it exists and is not disabled");
-		text("s24", "EMRCZHPWQONGNEGTJCZGSNFBYLZMSJPZBIITQHUFEREIKVKMBEZDRZRNAGSXTWGKLTKBZJGXTIHREJBZRDZOLCUAJLKNPPNCQVNOTHPHPEGZVGAHTQYFCPWQESWTGYQQVJOWFHBWGIIBVJXRXUYOEHYZCNJSJNMGANBBOAEZSDIFAVPMTCXZGSNVVDWRIGGQWZVWRORTZJHOAEQEUREMSOQOQYDPUNYJVBELBVUMUNRYQPFPUOULBBKDG@STCFXGZSNSIEBUUPMEUTWZNLNUQZPJWYNSNWRYUGBEQSORQYGYKGWOHBWSNEVQHARSHXADWBQXLNABCTEOLKBXDRQLZCTUCIXNNVCWAXNYMKQORGGWUKOHCIBKVACIRFUOZCTIGCZBAMRFRYQKIYAGVTBSDLEFMPRWBCDSKDAKFOKFZVTSIPKVDZMWKRTWBJMGGFUWESJCGWEXAUBKWUBEGQXPCRGDZBXOUJVUCVYEJDPZWQSUSMHNY.BH");
+		text("s24", "LWLEFECWSINZUDSCHUTISTRLIYXWITZBCAOFKTRRLZEMZSLFWKVVQQIGRVFZSUMLZTFAYFIQSZEBMJRAZUNBRGYFVSVPVVOMCNGDIENLFSESWWMYRUWLVIQWTWTJJQRAAOEFQGOUFMMKQJLNNBTAWNEFAWCZENVHYIJLALFZONDUTKXKXOZSYTGLYNNFCKYBXGOYJQUOELMMMTGWENXBNZYXANQYPWKDGVCPLGUQIQSDJZTGHNABKBNEO@AXVEUWEHUFBAQYWMFUFTZKYSTDHHYLMNORWTZGNIPTZMYFHLARSASHKJYJKCZNMTJJHGEFQVHUQKWHXKXTIQLTQEXUQCSPCIODBRGQKYJAMSLBWUJJSDAJQJVCUXPEUFFPXDQLADBXLUARQQIWBKMSLPTOKWJNTGXXLMETUDYJYBNMUZFTZGWRCWWHYQJUXDEYWSZAPIOPOTAQLWGAMHKUCWVUTFDSOYVZDDPVEYLFSUOPPCYXMUSBW.SK");
 		trace("set mobile (s31) if it exists and is not disabled");
-		text("s31", "0490 571 461");
+		text("s31", "0453 580 611");
 		trace("click [save] (s50) if it exists and is not disabled");
 		button("s50", true, false);
 		trace("Test Success");
 		verifySuccess();
 		trace("set name (s9) if it exists and is not disabled");
-		text("s9", "Vivamus porttitor, metus vitae lobortis mattis, libero metus tincidunt velit, nec dapibus ipsum arcu vel odio.Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+		text("s9", "Ut nec bibendum elit, vitae malesuada massa. Aenean ut odio hendrerit, consequat orci a, ultrices massa.  Nunc facilisis velit ut tempor vestibulum.");
 		trace("set contactType (s16) if it exists and is not disabled");
-		selectOne("s16", 2);
+		selectOne("s16", 1);
 		trace("set email1 (s24) if it exists and is not disabled");
-		text("s24", "WNCESGOBLHOMRAIEVNOFBWUZQDXUVAXOGWTVTZMDGGTYBSNXYROHHHTCBFQPNFDNMNAFSAJGBCDEHVDLPEKZMGOMAKVHSFVBHNXJNHHWFXNLACMXENAMGWKAOEUIETQNONZQUWXEUIXNINYNPHKSKXTOWDTPIIHJMSVLQTKURPLRUFPRODDDZISAZBWMMXODIGMHJRZWOBQQYHHWNNUVYJFGKPMUPZBODQNXSCKBLQQTZWQYLBHRNPBNH@YUJUSTBWSWOZQYKERBPPRNTCTVEROUCJTLLOSNGUQLCBRMPLGRSDMZTNANCYIYABOUUDNWAUDLLTAVHVLUOFDUGRBANEQPHMAXSUVZRPENGLGNFFUNVDUYPITOIDXCGFYHMYRFGNRNZYVKRMKNZBBZTNIEPOVZCXASVYAMFAODUNWCFKATZYVQYSUZNHBJSLGZDMMDMBEILMTDQRHVECFWZRDFLZCJYZINFFIAMDRGMKMPIKJIVXOAH.KE");
+		text("s24", "LRUJFRUQKPMRNYAKMUCCZKTDSFFNUWNIUJJDKIQIWQHMKBDCFFBUVNLUCDRLVKSOONGEZJMUIOQBANXPDGJRVCNLKXQEZHJIDTXPRGVKWUBFRQENPMWFCUNUIXFQVEOFLFEWXIGVHMQFIZUHHAXOYZYMVRFTMQLNVYNUYGHXHAQJRDTOKQUQDLLBHSXGZCIAFETDCMRVQCACJADACKMWDZYMCTRUPKTOSAUCDNQQUYJASKUJWKRTVQDNZ@UFCNFMNGGWHHUPVQQFNJQYPOTACJYLRGZQXYYAWQPXYZGDJPYINNOCMLUODIJVETFGLDZSCTACHGXZWVGKGDVMIQTOEDGEIIJGWWWJUYJRCGXPYWSCROIFWLKJHPVWAPMTIHBMAWIGUYORAHSCWJZGTPDWLUKLRSMDSRRJNLOAKEXCEWRQTJTDVAETQJARCPYQMRRZMBAJCWGDJVVDBZRMAKDJRSHXAKFAQWGNGZQXXODSYKPBMTODF.PU");
 		trace("set mobile (s31) if it exists and is not disabled");
-		text("s31", "0423 281 356");
+		text("s31", "0465 434 187");
 		trace("click [save] (s50) if it exists and is not disabled");
 		button("s50", true, false);
 		trace("Test Success");

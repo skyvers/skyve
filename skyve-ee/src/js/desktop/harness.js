@@ -405,10 +405,10 @@ var eventData = [
 	showHelp: function(url) {
 		if (url) {} else {
 			if (isc.BizUtil._currentView == isc.ListView.contents) {
-				url = 'http://www.bizhub.com.au/help/list.html';
+				url = 'https://skyvers.github.io/skyve-user-guide/';
 			}
 			else {
-				url = 'http://www.bizhub.com.au/help/list.html';
+				url = 'https://skyvers.github.io/skyve-user-guide/';
 			}
 		}
 		isc.BizUtil.popupFrame(url, "Skyve Help", 1024, 768);

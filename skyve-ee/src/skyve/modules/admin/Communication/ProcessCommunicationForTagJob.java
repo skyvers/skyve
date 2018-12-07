@@ -4,12 +4,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import modules.admin.Tag.TagBizlet;
-import modules.admin.domain.Communication;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.Job;
+
+import modules.admin.Tag.TagBizlet;
+import modules.admin.domain.Communication;
 
 public class ProcessCommunicationForTagJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -78,7 +78,7 @@ public class ProcessCommunicationForTagJob extends Job {
 			log.add("Finished Processing Communication Action for Tagged Items Job at " + new Date());
 
 		} else {
-			throw new Exception("Communication job failed to commence because not valid action type was selected.");
+			throw new Exception("Communication job failed to commence because no valid action type was selected.");
 		}
 	}
 }

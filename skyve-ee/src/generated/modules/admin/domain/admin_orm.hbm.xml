@@ -293,6 +293,7 @@
 		<property name="moduleName" length="100" />
 		<property name="documentName" length="500" />
 		<property name="importFileAbsolutePath" length="500" />
+		<property name="importFileName" length="200" />
 		<property name="exportFileAbsolutePath" length="500" />
 		<property name="advancedMode" />
 		<property name="columnTitlesOnly" />

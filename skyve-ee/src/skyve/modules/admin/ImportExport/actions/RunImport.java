@@ -52,17 +52,23 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					sb.append(" ");
 					if (Boolean.TRUE.equals(bean.getAdvancedMode()) || ImportExportColumnBizlet.ADVANCED.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
+//							Util.LOGGER.info("adding " + col.getBindingExpression());
 							loader.addField(col.getBindingExpression());
 
 							// prepare debug
 							sb.append(col.getBindingExpression()).append("=`").append(col.getBindingExpression()).append("`");
+						} else {
+							loader.addField((String) null);
 						}
 					} else {
 						if (col.getBindingName() != null) {
+//							Util.LOGGER.info("adding " + col.getBindingName());
 							loader.addField(col.getBindingName());
 
 							// prepare debug
 							sb.append(col.getBindingName()).append("=`{").append(col.getBindingName()).append("}`");
+						} else {
+							loader.addField((String) null);
 						}
 					}
 

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Import Export" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
-		<vbox border="true">
+		<vbox border="true" borderTitle="Select Mode">
 			<form>
+				<column responsiveWidth="2" />
 				<column />
 				<column />
 				<row>
@@ -16,8 +17,9 @@
 				</row>
 			</form>
 		</vbox>
-		<vbox border="true">
+		<vbox border="true" borderTitle="Configure Options">
 			<form>
+				<column responsiveWidth="2" />
 				<column />
 				<column />
 				<row>
@@ -59,8 +61,9 @@
 				</row>
 			</form>
 			<form visible="showExport">
+				<column responsiveWidth="2" />
 				<column />
-				<column />			
+				<column />		
 				<row>
 					<item>
 						<spacer></spacer>
@@ -71,8 +74,17 @@
 				</row>
 			</form>
 			<form invisible="showExport">
+				<column responsiveWidth="2" />
 				<column />
-				<column />			
+				<column />		
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+					</item>
+				</row>
 				<row>
 					<item>
 						<spacer></spacer>
@@ -100,7 +112,7 @@
 			</item>
 		</row>
 	</form>
-	<vbox invisible="showExport">
+	<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
 		<dataGrid binding="importExportColumns" invisible="showAdvancedBindings" showEdit="false">
 			<boundColumn binding="columnName" />
 			<boundColumn binding="bindingName" />
@@ -110,7 +122,7 @@
 			<boundColumn binding="bindingExpression" />
 		</dataGrid>
 	</vbox>
-	<vbox visible="showExport">
+	<vbox visible="showExport" border="true" borderTitle="Configure Export Columns">
 		<dataGrid binding="importExportColumns" invisible="showAdvancedBindings" showEdit="false">
 			<boundColumn binding="bindingName" />
 			<boundColumn binding="columnName" />

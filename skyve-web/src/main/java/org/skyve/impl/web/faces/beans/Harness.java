@@ -12,11 +12,8 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
@@ -161,32 +158,6 @@ public abstract class Harness extends Localisable {
 			sb.append("css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
 			cssRelativeFileNameUrl = sb.toString();
 		}
-	}
-	
-	public static MetaDataQueryDefinition deriveDocumentQuery(Customer customer,
-																Module module,
-																MenuItem item,
-																String queryName,
-																String documentName) {
-        MetaDataQueryDefinition query = null;
-		if (queryName != null) {
-            query = module.getMetaDataQuery(queryName);
-            if ((query == null) || (query.getName() == null)) {
-                MetaDataException me = new MetaDataException("The target query " + queryName + " for menu action " +
-                                                                item.getName() + " is invalid in module " + module.getName());
-                throw me;
-            }
-        }
-        else {
-            query = module.getDocumentDefaultQuery(customer, documentName);
-            if ((query == null) || (query.getName() == null)) {
-                MetaDataException me = new MetaDataException("The target document " + documentName + " for menu action " +
-                                                                item.getName() + " has no default query in module " + module.getName());
-                throw me;
-            }
-        }
-
-        return query;
 	}
 	
 	@SuppressWarnings("static-method")

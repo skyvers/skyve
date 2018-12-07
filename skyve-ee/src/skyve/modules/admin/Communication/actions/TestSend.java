@@ -2,13 +2,6 @@ package modules.admin.Communication.actions;
 
 import java.util.List;
 
-import modules.ModulesUtil;
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Tag.TagBizlet;
-import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.ActionType;
-import modules.admin.domain.Contact;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -16,15 +9,17 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-public class TestSend implements ServerSideAction<Communication> {
-	/**
-	 * For Serialization
-	 */
-	private static final long serialVersionUID = 2886341074753936987L;
+import modules.ModulesUtil;
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Tag.TagBizlet;
+import modules.admin.domain.Communication;
+import modules.admin.domain.Communication.ActionType;
+import modules.admin.domain.Contact;
 
-	/**
-	 * Kick off the annual returns job.
-	 */
+public class TestSend implements ServerSideAction<Communication> {
+
+	private static final long serialVersionUID = 39012560771532168L;
+
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

@@ -173,7 +173,7 @@ public final class ComparisonJSONManipulator {
 						propertyWidget.setBinding(propertyName);
 					}
 					
-					SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, propertyWidget);
+					SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, propertyWidget, true);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
 					String editorType = field.getEditorType();
@@ -185,7 +185,7 @@ public final class ComparisonJSONManipulator {
 						item.put(LENGTH_KEY, length);
 		            }
 		            if ((attribute != null) && DomainType.constant.equals(attribute.getDomainType())) {
-			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(user, nodeDocument, attribute);
+			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(user, nodeDocument, attribute, true);
 			            if (valueMap != null) {
 							item.put(VALUE_MAP_KEY, valueMap);
 			            }

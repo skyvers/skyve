@@ -272,7 +272,7 @@ public class DoctorUtil {
 					if(AttributeType.enumeration.equals(attribute.getAttributeType())
 							|| DomainType.constant.equals(attribute.getDomainType())){
 						try {
-							for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null) ){
+							for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null, false) ){
 								StringBuilder sb = new StringBuilder();
 								sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
 								valueList.getItems().add(sb.toString());

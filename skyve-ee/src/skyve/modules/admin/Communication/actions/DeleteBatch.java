@@ -2,8 +2,6 @@ package modules.admin.Communication.actions;
 
 import java.io.File;
 
-import modules.admin.domain.Communication;
-
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -11,7 +9,10 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Communication;
+
 public class DeleteBatch implements ServerSideAction<Communication> {
+
 	private static final long serialVersionUID = 5306067916641877356L;
 
 	@Override
@@ -26,7 +27,8 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 			FileUtil.delete(backupDir);
 		}
 
-		bean.setSelectedBatchTimestampFolderName(null); // deselect the deleted backup
+		// deselect the deleted backup
+		bean.setSelectedBatchTimestampFolderName(null);
 
 		return new ServerSideActionResult<>(bean);
 	}

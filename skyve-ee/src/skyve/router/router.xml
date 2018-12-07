@@ -7,40 +7,40 @@
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
 	<uxui name="external">
-		<route outcome="/external/list.xhtml">
+		<route outcome="/admin/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/external/edit.xhtml">
+		<route outcome="/admin/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/external/calendar.xhtml">
+		<route outcome="/admin/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/external/map.xhtml">
+		<route outcome="/admin/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/external/tree.xhtml">
+		<route outcome="/admin/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/external/home.xhtml" />
+		<route outcome="/admin/home.xhtml" />
 	</uxui>
 	<uxui name="tablet">
-		<route outcome="/external/list.xhtml">
+		<route outcome="/admin/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/external/edit.xhtml">
+		<route outcome="/admin/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/external/calendar.xhtml">
+		<route outcome="/admin/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/external/map.xhtml">
+		<route outcome="/admin/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/external/tree.xhtml">
+		<route outcome="/admin/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/external/home.xhtml" />
+		<route outcome="/admin/home.xhtml" />
 	</uxui>
 	<uxui name="phone">
 		<route outcome="/whosinIntegrate/inout.xhtml">

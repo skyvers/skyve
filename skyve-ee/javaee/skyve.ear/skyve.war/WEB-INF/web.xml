@@ -184,6 +184,10 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>PrimeInitialiseServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>MapServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
@@ -501,6 +505,15 @@
 	<servlet-mapping>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 		<url-pattern>/smartgen</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>PrimeInitialiseServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.prime.InitialiseServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrimeInitialiseServlet</servlet-name>
+		<url-pattern>/primeinit</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

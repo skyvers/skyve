@@ -91,5 +91,51 @@
 				<column binding="text" />
 			</columns>
 		</query>
+		<query name="qExpressionQuery" documentName="AllAttributesPersistent">
+			<description>Test qExpressionQueryProjected</description>
+			<columns>
+				<column displayName="Projected Unsorted" editable="false" filterable="false">
+					<name>pu</name>
+					<expression>
+						<![CDATA[
+							pu
+						]]>
+					</expression>
+				</column>
+				<column displayName="Not Projected Unsorted" editable="false" filterable="false">
+					<name>npu</name>
+					<projected>false</projected>
+					<expression>
+						<![CDATA[
+							npu
+						]]>
+					</expression>
+				</column>
+				<column displayName="Projected Sorted" editable="false" filterable="false" sortOrder="ascending">
+					<name>ps</name>
+					<expression>
+						<![CDATA[
+							ps
+						]]>
+					</expression>
+				</column>
+				<column displayName="Not Projected Sorted" editable="false" filterable="false" sortOrder="descending">
+					<name>nps</name>
+					<projected>false</projected>
+					<expression>
+						<![CDATA[
+							nps
+						]]>
+					</expression>
+				</column>
+			</columns>
+		</query>
+		<query name="qAssociations" documentName="AllAttributesPersistent">
+			<description>Test Associations and association of association work</description>
+			<columns>
+				<column binding="aggregatedAssociation" displayName="aggregatedAssociation" />
+				<column binding="aggregatedAssociation.aggregatedAssociation" displayName="aggregatedAssociation.aggregatedAssociation" />
+			</columns>
+		</query>
 	</queries>
 </module>

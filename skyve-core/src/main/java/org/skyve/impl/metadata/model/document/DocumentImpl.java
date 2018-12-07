@@ -369,17 +369,18 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		return AbstractRepository.get().getBizlet(customer, this);
+		return AbstractRepository.get().getBizlet(customer, this, true);
 	}
 
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,
-																T owningBean) {
+																T owningBean,
+																boolean runtime) {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
-			Bizlet<T> bizlet = getBizlet(customer);
+			Bizlet<T> bizlet = AbstractRepository.get().getBizlet(customer, this, runtime);
 			try {
 				if (DomainType.constant.equals(domainType)) {
 					result = customer.getConstantDomainValues(bizlet, getName(), attribute);

@@ -69,6 +69,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				}
 			} 
 			Files.copy(file.getInputStream(), Paths.get(importFile.getAbsolutePath()));
+			bean.setImportFileName(file.getFileName());
 			bean.setImportFileAbsolutePath(importFile.getAbsolutePath());				
 
 			// load the columns from the file
@@ -84,26 +85,27 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 					String columnName = loader.getStringFieldValue(i, true);
 					if (columnName == null || "".equals(columnName.trim())) {
 						moreCells = false;
-					} else {
-						
-						//create a new import export column config row for each column in the spreadsheet 
-						ImportExportColumn newCol = ImportExportColumn.newInstance();
-						newCol.setParent(bean);
-						bean.getImportExportColumns().add(newCol);
-						if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
-							newCol.setColumnName(columnName);
-							
-							//and guess a binding
-							for(Attribute a: document.getAttributes()) {
-								if(a.getDisplayName().toLowerCase().equals(columnName.toLowerCase())) {
-									newCol.setBindingName(a.getName());
-									break;
-								}
-							}
-						} else {
-							newCol.setColumnName(POISheetLoader.getPOIWorksheetColumnName(i));
-						}
+						break;
 					}
+
+					// create a new import export column config row for each column in the spreadsheet
+					ImportExportColumn newCol = ImportExportColumn.newInstance();
+					newCol.setParent(bean);
+					bean.getImportExportColumns().add(newCol);
+					if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
+						newCol.setColumnName(columnName);
+						
+						// and guess a binding
+						for (Attribute a : document.getAttributes()) {
+							if (a.getDisplayName().toLowerCase().equals(columnName.toLowerCase())) {
+								newCol.setBindingName(a.getName());
+								break;
+							}
+						}
+					} else {
+						newCol.setColumnName(POISheetLoader.getPOIWorksheetColumnName(i));
+					}
+
 					i++;
 				}
 			}
@@ -111,7 +113,10 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 			//construct a result message
 			StringBuilder sb = new StringBuilder();
 			if(i>0) {
-				sb.append("Successfully uploaded ").append(i).append(" rows");
+				sb.append("Successfully loaded ").append(i).append(" column")
+						.append(i != 1 ? "s" : "")
+						.append(". Configure each column title you wish to import with an appropriate "
+								+ "binding then click the Import Data button.");
 			} else {
 				sb.append("No rows uploaded, try again.");
 			}

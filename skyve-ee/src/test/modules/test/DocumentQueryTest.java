@@ -3,11 +3,13 @@ package modules.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 
+import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class DocumentQueryTest extends AbstractSkyveTest {
@@ -218,5 +220,33 @@ public class DocumentQueryTest extends AbstractSkyveTest {
 		CORE.getUser().getAttributes().put("TEST", "ICAL");
 		Assert.assertEquals(1, m.getMetaDataQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null)
 				.projectedResults().size());
+	}
+	
+	@Test
+	public void testExpressionQuery() throws Exception {
+		DocumentQuery q = m.getMetaDataQuery("qExpressionQuery").constructDocumentQuery(null, null);
+		String qs = ((AbstractQuery) q).toQueryString();
+		
+		Assert.assertTrue("Query should be ordered by text asc and desc: " + qs,
+							qs.contains("ps asc") && qs.contains("nps desc"));
+
+		q = m.getMetaDataQuery("qExpressionQuery").constructDocumentQuery(AggregateFunction.Sum, null);
+		qs = ((AbstractQuery) q).toQueryString();
+		Assert.assertFalse("Aggregate Query should not be ordered by text asc and desc: " + qs,
+							qs.contains("ps asc") && qs.contains("nps desc"));
+	}
+
+	@Test
+	public void testAssociations() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test3 = Util.constructRandomInstance(u, m, aapd, 1);
+		test2.setAggregatedAssociation(test3);
+		test1.setAggregatedAssociation(test2);
+		test1 = p.save(test1);
+		
+		Bean result =  m.getMetaDataQuery("qAssociations").
+							constructDocumentQuery(null, null).
+							projectedResult();
 	}
 }
