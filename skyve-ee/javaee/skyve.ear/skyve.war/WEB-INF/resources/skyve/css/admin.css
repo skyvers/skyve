@@ -24,11 +24,11 @@
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 }
-
+/* These three selectors are a bit broad I think.
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
 	border: none;
 }
-
+*/
 @media (max-width: 767px) {
 	.skin-blue .main-header .navbar .dropdown-menu li a {
 	    color: inherit;
