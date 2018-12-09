@@ -98,6 +98,19 @@ public class DocumentCreator extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"Document Creator",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof DocumentCreator) && 
 					this.getBizId().equals(((DocumentCreator) o).getBizId()));

@@ -337,38 +337,43 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			result.setParentDatabaseIndex(parent.getDatabaseIndex());
 		}
 
+		String bizKeyExpression = null;
+		String bizKeyCode = null;
+		if (bizKey != null) {
+			bizKeyExpression = bizKey.getExpression();
+			bizKeyCode = bizKey.getCode();
+		}
+
 		Persistent resultPersistent = result.getPersistent();
 		if (resultPersistent != null) {
 			if (bizKey == null) {
 				throw new MetaDataException(metaDataName + " : The document [bizKey] is required for a persistent or mapped document");
 			}
-
-			String expression = bizKey.getExpression();
-			String code = bizKey.getCode();
-			if (code != null) {
-				result.setBizKeyMethodCode(code);
-			}
-			else if (expression != null) {
-				StringBuilder sb = new StringBuilder(128);
-				sb.append("\t\ttry {\n");
-				sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),\n");
-				sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(expression).append("\",\n");
-				sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
-				sb.append("\t\t}\n");
-				sb.append("\t\tcatch (Exception e) {\n");
-				sb.append("\t\t\treturn \"Unknown\";\n");
-				sb.append("\t\t}");
-				result.setBizKeyMethodCode(sb.toString());
-				result.setBizKeyExpression(expression);
-			}
-			else {
+			if ((bizKeyCode == null) && (bizKeyExpression == null)) {
 				throw new MetaDataException(metaDataName + " : The document [bizKey] requires either some code or an expression defined.");
 			}
 		}
-
-		if ((resultPersistent == null) && (result.getBizKeyMethodCode() != null)) {
-			throw new MetaDataException(metaDataName + " : The document [bizKey] is NOT required for a transient document");
+		
+		if (bizKeyCode != null) {
+			result.setBizKeyMethodCode(bizKeyCode);
 		}
+		else if (bizKeyExpression != null) {
+			StringBuilder sb = new StringBuilder(128);
+			sb.append("\t\ttry {\n");
+			sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),\n");
+			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(bizKeyExpression).append("\",\n");
+			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
+			sb.append("\t\t}\n");
+			sb.append("\t\tcatch (Exception e) {\n");
+			sb.append("\t\t\treturn \"Unknown\";\n");
+			sb.append("\t\t}");
+			result.setBizKeyMethodCode(sb.toString());
+			result.setBizKeyExpression(bizKeyExpression);
+		}
+		else {
+			result.setBizKeyMethodCode("\t\treturn toString();\n");
+		}
+
 		if ((resultPersistent == null) && java.lang.Boolean.TRUE.equals(result.getParentDatabaseIndex())) {
 			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
 		}

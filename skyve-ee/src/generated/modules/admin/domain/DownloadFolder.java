@@ -60,6 +60,13 @@ public class DownloadFolder extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof DownloadFolder) && 
 					this.getBizId().equals(((DownloadFolder) o).getBizId()));

@@ -77,6 +77,13 @@ public class UserList extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof UserList) && 
 					this.getBizId().equals(((UserList) o).getBizId()));

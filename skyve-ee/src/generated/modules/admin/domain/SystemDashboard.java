@@ -53,6 +53,13 @@ public class SystemDashboard extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof SystemDashboard) && 
 					this.getBizId().equals(((SystemDashboard) o).getBizId()));

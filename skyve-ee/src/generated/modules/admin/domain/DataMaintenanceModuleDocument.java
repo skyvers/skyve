@@ -84,6 +84,13 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof DataMaintenanceModuleDocument) && 
 					this.getBizId().equals(((DataMaintenanceModuleDocument) o).getBizId()));

@@ -132,6 +132,12 @@ public interface Bean extends Serializable, Comparable<Bean> {
 
 	/**
 	 * 
+	 * @return
+	 */
+	public String getBizKey();
+	
+	/**
+	 * 
 	 * @param conditionName
 	 * @return
 	 */

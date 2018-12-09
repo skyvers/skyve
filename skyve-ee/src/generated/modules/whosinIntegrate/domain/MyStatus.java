@@ -61,6 +61,12 @@ public class MyStatus extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+return "My Status";
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof MyStatus) && 
 					this.getBizId().equals(((MyStatus) o).getBizId()));

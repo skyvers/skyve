@@ -93,6 +93,19 @@ public class UserDashboard extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"User Dashboard",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof UserDashboard) && 
 					this.getBizId().equals(((UserDashboard) o).getBizId()));
