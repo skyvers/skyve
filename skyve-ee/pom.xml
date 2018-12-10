@@ -249,6 +249,7 @@
                         <version>5.6.6</version>
                     </docletArtifact>
                     <doclint>none</doclint>
+					<overview>${basedir}/src/skyve/modules/overview.html</overview>
                     <additionalOptions><additionalOption>-hide org.skyve.*|java.*|org.skyve.impl.* -link http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/ -link http://docs.oracle.com/javase/8/docs/api/</additionalOption></additionalOptions>
                 </configuration>
             </plugin>
