@@ -42,6 +42,7 @@ public class UserImpl implements User {
 	private boolean passwordChangeRequired;
 	private String contactId;
 	private String contactName;
+	private String contactImageId;
 	private String customerName;
 	private String dataGroupId;
 	private String homeModuleName;
@@ -174,6 +175,24 @@ public class UserImpl implements User {
 
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+
+	@Override
+	public String getContactImageId() {
+		return contactImageId;
+	}
+
+	public void setContactImageId(String contactImageId) {
+		this.contactImageId = contactImageId;
+	}
+
+	@Override
+	@SuppressWarnings("boxing")
+	public String getContactImageUrl(int width, int height) {
+		if (contactImageId == null) {
+			return "images/blank.gif";
+		}
+		return String.format("content?_n=%s&_doc=admin.Contact&_b=image&_w=%d&_h=%d", contactImageId, width, height);
 	}
 
 	/**

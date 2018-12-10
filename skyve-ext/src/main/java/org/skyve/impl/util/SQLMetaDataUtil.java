@@ -71,6 +71,7 @@ public class SQLMetaDataUtil {
 						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
+						"c.image as contactImageId, " +
 						"u.dataGroup_id as dataGroupId, " +
 						"u.homeModule, " +
 						"r.roleName ");
@@ -88,6 +89,7 @@ public class SQLMetaDataUtil {
 						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
+						"c.image as contactImageId, " +
 						"u.dataGroup_id as dataGroupId, " +
 						"u.homeModule, " +
 						"r.roleName ");
@@ -113,6 +115,7 @@ public class SQLMetaDataUtil {
 					internalUser.setPasswordChangeRequired(Boolean.TRUE.equals(passwordChangeRequired));
 					internalUser.setContactId((String) userRoleRow.get("contactid"));
 					internalUser.setContactName((String) userRoleRow.get("contactname"));
+					internalUser.setContactImageId((String) userRoleRow.get("contactimageid"));
 					internalUser.setDataGroupId((String) userRoleRow.get("datagroupid"));
 					internalUser.setHomeModuleName((String) userRoleRow.get("homemodule"));
 					firstRow = false;

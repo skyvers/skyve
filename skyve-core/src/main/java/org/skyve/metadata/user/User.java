@@ -57,6 +57,16 @@ public interface User extends NamedMetaData {
 	public String getContactName();
 	
 	/**
+	 * The content ID of the contant image or null if there is no image
+	 */
+	public String getContactImageId();
+	
+	/**
+	 * The URL to use to get a thumbnail of the image from the resource servlet.
+	 */
+	public String getContactImageUrl(int width, int height);
+	
+	/**
 	 * 
 	 * @return
 	 */

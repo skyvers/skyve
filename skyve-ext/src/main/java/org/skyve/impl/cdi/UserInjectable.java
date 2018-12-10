@@ -67,6 +67,16 @@ public class UserInjectable implements User {
 	}
 
 	@Override
+	public String getContactImageId() {
+		return CORE.getUser().getContactImageId();
+	}
+
+	@Override
+	public String getContactImageUrl(int width, int height) {
+		return CORE.getUser().getContactImageUrl(width, height);
+	}
+	
+	@Override
 	public Customer getCustomer() {
 		return CORE.getUser().getCustomer();
 	}
