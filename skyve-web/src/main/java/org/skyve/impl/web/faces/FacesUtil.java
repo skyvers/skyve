@@ -5,10 +5,12 @@ import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.faces.FacesException;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.primefaces.PrimeFaces;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.web.faces.beans.FacesView;
 
 public class FacesUtil {
@@ -25,6 +27,8 @@ public class FacesUtil {
 	public static String USER_AGENT_TYPE_KEY = "skyveUserAgentType";
 	// used to get the responsive form grid out of the view root when required
 	public static String FORM_STYLES_KEY = "skyveFormStyles";
+	
+	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
 	
 	public static FacesView<?> getManagedBean(final String beanName) {
 		FacesContext fc = FacesContext.getCurrentInstance();
@@ -78,5 +82,23 @@ public class FacesUtil {
     
     public static void jsRedirect(String url) {
 		PrimeFaces.current().executeScript(String.format("window.location='%s'", url));
+    }
+    
+    /**
+     * Uses reflection to set the style class of a UIComponent.
+     * This method is required because faces doesn't factor CSS methods in an interface.
+     * 
+     * @param component
+     * @param styleClass
+     */
+    public static void setStyleCLass(UIComponent component, String styleClass) {
+    	if (component != null) {
+    		try {
+    			component.getClass().getMethod(SET_STYLE_CLASS_METHOD_NAME, String.class).invoke(component, styleClass);
+    		}
+    		catch (Exception e) {
+    			throw new DomainException("Cant setStyleClass() on component" + component, e); 
+    		}
+    	}
     }
 }
