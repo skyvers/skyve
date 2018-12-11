@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.List;
+
 import javax.faces.component.UIComponent;
 
 import org.skyve.domain.Bean;
@@ -28,7 +30,19 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
+	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
+		return component;
+	}
+	
+	@Override
 	public UIComponent downloadButton(UIComponent component, Button button, Action action, String moduleName, String documentName) {
+		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
+		return component;
+	}
+	
+	@Override
+	public UIComponent report(UIComponent component, Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -37,6 +51,27 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent reportButton(UIComponent component, Button button, Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
+	}
+	
+	@Override
+	public UIComponent upload(UIComponent component, Action action) {
+		styleUploadButton(component);
+		return component;
+	}
+
+	@Override
+	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+		styleUploadButton(component);
+		return component;
+	}
+	
+	private static void styleUploadButton(UIComponent span) {
+		if (span != null) {
+			List<UIComponent> children = span.getChildren();
+			if (children.size() >= 2) {
+				FacesUtil.setStyleCLass(children.get(1), BUTTON_STYLE_CLASS);
+			}
+		}
 	}
 	
 	@Override
