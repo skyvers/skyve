@@ -45,6 +45,7 @@ import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
@@ -286,6 +287,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								action.getInvisibleConditionName());
 	}
 	
+	@Override
+	public UIComponent uploadButton(UIComponent components, 
+										org.skyve.impl.metadata.view.widget.Button button, 
+										Action action) {
+		if (components != null) {
+			return components;
+		}
+
+		return uploadButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
+								action.getToolTip(), 
+								action.getName(), 
+								button.getPixelWidth(),
+								button.getPixelHeight(),
+								action.getClientValidation(),
+								action.getConfirmationText(),
+								action.getDisabledConditionName(), 
+								action.getInvisibleConditionName());
+	}
+
 	@Override
 	public UIComponent blurb(UIComponent component, 
 								String listVar,
@@ -1805,6 +1826,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent upload(UIComponent component, Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return uploadButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
+								action.getToolTip(), 
+								action.getName(), 
+								null,
+								null,
+								action.getClientValidation(),
+								action.getConfirmationText(),
+								action.getDisabledConditionName(), 
+								action.getInvisibleConditionName());
+	}
+
+	@Override
 	public UIComponent action(UIComponent component,
 								String listBinding,
 								String listVar,
@@ -2343,6 +2382,82 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							disabled,
 							invisible,
 							null);
+	}
+	
+	/**
+	 * Add the buttons and overlay
+	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
+	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *			    </p:overlayPanel>
+	 */
+	private UIComponent uploadButton(String title,
+										String iconStyleClass,
+										String tooltip,
+										String actionName,
+										Integer pixelWidth, 
+										Integer pixelHeight,
+										@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemented
+										String confirmationText,
+										String disabled,
+										String invisible) {
+		// A span as the top item so it can floiw correctly in the action panel
+		HtmlPanelGroup result = panelGroup(false, false, false, invisible, null);
+		List<UIComponent> children = result.getChildren();
+		
+		// Refresh remote command that calls rerender when the overlay panel is closed
+		RemoteCommand refresh = (RemoteCommand) a.createComponent(RemoteCommand.COMPONENT_TYPE);
+		setId(refresh, null);
+		String refreshId = refresh.getId();
+		refresh.setName(refreshId);
+		refresh.setActionExpression(methodExpressionForRerender(actionName, false));
+		refresh.setProcess("@none");
+		refresh.setUpdate(update);
+		children.add(refresh);
+		
+		// Upload button that the overlay panel is attached to
+		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(uploadButton, null);
+		String uploadButtonId = uploadButton.getId();
+		uploadButton.setValue(title);
+		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
+		uploadButton.setTitle(tooltip);
+		uploadButton.setType("button");
+		setSize(uploadButton, null, pixelWidth, null, null, pixelHeight, null, null);
+		setDisabled(uploadButton, disabled);
+		setConfirmation(uploadButton, confirmationText);
+		children.add(uploadButton);
+		
+		// Overlay panel attac hed to the upload button that houses the iframe
+		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+		setId(overlay, null);
+		String overlayId = overlay.getId();
+		overlay.setWidgetVar(overlayId + "Overlay");
+		overlay.setFor(uploadButtonId);
+		overlay.setHideEffect("fade");
+		overlay.setDynamic(false);
+		overlay.setShowCloseIcon(true);
+		overlay.setModal(true);
+		overlay.setStyle("width:50%;height:300px");
+		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
+		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
+
+		// show the overlay, reset the fileUpload.xhtml iframe
+		StringBuilder value = new StringBuilder(64);
+		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
+		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("')).concat('\\')')}");
+		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+
+		children.add(overlay);
+		
+		// <iframe id="s01_iframe" src="" style="width:100%;height:280px;border:none"></iframe>
+		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		iframe.setEscape(false);
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:280px;border:none\"></iframe>", overlayId));
+		setId(iframe, null);
+		overlay.getChildren().add(iframe);
+
+		return result;
 	}
 	
 	protected CommandLink actionLink(String title, 

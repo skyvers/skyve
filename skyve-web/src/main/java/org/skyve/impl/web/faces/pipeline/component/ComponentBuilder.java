@@ -105,6 +105,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												Action action, 
 												String moduleName, 
 												String documentName);
+	public abstract UIComponent uploadButton(UIComponent component, 
+												Button button, 
+												Action action);
 	
 	public abstract UIComponent staticImage(UIComponent component, StaticImage image);
 	public abstract UIComponent dynamicImage(UIComponent component, 
@@ -385,6 +388,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String moduleName,
 											String documentName);
 	
+	public abstract UIComponent upload(UIComponent component, Action action);
+
 	public abstract UIComponent action(UIComponent component, 
 										String listBinding, 
 										String listVar,

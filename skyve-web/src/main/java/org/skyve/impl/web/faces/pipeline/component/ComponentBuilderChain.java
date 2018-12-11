@@ -207,6 +207,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.uploadButton(result, button, action);
+		}
+		return result;
+	}
+
+	@Override
 	public UIComponent staticImage(UIComponent component, StaticImage image) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -581,6 +590,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.download(result, action, moduleName, documentName);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent upload(UIComponent component, Action action) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.upload(result, action);
 		}
 		return result;
 	}
