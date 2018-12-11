@@ -354,13 +354,11 @@
 		<group name="Communication">
 		<list document="Communication" name="Communications">
 			<uxui name="desktop" />
-			<uxui name="tablet" />
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
 			<list document="CommunicationTemplate" name="Communication Templates">
 				<uxui name="desktop" />
-				<uxui name="tablet" />
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
 			</list>
@@ -374,6 +372,7 @@
 			</edit>
 			<list document="DataGroup" name="Data Groups">
 				<uxui name="desktop" />
+				<uxui name="external" />
 				<uxui name="tablet" />
 				<role name="SecurityAdministrator" />
 			</list>
@@ -388,11 +387,11 @@
 			</edit>
 			<edit document="DataMaintenance" name="Data Maintenance">
 				<uxui name="desktop" />
-				<uxui name="tablet" />
 				<role name="DevOps" />
 			</edit>
 			<edit name="Document Creator" document="DocumentCreator">
 				<uxui name="desktop" />
+				<uxui name="external" />
 				<uxui name="tablet" />
 				<role name="DevOps" />
 			</edit>
@@ -403,22 +402,26 @@
 		</group>
 		<list name="Snapshots" document="Snapshot">
 			<uxui name="desktop" />
+			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list name="Tags" document="Tag">
 			<uxui name="desktop" />
+			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list name="Audits" document="Audit">
 			<uxui name="desktop" />
+			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="SecurityAdministrator" />
 			<role name="AuditManager" />
 		</list>
 		<edit document="SystemDashboard" name="System Dashboard">
 			<uxui name="desktop" />
+			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="SecurityAdministrator" />
 		</edit>
