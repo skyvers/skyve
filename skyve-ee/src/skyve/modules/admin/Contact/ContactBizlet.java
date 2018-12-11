@@ -1,28 +1,12 @@
 package modules.admin.Contact;
 
-import org.skyve.domain.Bean;
-import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.web.WebContext;
 
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 
 public class ContactBizlet extends Bizlet<Contact> {
 	private static final long serialVersionUID = 6794069388827546373L;
-
-	@Override
-	public Contact preExecute(ImplicitActionName actionName,
-								Contact bean,
-								Bean parentBean,
-								WebContext webContext)
-	throws Exception {
-		if(ImplicitActionName.Add.equals(actionName) ){
-			//TODO add default image using resource UnknownContact
-		}
-		
-		return bean;
-	}
 
 	public static String bizKey(Contact bean) {
 	  	StringBuilder result = new StringBuilder(64);
