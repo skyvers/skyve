@@ -831,6 +831,19 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{name}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof ReportDesign) && 
 					this.getBizId().equals(((ReportDesign) o).getBizId()));

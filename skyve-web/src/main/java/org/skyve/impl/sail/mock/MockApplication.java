@@ -58,6 +58,7 @@ import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
@@ -186,6 +187,9 @@ public class MockApplication extends Application {
 		}
 		else if (PickList.COMPONENT_TYPE.equals(componentType)) {
 			return new PickList();
+		}
+		else if (RemoteCommand.COMPONENT_TYPE.equals(componentType)) {
+			return new RemoteCommand();
 		}
 		else if (Row.COMPONENT_TYPE.equals(componentType)) {
 			return new Row();

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20181206</version>
+		<version>20181211</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -241,6 +241,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.1</version>
                 <configuration>
+                	<show>private</show>
                     <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
                     <docletArtifact>
                         <groupId>org.umlgraph</groupId>
@@ -248,6 +249,7 @@
                         <version>5.6.6</version>
                     </docletArtifact>
                     <doclint>none</doclint>
+					<overview>${basedir}/src/skyve/modules/overview.html</overview>
                     <additionalOptions><additionalOption>-hide org.skyve.*|java.*|org.skyve.impl.* -link http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/ -link http://docs.oracle.com/javase/8/docs/api/</additionalOption></additionalOptions>
                 </configuration>
             </plugin>

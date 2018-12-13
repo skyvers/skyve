@@ -106,6 +106,13 @@ public class Content extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof Content) && 
 					this.getBizId().equals(((Content) o).getBizId()));

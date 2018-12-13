@@ -87,6 +87,13 @@ public class ChangePassword extends AbstractTransientBean {
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		return toString();
+
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof ChangePassword) && 
 					this.getBizId().equals(((ChangePassword) o).getBizId()));

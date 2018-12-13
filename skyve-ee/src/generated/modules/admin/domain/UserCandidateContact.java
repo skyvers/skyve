@@ -83,6 +83,19 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	}
 
 	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{contact.bizKey}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		return ((o instanceof UserCandidateContact) && 
 					this.getBizId().equals(((UserCandidateContact) o).getBizId()));

@@ -106,6 +106,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+		return component;
+	}
+
+	@Override
 	public UIComponent staticImage(UIComponent component, StaticImage image) {
 		return component;
 	}
@@ -323,6 +328,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+		return component;
+	}
+
+	@Override
+	public UIComponent upload(UIComponent component, Action action) {
 		return component;
 	}
 

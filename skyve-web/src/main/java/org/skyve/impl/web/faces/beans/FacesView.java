@@ -435,6 +435,18 @@ public class FacesView<T extends Bean> extends Harness {
 		return result.toString();
 	}
 	
+	// /skyve/fileUpload.xhtml?_a=<actionName>&_c=<webId>
+	public String getFileUploadUrl(String actionName) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/fileUpload.xhtml?");
+		result.append(AbstractWebContext.ACTION_NAME).append('=').append(actionName);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		return result.toString();
+	}
+	
 	public String getContentUrl(final String binding, final boolean image) {
  		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
  	}

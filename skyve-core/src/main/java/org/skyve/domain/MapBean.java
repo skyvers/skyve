@@ -67,6 +67,11 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
+	public String getBizKey() {
+		return (String) get(Bean.BIZ_KEY);
+	}
+
+	@Override
 	public boolean evaluateCondition(String conditionName) {
 		// TODO we could evaluate conditions here I suppose using bean shell
 		return false;

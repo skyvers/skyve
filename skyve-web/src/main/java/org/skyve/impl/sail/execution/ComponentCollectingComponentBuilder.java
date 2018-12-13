@@ -121,6 +121,26 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
+	public UIComponent upload(UIComponent component, Action action) {
+		if (component != null) {
+			context.put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+	
+	@Override
+	public UIComponent uploadButton(UIComponent component,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action) {
+		if (component != null) {
+			context.put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+	
+	@Override
 	public UIComponent listGrid(UIComponent component,
 									String modelDocumentName,
 									String modelName,

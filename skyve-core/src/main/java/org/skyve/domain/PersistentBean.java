@@ -67,12 +67,6 @@ public interface PersistentBean extends Bean {
 
 	/**
 	 * 
-	 * @return
-	 */
-	public String getBizKey();
-	
-	/**
-	 * 
 	 * @param bizKey
 	 */
 	public void setBizKey(String bizKey);

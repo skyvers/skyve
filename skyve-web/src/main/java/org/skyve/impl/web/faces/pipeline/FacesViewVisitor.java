@@ -626,6 +626,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		else if (ImplicitActionName.Download.equals(name)) {
 			c = cb.downloadButton(null, button, action, module.getName(), document.getName());
 		}
+		else if (ImplicitActionName.Upload.equals(name)) {
+			c = cb.uploadButton(null, button, action);
+		}
 		else {
 			c = cb.actionButton(null, listBinding, listVar, button, action);
 		}
@@ -2069,6 +2072,9 @@ public class FacesViewVisitor extends ViewVisitor {
 																		action,
 																		module.getName(),
 																		document.getName()));
+					}
+					else if (ImplicitActionName.Upload.equals(name)) {
+						toolbarLayout.getChildren().add(cb.upload(null, action));
 					}
 					else {
 						String displayName = action.getDisplayName();
