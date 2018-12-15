@@ -36,4 +36,9 @@
 			]]></description>
 		</memo>	
 	</attributes>
+	<conditions>
+		<condition name="emailConfigured">
+			<expression><![CDATA[modules.admin.Communication.CommunicationUtil.validSMTPHost()]]></expression>
+		</condition>
+</conditions>	
 </document>

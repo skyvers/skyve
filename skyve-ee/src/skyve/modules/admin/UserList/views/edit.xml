@@ -6,17 +6,29 @@
 			<listGrid continueConversation="false" query="qUsers"></listGrid>
 		</tab>
 		<tab title="Invite Users">
+			<component document="Communication" name="_emailNotConfiguredBanner"/>
 			<vbox border="true" borderTitle="User Invitations" percentageWidth="60" shrinkWrap="height">
+				<form>
+					<column/>
+					<row>
+						<item>
+							<blurb>1. To invite users, select which permission group(s) to add them to.</blurb>
+						</item>
+					</row>
+				</form>
 				<vbox percentageHeight="40">
 					<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
 				</vbox>
 				<form>
-					<column />
+					<column/>
 					<row>
 						<item>
-							<label for="userInvitiationEmailList" />
+							<blurb>2. Then enter the email addresses of the new users.</blurb>
 						</item>
 					</row>
+				</form>
+				<form>
+					<column />
 					<row>
 						<item showLabel="false">
 							<textArea binding="userInvitiationEmailList" pixelHeight="200"/>

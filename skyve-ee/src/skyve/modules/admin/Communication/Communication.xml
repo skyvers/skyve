@@ -232,6 +232,9 @@
 				]]>
 			</expression>
 		</condition>
+		<condition name="emailConfigured">
+			<expression><![CDATA[modules.admin.Communication.CommunicationUtil.validSMTPHost()]]></expression>
+		</condition>
 	</conditions>
 	<uniqueConstraints>
 		<constraint scope="customer" description="Ensure no duplication of communication templates" name="UniqueSystemCommunication">

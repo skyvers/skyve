@@ -316,4 +316,23 @@ public class Configuration extends AbstractPersistentBean {
 		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
 		this.allowUserSelfRegistration = allowUserSelfRegistration;
 	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
+	}
 }

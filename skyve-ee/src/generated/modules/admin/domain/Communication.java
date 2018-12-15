@@ -322,7 +322,7 @@ public class Communication extends AbstractPersistentBean {
 	/**
 	 * BCC Me
 	 * <br/>
-	 * Monitor outgoing emails by including me in the Bcc
+	 * Monitor outgoing emails by including yourself in the Bcc
 	 **/
 	private Boolean monitorBcc;
 	/**
@@ -1140,6 +1140,25 @@ public class Communication extends AbstractPersistentBean {
 	 */
 	public boolean isNotBatchesRefreshRequired() {
 		return (! isBatchesRefreshRequired());
+	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
 	}
 
 	/**

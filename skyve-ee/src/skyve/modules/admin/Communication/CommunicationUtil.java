@@ -16,6 +16,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.util.TimeUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
@@ -643,5 +644,9 @@ public class CommunicationUtil {
 		}
 
 		return sb.toString();
+	}
+	
+	public static boolean validSMTPHost() {
+		return !"localhost".equals(UtilImpl.SMTP);
 	}
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_emailNotConfiguredBanner" title="Communication" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<vbox border="true" visible="notEmailConfigured" shrinkWrap="height">
+		<form>
+			<column />
+			<row>
+				<item>
+					<blurb><![CDATA[<font style="color:red;"><b>It looks like you haven't set up a valid email configuration. You may not be able to send emails.</b></font>]]></blurb>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+	</actions>
+	<newParameters />
+</view>
