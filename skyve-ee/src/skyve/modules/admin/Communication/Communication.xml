@@ -60,7 +60,7 @@
 		</text>
 		<boolean name="monitorBcc">
 			<displayName>BCC Me</displayName>
-			<description>Monitor outgoing emails by including me in the Bcc</description>
+			<description>Monitor outgoing emails by including yourself in the Bcc</description>
 		</boolean>
 		<text name="subject">
 			<displayName>Subject (expression)</displayName>

@@ -15,7 +15,7 @@
 					</item>
 					<item>
 						<checkBox binding="system" triState="false" />
-					</item>
+					</item>				
 				</row>
 				<row>
 					<item colspan="3">
@@ -28,7 +28,7 @@
 				</row>
 				<row>
 					<item colspan="3">
-						<textField binding="documentName" disabled="locked" />
+						<combo binding="documentName" disabled="locked" />
 					</item>
 				</row>
 				<row>
@@ -40,56 +40,50 @@
 					</item>
 				</row>
 			</form>
-			<vbox border="true" borderTitle="Results">
-				<form>
+			<hbox border="true" borderTitle="Results" shrinkWrap="height">
+				<form percentageWidth="80">
+					<column percentageWidth="20" />
 					<column />
 					<row>
-						<item showLabel="false">
+						<item>
 							<textArea binding="results" pixelHeight="100" disabled="true" />
 						</item>
 					</row>
 				</form>
-				<form>
-					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<button actionName="GetResults" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="CreateFiles" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="SendNow" pixelWidth="200" />
-						</item>
-					</row>
-				</form>
-			</vbox>
+				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="100">
+					<button actionName="GetResults" pixelWidth="200" />
+					<button actionName="CreateFiles" pixelWidth="200" />
+					<button actionName="SendNow" pixelWidth="200" />
+				</vbox>
+			</hbox>
 			<vbox border="true" borderTitle="Batches">
-				<listGrid model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
-					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
+				<listGrid model="BatchesModel"
+							selectedIdBinding="selectedBatchTimestampFolderName"
+							continueConversation="false" 
+							showAdd="false" 
+							showEdit="false" 
+							showExport="false"
+							showFilter="false" 
+							showRemove="false"
+							showSnap="false" 
+							showSummary="false" 
+							showTag="false" 
+							showZoom="false"
+						postRefresh="batchesRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BatchSelected" />
 					</onSelectedHandlers>
 				</listGrid>
-				<form>
-					<column/>
-					<column/>
-					<row>
-						<item>
-							<button actionName="ZipBatch" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="DeleteBatch" pixelWidth="200" />
-						</item>
-					</row>
-				</form>
+				<hbox horizontalAlignment="right" shrinkWrap="height">
+					<button actionName="ZipBatch" pixelWidth="100" />
+					<button actionName="DeleteBatch" pixelWidth="100" />
+				</hbox>
 			</vbox>
+			
 		</tab>
 		<tab title="Contents">
 			<form border="true" borderTitle="Email">
-				<column />
+				<column percentageWidth="20" />
 				<column />
 				<column />
 				<column />
@@ -110,10 +104,10 @@
 				<row>
 					<item>
 						<textField binding="sendFrom" invisible="notEmailType" />
-					</item>
+					</item>				
 					<item>
-						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false" />
-					</item>
+						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false"/>
+					</item>				
 				</row>
 				<row>
 					<item>
@@ -163,7 +157,7 @@
 				</row>
 				<row>
 					<item showLabel="true" colspan="4">
-						<textArea binding="body" />
+						<html binding="body" pixelHeight="300" pixelWidth="800" />
 					</item>
 				</row>
 				<row>
@@ -173,10 +167,12 @@
 				</row>
 			</form>
 			<form border="true" borderTitle="Options">
-				<column />
-				<column />
-				<column />
-				<column />
+				<column percentageWidth="20"/>
+				<column percentageWidth="10"/>
+				<column/>
+				<column/>
+				<column/>
+				<column/>
 				<row>
 					<item>
 						<checkBox binding="includeCalendar" triState="false" />
@@ -192,7 +188,7 @@
 		</tab>
 		<tab title="Options">
 			<form border="true" borderTitle="Attachments">
-				<column />
+				<column percentageWidth="20" />
 				<column />
 				<column />
 				<column />
@@ -257,30 +253,31 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action clientValidation="true" className="GetResults" displayName="Run Result Check Job" inActionPanel="false" iconStyleClass="fa fa-rotate-right" />
-
-		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fa fa-calculator" />
-
-		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa fa-cogs"
-			confirm="OK to create email files?" />
-
+		<action clientValidation="true" className="GetResults" displayName="Run Result Check Job" inActionPanel="false" iconStyleClass="fa fa-rotate-right"/>
+		
+		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fa fa-calculator"/>
+		
+		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa fa-cogs" confirm="OK to create email files?"/>
+		
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
+		
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa fa-envelope-square" confirm="Send test email to yourself?" />
+		
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fa fa-link" inActionPanel="false"/>
 
-		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa fa-envelope-square"
-			confirm="Send test email to yourself?" />
-
-		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fa fa-link" inActionPanel="false" />
-
-		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" iconStyleClass="fa fa-file-photo-o" />
+		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" 
+		iconStyleClass="fa fa-file-photo-o" />
 
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
-
-		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to delete this batch folder from the server filesystem?" iconStyleClass="fa fa-delete" />
-
-		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
-
+		
+		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" 
+		confirm="Are you sure you want to delete this batch folder from the server filesystem?" 
+		iconStyleClass="fa fa-delete"/>
+		
+		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected" 
+		confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" 
+		iconStyleClass="fa fa-file-zip-o"/>
+		
 	</actions>
 	<newParameters />
 </view>
