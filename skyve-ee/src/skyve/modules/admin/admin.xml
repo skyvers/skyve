@@ -14,6 +14,7 @@
 		<job name="jReindexAttachments" displayName="Reindex all attachments" className="org.skyve.impl.backup.ReindexAttachmentsJob" />
 		<job name="jReindexBeans" displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" />
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
+		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -296,6 +297,7 @@
 				</document>
 				<document name="UserCandidateContact" permission="_____"/>
 				<document name="UserList" permission="_____">
+					<action name="CreateUsers"/>
 					<action name="InviteUsers"/>
 				</document>
 				<document name="UserRole" permission="CRUDC" />

@@ -7,7 +7,7 @@ import org.skyve.web.WebContext;
 import modules.admin.UserList.BulkUserCreationJob;
 import modules.admin.domain.UserList;
 
-public class InviteUsers implements ServerSideAction<UserList> {
+public class CreateUsers implements ServerSideAction<UserList> {
 
 	
 	private static final long serialVersionUID = -4884065778373508731L;
@@ -16,10 +16,12 @@ public class InviteUsers implements ServerSideAction<UserList> {
 	public ServerSideActionResult<UserList> execute(UserList bean, WebContext webContext)
 			throws Exception {
 
-		bean.setBulkCreateWithEmail(Boolean.TRUE);
+		bean.setBulkCreateWithEmail(Boolean.FALSE);
 
 		BulkUserCreationJob.kickoffJob(bean, webContext);
 
 		return new ServerSideActionResult<>(bean);
 	}
+
+
 }

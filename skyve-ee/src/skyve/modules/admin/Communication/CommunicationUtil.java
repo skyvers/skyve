@@ -446,8 +446,10 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Communication kickOffJob(Communication communication) throws Exception {
+	public static Communication kickOffJob(Communication bean) throws Exception {
 
+		Communication communication = bean;
+		
 		String results = GetResults.getResults(communication);
 
 		// save this communication if it has not been saved yet

@@ -35,6 +35,9 @@
 			Provide a list separated by either comma or semicolon.
 			]]></description>
 		</memo>	
+		<boolean name="bulkCreateWithEmail" >
+			<displayName>Bulk create with email</displayName>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="emailConfigured">

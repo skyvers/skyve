@@ -34,6 +34,8 @@ public class UserList extends AbstractTransientBean {
 	public static final String userInvitationGroupsPropertyName = "userInvitationGroups";
 	/** @hidden */
 	public static final String userInvitiationEmailListPropertyName = "userInvitiationEmailList";
+	/** @hidden */
+	public static final String bulkCreateWithEmailPropertyName = "bulkCreateWithEmail";
 
 	/**
 	 * User Invitation Groups
@@ -51,6 +53,10 @@ public class UserList extends AbstractTransientBean {
 			Provide a list separated by either comma or semicolon.
 	 **/
 	private String userInvitiationEmailList;
+	/**
+	 * Bulk create with email
+	 **/
+	private Boolean bulkCreateWithEmail;
 
 	@Override
 	@XmlTransient
@@ -132,5 +138,42 @@ public class UserList extends AbstractTransientBean {
 	public void setUserInvitiationEmailList(String userInvitiationEmailList) {
 		preset(userInvitiationEmailListPropertyName, userInvitiationEmailList);
 		this.userInvitiationEmailList = userInvitiationEmailList;
+	}
+
+	/**
+	 * {@link #bulkCreateWithEmail} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getBulkCreateWithEmail() {
+		return bulkCreateWithEmail;
+	}
+
+	/**
+	 * {@link #bulkCreateWithEmail} mutator.
+	 * @param bulkCreateWithEmail	The new value.
+	 **/
+	@XmlElement
+	public void setBulkCreateWithEmail(Boolean bulkCreateWithEmail) {
+		preset(bulkCreateWithEmailPropertyName, bulkCreateWithEmail);
+		this.bulkCreateWithEmail = bulkCreateWithEmail;
+	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
 	}
 }
