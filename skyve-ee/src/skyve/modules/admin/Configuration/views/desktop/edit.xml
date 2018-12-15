@@ -24,7 +24,7 @@
         </row>
         <row>
             <item>
-                <textArea binding="passwordResetEmailBody"/>
+                <default binding="passwordResetEmailBody"/>
             </item>
         </row>
     </form>
