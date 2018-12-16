@@ -2,10 +2,8 @@ package modules.admin.Communication.actions;
 
 import java.io.File;
 
-import org.skyve.CORE;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
@@ -19,9 +17,8 @@ public class ZipBatch extends DownloadAction<Communication> {
 		
 		bean.setRefreshBatches(Boolean.FALSE);
 		
-		String customerName = CORE.getUser().getCustomerName();
-		String batchPath = Util.getContentDirectory() + "batch_" + customerName + File.separator + bean.getSelectedBatchTimestampFolderName();
-		String zipName = String.format("batch_%s_%s.zip", customerName, bean.getSelectedBatchTimestampFolderName());
+		String batchPath = bean.getBasePath() + File.separator + bean.getSelectedBatchTimestampFolderName();
+		String zipName = FileUtil.constructSafeFilePath("", bean.getSelectedBatchTimestampFolderName() , ".zip", false, bean.getDescription()+ "_");
 		
 		return FileUtil.prepareZipDownload(batchPath, zipName, webContext);
 	}

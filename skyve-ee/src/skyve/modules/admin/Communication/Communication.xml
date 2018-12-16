@@ -120,12 +120,18 @@
 				<value code="email" />
 			</values>
 		</enum>
-		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false">
+		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false" audited="false">
 			<displayName>Selected Batch Timestamp Folder Name</displayName>
 		</id>
-		<boolean name="refreshBatches" persistent="false" trackChanges="false">
+		<boolean name="refreshBatches" persistent="false" trackChanges="false" audited="false">
 			<displayName>Refresh Batches</displayName>
 			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="unTagSuccessful" persistent="false" trackChanges="false" audited="false">
+			<displayName>Untag successful documents</displayName>
+		</boolean>
+		<boolean name="notification" persistent="false" trackChanges="false" audited="false">
+			<displayName>Notify when job is complete</displayName>
 		</boolean>
 
 
@@ -171,7 +177,7 @@
 			</description>
 			<length>500</length>
 		</text>
-		<content name="mailImage" persistent="false">
+		<content name="mailImage" persistent="false" audited="false" trackChanges="false">
 			<displayName>Image</displayName>
 		</content>
 		<association name="template" type="aggregation">
@@ -184,12 +190,23 @@
 			<domain>variant</domain>
 			<documentName>CommunicationTemplate</documentName>
 		</association>
+		
+		<text name="basePath" persistent="false" audited="false" trackChanges="false">
+			<displayName>File Path to batches for this communication</displayName>
+			<length>500</length>
+		</text>
+		<text name="batch" persistent="false" audited="false" trackChanges="false">
+			<displayName>Batch</displayName>
+			<description>The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)</description>
+			<length>14</length>
+		</text>
 
 		<inverseMany name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>
 			<referenceName>communication</referenceName>
 		</inverseMany>
+		
 	</attributes>
 	<conditions>
 		<condition name="saveAction">

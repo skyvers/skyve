@@ -51,11 +51,36 @@
 						</item>
 					</row>
 				</form>
-				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="100">
-					<button actionName="GetResults" pixelWidth="200" />
-					<button actionName="CreateFiles" pixelWidth="200" />
-					<button actionName="SendNow" pixelWidth="200" />
-				</vbox>
+				<form>
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<button actionName="GetResults" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<button actionName="CreateFiles" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<button actionName="SendNow" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="unTagSuccessful" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="notification" triState="false" />
+						</item>
+					</row>
+				</form>
 			</hbox>
 			<vbox border="true" borderTitle="Batches">
 				<listGrid model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
@@ -262,7 +287,7 @@
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
 
 		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to delete this batch folder from the server filesystem?" iconStyleClass="fa fa-delete" />
+			confirm="Are you sure you want to delete this batch folder from the server filesystem?" iconStyleClass="fa fa-trash" />
 
 		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected"
 			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
