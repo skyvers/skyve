@@ -70,11 +70,11 @@
 					</row>
 					<row>
 						<item>
-							<textField binding="actionTag">
-								<onBlurHandlers>
+							<combo binding="actionTag">
+								<onChangedHandlers>
 									<server action="PrepareExplanation" />
-								</onBlurHandlers>
-							</textField>
+								</onChangedHandlers>
+							</combo>
 						</item>
 						<item>
 							<blurb>
@@ -131,11 +131,11 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="uploadDocumentName">
-							<onBlurHandlers>
+						<combo binding="uploadDocumentName">
+							<onChangedHandlers>
 								<server action="UpdateUploadDocument" />
-							</onBlurHandlers>
-						</textField>
+							</onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 				<row>
@@ -234,11 +234,11 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="actionDocumentName">
-							<onBlurHandlers>
+						<combo binding="actionDocumentName">
+							<onChangedHandlers>
 								<server action="UpdateActionDocument" />
-							</onBlurHandlers>
-						</textField>
+							</onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 			</form>
@@ -253,7 +253,7 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="documentCondition" />
+						<combo binding="documentCondition" />
 					</item>
 				</row>
 				<row>
