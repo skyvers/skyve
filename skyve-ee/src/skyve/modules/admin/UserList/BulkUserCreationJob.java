@@ -2,6 +2,7 @@ package modules.admin.UserList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -9,18 +10,19 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.ValidationUtil;
-import org.skyve.impl.web.WebUtil;
 import org.skyve.job.Job;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
+import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.UserList;
 
@@ -41,25 +43,31 @@ public class BulkUserCreationJob extends Job {
 
 		UserList userList = (UserList) getBean();
 
+		log.add("Job to create new users has commenced");
+		
 		List<Contact> validatedContacts = getValidatedContacts(userList);
 		int size = validatedContacts.size();
 		int processed = 1;
+		int created = 0;
 		for (Contact contact : validatedContacts) {
 
-			User newUser = createUserFromContact(contact, userList);
-			log.add("New user " + newUser.getUserName() + " successfully created");
+			User newUser = createUserFromContact(contact, userList, log);
+			if (newUser != null) {
+				created++;
+				if (Boolean.TRUE.equals(userList.getBulkCreateWithEmail())) {
+					try {
+						// send invitation email
+						CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
+								UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
+								UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
+								CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
-			if (Boolean.TRUE.equals(userList.getBulkCreateWithEmail())) {
-				try {
-					// send invitation email
-					CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
-							UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
-							UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
-							CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
-
-					log.add("New user " + newUser.getUserName() + " successfully emailed");
-				} catch (Exception e) {
-					log.add("New user " + newUser.getUserName() + " emailed FAILED");
+						log.add("New user '" + newUser.getUserName() + "' created and emailed ok");
+					} catch (Exception e) {
+						log.add("New user '" + newUser.getUserName() + "' created ok but emailed FAILED");
+					}
+				} else {
+					log.add("New user '" + newUser.getUserName() + "'created ok");
 				}
 			}
 
@@ -67,20 +75,21 @@ public class BulkUserCreationJob extends Job {
 		}
 
 		setPercentComplete(100);
+		log.add("Job to create new users has completed - " + created + " users created");
 	}
 
 	public static void kickoffJob(UserList bean, WebContext webContext) throws Exception {
-		
+
 		// validate that some groups are selected
 		if (bean.getUserInvitationGroups().isEmpty()) {
-			throw new ValidationException(new Message("You must select at least one permission group for invited users."));
+			throw new ValidationException(new Message("You must select at least one permission group for invited users"));
 		}
 
 		if (bean.getUserInvitiationEmailList() == null) {
 			throw new ValidationException(new Message("Enter one or more email addresses, separated by space ( ), comma (,) or semicolon (;)."));
 		}
-		
-		//validate email address before commencing
+
+		// validate email address before commencing
 		@SuppressWarnings("unused")
 		List<Contact> validatedContacts = getValidatedContacts(bean);
 
@@ -142,25 +151,54 @@ public class BulkUserCreationJob extends Job {
 	 * @param bean
 	 * @return the new User (saved)
 	 */
-	public static User createUserFromContact(Contact c, UserList bean) throws Exception {
-		Contact contact = c;
-		contact = CORE.getPersistence().save(contact);
+	public static User createUserFromContact(Contact c, UserList bean, List<String> log) throws Exception {
 
-		final String token = WebUtil.generatePasswordResetToken();
+		// check if user already exists
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+		q.getFilter().addEquals(User.userNamePropertyName, c.getEmail1());
+		q.setMaxResults(1);
 
-		// create a user - not with a generated password
-		User newUser = User.newInstance();
-		newUser.setUserName(contact.getEmail1());
-		newUser.setPassword(EXT.hashPassword(token));
-		newUser.setPasswordExpired(Boolean.TRUE);
-		newUser.setPasswordResetToken(token);
-		newUser.setContact(contact);
+		User found = q.beanResult();
+		if (found != null) {
+			log.add("The user '" + c.getEmail1() + "' already exists - no action will be taken");
+			return null;
+		}
 
-		// assign groups as selected
-		newUser.getGroups().addAll(bean.getUserInvitationGroups());
 
-		newUser = CORE.getPersistence().save(newUser);
+		try {
+			Contact contact = c;
+			contact = CORE.getPersistence().save(contact);
 
-		return newUser;
+			final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
+			// create a user - not with a generated password
+			User newUser = User.newInstance();
+			newUser.setUserName(contact.getEmail1());
+			newUser.setPassword(EXT.hashPassword(token));
+			newUser.setPasswordExpired(Boolean.TRUE);
+			newUser.setPasswordResetToken(token);
+			newUser.setContact(contact);
+
+			// assign groups as selected
+			List<Group> groups = bean.getUserInvitationGroups();
+			for (Group group : groups) {
+				// this job is in its own thread, own persistence, own transaction
+				// and UserList bean is from another persistence that haven’t been fully populagted
+				// so we need to re-retrieve each group
+				String id = group.getBizId();
+				CORE.getPersistence().evictCached(group);
+				group = CORE.getPersistence().retrieve(Group.MODULE_NAME, Group.DOCUMENT_NAME, id, false);
+
+				// now the group can be added to the new user
+				newUser.getGroups().add(group);
+			}
+
+			newUser = CORE.getPersistence().save(newUser);
+			return newUser;
+		} catch (Exception e) {
+			log.add("The user '" + c.getEmail1()+ "' could not be created");
+			return null;
+		}
+
+		
 	}
 }
