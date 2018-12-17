@@ -165,7 +165,9 @@ public class UserList extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
+						.validSMTPHost()));
 	}
 
 	/**

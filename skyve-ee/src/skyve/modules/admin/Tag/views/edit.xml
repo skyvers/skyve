@@ -70,11 +70,7 @@
 					</row>
 					<row>
 						<item>
-							<textField binding="actionTag">
-								<onBlurHandlers>
-									<server action="PrepareExplanation" />
-								</onBlurHandlers>
-							</textField>
+							<lookupDescription descriptionBinding="name" binding="actionTag"/>
 						</item>
 						<item>
 							<blurb>

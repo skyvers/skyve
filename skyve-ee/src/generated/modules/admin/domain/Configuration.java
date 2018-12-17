@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Configuration.ConfigurationExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -178,7 +179,7 @@ public class Configuration extends AbstractPersistentBean {
 		return Configuration.DOCUMENT_NAME;
 	}
 
-	public static Configuration newInstance() {
+	public static ConfigurationExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -324,7 +325,9 @@ public class Configuration extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (this))
+						.validSMTPHost()));
 	}
 
 	/**

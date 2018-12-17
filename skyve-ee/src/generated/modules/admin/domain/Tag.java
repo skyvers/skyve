@@ -834,7 +834,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setUnTagSuccessful(Boolean unTagSuccessful) {
-		preset(unTagSuccessfulPropertyName, unTagSuccessful);
 		this.unTagSuccessful = unTagSuccessful;
 	}
 
@@ -852,7 +851,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setNotification(Boolean notification) {
-		preset(notificationPropertyName, notification);
 		this.notification = notification;
 	}
 

@@ -41,7 +41,12 @@
 	</attributes>
 	<conditions>
 		<condition name="emailConfigured">
-			<expression><![CDATA[modules.admin.Communication.CommunicationUtil.validSMTPHost()]]></expression>
+			<expression>
+				<![CDATA[(
+					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
+						.validSMTPHost())
+				]]>
+			</expression>
 		</condition>
 </conditions>	
 </document>

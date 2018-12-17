@@ -90,6 +90,10 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String refreshBatchesPropertyName = "refreshBatches";
 	/** @hidden */
+	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
+	/** @hidden */
+	public static final String notificationPropertyName = "notification";
+	/** @hidden */
 	public static final String systemPropertyName = "system";
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
@@ -397,6 +401,14 @@ public class Communication extends AbstractPersistentBean {
 	 * Refresh Batches
 	 **/
 	private Boolean refreshBatches = new Boolean(true);
+	/**
+	 * Untag successful documents
+	 **/
+	private Boolean unTagSuccessful;
+	/**
+	 * Notify when job is complete
+	 **/
+	private Boolean notification;
 	/**
 	 * Used for System communications
 	 * <br/>
@@ -937,6 +949,40 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #unTagSuccessful} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getUnTagSuccessful() {
+		return unTagSuccessful;
+	}
+
+	/**
+	 * {@link #unTagSuccessful} mutator.
+	 * @param unTagSuccessful	The new value.
+	 **/
+	@XmlElement
+	public void setUnTagSuccessful(Boolean unTagSuccessful) {
+		this.unTagSuccessful = unTagSuccessful;
+	}
+
+	/**
+	 * {@link #notification} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getNotification() {
+		return notification;
+	}
+
+	/**
+	 * {@link #notification} mutator.
+	 * @param notification	The new value.
+	 **/
+	@XmlElement
+	public void setNotification(Boolean notification) {
+		this.notification = notification;
+	}
+
+	/**
 	 * {@link #system} accessor.
 	 * @return	The value.
 	 **/
@@ -1197,7 +1243,9 @@ public class Communication extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return (modules.admin.Communication.CommunicationUtil.validSMTPHost());
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
+						.validSMTPHost()));
 	}
 
 	/**

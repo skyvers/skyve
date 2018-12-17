@@ -658,14 +658,5 @@ public class CommunicationUtil {
 		}
 
 		return sb.toString();
-	}
-	
-	/**
-	 * Check whether a valid SMTP host has been configured
-	 * 
-	 * @return
-	 */
-	public static boolean validSMTPHost() {
-		return !"localhost".equals(UtilImpl.SMTP);
-	}
+	}	
 }
