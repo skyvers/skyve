@@ -247,7 +247,8 @@ public class SmartClientGenerateUtils {
 		protected TargetMetaData target;
 		
 		@SuppressWarnings("synthetic-access")
-		protected SmartClientAttributeDefinition(Customer customer, 
+		protected SmartClientAttributeDefinition(User user,
+													Customer customer, 
 													Module module,
 													Document document,
 													Locale locale,
@@ -315,7 +316,7 @@ public class SmartClientGenerateUtils {
 							// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
 							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
 							sb.append("',type:'regexp',errorMessage:'");
-							sb.append(processString(validator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(validator.constructMessage(user, title, converter)));
 							sb.append("'}");
 							validation = sb.toString();
 						}
@@ -363,7 +364,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:Date.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
 							}
 							sb.append("type:'dateRange',errorMessage:'");
-							sb.append(processString(dateValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(dateValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -382,13 +383,13 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'floatRange',errorMessage:'");
-							sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(decimalValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							Integer precision = decimalValidator.getPrecision();
 							if (precision != null) {
 								sb.append(",{precision:").append(precision).append(",roundToPrecision:true,type:'floatPrecision',errorMessage:'");
-								sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
+								sb.append(processString(decimalValidator.constructMessage(user, title, converter)));
 								sb.append("'}");
 							}
 							validation = sb.toString();
@@ -407,7 +408,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(integerValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(integerValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -426,7 +427,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(longValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(longValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -801,7 +802,8 @@ public class SmartClientGenerateUtils {
                                             InputWidget widget,
                                             String dataGridBindingOverride,
                                             boolean runtime) {
-            super(customer,
+            super(user,
+        			customer,
                     module, 
                     document, 
                     user.getLocale(),
@@ -1062,7 +1064,8 @@ public class SmartClientGenerateUtils {
 											Document document, 
 											MetaDataQueryColumn column,
 											boolean runtime) {
-			super(customer, 
+			super(user,
+					customer, 
 					module,
 					document,
 					(user == null) ? null : user.getLocale(),
