@@ -39,7 +39,7 @@
 		<filter name="adminAuditUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Communication" table="ADM_Communication" entity-name="adminCommunication">
+	<class name="modules.admin.Communication.CommunicationExtension" table="ADM_Communication" entity-name="adminCommunication">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -106,7 +106,7 @@
 		<filter name="adminCommunicationTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Configuration" table="ADM_Configuration" entity-name="adminConfiguration">
+	<class name="modules.admin.Configuration.ConfigurationExtension" table="ADM_Configuration" entity-name="adminConfiguration">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -440,8 +440,6 @@
 		</property>
 		<property name="actionModuleName" length="500" />
 		<property name="actionDocumentName" length="500" />
-		<property name="unTagSuccessful" />
-		<property name="notification" />
 		<property name="filterColumn" />
 		<property name="documentCondition" length="1000" />
 		<property name="documentAction" length="1000" />

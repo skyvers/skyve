@@ -49,4 +49,15 @@
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
 	</attributes>
+	<conditions>
+		<condition name="emailConfigured">
+			<expression>
+				<![CDATA[(
+					((modules.admin.Configuration.ConfigurationExtension) (this))
+						.validSMTPHost())
+				]]>
+			</expression>
+
+		</condition>
+	</conditions>
 </document>

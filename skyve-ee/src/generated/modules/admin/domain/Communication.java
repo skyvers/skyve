@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Communication.CommunicationExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -89,6 +90,10 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String refreshBatchesPropertyName = "refreshBatches";
 	/** @hidden */
+	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
+	/** @hidden */
+	public static final String notificationPropertyName = "notification";
+	/** @hidden */
 	public static final String systemPropertyName = "system";
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
@@ -106,6 +111,10 @@ public class Communication extends AbstractPersistentBean {
 	public static final String mailImagePropertyName = "mailImage";
 	/** @hidden */
 	public static final String templatePropertyName = "template";
+	/** @hidden */
+	public static final String basePathPropertyName = "basePath";
+	/** @hidden */
+	public static final String batchPropertyName = "batch";
 	/** @hidden */
 	public static final String subscriptionsPropertyName = "subscriptions";
 
@@ -322,7 +331,7 @@ public class Communication extends AbstractPersistentBean {
 	/**
 	 * BCC Me
 	 * <br/>
-	 * Monitor outgoing emails by including me in the Bcc
+	 * Monitor outgoing emails by including yourself in the Bcc
 	 **/
 	private Boolean monitorBcc;
 	/**
@@ -393,6 +402,14 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private Boolean refreshBatches = new Boolean(true);
 	/**
+	 * Untag successful documents
+	 **/
+	private Boolean unTagSuccessful;
+	/**
+	 * Notify when job is complete
+	 **/
+	private Boolean notification;
+	/**
 	 * Used for System communications
 	 * <br/>
 	 * System communications can not be deleted unless the system flag is cleared first.
@@ -447,6 +464,16 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private CommunicationTemplate template = null;
 	/**
+	 * File Path to batches for this communication
+	 **/
+	private String basePath;
+	/**
+	 * Batch
+	 * <br/>
+	 * The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)
+	 **/
+	private String batch;
+	/**
 	 * Subscriptions
 	 **/
 	private List<Subscription> subscriptions = new ArrayList<>();
@@ -463,7 +490,7 @@ public class Communication extends AbstractPersistentBean {
 		return Communication.DOCUMENT_NAME;
 	}
 
-	public static Communication newInstance() {
+	public static CommunicationExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -922,6 +949,40 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #unTagSuccessful} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getUnTagSuccessful() {
+		return unTagSuccessful;
+	}
+
+	/**
+	 * {@link #unTagSuccessful} mutator.
+	 * @param unTagSuccessful	The new value.
+	 **/
+	@XmlElement
+	public void setUnTagSuccessful(Boolean unTagSuccessful) {
+		this.unTagSuccessful = unTagSuccessful;
+	}
+
+	/**
+	 * {@link #notification} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getNotification() {
+		return notification;
+	}
+
+	/**
+	 * {@link #notification} mutator.
+	 * @param notification	The new value.
+	 **/
+	@XmlElement
+	public void setNotification(Boolean notification) {
+		this.notification = notification;
+	}
+
+	/**
 	 * {@link #system} accessor.
 	 * @return	The value.
 	 **/
@@ -1064,7 +1125,6 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setMailImage(String mailImage) {
-		preset(mailImagePropertyName, mailImage);
 		this.mailImage = mailImage;
 	}
 
@@ -1084,6 +1144,40 @@ public class Communication extends AbstractPersistentBean {
 	public void setTemplate(CommunicationTemplate template) {
 		preset(templatePropertyName, template);
 		this.template = template;
+	}
+
+	/**
+	 * {@link #basePath} accessor.
+	 * @return	The value.
+	 **/
+	public String getBasePath() {
+		return basePath;
+	}
+
+	/**
+	 * {@link #basePath} mutator.
+	 * @param basePath	The new value.
+	 **/
+	@XmlElement
+	public void setBasePath(String basePath) {
+		this.basePath = basePath;
+	}
+
+	/**
+	 * {@link #batch} accessor.
+	 * @return	The value.
+	 **/
+	public String getBatch() {
+		return batch;
+	}
+
+	/**
+	 * {@link #batch} mutator.
+	 * @param batch	The new value.
+	 **/
+	@XmlElement
+	public void setBatch(String batch) {
+		this.batch = batch;
 	}
 
 	/**
@@ -1140,6 +1234,27 @@ public class Communication extends AbstractPersistentBean {
 	 */
 	public boolean isNotBatchesRefreshRequired() {
 		return (! isBatchesRefreshRequired());
+	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
+						.validSMTPHost()));
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
 	}
 
 	/**

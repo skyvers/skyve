@@ -17,6 +17,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -101,7 +103,30 @@ public class FileUtil {
 	 */
 	public static String safeFileName(String unsafeName) {
 
-		return unsafeName.replace(',', '_').replace('&', '_').replace('/', '_').replace('\\', '_').replace(" ", "").replace(":", "_").replace("-","_");
+		// suitable for FAT32 - thanks to SharkAlley@Stack Overflow
+		final Pattern PATTERN = Pattern.compile("[%\\.\"\\*/:<>\\?\\\\\\|\\+,\\.;=\\[\\]]");
+
+		final int MAX_LENGTH = 127;
+
+	    StringBuffer sb = new StringBuffer();
+
+	    // Apply the regex
+	    Matcher m = PATTERN.matcher(unsafeName);
+
+	    while (m.find()) {
+
+	        // Convert matched character to percent-encoded.
+	        String replacement = "%"+Integer.toHexString(m.group().charAt(0)).toUpperCase();
+
+	        m.appendReplacement(sb,replacement);
+	    }
+	    m.appendTail(sb);
+
+	    String encoded = sb.toString();
+
+	    // Truncate the string.
+	    int end = Math.min(encoded.length(),MAX_LENGTH);
+	    return encoded.substring(0,end);
 	}
 
 	/**

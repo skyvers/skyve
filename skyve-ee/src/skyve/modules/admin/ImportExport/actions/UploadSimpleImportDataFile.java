@@ -123,7 +123,6 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 			bean.setResults(sb.toString());
 			webContext.growl(MessageSeverity.info, bean.getResults());
 
-			bean = pers.save(bean);
 		}
 		
 		return bean;

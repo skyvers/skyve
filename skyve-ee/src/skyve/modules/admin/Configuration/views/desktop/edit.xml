@@ -9,7 +9,7 @@
             </item>
         </row>
     </form>
-    <component document="Communication" name="_emailNotConfiguredBanner"/>
+	<component document="Communication" name="_emailNotConfiguredBanner"/>    
     <form border="true" borderTitle="Password Reset">
         <column responsiveWidth="4"/>
         <column/>
@@ -25,7 +25,7 @@
         </row>
         <row>
             <item>
-                <textArea binding="passwordResetEmailBody"/>
+                <default binding="passwordResetEmailBody"/>
             </item>
         </row>
     </form>

@@ -6,7 +6,16 @@
 			<listGrid continueConversation="false" query="qUsers"></listGrid>
 		</tab>
 		<tab title="Invite Users">
+			<component document="Communication" name="_emailNotConfiguredBanner" />
 			<vbox border="true" borderTitle="User Invitations" percentageWidth="60" shrinkWrap="height">
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>1. To invite users, select which permission group(s) to add them to.</blurb>
+						</item>
+					</row>
+				</form>
 				<vbox percentageHeight="40">
 					<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
 				</vbox>
@@ -14,17 +23,24 @@
 					<column />
 					<row>
 						<item>
-							<label for="userInvitiationEmailList" />
+							<blurb>2. Then enter the email addresses of the new users.</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item showLabel="false" colspan="2">
+							<textArea binding="userInvitiationEmailList" pixelHeight="200" />
 						</item>
 					</row>
 					<row>
-						<item showLabel="false">
-							<textArea binding="userInvitiationEmailList" pixelHeight="200"/>
+						<item>
+							<button actionName="CreateUsers" pixelWidth="200" />
 						</item>
-					</row>
-					<row>
-						<item align="centre">
-							<button actionName="InviteUsers" pixelWidth="150" />
+						<item>
+							<button actionName="InviteUsers" pixelWidth="200" />
 						</item>
 					</row>
 				</form>
@@ -33,5 +49,6 @@
 	</tabPane>
 	<actions>
 		<action className="InviteUsers" displayName="Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to invite the users?" />
+		<action className="CreateUsers" displayName="Create Users without Email" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to create the users?" />
 	</actions>
 </view>

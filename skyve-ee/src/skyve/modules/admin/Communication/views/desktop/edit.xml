@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<component name="_emailNotConfiguredBanner" />
+	<component name="_emailNotConfiguredBanner"/>
 	<tabPane>
 		<tab title="Manage">
 			<form border="true" borderTitle="Configuration">
@@ -29,7 +29,7 @@
 				</row>
 				<row>
 					<item colspan="3">
-						<textField binding="documentName" disabled="locked" />
+						<combo binding="documentName" disabled="locked" />
 					</item>
 				</row>
 				<row>
@@ -41,11 +41,12 @@
 					</item>
 				</row>
 			</form>
-			<vbox border="true" borderTitle="Results">
-				<form>
+			<hbox border="true" borderTitle="Results" shrinkWrap="height">
+				<form percentageWidth="80">
+					<column percentageWidth="20" />
 					<column />
 					<row>
-						<item showLabel="false">
+						<item>
 							<textArea binding="results" pixelHeight="100" disabled="true" />
 						</item>
 					</row>
@@ -58,9 +59,13 @@
 						<item>
 							<button actionName="GetResults" pixelWidth="200" />
 						</item>
+					</row>
+					<row>
 						<item>
 							<button actionName="CreateFiles" pixelWidth="200" />
 						</item>
+					</row>
+					<row>
 						<item>
 							<button actionName="SendNow" pixelWidth="200" />
 						</item>
@@ -76,7 +81,7 @@
 						</item>
 					</row>
 				</form>
-			</vbox>
+			</hbox>
 			<vbox border="true" borderTitle="Batches">
 				<listGrid model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
 					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
@@ -84,23 +89,16 @@
 						<server action="BatchSelected" />
 					</onSelectedHandlers>
 				</listGrid>
-				<form>
-					<column />
-					<column />
-					<row>
-						<item>
-							<button actionName="ZipBatch" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="DeleteBatch" pixelWidth="200" />
-						</item>
-					</row>
-				</form>
+				<hbox horizontalAlignment="right" shrinkWrap="height">
+					<button actionName="ZipBatch" pixelWidth="100" />
+					<button actionName="DeleteBatch" pixelWidth="100" />
+				</hbox>
 			</vbox>
+
 		</tab>
 		<tab title="Contents">
 			<form border="true" borderTitle="Email">
-				<column />
+				<column percentageWidth="20" />
 				<column />
 				<column />
 				<column />
@@ -174,7 +172,7 @@
 				</row>
 				<row>
 					<item showLabel="true" colspan="4">
-						<textArea binding="body" />
+						<html binding="body" pixelHeight="300" pixelWidth="800" />
 					</item>
 				</row>
 				<row>
@@ -184,6 +182,8 @@
 				</row>
 			</form>
 			<form border="true" borderTitle="Options">
+				<column percentageWidth="20" />
+				<column percentageWidth="10" />
 				<column />
 				<column />
 				<column />
@@ -203,7 +203,7 @@
 		</tab>
 		<tab title="Options">
 			<form border="true" borderTitle="Attachments">
-				<column />
+				<column percentageWidth="20" />
 				<column />
 				<column />
 				<column />
