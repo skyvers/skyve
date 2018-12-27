@@ -897,7 +897,7 @@ public abstract class AbstractDataFileLoader {
 
 							switch (activityType) {
 							case CREATE_ALL:
-								// Util.LOGGER.info("CREATE ALL");
+//								Util.LOGGER.info("CREATE ALL");
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {
@@ -905,7 +905,7 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
-								// Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+//								Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
 								debugFilter.append(field.getAttribute().getDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
@@ -929,7 +929,7 @@ public abstract class AbstractDataFileLoader {
 							default:
 
 								// check for compound binding
-								// Util.LOGGER.info("CREATE FIND");
+//								Util.LOGGER.info("CREATE FIND");
 								if (binding.indexOf('.') > 0) {
 									Util.LOGGER.info("Compound Binding " + binding);
 									lookupBean(result, field, loadValue, what);
