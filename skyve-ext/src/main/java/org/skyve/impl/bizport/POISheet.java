@@ -339,8 +339,10 @@ public final class POISheet implements BizPortSheet {
 			
 			// Set the range values if necessary
 			String[] rangeValues = column.getRangeValues();
-			Object minValue = column.getMinValue(); // TODO use the min and max values
-			Object maxValue = column.getMaxValue();
+			
+			// TODO use the min and max values
+//			Object minValue = column.getMinValue(); 
+//			Object maxValue = column.getMaxValue();
 			
 			if (! parent.ooxmlFormat) { // old school
 				if (rangeValues != null) {
