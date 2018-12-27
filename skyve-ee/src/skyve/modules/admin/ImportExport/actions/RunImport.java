@@ -7,11 +7,14 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -78,12 +81,35 @@ public class RunImport implements ServerSideAction<ImportExport> {
 				List<PersistentBean> beans = loader.beanResults();
 
 				// save them
+				int saveIndex = 1;
+				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
+					saveIndex++;
+				}
+				
 				for (PersistentBean b : beans) {
-					if (loader.isDebugMode()) {
-						Util.LOGGER.info(Binder.formatMessage(CORE.getCustomer(), sb.toString(), b));
+					try {
+						if(b!=null && (b.getBizKey()==null || b.getBizKey().trim().length()==0)) {
+							String msg = "The new record has no value for bizKey at row " + saveIndex + ".";
+							ValidationException ve = new ValidationException(new Message(msg));
+							throw ve;
+						}
+						b = CORE.getPersistence().save(b);
+					} catch (ValidationException ve) {
+						StringBuilder msg = new StringBuilder();
+						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid:");
+						for(Message m: ve.getMessages()) {
+							msg.append("\n").append(m.getErrorMessage());
+						}
+						msg.append("\nCheck upload values and try again.");
+						throw new ValidationException(new Message(msg.toString()));
+					} catch (Exception e) {
+						StringBuilder msg = new StringBuilder();
+						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid.");
+						msg.append("\nCheck that you are uploading to the correct binding and that you have supplied enough information for the results to be saved.");
+						throw new ValidationException(new Message(msg.toString()));
 					}
-					b = CORE.getPersistence().save(b);
 					i++;
+					saveIndex++;
 				}
 			}
 

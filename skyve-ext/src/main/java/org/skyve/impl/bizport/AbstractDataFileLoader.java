@@ -34,8 +34,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 
 /**
  * <pre>
@@ -290,13 +290,13 @@ public abstract class AbstractDataFileLoader {
 				field.setBinding(newBinding);
 				field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
 				if (debugMode) {
-				Util.LOGGER.info("Finalising field for association "+ attr.getDisplayName());
+					Util.LOGGER.info("Finalising field for association " + attr.getDisplayName());
 				}
 			} else {
 				// default
 				field.setAttribute(attr);
 				if (debugMode) {
-				 Util.LOGGER.info("Finalising field for scalar "+ attr.getDisplayName());
+					Util.LOGGER.info("Finalising field for scalar " + attr.getDisplayName());
 				}
 			}
 
@@ -660,8 +660,8 @@ public abstract class AbstractDataFileLoader {
 				Object loadValue = null;
 
 				if (field.getAttribute() == null) {
-					String msg= "The attribute corresponding to " + field.getBinding() + " didn't check out.";
-					Problem prob = new Problem(msg,"Column " + (fieldIndex + 1));
+					String msg = "The attribute corresponding to " + field.getBinding() + " didn't check out.";
+					Problem prob = new Problem(msg, "Column " + (fieldIndex + 1));
 					exception.addError(prob);
 					if (debugMode) {
 						Util.LOGGER.info(msg);
@@ -897,7 +897,7 @@ public abstract class AbstractDataFileLoader {
 
 							switch (activityType) {
 							case CREATE_ALL:
-//								Util.LOGGER.info("CREATE ALL");
+								// Util.LOGGER.info("CREATE ALL");
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {
@@ -905,7 +905,7 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
-//								Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+								// Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
 								debugFilter.append(field.getAttribute().getDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
@@ -929,7 +929,7 @@ public abstract class AbstractDataFileLoader {
 							default:
 
 								// check for compound binding
-//								Util.LOGGER.info("CREATE FIND");
+								// Util.LOGGER.info("CREATE FIND");
 								if (binding.indexOf('.') > 0) {
 									Util.LOGGER.info("Compound Binding " + binding);
 									lookupBean(result, field, loadValue, what);
