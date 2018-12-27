@@ -1447,15 +1447,7 @@ isc.BizButton.addMethods({
 				}
 			}
 			else if (this.type == "D") { // Delete on edit view
-				var me = this;
-				isc.ask('Do you want to delete this ' + this._view._singular + '?',
-							function(value) {
-								if (value) {
-									me._view.deleteInstance(validate);
-								}
-							},
-							{title: 'Delete?'}
-				);
+				this._view.deleteInstance(validate);
 			}
 			else if (this.type == "R") { // Remove on child edit view
 				var bizId = this._view.gather(false).bizId;
@@ -1567,7 +1559,7 @@ isc.BizButton.addMethods({
 			}
             else if (this.type == "V") { // Print this edit view
                 var params = {_mod: this._view._mod,
-                    _doc: this._view._doc}
+                				_doc: this._view._doc}
                 isc.ReportDialog.popupReport(this._view, params);
             }
 			else {

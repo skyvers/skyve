@@ -1,7 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
 
 import org.skyve.domain.Bean;
@@ -10,9 +9,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
-import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -28,8 +25,6 @@ import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ShrinkWrapper;
 import org.skyve.impl.metadata.view.VerticalAlignment;
-import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
@@ -97,14 +92,15 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -114,12 +110,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
-@Deprecated
-class SmartClientViewVisitor extends ViewVisitor {
+public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(100);
-	
-	private User user;
-	private Locale locale;
+
 	private boolean noCreateView;
 	private int variableCounter = 0;
 
@@ -130,18 +123,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
 
-	public SmartClientViewVisitor(User user,
-									Customer customer, 
-									Module module,
-									Document document,
-									View view,
-									boolean noCreateView) {
-		super((CustomerImpl) customer,
-				(ModuleImpl) module, 
-				(DocumentImpl) document,
-				(ViewImpl) view);
-		this.user = user;
-		this.locale = (user == null) ? null : user.getLocale();
+	protected SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+		super(user, module, document, view);
 		this.noCreateView = noCreateView;
 	}
 
@@ -150,7 +133,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() {
+	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
 		UtilImpl.LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
 		if (noCreateView) {
 			containerVariables.push("view");
@@ -169,13 +152,30 @@ class SmartClientViewVisitor extends ViewVisitor {
 		}
 	}
 
+	@Override
+	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
+		containerVariables.pop();
+		if (! noCreateView) {
+			if (ViewType.edit.toString().equals(view.getName())) {
+				code.append("view.addContained(edit);");
+			}
+			else if (ViewType.create.toString().equals(view.getName())) {
+				code.append("view.addContained(create);");
+			}
+		}
+		if (! viewHasAtLeastOneForm) {
+			String var = "v" + variableCounter++;
+			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
+			code.append("view._vm.addMember(").append(var).append(");");
+			code.append("view.addContained(").append(var).append(");\n");
+		}
+	}
+
 	// This is a stack in case we have a tab pane inside a tab pane
 	private Stack<Integer> tabNumbers = new Stack<>();
 	
 	@Override
-	public void visitTabPane(TabPane tabPane, 
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderTabPane(TabPane tabPane) {
 		tabNumbers.push(Integer.valueOf(0));
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizTabPane.create({");
@@ -192,18 +192,14 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedTabPane(TabPane tabPane, 
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedTabPane(TabPane tabPane) {
 		String variable = containerVariables.pop();
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 		tabNumbers.pop();
 	}
 
 	@Override
-	public void visitTab(Tab tab, 
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderTab(String title, String icon16x16Url, Tab tab) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizContainer.create({membersMargin:10,layoutMargin:10});\n");
 
@@ -211,18 +207,13 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedTab(Tab tab, 
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderedTab(String title, String icon16x16Url, Tab tab) {
 		String paneVariable = containerVariables.pop();
 		String tabPaneVariable = containerVariables.peek();
 		Integer tabNumber = tabNumbers.pop();
 		code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber);
-		String icon16 = tab.getIcon16x16RelativeFileName();
-		if (icon16 != null) {
-			code.append("',icon:'../resources?_doc=");
-			code.append(module.getName()).append('.').append(document.getName());
-			code.append("&_n=").append(icon16);
+		if (icon16x16Url != null) {
+			code.append("',icon:'../").append(icon16x16Url);
 			code.append("',title:'");
 		}
 		else {
@@ -232,7 +223,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 			}
 		}
-		code.append(SmartClientGenerateUtils.processString(Util.i18n(tab.getTitle(), locale)));
+		code.append(SmartClientGenerateUtils.processString(title));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 		disabled(tab.getDisabledConditionName(), code);
@@ -242,13 +233,11 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitVBox(VBox vbox, 
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderVBox(String borderTitle, VBox vbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
 		size(vbox, null, code);
-		bordered(vbox, vbox.getPixelPadding(), code);
+		bordered(borderTitle, vbox, vbox.getPixelPadding(), code);
 		box(vbox);
 		VerticalAlignment v = vbox.getVerticalAlignment();
 		if (v != null) {
@@ -291,9 +280,12 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitHBox(HBox hbox, 
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderedVBox(String borderTitle, VBox vbox) {
+		containerVariables.pop();
+	}
+
+	@Override
+	public void renderHBox(String borderTitle, HBox hbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizHBox.create({");
 		size(hbox, null, code);
@@ -329,7 +321,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 				throw new MetaDataException("HBox HoriaontalAlignment of " + h + " is not supported");
 			}
 		}
-		bordered(hbox, hbox.getPixelPadding(), code);
+		bordered(borderTitle, hbox, hbox.getPixelPadding(), code);
 		box(hbox);
 		invisible(hbox.getInvisibleConditionName(), code);
 		removeTrailingComma(code);
@@ -337,6 +329,11 @@ class SmartClientViewVisitor extends ViewVisitor {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 
 		containerVariables.push(variable);
+	}
+
+	@Override
+	public void renderedHBox(String title, HBox bbox) {
+		containerVariables.pop();
 	}
 
 	private void box(Box box) {
@@ -358,9 +355,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 	private VBox borderBox = null;
 	
 	@Override
-	public void visitForm(Form form, 
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderForm(String borderTitle, Form form) {
 		viewHasAtLeastOneForm = true;
 		
 		// If a form is defined with a border, then wrap the form definition in a vbox.
@@ -387,7 +382,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 			borderBox.setPercentageHeight(percentageHeight);
 			borderBox.setPixelHeight(pixelHeight);
 
-			visitVBox(borderBox, parentVisible, parentEnabled);
+			renderVBox(borderTitle, borderBox);
 		}
 		
 		formVariable = "v" + variableCounter++;
@@ -402,6 +397,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 		disabled(form.getDisabledConditionName(), code);
 //code.append("cellBorder:1,");
 		
+		// only size the form if its not in a border VBox
 		if (! Boolean.TRUE.equals(border)) { // false or null
 			size(form, null, code);
 			invisible(form.getInvisibleConditionName(), code);
@@ -417,25 +413,21 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedForm(Form form,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedForm(String borderTitle, Form form) {
 		code.setLength(code.length() - 1); // remove last comma
 		code.append("]);\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(formVariable).append(");\n");
 		formVariable = null;
-		visitedFormRow = false;
+		renderedFormRow = false;
 		
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			visitedVBox(borderBox, parentVisible, parentEnabled);
+			renderedVBox(borderTitle, borderBox);
 			borderBox = null;
 		}
 	}
 
 	@Override
-	public void visitFormColumn(FormColumn column,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderFormColumn(FormColumn column) {
 		Integer percentage = column.getPercentageWidth();
 		Integer pixel = column.getPixelWidth();
 		Integer responsive = column.getResponsiveWidth();
@@ -455,33 +447,29 @@ class SmartClientViewVisitor extends ViewVisitor {
 		}
 	}
 
-	// have we visited a form row in this form yet
-	private boolean visitedFormRow = false;
+	// have we rendered a form row in this form yet
+	private boolean renderedFormRow = false;
 	// have we started a new row
 	private boolean startedNewFormRow = false;
 
 	@Override
-	public void visitFormRow(FormRow row,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderFormRow(FormRow row) {
 		startedNewFormRow = true;
-		if (! visitedFormRow) {
+		if (! renderedFormRow) {
 			code.setLength(code.length() - 1); // remove last column comma
 			code.append("]});");
 			code.append("view._vm.addMember(").append(formVariable).append(");\n");
 			code.append(formVariable).append(".setItems([");
 		}
 
-		visitedFormRow = true;
+		renderedFormRow = true;
 	}
 
-	// The enclosing form item
-	public FormItem visitedItem;
-	
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
-		visitedItem = item;
-		
+	public void renderFormItem(String label,
+								boolean required,
+								String help,
+								FormItem item) {
 		code.append('{');
 		Boolean showLabel = item.getShowLabel();
 		if (showLabel != null) {
@@ -510,9 +498,10 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedFormItem(FormItem item,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedFormItem(String label,
+									boolean required,
+									String help,
+									FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
 			startedNewFormRow = false;
@@ -520,59 +509,92 @@ class SmartClientViewVisitor extends ViewVisitor {
 		else {
 			code.append("startRow:false},");
 		}
-		visitedItem = null;
 	}
 
 	@Override
-	public void visitedFormRow(FormRow row,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedFormRow(FormRow row) {
 		code.setLength(code.length() - 2); // remove "},"
 		code.append(",endRow:true},");
 	}
 
 	@Override
-	public void visitButton(Button button,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		Action action = view.getAction(button.getActionName());
-
+	public void renderFormButton(Action action,
+									String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									Button button) {
 		String buttonCode = generateButton(action.getResourceName(),
 											action.getImplicitName(),
-											action.getDisplayName(),
+											label,
 											action.getClientValidation(),
-											action.getRelativeIconFileName(),
+											iconUrl,
 											action.getIconStyleClass(),
-											action.getToolTip(),
-											action.getConfirmationText(),
+											toolTip,
+											confirmationText,
+											type,
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
 											button);
 		if (buttonCode != null) { // we have access
-			if (formVariable == null) {
-				String variable = "v" + variableCounter++;
-				code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
-				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-			}
-			else {
-				code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
-				code.append(buttonCode).append("]}),");
-				disabled(action.getDisabledConditionName(), code);
-				invisible(action.getInvisibleConditionName(), code);
-			}
+			code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
+			code.append(buttonCode).append("]}),");
+			disabled(action.getDisabledConditionName(), code);
+			invisible(action.getInvisibleConditionName(), code);
 		}
 		else {
-			if (formVariable != null) {
-				code.append("type:'spacer',");
-			}
+			code.append("type:'spacer',");
 		}
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator locator,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderButton(Action action,
+								String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								char type,
+								Button button) {
+		String buttonCode = generateButton(action.getResourceName(),
+											action.getImplicitName(),
+											label,
+											action.getClientValidation(),
+											iconUrl,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											type,
+											action.getParameters(),
+											action.getDisabledConditionName(),
+											action.getInvisibleConditionName(),
+											button);
+		if (buttonCode != null) { // we have access
+			String variable = "v" + variableCounter++;
+			code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
+			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+		}
+	}
+
+	@Override
+	public void renderFormGeoLocator(GeoLocator locator) {
+		StringBuilder geoLocatorCode = buildGeoLocator(locator);
+		code.append("type:'canvas',showTitle:false,canvas:isc.HLayout.create({height:22,members:[");
+		code.append(geoLocatorCode).append(")]}),");
+	}
+
+	@Override
+	public void renderGeoLocator(GeoLocator locator) {
+		StringBuilder geoLocatorCode = buildGeoLocator(locator);
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append('=').append(geoLocatorCode).append(");\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+	
+	private static StringBuilder buildGeoLocator(GeoLocator locator) {
 		StringBuilder geoLocatorCode = new StringBuilder(256);
 		geoLocatorCode.append("isc.BizUtil.createGeoLocator(view,");
 		String binding = locator.getLatitudeBinding();
@@ -631,31 +653,20 @@ class SmartClientViewVisitor extends ViewVisitor {
 		else {
 			geoLocatorCode.append(",'").append(binding).append('\'');
 		}
-
-		if (formVariable == null) {
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append('=').append(geoLocatorCode).append(");\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
-		else {
-			code.append("type:'canvas',showTitle:false,canvas:isc.HLayout.create({height:22,members:[");
-			code.append(geoLocatorCode).append(")]}),");
-		}
+		
+		return geoLocatorCode;
 	}
 
 	@Override
-	public void visitGeometry(Geometry geometry, 
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = geometry;
-			return;
-		}
+	public void renderMap(MapDisplay map) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
+		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Geometry found without a form");
-		}
-
+	@Override
+	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
 		size(geometry, null, code);
 		disabled(geometry.getDisabledConditionName(), code);
@@ -668,52 +679,96 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitMap(MapDisplay map,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderBoundColumnGeometry(Geometry geometry) {
+		dataWidgetColumnInputWidget = geometry;
+	}
+	
+	@Override
+	public void renderFormDialogButton(String label, DialogButton button) {
+		code.append("type:'blurb',defaultValue:'dialog button ");
+		code.append(SmartClientGenerateUtils.processString(label)).append("',");
+		disabled(button.getDisabledConditionName(), code);
+		invisible(button.getInvisibleConditionName(), code);
+	}
+	
+		@Override
+	public void renderDialogButton(String label, DialogButton button) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
-		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
+		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
+		code.append(SmartClientGenerateUtils.processString(label));
+		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
 	@Override
-	public void visitDialogButton(DialogButton button,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		if (formVariable == null) {
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(button.getCommand(), locale)));
-			code.append("'});\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
-		else {
-			code.append("type:'blurb',defaultValue:'dialog button ");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(button.getCommand(), locale))).append("',");
-			disabled(button.getDisabledConditionName(), code);
-			invisible(button.getInvisibleConditionName(), code);
-		}
+	public void renderFormSpacer(Spacer spacer) {
+		code.append("type:'spacer',");
+		size(spacer, null, code);
+        invisible(spacer.getInvisibleConditionName(), code);
 	}
 
 	@Override
-	public void visitDynamicImage(DynamicImage image,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// markup is generated in the JSON data for a data grid container column dynamic image
-		if (dataWidgetVariable != null) {
-			return;
-		}
-
-		if (formVariable == null) {
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append('=');
-			addImage(image);
-			code.append(";\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
+	public void renderSpacer(Spacer spacer) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
+        if ((spacer.getPixelWidth() != null) || 
+        		(spacer.getPixelHeight() != null) ||
+        		(spacer.getInvisibleConditionName() != null)) {
+        	code.append('{');
+        	size(spacer, null, code);
+	        invisible(spacer.getInvisibleConditionName(), code);
+        	code.setLength(code.length() - 1); // remove trailing comma
+        	code.append('}');
+        }
+		code.append(");\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	// TODO size, invisibility and binding
+	@Override
+	public void renderFormStaticImage(String fileUrl, StaticImage image) {
+		code.append("type:'canvas',showTitle:false,canvas:");
+		addStaticImage(image);
+		code.append(',');
+	}
+
+	@Override
+	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+		// markup is generated in the JSON data for a data grid container column static image
+	}
+
+	// TODO size, invisibility and binding
+	@Override
+	public void renderStaticImage(String fileUrl, StaticImage image) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append('=');
+		addStaticImage(image);
+		code.append(";\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+	
+	private void addStaticImage(StaticImage image) {
+		code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
+		code.append("',file:'").append(image.getRelativeFile()).append("',");
+		size(image, null, code);
+		removeTrailingComma(code);
+		code.append("})");
+	}
+
+	@Override
+	public void renderContainerColumnDynamicImage(DynamicImage image) {
+		// markup is generated in the JSON data for a data grid container column dynamic image
+	}
+
+	@Override
+	public void renderDynamicImage(DynamicImage image) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append('=');
+		addImage(image);
+		code.append(";\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+	
 	private void addImage(DynamicImage image) {
 		code.append("isc.BizDynamicImage.create({name:'");
 		code.append(image.getName());
@@ -735,226 +790,140 @@ class SmartClientViewVisitor extends ViewVisitor {
 		}
 		code.append("_view:view})");
 	}
-
-	// TODO size, invisibility and binding
+	
 	@Override
-	public void visitStaticImage(StaticImage image,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// markup is generated in the JSON data for a data grid container column static image
-		if (dataWidgetVariable != null) {
-			return;
+	public void renderFormLink(String value, Link link) {
+		// Take care of the title, as we're not calling preProcessFormItem
+		String label = getCurrentWidgetLabel();
+		if (label == null) {
+			label = "Link";
 		}
-
-		if (formVariable == null) {
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append('=');
-			addStaticImage(image);
-			code.append(";\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
-		else {
-			code.append("type:'canvas',showTitle:false,canvas:");
-			addStaticImage(image);
-			code.append(',');
-		}
-	}
-
-	private void addStaticImage(StaticImage image) {
-		code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
-		code.append("',file:'").append(image.getRelativeFile()).append("',");
-		size(image, null, code);
-		removeTrailingComma(code);
-		code.append("})");
+		code.append("title:'").append(label).append("',");
+		code.append("type:'blurb',name:'_");
+		code.append(formatCounter++).append("',"); // _1, _2 and so on
+		size(link, null, code);
+		invisible(link.getInvisibleConditionName(), code);
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) {
-		if (formVariable == null) { // not a form
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
-	        if ((spacer.getPixelWidth() != null) || 
-	        		(spacer.getPixelHeight() != null) ||
-	        		(spacer.getInvisibleConditionName() != null)) {
-	        	code.append('{');
-	        	size(spacer, null, code);
-		        invisible(spacer.getInvisibleConditionName(), code);
-	        	code.setLength(code.length() - 1); // remove trailing comma
-	        	code.append('}');
-	        }
-			code.append(");\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
-		else {
-			code.append("type:'spacer',");
-			size(spacer, null, code);
-	        invisible(spacer.getInvisibleConditionName(), code);
-		}
-	}
-
-	@Override
-	public void visitLink(Link link, 
-							boolean parentVisible, 
-							boolean parentEnabled) {
+	public void renderContainerColumnLink(String value, Link link) {
 		// markup is generated in the JSON data for a data grid container column link
-		if (dataWidgetVariable != null) {
-			return;
-		}
-
-		if (formVariable == null) {
-			// TODO fix this later
-		}
-		else {
-			// Take care of the title, as we're not calling preProcessFormItem
-			String label = visitedItem.getLabel();
-			if (label == null) {
-				label = "Link";
-			}
-			label = SmartClientGenerateUtils.processString(Util.i18n(label, locale));
-			code.append("title:'").append(label).append("',");
-			code.append("type:'blurb',name:'_");
-			code.append(formatCounter++).append("',"); // _1, _2 and so on
-			size(link, null, code);
-			invisible(link.getInvisibleConditionName(), code);
-		}
 	}
 
 	@Override
-	public void visitBlurb(Blurb blurb,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		Label label = new Label();
-		label.setValue(blurb.getMarkup());
-		label.setPixelWidth(blurb.getPixelWidth());
-		label.setPixelHeight(blurb.getPixelHeight());
-		label.setTextAlignment(blurb.getTextAlignment());
-		label.setInvisibleConditionName(blurb.getInvisibleConditionName());
-		visitLabel(label, parentVisible, parentEnabled);
+	public void renderLink(String value, Link link) {
+		// TODO Implement later
 	}
-
-	// Invisible
-	@Override
-	public void visitLabel(Label label,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
-		if (dataWidgetVariable != null) {
-			return;
-		}
-		
-		String binding = label.getBinding();
-		String value = label.getValue();
-
-		// Find the display name if applicable
-		String displayName = "Label";
-		String displayBinding = label.getFor();
-		if (displayBinding == null) {
-			displayBinding = binding;
-		}
-		if (displayBinding != null) {
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, displayBinding);
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					displayName = attribute.getDisplayName();
-				}
-			}
-		}
-
-		// does the value have binding expressions in them? - (?s) means mutliline match
-		boolean dynamic = (value != null) && BindUtil.messageIsBound(value); 
-		if (dynamic) {
-			if ((dataWidgetBinding == null) && (formVariable == null)) {
-				throw new MetaDataException("Label or blurb with a value of [" + value + 
-												"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
-			}
-
-			value = null;
-			binding = "_" + formatCounter++; // _1, _2 and so on
-		}
-		
-		HorizontalAlignment alignment = label.getTextAlignment();
-
-		if (formVariable == null) {
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=isc.BizLabel.create({");
-
-			size(label, null, code);
-			if (label.getPixelWidth() == null) { // default to whole width
-				code.append("width:'100%',");
-			}
-
-			if (alignment != null) {
-				code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
-			}
-			
-			if (binding == null) {
-				code.append("value:'");
-				code.append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
-			}
-			else {
-				code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
-			}
-			
-			code.append("'});\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
-		else {
-			// Set colSpan 1 if not set otherwise all formatting hell breaks loose
-			if (visitedItem.getColspan() == null) { // not set
-				code.append("colSpan:1,");
-			}
-			// Set endRow false as well to stop formatting gayness
-			// Since this is not an input widget, we can't use preProcessFormItem()
-			// Take care of the title, as we're not calling preProcessFormItem
-			String title = visitedItem.getLabel();
-			if (title == null) {
-				title = displayName;
-			}
-			title = SmartClientGenerateUtils.processString(Util.i18n(title, locale));
-			code.append("endRow:false,title:'").append(SmartClientGenerateUtils.processString(title)).append("',type:'blurb',");
-			if (binding == null) {
-				code.append("defaultValue:'").append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
-			}
-			else {
-				code.append("name:'").append(BindUtil.sanitiseBinding(binding));
-			}
-			code.append("',");
-			
-			if (alignment != null) {
-				code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
-			}
-			size(label, null, code);
-			invisible(label.getInvisibleConditionName(), code);
-		}
-	}
-
-	@Override
-	public void visitParameter(Parameter parameter,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		// do nothing - parameters are handled separately
+	
+	private static Label makeNewLabelFromBlurb(Blurb blurb) {
+		Label result = new Label();
+		result.setValue(blurb.getMarkup());
+		result.setPixelWidth(blurb.getPixelWidth());
+		result.setPixelHeight(blurb.getPixelHeight());
+		result.setTextAlignment(blurb.getTextAlignment());
+		result.setInvisibleConditionName(blurb.getInvisibleConditionName());
+		return result;
 	}
 	
 	@Override
-	public void visitFilterParameter(FilterParameter parameter,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		// do nothing - parameters are handled separately
+	public void renderFormBlurb(String markup, Blurb blurb) {
+		renderFormLabel(markup, makeNewLabelFromBlurb(blurb));
 	}
 
-	// TODO implement
 	@Override
-	public void visitProgressBar(ProgressBar progressBar,
-									boolean parentVisible,
-									boolean parentEnabled) {
-/*
-		if (formID != null) {
-			code.append("type:'canvas',showTitle:false,canvas:");
+	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+		renderContainerColumnLabel(markup, makeNewLabelFromBlurb(blurb));
+	}
 
+	@Override
+	public void renderBlurb(String markup, Blurb blurb) {
+		renderLabel(markup, makeNewLabelFromBlurb(blurb));
+	}
+	
+	@Override
+	public void renderFormLabel(String value, Label label) {
+		FormItem currentFormItem = getCurrentFormItem();
+		
+		// Set colSpan 1 if not set otherwise all formatting hell breaks loose
+		if (currentFormItem.getColspan() == null) { // not set
+			code.append("colSpan:1,");
 		}
-*/
-//TODO Make a value from CanvasItem.
+		// Set endRow false as well to stop formatting gayness
+		// Since this is not an input widget, we can't use preProcessFormItem()
+		// Take care of the title, as we're not calling preProcessFormItem
+		String title = currentFormItem.getLabel();
+		if (title == null) {
+			title = value;
+		}
+		code.append("endRow:false,title:'").append(SmartClientGenerateUtils.processString(title)).append("',type:'blurb',");
+
+		String binding = label.getBinding();
+
+		// does the value have binding expressions in them? - (?s) means mutliline match
+		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
+		if (dynamic) {
+			binding = "_" + formatCounter++; // _1, _2 and so on
+		}
+
+		if (binding == null) {
+			code.append("defaultValue:'").append(SmartClientGenerateUtils.processString(value, false, false));
+		}
+		else {
+			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
+		}
+		code.append("',");
+		
+		HorizontalAlignment alignment = label.getTextAlignment();
+		if (alignment != null) {
+			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+		}
+		size(label, null, code);
+		invisible(label.getInvisibleConditionName(), code);
+	}
+
+	@Override
+	public void renderContainerColumnLabel(String value, Label label) {
+		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
+	}
+
+	@Override
+	public void renderLabel(String value, Label label) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizLabel.create({");
+
+		size(label, null, code);
+		if (label.getPixelWidth() == null) { // default to whole width
+			code.append("width:'100%',");
+		}
+
+		HorizontalAlignment alignment = label.getTextAlignment();
+		if (alignment != null) {
+			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
+		}
+		
+		String binding = label.getBinding();
+
+		// does the value have binding expressions in them? - (?s) means mutliline match
+		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
+		if (dynamic) {
+			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
+											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
+		}
+		
+		if (binding == null) {
+			code.append("value:'").append(SmartClientGenerateUtils.processString(value, false, false));
+		}
+		else {
+			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
+		}
+		
+		code.append("'});\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+	
+	@Override
+	public void renderFormProgressBar(ProgressBar progressBar) {
+		// TODO Make a value from CanvasItem.
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
 		code.append(progressBar.getBinding());
@@ -962,242 +931,61 @@ class SmartClientViewVisitor extends ViewVisitor {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
-	private String dataWidgetVariable = null;
-	private Document dataWidgetDocument = null;
-	private String dataWidgetBinding = null;
-	// Indicates whether the field definition array has been completed and closed off
-	// Its used to ensure the last ']' is appended before adding events or closing the grid definition
-	private boolean dataWidgetFieldsIncomplete = false;
-	
-	@Override
-	public void visitDataGrid(DataGrid grid,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		visitDataWidget(grid);
-		if (Boolean.FALSE.equals(grid.getShowAdd())) {
-			code.append("showAdd:false,");
-		}
-		if (Boolean.FALSE.equals(grid.getShowZoom())) {
-			code.append("showZoom:false,");
-		}
-		if (Boolean.FALSE.equals(grid.getShowEdit())) {
-			code.append("showEdit:false,");
-		}
-		if (Boolean.FALSE.equals(grid.getShowRemove())) {
-			code.append("showRemove:false,");
-		}
-		if (Boolean.FALSE.equals(grid.getShowDeselect())) {
-			code.append("showDeselect:false,");
-		}
-		if (Boolean.TRUE.equals(grid.getInline())) { // defaults to not being inline
-			code.append("inline:true,");
-		}
-		if (Boolean.TRUE.equals(grid.getWordWrap())) { // defaults to not being wrapped
-			code.append("wordWrap:true,");
-		}
-		disableCRUD(grid, code);
-		String selectedIdBinding = grid.getSelectedIdBinding();
-		if (selectedIdBinding != null) {
-			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
-			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
-		}
-		disabled(grid.getDisabledConditionName(), code);
-		editable(grid.getEditable(), code);
-		code.append("_fields:[");
-	}
-	
-	@Override
-	public void visitDataRepeater(DataRepeater repeater,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		visitDataWidget(repeater);
-		code.append("isRepeater:true,");
-		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders()));
-		code.append(",showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid()));
-		code.append(",_fields:[");
-	}
-	
-	private void visitDataWidget(AbstractDataWidget widget) {
-		dataWidgetBinding = widget.getBinding();
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																module,
-																document,
-																dataWidgetBinding);
-		Relation relation = (Relation) target.getAttribute();
-		String documentName = relation.getDocumentName();
-
-		dataWidgetDocument = module.getDocument(customer, documentName);
-		dataWidgetVariable = "v" + variableCounter++;
-		code.append("var ").append(dataWidgetVariable).append("=isc.BizDataGrid.create({_mod:'");
-		code.append(dataWidgetDocument.getOwningModuleName());
-		code.append("',_doc:'");
-		code.append(dataWidgetDocument.getName());
-		code.append("',_b:'").append(BindUtil.sanitiseBinding(dataWidgetBinding));
-		code.append("',ID:").append(IDExpression());
-		code.append(",canCreate:").append(user.canCreateDocument(dataWidgetDocument));
-		code.append(",canUpdate:").append(user.canUpdateDocument(dataWidgetDocument));
-		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
-		String title = widget.getTitle();
-		if (title != null) {
-			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
-		}
-		if ((relation instanceof Collection) && 
-				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
-			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
-		}
-		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		invisible(widget.getInvisibleConditionName(), code);
-		dataWidgetFieldsIncomplete = true;
-		eventsWithNoForm = true;
-	}
-
-	@Override
-	public void visitedDataGrid(DataGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		visitedDataWidget();
-	}
-
-	@Override
-	public void visitedDataRepeater(DataRepeater repeater,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		visitedDataWidget();
-	}
-	
-	private void visitedDataWidget() {
-		if (dataWidgetFieldsIncomplete) {
-			code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
-			code.append("],");
-		}
-		code.append("_view:view});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(dataWidgetVariable).append(");\n");
-		dataWidgetVariable = null;
-		dataWidgetDocument = null;
-		dataWidgetBinding = null;
-		dataWidgetFieldsIncomplete = false;
-		eventsWithNoForm = false;
-	}
-	
-	private InputWidget dataWidgetColumnInputWidget;
-	
-	@Override
-	public void visitDataGridBoundColumn(DataGridBoundColumn column,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
-	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		if (dataWidgetColumnInputWidget != null) {
-			SmartClientDataGridFieldDefinition def = null;
-			String binding = column.getBinding();
-			if (binding == null) { // column bound to collection for the grid
-				def = SmartClientGenerateUtils.getDataGridField(user,
-																	customer,
-																	module, 
-																	document, 
-																	dataWidgetColumnInputWidget, 
-																	dataWidgetBinding,
-																	true);
-			} 
-			else {
-				def = SmartClientGenerateUtils.getDataGridField(user,
-																	customer,
-																	module, 
-																	dataWidgetDocument, 
-																	dataWidgetColumnInputWidget, 
-																	null,
-																	true);
-			}
-
-			String title = column.getTitle();
-			if (title != null) {
-				def.setTitle(Util.i18n(title, locale));
-			}
-			HorizontalAlignment textAlignment = column.getAlignment();
-			if (textAlignment != null) {
-				def.setAlign(textAlignment);
-			}
-			
-			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
-			def.setPixelWidth(column.getPixelWidth());
-			code.append('{').append(def.toJavascript()).append("},");
-
-			SmartClientLookupDefinition lookup = def.getLookup();
-			if (lookup != null) {
-				StringBuilder ds = new StringBuilder(64);
-				String optionDataSource = lookup.getOptionDataSource();
-				SmartClientGenerateUtils.appendDataSourceDefinition(user,
-																		customer, 
-																		lookup.getQuery(),
-																		optionDataSource,
-																		(Lookup) dataWidgetColumnInputWidget, 
-																		false,
-																		ds,
-																		null);
-				code.insert(0, ds);
-			}
-			dataWidgetColumnInputWidget = null;
-		}
-	}
-
-	@Override
-	public void visitDataGridContainerColumn(DataGridContainerColumn column,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("{name:'_").append(formatCounter++);
-		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
-		
-		String title = column.getTitle();
-		code.append((title == null) ? " " : SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append('\'');
-		HorizontalAlignment alignment = column.getAlignment();
-		if (alignment != null) {
-			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
-		}
-		Integer width = column.getPixelWidth();
-		if (width != null) {
-			code.append(",width:").append(width);
-		}
-		code.append("},");
-	}
-
-	@Override
-	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// do nothing
-	}
-	
 	private String listWidgetVariable = null;
 
 	@Override
-	public void visitListGrid(ListGrid grid,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		visitListWidget(grid);
-		visitGrid(grid);
+	public void renderListGrid(String title, ListGrid grid) {
+		renderListWidget(grid);
+		renderGrid(grid);
 	}
 
 	@Override
-	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
-		visitListWidget(repeater);
+	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderedListGrid(String title, ListGrid grid) {
+		appendFilterParameters(grid.getParameters(), code);
+		renderedListWidget();
+	}
+
+	@Override
+	public void renderListRepeater(String title, ListRepeater repeater) {
+		renderListWidget(repeater);
 		code.append("isRepeater:true,");
 		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders())).append(',');
 		code.append("showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid())).append(',');
 	}
+
+	@Override
+	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	@Override
-	public void visitTreeGrid(TreeGrid grid,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		visitListWidget(grid);
-		visitGrid(grid);
+	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderedListRepeater(String title, ListRepeater repeater) {
+		renderedListWidget();
+	}
+
+	@Override
+	public void renderTreeGrid(String title, TreeGrid grid) {
+		renderListWidget(grid);
+		renderGrid(grid);
 		String rootBinding = grid.getRootIdBinding();
 		if (rootBinding != null) {
 			code.append("rootIdBinding:'").append(BindUtil.sanitiseBinding(rootBinding)).append("',");
@@ -1205,7 +993,25 @@ class SmartClientViewVisitor extends ViewVisitor {
 		code.append("isTree:true,");
 	}
 
-	private void visitListWidget(AbstractListWidget widget) {
+	@Override
+	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderedTreeGrid(String title, TreeGrid grid) {
+		appendFilterParameters(grid.getParameters(), code);
+		renderedListWidget();
+	}
+
+	private void renderListWidget(AbstractListWidget widget) {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
@@ -1252,11 +1058,9 @@ class SmartClientViewVisitor extends ViewVisitor {
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		invisible(widget.getInvisibleConditionName(), code);
-		
-		eventsWithNoForm = true;
 	}
 	
-	private void visitGrid(ListGrid grid) {
+	private void renderGrid(ListGrid grid) {
 		code.append("contConv:").append(grid.getContinueConversation()).append(",");
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
@@ -1301,45 +1105,225 @@ class SmartClientViewVisitor extends ViewVisitor {
 		}
 	}
 
-	@Override
-	public void visitedListGrid(ListGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		appendFilterParameters(grid.getParameters(), code);
-		visitedListWidget();
-	}
-
-	@Override
-	public void visitedListRepeater(ListRepeater repeater, 
-										boolean parentVisible,
-										boolean parentEnabled) {
-		visitedListWidget();
-	}
-	
-	@Override
-	public void visitedTreeGrid(TreeGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		appendFilterParameters(grid.getParameters(), code);
-		visitedListWidget();
-	}
-
-	private void visitedListWidget() {
+	private void renderedListWidget() {
 		code.append("_view:view});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(listWidgetVariable).append(");\n");
 		listWidgetVariable = null;
-		eventsWithNoForm = false;
+	}
+
+	private String dataWidgetVariable = null;
+	private Document dataWidgetDocument = null;
+	private String dataWidgetBinding = null;
+	// Indicates whether the field definition array has been completed and closed off
+	// Its used to ensure the last ']' is appended before adding events or closing the grid definition
+	private boolean dataWidgetFieldsIncomplete = false;
+	
+	@Override
+	public void renderDataGrid(String title, DataGrid grid) {
+		renderDataWidget(grid);
+		if (Boolean.FALSE.equals(grid.getShowAdd())) {
+			code.append("showAdd:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowZoom())) {
+			code.append("showZoom:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowEdit())) {
+			code.append("showEdit:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowRemove())) {
+			code.append("showRemove:false,");
+		}
+		if (Boolean.FALSE.equals(grid.getShowDeselect())) {
+			code.append("showDeselect:false,");
+		}
+		if (Boolean.TRUE.equals(grid.getInline())) { // defaults to not being inline
+			code.append("inline:true,");
+		}
+		if (Boolean.TRUE.equals(grid.getWordWrap())) { // defaults to not being wrapped
+			code.append("wordWrap:true,");
+		}
+		disableCRUD(grid, code);
+		String selectedIdBinding = grid.getSelectedIdBinding();
+		if (selectedIdBinding != null) {
+			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
+			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
+		}
+		disabled(grid.getDisabledConditionName(), code);
+		editable(grid.getEditable(), code);
+		code.append("_fields:[");
 	}
 
 	@Override
-	public void visitCheckBox(CheckBox checkBox,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = checkBox;
-			return;
+	public void renderedDataGrid(String title, DataGrid grid) {
+		renderedDataWidget();
+	}
+
+	@Override
+	public void renderDataRepeater(String title, DataRepeater repeater) {
+		renderDataWidget(repeater);
+		code.append("isRepeater:true,");
+		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders()));
+		code.append(",showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid()));
+		code.append(",_fields:[");
+	}
+
+	@Override
+	public void renderedDataRepeater(String title, DataRepeater repeater) {
+		renderedDataWidget();
+	}
+
+	private void renderDataWidget(AbstractDataWidget widget) {
+		dataWidgetBinding = widget.getBinding();
+		Relation relation = (Relation) getCurrentTarget().getAttribute();
+		String documentName = relation.getDocumentName();
+
+		dataWidgetDocument = module.getDocument(customer, documentName);
+		dataWidgetVariable = "v" + variableCounter++;
+		code.append("var ").append(dataWidgetVariable).append("=isc.BizDataGrid.create({_mod:'");
+		code.append(dataWidgetDocument.getOwningModuleName());
+		code.append("',_doc:'");
+		code.append(dataWidgetDocument.getName());
+		code.append("',_b:'").append(BindUtil.sanitiseBinding(dataWidgetBinding));
+		code.append("',ID:").append(IDExpression());
+		code.append(",canCreate:").append(user.canCreateDocument(dataWidgetDocument));
+		code.append(",canUpdate:").append(user.canUpdateDocument(dataWidgetDocument));
+		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
+		String title = widget.getTitle();
+		if (title != null) {
+			code.append("title:'");
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
 		}
+		if ((relation instanceof Collection) && 
+				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
+		}
+		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
+		invisible(widget.getInvisibleConditionName(), code);
+		dataWidgetFieldsIncomplete = true;
+	}
+
+	private void renderedDataWidget() {
+		if (dataWidgetFieldsIncomplete) {
+			code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
+			code.append("],");
+		}
+		code.append("_view:view});\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(dataWidgetVariable).append(");\n");
+		dataWidgetVariable = null;
+		dataWidgetDocument = null;
+		dataWidgetBinding = null;
+		dataWidgetFieldsIncomplete = false;
+	}
+	
+	private InputWidget dataWidgetColumnInputWidget;
+	
+	@Override
+	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
+		// do nothing
+	}
+
+	@Override
+	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+		renderDataGridBoundColumn(title, column);
+	}
+
+	@Override
+	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
+		if (dataWidgetColumnInputWidget != null) {
+			SmartClientDataGridFieldDefinition def = null;
+			String binding = column.getBinding();
+			if (binding == null) { // column bound to collection for the grid
+				def = SmartClientGenerateUtils.getDataGridField(user,
+																	customer,
+																	module, 
+																	document, 
+																	dataWidgetColumnInputWidget, 
+																	dataWidgetBinding,
+																	true);
+			} 
+			else {
+				def = SmartClientGenerateUtils.getDataGridField(user,
+																	customer,
+																	module, 
+																	dataWidgetDocument, 
+																	dataWidgetColumnInputWidget, 
+																	null,
+																	true);
+			}
+
+			def.setTitle(title);
+			HorizontalAlignment textAlignment = column.getAlignment();
+			if (textAlignment != null) {
+				def.setAlign(textAlignment);
+			}
+			
+			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
+			def.setPixelWidth(column.getPixelWidth());
+			code.append('{').append(def.toJavascript()).append("},");
+
+			SmartClientLookupDefinition lookup = def.getLookup();
+			if (lookup != null) {
+				StringBuilder ds = new StringBuilder(64);
+				String optionDataSource = lookup.getOptionDataSource();
+				SmartClientGenerateUtils.appendDataSourceDefinition(user,
+																		customer, 
+																		lookup.getQuery(),
+																		optionDataSource,
+																		(Lookup) dataWidgetColumnInputWidget, 
+																		false,
+																		ds,
+																		null);
+				code.insert(0, ds);
+			}
+			dataWidgetColumnInputWidget = null;
+		}
+	}
+
+	@Override
+	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+		renderedDataGridBoundColumn(title, column);
+	}
+
+	@Override
+	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
+		code.append("{name:'_").append(formatCounter++);
+		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 		
+		code.append((title == null) ? " " : SmartClientGenerateUtils.processString(title)).append('\'');
+		HorizontalAlignment alignment = column.getAlignment();
+		if (alignment != null) {
+			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
+		}
+		Integer width = column.getPixelWidth();
+		if (width != null) {
+			code.append(",width:").append(width);
+		}
+		code.append("},");
+	}
+
+	@Override
+	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+		renderDataGridContainerColumn(title, column);
+	}
+
+	@Override
+	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
+		// do nothing
+	}
+
+	@Override
+	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+		renderedDataGridContainerColumn(title, column);
+	}
+
+	@Override
+	public void renderBoundColumnCheckBox(CheckBox checkBox) {
+		dataWidgetColumnInputWidget = checkBox;
+	}
+	
+	@Override
+	public void renderFormCheckBox(CheckBox checkBox) {
 		preProcessFormItem(checkBox, "checkbox");
 		size(checkBox, null, code);
 		if (! Boolean.FALSE.equals(checkBox.getTriState())) {
@@ -1349,19 +1333,20 @@ class SmartClientViewVisitor extends ViewVisitor {
 		disabled(checkBox.getDisabledConditionName(), code);
 		invisible(checkBox.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedCheckBox(CheckBox checkBox,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
 		// do nothing
 	}
 
+	@Override
+	public void renderedFormCheckBox(CheckBox checkBox) {
+		// do nothing
+	}
+	
 	// TODO implement this - does this need size? probably
 	@Override
-	public void visitCheckMembership(CheckMembership membership,
-										boolean parentVisible,
-										boolean parentEnabled) {
+	public void renderCheckMembership(CheckMembership membership) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
 		code.append("check membership").append(membership.getBinding());
@@ -1370,183 +1355,119 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCheckMembership(CheckMembership membership,
-										boolean parentVisible, 
-										boolean parentEnabled) {
+	public void renderedCheckMembership(CheckMembership membership) {
 		// do nothing - until implemented properly
 	}
 
 	@Override
-	public void visitColourPicker(ColourPicker colour,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = colour;
-			return;
-		}
+	public void renderBoundColumnColourPicker(ColourPicker colour) {
+		dataWidgetColumnInputWidget = colour;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Colour found without a form");
-		}
-
+	@Override
+	public void renderFormColourPicker(ColourPicker colour) {
 		preProcessFormItem(colour, "color");
 		size(colour, null, code);
 		disabled(colour.getDisabledConditionName(), code);
 		invisible(colour.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedColourPicker(ColourPicker colour,
-										boolean parentVisible,
-										boolean parentEnabled) {
+	public void renderedBoundColumnColourPicker(ColourPicker colour) {
 		// do nothing
 	}
 
 	@Override
-	public void visitCombo(Combo combo,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = combo;
-			return;
-		}
+	public void renderedFormColourPicker(ColourPicker colour) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnCombo(Combo combo) {
+		dataWidgetColumnInputWidget = combo;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Combo found without a form");
-		}
-
+	@Override
+	public void renderFormCombo(Combo combo) {
 		preProcessFormItem(combo, "select");
 		size(combo, null, code);
 		disabled(combo.getDisabledConditionName(), code);
 		invisible(combo.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedCombo(Combo combo,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedBoundColumnCombo(Combo combo) {
 		// do nothing
 	}
 
 	@Override
-	public void visitContentImage(ContentImage image,
-									boolean parentVisible, 
-									boolean parentEnabled) {
+	public void renderedFormCombo(Combo combo) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnContentImage(ContentImage image) {
+		dataWidgetColumnInputWidget = image;
+	}
+
+	@Override
+	public void renderContainerColumnContentImage(ContentImage image) {
 		// markup is generated in the JSON data for a data grid container column content image
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = image;
-			return;
-		}
-
-		if (formVariable == null) {
-			throw new MetaDataException("ContentImage found without a form");
-		}
-
+	}
+	
+	@Override
+	public void renderFormContentImage(ContentImage image) {
 		preProcessFormItem(image, "bizContentImage");
 		size(image, null, code);
 		disabled(image.getDisabledConditionName(), code);
 		invisible(image.getInvisibleConditionName(), code);
 		editable(image.getEditable(), code);
 	}
+	
+	@Override
+	public void renderBoundColumnContentLink(String value, ContentLink link) {
+		dataWidgetColumnInputWidget = link;
+	}
 
 	@Override
-	public void visitContentLink(ContentLink link,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = link;
-			return;
-		}
-
-		if (formVariable == null) {
-			throw new MetaDataException("ContentLink found without a form");
-		}
-
+	public void renderFormContentLink(String value, ContentLink link) {
 		preProcessFormItem(link, "bizContentLink");
-		String value = link.getValue();
 		if (value != null) {
-			code.append("value:'").append(SmartClientGenerateUtils.processString(Util.i18n(value, locale))).append("',");
+			code.append("value:'").append(SmartClientGenerateUtils.processString(value)).append("',");
 		}
 		disabled(link.getDisabledConditionName(), code);
 		invisible(link.getInvisibleConditionName(), code);
 		editable(link.getEditable(), code);
 	}
-
+	
 	@Override
-	public void visitRichText(RichText text,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = text;
-			return;
-		}
-
-		if (formVariable == null) {
-			throw new MetaDataException("RichText found without a form");
-		}
-
-		preProcessFormItem(text, "richText");
-		size(text, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+	public void renderBoundColumnHTML(HTML html) {
+		dataWidgetColumnInputWidget = html;
 	}
 
 	@Override
-	public void visitedRichText(RichText richText,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
-	public void visitHTML(HTML html,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = html;
-			return;
-		}
-
-		if (formVariable == null) {
-			throw new MetaDataException("HTML found without a form");
-		}
-
+	public void renderFormHTML(HTML html) {
 		preProcessFormItem(html, "bizHTML");
 		size(html, null, code);
 		disabled(html.getDisabledConditionName(), code);
 		invisible(html.getInvisibleConditionName(), code);
 	}
-
-	// indicates if we are visiting a list membership, list grid or data grid widget.
-	// this allow specific javascript for events to be generated since these widgets live outside of a form
-	private boolean eventsWithNoForm = false;
 	
 	@Override
-	public void visitListMembership(ListMembership membership,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		eventsWithNoForm = true;
-		
-		String membershipBinding = membership.getBinding();
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																module,
-																document,
-																membershipBinding);
-		Relation relation = (Relation) target.getAttribute();
+	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+		Relation relation = (Relation) getCurrentTarget().getAttribute();
 
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizListMembership.create({_b:'");
-		code.append(BindUtil.sanitiseBinding(membershipBinding));
+		code.append(BindUtil.sanitiseBinding(membership.getBinding()));
 		code.append('\'');
-		String heading = membership.getCandidatesHeading();
-		if (heading != null) {
+		if (candidatesHeading != null) {
 			code.append(",candidatesHeading:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(heading, locale))).append('\'');
+			code.append(SmartClientGenerateUtils.processString(candidatesHeading)).append('\'');
 		}
-		heading = membership.getMembersHeading();
-		if (heading != null) {
+		if (membersHeading != null) {
 			code.append(",membersHeading:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(heading, locale))).append('\'');
+			code.append(SmartClientGenerateUtils.processString(membersHeading)).append('\'');
 		}
 		if ((relation instanceof Collection) && 
 				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
@@ -1558,24 +1479,18 @@ class SmartClientViewVisitor extends ViewVisitor {
 		
 		containerVariables.push(variable);
 	}
-	
+
 	@Override
-	public void visitedListMembership(ListMembership membership,
-										boolean parentVisible,
-										boolean parentEnabled) {
+	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		removeTrailingComma(code);
 		code.append("});\n");
 
 		String variable = containerVariables.pop();
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-
-		eventsWithNoForm = false;
 	}
 
 	@Override
-	public void visitComparison(Comparison comparison,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderComparison(Comparison comparison) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizComparison.create({_b:'");
 		code.append(BindUtil.sanitiseBinding(comparison.getBinding()));
@@ -1590,18 +1505,20 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookupDescription(LookupDescription lookup,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = lookup;
-			return;
-		}
+	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+													boolean canCreate,
+													boolean canUpdate,
+													String descriptionBinding,
+													LookupDescription lookup) {
+		dataWidgetColumnInputWidget = lookup;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("LookupDescription found without a form");
-		}
-
+	@Override
+	public void renderFormLookupDescription(MetaDataQueryDefinition query,
+												boolean canCreate,
+												boolean canUpdate,
+												String descriptionBinding,
+												LookupDescription lookup) {
 		SmartClientFieldDefinition def = preProcessFormItem(lookup, "bizLookupDescription");
 		size(lookup, null, code);
 		disabled(lookup.getDisabledConditionName(), code);
@@ -1613,8 +1530,6 @@ class SmartClientViewVisitor extends ViewVisitor {
 
 		code.append(",_view:view,");
 		appendFilterParameters(lookup.getParameters(), code);
-
-		MetaDataQueryDefinition query = def.getLookup().getQuery();
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
@@ -1628,27 +1543,30 @@ class SmartClientViewVisitor extends ViewVisitor {
 																null);
 		code.insert(0, ds);
 	}
-
+	
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup,
-											boolean parentVisible,
-											boolean parentEnabled) {
+	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+														boolean canCreate,
+														boolean canUpdate,
+														String descriptionBinding,
+														LookupDescription lookup) {
 		// do nothing
 	}
 
 	@Override
-	public void visitLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = lookup;
-			return;
-		}
-
-		if (formVariable == null) {
-			throw new MetaDataException("Lookup found without a form");
-		}
-
+	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+												boolean canCreate,
+												boolean canUpdate,
+												String descriptionBinding,
+												LookupDescription lookup) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderFormLookup(MetaDataQueryDefinition query,
+									boolean canCreate,
+									boolean canUpdate,
+									Lookup lookup) {
 		code.append("type:'blurb',defaultValue:'lookup ");
 		code.append(lookup.getBinding()).append("',");
 		disableLookupComponents(lookup, code);
@@ -1656,51 +1574,43 @@ class SmartClientViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedFormLookup(MetaDataQueryDefinition query,
+									boolean canCreate,
+									boolean canUpdate,
+									Lookup lookup) {
 		// do nothing
 	}
 
 	@Override
-	public void visitPassword(Password password, 
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = password;
-			return;
-		}
+	public void renderBoundColumnPassword(Password password) {
+		dataWidgetColumnInputWidget = password;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Password found without a form");
-		}
-
+	@Override
+	public void renderFormPassword(Password password) {
 		preProcessFormItem(password, "password");
 		size(password, null, code);
 		disabled(password.getDisabledConditionName(), code);
 		invisible(password.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedPassword(Password password,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnPassword(Password password) {
 		// do nothing
 	}
 
 	@Override
-	public void visitRadio(Radio radio,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = radio;
-			return;
-		}
+	public void renderedFormPassword(Password password) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnRadio(Radio radio) {
+		dataWidgetColumnInputWidget = radio;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Radio found without a form");
-		}
-
+	@Override
+	public void renderFormRadio(Radio radio) {
 		preProcessFormItem(radio, "radioGroup");
 		size(radio, null, code);
 		if (Boolean.FALSE.equals(radio.getVertical())) {
@@ -1709,27 +1619,47 @@ class SmartClientViewVisitor extends ViewVisitor {
 		disabled(radio.getDisabledConditionName(), code);
 		invisible(radio.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedRadio(Radio radio,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedBoundColumnRadio(Radio radio) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSlider(Slider slider, 
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = slider;
-			return;
-		}
+	public void renderedFormRadio(Radio radio) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnRichText(RichText text) {
+		dataWidgetColumnInputWidget = text;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Slider found without a form");
-		}
-		
+	@Override
+	public void renderFormRichText(RichText text) {
+		preProcessFormItem(text, "richText");
+		size(text, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
+		disabled(text.getDisabledConditionName(), code);
+		invisible(text.getInvisibleConditionName(), code);
+	}
+	
+	@Override
+	public void renderedBoundColumnRichText(RichText richText) {
+		// do nothing
+	}
+
+	@Override
+	public void renderedFormRichText(RichText richText) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnSlider(Slider slider) {
+		dataWidgetColumnInputWidget = slider;
+	}
+
+	@Override
+	public void renderFormSlider(Slider slider) {
 		preProcessFormItem(slider, "slider");
 		Double min = slider.getMin();
 		if (min != null) {
@@ -1754,27 +1684,24 @@ class SmartClientViewVisitor extends ViewVisitor {
 		disabled(slider.getDisabledConditionName(), code);
 		invisible(slider.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedSlider(Slider slider,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedBoundColumnSlider(Slider slider) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSpinner(Spinner spinner, 
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = spinner;
-			return;
-		}
+	public void renderedFormSlider(Slider slider) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnSpinner(Spinner spinner) {
+		dataWidgetColumnInputWidget = spinner;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("Spinner found without a form");
-		}
-		
+	@Override
+	public void renderFormSpinner(Spinner spinner) {
 		preProcessFormItem(spinner, "spinner");
 		Double min = spinner.getMin();
 		if (min != null) {
@@ -1792,27 +1719,24 @@ class SmartClientViewVisitor extends ViewVisitor {
 		disabled(spinner.getDisabledConditionName(), code);
 		invisible(spinner.getInvisibleConditionName(), code);
 	}
-
+	
 	@Override
-	public void visitedSpinner(Spinner spinner,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedBoundColumnSpinner(Spinner spinner) {
 		// do nothing
 	}
 
 	@Override
-	public void visitTextArea(TextArea text, 
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = text;
-			return;
-		}
+	public void renderedFormSpinner(Spinner spinner) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnTextArea(TextArea text) {
+		dataWidgetColumnInputWidget = text;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("TextArea found without a form");
-		}
-
+	@Override
+	public void renderFormTextArea(TextArea text) {
 		preProcessFormItem(text, "textArea");
 		size(text, null, code);
 		disabled(text.getDisabledConditionName(), code);
@@ -1825,27 +1749,24 @@ class SmartClientViewVisitor extends ViewVisitor {
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 	}
-
+	
 	@Override
-	public void visitedTextArea(TextArea text,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnTextArea(TextArea text) {
 		// do nothing
 	}
 
 	@Override
-	public void visitTextField(TextField text,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (dataWidgetVariable != null) {
-			dataWidgetColumnInputWidget = text;
-			return;
-		}
+	public void renderedFormTextArea(TextArea text) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderBoundColumnTextField(TextField text) {
+		dataWidgetColumnInputWidget = text;
+	}
 
-		if (formVariable == null) {
-			throw new MetaDataException("TextField found without a form");
-		}
-
+	@Override
+	public void renderFormTextField(TextField text) {
 		if (Boolean.TRUE.equals(text.getPreviousValues())) {
 		    preProcessFormItem(text, "comboBox");
             TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, text.getBinding());
@@ -1888,24 +1809,26 @@ pickListFields:[{name:'value'}],
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 	}
-
+	
 	@Override
-	public void visitedTextField(TextField text,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnTextField(TextField text) {
 		// do nothing
 	}
 
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
-		if (visitedItem != null) {
+	public void renderedFormTextField(TextField text) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderFormInject(Inject inject) {
+		FormItem currentFormItem = getCurrentFormItem();
+		if (currentFormItem != null) {
 			// NB instead of preprocessFormItem(), handle title and required
-			String value = visitedItem.getLabel();
-			if (value != null) {
-				code.append("title:'").append(UtilImpl.processStringValue(value)).append("',");
+			if (currentFormItem.getLabel() != null) {
+				code.append("title:'").append(UtilImpl.processStringValue(getCurrentWidgetLabel())).append("',");
 			}
-			Boolean required = visitedItem.getRequired();
-			if (Boolean.TRUE.equals(required)) {
+			if (Boolean.TRUE.equals(currentFormItem.getRequired())) {
 				code.append("required:true,");
 			}
 		}
@@ -1913,504 +1836,401 @@ pickListFields:[{name:'value'}],
 	}
 
 	@Override
-	public void visitedView() {
-		containerVariables.pop();
-		if (! noCreateView) {
-			if (ViewType.edit.toString().equals(view.getName())) {
-				code.append("view.addContained(edit);");
-			}
-			else if (ViewType.create.toString().equals(view.getName())) {
-				code.append("view.addContained(create);");
-			}
-		}
-		if (! viewHasAtLeastOneForm) {
-			String var = "v" + variableCounter++;
-			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
-			code.append("view._vm.addMember(").append(var).append(");");
-			code.append("view.addContained(").append(var).append(");\n");
-		}
+	public void renderInject(Inject inject) {
+		code.append(inject.getScript());
 	}
 
 	@Override
-	public void visitedVBox(VBox vbox,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		containerVariables.pop();
-	}
-
-	@Override
-	public void visitedHBox(HBox hbox,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		containerVariables.pop();
-	}
-
-	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void renderCustomAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(action.getResourceName(), 
 					null, 
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) {
+	public void renderAddAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Add,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) {
+	public void renderRemoveAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Remove,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) {
+	public void renderZoomOutAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.ZoomOut,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) {
+	public void renderNavigateAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Navigate,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) {
+	public void renderOKAction(String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								char type,
+								ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.OK,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) {
+	public void renderSaveAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Save,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) {
+	public void renderCancelAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Cancel,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
+	public void renderDeleteAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Delete,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitReportAction(ActionImpl action) {
+	public void renderReportAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Report,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) {
+	public void renderBizExportAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
 		addAction(action.getResourceName(),
 					ImplicitActionName.BizExport,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) {
+	public void renderBizImportAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
 		addAction(action.getResourceName(),
 					ImplicitActionName.BizImport,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) {
+	public void renderDownloadAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
 		addAction(action.getResourceName(),
 					ImplicitActionName.Download,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) {
+	public void renderUploadAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(action.getResourceName(),
 					ImplicitActionName.Upload,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) {
+	public void renderNewAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.New,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) {
+	public void renderEditAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
 					ImplicitActionName.Edit,
-					action.getDisplayName(),
+					label,
 					action.getInActionPanel(),
 					action.getClientValidation(),
-					action.getRelativeIconFileName(),
-					action.getIconStyleClass(),
-					action.getToolTip(),
-					action.getConfirmationText(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitPrintAction(ActionImpl action) {
+	public void renderPrintAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		addAction(null,
-				ImplicitActionName.Print,
-				action.getDisplayName(),
-				action.getInActionPanel(),
-				action.getClientValidation(),
-				action.getRelativeIconFileName(),
-				action.getIconStyleClass(),
-				action.getToolTip(),
-				action.getConfirmationText(),
-				action.getParameters(),
-				action.getDisabledConditionName(),
-				action.getInvisibleConditionName());
+					ImplicitActionName.Print,
+					label,
+					action.getInActionPanel(),
+					action.getClientValidation(),
+					iconUrl,
+					iconStyleClass,
+					toolTip,
+					confirmationText,
+					type,
+					action.getParameters(),
+					action.getDisabledConditionName(),
+					action.getInvisibleConditionName());
 	}
-
-	@Override
-	public void visitOnChangedEventHandler(Changeable changeable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		if (eventsWithNoForm) {
-			code.append("changed:function(){var view=this._view;");
-		}
-		else {
-			code.append("changed:function(form,item,value){var view=form._view;");
-		}
-	}
-
-	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-	}
-
-	@Override
-	public void visitOnFocusEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
-	}
-
-	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		code.append("}},");
-	}
-
-	// indicates that we are blurring and we need to call special methods
-	// to potentially serialize calls to button actions after editorExit.
-	private boolean visitingOnBlur = false;
 	
-	@Override
-	public void visitOnBlurEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		visitingOnBlur = true;
-		
-		// This fires before the BizButton action() method if a button was clicked
-		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("blur:function(form,item){if(!isc.RPCManager.requestsArePending()){form._view._blurry=item;}},");
-		// This is called before or after the BizButton action depending on the browser.
-		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
-	}
-
-	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		code.append("}},");
-		visitingOnBlur = false;
-	}
-
-	// Used to sort out server-side events into the bizEditedForServer() method.
-	private boolean inOnAddedEventHandler = false;
-
-	@Override
-	public void visitOnAddedEventHandler(Addable addable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		if (dataWidgetFieldsIncomplete) {
-			code.setLength(code.length() - 1);
-			code.append("],");
-			dataWidgetFieldsIncomplete = false;
-		}
-		inOnAddedEventHandler = true;
-		if (eventsWithNoForm) {
-			code.append("bizAdded:function(){var view=this._view;");
-		}
-		else {
-			code.append("bizAdded:function(form,item,value){var view=form._view;");
-		}
-	}
-
-	@Override
-	public void visitedOnAddedEventHandler(Addable addable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		code.append("},");
-		inOnAddedEventHandler = false;
-	}
-
-	// Used to sort out server-side events into the bizEditedForServer() method.
-	private boolean inOnEditedEventHandler = false;
-
-	@Override
-	public void visitOnEditedEventHandler(Editable editable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		if (dataWidgetFieldsIncomplete) {
-			code.setLength(code.length() - 1);
-			code.append("],");
-			dataWidgetFieldsIncomplete = false;
-		}
-		inOnEditedEventHandler = true;
-		if (eventsWithNoForm) {
-			code.append("bizEdited:function(){var view=this._view;");
-		}
-		else {
-			code.append("bizEdited:function(form,item,value){var view=form._view;");
-		}
-	}
-
-	@Override
-	public void visitedOnEditedEventHandler(Editable editable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-		inOnEditedEventHandler = false;
-	}
-
-	// Used to sort out server-side events into the bizEditedForServer() method.
-	private boolean inOnRemovedEventHandler = false;
-
-	@Override
-	public void visitOnRemovedEventHandler(Removable removable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		if (dataWidgetFieldsIncomplete) {
-			code.setLength(code.length() - 1);
-			code.append("],");
-			dataWidgetFieldsIncomplete = false;
-		}
-		inOnRemovedEventHandler = true;
-		if (eventsWithNoForm) {
-			code.append("bizRemoved:function(){var view=this._view;");
-		}
-		else {
-			code.append("bizRemoved:function(form,item,value){var view=form._view;");
-		}
-	}
-
-	@Override
-	public void visitedOnRemovedEventHandler(Removable removable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-		inOnRemovedEventHandler = false;
-	}
-
-	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		if (dataWidgetFieldsIncomplete) {
-			code.setLength(code.length() - 1);
-			code.append("],");
-			dataWidgetFieldsIncomplete = false;
-		}
-		code.append("bizSelected:function(){var view=this._view;");
-	}
-
-	@Override
-	public void visitedOnSelectedEventHandler(Selectable selectable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-	}
-
-	@Override
-	public void visitOnPickedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		code.append("bizPicked:function(form,item,value){var view=form._view;");
-	}
-
-	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-	}
-
-	@Override
-	public void visitOnClearedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		code.append("bizCleared:function(form,item,value){var view=form._view;");
-	}
-
-	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		code.append("},");
-	}
-
 	private void writeOutServerSideCallbackMethodIfNecessary() {
 		if (inOnAddedEventHandler) {
 			code.append("},bizAddedForServer:function(form,item,value){var view=form._view;");
@@ -2424,29 +2244,184 @@ pickListFields:[{name:'value'}],
 	}
 	
 	@Override
+	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
+		if (getCurrentForm() != null) {
+			writeOutServerSideCallbackMethodIfNecessary();
+		}
+		code.append(visitingOnBlur ? "view.doBlurryAction('" : "view.doAction('");
+		code.append(server.getActionName()).append("',");
+		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
+	}
+
+	@Override
+	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+		if (getCurrentForm() == null) {
+			code.append("changed:function(){var view=this._view;");
+		}
+		else {
+			code.append("changed:function(form,item,value){var view=form._view;");
+		}
+	}
+
+	@Override
+	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+	}
+
+	@Override
+	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
+		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
+	}
+
+	@Override
+	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		code.append("}},");
+	}
+
+	// indicates that we are blurring and we need to call special methods
+	// to potentially serialize calls to button actions after editorExit.
+	private boolean visitingOnBlur = false;
+	
+	@Override
+	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		visitingOnBlur = true;
+		
+		// This fires before the BizButton action() method if a button was clicked
+		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
+		code.append("blur:function(form,item){if(!isc.RPCManager.requestsArePending()){form._view._blurry=item;}},");
+		// This is called before or after the BizButton action depending on the browser.
+		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
+		code.append("editorExit:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
+	}
+
+	@Override
+	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		code.append("}},");
+		visitingOnBlur = false;
+	}
+
+	// Used to sort out server-side events into the bizEditedForServer() method.
+	private boolean inOnAddedEventHandler = false;
+
+	@Override
+	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+		if (dataWidgetFieldsIncomplete) {
+			code.setLength(code.length() - 1);
+			code.append("],");
+			dataWidgetFieldsIncomplete = false;
+		}
+		inOnAddedEventHandler = true;
+		if (getCurrentForm() == null) {
+			code.append("bizAdded:function(){var view=this._view;");
+		}
+		else {
+			code.append("bizAdded:function(form,item,value){var view=form._view;");
+		}
+	}
+
+	@Override
+	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+		inOnAddedEventHandler = false;
+	}
+
+	// Used to sort out server-side events into the bizEditedForServer() method.
+	private boolean inOnEditedEventHandler = false;
+
+	@Override
+	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+		if (dataWidgetFieldsIncomplete) {
+			code.setLength(code.length() - 1);
+			code.append("],");
+			dataWidgetFieldsIncomplete = false;
+		}
+		inOnEditedEventHandler = true;
+		if (getCurrentForm() == null) {
+			code.append("bizEdited:function(){var view=this._view;");
+		}
+		else {
+			code.append("bizEdited:function(form,item,value){var view=form._view;");
+		}
+	}
+
+	@Override
+	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+		inOnEditedEventHandler = false;
+	}
+
+	// Used to sort out server-side events into the bizEditedForServer() method.
+	private boolean inOnRemovedEventHandler = false;
+
+	@Override
+	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+		if (dataWidgetFieldsIncomplete) {
+			code.setLength(code.length() - 1);
+			code.append("],");
+			dataWidgetFieldsIncomplete = false;
+		}
+		inOnRemovedEventHandler = true;
+		if (getCurrentForm() == null) {
+			code.append("bizRemoved:function(){var view=this._view;");
+		}
+		else {
+			code.append("bizRemoved:function(form,item,value){var view=form._view;");
+		}
+	}
+
+	@Override
+	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+		inOnRemovedEventHandler = false;
+	}
+
+	@Override
+	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+		if (dataWidgetFieldsIncomplete) {
+			code.setLength(code.length() - 1);
+			code.append("],");
+			dataWidgetFieldsIncomplete = false;
+		}
+		code.append("bizSelected:function(){var view=this._view;");
+	}
+
+	@Override
+	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+	}
+
+	@Override
+	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		code.append("bizPicked:function(form,item,value){var view=form._view;");
+	}
+
+	@Override
+	public void visitedOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+	}
+
+	@Override
+	public void visitOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		code.append("bizCleared:function(form,item,value){var view=form._view;");
+	}
+
+	@Override
+	public void visitedOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		code.append("},");
+	}
+
+	@Override
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 											EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		if (! eventsWithNoForm) {
+		if (getCurrentForm() != null) {
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
 		code.append(visitingOnBlur ? "view.rerenderBlurryAction(" : "view.rerenderAction(");
 		code.append(Boolean.FALSE.equals(rerender.getClientValidation()) ? "false,'" : "true,'");
 		code.append(source.getSource()).append("');");
-	}
-
-	@Override
-	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
-													boolean parentVisible,
-													boolean parentEnabled) {
-		if (! eventsWithNoForm) {
-			writeOutServerSideCallbackMethodIfNecessary();
-		}
-		Action action = view.getAction(server.getActionName());
-		code.append(visitingOnBlur ? "view.doBlurryAction('" : "view.doAction('");
-		code.append(server.getActionName()).append("',");
-		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
 
 	@Override
@@ -2479,6 +2454,37 @@ pickListFields:[{name:'value'}],
 													boolean parentEnabled) {
 		code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
 		code.append("');");
+	}
+
+	@Override
+	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+		// do nothing - parameters are handled separately
+	}
+
+	@Override
+	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+		// do nothing - parameters are handled separately
+	}
+
+	@Override
+	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType)) {
+			return Integer.valueOf(100);
+		}
+		if (AttributeType.dateTime.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.time.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+		if (AttributeType.timestamp.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+
+		return null;
 	}
 
 	/**
@@ -2541,7 +2547,7 @@ pickListFields:[{name:'value'}],
 				}
 			}
 			if ((! specifiedWidth) && 
-					(visitedItem != null) && 
+					(getCurrentFormItem() != null) && 
 					(! (sizable instanceof ContentSpecifiedWidth))) {
 				builder.append("width:'*',");
 			}
@@ -2644,12 +2650,11 @@ pickListFields:[{name:'value'}],
 		}
 	}
 
-	private void bordered(Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
+	private static void bordered(String title, Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
-			String borderTitle = bordered.getBorderTitle();
 			builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
-			if (borderTitle != null) {
-				builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(Util.i18n(borderTitle, locale)));
+			if (title != null) {
+				builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(title));
 				builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 			}
 			if (definedPixelPadding == null) {
@@ -2686,10 +2691,11 @@ pickListFields:[{name:'value'}],
 							String displayName,
 							Boolean inActionPanel,
 							Boolean clientValidation,
-							String relativeIconFileName,
+							String iconUrl,
 							String iconStyleClass,
 							String tooltip,
 							String confirmationText,
+							char type,
 							List<Parameter> parameters,
 							String disabledConditionName,
 							String invisibleConditionName) {
@@ -2700,10 +2706,11 @@ pickListFields:[{name:'value'}],
 												implicitName,
 												displayName,
 												clientValidation,
-												relativeIconFileName,
+												iconUrl,
 												iconStyleClass,
 												tooltip,
 												confirmationText,
+												type,
 												parameters,
 												disabledConditionName,
 												invisibleConditionName,
@@ -2723,182 +2730,40 @@ pickListFields:[{name:'value'}],
 	// return null if the button should NOT be added
 	private String generateButton(String resourceName,
 									ImplicitActionName implicitName,
-									String displayName,
+									String label,
 									Boolean clientValidation,
-									String relativeIconFileName,
+									String iconUrl,
 									String iconStyleClass,
-									String tooltip,
+									String toolTip,
 									String confirmationText,
+									char type,
 									List<Parameter> parameters,
 									String disabledConditionName,
 									String invisibleConditionName,
 									Button button) { // null if called from an action defn
 		StringBuilder result = new StringBuilder(128);
-		String revisedRelativeIconFileName = relativeIconFileName;
-		char actionType = ' ';
+		result.append("isc.BizButton.create({validate:");
+		result.append(! Boolean.FALSE.equals(clientValidation));
+
 		if (implicitName == null) {
-			if (! user.canExecuteAction(document, resourceName)) {
-				return null; // cannot execute this action
-			}
-			result.append("isc.BizButton.create({validate:");
-			result.append(! Boolean.FALSE.equals(clientValidation));
 			result.append(",actionName:'").append(resourceName);
 		}
 		else {
-			result.append("isc.BizButton.create({validate:");
-			result.append(! Boolean.FALSE.equals(clientValidation));
 			result.append(",actionName:'");
-			switch (implicitName) {
-			case Add:
-				if (! user.canCreateDocument(document)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Add.gif";
-				}
-				actionType = 'A';
-				result.append(implicitName);
-				break;
-			case BizExport:
-				if (! user.canExecuteAction(document, resourceName)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/BizExport.png";
-				}
-				actionType = 'X';
+			if (ImplicitActionName.BizExport.equals(implicitName) ||
+					ImplicitActionName.BizImport.equals(implicitName) ||
+					ImplicitActionName.Download.equals(implicitName) ||
+					ImplicitActionName.Upload.equals(implicitName)) {
 				result.append(resourceName);
-				break;
-			case BizImport:
-				if (! user.canExecuteAction(document, resourceName)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/BizImport.png";
-				}
-				actionType = 'I';
-				result.append(resourceName);
-				break;
-			case Download:
-				if (! user.canExecuteAction(document, resourceName)) {
-					return null; // cannot execute this action
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Download.png";
-				}
-				actionType = 'L';
-				result.append(resourceName);
-				break;
-			case Upload:
-				if (! user.canExecuteAction(document, resourceName)) {
-					return null; // cannot execute this action
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Upload.png";
-				}
-				actionType = 'U';
-				result.append(resourceName);
-				break;
-			case Cancel:
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Cancel.gif";
-				}
-				actionType = 'C';
+			}
+			else {
 				result.append(implicitName);
-				break;
-			case Delete:
-				if (! user.canDeleteDocument(document)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Delete.gif";
-				}
-				actionType = 'D';
-				result.append(implicitName);
-				break;
-			case Edit:
-				if (! user.canReadDocument(document)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Edit.gif";
-				}
-				actionType = 'E';
-				result.append(implicitName);
-				break;
-			case New:
-				if (! user.canCreateDocument(document)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/New.gif";
-				}
-				actionType = 'N';
-				result.append(implicitName);
-				break;
-			case OK:
-				if ((! user.canUpdateDocument(document)) && 
-						(! user.canCreateDocument(document))) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/OK.gif";
-				}
-				actionType = 'O';
-				result.append(implicitName);
-				break;
-			case Remove:
-				if (! user.canDeleteDocument(document)) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Remove.gif";
-				}
-				actionType = 'R';
-				result.append(implicitName);
-				break;
-			case Report:
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Report.gif";
-				}
-				actionType = 'P';
-				result.append(implicitName);
-				break;
-			case Save:
-				if ((! user.canUpdateDocument(document)) && 
-						(! user.canCreateDocument(document))) {
-					return null;
-				}
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Save.gif";
-				}
-				actionType = 'S';
-				result.append(implicitName);
-				break;
-			case ZoomOut:
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/ZoomOut.gif";
-				}
-				actionType = 'Z';
-				result.append(implicitName);
-				break;
-			case Print:
-				if (revisedRelativeIconFileName == null) {
-					revisedRelativeIconFileName = "actions/Report.gif";
-				}
-				actionType = 'V';
-				result.append(implicitName);
-				break;
-			default:
-				throw new IllegalArgumentException(implicitName + " not catered for");
 			}
 		}
 		result.append("',type:'");
-		result.append(actionType);
-		if (revisedRelativeIconFileName != null) {
-			result.append("',icon:'../resources?_doc=");
-			result.append(module.getName()).append('.').append(document.getName());
-			result.append("&_n=").append(revisedRelativeIconFileName);
+		result.append(type);
+		if (iconUrl != null) {
+			result.append("',icon:'../").append(iconUrl);
 			result.append("',displayName:'");
 		}
 		else {
@@ -2907,25 +2772,24 @@ pickListFields:[{name:'value'}],
 				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 			}
 		}
-		result.append((displayName == null) ? ((implicitName == null) ? " " : Util.i18n(implicitName.getDisplayName(), locale)) : SmartClientGenerateUtils.processString(Util.i18n(displayName, locale)));
-		result.append("',tabIndex:999,");
+		result.append(SmartClientGenerateUtils.processString(label)).append("',tabIndex:999,");
 		if (button != null) {
 			size(button, null, result);
 		}
 		disabled(disabledConditionName, result);
 		invisible(invisibleConditionName, result);
-		if (tooltip != null) {
-			result.append("tooltip:'").append(SmartClientGenerateUtils.processString(Util.i18n(tooltip, locale))).append("',");
+		if (toolTip != null) {
+			result.append("tooltip:'").append(SmartClientGenerateUtils.processString(toolTip)).append("',");
 		}
 		if (confirmationText != null) {
-			result.append("confirm:'").append(SmartClientGenerateUtils.processString(Util.i18n(confirmationText, locale))).append("',");
+			result.append("confirm:'").append(SmartClientGenerateUtils.processString(confirmationText)).append("',");
 		}
 		appendParameters(parameters, result);
 		result.append("_view:view})");
 		
 		return result.toString();
 	}
-
+	
 	private static void appendParameters(List<Parameter> parameters, StringBuilder builder) {
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			builder.append("params:{");
@@ -2962,7 +2826,7 @@ pickListFields:[{name:'value'}],
 			builder.append("],");
 		}
 	}
-
+	
 	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
 															String typeOverride) {
 		SmartClientFieldDefinition def = SmartClientGenerateUtils.getField(user,
@@ -2974,17 +2838,17 @@ pickListFields:[{name:'value'}],
 		if (typeOverride != null) {
 			def.setType(typeOverride);
 		}
-		String title = (visitedItem == null) ? null : visitedItem.getLabel();
+		String title = getCurrentWidgetLabel();
 		if (title != null) {
-			def.setTitle(Util.i18n(title, locale));
+			def.setTitle(title);
 		}
-		Boolean required = (visitedItem == null) ? null : visitedItem.getRequired();
-		if (required != null) {
-			def.setRequired(required.booleanValue());
+		boolean required = isCurrentWidgetRequired();
+		if (required) {
+			def.setRequired(required);
 		}
-		String help = (visitedItem == null) ? null : visitedItem.getHelp();
+		String help = getCurrentWidgetHelp();
 		if (help != null) {
-			def.setHelpText(Util.i18n(help, locale));
+			def.setHelpText(help);
 		}
 		
 		code.append(def.toJavascript());

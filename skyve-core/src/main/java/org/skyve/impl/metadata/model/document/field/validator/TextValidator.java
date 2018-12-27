@@ -18,6 +18,8 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
@@ -77,7 +79,8 @@ public class TextValidator extends FieldValidator<String> {
 	}
 	
 	@Override
-	public void validate(String value,
+	public void validate(User user,
+							String value,
 							String binding,
 							String displayName,
 							Converter<String> converter,
@@ -134,14 +137,14 @@ public class TextValidator extends FieldValidator<String> {
 			}
 			
 			if (! valid) {
-				e.getMessages().add(new Message(binding, constructMessage(displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(user, displayName, converter)));
 			}
 		}
 	}
 
 	@Override
-	public String constructMessage(String displayName, Converter<String> converter) {
-		String message = getValidationMessage();
+	public String constructMessage(User user, String displayName, Converter<String> converter) {
+		String message = Util.i18n(getValidationMessage(), user.getLocale());
 		return (message != null) ? message : (displayName + " is not formatted correctly.");
 	}
 }
