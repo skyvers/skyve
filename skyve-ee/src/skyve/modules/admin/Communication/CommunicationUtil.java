@@ -154,7 +154,7 @@ public class CommunicationUtil {
 		ValidationException ve = new ValidationException();
 		TextValidator v = new TextValidator();
         v.setType(ValidatorType.email);
-        v.validate(resolvedSendTo, "email", "Email", null, ve);
+        v.validate(user, resolvedSendTo, "email", "Email", null, ve);
         if(!ve.getMessages().isEmpty()) {
         	if (ResponseMode.SILENT.equals(responseMode)) {
 				Util.LOGGER.log(Level.WARNING, ve.getStackTrace().toString());
