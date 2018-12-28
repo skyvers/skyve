@@ -165,7 +165,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
 
 	private UIComponent current; // current component being constructed
-	private Stack<Container> currentContainers = new Stack<>(); // used to determine how to add widgets to containers
 	private UIComponent facesView; // the result of construction
 	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
@@ -205,14 +204,10 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 	        current = layout;
         }
-        
-        currentContainers.push(view);
 	}
 
 	@Override
 	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
-        currentContainers.pop();
-
         // Add the toolbar(s) if this is a full view render or
         // a view with a widgetId = actions widgetId
         if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
@@ -293,13 +288,10 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (layout != null) {
 			current = lb.addTabLayout(null, component, layout);
 		}
-
-		currentContainers.push(tab);
 	}
 
 	@Override
 	public void renderedTab(String title, String icon16x16Url, Tab tab) {
-		currentContainers.pop();
 		current = lb.addedTab(null, current);
 	}
 
@@ -340,14 +332,10 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 		current = layout;
-
-		currentContainers.push(vbox);
 	}
 
 	@Override
 	public void renderedVBox(String borderTitle, VBox vbox) {
-		currentContainers.pop();
-
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
 			current = lb.addedBorderLayout(null, current);
@@ -400,14 +388,10 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 		current = layout;
-
-		currentContainers.push(hbox);
 	}
 
 	@Override
 	public void renderedHBox(String title, HBox hbox) {
-		currentContainers.pop();
-
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
 			current = lb.addedBorderLayout(null, current);
@@ -1983,6 +1967,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									Integer responsiveWidth,
 									Integer percentageWidth,
 									String invisibleConditionName) {
+		Stack<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
@@ -1999,6 +1984,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void addedToContainer() {
+		Stack<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}
