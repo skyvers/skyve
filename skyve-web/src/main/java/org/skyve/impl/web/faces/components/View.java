@@ -11,17 +11,13 @@ import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
 import org.skyve.CORE;
-import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
-import org.skyve.impl.web.faces.pipeline.FacesViewVisitor;
+import org.skyve.impl.web.faces.pipeline.FacesViewRenderer;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
@@ -158,32 +154,30 @@ public class View extends HtmlPanelGroup {
     	layoutBuilder.setUpdate(update);
     	layoutBuilder.setUserAgentType(userAgentType);
 
-        FacesViewVisitor fvv = null;
+    	FacesViewRenderer fvr = null;
         org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit.toString());
         if (view != null) {
-        	fvv = new FacesViewVisitor(user,
-										(CustomerImpl) customer,
-										(ModuleImpl) module, 
-										(DocumentImpl) document,
-										(ViewImpl) view,
+        	fvr = new FacesViewRenderer(user,
+										module, 
+										document,
+										view,
 										widgetId,
 										componentBuilder,
 										layoutBuilder);
-            fvv.visit();
-            result.add(fvv.getFacesView());
+        	fvr.visit();
+            result.add(fvr.getFacesView());
         }
         view = repository.getView(uxui, customer, document, ViewType.create.toString());
         if (view != null) {
-            fvv = new FacesViewVisitor(user,
-                                          (CustomerImpl) customer,
-                                          (ModuleImpl) module, 
-                                          (DocumentImpl) document,
-                                          (ViewImpl) view,
+        	fvr = new FacesViewRenderer(user,
+                                          module, 
+                                          document,
+                                          view,
                                           widgetId,
                                           componentBuilder,
                                           layoutBuilder);
-            fvv.visit();
-            result.add(fvv.getFacesView());
+        	fvr.visit();
+            result.add(fvr.getFacesView());
         }
         
         return result;

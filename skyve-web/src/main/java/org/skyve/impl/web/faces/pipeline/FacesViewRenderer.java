@@ -15,11 +15,11 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
+import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Text;
@@ -27,8 +27,6 @@ import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
-import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -142,7 +140,10 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -156,9 +157,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
-@Deprecated
-public class FacesViewVisitor extends ViewVisitor {
-	private User user;
+public class FacesViewRenderer extends ViewRenderer {
 	private ComponentBuilder cb;
 	private LayoutBuilder lb;
 	private boolean createView;
@@ -170,22 +169,19 @@ public class FacesViewVisitor extends ViewVisitor {
 	private UIComponent facesView; // the result of construction
 	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
-	public FacesViewVisitor(User user, 
-							CustomerImpl customer,
-							ModuleImpl module,
-							DocumentImpl document,
-							ViewImpl view,
-							String widgetId,
-							ComponentBuilder cb,
-							LayoutBuilder lb) {
-		super(customer, module, document, view);
-		this.user = user;
+	public FacesViewRenderer(User user,
+								Module module,
+								Document document,
+								View view,
+								String widgetId,
+								ComponentBuilder cb,
+								LayoutBuilder lb) {
+		super(user, module, document, view);
 		String viewName = view.getName();
 		createView = ViewType.create.toString().equals(viewName);
 		this.widgetId = widgetId;
 		this.cb = cb;
 		this.lb = lb;
-		this.view = view;
 	}
 	
 	public UIComponent getFacesView() {
@@ -193,7 +189,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() {
+	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
 	    // Ensure visibility is set for both create and edit views
         current = cb.view(null, createView ? "created" : "notCreated");
         facesView = current;
@@ -214,7 +210,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedView() {
+	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
         currentContainers.pop();
 
         // Add the toolbar(s) if this is a full view render or
@@ -245,9 +241,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private StringBuilder stickyTabScript = new StringBuilder(128);
 	
 	@Override
-	public void visitTabPane(TabPane tabPane,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderTabPane(TabPane tabPane) {
 		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName(), stickyTabScript);
         addToContainer(component, 
         				tabPane.getPixelWidth(), 
@@ -262,9 +256,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedTabPane(TabPane tabPane,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedTabPane(TabPane tabPane) {
 		addedToContainer();
 
         // remember tab unless the tab selection is being controlled by the view.
@@ -291,11 +283,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 		stickyTabScript.setLength(0);
 	}
-	
+
 	@Override
-	public void visitTab(Tab tab,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderTab(String title, String icon16x16Url, Tab tab) {
 		UIComponent component = cb.tab(null, tab);
 		lb.addTab(current, component);
 		current = component;
@@ -308,17 +298,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedTab(Tab tab,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderedTab(String title, String icon16x16Url, Tab tab) {
 		currentContainers.pop();
 		current = lb.addedTab(null, current);
 	}
 
 	@Override
-	public void visitVBox(VBox vbox,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderVBox(String borderTitle, VBox vbox) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
@@ -359,9 +345,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedVBox(VBox vbox,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedVBox(String borderTitle, VBox vbox) {
 		currentContainers.pop();
 
 		// Cater for border, if one was added
@@ -380,9 +364,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitHBox(HBox hbox,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderHBox(String borderTitle, HBox hbox) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
@@ -423,9 +405,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedHBox(HBox hbox,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedHBox(String title, HBox hbox) {
 		currentContainers.pop();
 
 		// Cater for border, if one was added
@@ -447,9 +427,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private int currentFormColumn;
 	
 	@Override
-	public void visitForm(Form form,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderForm(String borderTitle, Form form) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
@@ -491,9 +469,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedForm(Form form,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedForm(String borderTitle, Form form) {
 		currentForm = null; // reset form
 
 		// Cater for border, if one was added
@@ -512,18 +488,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFormColumn(FormColumn column,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderFormColumn(FormColumn column) {
 		// Nothing to do here - for columns are a spec for html tables in this renderer.
 	}
 
 	private UIComponent formRowLayout = null;
 	
 	@Override
-	public void visitFormRow(FormRow row,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderFormRow(FormRow row) {
 		formRowLayout = lb.formRowLayout(null, row);
 		if (formRowLayout != null) {
 			current = lb.addFormRowLayout(null, current, formRowLayout);
@@ -534,23 +506,17 @@ public class FacesViewVisitor extends ViewVisitor {
 	private FormItem currentFormItem;
 	
 	@Override
-	public void visitFormItem(FormItem item,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderFormItem(String label, boolean required, String help, FormItem item) {
 		currentFormItem = item;
 	}
 
 	@Override
-	public void visitedFormItem(FormItem item,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedFormItem(String label, boolean required, String help, FormItem item) {
 		currentFormItem = null;
 	}
 
 	@Override
-	public void visitedFormRow(FormRow row,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedFormRow(FormRow row) {
 		if (formRowLayout != null) {
 			current = lb.addedFormRowLayout(null, formRowLayout);
 		}
@@ -613,12 +579,28 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 	}
-	
+
 	@Override
-	public void visitButton(Button button,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		org.skyve.metadata.view.Action action = view.getAction(button.getActionName());
+	public void renderFormButton(Action action,
+									String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									Button button) {
+		renderButton(action, label, iconUrl, iconStyleClass, toolTip, confirmationText, type, button);
+	}
+
+	@Override
+	public void renderButton(Action action,
+								String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								char type,
+								Button button) {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
@@ -645,9 +627,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator locator,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderFormGeoLocator(GeoLocator locator) {
+		renderGeoLocator(locator);
+	}
+
+	@Override
+	public void renderGeoLocator(GeoLocator locator) {
 	    UIComponent l = cb.label(null, "geoLocator"); // TODO geolocator
 	    addComponent(null, 
 	    				false, 
@@ -661,25 +646,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeometry(Geometry geometry,
-									boolean parentVisible,
-									boolean parentEnabled) {
-	    UIComponent l = cb.label(null, "geometry"); // TODO geometry
-	    addComponent(null, 
-	    				false, 
-	    				geometry.getInvisibleConditionName(), 
-	    				geometry.showsLabelByDefault(), 
-	    				null,
-	    				l, 
-	    				geometry.getPixelWidth(), 
-	    				null, 
-	    				null);
-	}
-
-	@Override
-	public void visitMap(MapDisplay map,
-							boolean parentVisible,
-							boolean parentEnabled) {
+	public void renderMap(MapDisplay map) {
 	    UIComponent l = cb.label(null, "map"); // TODO map
 	    addComponent(null, 
 	    				false, 
@@ -693,9 +660,24 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDialogButton(DialogButton button,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderBoundColumnGeometry(Geometry geometry) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderFormGeometry(Geometry geometry) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderFormDialogButton(String label, DialogButton button) {
+		renderDialogButton(label, button);
+	}
+
+	@Override
+	public void renderDialogButton(String label, DialogButton button) {
 	    UIComponent bn = cb.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
 	    				false, 
@@ -709,23 +691,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDynamicImage(DynamicImage image,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
-		UIComponent i = cb.dynamicImage(null, image, module.getName(), document.getName());
-		addComponent(null, 
-						false, 
-						image.getInvisibleConditionName(), 
-						false,
-						null,
-						i, 
-						image.getPixelWidth(), 
-						image.getResponsiveWidth(),
-						image.getPercentageWidth());
+	public void renderFormSpacer(Spacer spacer) {
+		renderSpacer(spacer);
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) {
+	public void renderSpacer(Spacer spacer) {
 		UIComponent component = cb.spacer(null, spacer);
 		if (component != null) {
 			addComponent(null, 
@@ -741,9 +712,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitStaticImage(StaticImage image,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderFormStaticImage(String fileUrl, StaticImage image) {
+		renderStaticImage(fileUrl, image);
+	}
+
+	@Override
+	public void renderStaticImage(String fileUrl, StaticImage image) {
 		UIComponent i = cb.staticImage(null, image);
 		addComponent(null, 
 						false, 
@@ -757,34 +731,41 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitBlurb(Blurb blurb,
-							boolean parentVisible,
-							boolean parentEnabled) {
-		String value = null;
-		String binding = null;
-		String markup = blurb.getMarkup();
-		if (markup.indexOf('{') > -1) {
-			binding = markup;
-		}
-		else {
-			value = markup;
-		}
-		UIComponent c = cb.blurb(null, listVar, value, binding, blurb);
-		addComponent(null, 
-						false, 
-						blurb.getInvisibleConditionName(), 
-						blurb.showsLabelByDefault(),
-						null,
-						c, 
-						blurb.getPixelWidth(), 
-						null, 
-						null);
+	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+		renderStaticImage(fileUrl, image);
 	}
 
 	@Override
-	public void visitLink(final Link link,
-	                        boolean parentVisible,
-	                        boolean parentEnabled) {
+	public void renderContainerColumnDynamicImage(DynamicImage image) {
+		renderDynamicImage(image);
+	}
+
+	@Override
+	public void renderDynamicImage(DynamicImage image) {
+		UIComponent i = cb.dynamicImage(null, image, module.getName(), document.getName());
+		addComponent(null, 
+						false, 
+						image.getInvisibleConditionName(), 
+						false,
+						null,
+						i, 
+						image.getPixelWidth(), 
+						image.getResponsiveWidth(),
+						image.getPercentageWidth());
+	}
+
+	@Override
+	public void renderFormLink(String value, Link link) {
+		renderLink(value, link);
+	}
+
+	@Override
+	public void renderContainerColumnLink(String value, Link link) {
+		renderLink(value, link);
+	}
+
+	@Override
+	public void renderLink(String value, Link link) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
 		final ReferenceTarget target = link.getTarget();
 		final AtomicReference<UIComponent> c = new AtomicReference<>();
@@ -889,30 +870,71 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLabel(Label label,
-	                        boolean parentVisible,
-	                        boolean parentEnabled) {
-		String value = label.getValue();
+	public void renderFormBlurb(String markup, Blurb blurb) {
+		renderBlurb(markup, blurb);
+	}
+
+	@Override
+	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+		renderBlurb(markup, blurb);
+	}
+
+	@Override
+	public void renderBlurb(String markup, Blurb blurb) {
+		String value = null;
+		String binding = null;
+		String blurbMarkup = blurb.getMarkup();
+		if (blurbMarkup.indexOf('{') > -1) {
+			binding = blurbMarkup;
+		}
+		else {
+			value = blurbMarkup;
+		}
+		UIComponent c = cb.blurb(null, listVar, value, binding, blurb);
+		addComponent(null, 
+						false, 
+						blurb.getInvisibleConditionName(), 
+						blurb.showsLabelByDefault(),
+						null,
+						c, 
+						blurb.getPixelWidth(), 
+						null, 
+						null);
+	}
+
+	@Override
+	public void renderFormLabel(String value, Label label) {
+		renderLabel(value, label);
+	}
+
+	@Override
+	public void renderContainerColumnLabel(String value, Label label) {
+		renderLabel(value, label);
+	}
+
+	@Override
+	public void renderLabel(String value, Label label) {
+		String labelValue = label.getValue();
 		String binding = label.getBinding();
-		if ((value == null) && (binding == null)) {
+		if ((labelValue == null) && (binding == null)) {
 			// Find the display name if applicable
-			value = "Label";
+			labelValue = "Label";
 			String displayBinding = label.getFor();
 			if (displayBinding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, displayBinding);
 				if (target != null) {
 					Attribute attribute = target.getAttribute();
 					if (attribute != null) {
-						value = String.format("%s %s:", attribute.getDisplayName(), attribute.isRequired() ? "*" : ""); 
+						labelValue = String.format("%s %s:", attribute.getDisplayName(), attribute.isRequired() ? "*" : ""); 
 					}
 				}
 			}
 		}
-		else if ((value != null) && value.indexOf('{') > -1) {
-			binding = value;
-			value = null;
+		else if ((labelValue != null) && labelValue.indexOf('{') > -1) {
+			binding = labelValue;
+			labelValue = null;
 		}
-	    UIComponent c = cb.label(null, listVar, value, binding, label);
+	    UIComponent c = cb.label(null, listVar, labelValue, binding, label);
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 
@@ -925,9 +947,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitProgressBar(ProgressBar progressBar,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderFormProgressBar(ProgressBar progressBar) {
 	    UIComponent p = cb.label(null, "progressBar"); // TODO progress bar
 	    addComponent(null, 
 	    				false, 
@@ -948,9 +968,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private Document listWidgetDrivingDocument;
 	
 	@Override
-	public void visitListGrid(ListGrid grid,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderListGrid(String title, ListGrid grid) {
 		visitListWidget(grid);
 		UIComponent l = cb.listGrid(null,
 										listWidgetModelDocumentName,
@@ -960,11 +978,26 @@ public class FacesViewVisitor extends ViewVisitor {
 										user.canCreateDocument(listWidgetDrivingDocument));
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
-	
+
 	@Override
-	public void visitListRepeater(ListRepeater repeater,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderedListGrid(String title, ListGrid grid) {
+		visitedListWidget();
+	}
+
+	@Override
+	public void renderListRepeater(String title, ListRepeater repeater) {
 		visitListWidget(repeater);
 		UIComponent r = cb.listRepeater(null,
 											listWidgetModelDocumentName, 
@@ -975,6 +1008,48 @@ public class FacesViewVisitor extends ViewVisitor {
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 											Boolean.TRUE.equals(repeater.getShowGrid()));
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+	}
+
+	@Override
+	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderedListRepeater(String title, ListRepeater repeater) {
+		visitedListWidget();
+	}
+
+	@Override
+	public void renderTreeGrid(String title, TreeGrid grid) {
+		UIComponent l = cb.label(null, "treeGrid");
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
+		currentGrid = grid;
+	}
+
+	@Override
+	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderedTreeGrid(String title, TreeGrid grid) {
+		currentGrid = null;
+		addedToContainer();
 	}
 
 	private void visitListWidget(AbstractListWidget widget) {
@@ -1001,21 +1076,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 		currentGrid = widget;		
 	}
-	
-	@Override
-	public void visitedListGrid(ListGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		visitedListWidget();
-	}
 
-	@Override
-	public void visitedListRepeater(ListRepeater repeater,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		visitedListWidget();
-	}
-	
 	private void visitedListWidget() {
 		currentGrid = null;
 		listWidgetModelDocumentName = null;
@@ -1025,28 +1086,11 @@ public class FacesViewVisitor extends ViewVisitor {
 		addedToContainer();
 	}
 
-	@Override
-	public void visitTreeGrid(TreeGrid grid,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		UIComponent l = cb.label(null, "treeGrid");
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
-		currentGrid = grid;
-	}
-
-	@Override
-	public void visitedTreeGrid(TreeGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		currentGrid = null;
-		addedToContainer();
-	}
-
 	private String listBinding;
 	private String listVar;
 	
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void renderDataGrid(String title, DataGrid grid) {
 		// Determine if the grid collection is ordered
 		listBinding = grid.getBinding();
 		boolean ordered = false;
@@ -1072,7 +1116,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void renderedDataGrid(String title, DataGrid grid) {
+		visitedDataWidget(grid);
+	}
+
+	@Override
+	public void renderDataRepeater(String title, DataRepeater repeater) {
 		// Create the data repeater faces component
 		listBinding = repeater.getBinding();
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
@@ -1086,14 +1135,9 @@ public class FacesViewVisitor extends ViewVisitor {
 			fragment = r;
 		}
 	}
-	
+
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-		visitedDataWidget(grid);
-	}
-	
-	@Override
-	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void renderedDataRepeater(String title, DataRepeater repeater) {
 		visitedDataWidget(repeater);
 	}
 
@@ -1137,11 +1181,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	private DataGridBoundColumn currentDataGridBoundColumn = null;
 	
 	@Override
-	public void visitDataGridBoundColumn(DataGridBoundColumn column,
-	                                        boolean parentVisible,
-	                                        boolean parentEnabled) {
+	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+		renderDataGridBoundColumn(title, column);
+	}
+
+	@Override
+	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		currentDataGridBoundColumn = column;
-		String title = column.getTitle();
+		String columnTitle = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
 			binding = Bean.BIZ_KEY;
@@ -1153,8 +1200,8 @@ public class FacesViewVisitor extends ViewVisitor {
 			if (target != null) {
 				Attribute targetAttribute = target.getAttribute();
 				if (targetAttribute != null) {
-					if (title == null) {
-						title = targetAttribute.getDisplayName();
+					if (columnTitle == null) {
+						columnTitle = targetAttribute.getDisplayName();
 					}
 					if (targetAttribute instanceof Association) {
 						sb.setLength(0);
@@ -1168,30 +1215,39 @@ public class FacesViewVisitor extends ViewVisitor {
 												(AbstractDataWidget) currentGrid,
 												column, 
 												listVar,
-												title, 
+												columnTitle, 
 												binding, 
 												gridColumnExpression);
 	}
 
 	@Override
-	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
-	                                        boolean parentVisible,
-	                                        boolean parentEnabled) {
+	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+		renderedDataGridBoundColumn(title, column);
+	}
+
+	@Override
+	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		current = cb.addedDataGridBoundColumn(null, current);
 		currentDataGridBoundColumn = null;
 	}
 
 	@Override
-	public void visitDataGridContainerColumn(DataGridContainerColumn column,
-	                                            boolean parentVisible,
-	                                            boolean parentEnabled) {
+	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+		renderDataGridContainerColumn(title, column);
+	}
+
+	@Override
+	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
         current = cb.addDataGridContainerColumn(null, current, (AbstractDataWidget) currentGrid, column);
 	}
 
 	@Override
-	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
-	                                            boolean parentVisible,
-	                                            boolean parentEnabled) {
+	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+		renderedDataGridContainerColumn(title, column);
+	}
+
+	@Override
+	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		current = cb.addedDataGridContainerColumn(null, current);
 	}
 
@@ -1199,9 +1255,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	private UIComponentBase eventSource = null;
 	
 	@Override
-	public void visitCheckBox(CheckBox checkBox,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderBoundColumnCheckBox(CheckBox checkBox) {
+		renderFormCheckBox(checkBox);
+	}
+
+	@Override
+	public void renderFormCheckBox(CheckBox checkBox) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(checkBox);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1222,16 +1281,17 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCheckBox(CheckBox checkBox,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
+		renderedFormCheckBox(checkBox);
+	}
+
+	@Override
+	public void renderedFormCheckBox(CheckBox checkBox) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitCheckMembership(CheckMembership membership,
-	                                    boolean parentVisible,
-	                                    boolean parentEnabled) {
+	public void renderCheckMembership(CheckMembership membership) {
 //		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
         UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
@@ -1239,17 +1299,18 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCheckMembership(CheckMembership membership,
-	                                    boolean parentVisible,
-	                                    boolean parentEnabled) {
+	public void renderedCheckMembership(CheckMembership membership) {
 	    addedToContainer();
 	    eventSource = null;
 	}
 
 	@Override
-	public void visitColourPicker(ColourPicker colour,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderBoundColumnColourPicker(ColourPicker colour) {
+		renderFormColourPicker(colour);
+	}
+
+	@Override
+	public void renderFormColourPicker(ColourPicker colour) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(colour);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1270,16 +1331,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedColourPicker(ColourPicker colour,
-	                                    boolean parentVisible,
-	                                    boolean parentEnabled) {
+	public void renderedBoundColumnColourPicker(ColourPicker colour) {
+		renderedFormColourPicker(colour);
+	}
+
+	@Override
+	public void renderedFormColourPicker(ColourPicker colour) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitCombo(Combo combo,
-	                        boolean parentVisible,
-	                        boolean parentEnabled) {
+	public void renderBoundColumnCombo(Combo combo) {
+		renderFormCombo(combo);
+	}
+
+	@Override
+	public void renderFormCombo(Combo combo) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(combo);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1300,16 +1367,27 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCombo(Combo combo,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderedBoundColumnCombo(Combo combo) {
+		renderedFormCombo(combo);
+	}
+
+	@Override
+	public void renderedFormCombo(Combo combo) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitContentImage(ContentImage image,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderBoundColumnContentImage(ContentImage image) {
+		renderFormContentImage(image);
+	}
+
+	@Override
+	public void renderContainerColumnContentImage(ContentImage image) {
+		renderFormContentImage(image);
+	}
+
+	@Override
+	public void renderFormContentImage(ContentImage image) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(image);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1329,9 +1407,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitContentLink(ContentLink link,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderBoundColumnContentLink(String value, ContentLink link) {
+		renderFormContentLink(value, link);
+	}
+
+	@Override
+	public void renderFormContentLink(String value, ContentLink link) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1351,9 +1432,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitHTML(HTML html,
-                            boolean parentVisible,
-                            boolean parentEnabled) {
+	public void renderBoundColumnHTML(HTML html) {
+		renderFormHTML(html);
+	}
+
+	@Override
+	public void renderFormHTML(HTML html) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(html);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1373,26 +1457,20 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitListMembership(ListMembership membership,
-										boolean parentVisible,
-										boolean parentEnabled) {
+	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		UIComponentBase c = (UIComponentBase) cb.listMembership(null, membership);
 		eventSource = c;
 		addToContainer(c, membership.getListWidthInPixels(), null, null, membership.getInvisibleConditionName());
 	}
 
 	@Override
-	public void visitedListMembership(ListMembership membership,
-										boolean parentVisible,
-										boolean parentEnabled) {
+	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		addedToContainer();
 		eventSource = null;
 	}
 
 	@Override
-	public void visitComparison(Comparison comparison,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderComparison(Comparison comparison) {
 //		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
         UIComponent c = cb.label(null, "comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
@@ -1400,9 +1478,20 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookupDescription(LookupDescription lookup,
-	                                    boolean parentVisible,
-	                                    boolean parentEnabled) {
+	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+													boolean canCreate,
+													boolean canUpdate,
+													String descriptionBinding,
+													LookupDescription lookup) {
+		renderFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+	}
+
+	@Override
+	public void renderFormLookupDescription(MetaDataQueryDefinition query,
+												boolean canCreate,
+												boolean canUpdate,
+												String descriptionBinding,
+												LookupDescription lookup) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
 		SmartClientLookupDefinition ldef = def.getLookup();
 		String title = def.getTitle();
@@ -1431,16 +1520,25 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup,
-	                                        boolean parentVisible,
-	                                        boolean parentEnabled) {
+	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+														boolean canCreate,
+														boolean canUpdate,
+														String descriptionBinding,
+														LookupDescription lookup) {
+		renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+	}
+
+	@Override
+	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+												boolean canCreate,
+												boolean canUpdate,
+												String descriptionBinding,
+												LookupDescription lookup) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderFormLookup(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate, Lookup lookup) {
 		UIComponent c = cb.label(null, "lookup"); // TODO lookup
 		addComponent(null, 
 						false, 
@@ -1454,16 +1552,17 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderedFormLookup(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate, Lookup lookup) {
 		// do nothing
 	}
 
 	@Override
-	public void visitPassword(Password password,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderBoundColumnPassword(Password password) {
+		renderFormPassword(password);
+	}
+
+	@Override
+	public void renderFormPassword(Password password) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(password);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1484,16 +1583,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedPassword(Password password,
-									boolean parentVisible,
-									boolean parentEnabled) {
+	public void renderedBoundColumnPassword(Password password) {
+		renderedFormPassword(password);
+	}
+
+	@Override
+	public void renderedFormPassword(Password password) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitRadio(Radio radio,
-                            boolean parentVisible,
-                            boolean parentEnabled) {
+	public void renderBoundColumnRadio(Radio radio) {
+		renderFormRadio(radio);
+	}
+
+	@Override
+	public void renderFormRadio(Radio radio) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(radio);
 		String title = def.getTitle();
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
@@ -1514,46 +1619,58 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedRadio(Radio radio,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderedBoundColumnRadio(Radio radio) {
+		renderedFormRadio(radio);
+	}
+
+	@Override
+	public void renderedFormRadio(Radio radio) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitRichText(RichText richText,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(richText);
+	public void renderBoundColumnRichText(RichText text) {
+		renderFormRichText(text);
+	}
+
+	@Override
+	public void renderFormRichText(RichText text) {
+		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.richText(null, listVar, richText, title, required);
+        UIComponentBase c = (UIComponentBase) cb.richText(null, listVar, text, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
-        				richText.getInvisibleConditionName(), 
-        				richText.showsLabelByDefault(),
+        				text.getInvisibleConditionName(), 
+        				text.showsLabelByDefault(),
         				helpText,
         				c, 
-        				richText.getPixelWidth(), 
+        				text.getPixelWidth(), 
         				null, 
         				null);
 	}
 
 	@Override
-	public void visitedRichText(RichText richText,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderedBoundColumnRichText(RichText text) {
+		renderedFormRichText(text);
+	}
+
+	@Override
+	public void renderedFormRichText(RichText text) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitSlider(Slider slider,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderBoundColumnSlider(Slider slider) {
+		renderFormSlider(slider);		
+	}
+
+	@Override
+	public void renderFormSlider(Slider slider) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
@@ -1572,16 +1689,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedSlider(Slider slider,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderedBoundColumnSlider(Slider slider) {
+		renderedFormSlider(slider);
+	}
+
+	@Override
+	public void renderedFormSlider(Slider slider) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitSpinner(Spinner spinner,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderBoundColumnSpinner(Spinner spinner) {
+		renderFormSpinner(spinner);
+	}
+
+	@Override
+	public void renderFormSpinner(Spinner spinner) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(spinner);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1602,16 +1725,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedSpinner(Spinner spinner,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderedBoundColumnSpinner(Spinner spinner) {
+		renderedFormSpinner(spinner);
+	}
+
+	@Override
+	public void renderedFormSpinner(Spinner spinner) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitTextArea(TextArea text,
-	                            boolean parentVisible,
-	                            boolean parentEnabled) {
+	public void renderBoundColumnTextArea(TextArea text) {
+		renderFormTextArea(text);
+	}
+
+	@Override
+	public void renderFormTextArea(TextArea text) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1632,16 +1761,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedTextArea(TextArea text,
-	                                boolean parentVisible,
-	                                boolean parentEnabled) {
+	public void renderedBoundColumnTextArea(TextArea text) {
+		renderedFormTextArea(text);
+	}
+
+	@Override
+	public void renderedFormTextArea(TextArea text) {
 		eventSource = null;
 	}
 
 	@Override
-	public void visitTextField(TextField text,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void renderBoundColumnTextField(TextField text) {
+		renderFormTextField(text);
+	}
+
+	@Override
+	public void renderFormTextField(TextField text) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1699,8 +1834,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
-		// do nothing - this is for web 2 ux uis only
+	public void renderedBoundColumnTextField(TextField text) {
+		renderedFormTextField(text);
+	}
+
+	@Override
+	public void renderedFormTextField(TextField text) {
+		eventSource = null;
 	}
 
 	private static javax.faces.convert.Converter convertConverter(Converter<?> converter, AttributeType type) {
@@ -1828,14 +1968,18 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitedTextField(TextField text,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		eventSource = null;
+	public void renderFormInject(Inject inject) {
+		// do nothing - this is for web 2 ux uis only
 	}
 
-	private void addToContainer(UIComponent component, 
-									Integer pixelWidth, 
+	@Override
+	public void renderInject(Inject inject) {
+		// do nothing - this is for web 2 ux uis only
+	}
+
+
+	private void addToContainer(UIComponent component,
+									Integer pixelWidth,
 									Integer responsiveWidth,
 									Integer percentageWidth,
 									String invisibleConditionName) {
@@ -1845,15 +1989,15 @@ public class FacesViewVisitor extends ViewVisitor {
 		Container currentContainer = currentContainers.peek();
 
 		current = lb.addToContainer(null,
-										currentContainer, 
-										current, 
-										component, 
-										pixelWidth, 
-										responsiveWidth, 
+										currentContainer,
+										current,
+										component,
+										pixelWidth,
+										responsiveWidth,
 										percentageWidth,
 										invisibleConditionName);
 	}
-	
+
 	private void addedToContainer() {
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
@@ -1863,190 +2007,18 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		String binding = changeable.getBinding();
-		List<EventAction> changedActions = changeable.getChangedActions();
-		cb.addAjaxBehavior(eventSource, "change", listBinding, listVar, binding, changedActions);
-		// Add this special event for date selection on calendar as "changed" doesn't fire on select
-		if (eventSource instanceof Calendar) {
-			cb.addAjaxBehavior(eventSource, "dateSelect", listBinding, listVar, binding, changedActions);
-		}
-	}
-
-	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitOnFocusEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		cb.addAjaxBehavior(eventSource, "focus", listBinding, listVar, binding, blurable.getFocusActions());
-	}
-
-	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitOnBlurEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		cb.addAjaxBehavior(eventSource, "blur", listBinding, listVar, binding, blurable.getBlurActions());
-	}
-
-	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitOnAddedEventHandler(Addable addable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitedOnAddedEventHandler(Addable addable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitOnEditedEventHandler(Editable editable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitedOnEditedEventHandler(Editable editable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitOnRemovedEventHandler(Removable removable,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitedOnRemovedEventHandler(Removable removable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
-		// TODO - need to account for data/list grids in here
-	}
-
-	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// TODO - need to account for data/list/tree grids in here
-	}
-
-	@Override
-	public void visitedOnSelectedEventHandler(Selectable editable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// TODO - need to account for data/list/tree grids in here
-	}
-
-	@Override
-	public void visitOnPickedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		cb.addAjaxBehavior(eventSource, "itemSelect", listBinding, listVar, lookup.getBinding(), lookup.getPickedActions());
-	}
-
-	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitOnClearedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled) {
-		cb.addAjaxBehavior(eventSource, "itemUnselect", listBinding, listVar, lookup.getBinding(), lookup.getClearedActions());
-	}
-
-	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
-											boolean parentVisible,
-											boolean parentEnabled) {
+	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
-	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
-													boolean parentVisible,
-													boolean parentEnabled) {
-		// event actions are handled when visiting the action handlers
-	}
-
-	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// event actions are handled when visiting the action handlers
-	}
-
-	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// event actions are handled when visiting the action handlers
-	}
-
-	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// event actions are handled when visiting the action handlers
-	}
-
-	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
-													boolean parentVisible,
-													boolean parentEnabled) {
-		// event actions are handled when visiting the action handlers
-	}
-
-	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void renderCustomAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
@@ -2059,6 +2031,188 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void renderAddAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+//		processImplicitAction(action, ImplicitActionName.Add);
+	}
+
+	@Override
+	public void renderRemoveAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type, 
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Remove);
+	}
+
+	@Override
+	public void renderZoomOutAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.ZoomOut);
+	}
+
+	@Override
+	public void renderNavigateAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+//		processImplicitAction(action, ImplicitActionName.Navigate);
+	}
+
+	@Override
+	public void renderOKAction(String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								char type,
+								ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.OK);
+	}
+
+	@Override
+	public void renderSaveAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Save);
+	}
+
+	@Override
+	public void renderCancelAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Cancel);
+	}
+
+	@Override
+	public void renderDeleteAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Delete);
+	}
+
+	/**
+	 * Create a button with a href URL that looks like...
+	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
+	 * 
+	 * @param action
+	 */
+	@Override
+	public void renderReportAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Report);
+	}
+
+	@Override
+	public void renderBizExportAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.BizExport);
+	}
+
+	@Override
+	public void renderBizImportAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.BizImport);
+	}
+
+	@Override
+	public void renderDownloadAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Download);
+	}
+
+	@Override
+	public void renderUploadAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		processImplicitAction(action, ImplicitActionName.Upload);
+	}
+
+	@Override
+	public void renderNewAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+//		processImplicitAction(action, ImplicitActionName.New);
+	}
+
+	@Override
+	public void renderEditAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+//		processImplicitAction(action, ImplicitActionName.Edit);
+	}
+
+	@Override
+	public void renderPrintAction(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									char type,
+									ActionImpl action) {
+		// TODO implement
 	}
 
 	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
@@ -2093,98 +2247,160 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 	}
-	
+
 	@Override
-	public void visitAddAction(ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.Add);
+	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Remove);
+	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+		String binding = changeable.getBinding();
+		List<EventAction> changedActions = changeable.getChangedActions();
+		cb.addAjaxBehavior(eventSource, "change", listBinding, listVar, binding, changedActions);
+		// Add this special event for date selection on calendar as "changed" doesn't fire on select
+		if (eventSource instanceof Calendar) {
+			cb.addAjaxBehavior(eventSource, "dateSelect", listBinding, listVar, binding, changedActions);
+		}
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.ZoomOut);
+	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.Navigate);
+	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		cb.addAjaxBehavior(eventSource, "focus", listBinding, listVar, binding, blurable.getFocusActions());
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.OK);
+	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Save);
+	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		cb.addAjaxBehavior(eventSource, "blur", listBinding, listVar, binding, blurable.getBlurActions());
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Cancel);
+	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Delete);
-	}
-
-	/**
-	 * Create a button with a href URL that looks like...
-	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
-	 * 
-	 * @param action
-	 */
-	@Override
-	public void visitReportAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Report);
+	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.BizExport);
+	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.BizImport);
+	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Upload);
+	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Download);
+	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.New);
+	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.Edit);
+	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+		// TODO - need to account for data/list/tree grids in here
 	}
 
 	@Override
-	public void visitParameter(Parameter parameter,
-								boolean parentVisible,
-								boolean parentEnabled) {
+	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+		// TODO - need to account for data/list/tree grids in here
+	}
+
+	@Override
+	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		cb.addAjaxBehavior(eventSource, "itemSelect", listBinding, listVar, lookup.getBinding(), lookup.getPickedActions());
+	}
+
+	@Override
+	public void visitedOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+
+	@Override
+	public void visitOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		cb.addAjaxBehavior(eventSource, "itemUnselect", listBinding, listVar, lookup.getBinding(), lookup.getClearedActions());
+	}
+
+	@Override
+	public void visitedOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+
+	@Override
+	public void visitRerenderEventAction(RerenderEventAction rerender,
+											EventSource source,
+											boolean parentVisible,
+											boolean parentEnabled) {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+												boolean parentVisible,
+												boolean parentEnabled) {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+												boolean parentVisible,
+												boolean parentEnabled) {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+												boolean parentVisible,
+												boolean parentEnabled) {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+													boolean parentVisible,
+													boolean parentEnabled) {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// nothing to see here
 	}
-	
+
 	@Override
-	public void visitFilterParameter(FilterParameter parameter,
-			boolean parentVisible, boolean parentEnabled) {
+	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 	}
 

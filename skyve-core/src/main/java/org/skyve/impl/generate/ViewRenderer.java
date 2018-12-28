@@ -203,7 +203,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
-	public abstract void renderedHBox(String title, HBox bbox);
+	public abstract void renderedHBox(String title, HBox hbox);
 
 	private Form currentForm;
 	public Form getCurrentForm() {
@@ -1595,14 +1595,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 
 	@Override
-	public final void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		Action action = view.getAction(server.getActionName());
-		visitServerSideActionEventAction(action, server);
-	}
-	
-	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
-
-	@Override
 	public final void visitCustomAction(ActionImpl action) {
 		if (preProcessAction(null, action)) {
 			renderCustomAction(actionLabel,
@@ -1959,6 +1951,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 											char type,
 											ActionImpl action);
 
+	@Override
+	public final void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
+		Action action = view.getAction(server.getActionName());
+		visitServerSideActionEventAction(action, server);
+	}
+	
+	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
+
 	protected LinkedHashMap<String, String> getLocalisedConstantDomainValueMap(Attribute attribute) {
 		List<DomainValue> values = document.getDomainValues(customer, 
 																DomainType.constant, 
@@ -1992,8 +1992,27 @@ public abstract class ViewRenderer extends ViewVisitor {
 		return HorizontalAlignment.left;
 	}
 	
-	public abstract Integer determineDefaultColumnWidth(AttributeType attributeType);
-	
+	@SuppressWarnings("static-method")
+	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType)) {
+			return Integer.valueOf(100);
+		}
+		if (AttributeType.dateTime.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.time.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+		if (AttributeType.timestamp.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+
+		return null;
+	}
+
 	private String iconToUrl(String icon) {
 		if (icon == null) {
 			return null;
