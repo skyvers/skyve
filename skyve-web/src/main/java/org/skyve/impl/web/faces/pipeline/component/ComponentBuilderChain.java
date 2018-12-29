@@ -136,10 +136,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tab(UIComponent component, Tab tab) {
+	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.tab(result, tab);
+			result = builder.tab(result, title, tab);
 		}
 		return result;
 	}

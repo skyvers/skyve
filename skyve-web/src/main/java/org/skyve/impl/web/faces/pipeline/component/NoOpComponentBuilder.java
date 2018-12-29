@@ -63,7 +63,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tab(UIComponent component, Tab tab) {
+	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		return component;
 	}
 

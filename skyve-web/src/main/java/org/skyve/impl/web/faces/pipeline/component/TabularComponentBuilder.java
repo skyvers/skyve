@@ -180,13 +180,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent tab(UIComponent component, org.skyve.impl.metadata.view.container.Tab tab) {
+	public UIComponent tab(UIComponent component, String title, org.skyve.impl.metadata.view.container.Tab tab) {
 		if (component != null) {
 			return component;
 		}
 
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
-		setValueOrValueExpression(tab.getTitle(), result::setTitle, "title", result);
+		setValueOrValueExpression(title, result::setTitle, "title", result);
 		setDisabled(result, tab.getDisabledConditionName());
 		setInvisible(result, tab.getInvisibleConditionName(), null);
 		setId(result, null);

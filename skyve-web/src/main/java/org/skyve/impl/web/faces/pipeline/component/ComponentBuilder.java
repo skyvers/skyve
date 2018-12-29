@@ -82,7 +82,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String documentName,
 											StringBuilder stickyTabScript);
 	
-	public abstract UIComponent tab(UIComponent component, Tab tab);
+	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,

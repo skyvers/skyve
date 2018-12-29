@@ -296,7 +296,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitTab(Tab tab,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		UIComponent component = cb.tab(null, tab);
+		UIComponent component = cb.tab(null, tab.getTitle(), tab);
 		lb.addTab(current, component);
 		current = component;
 		UIComponent layout = lb.tabLayout(null);

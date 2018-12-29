@@ -323,7 +323,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent tab(UIComponent component, Tab tab) {
+	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		if (component != null) {
 			// TODO this needs to take into account that it could be nested in other tabs and have a name clash
 			context.put(tab.getTitle() + " Tab", component, tab);

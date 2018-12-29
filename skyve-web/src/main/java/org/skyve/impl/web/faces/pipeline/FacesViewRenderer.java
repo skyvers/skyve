@@ -281,7 +281,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderTab(String title, String icon16x16Url, Tab tab) {
-		UIComponent component = cb.tab(null, tab);
+		UIComponent component = cb.tab(null, title, tab);
 		lb.addTab(current, component);
 		current = component;
 		UIComponent layout = lb.tabLayout(null);
@@ -300,7 +300,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			border = cb.border(null, vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			border = cb.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth());
 			addToContainer(border, 
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
@@ -356,7 +356,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			border = cb.border(null, hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			border = cb.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth());
 			addToContainer(border, 
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
@@ -407,7 +407,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private Form currentForm; // for columns and disabled state
 	private int currentFormColumn;
 	
 	@Override
@@ -415,7 +414,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			border = cb.border(null, form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
+			border = cb.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth());
 			addToContainer(border, 
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
@@ -447,15 +446,12 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 		current = layout;
-		currentForm = form;
 		currentFormColumn = 0;
 // TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
 	}
 
 	@Override
 	public void renderedForm(String borderTitle, Form form) {
-		currentForm = null; // reset form
-
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(form.getBorder())) {
 			current = lb.addedBorderLayout(null, current);
@@ -487,16 +483,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		currentFormColumn = 0;
 	}
 
-	private FormItem currentFormItem;
-	
 	@Override
 	public void renderFormItem(String label, boolean required, String help, FormItem item) {
-		currentFormItem = item;
+		// nothing to do here
 	}
 
 	@Override
 	public void renderedFormItem(String label, boolean required, String help, FormItem item) {
-		currentFormItem = null;
+		// nothing to do here
 	}
 
 	@Override
@@ -520,27 +514,25 @@ public class FacesViewRenderer extends ViewRenderer {
 			return;
 		}
 
-		if (currentDataGridBoundColumn != null) { // bound column in a datagrid
+		DataGridBoundColumn currentBoundColumn = getCurrentBoundColumn();
+		if (currentBoundColumn != null) { // bound column in a data grid or data repeater
 			// Add editing component if we have an inline data grid and the current column is editable
-			boolean columnEditable = ! Boolean.FALSE.equals(currentDataGridBoundColumn.getEditable());
+			boolean columnEditable = ! Boolean.FALSE.equals(currentBoundColumn.getEditable());
 			if (columnEditable) { // NB short circuit test
-				boolean inline = (currentGrid instanceof DataGrid) ? 
-									Boolean.TRUE.equals(((DataGrid) currentGrid).getInline()) :
+				AbstractDataWidget currentDataWidget = getCurrentDataWidget();
+				boolean inline = (currentDataWidget instanceof DataGrid) ? 
+									Boolean.TRUE.equals(((DataGrid) currentDataWidget).getInline()) :
 									true;
 				if (inline) {
 					current.getChildren().add(component);
 				}
 			}
 		}
-		else { // not a bound column in a datagrid
-			if (currentFormItem == null) { // not a form item
-				if (currentGrid == null) { // not a container column in a datagrid
-					// This must be a container (vbox, hbox etc)
-					addToContainer(component, pixelWidth, responsiveWidth, percentageWidth, widgetInvisible);
-					addedToContainer();
-				}
-				else {
-					// This must be a data grid container column
+		else { // not a bound column in a data grid or data repeater
+			Form currentForm = getCurrentForm();
+			if (currentForm == null) { // not a form item
+				DataGridContainerColumn currentContainerColumn = getCurrentContainerColumn();
+				if (currentContainerColumn != null) { // container column in a data grid or data repeater
 					// add a spacer, if required
 					List<UIComponent> children = current.getChildren();
 					if (! children.isEmpty()) {
@@ -548,12 +540,16 @@ public class FacesViewRenderer extends ViewRenderer {
 					}
 					children.add(component);
 				}
+				else {  // This must be a container (vbox, hbox etc)
+					addToContainer(component, pixelWidth, responsiveWidth, percentageWidth, widgetInvisible);
+					addedToContainer();
+				}
 			}
 			else { // a form item
 				lb.layoutFormItem(current,
 									component,
 									currentForm, 
-									currentFormItem, 
+									getCurrentFormItem(), 
 									currentFormColumn,
 									widgetLabel,
 									widgetRequired,
@@ -944,22 +940,14 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				null);
 	}
 
-	private MetaData currentGrid;
-
-	private String listWidgetModelDocumentName;
-	private String listWidgetModelName;
-	private ListModel<? extends Bean> listWidgetModel;
-	private Document listWidgetDrivingDocument;
-	
 	@Override
 	public void renderListGrid(String title, ListGrid grid) {
-		visitListWidget(grid);
 		UIComponent l = cb.listGrid(null,
-										listWidgetModelDocumentName,
-										listWidgetModelName,
-										listWidgetModel,
+										getCurrentListWidgetModelDocumentName(),
+										getCurrentListWidgetModelName(),
+										getCurrentListWidgetModel(),
 										grid,
-										user.canCreateDocument(listWidgetDrivingDocument));
+										user.canCreateDocument(getCurrentListWidgetDrivingDocument()));
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 
@@ -982,11 +970,10 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListRepeater(String title, ListRepeater repeater) {
-		visitListWidget(repeater);
 		UIComponent r = cb.listRepeater(null,
-											listWidgetModelDocumentName, 
-											listWidgetModelName, 
-											listWidgetModel, 
+											getCurrentListWidgetModelDocumentName(), 
+											getCurrentListWidgetModelName(), 
+											getCurrentListWidgetModel(), 
 											repeater.getParameters(), 
 											repeater.getTitle(),
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
@@ -1015,7 +1002,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderTreeGrid(String title, TreeGrid grid) {
 		UIComponent l = cb.label(null, "treeGrid");
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
-		currentGrid = grid;
 	}
 
 	@Override
@@ -1032,41 +1018,10 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
-		currentGrid = null;
 		addedToContainer();
 	}
 
-	private void visitListWidget(AbstractListWidget widget) {
-		String queryName = widget.getQueryName();
-		String modelName = widget.getModelName();
-		
-		if ((queryName == null) && (modelName != null)) {
-			listWidgetModelName = modelName;
-			listWidgetModelDocumentName = document.getName();
-			listWidgetModel = CORE.getRepository().getListModel(customer, document, listWidgetModelName, true);
-			listWidgetDrivingDocument = listWidgetModel.getDrivingDocument();
-		}
-		else {
-			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
-			if (query == null) {
-				query = module.getDocumentDefaultQuery(customer, queryName);
-			}
-			listWidgetModelName = queryName;
-			listWidgetModelDocumentName = query.getDocumentName();
-			listWidgetDrivingDocument = query.getDocumentModule(customer).getDocument(customer, listWidgetModelDocumentName);
-	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-	        queryModel.setQuery(query);
-	        listWidgetModel = queryModel;
-		}
-		currentGrid = widget;		
-	}
-
 	private void visitedListWidget() {
-		currentGrid = null;
-		listWidgetModelDocumentName = null;
-		listWidgetModelName = null;
-		listWidgetModel = null;
-		listWidgetDrivingDocument = null;
 		addedToContainer();
 	}
 
@@ -1090,7 +1045,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
 		UIComponent g = cb.dataGrid(null, listVar, ordered, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
-		currentGrid = grid;
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
@@ -1111,7 +1065,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
 		UIComponent r = cb.dataRepeater(null, listVar, repeater);
         addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
-		currentGrid = repeater;
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
@@ -1146,7 +1099,6 @@ public class FacesViewRenderer extends ViewRenderer {
 													alias, 
 													Boolean.TRUE.equals(grid.getInline()));
 		}
-	    currentGrid = null;
 	    listBinding = null;
 	    listVar = null;
 	    gridColumnExpression = null;
@@ -1162,7 +1114,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private StringBuilder gridColumnExpression;
-	private DataGridBoundColumn currentDataGridBoundColumn = null;
 	
 	@Override
 	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
@@ -1171,7 +1122,6 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
-		currentDataGridBoundColumn = column;
 		String columnTitle = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
@@ -1196,7 +1146,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		current = cb.addDataGridBoundColumn(null,
 												current, 
-												(AbstractDataWidget) currentGrid,
+												getCurrentDataWidget(),
 												column, 
 												listVar,
 												columnTitle, 
@@ -1212,7 +1162,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		current = cb.addedDataGridBoundColumn(null, current);
-		currentDataGridBoundColumn = null;
 	}
 
 	@Override
@@ -1222,7 +1171,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
-        current = cb.addDataGridContainerColumn(null, current, (AbstractDataWidget) currentGrid, column);
+        current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), column);
 	}
 
 	@Override
@@ -2413,6 +2362,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 		
+		FormItem currentFormItem = getCurrentFormItem();
 		String title = (currentFormItem == null) ? null : currentFormItem.getLabel();
 		if (title != null) {
 			result.setTitle(title);
