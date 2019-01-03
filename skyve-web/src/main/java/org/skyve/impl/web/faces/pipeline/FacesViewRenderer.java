@@ -9,22 +9,16 @@ import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIOutput;
 
 import org.primefaces.component.calendar.Calendar;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.ViewRenderer;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
-import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -80,7 +74,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -92,7 +85,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
-import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractListWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -132,7 +124,6 @@ import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -148,12 +139,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
-import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
@@ -584,16 +572,16 @@ public class FacesViewRenderer extends ViewRenderer {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
-			c = cb.reportButton(null, button, action);
+			c = cb.reportButton(null, label, iconStyleClass, toolTip, confirmationText, button, action);
 		}
 		else if (ImplicitActionName.Download.equals(name)) {
-			c = cb.downloadButton(null, button, action, module.getName(), document.getName());
+			c = cb.downloadButton(null, label, iconStyleClass, toolTip, confirmationText, button, action, module.getName(), document.getName());
 		}
 		else if (ImplicitActionName.Upload.equals(name)) {
-			c = cb.uploadButton(null, button, action);
+			c = cb.uploadButton(null, label, iconStyleClass, toolTip, confirmationText, button, action);
 		}
 		else {
-			c = cb.actionButton(null, listBinding, listVar, button, action);
+			c = cb.actionButton(null, dataWidgetBinding, dataWidgetVar, label, iconStyleClass, toolTip, confirmationText, button, action);
 		}
 	    addComponent(null, 
 	    				false, 
@@ -698,7 +686,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderStaticImage(String fileUrl, StaticImage image) {
-		UIComponent i = cb.staticImage(null, image);
+		UIComponent i = cb.staticImage(null, fileUrl, image);
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
@@ -787,7 +775,7 @@ public class FacesViewRenderer extends ViewRenderer {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 
-				c.set(cb.outputLink(listVar, link.getValue(), href.toString(), link.getInvisibleConditionName(), target));
+				c.set(cb.outputLink(dataWidgetVar, value, href.toString(), link.getInvisibleConditionName(), target));
 			}
 			
 			@Override
@@ -805,14 +793,15 @@ public class FacesViewRenderer extends ViewRenderer {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, listBinding);
+				final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
 
 				final Document listDocument;
 				// Figure out the document type of the relation.
 				if (listTarget.getAttribute() instanceof Relation) {
 					final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
 					listDocument = module.getDocument(customer, documentName);
-				} else {
+				}
+				else {
 					listDocument = listTarget.getDocument();
 				}
 
@@ -831,9 +820,10 @@ public class FacesViewRenderer extends ViewRenderer {
 				}
 
 				if (action != null) {
-					c.set(cb.actionLink(null, listBinding, listVar, link, action));
-				} else {
-					c.set(cb.actionLink(null, listBinding, listVar, link, reference.getActionName()));
+					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, link, action));
+				}
+				else {
+					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, link, reference.getActionName()));
 				}
 			}
 		}.process(outerReference);
@@ -863,14 +853,13 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderBlurb(String markup, Blurb blurb) {
 		String value = null;
 		String binding = null;
-		String blurbMarkup = blurb.getMarkup();
-		if (blurbMarkup.indexOf('{') > -1) {
-			binding = blurbMarkup;
+		if (markup.indexOf('{') > -1) {
+			binding = markup;
 		}
 		else {
-			value = blurbMarkup;
+			value = markup;
 		}
-		UIComponent c = cb.blurb(null, listVar, value, binding, blurb);
+		UIComponent c = cb.blurb(null, dataWidgetVar, value, binding, blurb);
 		addComponent(null, 
 						false, 
 						blurb.getInvisibleConditionName(), 
@@ -894,27 +883,26 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderLabel(String value, Label label) {
-		String labelValue = label.getValue();
+		String ultimateValue = label.getValue();
 		String binding = label.getBinding();
-		if ((labelValue == null) && (binding == null)) {
-			// Find the display name if applicable
-			labelValue = "Label";
-			String displayBinding = label.getFor();
-			if (displayBinding != null) {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, displayBinding);
-				if (target != null) {
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						labelValue = String.format("%s %s:", attribute.getDisplayName(), attribute.isRequired() ? "*" : ""); 
-					}
+		if ((ultimateValue == null) && (binding == null)) { // using the Label.for attribute
+			ultimateValue = "Label";
+			TargetMetaData target = getCurrentTarget();
+			if (target != null) {
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					ultimateValue = String.format("%s %s:", value, attribute.isRequired() ? "*" : ""); 
 				}
 			}
 		}
-		else if ((labelValue != null) && labelValue.indexOf('{') > -1) {
-			binding = labelValue;
-			labelValue = null;
+		else if ((value != null) && value.indexOf('{') > -1) { // label value with binding expression
+			binding = value;
+			ultimateValue = null;
 		}
-	    UIComponent c = cb.label(null, listVar, labelValue, binding, label);
+		else { // boilerplate value or a binding
+			ultimateValue = value;
+		}
+	    UIComponent c = cb.label(null, dataWidgetVar, ultimateValue, binding, label);
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 
@@ -946,6 +934,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
 										getCurrentListWidgetModel(),
+										title,
 										grid,
 										user.canCreateDocument(getCurrentListWidgetDrivingDocument()));
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
@@ -965,7 +954,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListGrid(String title, ListGrid grid) {
-		visitedListWidget();
+		addedToContainer();
 	}
 
 	@Override
@@ -975,7 +964,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											getCurrentListWidgetModelName(), 
 											getCurrentListWidgetModel(), 
 											repeater.getParameters(), 
-											repeater.getTitle(),
+											title,
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 											Boolean.TRUE.equals(repeater.getShowGrid()));
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
@@ -995,7 +984,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
-		visitedListWidget();
+		addedToContainer();
 	}
 
 	@Override
@@ -1021,19 +1010,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		addedToContainer();
 	}
 
-	private void visitedListWidget() {
-		addedToContainer();
-	}
-
-	private String listBinding;
-	private String listVar;
+	private String dataWidgetBinding;
+	private String dataWidgetVar;
 	
 	@Override
 	public void renderDataGrid(String title, DataGrid grid) {
 		// Determine if the grid collection is ordered
-		listBinding = grid.getBinding();
+		dataWidgetBinding = grid.getBinding();
 		boolean ordered = false;
-		final TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, listBinding);
+		final TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation instanceof Collection) {
@@ -1042,8 +1027,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		
 		// Create the datagrid faces component
-		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent g = cb.dataGrid(null, listVar, ordered, grid);
+		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
+		UIComponent g = cb.dataGrid(null, dataWidgetVar, ordered, title, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		gridColumnExpression = new StringBuilder(512);
 
@@ -1061,9 +1046,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderDataRepeater(String title, DataRepeater repeater) {
 		// Create the data repeater faces component
-		listBinding = repeater.getBinding();
-		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent r = cb.dataRepeater(null, listVar, repeater);
+		dataWidgetBinding = repeater.getBinding();
+		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
+		UIComponent r = cb.dataRepeater(null, dataWidgetVar, title, repeater);
         addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 		gridColumnExpression = new StringBuilder(512);
 
@@ -1081,7 +1066,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void visitedDataWidget(AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
-		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, widget.getBinding());
+		TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
@@ -1094,13 +1079,13 @@ public class FacesViewRenderer extends ViewRenderer {
 			current = cb.addDataGridActionColumn(null,
 													current, 
 													grid,
-													listVar,
+													dataWidgetVar,
 													gridColumnExpression.toString(), 
 													alias, 
 													Boolean.TRUE.equals(grid.getInline()));
 		}
-	    listBinding = null;
-	    listVar = null;
+	    dataWidgetBinding = null;
+	    dataWidgetVar = null;
 	    gridColumnExpression = null;
 	    addedToContainer();
 		
@@ -1122,25 +1107,16 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
-		String columnTitle = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
 			binding = Bean.BIZ_KEY;
 		}
 		else {
-			StringBuilder sb = new StringBuilder(64);
-			sb.append(listBinding).append('.').append(binding);
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
+			TargetMetaData target = getCurrentTarget();
 			if (target != null) {
 				Attribute targetAttribute = target.getAttribute();
-				if (targetAttribute != null) {
-					if (columnTitle == null) {
-						columnTitle = targetAttribute.getDisplayName();
-					}
-					if (targetAttribute instanceof Association) {
-						sb.setLength(0);
-						binding = sb.append(binding).append('.').append(Bean.BIZ_KEY).toString();
-					}
+				if (targetAttribute instanceof Association) {
+					binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
 				}
 			}
 		}
@@ -1148,8 +1124,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												current, 
 												getCurrentDataWidget(),
 												column, 
-												listVar,
-												columnTitle, 
+												dataWidgetVar,
+												title, 
 												binding, 
 												gridColumnExpression);
 	}
@@ -1171,7 +1147,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
-        current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), column);
+        current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column);
 	}
 
 	@Override
@@ -1194,19 +1170,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormCheckBox(CheckBox checkBox) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(checkBox);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponentBase c = (UIComponentBase) cb.checkBox(null, listVar, checkBox, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponentBase c = (UIComponentBase) cb.checkBox(null, dataWidgetVar, checkBox, title, required);
 		eventSource = c;
 		addComponent(title,
 						required,
 						checkBox.getInvisibleConditionName(), 
 						checkBox.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						c, 
 						checkBox.getPixelWidth(), 
 						null,
@@ -1225,7 +1197,6 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderCheckMembership(CheckMembership membership) {
-//		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
         UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
         addToContainer(c, null, null, null, membership.getInvisibleConditionName());
@@ -1244,19 +1215,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormColourPicker(ColourPicker colour) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(colour);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponentBase c = (UIComponentBase) cb.colourPicker(null, listVar, colour, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponentBase c = (UIComponentBase) cb.colourPicker(null, dataWidgetVar, colour, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
 						colour.getInvisibleConditionName(), 
 						colour.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						c, 
 						colour.getPixelWidth(), 
 						null, 
@@ -1280,19 +1247,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormCombo(Combo combo) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(combo);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponentBase s = (UIComponentBase) cb.combo(null, listVar, combo, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponentBase s = (UIComponentBase) cb.combo(null, dataWidgetVar, combo, title, required);
 		eventSource = s;
 		addComponent(title, 
 						required, 
 						combo.getInvisibleConditionName(), 
 						combo.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						s, 
 						combo.getPixelWidth(), 
 						null, 
@@ -1321,18 +1284,14 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormContentImage(ContentImage image) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(image);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponent c = cb.contentImage(null, listVar, image, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponent c = cb.contentImage(null, dataWidgetVar, image, title, required);
         addComponent(title, 
         				false, 
         				image.getInvisibleConditionName(), 
         				image.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				image.getPixelWidth(), 
         				null, 
@@ -1346,18 +1305,14 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormContentLink(String value, ContentLink link) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(link);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponent c = cb.contentLink(null, listVar, link, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponent c = cb.contentLink(null, dataWidgetVar, link, title, required);
 		addComponent(title, 
 						required, 
 						link.getInvisibleConditionName(), 
 						link.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						c, 
 						link.getPixelWidth(), 
 						null, 
@@ -1371,18 +1326,14 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormHTML(HTML html) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(html);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponent c = cb.html(null, listVar, html, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponent c = cb.html(null, dataWidgetVar, html, title, required);
         addComponent(title, 
         				required, 
         				html.getInvisibleConditionName(), 
         				html.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				html.getPixelWidth(), 
         				null, 
@@ -1404,7 +1355,6 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderComparison(Comparison comparison) {
-//		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
         UIComponent c = cb.label(null, "comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
         addedToContainer();
@@ -1425,27 +1375,22 @@ public class FacesViewRenderer extends ViewRenderer {
 												boolean canUpdate,
 												String descriptionBinding,
 												LookupDescription lookup) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
-		SmartClientLookupDefinition ldef = def.getLookup();
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
 		UIComponentBase c = (UIComponentBase) cb.lookupDescription(null,
-																	listVar, 
+																	dataWidgetVar, 
 																	lookup, 
 																	title, 
 																	required,
-																	BindUtil.unsanitiseBinding(ldef.getDisplayField()),
-																	ldef.getQuery());
+																	descriptionBinding,
+																	query);
         eventSource = c;
         
         addComponent(title, 
         				required, 
         				lookup.getInvisibleConditionName(), 
         				lookup.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				lookup.getPixelWidth(), 
         				null, 
@@ -1496,19 +1441,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormPassword(Password password) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(password);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-        UIComponentBase c = (UIComponentBase) cb.password(null, listVar, password, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+        UIComponentBase c = (UIComponentBase) cb.password(null, dataWidgetVar, password, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				password.getInvisibleConditionName(), 
         				password.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				password.getPixelWidth(), 
         				null, 
@@ -1532,19 +1473,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormRadio(Radio radio) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(radio);
-		String title = def.getTitle();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		boolean required = def.isRequired();
-        UIComponentBase c = (UIComponentBase) cb.radio(null, listVar, radio, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+        UIComponentBase c = (UIComponentBase) cb.radio(null, dataWidgetVar, radio, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
 						radio.getInvisibleConditionName(), 
 						radio.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						c, 
 						radio.getPixelWidth(), 
 						null, 
@@ -1568,19 +1505,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormRichText(RichText text) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(text);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-        UIComponentBase c = (UIComponentBase) cb.richText(null, listVar, text, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+        UIComponentBase c = (UIComponentBase) cb.richText(null, dataWidgetVar, text, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
         				text.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
         				null, 
@@ -1604,17 +1537,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormSlider(Slider slider) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-       UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
         eventSource = c;
-        addComponent(def.getTitle(), 
-        				def.isRequired(), 
+        addComponent(title, 
+        				required, 
         				slider.getInvisibleConditionName(), 
         				slider.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				slider.getPixelWidth(), 
         				null, 
@@ -1638,19 +1569,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormSpinner(Spinner spinner) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(spinner);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-        UIComponentBase c = (UIComponentBase) cb.spinner(null, listVar, spinner, title, required);
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+        UIComponentBase c = (UIComponentBase) cb.spinner(null, dataWidgetVar, spinner, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				spinner.getInvisibleConditionName(), 
         				spinner.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				spinner.getPixelWidth(), 
         				null, 
@@ -1674,19 +1601,22 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormTextArea(TextArea text) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(text);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		UIComponentBase c = (UIComponentBase) cb.textArea(null, listVar, text, title, required, def.getLength());
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
+		Integer length = null;
+		if (attribute instanceof LengthField) {
+			length = Integer.valueOf(((LengthField) attribute).getLength());
+		}
+
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		UIComponentBase c = (UIComponentBase) cb.textArea(null, dataWidgetVar, text, title, required, length);
         eventSource = c;
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
         				text.showsLabelByDefault(),
-        				helpText,
+        				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
         				null, 
@@ -1710,16 +1640,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormTextField(TextField text) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(text);
-		String title = def.getTitle();
-		boolean required = def.isRequired();
-		String helpText = (def instanceof SmartClientFieldDefinition) ?
-							((SmartClientFieldDefinition) def).getHelpText() :
-							null;
-		Attribute attribute = def.getTarget().getAttribute();
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		TextFormat textFormat = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
 		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
+		Integer length = null;
+		if (attribute instanceof LengthField) {
+			length = Integer.valueOf(((LengthField) attribute).getLength());
+		}
 		Converter<?> converter = null;
         if (attribute instanceof ConvertableField) {
             converter = ((ConvertableField) attribute).getConverter();
@@ -1745,12 +1674,14 @@ public class FacesViewRenderer extends ViewRenderer {
             }
         }
 
+        String title = getCurrentWidgetLabel();
+        boolean required = isCurrentWidgetRequired();
         UIComponentBase c = (UIComponentBase) cb.text(null,
-        												listVar, 
+        												dataWidgetVar, 
         												text, 
         												title, 
         												required,
-        												def.getLength(),
+        												length,
         												converter,
         												format,
         												convertConverter(converter, type));
@@ -1759,7 +1690,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						required, 
 						text.getInvisibleConditionName(), 
 						text.showsLabelByDefault(),
-						helpText,
+						getCurrentWidgetHelp(),
 						c, 
 						text.getPixelWidth(), 
 						null, 
@@ -1958,8 +1889,8 @@ public class FacesViewRenderer extends ViewRenderer {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
 					toolbarLayout.getChildren().add(cb.action(null,
-																listBinding,
-																listVar,
+																dataWidgetBinding,
+																dataWidgetVar,
 																action,
 																null,
 																action.getDisplayName()));
@@ -2172,8 +2103,8 @@ public class FacesViewRenderer extends ViewRenderer {
 							displayName = name.getDisplayName();
 						}
 						toolbarLayout.getChildren().add(cb.action(null,
-																	listBinding,
-																	listVar,
+																	dataWidgetBinding,
+																	dataWidgetVar,
 																	action,
 																	name,
 																	displayName));
@@ -2184,19 +2115,13 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		String binding = changeable.getBinding();
 		List<EventAction> changedActions = changeable.getChangedActions();
-		cb.addAjaxBehavior(eventSource, "change", listBinding, listVar, binding, changedActions);
+		cb.addAjaxBehavior(eventSource, "change", dataWidgetBinding, dataWidgetVar, binding, changedActions);
 		// Add this special event for date selection on calendar as "changed" doesn't fire on select
 		if (eventSource instanceof Calendar) {
-			cb.addAjaxBehavior(eventSource, "dateSelect", listBinding, listVar, binding, changedActions);
+			cb.addAjaxBehavior(eventSource, "dateSelect", dataWidgetBinding, dataWidgetVar, binding, changedActions);
 		}
 	}
 
@@ -2208,7 +2133,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		cb.addAjaxBehavior(eventSource, "focus", listBinding, listVar, binding, blurable.getFocusActions());
+		cb.addAjaxBehavior(eventSource, "focus", dataWidgetBinding, dataWidgetVar, binding, blurable.getFocusActions());
 	}
 
 	@Override
@@ -2219,7 +2144,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		cb.addAjaxBehavior(eventSource, "blur", listBinding, listVar, binding, blurable.getBlurActions());
+		cb.addAjaxBehavior(eventSource, "blur", dataWidgetBinding, dataWidgetVar, binding, blurable.getBlurActions());
 	}
 
 	@Override
@@ -2275,7 +2200,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		cb.addAjaxBehavior(eventSource, "itemSelect", listBinding, listVar, lookup.getBinding(), lookup.getPickedActions());
+		cb.addAjaxBehavior(eventSource, "itemSelect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getPickedActions());
 	}
 
 	@Override
@@ -2285,7 +2210,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		cb.addAjaxBehavior(eventSource, "itemUnselect", listBinding, listVar, lookup.getBinding(), lookup.getClearedActions());
+		cb.addAjaxBehavior(eventSource, "itemUnselect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getClearedActions());
 	}
 
 	@Override
@@ -2337,41 +2262,5 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
-	}
-
-	private SmartClientDataGridFieldDefinition getFieldDef(InputWidget inputWidget) {
-		SmartClientDataGridFieldDefinition result = null;
-
-		// Document is already set to the child document when instantiating a FacesViewVisitor
-		// so there is no need to resolve the view binding within the conversation bean.
-		DocumentImpl targetDocument = document;
-		ModuleImpl targetModule = module;
-
-		if (listBinding == null) {
-			result = SmartClientGenerateUtils.getField(user, customer, targetModule, targetDocument, inputWidget, true);
-		}
-		else {
-			if (inputWidget.getBinding() == null) {
-				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, listBinding, true);
-			}
-			else {
-				TargetMetaData target = Binder.getMetaDataForBinding(customer, targetModule, targetDocument, listBinding);
-				targetDocument = (DocumentImpl) module.getDocument(customer, ((Relation) target.getAttribute()).getDocumentName());
-				targetModule = (ModuleImpl) customer.getModule(targetDocument.getOwningModuleName());
-				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, null, true);
-			}
-		}
-		
-		FormItem currentFormItem = getCurrentFormItem();
-		String title = (currentFormItem == null) ? null : currentFormItem.getLabel();
-		if (title != null) {
-			result.setTitle(title);
-		}
-		Boolean required = (currentFormItem == null) ? null : currentFormItem.getRequired();
-		if (required != null) {
-			result.setRequired(required.booleanValue());
-		}
-
-		return result;
 	}
 }

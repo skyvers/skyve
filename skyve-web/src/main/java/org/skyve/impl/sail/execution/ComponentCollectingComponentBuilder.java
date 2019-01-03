@@ -70,6 +70,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent actionButton(UIComponent component,
 										String listBinding,
 										String listVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action) {
 		if (component != null) {
@@ -89,6 +93,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action,
 										String moduleName,
@@ -111,6 +119,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action) {
 		if (component != null) {
@@ -131,6 +143,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action) {
 		if (component != null) {
@@ -145,6 +161,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		if (component != null) {

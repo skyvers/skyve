@@ -86,18 +86,32 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent actionButton(UIComponent component, 
 										String listBinding,
 										String listVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
 										Action action) {
 		return component;
 	}
 
 	@Override
-	public UIComponent reportButton(UIComponent component, Button button, Action action) {
+	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		return component;
 	}
 
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
 										Action action,
 										String moduleName,
@@ -106,12 +120,18 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		return component;
 	}
 
 	@Override
-	public UIComponent staticImage(UIComponent component, StaticImage image) {
+	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		return component;
 	}
 
@@ -131,12 +151,12 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, String title, DataGrid grid) {
 		return component;
 	}
 
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String listVar, String title, DataRepeater repeater) {
 		return component;
 	}
 
@@ -161,6 +181,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current,
 													AbstractDataWidget widget,
+													String title,
 													DataGridContainerColumn column) {
 		return component;
 	}
@@ -186,6 +207,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		return component;
@@ -316,6 +338,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent actionLink(UIComponent component,
 									String listBinding,
 									String listVar,
+									String value,
 									Link link,
 									String actionName) {
 		return component;

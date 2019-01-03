@@ -325,15 +325,29 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
 				currentWidgetHelp = targetAttribute.getDescription();
 			}
-			preProcessWidget();
+			preProcessWidget(false);
 		}
 	}
 	
-	private void preProcessWidget() {
+	private void preProcessWidget(boolean clearState) {
+		if (clearState) {
+			currentWidgetLabel = null;
+			currentWidgetHelp = null;
+			currentWidgetRequired = null;
+		}
 		if (currentFormItem != null) {
-			currentWidgetLabel = currentFormItem.getLabel();
-			currentWidgetHelp = currentFormItem.getHelp();
-			currentWidgetRequired = currentFormItem.getRequired();
+			String label = currentFormItem.getLabel();
+			if (label != null) {
+				currentWidgetLabel = label;
+			}
+			String help = currentFormItem.getHelp();
+			if (help != null) {
+				currentWidgetHelp = help;
+			}
+			Boolean required = currentFormItem.getRequired();
+			if (required != null) {
+				currentWidgetRequired = required;
+			}
 		}
 		currentWidgetLabel = Util.i18n(currentWidgetLabel, locale);
 		currentWidgetHelp = Util.i18n(currentWidgetHelp, locale);
@@ -598,7 +612,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 	@Override
 	public final void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		Action action = view.getAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action)) {
 			if (currentFormItem != null) {
@@ -678,7 +692,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String label = Util.i18n(button.getDisplayName(), locale);
 		if (currentFormItem != null) {
 			renderFormDialogButton(label, button);
@@ -693,7 +707,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitSpacer(Spacer spacer) {
-		preProcessWidget();
+		preProcessWidget(true);
 		if (currentFormItem != null) {
 			renderFormSpacer(spacer);
 		}
@@ -707,7 +721,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String fileUrl = staticImageToUrl(image.getRelativeFile());
 		if (currentFormItem != null) {
 			renderFormStaticImage(fileUrl, image);
@@ -739,7 +753,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String value = Util.i18n(link.getValue(), locale);
 		if (currentFormItem != null) {
 			renderFormLink(value, link);
@@ -758,7 +772,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String markup = Util.i18n(blurb.getMarkup(), locale);
 		if (currentFormItem != null) {
 			renderFormBlurb(markup, blurb);
@@ -789,7 +803,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			value = null;
 		}
 		else {
-			preProcessWidget();
+			preProcessWidget(true);
 			value = Util.i18n(value, locale);
 			currentTarget = null;
 		}
@@ -1581,7 +1595,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		if (currentFormItem != null) {
 			renderFormInject(inject);
 		}

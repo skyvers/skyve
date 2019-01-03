@@ -175,51 +175,87 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent actionButton(UIComponent component, 
 										String listBinding,
 										String listVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionButton(result, listBinding, listVar, button, action);
+			result = builder.actionButton(result, 
+											listBinding,
+											listVar,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent reportButton(UIComponent component, Button button, Action action) {
+	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.reportButton(result, button, action);
+			result = builder.reportButton(result, label, iconStyleClass, toolTip, confirmationText, button, action);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
 										Action action,
 										String moduleName,
 										String documentName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.downloadButton(result, button, action, moduleName, documentName);
+			result = builder.downloadButton(result,
+												label,
+												iconStyleClass,
+												toolTip,
+												confirmationText,
+												button,
+												action,
+												moduleName,
+												documentName);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.uploadButton(result, button, action);
+			result = builder.uploadButton(result, label, iconStyleClass, toolTip, confirmationText, button, action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent staticImage(UIComponent component, StaticImage image) {
+	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.staticImage(result, image);
+			result = builder.staticImage(result, fileUrl, image);
 		}
 		return result;
 	}
@@ -252,19 +288,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, String title, DataGrid grid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataGrid(result, listVar, ordered, grid);
+			result = builder.dataGrid(result, listVar, ordered, title, grid);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String listVar, String title, DataRepeater repeater) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataRepeater(result, listVar, repeater);
+			result = builder.dataRepeater(result, listVar, title, repeater);
 		}
 		return result;
 	}
@@ -305,10 +341,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current,
 													AbstractDataWidget widget,
+													String title,
 													DataGridContainerColumn column) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addDataGridContainerColumn(result, current, widget, column);
+			result = builder.addDataGridContainerColumn(result, current, widget, title, column);
 		}
 		return result;
 	}
@@ -348,6 +385,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		UIComponent result = component;
@@ -356,6 +394,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										modelDocumentName,
 										modelName,
 										model,
+										title,
 										listGrid,
 										canCreateDocument);
 		}
@@ -554,11 +593,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent actionLink(UIComponent component,
 									String listBinding,
 									String listVar,
+									String value,
 									Link link,
 									String actionName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionLink(result, listBinding, listVar, link, actionName);
+			result = builder.actionLink(result, listBinding, listVar, value, link, actionName);
 		}
 		return result;
 	}
@@ -567,11 +607,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent actionLink(UIComponent component,
 								  String listBinding,
 								  String listVar,
+								  String value,
 								  Link link,
 								  Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionLink(result, listBinding, listVar, link, action);
+			result = builder.actionLink(result, listBinding, listVar, value, link, action);
 		}
 		return result;
 	}

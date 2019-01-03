@@ -13,6 +13,7 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		if (component != null) {

@@ -622,16 +622,44 @@ public class FacesViewVisitor extends ViewVisitor {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
-			c = cb.reportButton(null, button, action);
+			c = cb.reportButton(null,
+									action.getDisplayName(),
+									action.getIconStyleClass(),
+									action.getToolTip(),
+									action.getConfirmationText(),
+									button,
+									action);
 		}
 		else if (ImplicitActionName.Download.equals(name)) {
-			c = cb.downloadButton(null, button, action, module.getName(), document.getName());
+			c = cb.downloadButton(null,
+									action.getDisplayName(),
+									action.getIconStyleClass(),
+									action.getToolTip(),
+									action.getConfirmationText(),
+									button,
+									action,
+									module.getName(), 
+									document.getName());
 		}
 		else if (ImplicitActionName.Upload.equals(name)) {
-			c = cb.uploadButton(null, button, action);
+			c = cb.uploadButton(null, 
+									action.getDisplayName(),
+									action.getIconStyleClass(),
+									action.getToolTip(),
+									action.getConfirmationText(),
+									button,
+									action);
 		}
 		else {
-			c = cb.actionButton(null, listBinding, listVar, button, action);
+			c = cb.actionButton(null,
+									listBinding,
+									listVar,
+									action.getDisplayName(),
+									action.getIconStyleClass(),
+									action.getToolTip(),
+									action.getConfirmationText(),
+									button,
+									action);
 		}
 	    addComponent(null, 
 	    				false, 
@@ -744,7 +772,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitStaticImage(StaticImage image,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		UIComponent i = cb.staticImage(null, image);
+		UIComponent i = cb.staticImage(null, "images/" + image.getRelativeFile(), image);
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
@@ -870,9 +898,9 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 
 				if (action != null) {
-					c.set(cb.actionLink(null, listBinding, listVar, link, action));
+					c.set(cb.actionLink(null, listBinding, listVar, action.getDisplayName(), link, action));
 				} else {
-					c.set(cb.actionLink(null, listBinding, listVar, link, reference.getActionName()));
+					c.set(cb.actionLink(null, listBinding, listVar, link.getValue(), link, reference.getActionName()));
 				}
 			}
 		}.process(outerReference);
@@ -956,6 +984,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										listWidgetModelDocumentName,
 										listWidgetModelName,
 										listWidgetModel,
+										grid.getTitle(),
 										grid,
 										user.canCreateDocument(listWidgetDrivingDocument));
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
@@ -1060,7 +1089,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		
 		// Create the datagrid faces component
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent g = cb.dataGrid(null, listVar, ordered, grid);
+		UIComponent g = cb.dataGrid(null, listVar, ordered, grid.getTitle(), grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		currentGrid = grid;
 		gridColumnExpression = new StringBuilder(512);
@@ -1076,7 +1105,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Create the data repeater faces component
 		listBinding = repeater.getBinding();
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent r = cb.dataRepeater(null, listVar, repeater);
+		UIComponent r = cb.dataRepeater(null, listVar, repeater.getTitle(), repeater);
         addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 		currentGrid = repeater;
 		gridColumnExpression = new StringBuilder(512);
@@ -1185,7 +1214,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled) {
-        current = cb.addDataGridContainerColumn(null, current, (AbstractDataWidget) currentGrid, column);
+        current = cb.addDataGridContainerColumn(null, current, (AbstractDataWidget) currentGrid, column.getTitle(), column);
 	}
 
 	@Override

@@ -218,6 +218,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent actionButton(UIComponent component, 
 										String listBinding, 
 										String listVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
 		if (component != null) {
@@ -225,9 +229,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Map<String, String> properties = button.getProperties();
-		return actionButton(action.getDisplayName(),
-								action.getIconStyleClass(),
-				                action.getToolTip(),
+		return actionButton(label,
+								iconStyleClass,
+				                toolTip,
 				                action.getImplicitName(),
 				                action.getName(),
 				                false,
@@ -236,7 +240,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                button.getPixelWidth(),
 				                button.getPixelHeight(),
 				                action.getClientValidation(),
-				                action.getConfirmationText(),
+				                confirmationText,
 				                action.getDisabledConditionName(),
 				                action.getInvisibleConditionName(),
 				                properties.get(PROCESS_KEY),
@@ -245,26 +249,34 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent reportButton(UIComponent component, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
 		if (component != null) {
 			return component;
 		}
 
-		return reportButton(action.getDisplayName(), 
-								action.getIconStyleClass(),
-								action.getToolTip(), 
+		return reportButton(label, 
+								iconStyleClass,
+								toolTip, 
 								action.getParameters(), 
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(), 
 								action.getInvisibleConditionName());
 	}
 
 	@Override
 	public UIComponent downloadButton(UIComponent component, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action,
 										String moduleName, 
@@ -273,36 +285,40 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return downloadButton(action.getDisplayName(),
-								action.getIconStyleClass(),
-								action.getToolTip(),
+		return downloadButton(label,
+								iconStyleClass,
+								toolTip,
 								action.getName(),
 								moduleName, 
 								documentName, 
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(), 
 								action.getInvisibleConditionName());
 	}
 	
 	@Override
-	public UIComponent uploadButton(UIComponent components, 
+	public UIComponent uploadButton(UIComponent component, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
-		if (components != null) {
-			return components;
+		if (component != null) {
+			return component;
 		}
 
-		return uploadButton(action.getDisplayName(), 
-								action.getIconStyleClass(),
-								action.getToolTip(), 
+		return uploadButton(label, 
+								iconStyleClass,
+								toolTip, 
 								action.getName(), 
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(), 
 								action.getInvisibleConditionName());
 	}
@@ -379,7 +395,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, String title, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -398,7 +414,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
 												listVar,
-												grid.getTitle(),
+												title,
 												grid.getInvisibleConditionName(),
 												((! Boolean.TRUE.equals(grid.getInline())) &&
 														(! Boolean.FALSE.equals(grid.getShowZoom())) &&
@@ -427,7 +443,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * Any bound columns are editable inline.
 	 */
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String listVar, String title, DataRepeater repeater) {
 		if (component != null) {
 			return component;
 		}
@@ -436,7 +452,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		DataTable result = dataTable(repeater.getBinding(),
 										listVar,
-										repeater.getTitle(),
+										title,
 										repeater.getInvisibleConditionName(),
 										false,
 										null,
@@ -542,6 +558,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current, 
 													AbstractDataWidget widget,
+													String title,
 													DataGridContainerColumn column) {
 		if (component != null) {
 			return component;
@@ -549,7 +566,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		Column col = column(widget.getBinding(),
 								null,
-								column.getTitle(),
+								title,
 				                column.getAlignment(),
 				                false,
 				                column.getPixelWidth());
@@ -751,6 +768,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid grid,
 									boolean canCreateDocument) {
 		if (component != null) {
@@ -848,8 +866,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		result.setValueExpression("value", ef.createValueExpression(elc, modelExpression.toString(), SkyveLazyDataModel.class));
 
-		if (grid.getTitle() != null) {
-			addListGridHeader(grid.getTitle(), result);
+		if (title != null) {
+			addListGridHeader(title, result);
 		}
 
 		boolean showFilter = (! Boolean.FALSE.equals(grid.getShowFilter()));
@@ -1730,6 +1748,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent actionLink(UIComponent component,
 									String listBinding,
 									String listVar,
+									String value,
 									Link link,
 									String actionName) {
 		if (component != null) {
@@ -1739,7 +1758,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// TODO do the tooltip and client validation, disabled, invisible thing,
 		// Need the action, not just it's name
 		Map<String, String> properties = link.getProperties();
-		return actionLink(link.getValue(),
+		return actionLink(value,
 							null,
 							null,
 							actionName,
@@ -1760,6 +1779,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent actionLink(UIComponent component,
 								  String listBinding,
 								  String listVar,
+								  String value,
 								  Link link,
 								  Action action) {
 		if (component != null) {
@@ -1767,21 +1787,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Map<String, String> properties = link.getProperties();
-		return actionLink(link.getValue(),
-				action.getToolTip(),
-				null,
-				action.getName(),
-				false,
-				listBinding,
-				listVar,
-				link.getPixelWidth(),
-				null,
-				action.getClientValidation(),
-				action.getConfirmationText(),
-				action.getDisabledConditionName(),
-				action.getInvisibleConditionName(),
-				properties.get(PROCESS_KEY),
-				properties.get(UPDATE_KEY));
+		return actionLink(value,
+							action.getToolTip(),
+							null,
+							action.getName(),
+							false,
+							listBinding,
+							listVar,
+							link.getPixelWidth(),
+							null,
+							action.getClientValidation(),
+							action.getConfirmationText(),
+							action.getDisabledConditionName(),
+							action.getInvisibleConditionName(),
+							properties.get(PROCESS_KEY),
+							properties.get(UPDATE_KEY));
 	}
 	
 	@Override
@@ -2578,13 +2598,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent staticImage(UIComponent component, StaticImage image) {
+	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		if (component != null) {
 			return component;
 		}
 
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
-		result.setUrl("images/" + image.getRelativeFile());
+		result.setUrl(fileUrl);
 		setSize(result, 
 					null, 
 					image.getPixelWidth(), 
