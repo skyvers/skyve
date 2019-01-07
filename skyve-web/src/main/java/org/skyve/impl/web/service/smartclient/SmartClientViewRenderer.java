@@ -92,7 +92,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
@@ -2464,27 +2463,6 @@ pickListFields:[{name:'value'}],
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
-	}
-
-	@Override
-	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
-		if (AttributeType.date.equals(attributeType)) {
-			return Integer.valueOf(100);
-		}
-		if (AttributeType.dateTime.equals(attributeType)) {
-			return Integer.valueOf(125);
-		}
-		if (AttributeType.time.equals(attributeType)) {
-			return Integer.valueOf(75);
-		}
-		if (AttributeType.timestamp.equals(attributeType)) {
-			return Integer.valueOf(125);
-		}
-		if (AttributeType.bool.equals(attributeType)) {
-			return Integer.valueOf(75);
-		}
-
-		return null;
 	}
 
 	/**

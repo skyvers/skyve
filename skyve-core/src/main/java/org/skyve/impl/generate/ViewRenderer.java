@@ -203,7 +203,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentContainers.pop();
 	}
 
-	public abstract void renderedHBox(String title, HBox bbox);
+	public abstract void renderedHBox(String title, HBox hbox);
 
 	private Form currentForm;
 	public Form getCurrentForm() {
@@ -287,11 +287,21 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentWidgetHelp = null;
 		currentTarget = null;
 		
-		if (binding != null) {
-			currentTarget = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		String ultimateBinding = binding;
+		
+		if (currentDataWidget != null) {
+			if (binding == null) {
+				ultimateBinding = currentDataWidget.getBinding();
+			}
+			else {
+				ultimateBinding = BindUtil.createCompoundBinding(currentDataWidget.getBinding(), binding);
+			}
+		}
+		if (ultimateBinding != null) {
+			currentTarget = BindUtil.getMetaDataForBinding(customer, module, document, ultimateBinding);
 			Document targetDocument = currentTarget.getDocument(); 
 			Attribute targetAttribute = currentTarget.getAttribute();
-			if (binding.endsWith(Bean.BIZ_KEY)) {
+			if (ultimateBinding.endsWith(Bean.BIZ_KEY)) {
 				if (targetDocument != null) {
 					currentWidgetLabel = targetDocument.getSingularAlias();
 					currentWidgetHelp = targetDocument.getDescription();
@@ -303,7 +313,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					currentWidgetHelp = bizKeyAttribute.getDescription();
 				}
 			}
-			else if (binding.endsWith(Bean.ORDINAL_NAME)) {
+			else if (ultimateBinding.endsWith(Bean.ORDINAL_NAME)) {
 				org.skyve.impl.metadata.model.document.field.Integer bizOrdinalAttribute = DocumentImpl.getBizOrdinalAttribute();
 				currentWidgetLabel = bizOrdinalAttribute.getDisplayName();
 				currentWidgetRequired = bizOrdinalAttribute.getRequiredBool();
@@ -315,15 +325,29 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
 				currentWidgetHelp = targetAttribute.getDescription();
 			}
-			preProcessWidget();
+			preProcessWidget(false);
 		}
 	}
 	
-	private void preProcessWidget() {
+	private void preProcessWidget(boolean clearState) {
+		if (clearState) {
+			currentWidgetLabel = null;
+			currentWidgetHelp = null;
+			currentWidgetRequired = null;
+		}
 		if (currentFormItem != null) {
-			currentWidgetLabel = currentFormItem.getLabel();
-			currentWidgetHelp = currentFormItem.getHelp();
-			currentWidgetRequired = currentFormItem.getRequired();
+			String label = currentFormItem.getLabel();
+			if (label != null) {
+				currentWidgetLabel = label;
+			}
+			String help = currentFormItem.getHelp();
+			if (help != null) {
+				currentWidgetHelp = help;
+			}
+			Boolean required = currentFormItem.getRequired();
+			if (required != null) {
+				currentWidgetRequired = required;
+			}
 		}
 		currentWidgetLabel = Util.i18n(currentWidgetLabel, locale);
 		currentWidgetHelp = Util.i18n(currentWidgetHelp, locale);
@@ -588,7 +612,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 	@Override
 	public final void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		Action action = view.getAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action)) {
 			if (currentFormItem != null) {
@@ -668,7 +692,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String label = Util.i18n(button.getDisplayName(), locale);
 		if (currentFormItem != null) {
 			renderFormDialogButton(label, button);
@@ -683,7 +707,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitSpacer(Spacer spacer) {
-		preProcessWidget();
+		preProcessWidget(true);
 		if (currentFormItem != null) {
 			renderFormSpacer(spacer);
 		}
@@ -697,7 +721,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String fileUrl = staticImageToUrl(image.getRelativeFile());
 		if (currentFormItem != null) {
 			renderFormStaticImage(fileUrl, image);
@@ -729,7 +753,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String value = Util.i18n(link.getValue(), locale);
 		if (currentFormItem != null) {
 			renderFormLink(value, link);
@@ -748,7 +772,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		String markup = Util.i18n(blurb.getMarkup(), locale);
 		if (currentFormItem != null) {
 			renderFormBlurb(markup, blurb);
@@ -779,7 +803,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			value = null;
 		}
 		else {
-			preProcessWidget();
+			preProcessWidget(true);
 			value = Util.i18n(value, locale);
 			currentTarget = null;
 		}
@@ -806,7 +830,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	public abstract void renderFormProgressBar(ProgressBar progressBar);
 	
-	private String tabularTitle;
+	private String currentTabularTitle;
 
 	private String currentListWidgetModelName;
 	public String getCurrentListWidgetModelName() {
@@ -826,7 +850,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	
 	private void preProcessListWidget(AbstractListWidget widget) {
-		tabularTitle = Util.i18n(widget.getTitle(), locale);
+		currentTabularTitle = Util.i18n(widget.getTitle(), locale);
 
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
@@ -852,7 +876,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	
 	private void postProcessListWidget() {
-		tabularTitle = null;
+		currentTabularTitle = null;
 		currentListWidgetModelName = null;
 		currentListWidgetModelDocumentName = null;
 		currentListWidgetModel = null;
@@ -862,7 +886,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessListWidget(grid);
-		renderListGrid(tabularTitle, grid);
+		renderListGrid(currentTabularTitle, grid);
 		
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
@@ -880,7 +904,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
-		renderedListGrid(tabularTitle, grid);
+		renderedListGrid(currentTabularTitle, grid);
 		postProcessListWidget();
 	}
 
@@ -889,7 +913,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		preProcessListWidget(repeater);
-		renderListRepeater(tabularTitle, repeater);
+		renderListRepeater(currentTabularTitle, repeater);
 
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
@@ -907,7 +931,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitedListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
-		renderedListRepeater(tabularTitle, repeater);
+		renderedListRepeater(currentTabularTitle, repeater);
 		postProcessListWidget();
 	}
 
@@ -916,7 +940,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessListWidget(grid);
-		renderTreeGrid(tabularTitle, grid);
+		renderTreeGrid(currentTabularTitle, grid);
 
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
@@ -934,7 +958,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
-		renderedTreeGrid(tabularTitle, grid);
+		renderedTreeGrid(currentTabularTitle, grid);
 		postProcessListWidget();
 	}
 
@@ -945,25 +969,25 @@ public abstract class ViewRenderer extends ViewVisitor {
 		return currentDataWidget;
 	}
 	
-	private TargetMetaData dataWidgetTarget;
+	private TargetMetaData currentDataWidgetTarget;
 
 	@Override
 	public final void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(grid.getBinding());
-		dataWidgetTarget = currentTarget;
-		tabularTitle = Util.i18n(grid.getTitle(), locale);
+		currentDataWidgetTarget = currentTarget;
+		currentTabularTitle = Util.i18n(grid.getTitle(), locale);
 		currentDataWidget = grid;
-		renderDataGrid(tabularTitle, grid);
+		renderDataGrid(currentTabularTitle, grid);
 	}
 
 	public abstract void renderDataGrid(String title, DataGrid grid);
 
 	@Override
 	public final void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-		currentTarget = dataWidgetTarget;
-		renderedDataGrid(tabularTitle, grid);
-		dataWidgetTarget = null;
-		tabularTitle = null;
+		currentTarget = currentDataWidgetTarget;
+		renderedDataGrid(currentTabularTitle, grid);
+		currentDataWidgetTarget = null;
+		currentTabularTitle = null;
 		currentDataWidget = null;
 	}
 
@@ -972,20 +996,20 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(repeater.getBinding());
-		dataWidgetTarget = currentTarget;
-		tabularTitle = Util.i18n(repeater.getTitle(), locale);
+		currentDataWidgetTarget = currentTarget;
+		currentTabularTitle = Util.i18n(repeater.getTitle(), locale);
 		currentDataWidget = repeater;
-		renderDataRepeater(tabularTitle, repeater);
+		renderDataRepeater(currentTabularTitle, repeater);
 	}
 
 	public abstract void renderDataRepeater(String title, DataRepeater repeater);
 
 	@Override
 	public final void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
-		currentTarget = dataWidgetTarget;
-		renderedDataRepeater(tabularTitle, repeater);
-		dataWidgetTarget = null;
-		tabularTitle = null;
+		currentTarget = currentDataWidgetTarget;
+		renderedDataRepeater(currentTabularTitle, repeater);
+		currentDataWidgetTarget = null;
+		currentTabularTitle = null;
 		currentDataWidget = null;
 	}
 
@@ -1003,13 +1027,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		currentColumnTitle = column.getTitle();
-		String binding = column.getBinding();
-		if (binding == null) { // binding to the collection
-			preProcessWidget(currentDataWidget.getBinding());
-		}
-		else {
-			preProcessWidget(binding);
-		}
+		preProcessWidget(column.getBinding());
 		if (currentColumnTitle == null) {
 			currentColumnTitle = currentWidgetLabel;
 		}
@@ -1577,7 +1595,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget();
+		preProcessWidget(true);
 		if (currentFormItem != null) {
 			renderFormInject(inject);
 		}
@@ -1589,14 +1607,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderFormInject(Inject inject);
 	public abstract void renderInject(Inject inject);
 
-
-	@Override
-	public final void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		Action action = view.getAction(server.getActionName());
-		visitServerSideActionEventAction(action, server);
-	}
-	
-	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
 
 	@Override
 	public final void visitCustomAction(ActionImpl action) {
@@ -1955,6 +1965,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 											char type,
 											ActionImpl action);
 
+	@Override
+	public final void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
+		Action action = view.getAction(server.getActionName());
+		visitServerSideActionEventAction(action, server);
+	}
+	
+	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
+
 	protected LinkedHashMap<String, String> getLocalisedConstantDomainValueMap(Attribute attribute) {
 		List<DomainValue> values = document.getDomainValues(customer, 
 																DomainType.constant, 
@@ -1988,8 +2006,27 @@ public abstract class ViewRenderer extends ViewVisitor {
 		return HorizontalAlignment.left;
 	}
 	
-	public abstract Integer determineDefaultColumnWidth(AttributeType attributeType);
-	
+	@SuppressWarnings("static-method")
+	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType)) {
+			return Integer.valueOf(100);
+		}
+		if (AttributeType.dateTime.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.time.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+		if (AttributeType.timestamp.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+
+		return null;
+	}
+
 	private String iconToUrl(String icon) {
 		if (icon == null) {
 			return null;

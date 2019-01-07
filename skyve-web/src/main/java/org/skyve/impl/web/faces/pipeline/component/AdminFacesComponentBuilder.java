@@ -24,7 +24,15 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent actionButton(UIComponent component, String listBinding, String listVar, Button button, Action action) {
+	public UIComponent actionButton(UIComponent component,
+										String listBinding,
+										String listVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -36,7 +44,15 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent downloadButton(UIComponent component, Button button, Action action, String moduleName, String documentName) {
+	public UIComponent downloadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action,
+										String moduleName,
+										String documentName) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -48,7 +64,13 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent reportButton(UIComponent component, Button button, Action action) {
+	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -60,7 +82,13 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										Action action) {
 		styleUploadButton(component);
 		return component;
 	}
@@ -79,6 +107,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		FacesUtil.setStyleCLass(component, DATA_TABLE_STYLE_CLASS);
@@ -86,7 +115,11 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component,
+									String listVar,
+									boolean ordered,
+									String title,
+									DataGrid grid) {
 		FacesUtil.setStyleCLass(component, DATA_TABLE_STYLE_CLASS);
 		return component;
 	}

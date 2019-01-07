@@ -82,7 +82,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String documentName,
 											StringBuilder stickyTabScript);
 	
-	public abstract UIComponent tab(UIComponent component, Tab tab);
+	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,
@@ -95,21 +95,37 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent actionButton(UIComponent component,
 												String listBinding, 
 												String listVar, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
 												Action action);
 	public abstract UIComponent reportButton(UIComponent component, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
 												Action action);
 	public abstract UIComponent downloadButton(UIComponent component,
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
 												Action action, 
 												String moduleName, 
 												String documentName);
 	public abstract UIComponent uploadButton(UIComponent component, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
 												Action action);
 	
-	public abstract UIComponent staticImage(UIComponent component, StaticImage image);
+	public abstract UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image);
 	public abstract UIComponent dynamicImage(UIComponent component, 
 												DynamicImage image, 
 												String moduleName, 
@@ -126,7 +142,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String binding,
 										Label label);
 
-	public abstract UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid);
+	public abstract UIComponent dataGrid(UIComponent component,
+											String listVar,
+											boolean ordered,
+											String title,
+											DataGrid grid);
 
 	/*
 	 * Data Repeater is just like a data grid but...
@@ -135,7 +155,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * Any bound columns are editable inline.
 	 * There is no action column.
 	 */
-	public abstract UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater);
+	public abstract UIComponent dataRepeater(UIComponent component,
+												String listVar,
+												String title,
+												DataRepeater repeater);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
 														UIComponent current, 
 														AbstractDataWidget widget,
@@ -148,6 +171,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
 															UIComponent current,
 															AbstractDataWidget widget,
+															String title,
 															DataGridContainerColumn column);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent component,
@@ -162,6 +186,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model,
+											String title,
 											ListGrid listGrid,
 											boolean canCreateDocument);
 
@@ -370,14 +395,16 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public UIComponent actionLink(UIComponent component,
 										   String listBinding,
 										   String listVar,
+										   String value,
 										   Link link,
 										   Action action) {
-		return actionLink(component, listBinding, listVar, link, action.getName());
+		return actionLink(component, listBinding, listVar, value, link, action.getName());
 	}
 
 	public abstract UIComponent actionLink(UIComponent component,
 											String listBinding,
 											String listVar,
+											String value,
 											Link link,
 											String actionName);
 

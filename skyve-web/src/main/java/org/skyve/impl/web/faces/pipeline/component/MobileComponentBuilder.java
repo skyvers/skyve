@@ -142,14 +142,18 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component,
+									String listVar,
+									boolean ordered,
+									String title,
+									DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
 
 		DataList result = dataList(grid.getBinding(), 
 									listVar,
-		                			grid.getTitle(),
+		                			title,
 		                			grid.getInvisibleConditionName(),
 		                			grid.getWidgetId());
 		result.getPassThroughAttributes().put("data-inset", createValueExpressionFromCondition("true", null));
@@ -201,6 +205,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current, 
 													AbstractDataWidget widget, 
+													String title,
 													DataGridContainerColumn column) {
 		if (component != null) {
 			return component;
@@ -447,6 +452,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid grid,
 									boolean canCreateDocument) {
 		if (component != null) {
@@ -457,12 +463,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
 		String[] createDisabledConditionNames = (disableAddConditionName == null) ?
-				((disabledConditionName == null) ?
-						null :
-						new String[] {disabledConditionName}) :
-				((disabledConditionName == null) ?
-						new String[] {disableAddConditionName} :
-						new String[] {disableAddConditionName, disabledConditionName});
+													((disabledConditionName == null) ?
+															null :
+															new String[] {disabledConditionName}) :
+													((disabledConditionName == null) ?
+															new String[] {disableAddConditionName} :
+															new String[] {disableAddConditionName, disabledConditionName});
 		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);

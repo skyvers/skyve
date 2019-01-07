@@ -148,6 +148,7 @@ public class ListGrid extends HtmlPanelGroup {
 											documentName,
 											name,
 											model,
+											model.getDescription(),
 											listGrid,
 											user.canCreateDocument(model.getDrivingDocument()));
 	}
