@@ -17,7 +17,6 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.util.TimeUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
@@ -34,6 +33,7 @@ import org.skyve.web.WebContext;
 
 import modules.ModulesUtil;
 import modules.admin.Communication.actions.GetResults;
+import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.CommunicationTemplate;
@@ -44,7 +44,6 @@ public class CommunicationUtil {
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
-	public static final String DEFAULT_SENDER = "default.sender@skyve.org";
 	public static final String SENT_SUCCESSFULLY_MESSAGE = "Communication sent";
 
 	/**
@@ -105,7 +104,7 @@ public class CommunicationUtil {
 		String sendFromExpression = communication.getSendFrom();
 		String sendFrom = null;
 		if(sendFromExpression==null){
-			sendFrom = DEFAULT_SENDER;
+			sendFrom = ConfigurationExtension.defaultSMTPSender();
 		} else {
 			//resolve biding expression
 			sendFrom =  Binder.formatMessage(customer, sendFromExpression, specificBeans);
@@ -154,15 +153,14 @@ public class CommunicationUtil {
 		ValidationException ve = new ValidationException();
 		TextValidator v = new TextValidator();
         v.setType(ValidatorType.email);
-        v.validate(user, resolvedSendTo, "email", "Email", null, ve);
+        v.validate(user, resolvedSendTo, "email1", "Email", null, ve);
         if(!ve.getMessages().isEmpty()) {
         	if (ResponseMode.SILENT.equals(responseMode)) {
-				Util.LOGGER.log(Level.WARNING, ve.getStackTrace().toString());
+				Util.LOGGER.log(Level.ALL, "The resolved email sendTo address " + resolvedSendTo + " could not be validated.");
 			} else {
 				throw ve;
 			}  
         }
-		
         
        //Resolve email message contents
 		String ccTo = formatCommunicationMessage(customer, communication.getCcTo(), beans);
@@ -173,7 +171,6 @@ public class CommunicationUtil {
 		if(ccTo!=null){
 			cc = new String[] {ccTo};
 		}
-		
 		
 		//add myself to bcc if monitoring outgoing email
 		String[] bcc = null;
@@ -384,7 +381,7 @@ public class CommunicationUtil {
 			result.setDescription(description);
 			result.setFormatType(FormatType.email);
 			result.setSystem(Boolean.TRUE);
-			result.setSendFrom(DEFAULT_SENDER);
+			result.setSendFrom(ConfigurationExtension.defaultSMTPSender());
 			result.setSendTo(sendToExpression);
 			result.setCcTo(ccExpression);
 			result.setSubject(defaultSubject);

@@ -44,6 +44,8 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	private String description;
 	/**
 	 * Template
+	 * <br/>
+	 * Include "{body}" to designate where the body of the communication will be placed.
 	 **/
 	private String template;
 
