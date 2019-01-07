@@ -1243,9 +1243,7 @@ public class Communication extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return ((
-					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
-						.validSMTPHost()));
+		return (modules.admin.Configuration.ConfigurationExtension.validSMTPHost());
 	}
 
 	/**
