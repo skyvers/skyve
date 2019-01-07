@@ -45,11 +45,11 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
-public class PrimeReactComponentRenderer extends ComponentRenderer {
+public class ReactNativeComponentRenderer extends ComponentRenderer {
 	private Map<String, String> imports;
 	private String startingIndent;
 
-	public PrimeReactComponentRenderer(Map<String, String> imports, String startingIndent) {
+	public ReactNativeComponentRenderer(Map<String, String> imports, String startingIndent) {
 		this.imports = imports;
 		this.startingIndent = startingIndent;
 	}
@@ -245,6 +245,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent addedDataGridBoundColumn(RenderedComponent component, RenderedComponent current) {
+System.out.println("end column " + current);
 		return current.getParent();
 	}
 
@@ -254,6 +255,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 															AbstractDataWidget widget,
 															String columnTitle,
 															DataGridContainerColumn column) {
+System.out.println("conatin column " + column.getTitle());
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>addDataGridContainerColumn</span>");
@@ -263,6 +265,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current) {
+System.out.println("end column " + current);
 		return current.getParent();
 	}
 
@@ -274,6 +277,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 														String gridColumnExpression,
 														String singluarDocumentAlias,
 														boolean inline) {
+System.out.println("action column " + current);
 		return current;
 	}
 
@@ -519,7 +523,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	public RenderedComponent upload(RenderedComponent component, Action action) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("upload");
+		output.append("download");
 		return result;
 	}
 	

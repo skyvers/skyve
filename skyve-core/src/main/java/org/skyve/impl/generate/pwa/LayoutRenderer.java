@@ -6,6 +6,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
@@ -53,16 +54,24 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 														RenderedComponent formLayout,
 														RenderedComponent rowLayout);
 	public abstract RenderedComponent addedFormRowLayout(RenderedComponent component, RenderedComponent rowLayout);
-	public abstract void layoutFormItem(RenderedComponent formOrRowLayout,
-											RenderedComponent formItemComponent,
-											Form currentForm,
-											FormItem currentFormItem,
-											int currentFormColumn,
-											String widgetLabel,
-											boolean widgetRequired,
-											String widgetInvisible,
-											boolean widgetShowsLabelByDefault,
-											String widgetHelpText);
+	public abstract void layoutFormItemLabel(RenderedComponent formOrRowLayout,
+												RenderedComponent formItemComponent,
+												Form currentForm,
+												FormItem currentFormItem,
+												FormColumn currentFormColumn,
+												String widgetLabel,
+												boolean widgetRequired,
+												String widgetInvisible,
+												String widgetHelpText);
+	public abstract void layoutFormItemWidget(RenderedComponent formOrRowLayout,
+												RenderedComponent formItemComponent,
+												Form currentForm,
+												FormItem currentFormItem,
+												FormColumn currentFormColumn,
+												String widgetLabel,
+												boolean widgetRequired,
+												String widgetInvisible,
+												String widgetHelpText);
 	
 	/**
 	 * 

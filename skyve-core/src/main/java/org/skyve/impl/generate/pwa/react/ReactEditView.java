@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.Repository;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -23,14 +27,10 @@ public class ReactEditView extends ReactComponent {
 	public void setViews(Module module, Document document) {
 		this.module = module;
 		this.document = document;
-        editView = generator.repository.getView(generator.uxui,
-        											generator.customer,
-        											document,
-        											ViewType.edit.toString());
-        createView = generator.repository.getView(generator.uxui,
-        											generator.customer,
-        											document,
-        											ViewType.create.toString());
+		Repository r = CORE.getRepository();
+		Customer c = CORE.getCustomer();
+        editView = r.getView(generator.uxui, c, document, ViewType.edit.toString());
+        createView = r.getView(generator.uxui, c, document, ViewType.create.toString());
  	}
 
 	@Override
@@ -42,13 +42,14 @@ public class ReactEditView extends ReactComponent {
 		// Wrap edit and create views in a Fragment if necessary
 		boolean bothViews = (editView != null) && (createView != null);
 
+		User u = CORE.getUser();
 		if (editView != null) {
-			ReactViewVisitor v = new PrimeReactViewVisitor(generator.customer, module, document, editView, null, imports, bothViews);
+			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, editView, imports, bothViews);
 			v.visit();
 			editJsx = v.getResult().toString();
 		}
 		if (createView != null) {
-			ReactViewVisitor v = new PrimeReactViewVisitor(generator.customer, module, document, createView, null, imports, bothViews);
+			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, createView, imports, bothViews);
 			v.visit();
 			createJsx = v.getResult().toString();
 		}

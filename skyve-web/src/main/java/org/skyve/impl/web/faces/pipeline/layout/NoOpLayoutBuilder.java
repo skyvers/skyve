@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
@@ -93,16 +94,28 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 	}
 
 	@Override
-	public void layoutFormItem(UIComponent formOrRowLayout,
-								UIComponent formItemComponent,
-								Form currentForm,
-								FormItem currentFormItem,
-								int currentFormColumn,
-								String widgetLabel,
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
+	public void layoutFormItemLabel(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		// do nothing
+	}
+
+	@Override
+	public void layoutFormItemWidget(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		// do nothing
 	}
 

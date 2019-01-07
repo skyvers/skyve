@@ -4,14 +4,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientQueryColumnDefinition;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 
 
@@ -83,6 +86,8 @@ class ReactListView extends ReactComponent {
 
 		List<MetaDataQueryColumn> columns = (query != null) ? query.getColumns() : ((model == null) ? null : model.getColumns());
 		if (columns != null) {
+			User u = CORE.getUser();
+			Customer c = u.getCustomer();
 			for (MetaDataQueryColumn column : columns) {
 				// don't show hidden columns
 				if (column.isHidden()) {
@@ -93,7 +98,7 @@ class ReactListView extends ReactComponent {
 						(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
 					continue;
 				}
-				SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(null, generator.customer, module, document, column, false);
+				SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(u, c, module, document, column, false);
 				String columnName = column.getBinding();
 				if (columnName == null) {
 					columnName = column.getName();

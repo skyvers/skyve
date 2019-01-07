@@ -2,22 +2,21 @@ package org.skyve.impl.generate.pwa.react;
 
 import java.util.Map;
 
-import org.skyve.impl.generate.pwa.PWAViewVisitor;
-import org.skyve.metadata.customer.Customer;
+import org.skyve.impl.generate.pwa.PWAViewRenderer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 
-public class ReactViewVisitor extends PWAViewVisitor {
+public class ReactViewRenderer extends PWAViewRenderer {
 	protected Map<String, String> imports;
 
-	public ReactViewVisitor(Customer customer,
+	public ReactViewRenderer(User user,
 								Module module,
 								Document document,
 								View view,
-								String widgetId,
 								Map<String, String> imports) {
-		super(customer, module, document, view, widgetId);
+		super(user, module, document, view);
 		this.imports = imports;
 	}
 }
