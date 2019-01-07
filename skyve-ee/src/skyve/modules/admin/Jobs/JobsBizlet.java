@@ -5,8 +5,8 @@ import java.util.List;
 import modules.admin.domain.Job;
 import modules.admin.domain.Jobs;
 
+import org.skyve.EXT;
 import org.skyve.job.JobDescription;
-import org.skyve.job.JobScheduler;
 import org.skyve.metadata.model.document.Bizlet;
 
 public class JobsBizlet extends Bizlet<Jobs> {
@@ -33,7 +33,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 		List<Job> runningJobs = jobs.getRunningJobs();
 		runningJobs.clear();
 		
-		for (JobDescription jd : JobScheduler.getCustomerRunningJobs()) {
+		for (JobDescription jd : EXT.getCustomerRunningJobs()) {
 			// the job could be finished but the thread is still sleeping waiting for the last UI poll
 			if (jd.getStatus() == null) { // not finished
 				Job job = Job.newInstance();
@@ -41,7 +41,6 @@ public class JobsBizlet extends Bizlet<Jobs> {
 				job.setDisplayName(jd.getName());
 				job.setPercentComplete(new Integer(jd.getPercentComplete()));
 				job.setLog(jd.getLogging());
-				
 				runningJobs.add(job);
 			}
 		}
