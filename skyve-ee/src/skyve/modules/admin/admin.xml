@@ -354,13 +354,11 @@
 			<role name="SecurityAdministrator" />
 		</list>
 		<group name="Communication">
-		<list document="Communication" name="Communications">
-			<uxui name="desktop" />
-			<role name="ContactManager" />
-			<role name="SecurityAdministrator" />
-		</list>
+			<list document="Communication" name="Communications">
+				<role name="ContactManager" />
+				<role name="SecurityAdministrator" />
+			</list>
 			<list document="CommunicationTemplate" name="Communication Templates">
-				<uxui name="desktop" />
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
 			</list>
