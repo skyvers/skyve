@@ -104,7 +104,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			if (pre != null) {
 				switch (pre) {
 					case noProcessing:
-						instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and you've let the Skyve create all DDL. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
+						instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and Skyve has created all database objects. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
 						break;
 					case createTablesFromBackup:
 						instructionHint="Use this option when you've created a empty schema (manually or scripted).";
