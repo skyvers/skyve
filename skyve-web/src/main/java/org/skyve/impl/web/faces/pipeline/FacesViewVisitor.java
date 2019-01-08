@@ -600,16 +600,35 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 			else { // a form item
-				lb.layoutFormItem(current,
-									component,
-									currentForm, 
-									currentFormItem, 
-									currentFormColumn,
-									widgetLabel,
-									widgetRequired,
-									widgetInvisible,
-									showsLabelByDefault,
-									helpText);
+				List<FormColumn> formColumns = currentForm.getColumns();
+				Boolean formItemShowLabel = currentFormItem.getShowLabel();
+				boolean showLabel = (formItemShowLabel == null) ? showsLabelByDefault : formItemShowLabel.booleanValue();
+				if (showLabel) {
+					lb.layoutFormItemLabel(current,
+											component,
+											currentForm, 
+											currentFormItem, 
+											formColumns.get(currentFormColumn++),
+											widgetLabel,
+											widgetRequired,
+											widgetInvisible,
+											helpText);
+					if (currentFormColumn >= formColumns.size()) {
+						currentFormColumn = 0;
+					}
+				}				
+				lb.layoutFormItemLabel(current,
+										component,
+										currentForm, 
+										currentFormItem, 
+										formColumns.get(currentFormColumn++),
+										widgetLabel,
+										widgetRequired,
+										widgetInvisible,
+										helpText);
+				if (currentFormColumn >= formColumns.size()) {
+					currentFormColumn = 0;
+				}
 			}
 		}
 	}

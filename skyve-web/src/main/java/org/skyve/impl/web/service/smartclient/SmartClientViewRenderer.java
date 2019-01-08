@@ -468,12 +468,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormItem(String label,
 								boolean required,
 								String help,
+								boolean showLabel,
 								FormItem item) {
-		code.append('{');
-		Boolean showLabel = item.getShowLabel();
-		if (showLabel != null) {
-			code.append("showTitle:").append(showLabel).append(',');
-		}
+		code.append("{showTitle:").append(showLabel).append(',');
 		// label handled in preProcessFormItem()
 		Integer span = item.getColspan();
 		if (span != null) {
@@ -500,6 +497,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormItem(String label,
 									boolean required,
 									String help,
+									boolean showLabel,
 									FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
@@ -507,6 +505,20 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else {
 			code.append("startRow:false},");
+		}
+		
+		// Move along the requisite amount of form columns
+		if (showLabel) {
+			incrementFormColumn();
+		}
+		Integer colspan = item.getColspan();
+		if (colspan == null) { // defaults to 1
+			incrementFormColumn();
+		}
+		else {
+			for (int i = 0, l = colspan.intValue(); i < l; i++) {
+				incrementFormColumn();
+			}
 		}
 	}
 

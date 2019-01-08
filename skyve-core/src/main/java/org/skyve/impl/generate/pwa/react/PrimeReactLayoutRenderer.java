@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
  
@@ -47,7 +48,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent tabLayout(RenderedComponent component) {
-		imports.put("{VBox}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{VBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<VBox>");
@@ -85,7 +86,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent vboxLayout(RenderedComponent component, VBox vbox) {
-		imports.put("{VBox}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{VBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent("");
 		StringBuilder output = result.getOutput();
 		output.append("<VBox>");
@@ -94,7 +95,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent hboxLayout(RenderedComponent component, HBox hbox) {
-		imports.put("{HBox}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{HBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</HBox>").setIndent("");
 		StringBuilder output = result.getOutput();
 		output.append("<HBox>");
@@ -103,7 +104,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent formLayout(RenderedComponent component, Form form) {
-		imports.put("{Form}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{Form}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</Form>").setIndent("");
 		StringBuilder output = result.getOutput();
 		output.append("<Form>");
@@ -112,7 +113,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent formRowLayout(RenderedComponent component, FormRow row) {
-		imports.put("{HBox}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{HBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</HBox>");
 		StringBuilder output = result.getOutput();
 		output.append("<HBox>");
@@ -133,17 +134,32 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 	}
 
 	@Override
-	public void layoutFormItem(RenderedComponent formOrRowLayout,
-								RenderedComponent formItemComponent,
-								Form currentForm,
-								FormItem currentFormItem,
-								int currentFormColumn,
-								String widgetLabel,
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
-		imports.put("{Cell}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+	public void layoutFormItemLabel(RenderedComponent formOrRowLayout,
+										RenderedComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
+		RenderedComponent cell = new RenderedComponent();
+		cell.getOutput().append("<Cell>").append(widgetLabel).append("</Cell>");
+		formOrRowLayout.addChild(cell);
+	}
+
+	@Override
+	public void layoutFormItemWidget(RenderedComponent formOrRowLayout,
+										RenderedComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent cell = new RenderedComponent();
 		cell.getOutput().append("<Cell>");
 		cell.setAfter("</Cell>");
@@ -165,7 +181,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 		}
 
 		// add a cell for either HBox or VBox, it doesn't matter as the parent controls horizontal or vertical
-		imports.put("{Cell}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{Cell}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent cell = new RenderedComponent();
 		cell.getOutput().append("<Cell>");
 		cell.setAfter("</Cell>");

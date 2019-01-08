@@ -304,6 +304,7 @@ public class JobScheduler {
 			AbstractSkyveJob job = SKYVE_TRIGGER_LISTENER.getRunningJob(customerName, trigger.getName());
 			if (job != null) {
 				JobDescription jd = new JobDescription();
+				jd.setUser((User) trigger.getJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
 				jd.setStartTime(job.getStartTime());
 				jd.setName(job.getDisplayName());
 				jd.setPercentComplete(job.getPercentComplete());

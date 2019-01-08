@@ -8,6 +8,7 @@ import org.primefaces.mobile.component.field.Field;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
@@ -94,38 +95,36 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 		return null;
 	}
 
+	private UIComponent field = null;
+	
 	@Override
-	public void layoutFormItem(UIComponent formOrRowLayout,
-								UIComponent formItemComponent,
-								Form currentForm,
-								FormItem currentFormItem,
-								int currentFormColumn,
-								String widgetLabel,
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
-		UIComponent field = null;
-
-		// The label
-		if (! Boolean.FALSE.equals(currentFormItem.getShowLabel())) {
-			String label = currentFormItem.getLabel();
-			if (label == null) {
-				label = widgetLabel;
-			}
-			if (label != null) {
-				field = field(widgetInvisible);
-				OutputLabel l = label(label, null, widgetRequired);
-				field.getChildren().add(l);
-				formOrRowLayout.getChildren().add(field);
-			}
-		}
-		// The field
-		if (field == null) {
-			field = field(null);
-			formOrRowLayout.getChildren().add(field);
-		}
+	public void layoutFormItemLabel(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		field = field(widgetInvisible);
+		OutputLabel l = label(widgetLabel, null, widgetRequired);
+		field.getChildren().add(l);
+		formOrRowLayout.getChildren().add(field);
+	}
+	
+	@Override
+	public void layoutFormItemWidget(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		field.getChildren().add(formItemComponent);
+		field = null;
 	}
 	
 	@Override

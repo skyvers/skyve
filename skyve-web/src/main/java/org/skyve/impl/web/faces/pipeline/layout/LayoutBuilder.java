@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
@@ -56,16 +57,24 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 													UIComponent formLayout,
 													UIComponent rowLayout);
 	public abstract UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout);
-	public abstract void layoutFormItem(UIComponent formOrRowLayout,
-											UIComponent formItemComponent,
-											Form currentForm,
-											FormItem currentFormItem,
-											int currentFormColumn,
-											String widgetLabel,
-											boolean widgetRequired,
-											String widgetInvisible,
-											boolean widgetShowsLabelByDefault,
-											String widgetHelpText);
+	public abstract void layoutFormItemLabel(UIComponent formOrRowLayout,
+												UIComponent formItemComponent,
+												Form currentForm,
+												FormItem currentFormItem,
+												FormColumn currentFormColumn,
+												String widgetLabel,
+												boolean widgetRequired,
+												String widgetInvisible,
+												String widgetHelpText);
+	public abstract void layoutFormItemWidget(UIComponent formOrRowLayout,
+												UIComponent formItemComponent,
+												Form currentForm,
+												FormItem currentFormItem,
+												FormColumn currentFormColumn,
+												String widgetLabel,
+												boolean widgetRequired,
+												String widgetInvisible,
+												String widgetHelpText);
 	
 	/**
 	 * 

@@ -5,10 +5,6 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.repository.LocalDesignRepository;
-import org.skyve.metadata.customer.Customer;
-
 /*
 Integrate font-awesome
 Page listgrid
@@ -16,17 +12,13 @@ Do react native
 
  */
 public class ReactGenerator {
-	Customer customer;
 	String uxui;
-	AbstractRepository repository;
 	String projectFolderPath;
 	File srcSkyvePath;
 	File srcSkyveViewsPath;
 	Set<ReactComponent> components = new TreeSet<>();
 	
-	public ReactGenerator(String customerName, String uxui, String projectFolderPath) {
-		repository = AbstractRepository.get();
-		this.customer = repository.getCustomer(customerName);
+	public ReactGenerator(String uxui, String projectFolderPath) {
 		this.uxui = uxui;
 		this.projectFolderPath = projectFolderPath;
 		if (! new File(projectFolderPath).exists()) {
@@ -51,8 +43,6 @@ public class ReactGenerator {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		AbstractRepository repository = new LocalDesignRepository();
-		AbstractRepository.set(repository);
-		new ReactGenerator("demo", "desktop", "/Users/mike/Downloads/sigma-master/").generate();
+		new ReactGenerator("desktop", "/Users/mike/Downloads/sigma-master/").generate();
 	}
 }

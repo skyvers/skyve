@@ -215,6 +215,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		currentForm = form;
 		currentFormBorderTitle = Util.i18n(form.getBorderTitle(), locale);
+		currentFormColumnIndex = 0;
 		renderForm(currentFormBorderTitle, form);
 	}
 	
@@ -245,11 +246,28 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
 		currentFormRow = row;
+		currentFormColumnIndex = 0;
 		renderFormRow(row);
 	}
 
 	public abstract void renderFormRow(FormRow row);
 
+	private int currentFormColumnIndex = 0;
+	public void incrementFormColumn() {
+		if (currentForm != null) {
+			List<FormColumn> formColumns = currentForm.getColumns();
+			currentFormColumnIndex++;
+			if (currentFormColumnIndex >= formColumns.size()) {
+				currentFormColumnIndex = 0;
+			}
+		}
+	}
+	public FormColumn getCurrentFormColumn() {
+		if (currentForm != null) {
+			return currentForm.getColumns().get(currentFormColumnIndex);
+		}
+		return null;
+	}
 	private FormItem currentFormItem;
 	public FormItem getCurrentFormItem() {
 		return currentFormItem;
@@ -257,6 +275,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private String currentWidgetLabel;
 	public String getCurrentWidgetLabel() {
 		return currentWidgetLabel;
+	}
+	private boolean currentWidgetShowLabel;
+	public boolean isCurrentWidgetShowLabel() {
+		return currentWidgetShowLabel;
 	}
 	private Boolean currentWidgetRequired;
 	public boolean isCurrentWidgetRequired() {
@@ -279,10 +301,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderFormItem(String label,
 											boolean required,
 											String help,
+											boolean showsLabel,
 											FormItem item);
 	
-	private void preProcessWidget(String binding) {
+	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
 		currentWidgetLabel = null;
+		currentWidgetShowLabel = false;
 		currentWidgetRequired = null;
 		currentWidgetHelp = null;
 		currentTarget = null;
@@ -325,11 +349,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
 				currentWidgetHelp = targetAttribute.getDescription();
 			}
-			preProcessWidget(false);
+			preProcessWidget(false, showsLabelByDefault);
 		}
 	}
 	
-	private void preProcessWidget(boolean clearState) {
+	private void preProcessWidget(boolean clearState, boolean showsLabelByDefault) {
 		if (clearState) {
 			currentWidgetLabel = null;
 			currentWidgetHelp = null;
@@ -352,9 +376,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentWidgetLabel = Util.i18n(currentWidgetLabel, locale);
 		currentWidgetHelp = Util.i18n(currentWidgetHelp, locale);
 		if (currentFormItem != null) {
+			Boolean showLabel = currentFormItem.getShowLabel();
+			currentWidgetShowLabel = (showLabel == null) ? showsLabelByDefault : showLabel.booleanValue();
 			renderFormItem(currentWidgetLabel,
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
+							currentWidgetShowLabel,
 							currentFormItem);
 		}
 	}
@@ -364,10 +391,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		renderedFormItem(currentWidgetLabel,
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
+							currentWidgetShowLabel,
 							item);
 		currentFormItem = null;
 		currentWidgetRequired = null;
 		currentWidgetLabel = null;
+		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
 		currentTarget = null;
 	}
@@ -375,6 +404,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public abstract void renderedFormItem(String label,
 											boolean required,
 											String help,
+											boolean showLabel,
 											FormItem item);
 	
 	@Override
@@ -612,7 +642,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 	@Override
 	public final void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, button.showsLabelByDefault());
 		Action action = view.getAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action)) {
 			if (currentFormItem != null) {
@@ -657,7 +687,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(locator.getDescriptionBinding());
+		preProcessWidget(locator.getDescriptionBinding(), locator.showsLabelByDefault());
 		if (currentFormItem != null) {
 			renderFormGeoLocator(locator);
 		}
@@ -678,7 +708,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(geometry.getBinding());
+		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnGeometry(geometry);
 		}
@@ -692,7 +722,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, button.showsLabelByDefault());
 		String label = Util.i18n(button.getDisplayName(), locale);
 		if (currentFormItem != null) {
 			renderFormDialogButton(label, button);
@@ -707,7 +737,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitSpacer(Spacer spacer) {
-		preProcessWidget(true);
+		preProcessWidget(true, spacer.showsLabelByDefault());
 		if (currentFormItem != null) {
 			renderFormSpacer(spacer);
 		}
@@ -721,7 +751,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, image.showsLabelByDefault());
 		String fileUrl = staticImageToUrl(image.getRelativeFile());
 		if (currentFormItem != null) {
 			renderFormStaticImage(fileUrl, image);
@@ -753,7 +783,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, link.showsLabelByDefault());
 		String value = Util.i18n(link.getValue(), locale);
 		if (currentFormItem != null) {
 			renderFormLink(value, link);
@@ -772,7 +802,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, blurb.showsLabelByDefault());
 		String markup = Util.i18n(blurb.getMarkup(), locale);
 		if (currentFormItem != null) {
 			renderFormBlurb(markup, blurb);
@@ -795,15 +825,15 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String binding = label.getBinding();
 		String faw = label.getFor();
 		if (faw != null) {
-			preProcessWidget(faw);
+			preProcessWidget(faw, label.showsLabelByDefault());
 			value = currentWidgetLabel;
 		}
 		else if (binding != null) {
-			preProcessWidget(binding);
+			preProcessWidget(binding, label.showsLabelByDefault());
 			value = null;
 		}
 		else {
-			preProcessWidget(true);
+			preProcessWidget(true, label.showsLabelByDefault());
 			value = Util.i18n(value, locale);
 			currentTarget = null;
 		}
@@ -824,7 +854,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(progressBar.getBinding());
+		preProcessWidget(progressBar.getBinding(), progressBar.showsLabelByDefault());
 		renderFormProgressBar(progressBar);
 	}
 	
@@ -973,7 +1003,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(grid.getBinding());
+		preProcessWidget(grid.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
 		currentTabularTitle = Util.i18n(grid.getTitle(), locale);
 		currentDataWidget = grid;
@@ -995,7 +1025,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(repeater.getBinding());
+		preProcessWidget(repeater.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
 		currentTabularTitle = Util.i18n(repeater.getTitle(), locale);
 		currentDataWidget = repeater;
@@ -1027,7 +1057,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		currentColumnTitle = column.getTitle();
-		preProcessWidget(column.getBinding());
+		preProcessWidget(column.getBinding(), false);
 		if (currentColumnTitle == null) {
 			currentColumnTitle = currentWidgetLabel;
 		}
@@ -1096,7 +1126,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(checkBox.getBinding());
+		preProcessWidget(checkBox.getBinding(), checkBox.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnCheckBox(checkBox);
 		}
@@ -1123,7 +1153,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(membership.getBinding());
+		preProcessWidget(membership.getBinding(), false);
 		renderCheckMembership(membership);
 	}
 
@@ -1138,7 +1168,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(colour.getBinding());
+		preProcessWidget(colour.getBinding(), colour.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnColourPicker(colour);
 		}
@@ -1165,7 +1195,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(combo.getBinding());
+		preProcessWidget(combo.getBinding(), combo.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnCombo(combo);
 		}
@@ -1192,7 +1222,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(image.getBinding());
+		preProcessWidget(image.getBinding(), image.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnContentImage(image);
 		}
@@ -1210,7 +1240,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(link.getBinding());
+		preProcessWidget(link.getBinding(), link.showsLabelByDefault());
 		String value = Util.i18n(link.getValue(), locale);
 		if (currentBoundColumn != null) {
 			renderBoundColumnContentLink(value, link);
@@ -1225,7 +1255,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(html.getBinding());
+		preProcessWidget(html.getBinding(), html.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnHTML(html);
 		}
@@ -1242,7 +1272,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(membership.getBinding());
+		preProcessWidget(membership.getBinding(), false);
 		listMembershipCandidatesHeading = Util.i18n(membership.getCandidatesHeading(), locale);
 		listMembershipMembersHeading = Util.i18n(membership.getMembersHeading(), locale);
 		renderListMembership(listMembershipCandidatesHeading,
@@ -1269,7 +1299,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitComparison(Comparison comparison, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(comparison.getBinding());
+		preProcessWidget(comparison.getBinding(), false);
 		renderComparison(comparison);
 	}
 
@@ -1279,8 +1309,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private boolean currentLookupCanCreate;
 	private boolean currentLookupCanUpdate;
 	
-	private void preProcessLookupWidget(String binding, String widgetQueryName) {
-		preProcessWidget(binding);
+	private void preProcessLookupWidget(String binding, String widgetQueryName, boolean showsLabelByDefault) {
+		preProcessWidget(binding, showsLabelByDefault);
 		String queryName = widgetQueryName;
 		// Use reference query name if none provided in the widget
 		Attribute targetAttribute = currentTarget.getAttribute();
@@ -1305,7 +1335,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery());
+		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery(), lookup.showsLabelByDefault());
 
 		currentLookupDescriptionBinding = lookup.getDescriptionBinding();
 		if (currentLookupDescriptionBinding == null) {
@@ -1375,7 +1405,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery());
+		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery(), lookup.showsLabelByDefault());
 		renderFormLookup(currentLookupQuery,
 							currentLookupCanCreate,
 							currentLookupCanUpdate,
@@ -1406,7 +1436,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(password.getBinding());
+		preProcessWidget(password.getBinding(), password.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnPassword(password);
 		}
@@ -1433,7 +1463,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(radio.getBinding());
+		preProcessWidget(radio.getBinding(), radio.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnRadio(radio);
 		}
@@ -1460,7 +1490,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitRichText(RichText text, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(text.getBinding());
+		preProcessWidget(text.getBinding(), text.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnRichText(text);
 		}
@@ -1487,7 +1517,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(slider.getBinding());
+		preProcessWidget(slider.getBinding(), slider.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnSlider(slider);
 		}
@@ -1514,7 +1544,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(spinner.getBinding());
+		preProcessWidget(spinner.getBinding(), spinner.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnSpinner(spinner);
 		}
@@ -1541,7 +1571,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(text.getBinding());
+		preProcessWidget(text.getBinding(), text.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnTextArea(text);
 		}
@@ -1568,7 +1598,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(text.getBinding());
+		preProcessWidget(text.getBinding(), text.showsLabelByDefault());
 		if (currentBoundColumn != null) {
 			renderBoundColumnTextField(text);
 		}
@@ -1595,7 +1625,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true);
+		preProcessWidget(true, false);
 		if (currentFormItem != null) {
 			renderFormInject(inject);
 		}

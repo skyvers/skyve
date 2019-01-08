@@ -239,54 +239,50 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public void layoutFormItem(UIComponent formOrRowLayout, 
-								UIComponent formItemComponent, 
-								Form currentForm,
-								FormItem currentFormItem, 
-								int currentFormColumn,
-								String widgetLabel, 
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
-		// The label
-		boolean showLabel = widgetShowsLabelByDefault;
-		Boolean itemShowLabel = currentFormItem.getShowLabel();
-		if (itemShowLabel != null) {
-			showLabel = itemShowLabel.booleanValue();
+	public void layoutFormItemLabel(UIComponent formOrRowLayout, 
+										UIComponent formItemComponent, 
+										Form currentForm,
+										FormItem currentFormItem, 
+										FormColumn currentFormColumn,
+										String widgetLabel, 
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		String label = currentFormItem.getLabel();
+		if (label == null) {
+			label = widgetLabel;
 		}
-		if (showLabel) {
-			String label = currentFormItem.getLabel();
-			if (label == null) {
-				label = widgetLabel;
-			}
-			if (label != null) {
-				HtmlPanelGroup div = panelGroup(false, false, true, null, null);
-				setInvisible(div, widgetInvisible, null);
-				// style="<repsonsive column calc method call>"
-                String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
-				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} %s", 
-													managedBeanName,
-													Integer.toString(formIndex),
-													alignment);
-				div.setValueExpression("styleClass", 
-										ef.createValueExpression(elc, expression, String.class));
-				formOrRowLayout.getChildren().add(div);
-				HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
-				div.getChildren().add(l);
-			}
-		}
-		
-		// The field
+		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
+		setInvisible(div, widgetInvisible, null);
+		// style="<repsonsive column calc method call>"
+        String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
+		String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} %s", 
+											managedBeanName,
+											Integer.toString(formIndex),
+											alignment);
+		div.setValueExpression("styleClass", 
+								ef.createValueExpression(elc, expression, String.class));
+		formOrRowLayout.getChildren().add(div);
+		HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
+		div.getChildren().add(l);
+	}
+	
+	@Override
+	public void layoutFormItemWidget(UIComponent formOrRowLayout, 
+										UIComponent formItemComponent, 
+										Form currentForm,
+										FormItem currentFormItem, 
+										FormColumn currentFormColumn,
+										String widgetLabel, 
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		Integer colspan = currentFormItem.getColspan();
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
 		setInvisible(div, widgetInvisible, null);
 		
 		// Create a grid
 		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
-		if (currentFormItem.getHelp() != null) {
-			helpText = currentFormItem.getHelp();
-		}
 		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(pg, null);
 		pg.setCellpadding("0"); //Don't pad cells

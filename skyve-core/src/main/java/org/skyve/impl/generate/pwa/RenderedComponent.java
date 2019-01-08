@@ -10,7 +10,6 @@ public class RenderedComponent {
 	private RenderedComponent parent = null;
 	private List<RenderedComponent> children = new ArrayList<>();
 
-	
 	public StringBuilder getOutput() {
 		return output;
 	}

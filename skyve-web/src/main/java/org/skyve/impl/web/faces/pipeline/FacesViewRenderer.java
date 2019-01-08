@@ -395,8 +395,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private int currentFormColumn;
-	
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		// Cater for a border if this thing has a border
@@ -434,7 +432,6 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 		}
 		current = layout;
-		currentFormColumn = 0;
 // TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
 	}
 
@@ -468,16 +465,23 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (formRowLayout != null) {
 			current = lb.addFormRowLayout(null, current, formRowLayout);
 		}
-		currentFormColumn = 0;
 	}
 
 	@Override
-	public void renderFormItem(String label, boolean required, String help, FormItem item) {
+	public void renderFormItem(String label,
+								boolean required,
+								String help,
+								boolean showLabel,
+								FormItem item) {
 		// nothing to do here
 	}
 
 	@Override
-	public void renderedFormItem(String label, boolean required, String help, FormItem item) {
+	public void renderedFormItem(String label,
+									boolean required,
+									String help,
+									boolean showLabel,
+									FormItem item) {
 		// nothing to do here
 	}
 
@@ -492,7 +496,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void addComponent(String widgetLabel,
 								boolean widgetRequired,
 								String widgetInvisible,
-								boolean showsLabelByDefault,
 								String helpText,
 								UIComponent component,
 								Integer pixelWidth,
@@ -534,16 +537,39 @@ public class FacesViewRenderer extends ViewRenderer {
 				}
 			}
 			else { // a form item
-				lb.layoutFormItem(current,
-									component,
-									currentForm, 
-									getCurrentFormItem(), 
-									currentFormColumn,
-									widgetLabel,
-									widgetRequired,
-									widgetInvisible,
-									showsLabelByDefault,
-									helpText);
+				FormItem formItem = getCurrentFormItem();
+				FormColumn formColumn = getCurrentFormColumn();
+				if (isCurrentWidgetShowLabel()) {
+					lb.layoutFormItemLabel(current,
+											component,
+											currentForm, 
+											formItem, 
+											formColumn,
+											widgetLabel,
+											widgetRequired,
+											widgetInvisible,
+											helpText);
+					incrementFormColumn();
+				}
+
+				lb.layoutFormItemWidget(current,
+											component,
+											currentForm, 
+											formItem, 
+											formColumn,
+											widgetLabel,
+											widgetRequired,
+											widgetInvisible,
+											helpText);
+				Integer colspan = formItem.getColspan();
+				if (colspan == null) {
+					incrementFormColumn();
+				}
+				else {
+					for (int i = 0, l = colspan.intValue(); i< l; i++) {
+						incrementFormColumn();
+					}
+				}
 			}
 		}
 	}
@@ -586,7 +612,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				action.getInvisibleConditionName(), 
-	    				button.showsLabelByDefault(), 
 	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
@@ -605,7 +630,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				locator.getInvisibleConditionName(), 
-	    				locator.showsLabelByDefault(), 
 	    				null,
 	    				l, 
 	    				null, 
@@ -619,7 +643,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				map.getInvisibleConditionName(), 
-	    				false,
 	    				null,
 	    				l, 
 	    				map.getPixelWidth(), 
@@ -650,7 +673,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				button.getInvisibleConditionName(), 
-	    				button.showsLabelByDefault(),
 	    				null,
 	    				bn, 
 	    				null, 
@@ -670,7 +692,6 @@ public class FacesViewRenderer extends ViewRenderer {
 			addComponent(null, 
 							false, 
 							spacer.getInvisibleConditionName(), 
-							spacer.showsLabelByDefault(),
 							null,
 							component, 
 							spacer.getPixelWidth(), 
@@ -690,7 +711,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
-						image.showsLabelByDefault(),
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -714,7 +734,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
-						false,
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -831,7 +850,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						false, 
 						link.getInvisibleConditionName(), 
-						link.showsLabelByDefault(),
 						null,
 						c.get(), 
 						link.getPixelWidth(), 
@@ -863,7 +881,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						false, 
 						blurb.getInvisibleConditionName(), 
-						blurb.showsLabelByDefault(),
 						null,
 						c, 
 						blurb.getPixelWidth(), 
@@ -906,7 +923,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 
-	    				label.showsLabelByDefault(),
 	    				null,
 	    				c, 
 	    				label.getPixelWidth(), 
@@ -920,7 +936,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				false, 
 	    				progressBar.getInvisibleConditionName(), 
-	    				progressBar.showsLabelByDefault(),
 	    				null,
 	    				p, 
 	    				progressBar.getPixelWidth(), 
@@ -1040,7 +1055,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedDataGrid(String title, DataGrid grid) {
-		visitedDataWidget(grid);
+		renderedDataWidget(grid);
 	}
 
 	@Override
@@ -1060,10 +1075,10 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedDataRepeater(String title, DataRepeater repeater) {
-		visitedDataWidget(repeater);
+		renderedDataWidget(repeater);
 	}
 
-	private void visitedDataWidget(AbstractDataWidget widget) {
+	private void renderedDataWidget(AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
 		TargetMetaData target = getCurrentTarget();
@@ -1177,7 +1192,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						required,
 						checkBox.getInvisibleConditionName(), 
-						checkBox.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						c, 
 						checkBox.getPixelWidth(), 
@@ -1222,7 +1236,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						required, 
 						colour.getInvisibleConditionName(), 
-						colour.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						c, 
 						colour.getPixelWidth(), 
@@ -1254,7 +1267,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						required, 
 						combo.getInvisibleConditionName(), 
-						combo.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						s, 
 						combo.getPixelWidth(), 
@@ -1290,7 +1302,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				false, 
         				image.getInvisibleConditionName(), 
-        				image.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				image.getPixelWidth(), 
@@ -1311,7 +1322,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						required, 
 						link.getInvisibleConditionName(), 
-						link.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						c, 
 						link.getPixelWidth(), 
@@ -1332,7 +1342,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				html.getInvisibleConditionName(), 
-        				html.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				html.getPixelWidth(), 
@@ -1385,11 +1394,9 @@ public class FacesViewRenderer extends ViewRenderer {
 																	descriptionBinding,
 																	query);
         eventSource = c;
-        
         addComponent(title, 
         				required, 
         				lookup.getInvisibleConditionName(), 
-        				lookup.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				lookup.getPixelWidth(), 
@@ -1421,7 +1428,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						false, 
 						lookup.getInvisibleConditionName(), 
-						lookup.showsLabelByDefault(),
 						null,
 						c, 
 						null, 
@@ -1448,7 +1454,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				password.getInvisibleConditionName(), 
-        				password.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				password.getPixelWidth(), 
@@ -1480,7 +1485,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						required, 
 						radio.getInvisibleConditionName(), 
-						radio.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						c, 
 						radio.getPixelWidth(), 
@@ -1512,7 +1516,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
-        				text.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -1544,7 +1547,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				slider.getInvisibleConditionName(), 
-        				slider.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				slider.getPixelWidth(), 
@@ -1576,7 +1578,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				spinner.getInvisibleConditionName(), 
-        				spinner.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				spinner.getPixelWidth(), 
@@ -1615,7 +1616,6 @@ public class FacesViewRenderer extends ViewRenderer {
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
-        				text.showsLabelByDefault(),
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -1689,7 +1689,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						required, 
 						text.getInvisibleConditionName(), 
-						text.showsLabelByDefault(),
 						getCurrentWidgetHelp(),
 						c, 
 						text.getPixelWidth(), 
@@ -1840,7 +1839,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderInject(Inject inject) {
 		// do nothing - this is for web 2 ux uis only
 	}
-
 
 	private void addToContainer(UIComponent component,
 									Integer pixelWidth,

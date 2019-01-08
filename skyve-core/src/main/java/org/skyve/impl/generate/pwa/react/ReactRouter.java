@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -71,13 +73,14 @@ public class ReactRouter {
 	}
 	
 	private void viewImportsAndRoutes() {
-		for (Module m : generator.customer.getModules()) {
+		Customer c = CORE.getCustomer();
+		for (Module m : c.getModules()) {
 			String moduleName = m.getName();
 			Map<String, DocumentRef> refs = m.getDocumentRefs();
 			for (String documentName : refs.keySet()) {
 				DocumentRef ref = refs.get(documentName);
 				if (ref.getOwningModuleName().equals(moduleName)) {
-					Document d = m.getDocument(generator.customer, documentName);
+					Document d = m.getDocument(c, documentName);
 					ReactEditView view = new ReactEditView(generator, moduleName, documentName);
 					view.setViews(m, d);
 					processItem(view, null);
@@ -88,6 +91,7 @@ public class ReactRouter {
 	}
 	
 	private void menuImportsAndRoutes() {
+		Customer c = CORE.getCustomer();
 		new MenuRenderer(generator.uxui, null, null) {
 			@Override
 			@SuppressWarnings("synthetic-access")
@@ -134,10 +138,7 @@ public class ReactRouter {
 					component.setModel(itemModule,
 										itemDocument,
 										modelName,
-										generator.repository.getListModel(generator.customer,
-																			itemDocument,
-																			modelName,
-																			false));
+										CORE.getRepository().getListModel(c, itemDocument, modelName, false));
 				}
 				else if (item.getQueryName() != null) { // query driven
 					component.setQuery(itemModule,
@@ -147,7 +148,7 @@ public class ReactRouter {
 				else { // document driven
 					component.setQuery(itemModule,
 										itemDocument,
-										itemModule.getDocumentDefaultQuery(generator.customer, itemDocument.getName()));
+										itemModule.getDocumentDefaultQuery(c, itemDocument.getName()));
 				}
 				processItem(component, null);
 			}
@@ -179,7 +180,7 @@ public class ReactRouter {
 				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
 				processItem(new ReactTreeView(generator, moduleName, componentName), null);
 			}
-		}.render(generator.customer);
+		}.render(c);
 	}
 	
 	private void processItem(ReactComponent component, String[] params) {
