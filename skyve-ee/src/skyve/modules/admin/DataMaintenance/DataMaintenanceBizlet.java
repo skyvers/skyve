@@ -116,7 +116,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 						instructionHint="Use this option when the backup is from the same version of the application and your data size is not large (i.e. just delete the data and then run the restore.)";
 						break;
 					case dropTablesUsingBackupDropsqlRecreateTablesFromBackupCreatesql:
-						instructionHint="Use this option when your schema matches the application version of the backup (maybe your previous attempt to restore failed). You cant drop the schema without stopping the server and if you do that, you can't log in any more without restoring. Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
+						instructionHint="Use this option when your schema matches the application version of the backup (maybe your previous attempt to restore failed). You can't drop the schema without stopping the server and if you do that, you can't log in any more without restoring. Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
 						break;
 					case dropTablesUsingBackupDropsqlRecreateTablesFromMetadata:
 						instructionHint="Use this option when you've tried a restore before and your database is now in the shape of the backup application version.";
