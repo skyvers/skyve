@@ -1936,8 +1936,8 @@ isc.BizMapPicker.addMethods({
 				this._map.fitBounds(bounds);
             }
             else { // But points (Markers) are different
-                if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-                    this._map.panTo(obj.getPosition());
+            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
+            		this._map.panTo(obj.getPosition());
                 }
                 if (this._map.getZoom() < 15) {
                     this._map.setZoom(15);
@@ -2002,7 +2002,9 @@ isc.BizMapPicker.addMethods({
             });
 
 			this.clearIt();
-			this.mapIt();
+			// delay the mapIt call because even though the maps API is synchronous, sometimes the
+			// maps JS calls seem to beat the initialisation of the map.
+			this.delayCall('mapIt', null, 100);
 		}
 		else {
 			this.delayCall('build', null, 100);
