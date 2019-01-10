@@ -962,6 +962,25 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Whether to allow access to the PerformCombination action button
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isAllowCombination() {
+		return (combinationsOperator!=null && operandTag!=null);
+	}
+
+	/**
+	 * {@link #isAllowCombination} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotAllowCombination() {
+		return (! isAllowCombination());
+	}
+
+	/**
 	 * Attribute Set
 	 *
 	 * @return The condition
@@ -981,21 +1000,21 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Explanation exists
+	 * Whether to show the explanation
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
-	public boolean isExplanation() {
-		return (getCombinationExplanation()!=null);
+	public boolean isShowExplanation() {
+		return (getCombinationExplanation()!=null && getCombinationExplanation().trim().length()>0);
 	}
 
 	/**
-	 * {@link #isExplanation} negation.
+	 * {@link #isShowExplanation} negation.
 	 *
 	 * @return The negated condition
 	 */
-	public boolean isNotExplanation() {
-		return (! isExplanation());
+	public boolean isNotShowExplanation() {
+		return (! isShowExplanation());
 	}
 }

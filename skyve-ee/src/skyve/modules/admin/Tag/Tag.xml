@@ -146,10 +146,18 @@
 				<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
 			</expression>
 		</condition>
-		<condition name="explanation">
-			<description>Explanation exists</description>
+		<condition name="showExplanation">
+			<description>Whether to show the explanation</description>
 			<expression>
-				<![CDATA[getCombinationExplanation()!=null]]>
+				<![CDATA[getCombinationExplanation()!=null && getCombinationExplanation().trim().length()>0]]>
+			</expression>
+		</condition>
+		<condition name="allowCombination">
+			<description>Whether to allow access to the PerformCombination action button</description>
+			<expression>
+				<![CDATA[
+					combinationsOperator!=null && operandTag!=null
+				]]>
 			</expression>
 		</condition>
 	</conditions>

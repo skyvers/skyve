@@ -286,7 +286,9 @@ public class TagBizlet extends Bizlet<Tag> {
 	 */
 	private static Long getCount(Tag tag, String moduleName, String documentName) {
 
-		Long result = null;
+		//if refactoring this method for a TagExtension, ensure you re-test basic tagging functions in lists
+		
+		Long result = new Long(0);
 
 		try {
 			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
@@ -302,7 +304,7 @@ public class TagBizlet extends Bizlet<Tag> {
 
 			result = Long.valueOf(q.retrieveScalar(Number.class).longValue());
 		} catch (Exception e) {
-			result = new Long(0);
+			result = null;
 		}
 		return result;
 	}
@@ -330,4 +332,30 @@ public class TagBizlet extends Bizlet<Tag> {
 		}
 		return getCount(tag, moduleName, documentName);
 	}
+
+	@Override
+	public void preRerender(String source, Tag bean, WebContext webContext) throws Exception {
+		
+		switch(source) {
+		case Tag.uploadModuleNamePropertyName:
+			bean.setUploadDocumentName(null);
+			//$FALL-THROUGH$
+		case Tag.uploadDocumentNamePropertyName:
+			bean.setAttributeName(null);
+			bean.setDocumentCondition(null);
+			bean.setUploadTagged(TagBizlet.getCountOfDocument(bean, bean.getUploadModuleName(), bean.getUploadDocumentName()));			
+			break;
+		case Tag.actionModuleNamePropertyName:
+			bean.setActionDocumentName(null);
+			//$FALL-THROUGH$
+		case Tag.actionDocumentNamePropertyName:
+			bean.setDocumentAction(null);
+			break;
+		default:
+			break;
+		}
+		super.preRerender(source, bean, webContext);
+	}
+	
+	
 }

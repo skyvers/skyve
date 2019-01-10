@@ -115,10 +115,6 @@
 				<document name="Tag" permission="CRUDU">
 					<action name="Clear" />
 					<action name="TagAll" />
-					<action name="UpdateActionModule" />
-					<action name="UpdateActionDocument" />
-					<action name="UpdateUploadModule" />
-					<action name="UpdateUploadDocument" />
 					<action name="UploadTagCriteria" />
 					<action name="BulkDocumentAction" />
 					<action name="PerformCombination" />
@@ -317,10 +313,6 @@
 				<document name="Tag" permission="CRUDU">
 					<action name="Clear" />
 					<action name="TagAll" />
-					<action name="UpdateActionModule" />
-					<action name="UpdateActionDocument" />
-					<action name="UpdateUploadModule" />
-					<action name="UpdateUploadDocument" />
 					<action name="UploadTagCriteria" />
 					<action name="BulkDocumentAction" />
 					<action name="PerformCombination" />
