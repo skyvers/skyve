@@ -115,16 +115,26 @@
 		</tab>
 		<tab title="Data">
 			<form border="true" borderTitle="Truncate">
-				<column pixelWidth="100" responsiveWidth="1" />
-				<column responsiveWidth="2"/>
-				<column pixelWidth="75" responsiveWidth="1" />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
 				<column />
 				<row>
 					<item>
 						<textField binding="schemaName" />
 					</item>
+					<item>
+						<checkBox triState="false" binding="injectBootstrapUser" />
+					</item>
+					<item>
+						<password binding="confirmPassword" />
+					</item>
 					<item align="centre">
-						<button actionName="Truncate" />
+						<button actionName="Truncate" pixelWidth="100"/>
 					</item>
 				</row>
 			</form>

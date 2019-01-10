@@ -16,10 +16,21 @@
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
+
+		<!-- Schema Truncation -->
+		<text name="confirmPassword" persistent="false" trackChanges="false" >
+			<displayName>Confirm password</displayName>
+			<length>50</length>
+		</text>
+		<boolean name="injectBootstrapUser">
+			<displayName>Inject bootstrap user</displayName>
+		</boolean>
 		<text name="schemaName">
 			<displayName>Schema Name</displayName>
 			<length>1024</length>
 		</text>
+		
+		
 		
 		<!-- Data Refresh -->
 		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
