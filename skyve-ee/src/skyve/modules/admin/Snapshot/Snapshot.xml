@@ -13,10 +13,12 @@
 	<attributes>
 		<text name="moduleName" required="true">
 			<displayName>Module</displayName>
+			<domain>variant</domain>
 			<length>100</length>
 		</text>
 		<text name="queryName" required="true">
 			<displayName>Query</displayName>
+			<domain>dynamic</domain>
 			<length>100</length>
 		</text>
 		<text name="name" required="true">
@@ -36,6 +38,5 @@
 			<displayName>Snapshot Name for Copy</displayName>
 			<length>256</length>
 		</text>
-		
 	</attributes>
 </document>
