@@ -1,5 +1,6 @@
 package modules.admin.Tag.actions;
 
+import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Tag;
 
 import org.skyve.metadata.controller.ServerSideAction;
@@ -28,5 +29,6 @@ public class UpdateUploadDocument implements ServerSideAction<Tag> {
 		
 		bean.setAttributeName(null);
 		bean.setDocumentCondition(null);
+		bean.setUploadTagged(TagBizlet.getCountOfDocument(bean, bean.getActionModuleName(), bean.getActionDocumentName()));
 	}
 }

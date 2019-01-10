@@ -55,7 +55,7 @@
 						</item>
 						<item>
 							<blurb>
-								<![CDATA[<i>{currentTagCount} records.</i>]]>
+								<![CDATA[<i>{totalTagged} records.</i>]]>
 							</blurb>
 						</item>
 					</row>
@@ -70,11 +70,11 @@
 					</row>
 					<row>
 						<item>
-							<lookupDescription descriptionBinding="name" binding="actionTag"/>
+							<lookupDescription descriptionBinding="name" binding="operandTag"/>
 						</item>
 						<item>
 							<blurb>
-								<![CDATA[<i>{actionTagCount} records.</i>]]>
+								<![CDATA[<i>{operandTagCount} records.</i>]]>
 							</blurb>
 						</item>
 					</row>
@@ -157,11 +157,7 @@
 				<column />
 				<row>
 					<item>
-						<combo binding="attributeName">
-							<onChangedHandlers>
-								<rerender />
-							</onChangedHandlers>
-						</combo>
+						<textField binding="attributeName"/>
 					</item>
 				</row>
 				<row>
@@ -199,17 +195,17 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="numberLoaded" disabled="true" />
+						<textField binding="uploaded" disabled="true" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="numberMatched" disabled="true" />
+						<textField binding="uploadMatched" disabled="true" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="numberTagged" disabled="true" />
+						<textField binding="uploadTagged" disabled="true" />
 					</item>
 				</row>
 			</form>
@@ -297,13 +293,6 @@
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs"/>
 		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
 			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
-
-		<action className="ExceptTag" displayName="Except" inActionPanel="false" toolTip="Exclude records in the action Tag."
-			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" iconStyleClass="fa fa-minus"/>
-		<action className="IntersectTag" displayName="Intersect" inActionPanel="false"
-			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" iconStyleClass="fa fa-cut"/>
-		<action className="UnionTag" displayName="Union" inActionPanel="false" toolTip="Add records from the action Tag."
-			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" iconStyleClass="fa fa-share-alt"/>
 
 		<action className="UpdateUploadModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateUploadDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />

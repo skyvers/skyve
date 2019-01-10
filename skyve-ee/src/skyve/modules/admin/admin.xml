@@ -115,9 +115,6 @@
 				<document name="Tag" permission="CRUDU">
 					<action name="Clear" />
 					<action name="TagAll" />
-					<action name="ExceptTag" />
-					<action name="IntersectTag" />
-					<action name="UnionTag" />
 					<action name="UpdateActionModule" />
 					<action name="UpdateActionDocument" />
 					<action name="UpdateUploadModule" />
@@ -320,9 +317,6 @@
 				<document name="Tag" permission="CRUDU">
 					<action name="Clear" />
 					<action name="TagAll" />
-					<action name="ExceptTag" />
-					<action name="IntersectTag" />
-					<action name="UnionTag" />
 					<action name="UpdateActionModule" />
 					<action name="UpdateActionDocument" />
 					<action name="UpdateUploadModule" />

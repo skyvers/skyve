@@ -29,10 +29,10 @@ public class TagFactory {
 	public Tag sail() {
 		Tag result = new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
+		result.setOperandTag(null);
+
 		result.setActionModuleName(null);
 		result.setActionDocumentName(null);
-		result.setActionTag(null);
-		result.setActionTagCount(null);
 
 		result.setUploadModuleName(null);
 		result.setUploadDocumentName(null);
