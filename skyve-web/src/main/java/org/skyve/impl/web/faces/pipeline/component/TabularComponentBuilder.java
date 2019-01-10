@@ -124,7 +124,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
-
+	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
+	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
+	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
+	
 	@Override
 	public UIComponent view(UIComponent component, String invisibleConditionName) {
 		if (component != null) {
@@ -608,7 +611,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									"",
 					                HorizontalAlignment.centre,
 					                true,
-					                Integer.valueOf(45));
+					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
 			col.setPriority(1);
 			List<UIComponent> children = col.getChildren();
 
@@ -642,7 +645,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			if (! children.isEmpty()) {
 				if (children.size() > 1) {
-					col.setWidth("95");
+					col.setWidth(DOUBLE_ACTION_COLUMN_WIDTH);
 					col.setStyle("text-align:center !important");
 				}
 				current.getChildren().add(col);
@@ -1154,7 +1157,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
-		column.setWidth("60");
+		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
 		column.setStyle("text-align:center !important");
 
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
