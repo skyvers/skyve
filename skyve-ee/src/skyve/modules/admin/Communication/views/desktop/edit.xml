@@ -53,23 +53,7 @@
 				</form>
 				<form>
 					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<button actionName="GetResults" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<button actionName="CreateFiles" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<button actionName="SendNow" pixelWidth="200" />
-						</item>
-					</row>
+					<column responsiveWidth="1"/>
 					<row>
 						<item>
 							<checkBox binding="unTagSuccessful" triState="false" />
@@ -78,6 +62,21 @@
 					<row>
 						<item>
 							<checkBox binding="notification" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button actionName="GetResults" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button actionName="CreateFiles" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button actionName="SendNow" pixelWidth="200" />
 						</item>
 					</row>
 				</form>

@@ -11,11 +11,6 @@
 			<displayName>Description</displayName>
 			<length>250</length>
 		</text>
-		<association name="tag" type="aggregation">
-			<displayName>Tag</displayName>
-			<domain>variant</domain>
-			<documentName>Tag</documentName>
-		</association>
 		<text name="moduleName">
 			<displayName>Module</displayName>
 			<description>Bindings used in the communication address, subject and body will be based on the selected module document.</description>
@@ -28,6 +23,19 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
+		<association name="tag" type="aggregation" persistent="false" trackChanges="false">
+			<documentation><![CDATA[
+			<p>Tag is transient:
+			<ul><li>as good practice so that the user is forced to reconsider which
+			tag is used for the bulk communication each time, and</li>
+			<li>using a tag in the communication should not block the tag being removed
+			by normal user actions through the list functions</li></ul>
+			</p>
+			]]></documentation>
+			<displayName>Tag</displayName>
+			<domain>variant</domain>
+			<documentName>Tag</documentName>
+		</association>
 		<text name="toBinding">
 			<displayName>Send to</displayName>
 			<description>Provide a binding which contains the email address to send to</description>

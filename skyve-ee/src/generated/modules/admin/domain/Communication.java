@@ -44,11 +44,11 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
 	/** @hidden */
-	public static final String tagPropertyName = "tag";
-	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+	/** @hidden */
+	public static final String tagPropertyName = "tag";
 	/** @hidden */
 	public static final String toBindingPropertyName = "toBinding";
 	/** @hidden */
@@ -277,10 +277,6 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private String description;
 	/**
-	 * Tag
-	 **/
-	private Tag tag = null;
-	/**
 	 * Module
 	 * <br/>
 	 * Bindings used in the communication address, subject and body will be based on the selected module document.
@@ -292,6 +288,17 @@ public class Communication extends AbstractPersistentBean {
 	 * Bindings used in the communication address, subject and body will be based on the selected module document.
 	 **/
 	private String documentName;
+	/**
+	 * Tag
+	 * <br/>
+	 * <p>Tag is transient:
+			<ul><li>as good practice so that the user is forced to reconsider which
+			tag is used for the bulk communication each time, and</li>
+			<li>using a tag in the communication should not block the tag being removed
+			by normal user actions through the list functions</li></ul>
+			</p>
+	 **/
+	private Tag tag = null;
 	/**
 	 * Send to
 	 * <br/>
@@ -540,24 +547,6 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #tag} accessor.
-	 * @return	The value.
-	 **/
-	public Tag getTag() {
-		return tag;
-	}
-
-	/**
-	 * {@link #tag} mutator.
-	 * @param tag	The new value.
-	 **/
-	@XmlElement
-	public void setTag(Tag tag) {
-		preset(tagPropertyName, tag);
-		this.tag = tag;
-	}
-
-	/**
 	 * {@link #moduleName} accessor.
 	 * @return	The value.
 	 **/
@@ -591,6 +580,23 @@ public class Communication extends AbstractPersistentBean {
 	public void setDocumentName(String documentName) {
 		preset(documentNamePropertyName, documentName);
 		this.documentName = documentName;
+	}
+
+	/**
+	 * {@link #tag} accessor.
+	 * @return	The value.
+	 **/
+	public Tag getTag() {
+		return tag;
+	}
+
+	/**
+	 * {@link #tag} mutator.
+	 * @param tag	The new value.
+	 **/
+	@XmlElement
+	public void setTag(Tag tag) {
+		this.tag = tag;
 	}
 
 	/**

@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit" title="Communication" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
+	xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<component name="_emailNotConfiguredBanner" />
 	<tabPane>
 		<tab title="Manage">
 			<form border="true" borderTitle="Configuration">
-				<column percentageWidth="20" />
 				<column />
 				<column />
-				<column percentageWidth="5" />
+				<column />
 				<column />
 				<row>
 					<item>
@@ -32,16 +31,68 @@
 						<textField binding="documentName" disabled="locked" />
 					</item>
 				</row>
-				<row>
-					<item>
-						<default binding="tag" />
-					</item>
-					<item align="right" colspan="2">
-						<button actionName="GetCount" pixelWidth="200" />
-					</item>
-				</row>
 			</form>
-			<vbox border="true" borderTitle="Results">
+			<vbox border="true" borderTitle="Results" widgetId="results">
+				<hbox>
+					<form responsiveWidth="8">
+						<column />
+						<column />
+						<row>
+							<item>
+								<default binding="tag" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="unTagSuccessful" triState="false" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="notification" triState="false" />
+							</item>
+						</row>
+					</form>
+					<form responsiveWidth="4" >
+						<column />
+						<row>
+							<item>
+								<button actionName="GetCount" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="GetResults" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="CreateFiles" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="SendNow" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+					</form>
+				</hbox>
 				<form>
 					<column />
 					<row>
@@ -50,48 +101,10 @@
 						</item>
 					</row>
 				</form>
-				<form>
-					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<button actionName="GetResults" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="CreateFiles" pixelWidth="200" />
-						</item>
-						<item>
-							<button actionName="SendNow" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="unTagSuccessful" triState="false" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="notification" triState="false" />
-						</item>
-					</row>
-				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Batches">
-				<listGrid visible="showBatches" 
-					model="BatchesModel" 
-					selectedIdBinding="selectedBatchTimestampFolderName" 
-					continueConversation="false" 
-					showAdd="false" 
-					showEdit="false" 
-					showExport="false" 
-					showFilter="false" 
-					showRemove="false" 
-					showSnap="false" 
-					showSummary="false" 
-					showTag="false" 
-					showZoom="false" 
-					postRefresh="batchesRefreshRequired">
+			<vbox border="true" borderTitle="Batches" widgetId="batches">
+				<listGrid visible="showBatches" model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false"
+					showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BatchSelected" />
 					</onSelectedHandlers>
@@ -101,10 +114,18 @@
 					<column />
 					<row>
 						<item>
-							<button actionName="ZipBatch" pixelWidth="200" />
+							<button actionName="ZipBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
 						</item>
 						<item>
-							<button actionName="DeleteBatch" pixelWidth="200" />
+							<button actionName="DeleteBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
 						</item>
 					</row>
 				</form>
@@ -215,7 +236,6 @@
 		</tab>
 		<tab title="Options">
 			<form border="true" borderTitle="Attachments">
-				<column />
 				<column />
 				<column />
 				<column />

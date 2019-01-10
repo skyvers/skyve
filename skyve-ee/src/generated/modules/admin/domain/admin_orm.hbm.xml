@@ -49,7 +49,6 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="description" length="250" />
-		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_tag" />
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
