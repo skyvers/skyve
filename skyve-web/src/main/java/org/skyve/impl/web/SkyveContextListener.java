@@ -2,7 +2,6 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -14,10 +13,6 @@ import javax.servlet.ServletContextListener;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
-import org.skyve.domain.PersistentBean;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -25,18 +20,10 @@ import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.Role;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override
@@ -271,31 +258,33 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 
-		// ensure that the schema is created before trying to init the job scheduler
-		AbstractPersistence p = null;
-		try {
-			p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
-			p.begin();
-			if (bootstrap != null) { // we have a bootstrap stanza
-				SuperUser u = new SuperUser();
-				u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
-				u.setContactName(UtilImpl.BOOTSTRAP_USER);
-				u.setName(UtilImpl.BOOTSTRAP_USER);
-				u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
-				p.setUser(u);
-
-				bootstrap(p);
+		if(UtilImpl.ENVIRONMENT_IDENTIFIER!=null) {
+			// ensure that the schema is created before trying to init the job scheduler
+			AbstractPersistence p = null;
+			try {
+				p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
+				p.begin();
+				if (bootstrap != null) { // we have a bootstrap stanza
+					SuperUser u = new SuperUser();
+					u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
+					u.setContactName(UtilImpl.BOOTSTRAP_USER);
+					u.setName(UtilImpl.BOOTSTRAP_USER);
+					u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
+					p.setUser(u);
+	
+					EXT.bootstrap(p);
+				}
 			}
-		}
-		catch (Exception e) {
-			if (p != null) {
-				p.rollback();
+			catch (Exception e) {
+				if (p != null) {
+					p.rollback();
+				}
+				throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
 			}
-			throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
-		}
-		finally {
-			if (p != null) {
-				p.commit(true);
+			finally {
+				if (p != null) {
+					p.commit(true);
+				}
 			}
 		}
 		
@@ -303,59 +292,6 @@ public class SkyveContextListener implements ServletContextListener {
 		WebUtil.initConversationsCache();
 	}
 
-	private static void bootstrap(Persistence p) throws Exception {
-		User u = p.getUser();
-		Customer c = u.getCustomer();
-		Module adminMod = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
-		Document contactDoc = adminMod.getDocument(c, SQLMetaDataUtil.CONTACT_DOCUMENT_NAME);
-		Document userDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_DOCUMENT_NAME);
-		Document userRoleDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_ROLE_DOCUMENT_NAME);
-		DocumentQuery q = p.newDocumentQuery(userDoc);
-		q.getFilter().addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-		PersistentBean user = q.beanResult();
-		if (user == null) {
-			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s/%s", 
-												UtilImpl.BOOTSTRAP_CUSTOMER, 
-												UtilImpl.BOOTSTRAP_USER,
-												UtilImpl.BOOTSTRAP_PASSWORD));
-
-			// Create user
-			user = userDoc.newInstance(u);
-			u.setId(user.getBizId());
-			user.setBizUserId(u.getId());
-			BindUtil.set(user, SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
-
-			// Create contact
-			Bean contact = contactDoc.newInstance(u);
-			BindUtil.set(contact, SQLMetaDataUtil.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.convertAndSet(contact, SQLMetaDataUtil.CONTACT_TYPE_PROPERTY_NAME, "Person");
-			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER + "@skyve.org");
-
-			BindUtil.set(user, SQLMetaDataUtil.CONTACT_PROPERTY_NAME, contact);
-
-			// Add roles
-			@SuppressWarnings("unchecked")
-			List<Bean> roles = (List<Bean>) BindUtil.get(user, SQLMetaDataUtil.ROLES_PROPERTY_NAME);
-			for (Module m : c.getModules()) {
-				String moduleName = m.getName();
-				for (Role r : m.getRoles()) {
-					Bean role = userRoleDoc.newInstance(u);
-					BindUtil.set(role, ChildBean.PARENT_NAME, user);
-					BindUtil.set(role, SQLMetaDataUtil.ROLE_NAME_PROPERTY_NAME, String.format("%s.%s", moduleName, r.getName()));
-					roles.add(role);
-				}
-			}
-			
-			// Save the bootstrap user
-			p.save(user);
-		}
-		else {
-			UtilImpl.LOGGER.info(String.format("BOOTSTRAP USER %s/%s ALREADY EXISTS", 
-												UtilImpl.BOOTSTRAP_CUSTOMER, 
-												UtilImpl.BOOTSTRAP_USER));
-		}
-	}
 	
 	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
 		Object result = properties.get(key);
