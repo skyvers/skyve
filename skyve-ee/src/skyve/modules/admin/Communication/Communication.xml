@@ -209,6 +209,10 @@
 		
 	</attributes>
 	<conditions>
+		<condition name="showBatches">
+			<description>Whether to show the list of batches</description>
+			<expression><![CDATA[description!=null]]></expression>
+		</condition>
 		<condition name="saveAction">
 			<description>Save for Bulk Send</description>
 			<expression>

@@ -1330,4 +1330,23 @@ public class Communication extends AbstractPersistentBean {
 	public boolean isNotSaveAction() {
 		return (! isSaveAction());
 	}
+
+	/**
+	 * Whether to show the list of batches
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowBatches() {
+		return (description!=null);
+	}
+
+	/**
+	 * {@link #isShowBatches} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowBatches() {
+		return (! isShowBatches());
+	}
 }

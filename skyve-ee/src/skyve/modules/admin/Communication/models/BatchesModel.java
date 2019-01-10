@@ -86,7 +86,6 @@ public class BatchesModel extends ListModel<Communication> {
 	@Override
 	public Page fetch() throws Exception {
 		Communication communication = getBean();
-
 		return DownloadFolderBizlet.fetchFolders(communication.getBasePath(), getStartRow(), getEndRow());
 	}
 

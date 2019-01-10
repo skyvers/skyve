@@ -83,8 +83,20 @@
 				</form>
 			</hbox>
 			<vbox border="true" borderTitle="Batches">
-				<listGrid model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
-					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
+				<listGrid visible="showBatches" 
+					model="BatchesModel" 
+					selectedIdBinding="selectedBatchTimestampFolderName" 
+					continueConversation="false" 
+					showAdd="false" 
+					showEdit="false" 
+					showExport="false" 
+					showFilter="false" 
+					showRemove="false" 
+					showSnap="false" 
+					showSummary="false" 
+					showTag="false" 
+					showZoom="false" 
+					postRefresh="batchesRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BatchSelected" />
 					</onSelectedHandlers>
