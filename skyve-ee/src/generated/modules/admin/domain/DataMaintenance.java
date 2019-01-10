@@ -49,6 +49,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
 	/** @hidden */
+	public static final String confirmPasswordPropertyName = "confirmPassword";
+	/** @hidden */
+	public static final String injectBootstrapUserPropertyName = "injectBootstrapUser";
+	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
 	/** @hidden */
 	public static final String refreshDocumentsPropertyName = "refreshDocuments";
@@ -503,6 +507,14 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	private String modDocName;
 	/**
+	 * Confirm password
+	 **/
+	private String confirmPassword;
+	/**
+	 * Inject bootstrap user
+	 **/
+	private Boolean injectBootstrapUser;
+	/**
 	 * Schema Name
 	 **/
 	private String schemaName;
@@ -670,6 +682,41 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setModDocName(String modDocName) {
 		preset(modDocNamePropertyName, modDocName);
 		this.modDocName = modDocName;
+	}
+
+	/**
+	 * {@link #confirmPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	/**
+	 * {@link #confirmPassword} mutator.
+	 * @param confirmPassword	The new value.
+	 **/
+	@XmlElement
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
+
+	/**
+	 * {@link #injectBootstrapUser} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getInjectBootstrapUser() {
+		return injectBootstrapUser;
+	}
+
+	/**
+	 * {@link #injectBootstrapUser} mutator.
+	 * @param injectBootstrapUser	The new value.
+	 **/
+	@XmlElement
+	public void setInjectBootstrapUser(Boolean injectBootstrapUser) {
+		preset(injectBootstrapUserPropertyName, injectBootstrapUser);
+		this.injectBootstrapUser = injectBootstrapUser;
 	}
 
 	/**

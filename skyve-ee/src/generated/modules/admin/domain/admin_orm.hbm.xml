@@ -182,6 +182,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="modDocName" length="100" />
+		<property name="injectBootstrapUser" />
 		<property name="schemaName" length="1024" />
 		<property name="notification" />
 		<property name="dailyBackupRetention" />
