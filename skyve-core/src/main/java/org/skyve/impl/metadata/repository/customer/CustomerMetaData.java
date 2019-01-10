@@ -32,6 +32,8 @@ import org.skyve.util.Util;
 			name = "customer",
 			propOrder = {"language",
 							"uiResources",
+							"htmlResources", 
+							"loginResources", 
 							"defaultDateConverter", 
 							"defaultTimeConverter",
 							"defaultDateTimeConverter", 
@@ -44,6 +46,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 	private String language;
 	private UIResources uiResources;
+	private HTMLResourcesMetaData htmlResources;
+	private LoginResourcesMetaData loginResources;
 	private ConverterName defaultDateConverter;
 	private ConverterName defaultTimeConverter;
 	private ConverterName defaultDateTimeConverter;
@@ -68,6 +72,24 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setUiResources(UIResources uiResources) {
 		this.uiResources = uiResources;
+	}
+
+	public HTMLResourcesMetaData getHtmlResources() {
+		return htmlResources;
+	}
+
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setHtmlResources(HTMLResourcesMetaData htmlResources) {
+		this.htmlResources = htmlResources;
+	}
+
+	public LoginResourcesMetaData getLoginResources() {
+		return loginResources;
+	}
+
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setLoginResources(LoginResourcesMetaData loginResources) {
+		this.loginResources = loginResources;
 	}
 
 	public ConverterName getDefaultDateConverter() {
@@ -141,6 +163,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setLanguageTag(getLanguage());
 		result.setUiResources((uiResources == null) ? new UIResources() : uiResources);
+		result.setHtmlResources((htmlResources == null) ? new HTMLResourcesMetaData() : htmlResources);
+		result.setLoginResources((loginResources == null) ? new LoginResourcesMetaData() : loginResources);
 
 		ConverterName converterName = getDefaultDateConverter();
 		if (converterName == null) {
