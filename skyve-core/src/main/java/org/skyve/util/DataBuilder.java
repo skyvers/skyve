@@ -330,7 +330,8 @@ public class DataBuilder {
 	}
 	
 	/**
-	 * Specify the recursion depth for an assocition or collection.
+	 * Specify the recursion depth for an association or collection.
+	 * 
 	 * @param binding
 	 * @param depth
 	 * @return
