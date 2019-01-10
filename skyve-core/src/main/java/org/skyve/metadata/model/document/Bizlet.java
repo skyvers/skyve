@@ -25,6 +25,7 @@ import org.skyve.web.WebContext;
  * Form level -
  * 
  * getDomainValues() - called when rendering the pertinent field (including in list view).
+ * resolve() - called when we have a bizId from a view (combo or list membership) and we need a bean
  * preExecute() - called before an implicit action is executed.
  * 					parentBean parameter is not null when adding or editing (zooming) in a grid or lookup
  * 					(ie when ImplicitActionName.Add or ImplicitActionName.Edit is used).
@@ -149,6 +150,20 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 		return null;
 	}
 
+	/**
+	 * This method is called when a view sends a bizId representing the object and the object
+	 * needs to be supplied and set on a binding.
+	 * For example, this occurs in combos on associations or in list memberships on collections.
+	 * If the resolve method returns null, Skyve will try to retrieve the bean from the first level cache
+	 * and then from the database.
+	 * @param bizId	The ID of the bean to resolve
+	 * @return	The bean or null if it can't be resolved.
+	 * @throws Exception
+	 */
+	public T resolve(String bizId) throws Exception {
+		return null;
+	}
+	
 	/**
 	 * Called before a bean is flushed to the data-store on Persistence.save().
 	 * This is the place to ensure that transient derived data is saved with the bean,

@@ -62,7 +62,8 @@ public class SelectItemsBeanConverter implements Converter {
 				if ((subitems != null) && (subitems.length > 0)) {
 					Object object = findValueByStringConversion(context,
 																	component,
-																	new ArrayIterator(subitems), value,
+																	new ArrayIterator(subitems),
+																	value,
 																	converter);
 					if (object != null) {
 						return object;

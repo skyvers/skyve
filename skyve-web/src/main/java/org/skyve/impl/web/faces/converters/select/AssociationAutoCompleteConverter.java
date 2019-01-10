@@ -7,8 +7,12 @@ import javax.faces.convert.Converter;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 public class AssociationAutoCompleteConverter implements Converter {
     @Override
@@ -27,7 +31,10 @@ public class AssociationAutoCompleteConverter implements Converter {
 		            String bizId = documentName.substring(pos + 1);
 		            documentName = documentName.substring(0, pos);
 
-		            return CORE.getPersistence().retrieve(moduleName, documentName, bizId, false);
+		            Customer c = CORE.getCustomer();
+		            Module m  = c.getModule(moduleName);
+		            Document d = m.getDocument(c, documentName);
+		            return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence());
 				}
 			}.execute();
         }

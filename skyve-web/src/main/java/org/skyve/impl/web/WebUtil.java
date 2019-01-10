@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +27,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -336,12 +339,38 @@ public class WebUtil {
 	public static Bean findReferencedBean(Document referenceDocument, 
 											String bizId, 
 											Persistence persistence) {
-		Bean result = persistence.retrieve(referenceDocument, bizId, false);
+		Bean result = null;
+		
+		User user = persistence.getUser();
+		Customer customer = user.getCustomer();
+		Bizlet<Bean> bizlet = AbstractRepository.get().getBizlet(customer, referenceDocument, true);
+		if (bizlet != null) {
+			try {
+				result = bizlet.resolve(bizId);
+			}
+			catch (ValidationException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				UtilImpl.LOGGER.log(Level.SEVERE, 
+										String.format("Failed to resolve document %s.%s with bizId %s",
+														referenceDocument.getOwningModuleName(),
+														referenceDocument.getName(),
+														bizId),
+										e);
+				throw new MetaDataException(String.format("Failed to resolve this %s.", 
+															referenceDocument.getSingularAlias()),
+												e);
+				
+			}
+		}
+		if (result == null) {
+			result = persistence.retrieve(referenceDocument, bizId, false);
+		}
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
 																		referenceDocument.getSingularAlias())));
 		}
-		User user = persistence.getUser();
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 
 								result.getBizDocument(), 

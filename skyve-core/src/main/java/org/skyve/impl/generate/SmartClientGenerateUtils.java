@@ -658,7 +658,7 @@ public class SmartClientGenerateUtils {
 				}
 				else if ("image".equals(type)) { // content thumbnail column
 	            	result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
-	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
             		result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
             		result.append("&_w=").append((pixelWidth == null) ? 
 													((pixelHeight == null) ? "64" : pixelHeight.toString()) :
@@ -685,7 +685,7 @@ public class SmartClientGenerateUtils {
 				}
 				else if ("link".equals(type)) {
         			result.append(",formatCellValue:function(v,rec,row,col){return (v ? '<a href=\"content?_n='+v+'");
-	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
 	            	result.append("\" target=\"_blank\">Content</a>' : '')}");
 				}
 				else {

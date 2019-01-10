@@ -5,9 +5,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.customer.HTMLResources;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-public class HTMLResources implements org.skyve.metadata.customer.HTMLResources {
+public class HTMLResourcesMetaData implements HTMLResources {
 	private static final long serialVersionUID = 3982423990945642514L;
 
 	private String cssRelativeFileName;
