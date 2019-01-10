@@ -181,12 +181,12 @@
 			<hbox horizontalAlignment="right" shrinkWrap="height">
 				<form>
 					<column />
-					<column responsiveWidth="1" />
-					<column responsiveWidth="1" />
-					<column responsiveWidth="1" />
-					<column responsiveWidth="1" />
-					<column responsiveWidth="1" />
-					<column responsiveWidth="1" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
 					<row>
 						<item>
 							<spacer />
@@ -201,13 +201,13 @@
 							<button actionName="MigrateContent" />
 						</item>
 						<item align="right">
-							<button actionName="ReindexData" />
+							<button actionName="ReindexData" pixelWidth="150"/>
 						</item>
 						<item align="right">
-							<button actionName="ReindexContent" />
+							<button actionName="ReindexContent"  pixelWidth="150"/>
 						</item>
 						<item align="right">
-							<button actionName="Reindex" />
+							<button actionName="Reindex"  pixelWidth="150"/>
 						</item>
 					</row>
 				</form>
@@ -377,8 +377,10 @@
 			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh"/>
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
-		<action className="CheckContent" displayName="Check Content" inActionPanel="false" />
-		<action className="MigrateContent" displayName="Migrate Content" inActionPanel="false" confirm="Sure?" />
-		<action className="MigrateContentFiles" displayName="Migrate Content Files" inActionPanel="false" confirm="Sure?" />
+		
+		<!-- Only required for migration from legacy versions -->
+		<action className="CheckContent" displayName="Check Content" inActionPanel="false" visible="false"/>
+		<action className="MigrateContent" displayName="Migrate Content" inActionPanel="false" confirm="Sure?" visible="false"/>
+		<action className="MigrateContentFiles" displayName="Migrate Content Files" inActionPanel="false" confirm="Sure?" visible="false"/>
 	</actions>
 </view>
