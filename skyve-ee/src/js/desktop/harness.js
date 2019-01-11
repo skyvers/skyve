@@ -179,6 +179,7 @@ isc.BizUtil.addClassProperties({
 										canCreate: item.canCreate,
 										canUpdate: item.canUpdate,
 										canDelete: item.canDelete,
+										cellHeight: item.cellHeight,
 // This used to work in SC 8.2 but now doesn't send down any fields if present
 // NB - it is meant to ensure that only datasource defined fields goes down with the request
 //										sendExtraFields: false,

@@ -1344,6 +1344,10 @@ isc.BizListGrid.addMethods({
 			gridConfig.emptyMessage = 'No items shown. Filter the grid.';
 		}
 		
+		if (me.cellHeight) {
+			gridConfig.cellHeight = me.cellHeight;
+		}
+		
 		if (config.gridConfig) {
 			isc.addProperties(gridConfig, config.gridConfig);
 		}
@@ -1435,6 +1439,13 @@ isc.BizListGrid.addMethods({
 			if (menuConfig.autoPopulate !== undefined) {
 				me.autoPopulate = menuConfig.autoPopulate;
 			}
+		}
+		
+		if (me._dataSource.cellHeight) {
+			me.cellHeight = me._dataSource.cellHeight;
+		}
+		else {
+			me.cellHeight = null;
 		}
 
 		var fields = [];

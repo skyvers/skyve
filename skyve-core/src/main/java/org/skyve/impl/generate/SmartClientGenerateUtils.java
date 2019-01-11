@@ -1138,15 +1138,18 @@ public class SmartClientGenerateUtils {
 				canFilter = false;
 				canSortClientOnly = false;
 				canSave = false;
+				pixelWidth = contentColumn.getPixelWidth();
+				pixelHeight = contentColumn.getPixelHeight();
+				emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 				if (DisplayType.thumbnail.equals(contentColumn.getDisplay())) {
 					type = "image";
+					if (pixelHeight == null) {
+						pixelHeight = Integer.valueOf(64);
+					}
 				}
 				else {
 					type = "link";
 				}
-				pixelWidth = contentColumn.getPixelWidth();
-				pixelHeight = contentColumn.getPixelHeight();
-				emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 			}
 		}
 
@@ -1676,6 +1679,8 @@ public class SmartClientGenerateUtils {
 			}
 		}
 		
+		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
+		
 		for (MetaDataQueryColumn column : columns) {
 			if ((column instanceof MetaDataQueryProjectedColumn) && 
 					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
@@ -1684,6 +1689,16 @@ public class SmartClientGenerateUtils {
 
 			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
+
+			// define the minimum fixed cell height for the grid (dataSource) based on any content image columns
+			Integer pixelHeight = def.getPixelHeight();
+			if (pixelHeight != null) {
+				int h = pixelHeight.intValue();
+				if (h > cellHeight) {
+					cellHeight = h;
+				}
+			}
+
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {
 				StringBuilder childDataSourceDefinition = new StringBuilder(512);
@@ -1722,6 +1737,12 @@ public class SmartClientGenerateUtils {
 			toAppendTo.setLength(toAppendTo.length() - 1); // remove the last field comma
 		}
 		toAppendTo.append("]");
+		
+		// Add cellHeight if applicable
+		if (cellHeight > 0) {
+			toAppendTo.append(",cellHeight:").append(cellHeight);
+		}
+		
 		if (visitedQueryNames == null) {
 			toAppendTo.append("});}\n");
 		}
