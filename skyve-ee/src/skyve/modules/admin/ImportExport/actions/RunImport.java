@@ -9,6 +9,7 @@ import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheetLoader;
@@ -99,9 +100,14 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 						msg.append("\nCheck upload values and try again.");
 						throw new ValidationException(new Message(msg.toString()));
+					} catch (OptimisticLockException ole) {
+						StringBuilder msg = new StringBuilder();
+						msg.append("The import succeeded but the save failed.");
+						msg.append("\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
+						throw new ValidationException(new Message(msg.toString()));
 					} catch (Exception e) {
 						StringBuilder msg = new StringBuilder();
-						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid.");
+						msg.append("The import succeeded but saving the records failed.");
 						msg.append("\nCheck that you are uploading to the correct binding and that you have supplied enough information for the results to be saved.");
 						throw new ValidationException(new Message(msg.toString()));
 					}

@@ -44,11 +44,6 @@
 		</memo>
 		<boolean name="advancedMode">
 			<displayName>Advanced</displayName>
-			<defaultValue>false</defaultValue>
-		</boolean>
-		<boolean name="columnTitlesOnly">
-			<displayName>Template only (no data)</displayName>
-			<defaultValue>false</defaultValue>
 		</boolean>
 		
 		<!-- Quick Import -->
@@ -75,7 +70,7 @@
 			<description>Whether to show advanced binding strings</description>
 			<expression>
 				<![CDATA[
-				Boolean.TRUE.equals(advancedMode)
+				((ImportExportExtension) this).anyColumnHasExpression()
 				]]>
 			</expression>
 		</condition>

@@ -1,5 +1,7 @@
 package modules.admin.ImportExport.actions;
 
+import java.util.List;
+
 import org.skyve.impl.bizport.POISheetGenerator;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.web.WebContext;
@@ -19,12 +21,16 @@ public class RunExport extends DownloadAction<ImportExport> {
 	public Download download(ImportExport bean, WebContext webContext)
 			throws Exception {
 
+		return generateDownload(bean, bean.getImportExportColumns() , bean.getFileContainsHeaders(), Boolean.FALSE);
+	}
+	
+	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders, Boolean empty) throws Exception {
 		POISheetGenerator generator = new POISheetGenerator(bean.getModuleName(), bean.getDocumentName());
-		generator.setColumnTitles(bean.getFileContainsHeaders());
-		generator.setColumnTitlesOnly(bean.getColumnTitlesOnly());	
+		generator.setColumnTitles(containsHeaders);
+		generator.setColumnTitlesOnly(empty);	
 		
 		//add fields to generator
-		for(ImportExportColumn c: bean.getImportExportColumns()) {
+		for(ImportExportColumn c: columns) {
 			String binding = c.getBindingName();
 			if (Boolean.TRUE.equals(bean.getAdvancedMode()) || ImportExportColumnBizlet.ADVANCED.equals(c.getBindingName()) 
 					&& c.getBindingExpression()!=null) {
@@ -40,6 +46,6 @@ public class RunExport extends DownloadAction<ImportExport> {
 		sb.append(bean.getModuleName()).append("_").append(bean.getDocumentName());
 		generator.setDownloadName(sb.toString());
 
-		return generator.getDownload();
+		return generator.getDownload();		
 	}
 }

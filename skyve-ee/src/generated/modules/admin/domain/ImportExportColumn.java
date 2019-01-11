@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.admin.domain.ImportExport;
+import modules.admin.ImportExport.ImportExportExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -18,7 +18,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class ImportExportColumn extends AbstractPersistentBean implements ChildBean<ImportExport> {
+public class ImportExportColumn extends AbstractPersistentBean implements ChildBean<ImportExportExtension> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -53,7 +53,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 			<i>{name} ({mobile})</i>
 	 **/
 	private String bindingExpression;
-	private ImportExport parent;
+	private ImportExportExtension parent;
 
 	private Integer bizOrdinal;
 
@@ -162,7 +162,8 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	 */
 	@XmlTransient
 	public boolean isShowExpression() {
-		return (modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName));
+		return (bindingName!=null  &&
+				modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName));
 	}
 
 	/**
@@ -175,13 +176,13 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	}
 
 	@Override
-	public ImportExport getParent() {
+	public ImportExportExtension getParent() {
 		return parent;
 	}
 
 	@Override
 	@XmlElement
-	public void setParent(ImportExport parent) {
+	public void setParent(ImportExportExtension parent) {
 		preset(ChildBean.PARENT_NAME, parent);
 		this.parent =  parent;
 	}

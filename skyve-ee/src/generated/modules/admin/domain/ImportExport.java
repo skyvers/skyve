@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.ImportExport.ImportExportExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -50,8 +51,6 @@ public class ImportExport extends AbstractPersistentBean {
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
 	public static final String advancedModePropertyName = "advancedMode";
-	/** @hidden */
-	public static final String columnTitlesOnlyPropertyName = "columnTitlesOnly";
 	/** @hidden */
 	public static final String fileContainsHeadersPropertyName = "fileContainsHeaders";
 	/** @hidden */
@@ -165,11 +164,7 @@ public class ImportExport extends AbstractPersistentBean {
 	/**
 	 * Advanced
 	 **/
-	private Boolean advancedMode = new Boolean(false);
-	/**
-	 * Template only (no data)
-	 **/
-	private Boolean columnTitlesOnly = new Boolean(false);
+	private Boolean advancedMode;
 	/**
 	 * Column Headers
 	 **/
@@ -191,7 +186,7 @@ public class ImportExport extends AbstractPersistentBean {
 		return ImportExport.DOCUMENT_NAME;
 	}
 
-	public static ImportExport newInstance() {
+	public static ImportExportExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -366,24 +361,6 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #columnTitlesOnly} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getColumnTitlesOnly() {
-		return columnTitlesOnly;
-	}
-
-	/**
-	 * {@link #columnTitlesOnly} mutator.
-	 * @param columnTitlesOnly	The new value.
-	 **/
-	@XmlElement
-	public void setColumnTitlesOnly(Boolean columnTitlesOnly) {
-		preset(columnTitlesOnlyPropertyName, columnTitlesOnly);
-		this.columnTitlesOnly = columnTitlesOnly;
-	}
-
-	/**
 	 * {@link #fileContainsHeaders} accessor.
 	 * @return	The value.
 	 **/
@@ -454,7 +431,7 @@ public class ImportExport extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isShowAdvancedBindings() {
-		return (Boolean.TRUE.equals(advancedMode));
+		return (((ImportExportExtension) this).anyColumnHasExpression());
 	}
 
 	/**

@@ -25,6 +25,10 @@ public class Truncate implements ServerSideAction<DataMaintenance> {
 			throw new ValidationException(new Message(DataMaintenance.confirmPasswordPropertyName, "Enter your password to enable truncation"));
 		}
 		
+		if(ModulesUtil.currentAdminUser()==null) {
+			throw new ValidationException(new Message("No valid user exist"));
+		}
+		
 		if(EXT.checkPassword(bean.getConfirmPassword(), ModulesUtil.currentAdminUser().getPassword())) {
 			
 			org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName(), true, true);

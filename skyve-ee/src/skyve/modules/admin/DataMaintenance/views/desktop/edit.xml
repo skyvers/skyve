@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Data Maintenance" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Import/Export">
+			<form border="true" responsiveWidth="12" borderTitle="Bizport">
+				<column responsiveWidth="1" />
+				<column responsiveWidth="3" />
+				<column />
+				<row>
+					<item>
+						<combo binding="modDocName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="DataMaintenanceExportAction" pixelWidth="200" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="DataMaintenanceImportAction" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="Quick Import/Export">
+				<listGrid continueConversation="false" query="qImportExport"></listGrid>
+			</vbox>
+		</tab>
+		<tab title="Backup/Restore">
+			<form border="true" borderTitle="Job">
+				<column responsiveWidth="2" />
+				<column pixelWidth="60" responsiveWidth="1" />
+				<column responsiveWidth="2" />
+				<column pixelWidth="60" responsiveWidth="1" />
+				<column responsiveWidth="2" />
+				<column pixelWidth="60" responsiveWidth="1" />
+				<column responsiveWidth="2" />
+				<column pixelWidth="60" responsiveWidth="1" />
+				<row>
+					<item>
+						<spinner binding="dailyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="weeklyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="monthlyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="yearlyBackupRetention" min="0" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="Backups">
+				<listGrid model="BackupsModel" selectedIdBinding="selectedBackupName" continueConversation="false" showAdd="false"
+					showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
+					showTag="false" showZoom="false" postRefresh="backupsRefreshRequired">
+					<onSelectedHandlers>
+						<server action="BackupSelected" />
+					</onSelectedHandlers>
+				</listGrid>
+				<hbox horizontalAlignment="right" shrinkWrap="height">
+					<form border="true" borderTitle="Restore" percentageWidth="100">
+						<column pixelWidth="100" responsiveWidth="12" />
+						<column responsiveWidth="12" />
+						<column pixelWidth="110" responsiveWidth="12" />
+						<row>
+							<item>
+								<radio binding="contentRestoreOption" vertical="false" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<radio binding="restoreIndexingOption" vertical="false" />
+							</item>
+						</row>
+						<row>
+							<item required="false">
+								<combo binding="restorePreProcess">
+									<onChangedHandlers>
+										<rerender />
+									</onChangedHandlers>
+								</combo>
+							</item>
+							<item>
+								<button actionName="Restore" pixelWidth="110" />
+							</item>
+						</row>
+						<row>
+							<item><spacer/></item>
+							<item colspan="2">
+								<blurb>
+									<![CDATA[
+										<span style="white-space:pre-wrap"><i>{instructionHint}</i></span>
+									]]>
+								</blurb>
+							</item>
+						</row>
+					</form>
+					<vbox pixelMemberPadding="5">
+						<button actionName="Backup" pixelWidth="150" />
+						<button actionName="DownloadBackup" pixelWidth="150" />
+						<button actionName="UploadBackup" pixelWidth="150" />
+						<button actionName="DeleteBackup" pixelWidth="150" />
+					</vbox>
+				</hbox>
+			</vbox>
+		</tab>
+		<tab title="Data">
+			<form border="true" borderTitle="Truncate">
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<textField binding="schemaName" />
+					</item>
+					<item>
+						<checkBox triState="false" binding="injectBootstrapUser" />
+					</item>
+					<item>
+						<password binding="confirmPassword" />
+					</item>
+					<item align="centre">
+						<button actionName="Truncate" pixelWidth="100"/>
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="DDL">
+				<form border="true" borderTitle="Script" percentageHeight="100">
+					<column />
+					<row>
+						<item showLabel="false">
+							<blurb>
+								<![CDATA[
+									<span style="white-space:pre-wrap">{ddlScript}</span>
+								]]>
+							</blurb>
+						</item>
+					</row>
+				</form>
+				<hbox horizontalAlignment="right">
+					<button actionName="Create" pixelWidth="200" />
+					<button actionName="Drop" pixelWidth="200" />
+					<button actionName="Sync" pixelWidth="200" />
+				</hbox>
+			</vbox>
+		</tab>
+		<tab title="Content">
+			<listGrid model="ContentModel" selectedIdBinding="selectedContentId" continueConversation="false" showAdd="false"
+				showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
+				showTag="false" showZoom="false" postRefresh="contentRefreshRequired">
+				<onSelectedHandlers>
+					<server action="ContentSelected" />
+				</onSelectedHandlers>
+			</listGrid>
+			<form border="true" borderTitle="Selected Content" invisible="notAttachmentSelected">
+				<column />
+				<row>
+					<item align="centre">
+						<blurb>
+							<![CDATA[
+								{contentLink}
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+			<hbox horizontalAlignment="right" shrinkWrap="height">
+				<form>
+					<column />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<column pixelWidth="150" />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item align="right">
+							<button actionName="CheckContent" />
+						</item>
+						<item align="right">
+							<button actionName="MigrateContentFiles" />
+						</item>
+						<item align="right">
+							<button actionName="MigrateContent" />
+						</item>
+						<item align="right">
+							<button actionName="ReindexData" pixelWidth="150"/>
+						</item>
+						<item align="right">
+							<button actionName="ReindexContent"  pixelWidth="150"/>
+						</item>
+						<item align="right">
+							<button actionName="Reindex"  pixelWidth="150"/>
+						</item>
+					</row>
+				</form>
+			</hbox>
+		</tab>
+		<tab title="Manage Audits" visible="auditManager">
+			<form border="true" percentageWidth="60" responsiveWidth="12" borderTitle="Filter">
+				<column percentageWidth="20" responsiveWidth="2" />
+				<column responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<combo binding="auditModuleName" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="auditDocumentName" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="auditOperation" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="auditTimestampStart" >
+							<onBlurHandlers><rerender/>	</onBlurHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="auditTimestampEnd" >
+						<onBlurHandlers><rerender/>	</onBlurHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="auditUser"  descriptionBinding="bizKey" enableAdd="false">
+							<onPickedHandlers><rerender/></onPickedHandlers>
+							<onClearedHandlers><rerender/></onClearedHandlers>
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="auditMatchCount" disabled="true" />
+					</item>
+					<item>
+						<button actionName="CheckAuditMatches" pixelWidth="150" />
+					</item>
+				</row>
+			</form>
+			<form border="true" percentageWidth="60" responsiveWidth="12" borderTitle="Truncate">
+				<column percentageWidth="20" responsiveWidth="2" />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="TruncateAuditLog" pixelWidth="150" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<blurb>
+							<![CDATA[<i>{auditResponse}</i>]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+			<listGrid continueConversation="false" query="qAudits">
+				<filterParameter operator="equal" name="auditModuleName" binding="auditModuleName"/>
+				<filterParameter operator="equal" name="auditDocumentName" binding="auditDocumentName"/>
+				<filterParameter operator="equal" name="operation" binding="auditOperation"/>
+				<filterParameter operator="greaterEqual" name="timestamp" binding="auditTimestampStart"/>
+				<filterParameter operator="lessEqual" name="timestamp" binding="auditTimestampEnd"/>
+				<filterParameter operator="equal" name="userName" binding="auditUser.userName"/>
+			</listGrid>
+		</tab>
+		<tab title="Refresh">
+			<dataGrid binding="refreshDocuments" inline="true" 
+				showZoom="false" showAdd="false" showDeselect="false" showEdit="false" showRemove="false">
+				<boundColumn binding="include" editable="true"/>
+				<boundColumn binding="moduleName" editable="false"/>
+				<boundColumn binding="documentName" editable="false"/>
+			</dataGrid>
+			<form border="true" borderTitle="Document Data Refresh" >
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="refreshOption"/>
+					</item>
+					<item>
+						<combo binding="evictOption"/>
+					</item>
+					<item>
+						<checkBox binding="notification" triState="false" />
+					</item>
+					<item>
+						<button actionName="RefreshDocumentTuples"/>
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
+		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
+		<action className="Backup" displayName="Backup" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif"  iconStyleClass="fa fa-toggle-right"/>
+		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
+		<action className="ContentSelected" displayName="ContentSelected" inActionPanel="false" />
+		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to delete this backup folder from the server filesystem?" 
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o"/>
+		<action className="Reindex" displayName="Reindex" inActionPanel="false" 
+			confirm="Are you sure you want to reindex all data and content in the database?"
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>
+		<action className="ReindexData" displayName="Reindex Data" inActionPanel="false" 
+			confirm="Are you sure you want to reindex all data in the database?"
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>
+		<action className="ReindexContent" displayName="Reindex Content" inActionPanel="false"
+			confirm="Are you sure you want to reindex all content in the store?"
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>
+		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" 
+			relativeIconFileName="shared/icons/Exclamation.gif" iconStyleClass="fa fa-toggle-left" />
+		<action className="Truncate" displayName="Truncate" inActionPanel="false"
+			confirm="WARNING: Schema will be truncated (all data deleted) - there is no undo for this action. Ensure you have a backup of all data. OK to continue?(We strongly recommend you do a backup before this step)." 
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o"/>
+		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false"
+			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" 
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" disabled="jobCommenced" />
+		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-search"/>
+		<action className="RefreshDocumentTuples" displayName="Refresh Persisted Document Data" inActionPanel="false"
+			confirm="OK to start the Refresh Job? (There is no undo.)" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs"/>
+
+		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
+		<action className="Create" displayName="Script Create DB" inActionPanel="false"
+			toolTip="Generate a script to create the SQL DB" 
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil"/>
+		<action className="Drop" displayName="Script Drop DB" inActionPanel="false"
+			toolTip="Generate a script to drop the SQL DB" 
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil"/>
+		<action className="Sync" displayName="Script Synchronise DB" inActionPanel="false"
+			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh"/>
+		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
+		
+		<!-- Only required for migration from legacy versions -->
+		<action className="CheckContent" displayName="Check Content" inActionPanel="false" visible="false"/>
+		<action className="MigrateContent" displayName="Migrate Content" inActionPanel="false" confirm="Sure?" visible="false"/>
+		<action className="MigrateContentFiles" displayName="Migrate Content Files" inActionPanel="false" confirm="Sure?" visible="false"/>
+	</actions>
+</view>

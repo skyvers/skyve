@@ -215,7 +215,9 @@
 				<document name="ImportExport" permission="CRUDC">
 					<action name="RunExport"/>
 					<action name="RunImport"/>
+					<action name="ResetColumns"/>
 					<action name="UploadSimpleImportDataFile"/>
+					<action name="GetImportTemplate"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
 				<document name="ReportDesign" permission="_____">
@@ -372,7 +374,6 @@
 				<role name="DevOps" />
 			</edit>
 			<edit document="DataMaintenance" name="Data Maintenance">
-				<uxui name="desktop" />
 				<role name="DevOps" />
 			</edit>
 			<edit name="Document Creator" document="DocumentCreator">
