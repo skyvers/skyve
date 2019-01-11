@@ -3,7 +3,6 @@ package modules.admin.ImportExport.actions;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
@@ -15,6 +14,8 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.persistence.Persistence;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
@@ -53,7 +54,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					sb.append(" ");
 					if (Boolean.TRUE.equals(bean.getAdvancedMode()) || ImportExportColumnBizlet.ADVANCED.equals(col.getBindingName())) {
 						if (col.getBindingExpression() != null) {
-//							Util.LOGGER.info("adding " + col.getBindingExpression());
+							// Util.LOGGER.info("adding " + col.getBindingExpression());
 							loader.addField(col.getBindingExpression());
 
 							// prepare debug
@@ -63,7 +64,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 					} else {
 						if (col.getBindingName() != null) {
-//							Util.LOGGER.info("adding " + col.getBindingName());
+							// Util.LOGGER.info("adding " + col.getBindingName());
 							loader.addField(col.getBindingName());
 
 							// prepare debug
@@ -76,34 +77,57 @@ public class RunImport implements ServerSideAction<ImportExport> {
 				}
 
 				// get results from sheet
-				List<PersistentBean> beans = loader.beanResults();
+				// List<PersistentBean> beans = loader.beanResults();
 
 				// save them
 				int saveIndex = 1;
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
 					saveIndex++;
 				}
-				
-				for (PersistentBean b : beans) {
+
+				Util.LOGGER.info("Loading");
+				Persistence persistence = CORE.getPersistence();
+				while (loader.hasNextData()) {
+					loader.nextData();
+					if (loader.isNoData()) {
+						Util.LOGGER.info("End of import found at " + loader.getWhere());
+						break;
+					}
+
+					PersistentBean b = loader.beanResult();
+					if(b==null) {
+						Util.LOGGER.info("Loaded failed at " + loader.getWhere());
+					} else {
+						Util.LOGGER.info(b.getBizKey() + " - Loaded successfully");
+					}
+					
 					try {
-						if(b!=null && (b.getBizKey()==null || b.getBizKey().trim().length()==0)) {
+						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().length() == 0)) {
 							String msg = "The new record has no value for bizKey at row " + saveIndex + ".";
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;
 						}
-						b = CORE.getPersistence().save(b);
+						b = persistence.save(b);
+						Util.LOGGER.info(b.getBizKey() + " - Saved successfully");
+						persistence.evictCached(b);
+						
+//						persistence.commit(false);
+//						persistence.begin();
 					} catch (ValidationException ve) {
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid:");
-						for(Message m: ve.getMessages()) {
+						msg.append("\nCheck upload values and try again.");
+						msg.append("\n");
+						for (Message m : ve.getMessages()) {
 							msg.append("\n").append(m.getErrorMessage());
 						}
-						msg.append("\nCheck upload values and try again.");
+						
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (OptimisticLockException ole) {
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the save failed.");
-						msg.append("\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
+						msg.append(
+								"\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (Exception e) {
 						StringBuilder msg = new StringBuilder();
@@ -113,6 +137,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					}
 					i++;
 					saveIndex++;
+
 				}
 			}
 
