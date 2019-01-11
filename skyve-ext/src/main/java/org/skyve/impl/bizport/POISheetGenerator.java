@@ -1,10 +1,7 @@
 package org.skyve.impl.bizport;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -26,7 +20,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
 
 public class POISheetGenerator {
 
@@ -124,7 +117,9 @@ public class POISheetGenerator {
 		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 
-	public void generateFile() throws Exception {
+	public Download getDownload() throws Exception {
+		
+		Download result= null;
 
 		if (moduleName != null && documentName != null) {
 			// find the workbook template
@@ -148,7 +143,7 @@ public class POISheetGenerator {
 			}
 
 			if (!Boolean.TRUE.equals(columnTitlesOnly)) {
-
+				
 				// export values
 				DocumentQuery q = pers.newDocumentQuery(moduleName, documentName);
 				List<Bean> beans = q.beanResults();
@@ -156,9 +151,8 @@ public class POISheetGenerator {
 				for (Bean b : beans) {
 					rowNum++;
 					colNum = 1;
-
+					
 					for (DataFileExportField f : fields) {
-//						Util.LOGGER.info("Preparing export of " + f.getBindingExpression());
 
 						// attempt to find attribute with the binding
 						// if not assume it is a compound expression and use binder.formatMessage
@@ -166,14 +160,14 @@ public class POISheetGenerator {
 						if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
 							resolvedBinding = f.getBindingExpression().substring(1, f.getBindingExpression().length() - 1);
 						}
+						
 						if (resolvedBinding != null) {
 							try {
 								TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
 								Attribute attr = tm.getAttribute();
 								Object value = null;
-
-//								Util.LOGGER.info("Putting resolved Binding " + resolvedBinding + " with type " + attr.getAttributeType().toString() + " and value " + value);
 								switch (attr.getAttributeType()) {
+								case association:
 								case bool:
 								case colour:
 								case date:
@@ -212,29 +206,15 @@ public class POISheetGenerator {
 				}
 			}
 
-			// save temp file to content folder
-			DateFormat df = new SimpleDateFormat("yyyyMMddhhmm");
-			absoluteFilePath = String.format("%sdownload_%s", Util.getContentDirectory(), df.format(new DateTime()) + XLSX);
-
-			try (FileOutputStream output_file = new FileOutputStream(absoluteFilePath)) {// Open FileOutputStream to write updates
-				wb.write(output_file); // write changes
-				output_file.close(); // close the stream
+			//construct the Download
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				wb.write(baos); // write changes
+				
+				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+				result = new Download(downloadName, bais , MimeType.xlsx);
 			}
 		}
-	}
-
-	@SuppressWarnings("resource")
-	public Download getDownload() throws Exception {
-
-		generateFile();
-
-		File download = new File(absoluteFilePath);
-		if (!download.exists()) {
-			Util.LOGGER.warning("Download " + absoluteFilePath + " DNE");
-			throw new ValidationException(new Message("Download creation failed. File no longer exists"));
-		}
-
-		Download result = new Download(downloadName, new FileInputStream(download), MimeType.xlsx);
+		
 		return result;
 	}
 }
