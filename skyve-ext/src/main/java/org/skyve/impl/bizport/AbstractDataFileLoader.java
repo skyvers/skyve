@@ -93,7 +93,7 @@ import org.skyve.util.Util;
  * 			the CREATE_FIND activity is to attempt 
  * 				- to locate an existing company with contact.name equal to the value provided, or
  * 				- if a bean has been created during the load already for that value, reuse that bean.
- * FIND		- no creation of beans - just find existing beans with matching values
+ * FIND		- no creation of beans - just find the first existing bean with matching value
  * 
  * DataFileLoader offers two modes of operation - total file load, or iterative.
  * Iterative provides an iterator style, "line by line" approach to loading values to one bean at a time, 
@@ -897,7 +897,7 @@ public abstract class AbstractDataFileLoader {
 
 							switch (activityType) {
 							case CREATE_ALL:
-//								Util.LOGGER.info("CREATE ALL");
+								// Util.LOGGER.info("CREATE ALL");
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {
@@ -905,7 +905,7 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
-//								Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+								// Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
 								debugFilter.append(field.getAttribute().getDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
@@ -929,7 +929,7 @@ public abstract class AbstractDataFileLoader {
 							default:
 
 								// check for compound binding
-//								Util.LOGGER.info("CREATE FIND");
+								// Util.LOGGER.info("CREATE FIND");
 								if (binding.indexOf('.') > 0) {
 									Util.LOGGER.info("Compound Binding " + binding);
 									lookupBean(result, field, loadValue, what);
@@ -956,11 +956,13 @@ public abstract class AbstractDataFileLoader {
 
 		// now perform the query
 		if (LoaderActivityType.FIND.equals(activityType)) {
-			if (debugMode) {
-				if (qFind.getFilter().isEmpty()) {
+			if (qFind.getFilter().isEmpty()) {
+				if (debugMode) {
 					Util.LOGGER.info(getWhere() + " No filter set for Find operation.");
-				} else {
-					result = qFind.beanResult();
+				}
+			} else {
+				result = qFind.beanResult();
+				if (debugMode) {
 					if (result == null) {
 						Util.LOGGER.info("No result found for filter " + debugFilter.toString());
 					} else {
@@ -971,6 +973,7 @@ public abstract class AbstractDataFileLoader {
 		}
 
 		return (T) result;
+
 	}
 
 	/**
