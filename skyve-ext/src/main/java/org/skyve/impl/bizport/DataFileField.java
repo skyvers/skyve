@@ -100,6 +100,12 @@ public class DataFileField {
 	}
 
 	//default constructor
+	public DataFileField(String binding) {
+		this.binding = binding;
+		this.loadAction = LoadAction.SET_VALUE;
+		this.required=  false;
+	}
+	
 	public DataFileField(String binding, int index){
 		this.binding = binding;
 		this.loadAction = LoadAction.SET_VALUE;

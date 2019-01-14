@@ -35,7 +35,6 @@ public class POISheetGenerator {
 	public Boolean getColumnTitlesOnly() {
 		return columnTitlesOnly;
 	}
-
 	public void setColumnTitlesOnly(Boolean columnTitlesOnly) {
 		this.columnTitlesOnly = columnTitlesOnly;
 	}
@@ -138,7 +137,7 @@ public class POISheetGenerator {
 			if (!Boolean.FALSE.equals(columnTitles)) {
 				// export column titles
 				for (DataFileExportField f : fields) {
-					POIWorkbook.putPOICellValue(sheet, rowNum, colNum++, Cell.CELL_TYPE_STRING, f.getFieldTitle());
+					POIWorkbook.putPOICellValue(sheet, rowNum, colNum++, Cell.CELL_TYPE_STRING, f.getFieldTitle(), true);
 				}
 			}
 
@@ -204,6 +203,12 @@ public class POISheetGenerator {
 						colNum++;
 					}
 				}
+			}
+			
+			
+			//autosize columns
+			for(int i=0;i<colNum;i++) {
+				sheet.autoSizeColumn(i);
 			}
 
 			//construct the Download
