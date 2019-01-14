@@ -110,7 +110,7 @@ isc.ListView.addClassProperties({
 			iconMarkup = '<img style="width:32px;height:32px" src="resources?_doc=' + modoc + '&_n=' + icon + '&v=' + isc.BizUtil.version + '"/>';
 		}
 		else if (fontIcon) {
-			iconMarkup = '<i style="padding-left:5px;font-size:32px" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';
+			iconMarkup = '<i style="padding-left:5px;font-size:32px;width:32px" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';
 		}
 		var header = isc.BizUtil.headerTemplate;
 		header = header.replace('{icon}', iconMarkup).replace('{title}', title).replace('{link}', '');
