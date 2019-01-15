@@ -17,12 +17,12 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
-		<s:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="topMenu" value="true" />
 			<ui:param name="leftMenu" value="true" />
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:define name="body">
+				<s:conversation managedBean="skyve" />
 				<h:form prependId="false">
 					<p:focus />
 					<s:view module="#{skyve.bizModuleParameter}"

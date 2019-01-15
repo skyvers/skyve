@@ -19,10 +19,10 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<s:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:define name="pages">
+				<s:conversation managedBean="skyve" />
 				<pm:page id="edit">
 					<pm:header title="#{skyve.title}" fixed="true">
 						<p:button value="#{skyve.i18n['page.phone.home']}" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
