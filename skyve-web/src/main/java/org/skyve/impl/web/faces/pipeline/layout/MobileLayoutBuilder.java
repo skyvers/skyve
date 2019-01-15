@@ -123,6 +123,11 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
+		// No field defined if showLabel="false", so make one and attach it
+		if (field == null) {
+			field = field(widgetInvisible);
+			formOrRowLayout.getChildren().add(field);
+		}
 		field.getChildren().add(formItemComponent);
 		field = null;
 	}
