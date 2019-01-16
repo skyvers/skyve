@@ -135,7 +135,7 @@ public class BulkUserCreationJob extends Job {
 
 				// rethrow with a more meaningful message
 				StringBuilder errorMessage = new StringBuilder(64);
-				errorMessage.append(emailAddress).append(" is not a valid Email Address");
+				errorMessage.append("'").append(emailAddress).append("' is not a valid Email Address");
 				throw new ValidationException(new Message(errorMessage.toString()));
 			}
 			validatedContacts.add(c);
