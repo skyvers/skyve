@@ -144,6 +144,13 @@ public class FacesView<T extends Bean> extends Harness {
 		return history;
 	}
 	
+	/**
+	 * Called by "renderer" EL expressions in the generated view components - OK, Cancel & Delete buttons.
+	 */
+	public boolean hasHistory() {
+		return (! history.isEmpty());
+	}
+	
 	// The edited bean
 	@SuppressWarnings("unchecked")
 	public T getBean() {
@@ -181,7 +188,9 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			try {
-				c.getExternalContext().redirect(history.pop());
+				if (! history.isEmpty()) {
+					c.getExternalContext().redirect(history.pop());
+				}
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -203,7 +212,9 @@ public class FacesView<T extends Bean> extends Harness {
 	public void cancel() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - cancel");
 		try {
-			FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
+			if (! history.isEmpty()) {
+				FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -217,7 +228,9 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			try {
-				c.getExternalContext().redirect(history.pop());
+				if (! history.isEmpty()) {
+					c.getExternalContext().redirect(history.pop());
+				}
 			}
 			catch (IOException e) {
 				e.printStackTrace();
