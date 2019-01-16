@@ -64,6 +64,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.io.WKTWriter;
 
 /**
  * Provides utilities for getting and setting simple and compound bean properties.
@@ -539,6 +540,9 @@ public final class BindUtil {
 			}
 			else if (value instanceof Boolean) {
 				result = (((Boolean) value).booleanValue() ? "Yes" : "No");
+			}
+			else if (value instanceof Geometry) {
+				result = new WKTWriter().write((Geometry) value);
 			}
 			else {
 				result = value.toString();

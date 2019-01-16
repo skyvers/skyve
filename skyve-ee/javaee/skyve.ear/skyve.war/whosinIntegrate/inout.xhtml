@@ -14,7 +14,6 @@
 			<f:viewParam name="i" value="#{inOutView.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{inOutView.preRender}"/>
 		</f:metadata>
-		<s:conversation managedBean="inOutView" />
 		<ui:composition template="../mobile/template.xhtml">
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="skyveVersionComment" value="#{inOutView.skyveVersionComment}" />
@@ -22,6 +21,7 @@
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/load-image.min.js"></script>
 			</ui:define>
 			<ui:define name="pages">
+				<s:conversation managedBean="inOutView" />
 				<pm:page id="inout">
 					<pm:header title="In/Out" fixed="true">
 						<p:button value="Home" 
