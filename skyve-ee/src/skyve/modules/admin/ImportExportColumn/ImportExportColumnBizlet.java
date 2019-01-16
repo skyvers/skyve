@@ -25,7 +25,7 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
-	public static final String ADVANCED = "advanced...";
+	public static final String EXPRESSION = "expression...";
 
 	/**
 	 * 
@@ -71,7 +71,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 					}
 				}
 
-				bindings.add(new DomainValue(ADVANCED));
+				bindings.add(new DomainValue(EXPRESSION));
 			}
 
 			return bindings;

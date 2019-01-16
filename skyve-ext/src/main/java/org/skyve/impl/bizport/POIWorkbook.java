@@ -315,7 +315,6 @@ public final class POIWorkbook implements BizPortWorkbook {
 			}
 		}
 	}
-
 	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, Object value) throws Exception {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}

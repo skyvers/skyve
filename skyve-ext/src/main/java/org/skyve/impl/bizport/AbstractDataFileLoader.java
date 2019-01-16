@@ -894,10 +894,12 @@ public abstract class AbstractDataFileLoader {
 								Util.LOGGER.info(getWhere(fieldIndex) + " No load value found for " + field.getBinding());
 							}
 						} else {
-
+							if (debugMode) {
+								Util.LOGGER.info("Loading Activity Type=" + activityType.toString() + " Field Load Action= " + field.getLoadAction().toString());
+							}
+							
 							switch (activityType) {
 							case CREATE_ALL:
-								// Util.LOGGER.info("CREATE ALL");
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {

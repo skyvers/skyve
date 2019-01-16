@@ -18,6 +18,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Import Export
  * 
  * @depend - - - Mode
+ * @depend - - - Rollback
+ * @depend - - - LoadType
  * @navcomposed 1 importExportColumns 0..n ImportExportColumn
  * @stereotype "persistent"
  */
@@ -50,11 +52,13 @@ public class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
-	public static final String advancedModePropertyName = "advancedMode";
-	/** @hidden */
 	public static final String fileContainsHeadersPropertyName = "fileContainsHeaders";
 	/** @hidden */
 	public static final String importExportColumnsPropertyName = "importExportColumns";
+	/** @hidden */
+	public static final String rollbackPropertyName = "rollback";
+	/** @hidden */
+	public static final String loadTypePropertyName = "loadType";
 
 	/**
 	 * Mode
@@ -134,6 +138,166 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Error handling
+	 **/
+	@XmlEnum
+	public static enum Rollback implements Enumeration {
+		rollback("rollback", "Rollback all if there's a problem"),
+		noRollback("noRollback", "Load and save until error or complete");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private Rollback(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static Rollback fromCode(String code) {
+			Rollback result = null;
+
+			for (Rollback value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Rollback fromDescription(String description) {
+			Rollback result = null;
+
+			for (Rollback value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				Rollback[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (Rollback value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Loading strategy
+	 * <br/>
+	 * <p><b>Loading strategy</b></p>
+				<p><b>Create related records if they don't exist (recommended)</b>
+				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+				<p><b>Create everything even if there might be duplicates</b>
+					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+	 **/
+	@XmlEnum
+	public static enum LoadType implements Enumeration {
+		createFind("createFind", "Create related records if they don't exist"),
+		createAll("createAll", "Create everything even if there might be duplicates");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private LoadType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static LoadType fromCode(String code) {
+			LoadType result = null;
+
+			for (LoadType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static LoadType fromDescription(String description) {
+			LoadType result = null;
+
+			for (LoadType value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				LoadType[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (LoadType value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
 	 * Mode
 	 **/
 	private Mode mode = Mode.importData;
@@ -162,10 +326,6 @@ public class ImportExport extends AbstractPersistentBean {
 	 **/
 	private String results;
 	/**
-	 * Advanced
-	 **/
-	private Boolean advancedMode;
-	/**
 	 * Column Headers
 	 **/
 	private Boolean fileContainsHeaders = new Boolean(true);
@@ -173,6 +333,20 @@ public class ImportExport extends AbstractPersistentBean {
 	 * Columns
 	 **/
 	private List<ImportExportColumn> importExportColumns = new ArrayList<>();
+	/**
+	 * Error handling
+	 **/
+	private Rollback rollback = Rollback.rollback;
+	/**
+	 * Loading strategy
+	 * <br/>
+	 * <p><b>Loading strategy</b></p>
+				<p><b>Create related records if they don't exist (recommended)</b>
+				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+				<p><b>Create everything even if there might be duplicates</b>
+					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+	 **/
+	private LoadType loadType = LoadType.createFind;
 
 	@Override
 	@XmlTransient
@@ -343,24 +517,6 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #advancedMode} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getAdvancedMode() {
-		return advancedMode;
-	}
-
-	/**
-	 * {@link #advancedMode} mutator.
-	 * @param advancedMode	The new value.
-	 **/
-	@XmlElement
-	public void setAdvancedMode(Boolean advancedMode) {
-		preset(advancedModePropertyName, advancedMode);
-		this.advancedMode = advancedMode;
-	}
-
-	/**
 	 * {@link #fileContainsHeaders} accessor.
 	 * @return	The value.
 	 **/
@@ -406,6 +562,42 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #rollback} accessor.
+	 * @return	The value.
+	 **/
+	public Rollback getRollback() {
+		return rollback;
+	}
+
+	/**
+	 * {@link #rollback} mutator.
+	 * @param rollback	The new value.
+	 **/
+	@XmlElement
+	public void setRollback(Rollback rollback) {
+		preset(rollbackPropertyName, rollback);
+		this.rollback = rollback;
+	}
+
+	/**
+	 * {@link #loadType} accessor.
+	 * @return	The value.
+	 **/
+	public LoadType getLoadType() {
+		return loadType;
+	}
+
+	/**
+	 * {@link #loadType} mutator.
+	 * @param loadType	The new value.
+	 **/
+	@XmlElement
+	public void setLoadType(LoadType loadType) {
+		preset(loadTypePropertyName, loadType);
+		this.loadType = loadType;
+	}
+
+	/**
 	 * Whether the upload file exists
 	 *
 	 * @return The condition
@@ -425,22 +617,23 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Whether to show advanced binding strings
+	 * The load type  - whether to normalise the input or create all records
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
-	public boolean isShowAdvancedBindings() {
-		return (((ImportExportExtension) this).anyColumnHasExpression());
+	public boolean isLoadTypeCreateFind() {
+		return (!isShowExport()
+				&& LoadType.createFind.equals(loadType));
 	}
 
 	/**
-	 * {@link #isShowAdvancedBindings} negation.
+	 * {@link #isLoadTypeCreateFind} negation.
 	 *
 	 * @return The negated condition
 	 */
-	public boolean isNotShowAdvancedBindings() {
-		return (! isShowAdvancedBindings());
+	public boolean isNotLoadTypeCreateFind() {
+		return (! isLoadTypeCreateFind());
 	}
 
 	/**
@@ -460,6 +653,25 @@ public class ImportExport extends AbstractPersistentBean {
 	 */
 	public boolean isNotShowExport() {
 		return (! isShowExport());
+	}
+
+	/**
+	 * Whether to show advanced binding strings
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowExpressions() {
+		return (((ImportExportExtension) this).anyColumnHasExpression());
+	}
+
+	/**
+	 * {@link #isShowExpressions} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowExpressions() {
+		return (! isShowExpressions());
 	}
 
 	/**
