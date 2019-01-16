@@ -84,8 +84,10 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 															facesView.getUxUi().getName());
 				
 				// this is for the cancel, ok and delete buttons
-				String referer = ec.getRequestHeaderMap().get("referer");
-				facesView.getHistory().push(referer);
+				String referer = Util.processStringValue(ec.getRequestHeaderMap().get("referer"));
+				if (referer != null) {
+					facesView.getHistory().push(referer);
+				}
 				if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 				webContext = new FacesWebContext();
 				webContext.setConversation(AbstractPersistence.get());
@@ -120,8 +122,10 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			}
 			
 			// this is for the cancel, ok and delete buttons
-			String referer = ec.getRequestHeaderMap().get("referer");
-			facesView.getHistory().push(referer);
+			String referer = Util.processStringValue(ec.getRequestHeaderMap().get("referer"));
+			if (referer != null) {
+				facesView.getHistory().push(referer);
+			}
 			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 			webContext = new FacesWebContext();
 			webContext.setConversation(persistence);

@@ -147,7 +147,7 @@ public class FacesView<T extends Bean> extends Harness {
 	/**
 	 * Called by "renderer" EL expressions in the generated view components - OK, Cancel & Delete buttons.
 	 */
-	public boolean hasHistory() {
+	public boolean isHasHistory() {
 		return (! history.isEmpty());
 	}
 	

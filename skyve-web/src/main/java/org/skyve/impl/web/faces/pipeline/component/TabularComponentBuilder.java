@@ -2259,6 +2259,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				ImplicitActionName.Delete.equals(implicitActionName)) {
 			StringBuilder expression = new StringBuilder(128);
 			expression.append("empty ").append(managedBeanName).append(".viewBinding");
+			
+			// Add check for history before showing OK, Cancel or Delete buttons
+			if (! ImplicitActionName.Save.equals(implicitActionName)) {
+				expression.insert(0, "((");
+				expression.append(") and ").append(managedBeanName).append(".hasHistory)");
+			}
+			
+			// Add invisible condition to the mix
 			if (invisible == null) {
 				result.setValueExpression("rendered",
 											createValueExpressionFromFragment(null, 
