@@ -295,12 +295,21 @@
 		<property name="importFileAbsolutePath" length="500" />
 		<property name="importFileName" length="200" />
 		<property name="exportFileAbsolutePath" length="500" />
-		<property name="advancedMode" />
 		<property name="fileContainsHeaders" />
 		<bag name="importExportColumns" order-by="bizOrdinal" cascade="all-delete-orphan">
 			<key column="parent_id" />
 			<one-to-many entity-name="adminImportExportColumn" />
 		</bag>
+		<property name="rollback" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$Rollback</param>
+			</type>
+		</property>
+		<property name="loadType" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$LoadType</param>
+			</type>
+		</property>
 		<filter name="adminImportExportNoneFilter" condition="1=0"/>
 		<filter name="adminImportExportCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminImportExportDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -321,6 +330,11 @@
 		<property name="columnName" length="100" />
 		<property name="bindingName" length="100" />
 		<property name="bindingExpression" length="200" />
+		<property name="loadAction" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExportColumn$LoadAction</param>
+			</type>
+		</property>
 		<filter name="adminImportExportColumnNoneFilter" condition="1=0"/>
 		<filter name="adminImportExportColumnCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminImportExportColumnDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -24,6 +24,17 @@ public class RunExport extends DownloadAction<ImportExport> {
 		return generateDownload(bean, bean.getImportExportColumns() , bean.getFileContainsHeaders(), Boolean.FALSE);
 	}
 	
+	/**
+	 * Generate a POI download using the generator and the column specifications
+	 * 
+	 * @param bean - the ImportExport configuration record describing what to export
+	 * @param columns - the column configurations
+	 * @param containsHeaders - whether headers should be included
+	 * @param empty - whether the output is intended as an empty template for import
+	 * @return - a download to be given to the user
+	 * 
+	 * @throws Exception
+	 */
 	public static Download generateDownload(ImportExport bean, List<ImportExportColumn> columns, Boolean containsHeaders, Boolean empty) throws Exception {
 		POISheetGenerator generator = new POISheetGenerator(bean.getModuleName(), bean.getDocumentName());
 		generator.setColumnTitles(containsHeaders);
@@ -32,20 +43,18 @@ public class RunExport extends DownloadAction<ImportExport> {
 		//add fields to generator
 		for(ImportExportColumn c: columns) {
 			String binding = c.getBindingName();
-			if (Boolean.TRUE.equals(bean.getAdvancedMode()) || ImportExportColumnBizlet.ADVANCED.equals(c.getBindingName()) 
-					&& c.getBindingExpression()!=null) {
+			if (ImportExportColumnBizlet.EXPRESSION.equals(c.getBindingName()) && c.getBindingExpression()!=null) {
 				binding=c.getBindingExpression();				
 			}
 			
 			generator.addField(c.getColumnName(), binding);
 		}
-		
 
-		//Generate download file name
+		// Generate download file name
 		StringBuilder sb = new StringBuilder();
 		sb.append(bean.getModuleName()).append("_").append(bean.getDocumentName());
 		generator.setDownloadName(sb.toString());
-
-		return generator.getDownload();		
+		
+		return generator.getDownload();	
 	}
 }

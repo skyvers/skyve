@@ -27,14 +27,33 @@
 			]]></description>
 			<length>200</length>
 		</text>
+		<enum name="loadAction" >
+			<displayName>Action</displayName>
+			<values>
+				<value code="set" name="setValue" description="Set value"/>
+				<value code="equals" name="lookupEquals" description="Find exact match"/>
+				<value code="like" name="lookupLike" description="Find like match"/>
+				<value code="contains" name="lookupContains" description="Find matches containing this value"/>
+				<value code="confirm" name="confirmValue" description="Fail if not found"/>
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="showExpression">
-			<description>Whether to show advanced binding strings</description>
+			<description>Whether to show binding expressions</description>
 			<expression>
 				<![CDATA[
-				bindingName!=null  &&
-				modules.admin.ImportExportColumn.ImportExportColumnBizlet.ADVANCED.equals(bindingName)
+				bindingName!=null
+				&& modules.admin.ImportExportColumn.ImportExportColumnBizlet.EXPRESSION.equals(bindingName)
+				]]>
+			</expression>
+		</condition>
+		<condition name="showLoadAction">
+			<description>Whether to show the load action</description>
+			<expression>
+				<![CDATA[
+				bindingName!=null
+				&& (parent.getMode()!=null && modules.admin.domain.ImportExport.Mode.importData.equals(parent.getMode())) 
 				]]>
 			</expression>
 		</condition>

@@ -7,7 +7,6 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -16,8 +15,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExport.actions.UploadSimpleImportDataFile;
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
+import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
@@ -31,7 +30,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 
-		//list of modules
+		// list of modules
 		if (ImportExport.moduleNamePropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
@@ -39,15 +38,15 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 				result.add(new DomainValue(module.getName(), module.getTitle()));
 			}
 			return result;
-		}		
-		
+		}
+
 		return super.getConstantDomainValues(attributeName);
 	}
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExport bean) throws Exception {
 
-		//list documents within modules
+		// list documents within modules
 		if (ImportExport.documentNamePropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
@@ -60,43 +59,36 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 			}
 			return result;
 		}
-		
+
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
 	@Override
 	public void preRerender(String source, ImportExport bean, WebContext webContext) throws Exception {
-		
+
 		updateColumns(source, bean);
-		
+
 		super.preRerender(source, bean, webContext);
 	}
-	
-	public static void updateColumns(String source, ImportExport bean) throws Exception{
+
+	public static void updateColumns(String source, ImportExport bean) throws Exception {
 		switch (source) {
-		case ImportExport.advancedModePropertyName:
-			// switching into advanced mode, prepare binding expression equivalents
-			if (Boolean.TRUE.equals(bean.getAdvancedMode())) {
-				for (ImportExportColumn c : bean.getImportExportColumns()) {
-					if (c.getBindingName() != null && !ImportExportColumnBizlet.ADVANCED.equals(c.getBindingName())) {
-						c.setBindingExpression("{" + c.getBindingName() + "}");
-					}
-				}
-			}
-			break;
 		case ImportExport.documentNamePropertyName:
 			// if changing document name, recreate default import export column config
 			bean.getImportExportColumns().clear();
-		//$FALL-THROUGH$
-	case ImportExport.modePropertyName:
-			if(Mode.importData.equals(bean.getMode()) && bean.getImportFileAbsolutePath()!=null) {
+			//$FALL-THROUGH$
+		case ImportExport.modePropertyName:
+			if (Mode.importData.equals(bean.getMode()) && bean.getImportFileAbsolutePath() != null) {
 				bean.getImportExportColumns().clear();
-				UploadSimpleImportDataFile.loadColumnsFromFile(bean, new UploadException());				
+				UploadSimpleImportDataFile.loadColumnsFromFile(bean, new UploadException());
+				if(bean.getLoadType()==null) {
+					bean.setLoadType(LoadType.createFind);
+				}
 			}
 			if (Mode.exportData.equals(bean.getMode()) && bean.getImportExportColumns().size() == 0) {
 				if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 					List<ImportExportColumn> columns = generateColumns(bean);
-					for(ImportExportColumn c: columns) {
+					for (ImportExportColumn c : columns) {
 						c.setParent((ImportExportExtension) bean);
 						bean.getImportExportColumns().add(c);
 					}
@@ -105,15 +97,14 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 			break;
 		default:
 			break;
-	}
-
+		}
 	}
 
 	/**
 	 * Generate column configs from scalar attributes
 	 */
 	public static List<ImportExportColumn> generateColumns(ImportExport bean) {
-		
+
 		List<ImportExportColumn> columns = new ArrayList<>();
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -122,24 +113,24 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 		Document document = module.getDocument(customer, bean.getDocumentName());
 
 		for (Attribute a : document.getAttributes()) {
-			//exclude unsupported types
-			if (!AttributeType.association.equals(a.getAttributeType())
-					&& !AttributeType.collection.equals(a.getAttributeType())
-					&& !AttributeType.content.equals(a.getAttributeType())
-					&& !AttributeType.geometry.equals(a.getAttributeType())
-					&& !AttributeType.inverseMany.equals(a.getAttributeType())
-					&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
-				
-				//also exclude non persistent fields
-				if(a.isPersistent()) {
+			if (a.isPersistent()) {
+				// exclude unsupported types
+				switch (a.getAttributeType()) {
+				case collection:
+				case content:
+				case inverseMany:
+				case inverseOne:
+					break;
+				default:
 					ImportExportColumn col = ImportExportColumn.newInstance();
 					col.setBindingName(a.getName());
 					col.setColumnName(a.getDisplayName());
 					columns.add(col);
+					break;
 				}
 			}
 		}
-		
+
 		return columns;
 	}
 

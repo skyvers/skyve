@@ -61,12 +61,10 @@
 					</form>
 					<form invisible="showExport">
 						<column />
+						<column />
 						<row>
 							<item>
-								<spacer />
-							</item>
-							<item>
-								<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+								<combo binding="loadType"/>
 							</item>
 						</row>
 					</form>
@@ -76,10 +74,10 @@
 						<column />
 						<row>
 							<item>
-								<button pixelWidth="200" actionName="ResetColumns" >
+								<button pixelWidth="200" actionName="ResetColumns">
 									<properties>
 										<c:property key="update">columns</c:property>
-									</properties>								
+									</properties>
 								</button>
 							</item>
 						</row>
@@ -112,6 +110,14 @@
 					</form>
 				</vbox>
 			</hbox>
+			<form invisible="showExport">
+				<column/>
+				<row>
+					<item>
+						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+					</item>
+				</row>
+			</form>
 		</vbox>
 	</vbox>
 	<form>
@@ -124,21 +130,22 @@
 	</form>
 	<vbox widgetId="columns">
 		<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
-			<dataGrid binding="importExportColumns" invisible="showAdvancedBindings" showEdit="false">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
 			</dataGrid>
-			<dataGrid binding="importExportColumns" visible="showAdvancedBindings" showEdit="false">
+			<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingExpression" />
 			</dataGrid>
 		</vbox>
 		<vbox visible="showExport" border="true" borderTitle="Configure Export Columns">
-			<dataGrid binding="importExportColumns" invisible="showAdvancedBindings" showEdit="false">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 				<boundColumn binding="bindingName" />
 				<boundColumn binding="columnName" />
 			</dataGrid>
-			<dataGrid binding="importExportColumns" visible="showAdvancedBindings" showEdit="false">
+			<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
+				<boundColumn binding="bindingName" />
 				<boundColumn binding="bindingExpression" />
 				<boundColumn binding="columnName" />
 			</dataGrid>
@@ -147,8 +154,8 @@
 	<actions>
 		<defaults />
 		<upload className="UploadSimpleImportDataFile" displayName="Upload file" invisible="showExport" inActionPanel="false" />
-		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" inActionPanel="false" 
-		confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)"/>
+		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" inActionPanel="false"
+			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
 		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" />
 		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" />
 		<download className="GetImportTemplate" displayName="Get Template for Import" invisible="showExport" inActionPanel="false" />
