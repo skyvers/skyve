@@ -7,8 +7,6 @@
 	<singularAlias>Setup</singularAlias>
 	<pluralAlias>Setup</pluralAlias>
 	<iconStyleClass>fa fa-lock</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/password16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/password32.png</icon32x32RelativeFilePath>
 	<bizKey expression="Admin Setup"/>
 	<attributes>
 		<enum name="passwordComplexityModel" required="true">
@@ -17,7 +15,8 @@
 			<values>
 				<value code="MINIMUM" description="Minimum - min 6 chars"/>
 				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
-				<value code="MAXIMUM" description="Maximum - min 8 chars, upper, lower, numeric and punctuation"/>
+				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
+				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
 			</values>
 		</enum>
 		<text name="fromEmail" required="true">
