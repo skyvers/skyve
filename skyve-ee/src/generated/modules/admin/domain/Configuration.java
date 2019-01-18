@@ -57,7 +57,8 @@ public class Configuration extends AbstractPersistentBean {
 	public static enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
-		maximumMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Maximum - min 8 chars, upper, lower, numeric and punctuation");
+		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
+		strongMin10CharsUpperLowerNumericAndPunctuation("STRONG", "Strong - min 10 chars, upper, lower, numeric and punctuation");
 
 		private String code;
 		private String description;

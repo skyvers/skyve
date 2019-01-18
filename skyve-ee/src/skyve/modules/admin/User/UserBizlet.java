@@ -218,9 +218,9 @@ public class UserBizlet extends Bizlet<User> {
 						ComplexityModel cm = new ComplexityModel(configuration.getPasswordComplexityModel());
 						if (!newPassword.matches(cm.getComparison())) {
 							StringBuilder sb = new StringBuilder(64);
-							sb.append("The password you have entered is not sufficiently complex.\n");
+							sb.append("The password you have entered is not sufficiently complex. ");
 							sb.append(cm.getRule());
-							sb.append("\nPlease re-enter and confirm the password.");
+							sb.append(" Please re-enter and confirm the password.");
 							Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 							e.getMessages().add(message);
 						}

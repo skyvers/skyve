@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Create a new User" name="create" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="Create a new User" name="create" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox border="true" shrinkWrap="height">
 		<form invisible="notConfirmContact">
@@ -86,7 +87,7 @@
 			</row>
 		</form>
 		<hbox invisible="notCreateContact">
-			<form >
+			<form percentageWidth="60">
 				<column responsiveWidth="4"/>
 				<column />
 				<row>
@@ -100,7 +101,7 @@
 					</item>
 				</row>
 			</form>
-			<form>
+			<form percentageWidth="40">
 				<column responsiveWidth="4"/>
 				<column />
 				<row>
@@ -111,7 +112,7 @@
 			</form>
 		</hbox>
 		<hbox invisible="notConfirmUserNameAndPassword">
-			<form >
+			<form percentageWidth="60">
 				<column responsiveWidth="4"/>
 				<column />
 				<row>
@@ -140,7 +141,7 @@
 					</item>
 				</row>
 			</form>
-			<form>
+			<form percentageWidth="40">
 				<column responsiveWidth="4"/>
 				<column />
 				<row>
@@ -151,8 +152,8 @@
 			</form>
 		</hbox>
 		<hbox invisible="notConfirmGroupMemberships">
-			<vbox>
-				<form>
+			<vbox percentageWidth="60">
+				<form >
 					<column responsiveWidth="4" />
 					<column />
 					<row>
@@ -172,7 +173,7 @@
 					</row>
 				</form>
 				<hbox percentageWidth="100" pixelHeight="300">
-					<form responsiveWidth="4" >
+					<form >
 						<column />
 						<row>
 							<item>
@@ -183,7 +184,7 @@
 					<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
 				</hbox>
 			</vbox>
-			<form >
+			<form percentageWidth="40">
 				<column responsiveWidth="4"/>
 				<column />
 				<row>
