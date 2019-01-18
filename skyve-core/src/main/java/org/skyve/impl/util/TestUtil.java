@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,12 +23,15 @@ import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.util.test.DataMap;
@@ -682,4 +686,40 @@ public class TestUtil {
 			arr[i] = a;
 		}
 	}
+	
+	/**
+	 * <p>
+	 * Returns a random bean tuple from the specified document query
+	 * </p>
+	 * 
+	 * <p>
+	 * E.g. <code>src/test/resources/data/postCode.txt</code>
+	 * </p>
+	 * 
+	 * @param q - the query to find a random value from
+	 * @return - the random bean from the query result
+	 */
+    public static <T extends Bean> T findRandomDocumentQueryResult(DocumentQuery q) {
+        AbstractDocumentQuery aq = ((AbstractDocumentQuery) q);
+
+        aq.clearProjections();
+        q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+        long count = q.scalarResult(Number.class).longValue();
+
+        // we just need a random number
+        if (count > Integer.MAX_VALUE) {
+            count = Integer.MAX_VALUE;
+        } else if (count == 0) {
+            return null;
+        }
+
+        int randomIndex = new Random().nextInt((int) count - 1);
+
+        // get the random record
+        aq.clearProjections();
+        q.setFirstResult(randomIndex);
+        q.setMaxResults(1);
+
+        return q.beanResult();
+    }	
 }
