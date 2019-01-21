@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
@@ -142,10 +143,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		summaryQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, Bean.DOCUMENT_ID);
 		summaryQuery.addAggregateProjection(AggregateFunction.Min, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
 		
-		int startRow = getStartRow();
-		int endRow = getEndRow();
-		detailQuery.setFirstResult(startRow);
-		detailQuery.setMaxResults(endRow - startRow);
+		// Only page if this isn't an aggregate query
+		if (! query.isAggregate()) {
+			int startRow = getStartRow();
+			int endRow = getEndRow();
+			detailQuery.setFirstResult(startRow);
+			detailQuery.setMaxResults(endRow - startRow);
+		}
 		
 		SortParameter[] sorts = getSortParameters();
 		if (sorts != null) {
@@ -163,9 +167,19 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		}
 		
 		Page result = new Page();
-		Bean summaryBean = summaryQuery.projectedResult();
+		List<Bean> rows = detailQuery.projectedResults();
+		Bean summaryBean = null;
+		if (query.isAggregate()) {
+			Map<String, Object> properties = new TreeMap<>();
+			properties.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
+			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+			summaryBean = new MapBean(module.getName(), drivingDocument.getName(), properties);
+		}
+		else {
+			summaryBean = summaryQuery.projectedResult();
+		}
 		result.setTotalRows(((Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID)).longValue());
-		result.setRows(detailQuery.projectedResults());
+		result.setRows(rows);
 		result.setSummary(summaryBean);
 		
 		return result;

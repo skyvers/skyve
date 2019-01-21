@@ -25,6 +25,14 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	public Boolean getPolymorphic();
 
 	/**
+	 * If true, the query will omit projections for the in-built biz... columns enabling 
+	 * a summary result set with grouping and query aggregate functions to be constructed for the rows.
+	 * The list grid implementations should respond by disabling all zooming, summary rows, filtering etc.
+	 * @return	true if agregate, otherwise false.
+	 */
+	public boolean isAggregate();
+
+	/**
 	 * 
 	 * @param customer
 	 * @return

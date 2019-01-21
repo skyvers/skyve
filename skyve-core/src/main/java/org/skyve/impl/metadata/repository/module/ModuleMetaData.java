@@ -284,6 +284,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 					}
 					documentQueryImpl.setDocumentName(value);
 					documentQueryImpl.setPolymorphic(documentQueryMetaData.getPolymorphic());
+					documentQueryImpl.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
 					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
 					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
 

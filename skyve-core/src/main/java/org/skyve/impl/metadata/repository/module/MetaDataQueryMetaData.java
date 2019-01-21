@@ -17,12 +17,13 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "query")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",
-			propOrder = {"documentName", "polymorphic", "from", "filter", "columns"})
+			propOrder = {"documentName", "polymorphic", "aggregate", "from", "filter", "columns"})
 public class MetaDataQueryMetaData extends QueryMetaData {
 	private static final long serialVersionUID = -7717015766195112054L;
 
 	private String documentName;
 	private Boolean polymorphic;
+	private Boolean aggregate;
 	private String from;
 	private String filter;
 	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
@@ -43,6 +44,15 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	@XmlAttribute
 	public void setPolymorphic(Boolean polymorphic) {
 		this.polymorphic = polymorphic;
+	}
+
+	public Boolean getAggregate() {
+		return aggregate;
+	}
+
+	@XmlAttribute
+	public void setAggregate(Boolean aggregate) {
+		this.aggregate = aggregate;
 	}
 
 	public String getFrom() {
