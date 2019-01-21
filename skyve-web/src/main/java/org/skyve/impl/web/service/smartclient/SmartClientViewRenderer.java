@@ -945,7 +945,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private String listWidgetVariable = null;
 
 	@Override
-	public void renderListGrid(String title, ListGrid grid) {
+	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		renderListWidget(grid);
 		renderGrid(grid);
 	}
@@ -963,7 +963,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderedListGrid(String title, ListGrid grid) {
+	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		appendFilterParameters(grid.getParameters(), code);
 		renderedListWidget();
 	}

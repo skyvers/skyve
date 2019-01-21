@@ -209,7 +209,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		return component;
 	}
 

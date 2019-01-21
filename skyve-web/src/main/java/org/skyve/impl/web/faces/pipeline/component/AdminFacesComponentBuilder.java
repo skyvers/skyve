@@ -109,7 +109,8 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		FacesUtil.setStyleCLass(component, DATA_TABLE_STYLE_CLASS);
 		return component;
 	}

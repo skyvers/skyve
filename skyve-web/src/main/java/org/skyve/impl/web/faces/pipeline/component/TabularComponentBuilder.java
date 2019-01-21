@@ -773,7 +773,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid grid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
@@ -782,7 +783,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 
-		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
 		String[] createDisabled = (disableAddConditionName == null) ?
@@ -792,7 +793,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									((disabledConditionName == null) ?
 											new String[] {disableAddConditionName} :
 											new String[] {disableAddConditionName, disabledConditionName});
-		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
+		boolean zoomRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         result.setVar("row");

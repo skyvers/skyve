@@ -454,12 +454,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid grid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
 
-		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
 		String[] createDisabledConditionNames = (disableAddConditionName == null) ?
@@ -469,7 +470,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													((disabledConditionName == null) ?
 															new String[] {disableAddConditionName} :
 															new String[] {disableAddConditionName, disabledConditionName});
-		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
+		boolean zoomRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, null);
@@ -545,7 +546,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			
 			boolean first = (value.length() == 0);
 			value.append(first ? "<h2>" : "<p>");
-			value.append("#{row['{").append(column.getBinding()).append("}']}");
+			String name = column.getBinding();
+			if (name == null) {
+				name = column.getName();
+			}
+			value.append("#{row['{").append(name).append("}']}");
 			value.append(first ? "</h2>" : "</p>");
 		}
 		

@@ -1005,7 +1005,8 @@ public class FacesViewVisitor extends ViewVisitor {
 										listWidgetModel,
 										grid.getTitle(),
 										grid,
-										user.canCreateDocument(listWidgetDrivingDocument));
+										user.canCreateDocument(listWidgetDrivingDocument),
+										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 	

@@ -284,7 +284,8 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 										ListModel<? extends Bean> model,
 										String title,
 										ListGrid listGrid,
-										boolean canCreateDocument) {
+										boolean canCreateDocument,
+										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ListGrid</span>");

@@ -878,6 +878,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public Document getCurrentListWidgetDrivingDocument() {
 		return currentListWidgetDrivingDocument;
 	}
+	private boolean currentListWidgetAggregateQuery;
 	
 	private void preProcessListWidget(AbstractListWidget widget) {
 		currentTabularTitle = Util.i18n(widget.getTitle(), locale);
@@ -890,6 +891,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentListWidgetModelDocumentName = document.getName();
 			currentListWidgetModel = CORE.getRepository().getListModel(customer, document, currentListWidgetModelName, true);
 			currentListWidgetDrivingDocument = currentListWidgetModel.getDrivingDocument();
+			currentListWidgetAggregateQuery = false;
 		}
 		else {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
@@ -902,6 +904,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
 	        currentListWidgetModel = queryModel;
+	        currentListWidgetAggregateQuery = query.isAggregate();
 		}
 	}
 	
@@ -911,12 +914,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentListWidgetModelDocumentName = null;
 		currentListWidgetModel = null;
 		currentListWidgetDrivingDocument = null;
+		currentListWidgetAggregateQuery = false;
 	}
 
 	@Override
 	public final void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessListWidget(grid);
-		renderListGrid(currentTabularTitle, grid);
+		renderListGrid(currentTabularTitle, currentListWidgetAggregateQuery, grid);
 		
 		for (MetaDataQueryColumn column : currentListWidgetModel.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
@@ -928,17 +932,17 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 
-	public abstract void renderListGrid(String title, ListGrid grid);
+	public abstract void renderListGrid(String title, boolean aggregateQuery, ListGrid grid);
 	public abstract void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column);
 	public abstract void renderListGridContentColumn(MetaDataQueryContentColumn column);
 
 	@Override
 	public final void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
-		renderedListGrid(currentTabularTitle, grid);
+		renderedListGrid(currentTabularTitle, currentListWidgetAggregateQuery, grid);
 		postProcessListWidget();
 	}
 
-	public abstract void renderedListGrid(String title, ListGrid grid);
+	public abstract void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid);
 
 	@Override
 	public final void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {

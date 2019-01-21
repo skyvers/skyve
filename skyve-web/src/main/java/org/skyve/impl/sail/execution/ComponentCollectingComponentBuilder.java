@@ -163,7 +163,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext) { // an edit view

@@ -944,14 +944,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderListGrid(String title, ListGrid grid) {
+	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		UIComponent l = cb.listGrid(null,
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
 										getCurrentListWidgetModel(),
 										title,
 										grid,
-										user.canCreateDocument(getCurrentListWidgetDrivingDocument()));
+										user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
+										aggregateQuery);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 
@@ -968,7 +969,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedListGrid(String title, ListGrid grid) {
+	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		addedToContainer();
 	}
 

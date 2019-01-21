@@ -18,7 +18,8 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			((DataTable) component).setStickyHeader(true);
 		}

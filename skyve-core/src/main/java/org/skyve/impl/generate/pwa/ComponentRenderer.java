@@ -150,7 +150,8 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												ListModel<? extends Bean> model,
 												String title,
 												ListGrid listGrid,
-												boolean canCreateDocument);
+												boolean canCreateDocument,
+												boolean aggregateQuery);
 
 	/*
 	 * List Repeater is just like a list grid but...

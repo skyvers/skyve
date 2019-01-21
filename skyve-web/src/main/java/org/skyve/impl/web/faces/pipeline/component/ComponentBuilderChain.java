@@ -387,7 +387,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -396,7 +397,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										model,
 										title,
 										listGrid,
-										canCreateDocument);
+										canCreateDocument,
+										aggregateQuery);
 		}
 		return result;
 	}

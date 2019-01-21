@@ -288,7 +288,8 @@ System.out.println("action column " + current);
 										ListModel<? extends Bean> model,
 										String title,
 										ListGrid listGrid,
-										boolean canCreateDocument) {
+										boolean canCreateDocument,
+										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ListGrid</span>");

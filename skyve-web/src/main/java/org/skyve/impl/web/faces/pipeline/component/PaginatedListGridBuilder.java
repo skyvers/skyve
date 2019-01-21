@@ -15,7 +15,8 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			UIData dt = (UIData) component;
 			dt.setPaginator(true);

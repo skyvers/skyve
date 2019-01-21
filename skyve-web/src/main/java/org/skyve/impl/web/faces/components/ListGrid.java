@@ -117,11 +117,13 @@ public class ListGrid extends HtmlPanelGroup {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
+		boolean aggregateQuery = false;
 		if (queryName != null) {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			if (query == null) {
 				query = module.getDocumentDefaultQuery(customer, queryName);
 			}
+			aggregateQuery = query.isAggregate();
 			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 			queryModel.setQuery(query);
 			model = queryModel;
@@ -150,6 +152,7 @@ public class ListGrid extends HtmlPanelGroup {
 											model,
 											model.getDescription(),
 											listGrid,
-											user.canCreateDocument(model.getDrivingDocument()));
+											user.canCreateDocument(model.getDrivingDocument()),
+											aggregateQuery);
 	}
 }

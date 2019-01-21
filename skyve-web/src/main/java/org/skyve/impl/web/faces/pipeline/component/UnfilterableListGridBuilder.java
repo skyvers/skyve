@@ -15,7 +15,8 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column) {

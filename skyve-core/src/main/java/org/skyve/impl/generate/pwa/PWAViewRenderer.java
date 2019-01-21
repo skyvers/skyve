@@ -790,14 +790,15 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderListGrid(String title, ListGrid grid) {
+	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		RenderedComponent l = cr.listGrid(null,
 											getCurrentListWidgetModelDocumentName(),
 											getCurrentListWidgetModelName(),
 											getCurrentListWidgetModel(),
 											title,
 											grid,
-											(user == null) ? true : user.canCreateDocument(getCurrentListWidgetDrivingDocument()));
+											(user == null) ? true : user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
+											aggregateQuery);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 	
@@ -814,7 +815,7 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedListGrid(String title, ListGrid grid) {
+	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		addedToContainer();
 	}
 
