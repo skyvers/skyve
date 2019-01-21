@@ -176,6 +176,7 @@ isc.BizUtil.addClassProperties({
 										modoc: item.modoc,
 										icon: item.icon,
 										fontIcon: item.fontIcon,
+										aggregate: item.aggregate,
 										canCreate: item.canCreate,
 										canUpdate: item.canUpdate,
 										canDelete: item.canDelete,

@@ -1522,6 +1522,7 @@ public class SmartClientGenerateUtils {
 											drivingDocumentModule,
 											drivingDocument,
 											null,
+											false,
 											modelName,
 											model.getDescription(),
 											model.getColumns(),
@@ -1562,6 +1563,7 @@ public class SmartClientGenerateUtils {
 											documentModule, 
 											drivingDocument, 
 											query.getName(), 
+											query.isAggregate(),
 											null, 
 											query.getDescription(),
 											query.getColumns(),
@@ -1580,6 +1582,7 @@ public class SmartClientGenerateUtils {
 														Module drivingDocumentModule,
 														Document drivingDocument,
 														String queryName,
+														boolean aggregateQuery,
 														String modelName,
 														String description,
 														List<MetaDataQueryColumn> columns,
@@ -1645,7 +1648,8 @@ public class SmartClientGenerateUtils {
 			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
 			toAppendTo.append(",criteriaPolicy:'dropOnChange");
 		}
-		toAppendTo.append("',canCreate:").append(user.canCreateDocument(drivingDocument));
+		toAppendTo.append("',aggregate:").append(aggregateQuery);
+		toAppendTo.append(",canCreate:").append(user.canCreateDocument(drivingDocument));
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");

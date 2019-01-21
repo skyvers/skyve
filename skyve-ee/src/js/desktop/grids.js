@@ -27,6 +27,7 @@ isc.BizGrid.addProperties({
 	clearSelectionItem: null,
 	
 	// document privileges granted - affects the tools that are enabled
+	aggregate: false,
 	canCreate: false, 
 	canUpdate: false, 
 	canDelete: false,
@@ -127,7 +128,7 @@ isc.BizListGrid.addProperties({
 	_dataSource: null,
 
 	// the toolbar
-	_toolbar:null,
+	_toolbar: null,
 	
 	// the filter builder
 	_advancedFilter: null,
@@ -968,15 +969,14 @@ isc.BizListGrid.addMethods({
 		}
         if (me._config.isRepeater) {} else {
             me.addMember(me._toolbar);
-        }
-        if (me._config.isRepeater) {} else {
         	me.addMember(me._advancedFilter);
         }
 		me.addMember(me.grid);
 		if (me._config.isTree) {} else {
 			if (me._config.isRepeater) {} else {
-				if (me.showSummary) {
-					me.addMember(me._summaryGrid);
+				me.addMember(me._summaryGrid);
+				if (! me.showSummary) {
+					me.hideMember(me._summaryGrid);
 				}
 			}
 		}
@@ -1014,7 +1014,7 @@ isc.BizListGrid.addMethods({
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me._advancedFilter.toggleButton.selected)),
+			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me._dataSource.aggregate) && (! me._advancedFilter.toggleButton.selected)),
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,
@@ -1431,6 +1431,27 @@ isc.BizListGrid.addMethods({
 		me.canCreate = me._dataSource.canCreate;
 		me.canUpdate = me._dataSource.canUpdate;
 		me.canDelete = me._dataSource.canDelete;
+		if (me._dataSource.aggregate) {
+			if (me._config.isRepeater) {} else {
+				me.hideMember(me._toolbar);
+				if (me._config.isTree) {} else {
+					me.hideMember(me._summaryGrid);
+				}
+			}
+			me.canCreate = false;
+			me.canUpdate = false;
+			me.canDelete = false;
+			me.canZoom = false;
+		}
+		else {
+			if (me._config.isRepeater) {} else {
+				me.showMember(me._toolbar);
+				if (me._config.isTree) {} else {
+					me.showMember(me._summaryGrid);
+				}
+			}
+			me.canZoom = true;
+		}
 		
 		if (menuConfig) {
 			// set the menu defaults (remember that one instance of BizListGrid is shared for list view)
@@ -1449,7 +1470,7 @@ isc.BizListGrid.addMethods({
 		}
 
 		var fields = [];
-		if (me.isRepeater) {
+		if (me.isRepeater || me._dataSource.aggregate) {
 			fields.add({name: "bizTagged", hidden: true, canHide: false});
 		}
 		else if (me.showTag) {
@@ -1498,7 +1519,7 @@ isc.BizListGrid.addMethods({
 		else {
 			fields.add({name: "bizTagged", hidden: true, canHide: false});
 		}
-		if (me.isRepeater) {
+		if (me.isRepeater || me._dataSource.aggregate) {
 			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
 		}
 		else {
@@ -1580,7 +1601,7 @@ isc.BizListGrid.addMethods({
 		me._createGrid(me._config, fields);
 		// Set if the grid can expand based on whether there are detail fields defined
 		me.grid.setCanExpandRecords(hasDetailFields);
-		if (me._config.isTree || me._config.isRepeater || (! me.showSummary)) {
+		if (me._config.isTree || me._config.isRepeater) {
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
