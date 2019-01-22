@@ -10,9 +10,21 @@
 		</vbox>
 	</hbox>
 	<vbox border="true" borderTitle="Activity">
-		<dynamicImage name="Activity" />
-	</vbox>
-	<vbox border="true" borderTitle="Jobs">
-		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
-	</vbox>
+		<dynamicImage name="Activity"/>
+	</vbox>	
+	<tabPane>
+		<tab title="Jobs">
+			<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
+		</tab>
+		<tab title="Users by Group">
+			<listGrid continueConversation="false" query="qUsersByGroup" title="Number of Users by Group"
+				showAdd="false" showEdit="false" showFilter="false" showRemove="false"
+				showSnap="false" showSummary="false" showTag="false" showZoom="false"/>		
+		</tab>
+		<tab title="Contacts by Type">
+			<listGrid continueConversation="false" query="qContactsByContactType" title="Number of Contacts by Type"
+				showAdd="false" showEdit="false" showFilter="false" showRemove="false"
+				showSnap="false" showSummary="false" showTag="false" showZoom="false"/>							
+		</tab>
+	</tabPane>
 </view>
