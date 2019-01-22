@@ -429,6 +429,25 @@
 				<column binding="mobile" sortOrder="ascending" />
 			</columns>
 		</query>
+        <query name="qContactsByContactType" documentName="Contact" aggregate="true">
+            <description>Number of Contacts by Contact Type</description>
+            <from>
+                <![CDATA[
+                    {admin.Contact} as bean group by bean.contactType
+                ]]>
+            </from>
+            <columns>
+                <column binding="contactType" sortOrder="ascending" />
+                <column displayName="Count">
+                    <name>count</name>
+                    <expression>
+                        <![CDATA[
+                            count(1)
+                        ]]>
+                    </expression>
+                </column>
+            </columns>
+        </query>	
 		<query name="qUsers" documentName="User">
 			<description>All Users</description>
 			<columns>
@@ -481,6 +500,28 @@
 				<column binding="userName" sortOrder="ascending" />
 			</columns>
 		</query>
+		<query name="qUsersByGroup" documentName="Group" aggregate="true">
+			<description>Users by Group</description>
+			<from>
+				<![CDATA[
+					{admin.User} as user
+					inner join user.groups as bean
+					group by bean.name
+				]]>
+			</from>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column displayName="Users">
+					<name>users</name>
+					<expression>
+						<![CDATA[
+							count(1)
+						]]>
+					</expression>
+				</column>
+			</columns>
+		</query>
+		
 		<query name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
