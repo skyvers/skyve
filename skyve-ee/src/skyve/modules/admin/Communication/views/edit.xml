@@ -28,7 +28,7 @@
 				</row>
 				<row>
 					<item colspan="3">
-						<textField binding="documentName" disabled="locked" />
+						<combo binding="documentName" disabled="locked" />
 					</item>
 				</row>
 			</form>
