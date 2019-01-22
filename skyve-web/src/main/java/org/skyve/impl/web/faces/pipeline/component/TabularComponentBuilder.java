@@ -1038,24 +1038,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				column.setFilterable(false);
 			}
 			
-			// Add column styling
+			// Column styling
 			StringBuilder style = new StringBuilder(64);
 			Integer pixelWidth = queryColumn.getPixelWidth();
 			if (pixelWidth == null) {
 				pixelWidth = SmartClientGenerateUtils.determineDefaultColumnWidth(attributeType);
-			}
-			if (pixelWidth != null) {
-				style.append("width:").append(pixelWidth).append("px;");
-			}
-			HorizontalAlignment alignment = queryColumn.getAlignment();
-			if (alignment == null) {
-				alignment = SmartClientGenerateUtils.determineDefaultColumnAlignment(attributeType);
-			}
-			if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
-				style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
-			}
-			if (style.length() > 0) {
-				column.setStyle(style.toString());
 			}
 
 			String value = null;
@@ -1080,6 +1067,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					String height = (pixelHeight == null) ? 
 										((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 										pixelHeight.toString();
+
+					// Adjust the table column
+					// set content columns to have a padding of 5px on the left and right as the image served takes up
+					// all of the available <td/>'s allotted space.
+					// Also, increase the columns pixel width by 10px
+					style.append("padding-left:5px;padding-right:5px;");
+					pixelWidth = Integer.valueOf(Integer.parseInt(width) + 10);
+
 					String empty = "''";
 					if (emptyThumbnailRelativeFile != null) {
 						empty = String.format("'<img src=\"resources?_n=%s'.concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_w=%s&_h=%s\"/>')",
@@ -1105,6 +1100,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				}
 			}
 			
+			// Finish the column styling
+			if (pixelWidth != null) {
+				style.append("width:").append(pixelWidth).append("px;");
+			}
+			HorizontalAlignment alignment = queryColumn.getAlignment();
+			if (alignment == null) {
+				alignment = SmartClientGenerateUtils.determineDefaultColumnAlignment(attributeType);
+			}
+			if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
+				style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
+			}
+			if (style.length() > 0) {
+				column.setStyle(style.toString());
+			}
+
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
 			column.getChildren().add(outputText);
