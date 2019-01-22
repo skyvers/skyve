@@ -12,7 +12,7 @@
 		</row>
 		<row>
 			<item>
-				<textField binding="queryName" />
+				<combo binding="queryName" />
 			</item>
 		</row>
 		<row>

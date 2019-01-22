@@ -54,9 +54,7 @@
 		<text name="attributeName" >
 			<displayName>Attribute</displayName>
 			<description>The name of the attribute to tag.</description>
-			<!--  
 			<domain>dynamic</domain>
-			 -->
 			<length>500</length>
 		</text>
 		<boolean name="fileHasHeaders">

@@ -19,6 +19,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Tag;
@@ -47,7 +48,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			Module module = customer.getModule(bean.getActionModuleName());
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
-				result.add(new DomainValue(document.getName(), document.getDescription()));
+				result.add(new DomainValue(document.getName(), document.getSingularAlias()));
 			}
 		}
 
@@ -56,7 +57,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
-				result.add(new DomainValue(document.getName(), document.getDescription()));
+				result.add(new DomainValue(document.getName(), document.getSingularAlias()));
 			}
 		}
 
@@ -64,6 +65,7 @@ public class TagBizlet extends Bizlet<Tag> {
 				&& bean.getUploadModuleName() != null && bean.getUploadDocumentName() != null) {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			Document document = module.getDocument(customer, bean.getUploadDocumentName());
+			Util.LOGGER.info("UPLOAD DOCUMENT IS " + bean.getUploadDocumentName());
 			for (Attribute attribute : document.getAllAttributes()) {
 				result.add(new DomainValue(attribute.getName(), attribute.getDisplayName()));
 			}

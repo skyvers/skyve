@@ -42,15 +42,15 @@
 						</row>
 						<row>
 							<item>
-								<textField binding="documentName">
-									<onBlurHandlers>
+								<combo binding="documentName">
+									<onChangedHandlers>
 										<rerender>
 											<properties>
 												<c:property key="update">configureOptions</c:property>
 											</properties>
 										</rerender>
-									</onBlurHandlers>
-								</textField>
+									</onChangedHandlers>
+								</combo>
 							</item>
 						</row>
 						<row>

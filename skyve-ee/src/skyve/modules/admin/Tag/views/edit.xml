@@ -131,11 +131,11 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="uploadDocumentName">
-							<onBlurHandlers>
+						<combo binding="uploadDocumentName">
+							<onChangedHandlers>
 								<rerender/>
-							</onBlurHandlers>
-						</textField>
+							</onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 				<row>
@@ -161,14 +161,11 @@
 				<column />
 				<row>
 					<item>
-						<!-- 
 						<combo binding="attributeName">
 							<onChangedHandlers>
 								<rerender />
 							</onChangedHandlers>
 						</combo>
-						 -->
-						<textField binding="attributeName"/>
 					</item>
 				</row>
 				<row>
@@ -237,11 +234,11 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="actionDocumentName">
-							<onBlurHandlers>
+						<combo binding="actionDocumentName">
+							<onChangedHandlers>
 								<rerender/>
-							</onBlurHandlers>
-						</textField>
+							</onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 			</form>
