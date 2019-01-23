@@ -162,14 +162,11 @@
 				<column />
 				<row>
 					<item>
-						<!-- 
 						<combo binding="attributeName">
 							<onChangedHandlers>
 								<rerender />
 							</onChangedHandlers>
 						</combo>
-						 -->
-						 <textField binding="attributeName"/>
 					</item>
 				</row>
 				<row>

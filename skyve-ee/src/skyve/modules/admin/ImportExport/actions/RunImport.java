@@ -27,7 +27,7 @@ import org.skyve.web.WebContext;
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
-import modules.admin.domain.ImportExport.Rollback;
+import modules.admin.domain.ImportExport.RollbackErrors;
 import modules.admin.domain.ImportExportColumn;
 
 public class RunImport implements ServerSideAction<ImportExport> {
@@ -151,7 +151,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						persistence.evictCached(b);
 
 						//commit and start a new transaction if selected
-						if(Rollback.noRollback.equals(bean.getRollback())) {
+						if(RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
 							persistence.commit(false);
 							persistence.begin();
 						}

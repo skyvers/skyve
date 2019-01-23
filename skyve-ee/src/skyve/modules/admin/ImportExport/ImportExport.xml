@@ -53,12 +53,12 @@
 			<documentName>ImportExportColumn</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<enum name="rollback">
+		<enum name="rollbackErrors">
 			<displayName>Error handling</displayName>
-			<defaultValue>rollback</defaultValue>
+			<defaultValue>rollbackErrors</defaultValue>
 			<values>
-				<value code="rollback" name="rollback" description="Rollback all if there's a problem"/>
-				<value code="noRollback" name="noRollback" description="Load and save until error or complete"/>
+				<value code="rollbackErrors" name="rollbackErrors" description="Roll-back all if there's a problem"/>
+				<value code="noRollbackErrors" name="noRollbackErrors" description="Load and save until error or complete"/>
 			</values>
 		</enum>
 		<enum name="loadType">

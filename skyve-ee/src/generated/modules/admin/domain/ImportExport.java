@@ -18,7 +18,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Import Export
  * 
  * @depend - - - Mode
- * @depend - - - Rollback
+ * @depend - - - RollbackErrors
  * @depend - - - LoadType
  * @navcomposed 1 importExportColumns 0..n ImportExportColumn
  * @stereotype "persistent"
@@ -56,7 +56,7 @@ public class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String importExportColumnsPropertyName = "importExportColumns";
 	/** @hidden */
-	public static final String rollbackPropertyName = "rollback";
+	public static final String rollbackErrorsPropertyName = "rollbackErrors";
 	/** @hidden */
 	public static final String loadTypePropertyName = "loadType";
 
@@ -141,9 +141,9 @@ public class ImportExport extends AbstractPersistentBean {
 	 * Error handling
 	 **/
 	@XmlEnum
-	public static enum Rollback implements Enumeration {
-		rollback("rollback", "Rollback all if there's a problem"),
-		noRollback("noRollback", "Load and save until error or complete");
+	public static enum RollbackErrors implements Enumeration {
+		rollbackErrors("rollbackErrors", "Roll-back all if there's a problem"),
+		noRollbackErrors("noRollbackErrors", "Load and save until error or complete");
 
 		private String code;
 		private String description;
@@ -154,7 +154,7 @@ public class ImportExport extends AbstractPersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues;
 
-		private Rollback(String code, String description) {
+		private RollbackErrors(String code, String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -175,10 +175,10 @@ public class ImportExport extends AbstractPersistentBean {
 			return domainValue;
 		}
 
-		public static Rollback fromCode(String code) {
-			Rollback result = null;
+		public static RollbackErrors fromCode(String code) {
+			RollbackErrors result = null;
 
-			for (Rollback value : values()) {
+			for (RollbackErrors value : values()) {
 				if (value.code.equals(code)) {
 					result = value;
 					break;
@@ -188,10 +188,10 @@ public class ImportExport extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static Rollback fromDescription(String description) {
-			Rollback result = null;
+		public static RollbackErrors fromDescription(String description) {
+			RollbackErrors result = null;
 
-			for (Rollback value : values()) {
+			for (RollbackErrors value : values()) {
 				if (value.description.equals(description)) {
 					result = value;
 					break;
@@ -203,9 +203,9 @@ public class ImportExport extends AbstractPersistentBean {
 
 		public static List<DomainValue> toDomainValues() {
 			if (domainValues == null) {
-				Rollback[] values = values();
+				RollbackErrors[] values = values();
 				domainValues = new ArrayList<>(values.length);
-				for (Rollback value : values) {
+				for (RollbackErrors value : values) {
 					domainValues.add(value.domainValue);
 				}
 			}
@@ -336,7 +336,7 @@ public class ImportExport extends AbstractPersistentBean {
 	/**
 	 * Error handling
 	 **/
-	private Rollback rollback = Rollback.rollback;
+	private RollbackErrors rollbackErrors = RollbackErrors.rollbackErrors;
 	/**
 	 * Loading strategy
 	 * <br/>
@@ -562,21 +562,21 @@ public class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #rollback} accessor.
+	 * {@link #rollbackErrors} accessor.
 	 * @return	The value.
 	 **/
-	public Rollback getRollback() {
-		return rollback;
+	public RollbackErrors getRollbackErrors() {
+		return rollbackErrors;
 	}
 
 	/**
-	 * {@link #rollback} mutator.
-	 * @param rollback	The new value.
+	 * {@link #rollbackErrors} mutator.
+	 * @param rollbackErrors	The new value.
 	 **/
 	@XmlElement
-	public void setRollback(Rollback rollback) {
-		preset(rollbackPropertyName, rollback);
-		this.rollback = rollback;
+	public void setRollbackErrors(RollbackErrors rollbackErrors) {
+		preset(rollbackErrorsPropertyName, rollbackErrors);
+		this.rollbackErrors = rollbackErrors;
 	}
 
 	/**

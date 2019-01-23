@@ -300,9 +300,9 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="adminImportExportColumn" />
 		</bag>
-		<property name="rollback" length="10">
+		<property name="rollbackErrors" length="16">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.ImportExport$Rollback</param>
+				<param name="enumClass">modules.admin.domain.ImportExport$RollbackErrors</param>
 			</type>
 		</property>
 		<property name="loadType" length="10">
