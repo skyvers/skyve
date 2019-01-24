@@ -29,6 +29,10 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -5786617076399299709L;
 
 	public static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+	
+	public static final String ADMIN_MODULE_NAME = "admin";
+	public static final String GENERIC_DOCUMENT_NAME = "Generic";
+	public static final String MEMO_1_PROPERTY_NAME = "memo1";
 
 	private T bean;
 	public T getBean() {
