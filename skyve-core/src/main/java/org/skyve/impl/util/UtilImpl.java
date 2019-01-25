@@ -139,6 +139,9 @@ public class UtilImpl {
 
 	// null = prod, could be dev, test, uat or another arbitrary environment
 	public static String ENVIRONMENT_IDENTIFIER = null;
+	
+	// email address for error.jsp
+	public static String SUPPORT_EMAIL_ADDRESS = null;
 
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;

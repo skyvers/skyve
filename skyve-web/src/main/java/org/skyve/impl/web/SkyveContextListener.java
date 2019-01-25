@@ -240,6 +240,7 @@ public class SkyveContextListener implements ServletContextListener {
 						"environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
 			}
 		}
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString("environment", "supportEmailAddress", environment, false);
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
