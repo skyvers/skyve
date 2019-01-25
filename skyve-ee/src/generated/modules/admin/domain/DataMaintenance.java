@@ -653,7 +653,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Data Maintenance{modDocName}",
+														"Data Maintenance",
 														this);
 		}
 		catch (Exception e) {

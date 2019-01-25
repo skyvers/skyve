@@ -179,7 +179,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Column",
+														"Column {columnName}",
 														this);
 		}
 		catch (Exception e) {

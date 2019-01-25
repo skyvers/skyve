@@ -38,7 +38,7 @@
 		<text name="phone">
 			<displayName>Phone</displayName>
 			<length>14</length>
-			<format mask="(##) #### ####" />
+			<format mask="## #### ####" />
 		</text>
 		<geometry name="boundary">
 			<displayName>Boundary</displayName>
