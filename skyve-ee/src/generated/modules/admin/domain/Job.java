@@ -98,7 +98,7 @@ public class Job extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{displayName}",
+														"Job {displayName}",
 														this);
 		}
 		catch (Exception e) {

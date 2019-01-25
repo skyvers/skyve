@@ -208,7 +208,14 @@ public class Staff extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return getContact().getName();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"contact.bizKey",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

@@ -26,7 +26,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 		accept or decline receiving communications and in what manner they are delivered.
  * 
  * @depend - - - FormatType
- * @navhas n communication 0..1 Communication
+ * @navhas n communication 1 Communication
  * @stereotype "persistent"
  */
 @XmlType

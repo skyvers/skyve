@@ -87,7 +87,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{contact.bizKey}",
+														"Contact {contact.bizKey}",
 														this);
 		}
 		catch (Exception e) {

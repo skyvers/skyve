@@ -473,7 +473,7 @@ public class Tag extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{name}",
+														"Tag {name}",
 														this);
 		}
 		catch (Exception e) {
