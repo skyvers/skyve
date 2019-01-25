@@ -11,6 +11,7 @@ import modules.test.domain.MappedBase;
 import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Mapped Extension Single Strategy
@@ -55,11 +56,11 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 	/**
 	 * Aggregated Collection
 	 **/
-	private List<MappedExtensionSingleStrategyExtension> aggregatedCollection = new ArrayList<>();
+	private List<MappedExtensionSingleStrategyExtension> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
 	/**
 	 * Composed Collection
 	 **/
-	private List<MappedExtensionSingleStrategyExtension> composedCollection = new ArrayList<>();
+	private List<MappedExtensionSingleStrategyExtension> composedCollection = new ChangeTrackingArrayList<>("composedCollection", this);
 	/**
 	 * Inverse
 	 **/

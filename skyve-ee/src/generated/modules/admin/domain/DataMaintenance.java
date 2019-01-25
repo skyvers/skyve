@@ -16,6 +16,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
@@ -521,7 +522,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * Refresh Documents
 	 **/
-	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
+	private List<DataMaintenanceModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
 	/**
 	 * Notify me on completion
 	 **/

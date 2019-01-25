@@ -14,6 +14,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
@@ -256,7 +257,7 @@ public class User extends AbstractPersistentBean {
 	 * <br/>
 	 * The collection of groups that this user belongs to.
 	 **/
-	private List<Group> groups = new ArrayList<>();
+	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
 	 * Roles
 	 * <br/>
@@ -266,7 +267,7 @@ public class User extends AbstractPersistentBean {
 			However user may also have specific roles assigned in addition to the roles
 			which are implied from the groups to which they belong.
 	 **/
-	private List<UserRole> roles = new ArrayList<>();
+	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
 	/**
 	 * Wizard State
 	 * <br/>
@@ -295,7 +296,7 @@ public class User extends AbstractPersistentBean {
 	 * <br/>
 	 * The contacts who possibly match the search criteria.
 	 **/
-	private List<UserCandidateContact> candidateContacts = new ArrayList<>();
+	private List<UserCandidateContact> candidateContacts = new ChangeTrackingArrayList<>("candidateContacts", this);
 	/**
 	 * The contact selected for this user.
 	 **/

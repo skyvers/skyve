@@ -1988,7 +1988,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		if (reference instanceof Collection) {
 			imports.add("java.util.List");
-			imports.add("java.util.ArrayList");
 
 			attributeJavadoc(reference, attributes);
 			if (deprecated) {
@@ -1999,7 +1998,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				attributes.append("transient ");
 			}
 			attributes.append("List<").append(propertyClassName).append("> ").append(name);
-			attributes.append(" = new ArrayList<>();\n");
+			if (reference.isTrackChanges()) {
+				imports.add("org.skyve.impl.domain.ChangeTrackingArrayList");
+				attributes.append(" = new ChangeTrackingArrayList<>(\"");
+				attributes.append(name).append("\", this);\n");
+			}
+			else {
+				imports.add("java.util.ArrayList");
+				attributes.append(" = new ArrayList<>();\n");
+			}
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);

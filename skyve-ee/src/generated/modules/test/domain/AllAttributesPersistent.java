@@ -21,6 +21,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.Decimal10Mapper;
@@ -192,7 +193,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * Aggregated Collection
 	 **/
-	private List<AllAttributesPersistent> aggregatedCollection = new ArrayList<>();
+	private List<AllAttributesPersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
 	/**
 	 * Colour
 	 **/

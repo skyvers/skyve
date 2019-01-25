@@ -1,6 +1,5 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Users
@@ -42,7 +42,7 @@ public class UserList extends AbstractTransientBean {
 	 * <br/>
 	 * The collection of groups that invited users are assigned.
 	 **/
-	private List<Group> userInvitationGroups = new ArrayList<>();
+	private List<Group> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
 	/**
 	 * Invitation email addresses
 	 * <br/>
