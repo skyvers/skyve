@@ -116,7 +116,9 @@
 		passwordHashingAlgorithm: "bcrypt",
 		// Absolute path on the filesystem to the source directory where modules live for creating new documents
 		// via skyve script, e.g. c:/workspace/project/src/main/java
-		moduleDirectory: null
+		moduleDirectory: null,
+		// Email address for system support
+		supportEmailAddress: "info@skyve.org"
 	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
 	bootstrap: {

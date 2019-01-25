@@ -9,7 +9,7 @@
 	<iconStyleClass>fa fa-cogs</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
-	<bizKey expression="{displayName}"/>
+	<bizKey expression="Job {displayName}"/>
 	<attributes>
 		<timestamp name="startTime">
 			<displayName>Start Time</displayName>
@@ -17,7 +17,7 @@
 		<timestamp name="endTime">
 			<displayName>End Time</displayName>
 		</timestamp>
-		<text name="displayName" >
+		<text name="displayName">
 			<displayName>Name</displayName>
 			<length>100</length>
 		</text>

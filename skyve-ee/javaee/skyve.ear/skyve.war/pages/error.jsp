@@ -49,7 +49,7 @@
 					<%=Util.i18n("page.loginError.retry", locale)%>
 					<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>" target="_top" style="color:white"><%=Util.i18n("page.error.retry.link", locale)%></a> 
 					<%=Util.i18n("page.error.alternative", locale)%> 
-					<a href="mailto:info@bizhub.com.au?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.loginError.noMessage", locale) : exception.getLocalizedMessage()%> 
+					<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.loginError.noMessage", locale) : exception.getLocalizedMessage()%> 
 					for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.loginError.notLoggedIn", locale)%> 
 					 <%=new java.util.Date()%>" style="color:white"><%=Util.i18n("page.loginError.report", locale)%></a>
 			</font> 
