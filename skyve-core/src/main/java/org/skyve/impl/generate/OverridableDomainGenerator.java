@@ -542,7 +542,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 					.replace(SRC_PATH.replaceAll("\\\\|\\/", "."), "");
 
-			System.out.println("Found factory " + className);
+			UtilImpl.LOGGER.fine("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -3183,16 +3183,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (attribute.getName().contains("_")) {
 					throw new MetaDataException(
 							String.format(
-									"Document %s.%s cannot contain attribute named %s because it contains an underscore. Try using %s instead.",
-									document.getOwningModuleName(), document.getName(), attribute.getName(),
-									attribute.getName().replaceAll("_", "-")));
+									"Document %s.%s cannot contain attribute named %s because it contains an "
+											+ "underscore. Underscores are reserved for JSON serialisation.",
+									document.getOwningModuleName(), document.getName(), attribute.getName()));
 				}
 
 				AttributeType type = attribute.getAttributeType();
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
-					System.out.println(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
+					UtilImpl.LOGGER.fine(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
 							document.getName()));
 					return;
 				}
