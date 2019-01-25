@@ -7,7 +7,7 @@
 	<singularAlias>Import Export Column</singularAlias>
 	<pluralAlias>Import Export Columns</pluralAlias>
 	<parentDocument>ImportExport</parentDocument>
-	<bizKey expression="Column"/>
+	<bizKey expression="Column {columnName}"/>
 	<attributes>
 		<text name="columnName" required="true">
 			<displayName>Column Title</displayName>

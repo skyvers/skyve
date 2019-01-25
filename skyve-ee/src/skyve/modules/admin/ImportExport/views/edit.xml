@@ -11,7 +11,7 @@
 					<item>
 						<radio binding="mode" vertical="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</radio>
 					</item>
@@ -31,7 +31,7 @@
 							<item>
 								<combo binding="moduleName">
 									<onChangedHandlers>
-										<rerender>
+										<rerender clientValidation="false">
 											<properties>
 												<c:property key="update">configureOptions</c:property>
 											</properties>
@@ -44,7 +44,7 @@
 							<item>
 								<combo binding="documentName">
 									<onChangedHandlers>
-										<rerender>
+										<rerender clientValidation="false">
 											<properties>
 												<c:property key="update">configureOptions</c:property>
 											</properties>

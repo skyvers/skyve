@@ -7,7 +7,7 @@
 	<singularAlias>Tag</singularAlias>
 	<pluralAlias>Tags</pluralAlias>
 	<iconStyleClass>fa fa-tag</iconStyleClass>
-	<bizKey expression="{name}"/>
+	<bizKey expression="Tag {name}"/>
 	<attributes>
 		<text name="name">
 			<displayName>Name</displayName>

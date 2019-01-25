@@ -17,12 +17,12 @@
 				<value code="exportData" description="Export Data"/>
 			</values>
 		</enum>
-		<text name="moduleName">
+		<text name="moduleName" required="true">
 			<displayName>Module Name</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
-		<text name="documentName" >
+		<text name="documentName" required="true">
 			<displayName>Document</displayName>
 			<domain>dynamic</domain>
 			<length>500</length>
