@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20190124</version>
+		<version>20190125-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 
