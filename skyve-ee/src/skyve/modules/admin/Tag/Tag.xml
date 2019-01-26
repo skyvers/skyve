@@ -96,10 +96,10 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
-		<boolean name="unTagSuccessful" persistent="false" trackChanges="false" audited="false">
+		<boolean name="unTagSuccessful">
 			<displayName>Untag successful documents</displayName>
 		</boolean>
-		<boolean name="notification" persistent="false" trackChanges="false" audited="false">
+		<boolean name="notification">
 			<displayName>Notify when job is complete</displayName>
 		</boolean>
 		<integer name="filterColumn">

@@ -52,6 +52,12 @@ public class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
+	@Deprecated
+	public static final String advancedModePropertyName = "advancedMode";
+	/** @hidden */
+	@Deprecated
+	public static final String columnTitlesOnlyPropertyName = "columnTitlesOnly";
+	/** @hidden */
 	public static final String fileContainsHeadersPropertyName = "fileContainsHeaders";
 	/** @hidden */
 	public static final String importExportColumnsPropertyName = "importExportColumns";
@@ -326,6 +332,16 @@ public class ImportExport extends AbstractPersistentBean {
 	 **/
 	private String results;
 	/**
+	 * Advanced Mode
+	 **/
+	@Deprecated
+	private Boolean advancedMode;
+	/**
+	 * Include Titles only
+	 **/
+	@Deprecated
+	private Boolean columnTitlesOnly;
+	/**
 	 * Column Headers
 	 **/
 	private Boolean fileContainsHeaders = new Boolean(true);
@@ -514,6 +530,46 @@ public class ImportExport extends AbstractPersistentBean {
 	@XmlElement
 	public void setResults(String results) {
 		this.results = results;
+	}
+
+	/**
+	 * {@link #advancedMode} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public Boolean getAdvancedMode() {
+		return advancedMode;
+	}
+
+	/**
+	 * {@link #advancedMode} mutator.
+	 * @param advancedMode	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setAdvancedMode(Boolean advancedMode) {
+		preset(advancedModePropertyName, advancedMode);
+		this.advancedMode = advancedMode;
+	}
+
+	/**
+	 * {@link #columnTitlesOnly} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public Boolean getColumnTitlesOnly() {
+		return columnTitlesOnly;
+	}
+
+	/**
+	 * {@link #columnTitlesOnly} mutator.
+	 * @param columnTitlesOnly	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setColumnTitlesOnly(Boolean columnTitlesOnly) {
+		preset(columnTitlesOnlyPropertyName, columnTitlesOnly);
+		this.columnTitlesOnly = columnTitlesOnly;
 	}
 
 	/**

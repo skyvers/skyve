@@ -42,6 +42,12 @@
 		<memo name="results" persistent="false" audited="false" trackChanges="false">
 			<displayName>Results</displayName>
 		</memo>
+		<boolean name="advancedMode" deprecated="true">
+			<displayName>Advanced Mode</displayName>
+		</boolean>
+		<boolean name="columnTitlesOnly" deprecated="true">
+			<displayName>Include Titles only</displayName>
+		</boolean>		
 		
 		<!-- Quick Import -->
 		<boolean name="fileContainsHeaders">

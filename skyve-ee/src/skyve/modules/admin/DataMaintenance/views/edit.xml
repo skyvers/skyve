@@ -104,7 +104,7 @@
 			</vbox>
 			<vbox border="true" borderTitle="Restore" widgetId="restore">
 				<form>
-					<column responsiveWidth="4"/>
+					<column responsiveWidth="2"/>
 					<column />
 					<row>
 						<item>
@@ -142,7 +142,10 @@
 						</item>					
 					</row>
 					<row>
-						<item colspan="2">
+						<item>
+							<spacer/>
+						</item>
+						<item>
 							<blurb>
 									<![CDATA[
 										<span style="white-space:pre-wrap"><i>{instructionHint}</i></span>

@@ -295,6 +295,8 @@
 		<property name="importFileAbsolutePath" length="500" />
 		<property name="importFileName" length="200" />
 		<property name="exportFileAbsolutePath" length="500" />
+		<property name="advancedMode" />
+		<property name="columnTitlesOnly" />
 		<property name="fileContainsHeaders" />
 		<bag name="importExportColumns" order-by="bizOrdinal" cascade="all-delete-orphan">
 			<key column="parent_id" />
@@ -453,6 +455,8 @@
 		</property>
 		<property name="actionModuleName" length="500" />
 		<property name="actionDocumentName" length="500" />
+		<property name="unTagSuccessful" />
+		<property name="notification" />
 		<property name="filterColumn" />
 		<property name="documentCondition" length="1000" />
 		<property name="documentAction" length="1000" />
