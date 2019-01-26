@@ -185,7 +185,7 @@ public class Util {
 	}
 	
 	public static String getSupportEmailAddress() {
-		return (UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS;
+		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
 	private static Boolean secureUrl = null;
