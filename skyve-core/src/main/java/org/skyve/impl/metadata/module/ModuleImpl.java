@@ -145,7 +145,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	private void processColumns(Customer customer, Document document, List<MetaDataQueryColumn> columns, boolean includeAssociationBizKeys) {
-		// NB We have to manually traverse the document inheritence hierarchy with the given customer
+		// NB We have to manually traverse the document inheritance hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
 		boolean firstColumn = true;
@@ -186,9 +186,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 					final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 					column.setEditable(false);
-					column.setDisplayName(String.format("%s BizKey", association.getDisplayName()));
+					column.setDisplayName(association.getDisplayName());
 					column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
-					column.setHidden(true);
 					if (firstColumn) {
 						column.setSortOrder(SortDirection.ascending);
 						firstColumn = false;
