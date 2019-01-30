@@ -60,9 +60,9 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -205,7 +205,13 @@ public class LocalDesignRepository extends AbstractRepository {
 		if (modulesDirectory.exists() && modulesDirectory.isDirectory()) {
 			for (File moduleDirectory : modulesDirectory.listFiles()) {
 				if (moduleDirectory.isDirectory() && (! moduleDirectory.getName().equals(SUBVERSION_DIRECTORY))) {
-					result.add(moduleDirectory.getName());
+					// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
+					for (File moduleChild : moduleDirectory.listFiles()) {
+						if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
+							result.add(moduleDirectory.getName());
+							break;
+						}
+					}
 				}
 			}
 		}

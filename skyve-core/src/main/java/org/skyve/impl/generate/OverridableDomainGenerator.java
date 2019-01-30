@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -204,6 +210,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	@Override
 	public void generate() throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
+
+		// delete generated and generatedTest directories
+		deleteGeneratedDirectories(repository.getAllVanillaModuleNames());
 
 		populateDataStructures();
 
@@ -406,24 +415,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// clear out the domain folder
 		final String packagePath = repository.MODULES_NAMESPACE + moduleName + '/' + repository.DOMAIN_NAME;
 		File domainFolder = new File(GENERATED_PATH + packagePath + '/');
-		if (domainFolder.exists()) {
-			for (File domainFile : domainFolder.listFiles()) {
-				domainFile.delete();
-			}
-		} else {
+		if (!domainFolder.exists()) {
 			domainFolder.mkdirs();
 		}
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
 		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
-
-		if (domainTestPath.exists()) {
-			for (File testFile : domainTestPath.listFiles()) {
-				testFile.delete();
-			}
-			domainTestPath.delete();
-		}
 
 		// Make a orm.hbm.xml file
 		File mappingFile = new File(GENERATED_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
@@ -3245,5 +3243,68 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"Document %s.%s cannot contain attribute named \"%s\" because it is a reserved word in database dialect %s.",
 				document.getOwningModuleName(), document.getName(), attribute.getName(),
 				DIALECT_OPTIONS.getDescription());
+	}
+
+	/**
+	 * Deletes the specified directory and all subfolders/files
+	 * 
+	 * @param directory The path to the directory to delete
+	 * @throws IOException
+	 */
+	private static void deleteDirectory(Path directory) throws IOException {
+		if (Files.exists(directory)) {
+			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+					Files.delete(path);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path subDir, IOException ioException) throws IOException {
+					Files.delete(subDir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		}
+	}
+
+	/**
+	 * Deletes the generated source domain and test directories and all files below them for all active
+	 * modules. Deletes the entire source and test generated directories for unreferenced modules. This
+	 * is to ensure a clean start for generating the domain.
+	 * 
+	 * @param moduleNames The list of all active module names
+	 * 
+	 * @throws IOException
+	 */
+	private static void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
+		// src/main/java/generated/modules
+		final Path generatedDirectory = Paths.get(GENERATED_PATH, AbstractRepository.get().MODULES_NAMESPACE);
+
+		// get all directories at this level
+		for (File child : generatedDirectory.toFile().listFiles()) {
+			if (child.isDirectory() && moduleNames.contains(child.getName())) {
+				final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(AbstractRepository.get().DOMAIN_NAME);
+				if (packagePath.toFile().exists()) {
+					for (File domainFile : packagePath.toFile().listFiles()) {
+						domainFile.delete();
+					}
+				} else {
+					packagePath.toFile().mkdirs();
+				}
+			} else {
+				System.out
+						.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
+				deleteDirectory(child.toPath());
+			}
+		}
+		
+		// delete the generated test directory
+		final Path generatedTestDirectory = Paths.get(GENERATED_TEST_PATH);
+		if (generatedTestDirectory.toFile().exists()) {
+			System.out.println(String.format("Deleting generated test directory %s", generatedTestDirectory.toString()));
+			deleteDirectory(generatedTestDirectory);
+		}
 	}
 }

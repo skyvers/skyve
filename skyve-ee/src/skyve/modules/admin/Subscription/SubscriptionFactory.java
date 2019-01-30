@@ -11,7 +11,10 @@ public class SubscriptionFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static Subscription crudInstance() throws Exception {
-		Subscription sub = new DataBuilder().build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+		Subscription sub = new DataBuilder()
+				.optional(true, false)
+				.depth(1)
+				.build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
 		sub.setFormatType(FormatType.email);
 
 		return sub;
