@@ -119,7 +119,8 @@ SKYVE = function() {
 
         toggleFilters: function(dataTableId) {
             var hiddenClass = 'hiddenFilter';
-			var dataTable = $('#' + dataTableId);
+            // test for element that ends with the dataTableId as it may be in a naming container
+            var dataTable = $('[id$="' + dataTableId + '"]');
 			if (dataTable != null) {
 				var toggleClass = function() {
                     var filter = $(this);
