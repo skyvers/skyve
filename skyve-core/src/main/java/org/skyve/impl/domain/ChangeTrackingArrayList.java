@@ -3,6 +3,7 @@ package org.skyve.impl.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -97,11 +98,14 @@ public class ChangeTrackingArrayList<E> extends ArrayList<E> {
 	}
 
 	private void preset() {
-		if (isEmpty()) {
-			owner.preset(propertyName, Collections.emptyList());
-		}
-		else {
-			owner.preset(propertyName, new ArrayList<>(this));
+		Map<String, Object> originalValues = owner.originalValues();
+		if (! originalValues.containsKey(propertyName)) {
+			if (isEmpty()) {
+				originalValues.put(propertyName, Collections.emptyList());
+			}
+			else {
+				originalValues.put(propertyName, new ArrayList<>(this));
+			}
 		}
 	}
 }
