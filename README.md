@@ -58,7 +58,7 @@ The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://g
 ### Before you start:
 Install Eclipse or an alternative Java based Integrated Development Environment.
 
-Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 13, but Wildfly 14 is not currently compatible with Skyve).
+Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 15).
 
 These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
 
