@@ -70,29 +70,18 @@
 		<param-name>primefaces.FONT_AWESOME</param-name>
 		<param-value>true</param-value>
 	</context-param>
-    <filter>
-        <filter-name>PrimeFaces FileUpload Filter</filter-name>
-        <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>PrimeFaces FileUpload Filter</filter-name>
-        <servlet-name>FacesServlet</servlet-name>
-    </filter-mapping>
-    
-    <servlet>
-	    <servlet-name>Push Servlet</servlet-name>
-	    <servlet-class>org.primefaces.push.PushServlet</servlet-class>
-        <init-param>
-            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
-            <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-	    <async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-	    <servlet-name>Push Servlet</servlet-name>
-	    <url-pattern>/primepush/*</url-pattern>
-	</servlet-mapping>
+	<context-param>
+		<param-name>org.omnifaces.SOCKET_ENDPOINT_ENABLED</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<filter>
+		<filter-name>PrimeFaces FileUpload Filter</filter-name>
+		<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>PrimeFaces FileUpload Filter</filter-name>
+		<servlet-name>FacesServlet</servlet-name>
+	</filter-mapping>
 
     <filter>
         <display-name>SkyveFacesFilter</display-name>

@@ -2,6 +2,7 @@ package org.skyve.web;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.web.Pusher.PushMessage;
 
 /**
  * 
@@ -83,13 +84,28 @@ public interface WebContext {
 	// should the state of the views (ie history) be available for server-side interrogation?
 	
 	/**
-	 * This method is used to push to all clients using atmosphere.
-	 * @param path	The path (topic) that the message is intended for
-	 * @param o	The object to push
+	 * PushMessage factory method
+	 * @return	A new push message.
 	 */
-	public void push(String path, Object o);
+	public PushMessage newPushMessage();
 	
+	/**
+	 * This method is used to push to clients.
+	 * @param message	The message to push.
+	 */
+	public void push(PushMessage message) throws Exception;
+	
+	/**
+	 * Add a message to the current view to be displayed.
+	 * @param severity
+	 * @param message
+	 */
 	public void message(MessageSeverity severity, String message);
 	
+	/**
+	 * Add a growl (toast) to the current view to be popped.
+	 * @param severity
+	 * @param message
+	 */
 	public void growl(MessageSeverity severity, String message);
 }

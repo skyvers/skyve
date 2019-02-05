@@ -24,6 +24,7 @@
 			<ui:define name="body">
 				<h:form prependId="false">
 					<p:focus />
+					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@none" update="@form" />
 					<s:listGrid module="#{skyve.bizModuleParameter}"
 									query="#{skyve.queryNameParameter}"
 									managedBean="skyve" />

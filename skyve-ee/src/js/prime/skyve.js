@@ -133,6 +133,36 @@ SKYVE = function() {
 				dataTable.find('.ui-filter-column').each(toggleClass);
 				dataTable.find('.ui-column-customfilter').each(toggleClass);
 			}
+		},
+		
+		onPushMessage: function(pushMessage) {
+			var growls = [];
+
+			for (var i = 0, l = pushMessage.length; i < l; i++) {
+				var m = pushMessage[i];
+				if (m.type == 'g') {
+					growls.push({severity: m.severity, summary: m.message});
+				}
+				else if (m.type == 'm') {
+					alert(m.message);
+				}
+				else if (m.type == 'r') {
+					pushRerender();
+				}
+				else if (m.type == 'j') {
+					window[m.method](m.argument);
+				}
+			}
+			
+			if (growls.length > 0) {
+				PrimeFaces.cw('Growl', 'pushGrowl', {
+					id: 'pushGrowl', 
+					widgetVar: 'pushGrowl',
+					life: 6000, 
+					sticky: false, 
+					msgs: growls 
+				});
+			}
 		}
 	};
 }();

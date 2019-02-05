@@ -4,6 +4,7 @@
 				xmlns:f="http://java.sun.com/jsf/core"
 				xmlns:h="http://java.sun.com/jsf/html"
 				xmlns:p="http://primefaces.org/ui" 
+				xmlns:o="http://omnifaces.org/ui"
 				template="/admin.xhtml">
 	<ui:define name="head">
 		<title>Skyve</title>
@@ -80,10 +81,13 @@
 	<ui:define name="content-begin">
 		<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 		<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-	
+
+		<o:socket id="socket" widgetVar="socket" channel="skyve" onmessage="function(message) { SKYVE.onPushMessage(message) }" />
 		<p:messages id="messages1" widgetVar="messages" globalOnly="true" escape="false">
 			<p:autoUpdate />
 		</p:messages>
+		<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+		<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 		<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 			<p:autoUpdate />
 		</p:growl>

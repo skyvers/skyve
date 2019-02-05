@@ -999,5 +999,60 @@ isc.BizUtil.addClassMethods({
 			sticky: (sticky ? sticky : false), 
 			msgs: msgs 
 		});
+	},
+	
+	onPushMessage: function(pushMessage) {
+		var growls = [];
+		var messages = [];
+		var warn = false;
+
+		for (var i = 0, l = pushMessage.length; i < l; i++) {
+			var m = pushMessage[i];
+			if (m.type == 'g') {
+				growls.add({severity: m.severity, summary: m.message});
+			}
+			else if (m.type == 'm') {
+				if (m.severity != 'info') {
+					warn = true;
+				}
+				messages.add(m.message);
+			}
+			else if (m.type == 'r') {
+				var view = isc.BizUtil.getCurrentView();
+				if (view && view.rerender) {
+					view.rerender();
+				}
+			}
+			else if (m.type == 'j') {
+				window[m.method](m.argument);
+			}
+		}
+		
+		if (growls.length > 0) {
+			isc.BizUtil.growl(growls);
+		}
+		if (messages.length > 0) {
+			var multiple = (messages.length > 1);
+			var markup = multiple ? '<ul>' : '';
+			for (var i = 0, l = messages.length; i < l; i++) {
+				var message = messages[i];
+				if (multiple) {
+					markup += '<li>';
+				}
+				markup += message;
+				if (multiple) {
+					markup += '</li>';
+				}
+			}
+			if (multiple) {
+				markup += '</ul>';
+			}
+		}
+		if (warn) {
+			isc.warn(markup);
+		}
+		else {
+			isc.say(markup);
+		}
 	}
 });

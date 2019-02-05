@@ -4,6 +4,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
+		xmlns:o="http://omnifaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -76,9 +77,12 @@
 <!--
 								<ui:insert name="breadcrumbs" />
 -->
+							<o:socket id="socket" widgetVar="socket" channel="skyve" onmessage="function(message) { SKYVE.onPushMessage(message) }" />
 							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:messages>
+							<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+							<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 							<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:growl>
