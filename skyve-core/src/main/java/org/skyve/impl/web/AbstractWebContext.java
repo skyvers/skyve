@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.WebContext;
@@ -169,17 +168,6 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 		return super.toString() + '#' + getWebId();
 	}
 	
-	/**
-	 * Injects any {@link Injected} fields after de-serialisation.
-	 * @return this
-	 * @throws Exception
-	 * @see BeanProvider#injectFields(Object)
-	 */
-	protected Object readResolve() throws Exception {
-	    BeanProvider.injectFields(this);
-	    return this;
-	}
-
 	// TODO - implement view push/pop/replace/parent refresh
 	// This class should have methods to accomplish the following
 	// push a new view - ie popup on client-side, or render on server-side stack

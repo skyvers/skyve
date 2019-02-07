@@ -5,14 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.web.Pusher;
-import org.skyve.web.Pusher.PushMessage;
 
 public final class SmartClientWebContext extends AbstractWebContext {
 	private static final long serialVersionUID = 7657798607012186366L;
@@ -25,23 +22,10 @@ public final class SmartClientWebContext extends AbstractWebContext {
 	// lazily initialized list of messages to render
 	private transient List<Map<String, String>> messages;
 	
-	@Inject
-	private transient Pusher pusher;
-	
 	public SmartClientWebContext(String key, 
 									HttpServletRequest request, 
 									HttpServletResponse response) {
 		super(key, request, response);
-	}
-	
-	@Override
-	public PushMessage newPushMessage() {
-		return pusher.newPushMessage();
-	}
-
-	@Override
-	public void push(PushMessage message) throws Exception {
-		pusher.push(message);
 	}
 	
 	@Override

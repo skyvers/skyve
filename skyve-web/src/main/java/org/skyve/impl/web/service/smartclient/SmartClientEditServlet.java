@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -110,7 +109,6 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	else {
 			            // Create and inject any dependencies
 			            webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
-			    		webContext = BeanProvider.injectFields(webContext);
 
 			    		UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();

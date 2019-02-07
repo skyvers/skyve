@@ -2,7 +2,6 @@ package org.skyve.web;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
-import org.skyve.web.Pusher.PushMessage;
 
 /**
  * 
@@ -82,18 +81,6 @@ public interface WebContext {
 	// get a view to change its binding?
 	// does an edit view needs its list view as a parent?
 	// should the state of the views (ie history) be available for server-side interrogation?
-	
-	/**
-	 * PushMessage factory method
-	 * @return	A new push message.
-	 */
-	public PushMessage newPushMessage();
-	
-	/**
-	 * This method is used to push to clients.
-	 * @param message	The message to push.
-	 */
-	public void push(PushMessage message) throws Exception;
 	
 	/**
 	 * Add a message to the current view to be displayed.

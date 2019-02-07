@@ -1,5 +1,7 @@
 package org.skyve.impl.web;
 
+import static java.lang.Boolean.TRUE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
@@ -7,10 +9,15 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import javax.faces.FacesException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.websocket.server.ServerContainer;
+import javax.websocket.server.ServerEndpointConfig;
 
+import org.omnifaces.cdi.push.Socket;
+import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.impl.content.AbstractContentManager;
@@ -22,6 +29,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.VariableExpander;
+import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
 
@@ -291,8 +299,20 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		JobScheduler.init();
 		WebUtil.initConversationsCache();
+		
+		// Start a websocket end point
+		// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
+		try {
+			ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
+			ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
+			container.addEndpoint(config);
+			// to stop the <o:socket/> from moaning that the endpoint is not configured
+			ctx.setAttribute(Socket.class.getName(), TRUE);
+		}
+		catch (Exception e) {
+			throw new FacesException(e);
+		}
 	}
-
 	
 	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
 		Object result = properties.get(key);
