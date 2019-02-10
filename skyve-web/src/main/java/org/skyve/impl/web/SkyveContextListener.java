@@ -267,33 +267,32 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 
-		if(UtilImpl.ENVIRONMENT_IDENTIFIER!=null) {
-			// ensure that the schema is created before trying to init the job scheduler
-			AbstractPersistence p = null;
-			try {
-				p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
-				p.begin();
-				if (bootstrap != null) { // we have a bootstrap stanza
-					SuperUser u = new SuperUser();
-					u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
-					u.setContactName(UtilImpl.BOOTSTRAP_USER);
-					u.setName(UtilImpl.BOOTSTRAP_USER);
-					u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
-					p.setUser(u);
-	
-					EXT.bootstrap(p);
-				}
+		// ensure that the schema is created before trying to init the job scheduler
+		AbstractPersistence p = null;
+		try {
+			p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
+			p.begin();
+			// If this is not prod and we have a bootstrap stanza
+			if ((UtilImpl.ENVIRONMENT_IDENTIFIER != null) && (bootstrap != null)) {
+				SuperUser u = new SuperUser();
+				u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
+				u.setContactName(UtilImpl.BOOTSTRAP_USER);
+				u.setName(UtilImpl.BOOTSTRAP_USER);
+				u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
+				p.setUser(u);
+
+				EXT.bootstrap(p);
 			}
-			catch (Exception e) {
-				if (p != null) {
-					p.rollback();
-				}
-				throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
+		}
+		catch (Exception e) {
+			if (p != null) {
+				p.rollback();
 			}
-			finally {
-				if (p != null) {
-					p.commit(true);
-				}
+			throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
+		}
+		finally {
+			if (p != null) {
+				p.commit(true);
 			}
 		}
 		
