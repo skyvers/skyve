@@ -70,9 +70,10 @@
 		<param-name>primefaces.FONT_AWESOME</param-name>
 		<param-value>true</param-value>
 	</context-param>
+	<!--Skyve runs its own endpoint extension so it can get hold of the WebSocket sessions -->
 	<context-param>
 		<param-name>org.omnifaces.SOCKET_ENDPOINT_ENABLED</param-name>
-		<param-value>true</param-value>
+		<param-value>false</param-value>
 	</context-param>
 	<filter>
 		<filter-name>PrimeFaces FileUpload Filter</filter-name>

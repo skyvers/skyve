@@ -16,8 +16,7 @@ public class JSON {
 	 * @param propertyNames Needed for marshalling the result of executing a Query.
 	 * @return The JSON.
 	 */
-	public static final String marshall(Customer customer, Object beanOrBeans, Set<String> propertyNames)
-	throws Exception {
+	public static final String marshall(Customer customer, Object beanOrBeans, Set<String> propertyNames) {
 		JSONWriter writer = new JSONWriter(customer);
 		return writer.write(beanOrBeans, propertyNames);
 	}

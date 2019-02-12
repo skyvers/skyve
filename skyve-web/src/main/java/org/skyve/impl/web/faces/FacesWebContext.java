@@ -7,35 +7,19 @@ import java.util.UUID;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.web.Pusher;
-import org.skyve.web.Pusher.PushMessage;
 
 public class FacesWebContext extends AbstractWebContext {
 	private static final long serialVersionUID = -1539528185277420146L;
 
-	@Inject
-	private transient Pusher pusher;
-	
 	public FacesWebContext() {
 		super(UUID.randomUUID().toString(),
 				FacesContext.getCurrentInstance().getExternalContext().getRequest(),
 				FacesContext.getCurrentInstance().getExternalContext().getResponse());
 	}
 
-	@Override
-	public PushMessage newPushMessage() {
-		return pusher.newPushMessage();
-	}
-
-	@Override
-	public void push(PushMessage message) throws Exception {
-		pusher.push(message);
-	}
-	
 	@Override
 	public void growl(MessageSeverity severity, String message) {
 		message(severity, message);

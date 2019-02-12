@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.skyve.bizport.BizPortSheet;
@@ -52,8 +54,10 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
+import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -159,6 +163,28 @@ public class EXT {
 		MailUtil.sendMail(mail);
 	}
 
+	/**
+	 * Push a message to connected client user interfaces.
+	 */
+	public static void push(PushMessage message) {
+		// Note Sessions are thread-safe
+		Set<String> userIds = message.getUserIds();
+		boolean broadcast = userIds.isEmpty();
+		for (Session session : PushMessage.SESSIONS) {
+			if (session.isOpen()) {
+				if (broadcast) {
+					session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+				}
+				else {
+					Object userId = session.getUserProperties().get("user");
+					if ((userId == null) || userIds.contains(userId)) {
+						session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Run a job once. The job disappears from the Scheduler once it is run and
 	 * a record of the run in placed in admin.Job. User must look in admin to

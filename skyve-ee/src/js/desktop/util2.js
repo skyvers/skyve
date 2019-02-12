@@ -1047,12 +1047,13 @@ isc.BizUtil.addClassMethods({
 			if (multiple) {
 				markup += '</ul>';
 			}
-		}
-		if (warn) {
-			isc.warn(markup);
-		}
-		else {
-			isc.say(markup);
+
+			if (warn) {
+				isc.warn(markup);
+			}
+			else {
+				isc.say(markup);
+			}
 		}
 	}
 });

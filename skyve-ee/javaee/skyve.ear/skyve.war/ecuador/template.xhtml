@@ -6,7 +6,6 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://primefaces.org/ecuador"
-		xmlns:o="http://omnifaces.org/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -59,12 +58,9 @@
 				</h:panelGroup>
 				
 				<div class="layout-main">
-					<o:socket id="socket" widgetVar="socket" channel="skyve" onmessage="function(message) { SKYVE.onPushMessage(message) }" />
 					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:messages>
-					<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
-					<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:growl>

@@ -95,7 +95,7 @@
 		<intercept-url pattern="/download" access="authenticated" />
 		
 		<!-- Secure the Push endpoint -->
-		<intercept-url pattern="/omnifaces.push/*" access="authenticated" />
+		<intercept-url pattern="/omnifaces.push/**" access="authenticated" />
 		
 		<!-- Do not Secure trackmate servlet - it handles authentication itself -->
 		<intercept-url pattern="/tracks" access="permitAll" />
