@@ -187,14 +187,21 @@ public class Menu extends Harness {
 	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) {
 		StringBuilder url = new StringBuilder(64);
 		if (item instanceof ListItem) {
-			ListItem gridItem = (ListItem) item;
+			ListItem listItem = (ListItem) item;
 			url.append(Util.getSkyveContextUrl());
 			url.append("/?a=").append(WebAction.l.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
-																		module,
-																		item,
-																		gridItem.getQueryName(),
-																		gridItem.getDocumentName()).getName());
+			String modelName = listItem.getModelName();
+			if (modelName != null) {
+				url.append("&d=").append(listItem.getDocumentName());
+				url.append("&q=").append(listItem.getModelName());
+			}
+			else {
+				url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
+																			module,
+																			item,
+																			listItem.getQueryName(),
+																			listItem.getDocumentName()).getName());
+			}
 		}
 		else if (item instanceof EditItem) {
 			url.append(Util.getSkyveContextUrl());

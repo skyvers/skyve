@@ -86,6 +86,16 @@ public class FacesView<T extends Bean> extends Harness {
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 
+	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel - q becomes the model name
+	private String modelName;
+
+	public String getModelName() {
+		return modelName;
+	}
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
+
 	@PostConstruct
 	protected void postConstruct() {
 		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(AbstractWebContext.UXUI);

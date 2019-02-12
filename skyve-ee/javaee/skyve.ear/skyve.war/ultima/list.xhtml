@@ -34,7 +34,9 @@
 					<div class="ui-g">
 						<div class="ui-g-12">
 							<s:listGrid module="#{skyve.bizModuleParameter}"
+											document="#{skyve.bizDocumentParameter}"
 											query="#{skyve.queryNameParameter}"
+											model="#{skyve.modelName}"
 											managedBean="skyve"
 											paginator="true"
 											update="@form" />

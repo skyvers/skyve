@@ -33,10 +33,12 @@
 						</p:messages>
 						<h:form prependId="false">
 							<s:listGrid module="#{skyve.bizModuleParameter}"
-										query="#{skyve.queryNameParameter}"
-										managedBean="skyve"
-										paginator="true"
-										componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.MobileComponentBuilderChain" />
+											document="#{skyve.bizDocumentParameter}"
+											query="#{skyve.queryNameParameter}"
+											model="#{skyve.modelName}"
+											managedBean="skyve"
+											paginator="true"
+											componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.MobileComponentBuilderChain" />
 						</h:form>
 					</pm:content>
 				</pm:page>

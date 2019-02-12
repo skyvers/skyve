@@ -30,7 +30,9 @@
 					<p:focus />
 					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@none" update="@form" />
 					<s:listGrid module="#{skyve.bizModuleParameter}"
+									document="#{skyve.bizDocumentParameter}"
 									query="#{skyve.queryNameParameter}"
+									model="#{skyve.modelName}"
 									managedBean="skyve" />
 				</h:form>
 			</ui:define>

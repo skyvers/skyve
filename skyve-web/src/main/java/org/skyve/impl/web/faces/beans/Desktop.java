@@ -103,8 +103,13 @@ public class Desktop extends Harness {
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						result.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
-						QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
-						result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+						if (bizDocument != null) {
+							result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+						}
+						else {
+							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
+							result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+						}
 					} 
 					else {
 						result.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
