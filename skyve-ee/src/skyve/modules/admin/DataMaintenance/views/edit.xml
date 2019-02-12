@@ -3,6 +3,7 @@
 	xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Import/Export">
+			<!-- Bizport not implemented for PF
 			<form border="true" borderTitle="Bizport">
 				<column />
 				<column />
@@ -29,6 +30,7 @@
 					</item>
 				</row>
 			</form>
+			 -->
 			<vbox border="true" borderTitle="Quick Import/Export">
 				<listGrid continueConversation="false" query="qImportExport"></listGrid>
 			</vbox>
