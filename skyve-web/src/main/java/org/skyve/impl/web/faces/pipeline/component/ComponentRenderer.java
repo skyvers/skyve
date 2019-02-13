@@ -521,9 +521,11 @@ public class ComponentRenderer {
 		else if (component instanceof UIOutput) {
 			UIOutput output = (UIOutput) component;
 
-			putValue(attributes, "value", output.getValue());
 			putValueExpression(attributes, "value", component);
-
+			if (! attributes.containsKey("value")) {
+				putValue(attributes, "value", output.getValue());
+			}
+			
 			if (tagName == null) { // no tag
 				out.append(indentation).append(attributes.get("value")).append('\n');
 				return;
