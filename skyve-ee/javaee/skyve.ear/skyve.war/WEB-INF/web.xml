@@ -319,6 +319,20 @@
         <filter-name>RestFilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
     </filter-mapping>
+    
+    <!-- API documentation servlet -->
+	<!-- <servlet>
+		<servlet-name>DocsServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.DocsServlet</servlet-class>
+		<init-param>
+			<param-name>docsPath</param-name>
+			<param-value>/swagger/swagger.xhtml</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DocsServlet</servlet-name>
+		<url-pattern>/docs</url-pattern>
+	</servlet-mapping> -->
 	
 	<servlet>
 		<servlet-name>H2Console</servlet-name>
