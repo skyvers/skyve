@@ -307,24 +307,24 @@ public class Desktop extends Harness {
 		// render each module menu
 		new MenuRenderer(uxui, getLocale(), chosenModuleName) {
 			@Override
-			public void renderModuleMenu(Menu menu, Module module, boolean open) {
+			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
 				result.append("{name:'");
-				result.append(module.getName());
+				result.append(menuModule.getName());
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getTitle(), getLocale())));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getTitle(), getLocale())));
 				result.append("',");
 			}
 			
 			@Override
-			public void renderMenuRoot(Menu menu, Module module) {
+			public void renderMenuRoot(Menu menu, Module menuModule) {
 				result.append("root:{name:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getName(), getLocale())));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getName(), getLocale())));
 				result.append("',sub:[");
 			}
 			
 			@Override
-			public void renderMenuGroup(MenuGroup group) {
+			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				result.append("{desc:'");
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName(), locale)));
 				result.append("', sub:[");
@@ -332,6 +332,7 @@ public class Desktop extends Harness {
 			
 			@Override
 			public void renderCalendarItem(CalendarItem item,
+											Module menuModule,
 											Module itemModule,
 											Document itemDocument,
 											String itemQueryName,
@@ -342,19 +343,28 @@ public class Desktop extends Harness {
 			}
 			
 			@Override
-			public void renderEditItem(EditItem item, Module itemModule, Document itemDocument, String icon16, String iconStyleClass) {
+			public void renderEditItem(EditItem item,
+										Module menuModule,
+										Module itemModule,
+										Document itemDocument,
+										String icon16,
+										String iconStyleClass) {
 				result.append("{name:'").append(itemDocument.getName());
 				renderItem(item.getName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
 			}
 			
 			@Override
-			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
+			public void renderLinkItem(LinkItem item,
+										Module menuModule,
+										boolean relative,
+										String absoluteHref) {
 				result.append("{name:'").append(absoluteHref);
 				renderItem(item.getName(), null, null, null, "link", null, null);
 			}
 			
 			@Override
 			public void renderListItem(ListItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -379,6 +389,7 @@ public class Desktop extends Harness {
 			
 			@Override
 			public void renderMapItem(MapItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName, 
@@ -398,6 +409,7 @@ public class Desktop extends Harness {
 			
 			@Override
 			public void renderTreeItem(TreeItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -447,19 +459,19 @@ public class Desktop extends Harness {
 			}
 			
 			@Override
-			public void renderedMenuGroup(MenuGroup group) {
+			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
 				result.setLength(result.length() - 1);
 				result.append("]},");
 			}
 			
 			@Override
-			public void renderedMenuRoot(Menu menu, Module module) {
+			public void renderedMenuRoot(Menu menu, Module menuModule) {
 				result.setLength(result.length() -1); // remove the last comma
 				result.append("]}");
 			}
 
 			@Override
-			public void renderedModuleMenu(Menu menu, Module module, boolean open) {
+			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
 				result.append(",open:").append(open).append("},");
 			}
 		}.render(getUser());

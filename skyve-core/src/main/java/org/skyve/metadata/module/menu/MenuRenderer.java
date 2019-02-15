@@ -33,20 +33,23 @@ public class MenuRenderer {
 	}
 	
 	public void renderModuleMenu(@SuppressWarnings("unused") Menu menu,
-									@SuppressWarnings("unused") Module module,
+									@SuppressWarnings("unused") Module menuModule,
 									@SuppressWarnings("unused") boolean open) {
 		// nothing to do
 	}
 	
-	public void renderMenuRoot(@SuppressWarnings("unused") Menu menu, @SuppressWarnings("unused") Module module) {
+	public void renderMenuRoot(@SuppressWarnings("unused") Menu menu,
+								@SuppressWarnings("unused") Module menuModule) {
 		// nothing to do
 	}
 	
-	public void renderMenuGroup(@SuppressWarnings("unused") MenuGroup group) {
+	public void renderMenuGroup(@SuppressWarnings("unused") MenuGroup group,
+									@SuppressWarnings("unused") Module menuModule) {
 		// nothing to do
 	}
 	
 	public void renderTreeItem(@SuppressWarnings("unused") TreeItem item,
+								@SuppressWarnings("unused") Module menuModule,
 								@SuppressWarnings("unused") Module itemModule,
 								@SuppressWarnings("unused") Document itemDocument,
 								@SuppressWarnings("unused") String itemQueryName,
@@ -56,6 +59,7 @@ public class MenuRenderer {
 	}
 	
 	public void renderListItem(@SuppressWarnings("unused") ListItem item,
+								@SuppressWarnings("unused") Module menuModule,
 								@SuppressWarnings("unused") Module itemModule,
 								@SuppressWarnings("unused") Document itemDocument,
 								@SuppressWarnings("unused") String itemQueryName,
@@ -65,6 +69,7 @@ public class MenuRenderer {
 	}
 	
 	public void renderCalendarItem(@SuppressWarnings("unused") CalendarItem item,
+									@SuppressWarnings("unused") Module menuModule,
 									@SuppressWarnings("unused") Module itemModule,
 									@SuppressWarnings("unused") Document itemDocument,
 									@SuppressWarnings("unused") String itemQueryName,
@@ -74,6 +79,7 @@ public class MenuRenderer {
 	}
 	
 	public void renderMapItem(@SuppressWarnings("unused") MapItem item,
+								@SuppressWarnings("unused") Module menuModule,
 								@SuppressWarnings("unused") Module itemModule,
 								@SuppressWarnings("unused") Document itemDocument,
 								@SuppressWarnings("unused") String itemQueryName,
@@ -83,6 +89,7 @@ public class MenuRenderer {
 	}
 	
 	public void renderEditItem(@SuppressWarnings("unused") EditItem item,
+								@SuppressWarnings("unused") Module menuModule,
 								@SuppressWarnings("unused") Module itemModule,
 								@SuppressWarnings("unused") Document itemDocument,
 								@SuppressWarnings("unused") String icon16,
@@ -91,21 +98,24 @@ public class MenuRenderer {
 	}
 	
 	public void renderLinkItem(@SuppressWarnings("unused") LinkItem item,
+								@SuppressWarnings("unused") Module menuModule,
 								@SuppressWarnings("unused") boolean relative,
 								@SuppressWarnings("unused") String absoluteHref) {
 		// nothing to do
 	}
 
-	public void renderedMenuGroup(@SuppressWarnings("unused") MenuGroup group) {
+	public void renderedMenuGroup(@SuppressWarnings("unused") MenuGroup group,
+									@SuppressWarnings("unused") Module menuModule) {
 		// nothing to do
 	}
 	
-	public void renderedMenuRoot(@SuppressWarnings("unused") Menu menu, @SuppressWarnings("unused") Module module) {
+	public void renderedMenuRoot(@SuppressWarnings("unused") Menu menu,
+									@SuppressWarnings("unused") Module menuModule) {
 		// nothing to do
 	}
 	
 	public void renderedModuleMenu(@SuppressWarnings("unused") Menu menu,
-									@SuppressWarnings("unused") Module module,
+									@SuppressWarnings("unused") Module menuModule,
 									@SuppressWarnings("unused") boolean open) {
 		// nothing to do
 	}
@@ -129,12 +139,12 @@ public class MenuRenderer {
 		final AtomicBoolean first = new AtomicBoolean(true);
 
 		// render each module menu
-		for (Module module : customer.getModules()) {
-			String moduleName = module.getName();
+		for (Module menuModule : customer.getModules()) {
+			String menuModuleName = menuModule.getName();
 
 			Menu menu = (user == null) ?
-							customer.getModule(moduleName).getMenu() :
-							((UserImpl) user).getModuleMenu(moduleName);
+							customer.getModule(menuModuleName).getMenu() :
+							((UserImpl) user).getModuleMenu(menuModuleName);
 			if ((uxui == null) || menu.isApplicable(uxui)) {
 				boolean open = false;
 				if (setFirstModuleOpen) {
@@ -142,28 +152,28 @@ public class MenuRenderer {
 					first.set(false);
 				} 
 				else {
-					open = moduleName.equals(selectedModuleName);
+					open = menuModuleName.equals(selectedModuleName);
 				}
 
-				renderModuleMenu(menu, module, open);
-				renderMenuRoot(menu, module);
-				renderMenuItems(customer, module, menu.getItems());
-				renderedMenuRoot(menu, module);
-				renderedModuleMenu(menu, module, open);
+				renderModuleMenu(menu, menuModule, open);
+				renderMenuRoot(menu, menuModule);
+				renderMenuItems(customer, menuModule, menu.getItems());
+				renderedMenuRoot(menu, menuModule);
+				renderedModuleMenu(menu, menuModule, open);
 			}
 		}
 	}
 
 	private void renderMenuItems(Customer customer,
-									Module module, 
+									Module menuModule, 
 									List<MenuItem> items) {
 		for (MenuItem item : items) {
 			if ((uxui == null) || item.isApplicable(uxui)) {
 				if (item instanceof MenuGroup) {
 					MenuGroup group = (MenuGroup) item;
-					renderMenuGroup(group);
-					renderMenuItems(customer, module, group.getItems());
-					renderedMenuGroup(group);
+					renderMenuGroup(group, menuModule);
+					renderMenuItems(customer, menuModule, group.getItems());
+					renderedMenuGroup(group, menuModule);
 				}
 				else {
 					String icon16 = null;
@@ -176,11 +186,11 @@ public class MenuRenderer {
 						String itemQueryName = treeItem.getQueryName();
 						String modelName = treeItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
 						}
 						else {
 		                    MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
+													                                menuModule,
 													                                item,
 													                                itemQueryName,
 													                                itemDocumentName);
@@ -191,7 +201,7 @@ public class MenuRenderer {
 						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
-	                    renderTreeItem(treeItem, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
+	                    renderTreeItem(treeItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 	                else if (item instanceof ListItem) {
 						ListItem listItem = (ListItem) item;
@@ -199,11 +209,11 @@ public class MenuRenderer {
 						String itemQueryName = listItem.getQueryName();
 						String modelName = listItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
 						}
 						else {
 							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
+													                                menuModule,
 													                                item,
 													                                itemQueryName,
 													                                itemDocumentName);
@@ -214,13 +224,13 @@ public class MenuRenderer {
 						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
-						renderListItem(listItem, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
+						renderListItem(listItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 					}
 					else if (item instanceof CalendarItem) {
 	                    CalendarItem calendarItem = (CalendarItem) item;
 	                    itemDocumentName = calendarItem.getDocumentName();
 						MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-												                                module,
+												                                menuModule,
 												                                item,
 												                                calendarItem.getQueryName(),
 												                                itemDocumentName);
@@ -230,7 +240,7 @@ public class MenuRenderer {
 						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
-						renderCalendarItem(calendarItem, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
+						renderCalendarItem(calendarItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 	                else if (item instanceof MapItem) {
 	                    MapItem mapItem = (MapItem) item;
@@ -238,11 +248,11 @@ public class MenuRenderer {
 						String itemQueryName = mapItem.getQueryName();
 						String modelName = mapItem.getModelName();
 						if (modelName != null) {
-							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							itemModule = customer.getModule(menuModule.getDocument(customer, itemDocumentName).getOwningModuleName());
 						}
 						else {
 							MetaDataQueryDefinition query = deriveDocumentQuery(customer,
-													                                module,
+													                                menuModule,
 													                                item,
 													                                itemQueryName,
 													                                itemDocumentName);
@@ -252,16 +262,16 @@ public class MenuRenderer {
 						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
-						renderMapItem(mapItem, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
+						renderMapItem(mapItem, menuModule, itemModule, itemDocument, itemQueryName, icon16, iconStyleClass);
 	                }
 					else if (item instanceof EditItem) {
 						EditItem editItem = (EditItem) item;
 						itemDocumentName = editItem.getDocumentName();
-						itemModule = module;
-						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						Document itemDocument = menuModule.getDocument(customer, itemDocumentName);
+						itemModule = customer.getModule(itemDocument.getOwningModuleName());
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
-						renderEditItem(editItem, itemModule, itemDocument, icon16, iconStyleClass);
+						renderEditItem(editItem, menuModule, itemModule, itemDocument, icon16, iconStyleClass);
 					}
 					else if (item instanceof LinkItem) {
 						LinkItem linkItem = (LinkItem) item;
@@ -285,7 +295,7 @@ public class MenuRenderer {
 				    		}
 						}
 
-						renderLinkItem(linkItem, relative, href);
+						renderLinkItem(linkItem, menuModule, relative, href);
 					}
 				}
 			}

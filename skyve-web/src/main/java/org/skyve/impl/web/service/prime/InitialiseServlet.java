@@ -82,27 +82,28 @@ public class InitialiseServlet extends HttpServlet {
 		json.append("[");
 		
 		new MenuRenderer(uxui, user.getLocale(), chosenModuleName) {
-			private void appendItem(MenuItem item, String iconStyleClass, Module module, String function, String ref) {
+			private void appendItem(MenuItem item, String iconStyleClass, Module itemModule, String function, String ref) {
 				json.append("{\"label\":\"").append(item.getName());
 				if (iconStyleClass != null) {
 					json.append("\",\"icon\":\"").append(iconStyleClass);
 				}
-				json.append("\",\"command\":()=>{window.location='#/").append(module.getName());
+				json.append("\",\"command\":()=>{window.location='#/").append(itemModule.getName());
 				json.append('/').append(function).append(ref).append("'}},");				
 			}
 			
 			@Override
-			public void renderModuleMenu(Menu menu, Module module, boolean open) {
-				json.append("{\"label\":\"").append(module.getTitle()).append("\",\"items\":[");
+			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
+				json.append("{\"label\":\"").append(menuModule.getTitle()).append("\",\"items\":[");
 			}
 
 			@Override
-			public void renderMenuGroup(MenuGroup group) {
+			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				json.append("{\"label\":\"").append(group.getName()).append("\",\"items\":[");
 			}
 			
 			@Override
 			public void renderCalendarItem(CalendarItem item,
+											Module menuModule,
 											Module itemModule,
 											Document itemDocument,
 											String itemQueryName,
@@ -114,6 +115,7 @@ public class InitialiseServlet extends HttpServlet {
 			
 			@Override
 			public void renderEditItem(EditItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String icon16,
@@ -122,13 +124,14 @@ public class InitialiseServlet extends HttpServlet {
 			}
 
 			@Override
-			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
+			public void renderLinkItem(LinkItem item, Module menuModule, boolean relative, String absoluteHref) {
 				json.append("{\"label\":\"").append(item.getName());
 				json.append("\",\"command\":()=>{window.location='").append(absoluteHref).append("'}},");
 			}
 			
 			@Override
 			public void renderListItem(ListItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -140,6 +143,7 @@ public class InitialiseServlet extends HttpServlet {
 			
 			@Override
 			public void renderMapItem(MapItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -151,6 +155,7 @@ public class InitialiseServlet extends HttpServlet {
 			
 			@Override
 			public void renderTreeItem(TreeItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -161,13 +166,13 @@ public class InitialiseServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderedMenuGroup(MenuGroup group) {
+			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
 				json.setLength(json.length() - 1); // remove trailing comma
 				json.append("]},");
 			}
 			
 			@Override
-			public void renderedModuleMenu(Menu menu, Module module, boolean open) {
+			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
 				json.setLength(json.length() - 1); // remove trailing comma
 				json.append("]},");
 			}

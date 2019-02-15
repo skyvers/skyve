@@ -358,7 +358,7 @@ public class FacesView<T extends Bean> extends Harness {
 	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
 												String documentName, 
 												String queryName,
-												String modelName,
+												@SuppressWarnings("hiding") String modelName,
 												List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
@@ -396,8 +396,10 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	// Note - this is also called from EL in ListGrid tag
- 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule, 
+ 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule,
+ 												final String bizDocument,
 												final String queryName,
+												@SuppressWarnings("hiding") final String modelName,
 												final List<FilterParameter> parameters) {
  		List<BeanMapAdapter<Bean>> result = null;
  		
@@ -419,7 +421,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				result = new GetBeansAction(this, bizModule, queryName, parameters).execute();
+				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -530,7 +532,9 @@ public class FacesView<T extends Bean> extends Harness {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");
+		String completeDocument = (String) attributes.get("document");
 		String completeQuery = (String) attributes.get("query");
+		String completeModel = (String) attributes.get("model");
 		String displayBinding = (String) attributes.get("display");
 
 		// Take a defensive copy of the parameters collection and add the query to the description binding
@@ -554,7 +558,7 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 		
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
-		return getBeans(completeModule, completeQuery, parameters);
+		return getBeans(completeModule, completeDocument, completeQuery, completeModel, parameters);
 	}
 
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()

@@ -73,12 +73,13 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
-		Document d = m.getDocument(c, documentName);
+		Document d = null;
 		MetaDataQueryDefinition query = null;
 		ListModel<Bean> model = null;
 
 		// model type of request
 		if (modelName != null) {
+			d = m.getDocument(c, documentName);
 			model = CORE.getRepository().getListModel(c, d, modelName, true);
 			if (model == null) {
 				throw new MetaDataException(modelName + " is not a valid ListModel");
@@ -101,6 +102,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 					throw new MetaDataException(documentName + " is not a valid document for a default query.");
 				}
 			}
+			d = m.getDocument(c, query.getDocumentName());
 	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
 	        model = queryModel;

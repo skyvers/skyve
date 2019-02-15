@@ -96,6 +96,7 @@ public class ReactRouter {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderCalendarItem(CalendarItem item,
+											Module menuModule,
 											Module itemModule,
 											Document itemDocument,
 											String itemQueryName,
@@ -110,6 +111,7 @@ public class ReactRouter {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderEditItem(EditItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String icon16,
@@ -125,6 +127,7 @@ public class ReactRouter {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderListItem(ListItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -141,14 +144,14 @@ public class ReactRouter {
 										CORE.getRepository().getListModel(c, itemDocument, modelName, false));
 				}
 				else if (item.getQueryName() != null) { // query driven
-					component.setQuery(itemModule,
+					component.setQuery(menuModule,
 										itemDocument,
-										itemModule.getMetaDataQuery(itemQueryName));
+										menuModule.getMetaDataQuery(itemQueryName));
 				}
 				else { // document driven
-					component.setQuery(itemModule,
+					component.setQuery(menuModule,
 										itemDocument,
-										itemModule.getDocumentDefaultQuery(c, itemDocument.getName()));
+										menuModule.getDocumentDefaultQuery(c, itemDocument.getName()));
 				}
 				processItem(component, null);
 			}
@@ -156,6 +159,7 @@ public class ReactRouter {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderMapItem(MapItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
@@ -170,6 +174,7 @@ public class ReactRouter {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderTreeItem(TreeItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,

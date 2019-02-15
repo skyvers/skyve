@@ -34,6 +34,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebAction;
 
@@ -435,7 +436,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 						var="row"
 						paginator="true" 
 						rows="10" 
-						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.queryNameParameter)}">
+						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.bizDocumentParameter, skyve.queryNameParameter, skyve.modelName)}">
 			<f:facet name="header">
 				<p:button href="./?a=#{WebAction.e.toString()}&amp;m=#{skyve.bizModuleParameter}&amp;d=#{skyve.bizDocumentParameter}" value="New" />
 			</f:facet>
@@ -490,16 +491,27 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											drivingDocumentName, 
 											modelName) :
     						String.format("#{%s.getLazyDataModel('%s','%s',null,'%s')}", 
-										managedBeanName, 
-										moduleName, 
-										modelDocumentName, 
-										modelName);
+											managedBeanName, 
+											moduleName, 
+											modelDocumentName, 
+											modelName);
         result.setValueExpression("value", ef.createValueExpression(elc, value, SkyveLazyDataModel.class));
 */
-        String value = String.format("#{%s.getBeans('%s','%s',null)}", 
-        								managedBeanName, 
-        								moduleName,
-        								modelName);
+		String value = null;
+		if (model instanceof DocumentQueryListModel) {
+			value = String.format("#{%s.getBeans('%s','%s', '%s', null, null)}", 
+									managedBeanName, 
+									moduleName,
+									drivingDocumentName,
+									modelName);
+		}
+		else {
+			value = String.format("#{%s.getBeans('%s','%s', null, '%s', null)}", 
+									managedBeanName, 
+									moduleName,
+									modelDocumentName,
+									modelName);
+		}
         result.setValueExpression("value", ef.createValueExpression(elc, value, List.class));
 
 		if (canCreateDocument && createRendered) {

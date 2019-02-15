@@ -744,7 +744,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	/*
 		<p:dataTable id="list"
 						var="row"
-						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.queryNameParameter)}">
+						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.bizDocumentParameter, skyve.queryNameParameter, skyve.modelName)}">
 			<f:facet name="header">
 				<p:outputPanel>
 					Contacts
