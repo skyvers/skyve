@@ -90,7 +90,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 			if (queryName != null) {
 				query = m.getMetaDataQuery(queryName);
 				if (query == null) {
-					query = m.getDocumentDefaultQuery(c, documentName);
+					if (documentName == null) { // query name is the document name
+						query = m.getDocumentDefaultQuery(c, queryName);
+					}
+					else {
+						query = m.getDocumentDefaultQuery(c, documentName);
+					}
 				}
 				if (query == null) {
 					throw new MetaDataException(queryName + " is not a valid document query.");
