@@ -822,7 +822,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																		createIdCounter,
 																		true);
 			manipulator.visit();
-			manipulator.applyJSON((String) parameters.get("bean"), persistence);
+			manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 		}
 		else {
 			mutableCustomActionName = null;

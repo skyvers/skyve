@@ -156,11 +156,13 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * For example, this occurs in combos on associations or in list memberships on collections.
 	 * If the resolve method returns null, Skyve will try to retrieve the bean from the first level cache
 	 * and then from the database.
-	 * @param bizId	The ID of the bean to resolve
+	 * @param bizId	The ID of the bean to resolve.
+	 * @param bean	The view bean.
+	 * @param webContext	The webContext can be used to get the current bean if required.
 	 * @return	The bean or null if it can't be resolved.
 	 * @throws Exception
 	 */
-	public T resolve(String bizId) throws Exception {
+	public T resolve(String bizId, Bean bean, WebContext webContext) throws Exception {
 		return null;
 	}
 	

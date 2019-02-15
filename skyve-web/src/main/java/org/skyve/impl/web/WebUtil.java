@@ -338,7 +338,9 @@ public class WebUtil {
 	// find the existing bean with retrieve
 	public static Bean findReferencedBean(Document referenceDocument, 
 											String bizId, 
-											Persistence persistence) {
+											Persistence persistence,
+											Bean bean,
+											WebContext webContext) {
 		Bean result = null;
 		
 		User user = persistence.getUser();
@@ -346,7 +348,7 @@ public class WebUtil {
 		Bizlet<Bean> bizlet = AbstractRepository.get().getBizlet(customer, referenceDocument, true);
 		if (bizlet != null) {
 			try {
-				result = bizlet.resolve(bizId);
+				result = bizlet.resolve(bizId, bean, webContext);
 			}
 			catch (ValidationException e) {
 				throw e;
