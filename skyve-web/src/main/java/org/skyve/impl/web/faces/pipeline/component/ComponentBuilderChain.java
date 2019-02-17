@@ -382,6 +382,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
@@ -392,6 +393,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
+										moduleName,
 										modelDocumentName,
 										modelName,
 										model,

@@ -10,6 +10,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,

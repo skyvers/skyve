@@ -147,6 +147,7 @@ public class ListGrid extends HtmlPanelGroup {
 		listGrid.setShowFilter(filterRendered);
 
 		return componentBuilder.listGrid(null,
+											moduleName,
 											documentName,
 											name,
 											model,

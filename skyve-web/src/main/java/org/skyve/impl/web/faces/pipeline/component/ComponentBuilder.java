@@ -183,6 +183,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															boolean inline);
 	
 	public abstract UIComponent listGrid(UIComponent component,
+											String moduleName,
 											String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model,

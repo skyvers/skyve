@@ -104,6 +104,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,

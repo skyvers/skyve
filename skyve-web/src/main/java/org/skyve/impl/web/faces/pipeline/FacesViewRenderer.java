@@ -946,6 +946,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		UIComponent l = cb.listGrid(null,
+										module.getName(),
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
 										getCurrentListWidgetModel(),

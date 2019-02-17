@@ -1000,6 +1000,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled) {
 		visitListWidget(grid);
 		UIComponent l = cb.listGrid(null,
+										module.getName(),
 										listWidgetModelDocumentName,
 										listWidgetModelName,
 										listWidgetModel,

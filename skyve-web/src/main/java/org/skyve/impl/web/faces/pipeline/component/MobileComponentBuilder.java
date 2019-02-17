@@ -450,6 +450,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	 */
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
@@ -480,7 +481,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
 
 		Document drivingDocument = model.getDrivingDocument();
-		String moduleName = drivingDocument.getOwningModuleName();
+		String owningModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 // Lazy data models don't seem to work on mobile data lists 		
 /*
@@ -515,7 +516,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
         result.setValueExpression("value", ef.createValueExpression(elc, value, List.class));
 
 		if (canCreateDocument && createRendered) {
-        	addListGridHeader(result, moduleName, drivingDocumentName, createDisabledConditionNames);
+        	addListGridHeader(result, owningModuleName, drivingDocumentName, createDisabledConditionNames);
         }
 		addListGridBoundColumns(model, result.getChildren(), zoomRendered, grid.getDisableZoomConditionName());
 		

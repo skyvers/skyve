@@ -13,6 +13,7 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,

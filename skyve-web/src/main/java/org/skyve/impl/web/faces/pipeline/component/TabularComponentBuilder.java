@@ -768,6 +768,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	*/
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
@@ -780,7 +781,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Document drivingDocument =  model.getDrivingDocument();
-		String moduleName = drivingDocument.getOwningModuleName();
+		String owningModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 
 		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
@@ -882,7 +883,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
         if ((canCreateDocument && createRendered) || zoomRendered) {
-        	final UIComponent actionColumn = createListGridActionColumn(moduleName,
+        	final UIComponent actionColumn = createListGridActionColumn(owningModuleName,
 									        								drivingDocumentName, 
 									        								canCreateDocument,
 									        								createRendered, 
