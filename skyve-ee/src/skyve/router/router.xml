@@ -55,6 +55,6 @@
 		<route outcome="/mobile/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/mobile/menu.xhtml" />
+		<route outcome="/mobile/home.xhtml" />
 	</uxui>
 </router>
