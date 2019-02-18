@@ -8,7 +8,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -77,6 +79,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @param message The message to set.
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "message", required = true)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setMessage(String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}

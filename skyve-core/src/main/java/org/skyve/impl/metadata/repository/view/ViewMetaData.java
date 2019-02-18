@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -150,6 +151,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	}
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}

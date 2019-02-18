@@ -10,7 +10,9 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -60,6 +62,7 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFrom(String from) {
 		this.from =  UtilImpl.processStringValue(from);
 	}
@@ -69,6 +72,7 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFilter(String filter) {
 		this.filter =  UtilImpl.processStringValue(filter);
 	}

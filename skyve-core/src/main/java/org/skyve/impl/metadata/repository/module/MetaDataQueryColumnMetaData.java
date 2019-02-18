@@ -3,7 +3,9 @@ package org.skyve.impl.metadata.repository.module;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -92,6 +94,7 @@ public abstract class MetaDataQueryColumnMetaData implements MetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFilterExpression(String filterExpression) {
 		this.filterExpression = UtilImpl.processStringValue(filterExpression);
 	}

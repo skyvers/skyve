@@ -6,10 +6,12 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.view.InjectBinding;
 
 /**
@@ -30,6 +32,7 @@ public class Inject implements MetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = true)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setScript(String script) {
 		this.script = UtilImpl.processStringValue(script);
 	}

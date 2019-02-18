@@ -7,8 +7,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
@@ -64,6 +66,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	}
 
 	@XmlValue
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setMarkup(String markup) {
 		this.markup = UtilImpl.processStringValue(markup);
 	}
