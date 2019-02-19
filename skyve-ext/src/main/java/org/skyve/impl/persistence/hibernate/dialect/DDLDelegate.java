@@ -29,13 +29,15 @@ import org.skyve.impl.util.UtilImpl;
 import geodb.GeoDB;
 
 public class DDLDelegate {
-	public static void migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect)
+	public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
+		List<String> result = new ArrayList<>(20);
+		
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(true);
 
 			// Ensure that a H2 database is spatially enabled
-			if (skyveDialect instanceof H2SpatialDialect) {
+			if (execute && (skyveDialect instanceof H2SpatialDialect)) {
 				GeoDB.InitGeoDB(connection);
 			}
 
@@ -68,13 +70,16 @@ public class DDLDelegate {
 			try (Statement statement = connection.createStatement()) {
 				final Database database = metadata.getDatabase();
 				for (Namespace namespace : database.getNamespaces()) {
-					for (Table table : namespace.getTables() ) {
-						if (table.isPhysicalTable() ) {
+					for (Table table : namespace.getTables()) {
+						if (table.isPhysicalTable()) {
 							final TableInformation tableInformation = databaseInformation.getTableInformation(table.getQualifiedTableName());
 							if (tableInformation != null && tableInformation.isPhysicalTable()) {
 								for (String ddl : sqlAlterTableDDL(skyveDialect, table, tableInformation, metadata)) {
 	                        		UtilImpl.LOGGER.info(ddl);
-	                        		statement.executeUpdate(ddl);
+	                        		result.add(ddl);
+	                        		if (execute) {
+	                        			statement.executeUpdate(ddl);
+	                        		}
 								}
 							}
 						}
@@ -82,7 +87,7 @@ public class DDLDelegate {
 				}
 			}
 		}
-		// return ArrayHelper.toStringArray(result);
+		return result;
 	}
 	
 	/**

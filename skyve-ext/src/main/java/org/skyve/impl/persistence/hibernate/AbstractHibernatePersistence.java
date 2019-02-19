@@ -1,12 +1,15 @@
 package org.skyve.impl.persistence.hibernate;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +39,9 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.SessionFactoryBuilder;
 import org.hibernate.boot.cfgxml.spi.LoadedConfig;
+import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.boot.spi.MetadataImplementor;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
@@ -46,9 +51,10 @@ import org.hibernate.internal.SessionImpl;
 import org.hibernate.jpa.event.spi.JpaIntegrator;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
-import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.hbm2ddl.SchemaUpdate;
+import org.hibernate.tool.schema.TargetType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.skyve.content.BeanContent;
@@ -113,6 +119,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
 	private static SessionFactory sf = null;
+	private static Metadata metadata = null;
 	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
 	
 	static {
@@ -147,6 +154,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		sf.close();
 		sf = null;
+		metadata = null;
 
 		if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
@@ -244,8 +252,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				result.add(new JpaIntegrator());
 				result.add(new Integrator() {
 					@Override
-					public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory,
-							SessionFactoryServiceRegistry serviceRegistry) {
+					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
+											SessionFactoryImplementor sessionFactory,
+											SessionFactoryServiceRegistry serviceRegistry) {
 						HibernateListener listener = new HibernateListener();
 						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
@@ -274,7 +283,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			}
 		});
 		
-		ServiceRegistry standardRegistry = ssrb.build();
+		StandardServiceRegistry standardRegistry = ssrb.build();
 		MetadataSources sources = new MetadataSources(standardRegistry);
 
 		sources.addAnnotatedClass(AbstractPersistentBean.class);
@@ -316,14 +325,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			}
 		}
 
-		Metadata metadata = sources.getMetadataBuilder().build();
+		metadata = sources.getMetadataBuilder().build();
 		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
 		
 		sf = sessionFactoryBuilder.build();
 
 		if (UtilImpl.DDL_SYNC) {
 			try {
-				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect());
+				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not apply skyve extra schema updates", e);
@@ -355,81 +364,36 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 	
 	@Override
-	public final void generateDDL(List<String> drops, List<String> creates, List<String> updates) {
-// TODO reinstate this method
-		SchemaExport export = new SchemaExport();
-/*
-		Properties properties = new Properties();
-		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
-		if (dataSource == null) {
-			properties.put("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
-			properties.put("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
-			String value = UtilImpl.DATA_STORE.getUserName();
-			if (value != null) {
-				properties.put("hibernate.connection.username", value);
+	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
+		try {
+			if (dropDDLFilePath != null) {
+				new SchemaExport().setOutputFile(dropDDLFilePath).drop(EnumSet.of(TargetType.SCRIPT), metadata);
 			}
-			value = UtilImpl.DATA_STORE.getPassword();
-			if (value != null) {
-				properties.put("hibernate.connection.password", value);
+			if (createDDLFilePath != null) {
+				new SchemaExport().setOutputFile(createDDLFilePath).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
 			}
-			properties.put("hibernate.connection.autocommit", "false");
-		}
-		else {
-			properties.put("hibernate.connection.datasource", dataSource);
-		}
-		properties.put("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
-		
-		Configuration cfg = new Configuration();
-		cfg.setProperties(properties);
-
-		AbstractRepository repository = AbstractRepository.get();
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-		StringBuilder sb = new StringBuilder(256);
-		for (String moduleName : repository.getAllVanillaModuleNames()) {
-			sb.setLength(0);
-			sb.append(repository.MODULES_NAME).append('/');
-			sb.append(moduleName).append('/');
-			sb.append(repository.DOMAIN_NAME).append('/');
-			sb.append(moduleName).append("_orm.hbm.xml");
-			cfg.addResource(sb.toString(), classLoader);
-		}
-
-		Dialect dialect = Dialect.getDialect(properties);
-
-		if (drops != null) {
-			String[] temp = cfg.generateDropSchemaScript(dialect);
-            for (String drop : temp) {
-				drops.add(drop);
-            }
-		}
-		
-		if (creates != null) {
-			String[] temp = cfg.generateSchemaCreationScript(dialect);
-            for (String create : temp) {
-				creates.add(create);
-            }
-		}
-
-		if (updates != null) {
-			DatabaseMetadata meta;
-			try (Connection connection = getConnection()) {
-				meta = new DatabaseMetadata(connection, dialect);
-	
-				String[] temp = cfg.generateSchemaUpdateScript(dialect, meta);
-	            for (String update : temp) {
-					updates.add(update);
-	            }
-				temp = generateExtraSchemaUpdates(cfg, false);
-	            for (String update : temp) {
-					updates.add(update);
-	            }
-			}
-			catch (Exception e) {
-				throw new DomainException("Could not get database metadata", e);
+			if (updateDDLFilePath != null) {
+				new SchemaUpdate().setOutputFile(updateDDLFilePath).execute(EnumSet.of(TargetType.SCRIPT), metadata);
+				try (FileWriter fw = new FileWriter(updateDDLFilePath, true)) {
+					try (BufferedWriter bw = new BufferedWriter(fw)) {
+						for (String ddl : DDLDelegate.migrate(((MetadataImplementor) metadata).getMetadataBuildingOptions().getServiceRegistry(),
+																metadata,
+																AbstractHibernatePersistence.getDialect(),
+																false)) {
+							bw.write(ddl);
+							bw.write(';');
+							bw.newLine();
+						}
+					}
+				}
 			}
 		}
-*/
+		catch (IOException e) {
+			throw new DomainException("Could not create temporary DDL file", e);
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not read temporary DDL file", e);
+		}
 	}
 
 	@Override
