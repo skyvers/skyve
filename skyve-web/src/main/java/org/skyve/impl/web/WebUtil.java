@@ -339,7 +339,7 @@ public class WebUtil {
 	public static Bean findReferencedBean(Document referenceDocument, 
 											String bizId, 
 											Persistence persistence,
-											Bean bean,
+											Bean conversationBean,
 											WebContext webContext) {
 		Bean result = null;
 		
@@ -348,7 +348,7 @@ public class WebUtil {
 		Bizlet<Bean> bizlet = AbstractRepository.get().getBizlet(customer, referenceDocument, true);
 		if (bizlet != null) {
 			try {
-				result = bizlet.resolve(bizId, bean, webContext);
+				result = bizlet.resolve(bizId, conversationBean, webContext);
 			}
 			catch (ValidationException e) {
 				throw e;
