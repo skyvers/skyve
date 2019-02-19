@@ -75,9 +75,9 @@ public class DDLDelegate {
 							final TableInformation tableInformation = databaseInformation.getTableInformation(table.getQualifiedTableName());
 							if (tableInformation != null && tableInformation.isPhysicalTable()) {
 								for (String ddl : sqlAlterTableDDL(skyveDialect, table, tableInformation, metadata)) {
-	                        		UtilImpl.LOGGER.info(ddl);
 	                        		result.add(ddl);
 	                        		if (execute) {
+		                        		UtilImpl.LOGGER.info(ddl);
 	                        			statement.executeUpdate(ddl);
 	                        		}
 								}
