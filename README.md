@@ -12,6 +12,9 @@ This repository is the Java implementation of the Skyve framework specification.
   * [Before you start](#before-you-start)
   * [Overview](#overview)
   * [Detailed Instructions](#detailed-instructions) 
+ * [Quick start](#quick-start)
+   * [Core Concepts](#core-concepts)
+   * [Simple Example](#simple-example)
  * [Skyve Maven commands](#skyve-maven-commands)
  * [Updating Skyve version](#updating-skyve-version)
  * [Configuring Spring Security](#configuring-spring-security)
@@ -55,20 +58,21 @@ The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://g
 
 ## Creating a new Skyve project
 
-### Before you start:
-Install Eclipse or an alternative Java based Integrated Development Environment.
+### Before you start
 
-Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 15).
+* Install a Java 8 JDK for your operating system.
+* Install Eclipse or an alternative Java based Integrated Development Environment.
+* Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 15).
 
 These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
 
-### Overview:
+### Overview
 1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email.
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application server security domain, create an empty database, and deploy your application.
 4. Log into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
-### Detailed Instructions:
+### Detailed Instructions
 
 #### Creating the Project
 * Go to https://foundry.skyve.org/foundry/project.xhtml
@@ -104,6 +108,126 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 * Open your preferred browser and navigate to `localhost:8080/<projectName>`.
 * Log in with the credentials specified in the `boostrap` stanza of the json settings file.
 * Once logged in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
+
+## Quick start
+
+### Core Concepts
+
+Creating applications with Skyve does involve some new concepts and does have a learning curve.Before we start building an application, it is useful to have at least a basic understanding of what an application consists of. 
+
+A Skyve Java no-code application can be created in its simplest form by specifying only metadata (in the form of XML files). All Skyve applications include an _admin_ module, and additional modules are defined for specific application functionality. A high level metadata structure follows the following pattern
+
+* `src/main/java/`
+  * modules
+    * admin
+    * newModule
+      * Document
+        * `Document.xml`
+        * `DocumentBizlet.java`
+        * actions
+          * `Action.java`
+        * views
+          * `edit.xml`
+
+#### Modules
+
+Modules define a grouping of application functionality and correspond to top-level menu items. Each module directory contains a `module.xml`, as well as sub-directories per Document.
+
+#### Documents
+
+Skyve uses the term document to indicate the business-focused nature of application objects. These can be thought of as entities, or at a simplistic level correspond to a database table (not always the case). Documents can appear as child level menu-items of the parent module, and are used to define new views within your application.
+
+#### Views
+
+Skyve will automatically generate a user interface screen (view) for each Document. View files are defined to override the generated view if customisation is required. View files are located within the _views_ directory of the parent Document.
+
+See the [Skyve Development Guide](https://github.com/skyvers/skyve-dev-guide) for much more detailed explanations of these concepts.
+
+### Simple Example
+
+In this example, we are going to walk through creating a new module and document. This assumes the [Creating a new Skyve Project](#creating-a-new-skyve-project) steps have been followed, and you have a new Skyve project in your IDE, building and deploying.
+
+**Add a new module**
+
+Our project comes with an _admin_ module which includes a lot of core system functionality, but we will add a new module to store our custom domain.
+
+Run the following maven command against your project: 
+```
+mvn skyve:addModule
+```
+When prompted for a module name, enter `todo`.
+
+You may need to refresh your IDE workspace, but you should be able to see a new todo package, and a `todo.xml`. This command also added the todo module to our customer.xml file. Inpsect `todo.xml` and see that it is pretty empty for now, so lets add a basic definition to include the document we're about to add.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="todo" name="todo" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
+    <homeRef>list</homeRef>
+    <homeDocument>ToDo</homeDocument>
+    <documents>
+        <document ref="ToDo"/>
+    </documents>
+    <roles>
+        <role name="Maintainer">
+            <description>Create, edit and delete permission within the ToDo module.</description>
+            <privileges>
+                <document name="ToDo" permission="CRUDC"/>
+            </privileges>
+        </role>
+    </roles>
+    <menu>
+        <list document="ToDo" name="All ToDos">
+            <role name="Maintainer"/>
+        </list>
+    </menu>
+</module>
+```
+
+This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu.
+
+**Add a new document**
+
+Run the following maven command against your project: 
+```
+mvn skyve:addDocument
+```
+When prompted for a module name, enter `todo`, and for a document name, enter `ToDo`.
+
+Refresh your workspace again if required, then you should see a ToDo directory under your todo package, and a `ToDo.xml`. Skyve convention is to use camel case (or lowercase) for module names, and title case for document names.
+
+If you inspect our new `ToDo.xml` you will see that it is pretty empty, so lets give it some attributes to store data in.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ToDo" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="TODO_ToDo"/>
+    <singularAlias>ToDo</singularAlias>
+    <pluralAlias>ToDos</pluralAlias>
+    <bizKey>{description}</bizKey>
+    <attributes>
+    	<text name="description" required="true">
+    		<displayName>Description</displayName>
+    		<length>200</length>
+    	</text>
+    	<boolean name="complete" required="true">
+    		<displayName>Complete</displayName>
+    		<defaultValue>false</defaultValue>
+    	</boolean>
+    </attributes>
+</document>
+```
+
+This basic document definition specifies the persistent name (database table), the business key, singular and plural aliases (for showing in list and single edit views), and the attributes which make up this document.
+
+**Generate Domain**
+
+Run the following maven command against your project: 
+```
+mvn skyve:generateDomain
+```
+This will validate all your project metadata and warn you if there are any errors. If everything is ok, it will generate application code based on the metadata, and you will see a build success message.
+
+You should now be able to start your server and deploy your application to test it. Once delployed, hopefully you can see a todo module menu, with a child menu item of All ToDos. Clicking on All ToDos, then clicking the `+` button, you should be able to create a new ToDo. This is the Skyve generated view, which contains our two Document attributes, _description_ and _complete_.
 
 ## Skyve Maven commands
 New projects created from the website come with pre-configured maven run configurations for Eclipse. These are standard maven goals using the Skyve maven plugin and can be run from the command line or another IDE. The 6 main goals are described here:
@@ -146,13 +270,13 @@ This refreshes your project’s `/deployments’ directory and creates a ‘proj
 
 ### Add Module
 ```
-mvn skyve:addModule
+mvn skyve:newModule
 ```
 This will prompt you for the new module name, then create a new module directory and module.xml with the specified name. It will also update your customer.xml with the new module. Note: the new module will not pass generate domain, some required fields will be missing (such as the default view).
 
 ### Add Document
 ```
-mvn skyve:addDocument
+mvn skyve:newDocument
 ```
 This will prompt you for a module name, and the new document name, then create the new document directory and document.xml in the correct location within your project structure. Note: the new document will not pass generate domain, some required fields will be missing.
 
