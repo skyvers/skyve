@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,11 +81,9 @@ public class BackupJob extends CancellableJob {
 
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
-		List<String> drops = new ArrayList<>();
-		List<String> creates = new ArrayList<>();
-		p.generateDDL(drops, creates, null);
-		BackupUtil.writeScript(drops, new File(backupDir, "drop.sql"));
-		BackupUtil.writeScript(creates, new File(backupDir, "create.sql"));
+		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(), 
+						new File(backupDir, "create.sql").getAbsolutePath(),
+						null);
 
 		try (FileWriter problemsTxt = new FileWriter(new File(backupDir, "problems.txt"))) {
 			try (BufferedWriter problems = new BufferedWriter(problemsTxt)) {

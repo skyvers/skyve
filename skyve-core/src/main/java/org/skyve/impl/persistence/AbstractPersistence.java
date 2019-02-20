@@ -1,6 +1,5 @@
 package org.skyve.impl.persistence;
 
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -12,7 +11,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.impl.persistence.AbstractPersistence;
 
 public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
@@ -89,7 +87,7 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	public abstract void disposeAllPersistenceInstances();
-	public abstract void generateDDL(List<String> drops, List<String> creates, List<String> updates);
+	public abstract void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath);
 
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
