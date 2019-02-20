@@ -63,18 +63,18 @@ Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may u
 These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
 
 ### Overview:
-1. Use the Project Creator to create a Skyve project download and receive the link to the file via email.
+1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email.
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application server security domain, create an empty database, and deploy your application.
-4. Log into your application at localhost:8080/<projectName> with your bootstrap credentials and begin using the no-code application.
+4. Log into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions:
 
 #### Creating the Project
 * Go to https://foundry.skyve.org/foundry/project.xhtml
 * Enter a valid email address
-* Enter project name (should be a single string like projectName)
-* Enter a customer name (should be a single string like myOrganisationName
+* Enter project name
+* Enter a customer name (should be a single string like myOrganisationName, or set it to _skyve_ if unsure)
 	* Customer is a core concept for Skyve applications to support multi-tenant SaaS applications. Because Skyve is intended and designed for multi-tenancy, data is assumed to exist within a customer (i.e. tenant) context. To understand more about the Customer concept and multi-tenant applications, see https://github.com/skyvers/skyve-dev-guide#multi-tenant--mass-customisation).
 * Choose your preferred database type (and dialect) 
 	* H2 is a file based database perfect for quick prototyping or getting started if you're not sure
@@ -85,52 +85,76 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 #### Import the project
 * After a few seconds, an email will be sent to the nominated email address with a link to download the project artefacts as a single zip file. Click the link to download the file.
 * Once the file has downloaded, unzip the contents to your development workspace location.
-* In Eclipse, choose File -> Import and choose Existing Maven Projects and follow the wizard selecting the directory you unzipped from the email.
-* To build your project and prepare it to run, from the Run menu choose Run Configurations. Under Maven Build, choose the /Generate Domain/ run configuration for your project name. For your project to run, Skyve must generate required domain classes and Maven will ensure that all related open-source components are included.
+* In Eclipse, choose File -> Import and choose _Existing Maven Projects_ and follow the wizard selecting the directory you unzipped from the email.
+* To build your project and prepare it to run, from the Run menu choose Run Configurations. Under Maven Build, choose the _Generate Domain_ run configuration for your project name. For your project to run, Skyve must generate required domain classes and maven will ensure that all related open-source components are included.
 * Once domain generation is completed, your application is ready to deploy.
 
 #### Configure the application server and database
 * To configure Wildfly to deploy your application:
 	* Copy the contents of the deployments folder to `wildfly/standalone/deployments/`
-		* The deployments folder contains a data source file (projectName-ds.xml) and a json instance settings file (projectName.json).
+		* The project root contains a data source file (projectName-ds.xml) and a json instance settings file (projectName.json).
 		* The datasource file declares the data source connection name to the nominated database engine. The JDBC connection string and associated credentials settings must be valid for the selected database engine. Skyve will create all required tables, so an empty database is required. For an H2 database, this will specify the path to the database file's location.
 		* The json settings file contains the settings specific to the application instance and includes credentials for a boostrap user to get your started.
-		* You may need to configure the content directory path within your JSON to be a valid directory on your filesystem. This is where an uploaded files will be stored and indexed by Elastic Search.
+		* You will need to configure the `content: { directory:` path within your JSON to be a valid directory on your filesystem. This is where any uploaded files will be stored and indexed by Elastic Search.
 	* If you selected a database engine other than H2, you'll need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you'll need to modify the projectName-ds.xml file in the deployments folder accordingly.
 		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
 #### Log in
 * Open your preferred browser and navigate to `localhost:8080/<projectName>`.
-* Log in with the credentials specified in the boostrap stanza of the json settings file.
+* Log in with the credentials specified in the `boostrap` stanza of the json settings file.
 * Once logged in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
 
 ## Skyve Maven commands
 New projects created from the website come with pre-configured maven run configurations for Eclipse. These are standard maven goals using the Skyve maven plugin and can be run from the command line or another IDE. The 6 main goals are described here:
 
-#### Generate Domain
-`mvn skyve:generateDomain`
+### Generate Domain
+```
+mvn skyve:generateDomain
+```
 Generate domain validates and compiles the metadata (XML files) in your project and checks that the application domain is in a valid state. Errors for the developer to fix are written to your console, and if generate is successful, the domain will be compiled to produce Java domain files and unit tests.
 
-#### Generate Edit View
-`mvn skyve:generateEditView`
+### Generate Edit View
+```
+mvn skyve:generateEditView
+```
 Generate edit view requires to additional parameters, a `module` and `document` key value pair. If no edit.xml is specified for a document, Skyve will create a scaffolded view automatically using the attributes specified in the document. When customising a view, it is useful to start from the scaffolded view and extend it, this command will write a `generatedEdit.xml` file to the package specified by the module and document parameters.
 
-#### Generate Default Queries
-`mvn skyve:generateDefaultQueries`
+### Generate Default Queries
+```
+mvn skyve:generateDefaultQueries
+```
 Similar to having a scaffolded edit view for new documents, when documents are shown in a list from a menu or in a lookupDescription, the /default query/ will be used which defines which columns are shown. This maven command can write out all the default queries to a file in the project root so any queries can be tweaked and included in your module.xml.
 
-#### Skyve Script
-`mvn skyve:script`
+### Skyve Script
+```
+mvn skyve:script
+```
 This will look for a file called `skyve.md` inside a script directory in your project root. Any modules and documents found inside this file will be generated and added to your project. For more user feedback, this can also be performed via the UI from admin -> Document Creator.
 
-#### Update Resources
-`mvn clean compile war:exploded`
+### Update Resources
+```
+mvn clean compile war:exploded
+```
 Depending on how you configure your Wildfly, if you are not publishing changes during development into `wildfly/standalone/deployments`, you can use this maven command to update your local `/deployments/` directory with the compiled project. Your Wildfly deployment scanner can then be set to watch this location.
 
-#### Local Deploy
-`man compile war:exploded skyve:touch`
+### Local Deploy
+```
+mvn compile war:exploded skyve:touch
+```
 This refreshes your project’s `/deployments’ directory and creates a ‘projectName.dodeploy’ file telling Wildfly to restart the module. This is used when there are any Java or module changes which are cannot be hot-reloaded.
+
+### Add Module
+```
+mvn skyve:addModule
+```
+This will prompt you for the new module name, then create a new module directory and module.xml with the specified name. It will also update your customer.xml with the new module. Note: the new module will not pass generate domain, some required fields will be missing (such as the default view).
+
+### Add Document
+```
+mvn skyve:addDocument
+```
+This will prompt you for a module name, and the new document name, then create the new document directory and document.xml in the correct location within your project structure. Note: the new document will not pass generate domain, some required fields will be missing.
 
 ## Updating Skyve version
 To update your project with a specific Skyve version, you'll need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved. Releases are tagged, so it is typically safest to checkout the last tagged commit.
@@ -141,7 +165,7 @@ To update your project with a specific Skyve version, you'll need to pull/check-
 These instructions apply to projects created using the [Creating a new Skyve Project](#creating-a-new-skyve-project) process above. If you created your project manually, these steps may differ.
 
 - If using Eclipse, create a new Run Configuration target, setting the base directory to your project's workspace, and setting the goal to `skyve:assemble`. Once setup in your pom this can also be run from the command line with `mvn skyve:assemble`.
-- In your project's `pom.xml`, update the skyve.version property to match the version of Skyve you pulled/checked out
+- In your project's `pom.xml`, update the `skyve.version` property to match the version of Skyve you pulled/checked out
     - Find the Skyve plugin (search for artifactId `skyve-maven-plugin`) and configure the `<skyveDir></skyveDir>` setting with a relative or absolute path to the Skyve project local drive location (where you pulled to)
     - Set your `<customer></customer>` to match the customer in your project
     - Save your `pom.xml`
