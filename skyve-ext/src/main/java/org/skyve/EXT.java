@@ -687,7 +687,6 @@ public class EXT {
 	 * @throws Exception
 	 */
 	public static void bootstrap(Persistence p) throws Exception {
-			
 		User u = p.getUser();
 		Customer c = u.getCustomer();
 		Module adminMod = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
@@ -698,10 +697,10 @@ public class EXT {
 		q.getFilter().addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
 		PersistentBean user = q.beanResult();
 		if (user == null) {
-			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s/%s",
-					UtilImpl.BOOTSTRAP_CUSTOMER,
-					UtilImpl.BOOTSTRAP_USER,
-					UtilImpl.BOOTSTRAP_PASSWORD));
+			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s (%s)",
+												UtilImpl.BOOTSTRAP_CUSTOMER,
+												UtilImpl.BOOTSTRAP_USER,
+												UtilImpl.BOOTSTRAP_EMAIL));
 
 			// Create user
 			user = userDoc.newInstance(u);
@@ -714,7 +713,7 @@ public class EXT {
 			Bean contact = contactDoc.newInstance(u);
 			BindUtil.set(contact, SQLMetaDataUtil.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
 			BindUtil.convertAndSet(contact, SQLMetaDataUtil.CONTACT_TYPE_PROPERTY_NAME, "Person");
-			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER + "@skyve.org");
+			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_EMAIL);
 
 			BindUtil.set(user, SQLMetaDataUtil.CONTACT_PROPERTY_NAME, contact);
 
@@ -733,10 +732,11 @@ public class EXT {
 
 			// Save the bootstrap user
 			p.save(user);
-		} else {
+		}
+		else {
 			UtilImpl.LOGGER.info(String.format("BOOTSTRAP USER %s/%s ALREADY EXISTS",
-					UtilImpl.BOOTSTRAP_CUSTOMER,
-					UtilImpl.BOOTSTRAP_USER));
+												UtilImpl.BOOTSTRAP_CUSTOMER,
+												UtilImpl.BOOTSTRAP_USER));
 		}
 	}	
 }

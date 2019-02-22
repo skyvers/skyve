@@ -124,6 +124,7 @@
 	bootstrap: {
 		customer: "demo",
 		user: "admin",
+		email: "admin@skyve.org",
 		password: "admin"
 	}
 }

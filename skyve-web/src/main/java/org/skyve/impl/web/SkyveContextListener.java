@@ -262,6 +262,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (bootstrap != null) {
 			UtilImpl.BOOTSTRAP_CUSTOMER = getString("bootstrap", "customer", bootstrap, true);
 			UtilImpl.BOOTSTRAP_USER = getString("bootstrap", "user", bootstrap, true);
+			UtilImpl.BOOTSTRAP_EMAIL = getString("bootstrap", "email", bootstrap, true);
 			UtilImpl.BOOTSTRAP_PASSWORD = getString("bootstrap", "password", bootstrap, true);
 		}
 		
