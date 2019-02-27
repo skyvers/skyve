@@ -320,7 +320,7 @@ public class SmartClientListServlet extends HttpServlet {
 					
 					// serialize and cache conversation, if applicable
 			    	if (webContext != null) {
-			    		WebUtil.putConversationInCache(webContext);
+			    		WebUtil.cacheConversation(webContext);
 			    	}
 				}
 				catch (InvocationTargetException e) {

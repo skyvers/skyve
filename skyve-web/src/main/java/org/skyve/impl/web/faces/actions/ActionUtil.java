@@ -71,7 +71,7 @@ public class ActionUtil {
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
-		WebUtil.putConversationInCache(webContext);
+		WebUtil.cacheConversation(webContext);
 		
 		// Put the view in the session
 		facesView.dehydrate();

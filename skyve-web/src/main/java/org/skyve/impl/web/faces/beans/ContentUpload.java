@@ -116,7 +116,7 @@ public class ContentUpload extends Localisable {
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
-			WebUtil.putConversationInCache(webContext);
+			WebUtil.cacheConversation(webContext);
 			
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);

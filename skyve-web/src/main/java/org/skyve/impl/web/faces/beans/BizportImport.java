@@ -179,7 +179,7 @@ public class BizportImport extends Localisable {
 			}
 
 			// only put conversation in cache if we have been successful in executing
-			WebUtil.putConversationInCache(webContext);
+			WebUtil.cacheConversation(webContext);
 
 			
 			if (exception.hasProblems()) {

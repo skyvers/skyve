@@ -95,4 +95,18 @@ public interface WebContext {
 	 * @param message
 	 */
 	public void growl(MessageSeverity severity, String message);
+	
+	/**
+	 * Put this conversation into the conversation cache.
+	 * @throws Exception
+	 */
+	public void cacheConversation() throws Exception;
+	
+	/**
+	 * Kick off a new background task backed by this conversation.
+	 * @param taskClass	The class of the task to execute.
+	 * @param bean	The bean to use within the task.
+	 * @throws Exception
+	 */
+	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass, T bean) throws Exception;
 }

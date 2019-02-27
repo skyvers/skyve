@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.domain.messages.MessageSeverity;
-import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ViewWebContext;
 
-public final class SmartClientWebContext extends AbstractWebContext {
+public final class SmartClientWebContext extends ViewWebContext {
 	private static final long serialVersionUID = 7657798607012186366L;
 
 	public static final String EDIT_ID_COUNTER = "_ecnt";

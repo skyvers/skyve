@@ -191,7 +191,7 @@ public class FileUpload extends Localisable {
 			}
 			
 			// only put conversation in cache if we have been successful in executing
-			WebUtil.putConversationInCache(webContext);
+			WebUtil.cacheConversation(webContext);
 			
 			if (exception.hasProblems()) {
 				for (Problem error : exception.getErrors()) {

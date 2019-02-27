@@ -71,9 +71,10 @@ public class WebUtil {
 		CacheManager.getInstance().shutdown();
 	}
 	
-	public static void putConversationInCache(AbstractWebContext webContext)
+	public static void cacheConversation(AbstractWebContext webContext)
 	throws Exception {
 		if (webContext != null) {
+			// Note that EHCache puts are thread-safe
 			getConversations().put(new Element(webContext.getKey(), SerializationHelper.serialize(webContext)));
 		}
 	}

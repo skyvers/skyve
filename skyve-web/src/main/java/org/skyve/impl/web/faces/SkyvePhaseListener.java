@@ -153,7 +153,7 @@ public class SkyvePhaseListener implements PhaseListener {
 					Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
 					if ((maximumSeverity == null) || 
 							(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
-						WebUtil.putConversationInCache(webContext);
+						WebUtil.cacheConversation(webContext);
 					}
 					view.dehydrate();
 				}

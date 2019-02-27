@@ -1,6 +1,21 @@
 package org.skyve.job;
 
-import org.quartz.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.quartz.CronTrigger;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.ObjectAlreadyExistsException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
+import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
@@ -15,18 +30,14 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import org.skyve.web.BackgroundTask;
 
 public class JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
@@ -161,6 +172,33 @@ public class JobScheduler {
 			trigger.setJobName(job.getName());
 	
 			scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
+		}
+	}
+	
+	/**
+	 * Run a Background task.
+	 * 
+	 * @param taskClass	The job to run
+	 * @param bean	The bean to operate on in the task
+	 * @param user	The current user
+	 * @param webId	The webId of the conversation to get from the cache
+	 * @throws Exception
+	 */
+	public static <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, T bean, User user, String webId)
+	throws Exception {
+		if (UtilImpl.JOB_SCHEDULER) {
+			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+			trigger.setVolatility(true);
+			JobDataMap map = trigger.getJobDataMap();
+			map.put(Bean.DOCUMENT_ID, bean.getBizId());
+			map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+			map.put(AbstractWebContext.CONTEXT_NAME, webId);
+			
+			JobDetail jd = new JobDetail(UUID.randomUUID().toString(), taskClass);
+			jd.setVolatility(true);
+			jd.setDurability(false);
+			
+			JOB_SCHEDULER.scheduleJob(jd, trigger);
 		}
 	}
 	

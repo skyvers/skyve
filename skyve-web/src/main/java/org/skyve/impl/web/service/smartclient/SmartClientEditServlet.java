@@ -672,7 +672,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.putConversationInCache(webContext);
+			WebUtil.cacheConversation(webContext);
 		}
     }
     
@@ -981,7 +981,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.putConversationInCache(webContext);
+			WebUtil.cacheConversation(webContext);
 		}
 	}
 	
@@ -1047,7 +1047,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		persistence.delete(processDocument, persistentBeanToDelete);
 
-		WebUtil.putConversationInCache(webContext);
+		WebUtil.cacheConversation(webContext);
 
 		pw.append("{\"response\":{\"status\":0}}");
 	}

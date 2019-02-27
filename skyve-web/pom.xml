@@ -53,11 +53,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
     		<groupId>org.jboss.weld.se</groupId>
     		<artifactId>weld-se</artifactId>
     		<scope>compile</scope>

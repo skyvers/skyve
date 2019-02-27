@@ -116,7 +116,7 @@ public class DownloadServlet extends HttpServlet {
 			            
 						// lastly put the conversation in the cache, after the response is sent
 						// and all lazy loading of domain objects has been realised
-						WebUtil.putConversationInCache(webContext);
+						WebUtil.cacheConversation(webContext);
 					}
 					catch (InvocationTargetException e) {
 						throw e.getTargetException();
