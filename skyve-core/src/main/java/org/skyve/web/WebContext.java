@@ -105,8 +105,14 @@ public interface WebContext {
 	/**
 	 * Kick off a new background task backed by this conversation.
 	 * @param taskClass	The class of the task to execute.
-	 * @param bean	The bean to use within the task.
 	 * @throws Exception
 	 */
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass, T bean) throws Exception;
+	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	
+	/**
+	 * Kick off a new background task backed by this conversation without caching the conversation first.
+	 * @param taskClass	The class of the task to execute.
+	 * @throws Exception
+	 */
+	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
 }

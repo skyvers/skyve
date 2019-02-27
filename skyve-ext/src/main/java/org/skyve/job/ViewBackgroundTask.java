@@ -31,14 +31,6 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	public final T getBean() {
 		return bean;
 	}
-
-	/**
-	 * Set the bean for the task.
-	 */
-	@Override
-	public final void setBean(T bean) {
-		this.bean = bean;
-	}
 	
 	/**
 	 * Place the conversation backing this task into the conversation cache.
@@ -65,13 +57,12 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 		try {
 			JobDataMap map = context.getMergedJobDataMap();
 			String webId = map.getString(AbstractWebContext.CONTEXT_NAME);
-			String bizId = map.getString(Bean.DOCUMENT_ID);
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
         	webContext = ConversationUtil.getCachedConversation(webId, null, null);
 			@SuppressWarnings("unchecked")
-			T t = (T) webContext.getBean(bizId);
+			T t = (T) webContext.getCurrentBean();
 			bean = t;
-
+        	
 			persistence = webContext.getConversation();
             persistence.setForThread();
 			persistence.begin();

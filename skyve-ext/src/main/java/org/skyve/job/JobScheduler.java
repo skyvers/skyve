@@ -179,18 +179,16 @@ public class JobScheduler {
 	 * Run a Background task.
 	 * 
 	 * @param taskClass	The job to run
-	 * @param bean	The bean to operate on in the task
 	 * @param user	The current user
 	 * @param webId	The webId of the conversation to get from the cache
 	 * @throws Exception
 	 */
-	public static <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, T bean, User user, String webId)
+	public static <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId)
 	throws Exception {
 		if (UtilImpl.JOB_SCHEDULER) {
 			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
 			trigger.setVolatility(true);
 			JobDataMap map = trigger.getJobDataMap();
-			map.put(Bean.DOCUMENT_ID, bean.getBizId());
 			map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
 			map.put(AbstractWebContext.CONTEXT_NAME, webId);
 			

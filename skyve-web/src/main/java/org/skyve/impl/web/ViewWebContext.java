@@ -5,7 +5,7 @@ import org.skyve.job.JobScheduler;
 import org.skyve.web.BackgroundTask;
 
 /**
- * Implements the cacheConversation() and background() methods.
+ * Implements the cacheConversation(), background() & backgroundWithoutCachingConversation() methods.
  * @author mike
  */
 public abstract class ViewWebContext extends AbstractWebContext {
@@ -21,7 +21,13 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	}
 	
 	@Override
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass, T bean) throws Exception {
-		JobScheduler.runBackgroundTask(taskClass, bean, getConversation().getUser(), getWebId());
+	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception {
+		cacheConversation();
+		JobScheduler.runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+	}
+
+	@Override
+	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) throws Exception {
+		JobScheduler.runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
 	}
 }

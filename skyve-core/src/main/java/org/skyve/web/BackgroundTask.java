@@ -15,11 +15,6 @@ public interface BackgroundTask<T extends Bean> {
 	T getBean();
 
 	/**
-	 * Set the bean for the task.
-	 */
-	void setBean(T bean);
-
-	/**
 	 * Place the conversation backing this task into the conversation cache.
 	 */
 	void cacheConversation() throws Exception;
