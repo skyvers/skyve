@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 
@@ -103,9 +104,9 @@ public class SkyvePhaseListener implements PhaseListener {
 	private static void restore(FacesView<?> view, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = WebUtil.getCachedConversation(view.getDehydratedWebId(),
-																		(HttpServletRequest) ec.getRequest(),
-																		(HttpServletResponse) ec.getResponse());
+		AbstractWebContext webContext = ConversationUtil.getCachedConversation(view.getDehydratedWebId(),
+																				(HttpServletRequest) ec.getRequest(),
+																				(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
@@ -118,9 +119,9 @@ public class SkyvePhaseListener implements PhaseListener {
 	private static void restore(String webId, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = WebUtil.getCachedConversation(webId,
-																		(HttpServletRequest) ec.getRequest(),
-																		(HttpServletResponse) ec.getResponse());
+		AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId,
+																				(HttpServletRequest) ec.getRequest(),
+																				(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
@@ -153,7 +154,7 @@ public class SkyvePhaseListener implements PhaseListener {
 					Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
 					if ((maximumSeverity == null) || 
 							(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
-						WebUtil.cacheConversation(webContext);
+						ConversationUtil.cacheConversation(webContext);
 					}
 					view.dehydrate();
 				}
@@ -167,7 +168,7 @@ public class SkyvePhaseListener implements PhaseListener {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) WebUtil.logConversationsStats();
+			if (UtilImpl.FACES_TRACE) ConversationUtil.logConversationsStats();
 		}
 	}
 }

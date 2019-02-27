@@ -17,7 +17,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 
 	@Override
 	public void cacheConversation() throws Exception {
-		WebUtil.cacheConversation(this);
+		ConversationUtil.cacheConversation(this);
 	}
 	
 	@Override

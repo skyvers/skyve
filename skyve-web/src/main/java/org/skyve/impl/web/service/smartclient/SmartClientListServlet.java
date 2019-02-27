@@ -37,6 +37,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.web.SortParameter;
 import org.skyve.impl.web.WebUtil;
@@ -113,7 +114,7 @@ public class SmartClientListServlet extends HttpServlet {
 				try {
 					// use the view's conversation if it was sent down from the client
 					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-					AbstractWebContext webContext = WebUtil.getCachedConversation(webId, request, response);
+					AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId, request, response);
 					Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
@@ -320,7 +321,7 @@ public class SmartClientListServlet extends HttpServlet {
 					
 					// serialize and cache conversation, if applicable
 			    	if (webContext != null) {
-			    		WebUtil.cacheConversation(webContext);
+			    		ConversationUtil.cacheConversation(webContext);
 			    	}
 				}
 				catch (InvocationTargetException e) {

@@ -301,7 +301,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		JobScheduler.init();
-		WebUtil.initConversationsCache();
+		ConversationUtil.initConversationsCache();
 		
 		// Start a websocket end point
 		// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
@@ -350,7 +350,7 @@ public class SkyveContextListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
-		WebUtil.destroyConversationsCache();
+		ConversationUtil.destroyConversationsCache();
 		
 		@SuppressWarnings("resource")
 		AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();

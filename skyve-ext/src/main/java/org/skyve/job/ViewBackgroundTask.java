@@ -8,7 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.WebUtil;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
@@ -45,7 +45,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	 */
 	@Override
 	public final void cacheConversation() throws Exception {
-		WebUtil.cacheConversation(webContext);
+		ConversationUtil.cacheConversation(webContext);
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			String webId = map.getString(AbstractWebContext.CONTEXT_NAME);
 			String bizId = map.getString(Bean.DOCUMENT_ID);
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
-        	webContext = WebUtil.getCachedConversation(webId, null, null);
+        	webContext = ConversationUtil.getCachedConversation(webId, null, null);
 			@SuppressWarnings("unchecked")
 			T t = (T) webContext.getBean(bizId);
 			bean = t;

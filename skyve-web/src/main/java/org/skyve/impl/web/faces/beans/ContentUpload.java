@@ -19,7 +19,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.WebUtil;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.persistence.Persistence;
 
@@ -94,7 +94,7 @@ public class ContentUpload extends Localisable {
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -116,7 +116,7 @@ public class ContentUpload extends Localisable {
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
-			WebUtil.cacheConversation(webContext);
+			ConversationUtil.cacheConversation(webContext);
 			
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);

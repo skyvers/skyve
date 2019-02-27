@@ -39,6 +39,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgentType;
@@ -101,7 +102,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					AbstractWebContext webContext = null;
 			        String key = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 			        if (key != null) {
-			        	webContext = WebUtil.getCachedConversation(key, request, response);
+			        	webContext = ConversationUtil.getCachedConversation(key, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();
@@ -672,7 +673,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.cacheConversation(webContext);
+			ConversationUtil.cacheConversation(webContext);
 		}
     }
     
@@ -981,7 +982,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.cacheConversation(webContext);
+			ConversationUtil.cacheConversation(webContext);
 		}
 	}
 	
@@ -1047,7 +1048,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		persistence.delete(processDocument, persistentBeanToDelete);
 
-		WebUtil.cacheConversation(webContext);
+		ConversationUtil.cacheConversation(webContext);
 
 		pw.append("{\"response\":{\"status\":0}}");
 	}

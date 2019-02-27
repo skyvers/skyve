@@ -6,7 +6,7 @@ import javax.faces.context.FacesContext;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.WebUtil;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
@@ -71,7 +71,7 @@ public class ActionUtil {
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
-		WebUtil.cacheConversation(webContext);
+		ConversationUtil.cacheConversation(webContext);
 		
 		// Put the view in the session
 		facesView.dehydrate();

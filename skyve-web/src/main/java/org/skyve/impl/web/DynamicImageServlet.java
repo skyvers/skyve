@@ -81,7 +81,7 @@ public class DynamicImageServlet extends HttpServlet {
 				}
 		        
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-	        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 				Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 				AbstractPersistence.get().setUser(user);

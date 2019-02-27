@@ -15,6 +15,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -137,7 +138,7 @@ public class MapServlet extends HttpServlet {
 	throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-    	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+    	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
@@ -153,7 +154,7 @@ public class MapServlet extends HttpServlet {
 	throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-    	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+    	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
