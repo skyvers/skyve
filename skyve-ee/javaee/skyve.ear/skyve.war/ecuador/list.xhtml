@@ -32,7 +32,7 @@
 				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 				<h:form prependId="false">
 					<p:focus />
-					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@none" update="@form" />
+					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@this" update="@form" />
 					<div class="ui-g ui-fluid">
 						<div class="ui-g-12">
 							<s:listGrid module="#{skyve.bizModuleParameter}"
