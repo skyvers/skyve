@@ -183,7 +183,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(tabPane.getInvisibleConditionName(), code);
 		String selected = tabPane.getSelectedTabIndexBinding();
 		if (selected != null) {
-			code.append("selectedTabIndexBinding:'").append(selected).append("',");
+			code.append("selectedTabIndexBinding:'").append(BindUtil.sanitiseBinding(selected)).append("',");
 		}
 		code.append("_view:view});\n");
 
