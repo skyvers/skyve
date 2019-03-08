@@ -211,10 +211,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	public void generate() throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
 
+		populateDataStructures();
+
 		// delete generated and generatedTest directories
 		deleteGeneratedDirectories(repository.getAllVanillaModuleNames());
-
-		populateDataStructures();
 
 		// generate the domain classes for vanilla modules
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
