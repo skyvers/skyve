@@ -15,6 +15,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.ModulesUtil.DomainValueSortByDescription;
+import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.DataMaintenanceModuleDocument;
@@ -24,7 +25,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
-	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete. Check Job log for details.";
+	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
