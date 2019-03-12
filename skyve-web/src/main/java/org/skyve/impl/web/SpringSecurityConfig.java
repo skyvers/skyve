@@ -9,6 +9,7 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
@@ -16,6 +17,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
  * This class supplies named spring beans to the OOTB security.xml
  */
 @Configuration
+@EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	@SuppressWarnings("static-method")
