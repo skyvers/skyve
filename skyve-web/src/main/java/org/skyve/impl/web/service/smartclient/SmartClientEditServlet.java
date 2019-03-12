@@ -377,7 +377,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
 	    	pw.append("<li>");
-	        pw.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+	        pw.append(SmartClientGenerateUtils.processString(m.getText()));
 	        pw.append("</li>");
     	}
     	pw.append("</ul>");
@@ -397,12 +397,12 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
 	    		sb.append('"').append(BindUtil.sanitiseBinding(binding)).append("\":\"");
-	    		String message = m.getErrorMessage();
+	    		String message = m.getText();
 	    		if (message == null) {
 	    			sb.append("An error has occurred");
 	    		}
 	    		else {
-		    		sb.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+		    		sb.append(SmartClientGenerateUtils.processString(m.getText()));
 	    		}
 	    		sb.append("\",");
 	    	}

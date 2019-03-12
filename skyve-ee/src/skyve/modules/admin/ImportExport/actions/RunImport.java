@@ -163,7 +163,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						msg.append("\nCheck upload values and try again.");
 						msg.append("\n");
 						for (Message m : ve.getMessages()) {
-							msg.append("\n").append(m.getErrorMessage());
+							msg.append("\n").append(m.getText());
 						}
 
 						throw new ValidationException(new Message(msg.toString()));

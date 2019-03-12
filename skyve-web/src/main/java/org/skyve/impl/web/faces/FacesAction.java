@@ -99,7 +99,7 @@ public abstract class FacesAction<T> {
 	private static void processErrors(FacesContext context,
 										Message em,
 										TreeSet<String> globalMessageSet) {
-		String message = em.getErrorMessage();
+		String message = em.getText();
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
 		for (String binding : em.getBindings()) {
 			List<UIComponent> components = findComponentsByBinding(context.getViewRoot(), binding);

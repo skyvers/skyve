@@ -166,7 +166,7 @@ public class WebUtil {
 				errorMessage = e.getLocalizedMessage();
 			}
 			else {
-				errorMessage = messages.get(0).getErrorMessage();
+				errorMessage = messages.get(0).getText();
 			}
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
