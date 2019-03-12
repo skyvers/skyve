@@ -437,7 +437,7 @@ class ViewJSONManipulator extends ViewVisitor {
 /*	
 	private static void displayViewBindings(ViewBindings bindings) {
 		for (String binding : bindings.getBindings()) {
-			Util.LOGGER.info(bindings.getFullyQualifiedBindingPrefix() + " - " + bindings.getBindingPrefix() + " : " + binding);
+			UtilImpl.LOGGER.info(bindings.getFullyQualifiedBindingPrefix() + " - " + bindings.getBindingPrefix() + " : " + binding);
 		}
 		
 		for (String binding : bindings.getChildren()) {
@@ -462,7 +462,7 @@ class ViewJSONManipulator extends ViewVisitor {
 							AbstractPersistence persistence,
 							WebContext webContext)
 	throws Exception {
-//Util.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
+//UtilImpl.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
 
 		applyJSONProperties(bindings, appliedToDoc, values, appliedTo, persistence, webContext);
 
@@ -722,7 +722,7 @@ class ViewJSONManipulator extends ViewVisitor {
 										WebContext webContext)
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
-//Util.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
+//UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
 			if (bindings.isWritable(binding)) {
 				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
 			}
@@ -802,7 +802,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
-//Util.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
+//UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
 				BindUtil.populateProperty(user, 
 											targetBean, 
 											binding, 
