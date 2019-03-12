@@ -12,6 +12,7 @@ public class BrowserConfiguration {
 	private String baseUrl;
 	private String pathToDriver;
 	private String userAgentString;
+	private boolean headless = false;
 	private Dimension resolution;
 	private long pageLoadTimeout;
 	private TimeUnit pageLoadTimeoutUnit;
@@ -32,6 +33,11 @@ public class BrowserConfiguration {
 	
 	public BrowserConfiguration userAgentString(@SuppressWarnings("hiding") String userAgentString) {
 		this.userAgentString = userAgentString;
+		return this;
+	}
+	
+	public BrowserConfiguration headless(@SuppressWarnings("hiding") boolean headless) {
+		this.headless = headless;
 		return this;
 	}
 	
@@ -70,6 +76,10 @@ public class BrowserConfiguration {
 		return userAgentString;
 	}
 
+	boolean isHeadless() {
+		return headless;
+	}
+	
 	Dimension getResolution() {
 		return resolution;
 	}
