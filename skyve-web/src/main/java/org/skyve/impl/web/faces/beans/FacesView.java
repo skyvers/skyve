@@ -291,6 +291,10 @@ public class FacesView<T extends Bean> extends Harness {
 									UtilImpl.processStringValue(bizId)).execute();
 		new SetTitleAction(this).execute();
 	}
+	
+	public void action(String actionName) {
+		action(actionName, null, null);
+	}
 
 	public void rerender(String source, boolean validate) {
 		new RerenderAction<>(this, source, validate).execute();
