@@ -6,21 +6,24 @@
 			xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		 							http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 		 							http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
-	<!-- The jndi-name should match the defined data source in the app server -->
+	<!--
+	The following data source definition is supplied by skyve...
 	<jee:jndi-lookup id="dataSource" jndi-name="java:/H2Demo" expected-type="javax.sql.DataSource" />
-
+	-->
 	<!-- Ensure the correct SQL dialect is used -->
 	<authentication-manager>
-		<authentication-provider>
+		<authentication-provider user-service-ref="jdbcUserService">
 			<password-encoder ref="delegatingEncoder" />
+			<!-- Uncomment this if you do not want to use the Skyve supplied jdbc-user-service
 			<jdbc-user-service data-source-ref="dataSource" 
 								users-by-username-query="select bizCustomer || '/' || userName, password, not ifNull(inactive, false) from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
 								authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
 								group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-								role-prefix="none" />
+								role-prefix="none" />	
+			-->
 		</authentication-provider>
 	</authentication-manager>
-
+	
 	<!-- Do not secure the H2 database servlet -->
 	<http auto-config="true" use-expressions="true" security="none" pattern="/h2/**" />
 

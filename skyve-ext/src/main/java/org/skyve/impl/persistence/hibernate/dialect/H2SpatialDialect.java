@@ -90,4 +90,9 @@ public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	public UniqueDelegate getUniqueDelegate() {
 		return uniqueDelegate;
 	}
+	
+	@Override
+	public RDBMS getRDBMS() {
+		return RDBMS.h2;
+	}
 }
