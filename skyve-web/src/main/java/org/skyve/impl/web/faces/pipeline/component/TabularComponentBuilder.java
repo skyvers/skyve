@@ -1597,6 +1597,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s')", sanitisedBinding));
 		}
+		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
 		toAddTo.add(clearButton);
 	}
 	

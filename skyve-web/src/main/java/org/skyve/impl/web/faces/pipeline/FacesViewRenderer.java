@@ -583,13 +583,14 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									Button button) {
+		Form currentForm = getCurrentForm();
 		renderButton(action,
 						label,
 						iconStyleClass,
 						toolTip,
 						confirmationText,
 						button,
-						getCurrentForm().getDisabledConditionName());
+						(currentForm == null) ? null : currentForm.getDisabledConditionName());
 	}
 
 	@Override
@@ -1237,10 +1238,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormCheckBox(CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponentBase c = (UIComponentBase) cb.checkBox(null,
 															dataWidgetVar,
 															checkBox,
-															getCurrentForm().getDisabledConditionName(),
+															(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 															title, required);
 		eventSource = c;
 		addComponent(title,
@@ -1285,10 +1287,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormColourPicker(ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponentBase c = (UIComponentBase) cb.colourPicker(null,
 																dataWidgetVar,
 																colour,
-																getCurrentForm().getDisabledConditionName(),
+																(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 																title, required);
 		eventSource = c;
 		addComponent(title, 
@@ -1320,10 +1323,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormCombo(Combo combo) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponentBase s = (UIComponentBase) cb.combo(null,
 														dataWidgetVar,
 														combo,
-														getCurrentForm().getDisabledConditionName(),
+														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 														title, required);
 		eventSource = s;
 		addComponent(title, 
@@ -1360,10 +1364,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormContentImage(ContentImage image) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponent c = cb.contentImage(null,
 											dataWidgetVar,
 											image,
-											getCurrentForm().getDisabledConditionName(),
+											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 											title,
 											required);
         addComponent(title, 
@@ -1385,10 +1390,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormContentLink(String value, ContentLink link) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponent c = cb.contentLink(null,
 										dataWidgetVar,
 										link,
-										getCurrentForm().getDisabledConditionName(),
+										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 										title,
 										required);
 		addComponent(title, 
@@ -1410,10 +1416,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormHTML(HTML html) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponent c = cb.html(null,
 									dataWidgetVar,
 									html,
-									getCurrentForm().getDisabledConditionName(),
+									(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 									title,
 									required);
         addComponent(title, 
@@ -1463,11 +1470,12 @@ public class FacesViewRenderer extends ViewRenderer {
 												LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponentBase c = (UIComponentBase) cb.lookupDescription(null,
 																	dataWidgetVar, 
 																	lookup, 
 																	title, 
-																	getCurrentForm().getDisabledConditionName(),
+																	(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 																	required,
 																	descriptionBinding,
 																	query);
@@ -1527,10 +1535,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormPassword(Password password) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
         UIComponentBase c = (UIComponentBase) cb.password(null,
         													dataWidgetVar,
         													password,
-        													getCurrentForm().getDisabledConditionName(),
+        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
         													title,
         													required);
         eventSource = c;
@@ -1563,10 +1572,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormRadio(Radio radio) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
         UIComponentBase c = (UIComponentBase) cb.radio(null,
         												dataWidgetVar,
         												radio,
-        												getCurrentForm().getDisabledConditionName(),
+        												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
         												title,
         												required);
 		eventSource = c;
@@ -1599,10 +1609,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormRichText(RichText text) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
         UIComponentBase c = (UIComponentBase) cb.richText(null,
         													dataWidgetVar,
         													text,
-        													getCurrentForm().getDisabledConditionName(),
+        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
         													title,
         													required);
         eventSource = c;
@@ -1666,10 +1677,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormSpinner(Spinner spinner) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
-        UIComponentBase c = (UIComponentBase) cb.spinner(null,
+		Form currentForm = getCurrentForm();
+		UIComponentBase c = (UIComponentBase) cb.spinner(null,
         													dataWidgetVar,
         													spinner,
-        													getCurrentForm().getDisabledConditionName(),
+        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
         													title,
         													required);
         eventSource = c;
@@ -1709,10 +1721,11 @@ public class FacesViewRenderer extends ViewRenderer {
 
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
 		UIComponentBase c = (UIComponentBase) cb.textArea(null,
 															dataWidgetVar,
 															text,
-															getCurrentForm().getDisabledConditionName(),
+															(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 															title,
 															required,
 															length);
@@ -1780,10 +1793,11 @@ public class FacesViewRenderer extends ViewRenderer {
 
         String title = getCurrentWidgetLabel();
         boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
         UIComponentBase c = (UIComponentBase) cb.text(null,
         												dataWidgetVar, 
         												text, 
-        												getCurrentForm().getDisabledConditionName(),
+        												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
         												title, 
         												required,
         												length,
