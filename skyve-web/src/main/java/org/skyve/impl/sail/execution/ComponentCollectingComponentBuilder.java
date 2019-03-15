@@ -75,6 +75,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(button.getActionName(), component, button);
@@ -98,6 +99,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action,
 										String moduleName,
 										String documentName) {
@@ -124,6 +126,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -148,6 +151,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -260,6 +264,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent checkBox(UIComponent component,
 									String listVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(checkBox, component);
@@ -269,13 +274,19 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent colourPicker(UIComponent component,
 										String listVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return putByBinding(colour, component);
 	}
 	
 	@Override
-	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String listVar,
+								Combo combo,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return putByBinding(combo, component);
 	}
 	
@@ -283,6 +294,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent contentImage(UIComponent component,
 										String listVar,
 										ContentImage image,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return putByBinding(image, component);
@@ -292,13 +304,19 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent contentLink(UIComponent component,
 									String listVar,
 									ContentLink link,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(link, component);
 	}
 	
 	@Override
-	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component,
+								String listVar,
+								HTML html,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return putByBinding(html, component);
 	}
 	
@@ -306,6 +324,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent lookupDescription(UIComponent component,
 											String listVar,
 											LookupDescription lookup,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											String displayBinding,
@@ -317,6 +336,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent password(UIComponent component,
 									String listVar,
 									Password password,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(password, component);
@@ -326,18 +346,29 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent radio(UIComponent component,
 								String listVar,
 								Radio radio,
+								String formDisabledConditionName,
 								String title,
 								boolean required) {
 		return putByBinding(radio, component);
 	}
 	
 	@Override
-	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+	public UIComponent richText(UIComponent component,
+									String listVar,
+									RichText text,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return putByBinding(text, component);
 	}
 	
 	@Override
-	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+	public UIComponent spinner(UIComponent component,
+									String listVar,
+									Spinner spinner,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return putByBinding(spinner, component);
 	}
 	
@@ -354,6 +385,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent text(UIComponent component,
 								String listVar,
 								TextField text,
+								String formDisabledConditionName,
 								String title,
 								boolean required,
 								Integer length,
@@ -367,6 +399,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent textArea(UIComponent component,
 									String listVar,
 									TextArea text,
+									String formDisabledConditionName,
 									String title,
 									boolean required,
 									Integer length) {

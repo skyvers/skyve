@@ -91,6 +91,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		return component;
 	}
@@ -102,6 +103,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		return component;
 	}
@@ -113,6 +115,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action,
 										String moduleName,
 										String documentName) {
@@ -126,6 +129,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		return component;
 	}
@@ -236,6 +240,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent checkBox(UIComponent component,
 									String listVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return component;
@@ -245,13 +250,19 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent colourPicker(UIComponent component,
 										String listVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String listVar,
+								Combo combo,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return component;
 	}
 
@@ -259,6 +270,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent contentImage(UIComponent component,
 										String listVar,
 										ContentImage image,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return component;
@@ -268,13 +280,19 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent contentLink(UIComponent component,
 									String listVar,
 									ContentLink link,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component,
+								String listVar,
+								HTML html,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return component;
 	}
 
@@ -282,6 +300,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent lookupDescription(UIComponent component,
 											String listVar,
 											LookupDescription lookup,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											String displayBinding,
@@ -293,23 +312,38 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent password(UIComponent component,
 									String listVar,
 									Password password,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent radio(UIComponent component, String listVar, Radio radio, String title, boolean required) {
+	public UIComponent radio(UIComponent component,
+								String listVar,
+								Radio radio,
+								String formDisabledConditionName,
+								String title, boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+	public UIComponent richText(UIComponent component,
+									String listVar,
+									RichText text,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+	public UIComponent spinner(UIComponent component,
+									String listVar,
+									Spinner spinner,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return component;
 	}
 
@@ -317,6 +351,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent textArea(UIComponent component,
 									String listVar,
 									TextArea text,
+									String formDisabledConditionName,
 									String title,
 									boolean required,
 									Integer length) {
@@ -327,6 +362,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent text(UIComponent component,
 								String listVar,
 								TextField text,
+								String formDisabledConditionName,
 								String title,
 								boolean required,
 								Integer length,

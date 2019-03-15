@@ -39,6 +39,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 											Boolean clientValidation, 
 											String confirmationText, 
 											String disabled, 
+											String formDisabled,
 											String invisible,
 											String processOverride,
 											String updateOverride) {
@@ -56,6 +57,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 										clientValidation, 
 										confirmationText, 
 										disabled, 
+										formDisabled,
 										invisible,
 										processOverride,
 										updateOverride);
@@ -74,6 +76,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 									clientValidation, 
 									confirmationText, 
 									disabled, 
+									formDisabled,
 									invisible,
 									processOverride,
 									updateOverride);

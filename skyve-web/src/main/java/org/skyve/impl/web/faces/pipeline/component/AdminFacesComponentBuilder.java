@@ -32,6 +32,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
@@ -50,6 +51,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action,
 										String moduleName,
 										String documentName) {
@@ -70,6 +72,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
@@ -88,6 +91,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		styleUploadButton(component);
 		return component;

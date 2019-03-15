@@ -180,6 +180,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -191,6 +192,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
+											formDisabledConditionName,
 											action);
 		}
 		return result;
@@ -203,10 +205,18 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.reportButton(result, label, iconStyleClass, toolTip, confirmationText, button, action);
+			result = builder.reportButton(result,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
 		}
 		return result;
 	}
@@ -218,6 +228,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action,
 										String moduleName,
 										String documentName) {
@@ -229,6 +240,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												toolTip,
 												confirmationText,
 												button,
+												formDisabledConditionName,
 												action,
 												moduleName,
 												documentName);
@@ -243,10 +255,18 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.uploadButton(result, label, iconStyleClass, toolTip, confirmationText, button, action);
+			result = builder.uploadButton(result,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
 		}
 		return result;
 	}
@@ -441,11 +461,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent checkBox(UIComponent component,
 									String listVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.checkBox(result, listVar, checkBox, title, required);
+			result = builder.checkBox(result,
+										listVar,
+										checkBox,
+										formDisabledConditionName,
+										title,
+										required);
 		}
 		return result;
 	}
@@ -454,20 +480,31 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent colourPicker(UIComponent component,
 										String listVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.colourPicker(result, listVar, colour, title, required);
+			result = builder.colourPicker(result,
+											listVar,
+											colour,
+											formDisabledConditionName,
+											title,
+											required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String listVar,
+								Combo combo,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.combo(result, listVar, combo, title, required);
+			result = builder.combo(result, listVar, combo, formDisabledConditionName,  title, required);
 		}
 		return result;
 	}
@@ -476,11 +513,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent contentImage(UIComponent component,
 										String listVar,
 										ContentImage image,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentImage(result, listVar, image, title, required);
+			result = builder.contentImage(result, listVar, image, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
@@ -489,20 +527,26 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent contentLink(UIComponent component,
 									String listVar,
 									ContentLink link,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentLink(result, listVar, link, title, required);
+			result = builder.contentLink(result, listVar, link, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component,
+								String listVar,
+								HTML html,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.html(result, listVar, html, title, required);
+			result = builder.html(result, listVar, html, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
@@ -511,13 +555,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent lookupDescription(UIComponent component,
 											String listVar,
 											LookupDescription lookup,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											String displayBinding,
 											QueryDefinition query) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.lookupDescription(result, listVar, lookup, title, required, displayBinding, query);
+			result = builder.lookupDescription(result,
+												listVar,
+												lookup,
+												formDisabledConditionName,
+												title,
+												required,
+												displayBinding,
+												query);
 		}
 		return result;
 	}
@@ -526,38 +578,54 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent password(UIComponent component,
 									String listVar,
 									Password password,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, listVar, password, title, required);
+			result = builder.password(result, listVar, password, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent radio(UIComponent component, String listVar, Radio radio, String title, boolean required) {
+	public UIComponent radio(UIComponent component,
+								String listVar,
+								Radio radio,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.radio(result, listVar, radio, title, required);
+			result = builder.radio(result, listVar, radio, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+	public UIComponent richText(UIComponent component,
+									String listVar,
+									RichText text,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.richText(result, listVar, text, title, required);
+			result = builder.richText(result, listVar, text, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+	public UIComponent spinner(UIComponent component,
+								String listVar,
+								Spinner spinner,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, listVar, spinner, title, required);
+			result = builder.spinner(result, listVar, spinner, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
@@ -566,12 +634,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent textArea(UIComponent component,
 									String listVar,
 									TextArea text,
+									String formDisabledConditionName,
 									String title,
 									boolean required,
 									Integer length) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, listVar, text, title, required, length);
+			result = builder.textArea(result, listVar, text, formDisabledConditionName, title, required, length);
 		}
 		return result;
 	}
@@ -580,6 +649,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent text(UIComponent component,
 								String listVar,
 								TextField text,
+								String formDisabledConditionName,
 								String title,
 								boolean required,
 								Integer length,
@@ -588,7 +658,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 								javax.faces.convert.Converter facesConverter) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.text(result, listVar, text, title, required, length, converter, format, facesConverter);
+			result = builder.text(result,
+									listVar,
+									text,
+									formDisabledConditionName,
+									title,
+									required,
+									length,
+									converter,
+									format,
+									facesConverter);
 		}
 		return result;
 	}

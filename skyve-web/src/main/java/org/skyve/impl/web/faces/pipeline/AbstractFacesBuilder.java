@@ -73,9 +73,17 @@ public abstract class AbstractFacesBuilder {
 		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
 	
-	protected void setDisabled(UIComponent component, String disabledConditionName) {
+	protected void setDisabled(UIComponent component, String disabledConditionName, String formDisabledConditionName) {
 		if (disabledConditionName != null) {
-			component.setValueExpression("disabled", createValueExpressionFromCondition(disabledConditionName, null));
+			if (formDisabledConditionName == null) {
+				component.setValueExpression("disabled", createValueExpressionFromCondition(disabledConditionName, null));
+			}
+			else {
+				component.setValueExpression("disabled", createOredValueExpressionFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+			}
+		}
+		else if (formDisabledConditionName != null) {
+			component.setValueExpression("disabled", createValueExpressionFromCondition(formDisabledConditionName, null));
 		}
 	}
 

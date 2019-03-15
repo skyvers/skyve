@@ -85,7 +85,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											Integer pixelHeight,
 											Boolean clientValidation, 
 											String confirmationText, 
-											String disabled, 
+											String disabled,
+											String formDisabled,
 											String invisible,
 											String processOverride,
 											String updateOverride) {
@@ -102,6 +103,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													clientValidation, 
 													null, // confirmation dialogs don't work in mobile
 													disabled, 
+													formDisabled,
 													invisible,
 													processOverride,
 													updateOverride);
@@ -122,6 +124,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									Boolean clientValidation, 
 									String confirmationText, 
 									String disabled, 
+									String formDisabled,
 									String invisible,
 									String processOverride,
 									String updateOverride) {
@@ -136,7 +139,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									pixelHeight,
 									clientValidation, 
 									null, // confirmation dialogs don't work in mobile
-									disabled, 
+									disabled,
+									formDisabled,
 									invisible,
 									processOverride,
 									updateOverride);
@@ -256,6 +260,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												null,
 												null,
 												null,
+												null,
 												null);
 			link.getChildren().add(outputText);
 			current.getChildren().add(link);
@@ -282,6 +287,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent checkBox(UIComponent component,
 									String listVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		if (component != null) {
@@ -293,6 +299,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 																			title,
 																			required,
 																			checkBox.getDisabledConditionName(),
+																			formDisabledConditionName,
 																			false);
 		result.setItemLabel(title);
 		return result;
@@ -302,6 +309,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent colourPicker(UIComponent component,
 										String listVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		if (component != null) {
@@ -312,6 +320,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 								colour.getBinding(), 
 								title, 
 								required, 
+								colour.getDisabledConditionName(),
+								formDisabledConditionName,
 								colour.getPixelWidth(),
 								false);
 	}
@@ -320,6 +330,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent lookupDescription(UIComponent component,
 											String listVar, 
 											LookupDescription lookup, 
+											String formDisabledConditionName,
 											String title, 
 											boolean required,
 											String displayBinding,
@@ -333,6 +344,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										title,
 										required,
 										lookup.getDisabledConditionName(),
+										formDisabledConditionName,
 										displayBinding,
 										query,
 										lookup.getParameters(),
@@ -348,6 +360,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									required, 
 									false,
 									"true", 
+									null,
 									null, 
 									null, 
 									null, 
@@ -367,6 +380,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent password(UIComponent component,
 									String listVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
+									String formDisabledConditionName,
 									String title, 
 									boolean required) {
 		if (component != null) {
@@ -378,6 +392,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			                title,
 			                required,
 			                password.getDisabledConditionName(),
+							formDisabledConditionName,
 			                password.getPixelWidth(),
 			                false);
 	}
@@ -386,6 +401,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent textArea(UIComponent component,
 									String listVar, 
 									TextArea text, 
+									String formDisabledConditionName,
 									String title, 
 									boolean required,
 									Integer length) {
@@ -399,6 +415,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 							required,
 							Boolean.FALSE.equals(text.getEditable()),
 							text.getDisabledConditionName(),
+							formDisabledConditionName,
 							length,
 							text.getPixelWidth(),
 							text.getPixelHeight(),
@@ -409,6 +426,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent text(UIComponent component,
 								String listVar, 
 								TextField text, 
+								String formDisabledConditionName,
 								String title, 
 								boolean required,
 								Integer length,
@@ -425,6 +443,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 							required,
 							Boolean.FALSE.equals(text.getEditable()),
 							text.getDisabledConditionName(),
+							formDisabledConditionName,
 							length,
 							facesConverter,
 							text.getPixelWidth(),

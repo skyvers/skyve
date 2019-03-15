@@ -100,6 +100,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	public abstract UIComponent reportButton(UIComponent component, 
 												String label,
@@ -107,6 +108,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	public abstract UIComponent downloadButton(UIComponent component,
 												String label,
@@ -114,6 +116,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action, 
 												String moduleName, 
 												String documentName);
@@ -123,6 +126,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	
 	public abstract UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image);
@@ -215,42 +219,49 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent checkBox(UIComponent component, 
 											String listVar, 
 											CheckBox checkBox, 
+											String formDisabledConditionName,
 											String title, 
 											boolean required);
 
 	public abstract UIComponent colourPicker(UIComponent component, 
 												String listVar, 
 												ColourPicker colour, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 	
 	public abstract UIComponent combo(UIComponent component, 
 										String listVar, 
 										Combo combo, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required);
 
 	public abstract UIComponent contentImage(UIComponent component, 
 												String listVar, 
 												ContentImage image, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 
 	public abstract UIComponent contentLink(UIComponent component, 
 												String listVar, 
 												ContentLink link, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 	
 	public abstract UIComponent html(UIComponent component, 
 										String listVar, 
 										HTML html, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required);
 
 	public abstract UIComponent lookupDescription(UIComponent component, 
 													String listVar,
 													LookupDescription lookup,
+													String formDisabledConditionName,
 													String title,
 													boolean required,
 													String displayBinding,
@@ -259,30 +270,35 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent password(UIComponent component, 
 											String listVar,
 											Password password,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 
 	public abstract UIComponent radio(UIComponent component, 
 										String listVar,
 										Radio radio,
+										String formDisabledConditionName,
 										String title,
 										boolean required);
 	
 	public abstract UIComponent richText(UIComponent component, 
 											String listVar,
 											RichText text,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 	
 	public abstract UIComponent spinner(UIComponent component, 
 											String listVar,
 											Spinner spinner,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 	
 	public abstract UIComponent text(UIComponent component, 
 										String listVar, 
 										TextField text, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required,
 										Integer length,
@@ -293,6 +309,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent textArea(UIComponent component, 
 											String listVar,
 											TextArea text,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											Integer length);
