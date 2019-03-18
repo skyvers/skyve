@@ -49,7 +49,7 @@ public abstract class InlineWebDriverExecutor<T extends AutomationContext> exten
 		Procedure after = interaction.getAfter();
 		if (after != null) {
 			indent().append("// After ").append(interaction.getName()).newline();
-			for (Step step : interaction.getSteps()) {
+			for (Step step : after.getSteps()) {
 				step.execute(this);
 			}
 		}
