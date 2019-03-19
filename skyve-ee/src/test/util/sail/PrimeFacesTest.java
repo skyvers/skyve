@@ -106,6 +106,21 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
+	protected void radio(String id, int index) {
+		WebElement element = byId(id);
+		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+			// Look for prime faces disabled style
+			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+				element = byXpath("//label[@for='" + id + ":" + index + "']");
+				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+					click(element);
+					
+					waitForAjaxResponse();
+				}
+			}
+		}
+	}
+	
 	protected void selectOne(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -209,14 +224,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 //				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
 				click(element);
 				
-				// Wait for pick list drop down
-				By xpath = By.xpath(String.format("//div[@id='%s_panel']", id));
+				// Wait for pick list drop down - can be a span or div depending on theme
+				By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 				WebDriverWait wait = new WebDriverWait(driver, 30);
 				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
 													ExpectedConditions.visibilityOfElementLocated(xpath)));
 				
 				// Select the row
-				element = byXpath(String.format("//div[@id='%s_panel']/ul/li[%d]", id, Integer.valueOf(row + 1)));
+				// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+				element = byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row + 1)));
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 					// Scroll the drop down panel so the item is visible
 					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
@@ -232,14 +248,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			_input(id, search);
 
-			// Wait for pick list drop down
-			By xpath = By.xpath(String.format("//div[@id='%s_panel']", id));
+			// Wait for pick list drop down - can be a span or div depending on theme
+			By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 			WebDriverWait wait = new WebDriverWait(driver, 30);
 			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
 												ExpectedConditions.visibilityOfElementLocated(xpath)));
 
 			// Select the first row
-			element = byXpath(String.format("//div[@id='%s_panel']/ul/li", id));
+			// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+			element = byXpath(String.format("//*[@id='%s_panel']//ul/li", id));
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				click(element);
 				waitForAjaxResponse();
