@@ -9,7 +9,7 @@
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String referer = request.getHeader("Referer");
+	String referer = WebUtil.getRefererHeader(request);
 	
 	// Determine the locale
 	String customer = WebUtil.determineCustomerWithoutSession(request);
@@ -102,7 +102,7 @@
 		            	</div>
 		            	
 		            	<% if (referer == null) { %>
-							<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
+							<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						<% } else { %>
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						<% } %>

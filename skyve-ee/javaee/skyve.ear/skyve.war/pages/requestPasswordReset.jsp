@@ -16,7 +16,6 @@
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String referer = request.getHeader("Referer");
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();

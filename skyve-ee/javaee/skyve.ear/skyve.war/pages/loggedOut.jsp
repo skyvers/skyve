@@ -8,7 +8,7 @@
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String referer = request.getHeader("Referer");
+	String referer = WebUtil.getRefererHeader(request);
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
@@ -100,7 +100,7 @@
 		            		<%=Util.i18n("page.logout.banner", locale)%>
 		            	</div>
 						<% if (referer == null) { %>
-							<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+							<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 						<% } else { %>
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.banner", locale)%></a>
 						<% } %>

@@ -93,7 +93,7 @@ public class SkyveFacesFilter implements Filter {
                 // NB Can't use the referer header as if we traverse a data grid, 
                 // the URL does not represent all of the state required to perform a get and redisplay the page.
                 // This is because part of the state is temporarily saved in the session.
-                // String redirect = request.getHeader("Referer");
+                // String redirect = WebUtil.getRefererHeader(request);
                 String redirect = absoluteContextURL.toString() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
                 if (FacesUtil.isAjax(request)) {

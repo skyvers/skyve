@@ -307,4 +307,17 @@ public class WebUtil {
 		
 		return result;
 	}
+	
+	public static String getReferer(HttpServletRequest request) {
+		String result = Util.processStringValue(request.getHeader("referer"));
+		if (result != null) {
+			if (! result.startsWith(Util.getSkyveContextUrl())) {
+				Util.LOGGER.warning("referer header " + result +
+										" looks tamplered with because it does not start with " + Util.getSkyveContextUrl() + 
+										". This looks like a doctored request because Referrer-Policy should be same-origin!");
+				result = null;
+			}
+		}
+		return result;
+	}
 }
