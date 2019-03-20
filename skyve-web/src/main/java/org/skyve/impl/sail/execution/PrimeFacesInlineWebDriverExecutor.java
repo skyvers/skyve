@@ -12,6 +12,7 @@ import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
@@ -228,6 +229,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 								(component instanceof Password) ||
 								(component instanceof InputMask);
 			boolean selectOne = (component instanceof SelectOneMenu);
+			boolean radio = (component instanceof SelectOneRadio);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
 			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
 			
@@ -265,6 +267,9 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			}
 			else if (selectOne) {
 				indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+			}
+			else if (radio) {
+				indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
 		}
 	}

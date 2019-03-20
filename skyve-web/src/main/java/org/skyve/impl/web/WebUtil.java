@@ -308,7 +308,7 @@ public class WebUtil {
 		return result;
 	}
 	
-	public static String getReferer(HttpServletRequest request) {
+	public static String getRefererHeader(HttpServletRequest request) {
 		String result = Util.processStringValue(request.getHeader("referer"));
 		if (result != null) {
 			if (! result.startsWith(Util.getSkyveContextUrl())) {
