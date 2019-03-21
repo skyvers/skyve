@@ -45,6 +45,6 @@ public class DataGridZoom implements Step {
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return String.format("%s[%d].zoom", binding, row);
+		return binding + ".zoom";
 	}
 }

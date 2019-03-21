@@ -287,6 +287,17 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
+	protected void dataGridSelect(String dataGridId, int row) {
+		// check list grid is present
+		WebElement element = byId(dataGridId);
+		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+			// Find the row
+			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
+			click(element);
+			waitForAjaxResponse();
+		}
+	}
+
 	protected void listGridButton(String listGridId, String buttonId, boolean ajax) {
 		// check list grid is present
 		WebElement element = byId(listGridId);

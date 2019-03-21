@@ -175,7 +175,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 			}
 
 			// Need to change the value in the combo into an index
-			if (bound instanceof Combo) {
+			if ((bound instanceof Combo) || bound instanceof Radio) {
 				if (value == null) {
 					value = "0";
 				}
@@ -193,7 +193,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 						}
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
-						String message = String.format("WARNING: Can't set value for combo [%s] in document %s.%s as there were no domain values.",
+						String message = String.format("WARNING: Can't set value for combo/radio [%s] in document %s.%s as there were no domain values.",
 														binding,
 														bean.getBizModule(),
 														bean.getBizDocument());
@@ -207,7 +207,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 						value = String.valueOf(index);
 					}
 					else {
-						String message = String.format("WARNING: Can't set value '%s' for combo [%s] in document %s.%s as it is not a valid value. Check the data factory!",
+						String message = String.format("WARNING: Can't set value '%s' for combo/radio [%s] in document %s.%s as it is not a valid value. Check the data factory!",
 														value,
 														binding,
 														bean.getBizModule(),
