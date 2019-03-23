@@ -72,6 +72,8 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				bean = (T) webContext.getCurrentBean();
 			}
 			else {
+				// No security check is required as we are at the top of the conversation
+				// If the user doesn't have create privilege, it will be stopped in SaveAction.
 				bean = document.newInstance(user);
 				
 				SortedMap<String, Object> parameters = SmartClientEditServlet.collectRequestParameters((HttpServletRequest) ec.getRequest());
@@ -122,6 +124,9 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 	    		}
 			}
 			
+			// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
+			// Its up to the app coder to disable the UI if appropriate.
+
 			// this is for the cancel, ok and delete buttons
 			String referer = WebUtil.getRefererHeader((HttpServletRequest) ec.getRequest());
 			if (referer != null) {

@@ -31,6 +31,8 @@ public class ZoomInAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomInAction - listBinding=" + listBinding + " : bizId=" + bizId);
 
+		// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
+		// Its up to the app coder to disable the UI if appropriate.
 		if (FacesAction.validateRequiredFields()) {
 			String viewBinding = facesView.getViewBinding();
 			Bean parentBean = facesView.getCurrentBean().getBean();

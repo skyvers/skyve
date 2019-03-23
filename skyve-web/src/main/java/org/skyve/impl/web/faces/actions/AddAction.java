@@ -18,6 +18,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
@@ -69,24 +70,26 @@ public class AddAction extends FacesAction<Void> {
     	
     	// Create a new element
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
-		Collection targetCollection = (Collection) target.getAttribute();
-		Document collectionDocument = module.getDocument(customer, targetCollection.getDocumentName());
-    	Persistent persistent = collectionDocument.getPersistent();
-    	if ((persistent != null) && 
-    			(persistent.getName() != null) && 
-    			(! user.canCreateDocument(collectionDocument))) {
+		Relation targetRelation = (Relation) target.getAttribute();
+		Document relationDocument = module.getDocument(customer, targetRelation.getDocumentName());
+    	Persistent persistent = relationDocument.getPersistent();
+
+    	// check for create privilege if the collection is persistent and the collection document is persistent
+    	if (targetRelation.isPersistent() && // collection is persistent
+    			(persistent != null) && (persistent.getName() != null) && // collection document is persistent
+    			(! user.canCreateDocument(relationDocument))) {
 			throw new SecurityException("create this data", user.getName());
 		}
 
     	// Create the new bean
-    	Bean newBean = collectionDocument.newInstance(user);
+    	Bean newBean = relationDocument.newInstance(user);
 		// Get the list (collection or inverse many)
 		@SuppressWarnings("unchecked")
 		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 
 		// Set the parent of a child bean, if applicable
 		if (newBean instanceof ChildBean<?>) {
-			Document parentDocument = collectionDocument.getParentDocument(customer);
+			Document parentDocument = relationDocument.getParentDocument(customer);
 			String parentModuleName = parentDocument.getOwningModuleName();
 			String parentDocumentName = parentDocument.getName();
 
@@ -117,7 +120,8 @@ public class AddAction extends FacesAction<Void> {
 			}
 
 			// set bizOrdinal if this is an ordered child collection
-			if (Boolean.TRUE.equals(targetCollection.getOrdered())) {
+			if ((targetRelation instanceof Collection) &&
+					Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
 				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
 			}
 		}
@@ -127,7 +131,7 @@ public class AddAction extends FacesAction<Void> {
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 		if (! vetoed) {
-			Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
+			Bizlet<Bean> bizlet = ((DocumentImpl) relationDocument).getBizlet(customer);
 			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + webContext);
 				newBean = bizlet.preExecute(ImplicitActionName.Add, newBean, parentBean, webContext);

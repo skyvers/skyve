@@ -435,6 +435,8 @@ public class SmartClientEditServlet extends HttpServlet {
     	
     	if (formBinding == null) { // top level
 	    	if (bizId == null) { // new instance
+				// No security check is required as we are at the top of the conversation
+				// If the user doesn't have create privilege, it will be stopped in SaveAction.
 	    		processBean = processDocument.newInstance(user);
 
 	    		applyNewParameters(customer,
@@ -538,7 +540,20 @@ public class SmartClientEditServlet extends HttpServlet {
 			}
 
     		if (bizId == null) { // new instance
-				processBean = processDocument.newInstance(user);
+    			Module contextModule = customer.getModule(contextBean.getBizModule());
+    			Document contextDocument = contextModule.getDocument(customer, contextBean.getBizDocument());
+    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, formBinding);
+        		Attribute targetRelation = (target == null) ? null : target.getAttribute();
+            	Persistent persistent = processDocument.getPersistent();
+
+            	// check for create privilege if the collection is persistent and the collection document is persistent
+            	if ((targetRelation != null) && targetRelation.isPersistent() && // collection is persistent
+    	    			(persistent != null) && (persistent.getName() != null) &&  // collection document is persistent
+    	    			(! user.canCreateDocument(processDocument))) {
+    				throw new SecurityException("create this data", user.getName());
+    			}
+
+    			processBean = processDocument.newInstance(user);
 	    		
 	    		applyNewParameters(customer,
 	    							user,
@@ -615,6 +630,9 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
     		}
     		else {
+    			// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
+    			// Its up to the app coder to disable the UI if appropriate.
+
     			if (referenceValue instanceof List<?>) {
     				processBean = BindUtil.getElementInCollection(contextBean, formBinding, bizId);
     			}
@@ -885,13 +903,10 @@ public class SmartClientEditServlet extends HttpServlet {
 
 			// We are zooming out, so run the required validation and security checks
 			if (ImplicitActionName.ZoomOut.equals(implicitAction)) {
-				if (processedBean.isNotPersisted() && (! user.canCreateDocument(processDocument))) {
-					throw new SecurityException("create this data", user.getName());
-				}
-				// Cannot test for updating the data as the zoom out button is the only way out of the UI
-//				else if (processedBean.isPersisted() && (! user.canUpdateDocument(processDocument))) {
-//					throw new SecurityException("update this data", user.getName());
-//				}
+				// We cannot do security tests at this point because
+				// ZoomOut is the only way out of the UI.
+				// Create privilege is checked at instantiation time - on the zoom in operation
+
 				ValidationUtil.validateBeanAgainstDocument(processDocument, processedBean);
 				if (processBizlet != null) {
 					ValidationUtil.validateBeanAgainstBizlet(processBizlet, processedBean);
