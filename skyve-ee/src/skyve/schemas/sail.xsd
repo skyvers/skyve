@@ -33,6 +33,10 @@
 
   <xs:element name="listGridZoom" type="tns:listGridZoom"/>
 
+  <xs:element name="login" type="tns:login"/>
+
+  <xs:element name="logout" type="tns:logout"/>
+
   <xs:element name="lookupDescriptionAutoComplete" type="tns:lookupDescriptionAutoComplete"/>
 
   <xs:element name="lookupDescriptionEdit" type="tns:lookupDescriptionEdit"/>
@@ -89,6 +93,8 @@
   <xs:complexType name="procedure">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:login"/>
+        <xs:element ref="tns:logout"/>
         <xs:element ref="tns:navigateList"/>
         <xs:element ref="tns:navigateTree"/>
         <xs:element ref="tns:navigateMap"/>
@@ -123,6 +129,17 @@
         <xs:element ref="tns:execute"/>
       </xs:choice>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="login">
+    <xs:sequence/>
+    <xs:attribute name="customer" type="xs:string"/>
+    <xs:attribute name="password" type="xs:string" use="required"/>
+    <xs:attribute name="user" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="logout">
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="navigateList">
@@ -359,6 +376,8 @@
         <xs:complexType>
           <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element ref="tns:login"/>
+              <xs:element ref="tns:logout"/>
               <xs:element ref="tns:navigateList"/>
               <xs:element ref="tns:navigateTree"/>
               <xs:element ref="tns:navigateMap"/>

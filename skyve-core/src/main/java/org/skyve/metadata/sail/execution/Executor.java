@@ -39,6 +39,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
 public interface Executor {
 	public void executeAutomation(Automation automation);
@@ -49,6 +51,9 @@ public interface Executor {
 	public void executePopContext(PopContext pop);
 	public void executeClearContext(ClearContext clear);
 	
+	public void executeLogin(Login login);
+	public void executeLogout(Logout logout);
+
 	public void executeNavigateList(NavigateList list);
 	public void executeNavigateEdit(NavigateEdit edit);
 	public void executeNavigateTree(NavigateTree tree);

@@ -38,6 +38,29 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
+    protected void login(String customer, String username, String password) throws Exception {        
+        driver.get(baseUrl);
+
+        if (customer != null) {
+            driver.findElement(By.name("customer")).clear();
+            driver.findElement(By.name("customer")).sendKeys(customer);
+        }
+        
+        driver.findElement(By.name("user")).clear();
+        driver.findElement(By.name("user")).sendKeys(username);
+
+        driver.findElement(By.name("password")).clear();
+        driver.findElement(By.name("password")).sendKeys(password);
+     
+        driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();        
+    }
+    
+    protected void logout() {
+    	driver.get(baseUrl + "loggedOut");
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+    }
+    
 	protected void checkbox(String id, Boolean value) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {

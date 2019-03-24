@@ -41,13 +41,17 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Procedure {
 	private List<Step> steps = new ArrayList<>();
 
-	@XmlElementRefs({@XmlElementRef(type = NavigateList.class),
+	@XmlElementRefs({@XmlElementRef(type = Login.class),
+						@XmlElementRef(type = Logout.class),
+						@XmlElementRef(type = NavigateList.class),
 						@XmlElementRef(type = NavigateEdit.class),
 						@XmlElementRef(type = NavigateTree.class),
 						@XmlElementRef(type = NavigateMap.class),

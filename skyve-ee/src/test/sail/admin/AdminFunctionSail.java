@@ -17,7 +17,6 @@ public class AdminFunctionSail extends TestAdminMenuExternalTabletAsAdmininstrat
 		
 //		testMenuContacts();
 
-		//logout?
-		
+		logout();
 	}
 }

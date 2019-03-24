@@ -44,6 +44,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -83,7 +85,9 @@ public class Interaction implements Executable {
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.SAIL_NAMESPACE, name = "method")
-	@XmlElementRefs({@XmlElementRef(type = NavigateList.class),
+	@XmlElementRefs({@XmlElementRef(type = Login.class),
+						@XmlElementRef(type = Logout.class),
+						@XmlElementRef(type = NavigateList.class),
 						@XmlElementRef(type = NavigateEdit.class),
 						@XmlElementRef(type = NavigateTree.class),
 						@XmlElementRef(type = NavigateMap.class),

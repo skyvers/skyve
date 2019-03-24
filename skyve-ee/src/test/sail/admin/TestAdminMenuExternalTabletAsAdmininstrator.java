@@ -2,7 +2,6 @@ package sail.admin;
 
 import org.junit.After;
 import org.junit.Before;
-import org.openqa.selenium.By;
 
 import util.sail.BrowserConfiguration;
 import util.sail.Devices;
@@ -20,22 +19,6 @@ public class TestAdminMenuExternalTabletAsAdmininstrator extends PrimeFacesTest 
 	@After
 	public void teardown() {
 		tearDownBrowser();
-	}
-
-	protected void login(String customer, String username, String password) throws Exception {
-
-		driver.get(baseUrl);
-
-		driver.findElement(By.name("customer")).clear();
-		driver.findElement(By.name("customer")).sendKeys(customer);
-
-		driver.findElement(By.name("user")).clear();
-		driver.findElement(By.name("user")).sendKeys(username);
-
-		driver.findElement(By.name("password")).clear();
-		driver.findElement(By.name("password")).sendKeys(password);
-
-		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
 	}
 	
 	/**

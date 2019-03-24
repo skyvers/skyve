@@ -65,6 +65,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
@@ -103,6 +105,32 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void executePopContext(PopContext pop) {
 		pop();
+	}
+	
+	@Override
+	public void executeLogin(Login login) {
+		String customer = login.getCustomer();
+		String user = login.getUser();
+		
+		if (customer == null) {
+			comment("Login as " + user);
+		}
+		else {
+			comment("Login as " + customer + "/" + user);
+		}
+		command("open", ".");
+		if (customer != null) {
+			command("type", "name=customer", customer);
+		}
+		command("type", "name=user", user);
+		command("type", "name=password", login.getPassword());
+		command("clickAndWait", "css=input[type=&quot;submit&quot;]");
+	}
+	
+	@Override
+	public void executeLogout(Logout logout) {
+		comment("Logout");
+		command("open", "loggedOut");
 	}
 	
 	@Override

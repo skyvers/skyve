@@ -2,7 +2,7 @@
 <automation uxui="external"
 				userAgentType="tablet"
 				testStrategy="Assert" 
-				xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../src/skyve/schemas/sail.xsd"
+				xsi:schemaLocation="http://www.skyve.org/xml/sail ../../schemas/sail.xsd"
 				xmlns="http://www.skyve.org/xml/sail" 
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<interaction name="Backup existing data" >

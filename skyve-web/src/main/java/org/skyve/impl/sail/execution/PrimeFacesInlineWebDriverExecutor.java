@@ -65,6 +65,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
@@ -103,6 +105,34 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 	@Override
 	public void executePopContext(PopContext pop) {
 		pop();
+	}
+	
+	@Override
+	public void executeLogin(Login login) {
+		String customer = login.getCustomer();
+		String user = login.getUser();
+		
+		if (customer == null) {
+			comment("Login as " + user);
+		}
+		else {
+			comment("Login as " + customer + "/" + user);
+		}
+		indent().append("login(");
+		if (customer == null) {
+			append("null, ");
+		}
+		else {
+			append("\"").append(customer).append("\", ");
+		}
+		append("\"").append(user).append("\", ");
+		append("\"").append(login.getPassword()).append("\");").newline();
+	}
+	
+	@Override
+	public void executeLogout(Logout logout) {
+		comment("Logout");
+		indent().append("logout();").newline();
 	}
 	
 	@Override
