@@ -11,6 +11,7 @@ public abstract class InlineWebDriverExecutor<T extends AutomationContext> exten
 	public void executeAutomation(Automation automation) {
 		super.executeAutomation(automation); // set context defaults
 
+		in();
 		Procedure before = automation.getBefore();
 		if (before != null) {
 			startTest("Before Automation");

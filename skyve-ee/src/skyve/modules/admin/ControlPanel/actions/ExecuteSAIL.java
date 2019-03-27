@@ -23,10 +23,16 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
+		executeSAIL(bean, true);
+		return new ServerSideActionResult<>(bean);
+	}
+	
+	static void executeSAIL(ControlPanelExtension bean, boolean escapeAndFormat) {
 		bean.setResults(null);
 		bean.setTabIndex(null);
 		
 		modules.admin.domain.User user = bean.getSailUser();
+		String baseUrl = bean.getSailBaseUrl();
 		SailExecutor executorClass = bean.getSailExecutor();
 		String componentBuilderClass = bean.getSailComponentBuilder();
 		String layoutBuilderClass = bean.getSailLayoutBuilder();
@@ -37,6 +43,10 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		if (user == null) {
 			error = true;
 			message.addBinding(ControlPanel.sailUserPropertyName);
+		}
+		if (baseUrl == null) {
+			error = true;
+			message.addBinding(ControlPanel.sailBaseUrlPropertyName);
 		}
 		if (executorClass == null) {
 			error = true;
@@ -92,7 +102,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			Class<?> type = loader.loadClass(executorClass.toCode());
 			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
 			automation.execute(executor);
-			bean.setResults(executor.toString());
+			bean.setResults(executor.toString(), escapeAndFormat);
 		}
 		catch (Exception e) {
 			bean.trapException(e);
@@ -101,6 +111,5 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			p.setUser(currentUser);
 		}
 		bean.setTabIndex(Integer.valueOf(2));
-		return new ServerSideActionResult<>(bean);
 	}
 }

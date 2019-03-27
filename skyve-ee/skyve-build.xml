@@ -167,5 +167,11 @@
 			<fileset dir="${sail.dir}" includes="**" excludes="sail-assemble*.txt,sail.xml,**/.DS_Store,**/sail.sh,**/chromedriver" />
 			<zipfileset dir="${sail.dir}" includes="**/sail.sh,**/chromedriver" filemode="755" />
 		</zip>
+		
+		<property name="compile.dir" value="./content/compile" />
+
+		<copy tofile="${compile.dir}/junit-4.12.jar" file="${sail.dir}/junit-4.12.jar" overwrite="true"/>
+		<copy tofile="${compile.dir}/skyve-core.jar" file="${sail.dir}/skyve-core.jar" overwrite="true"/>
+		<copy tofile="${compile.dir}/test.jar" file="${sail.dir}/test.jar" overwrite="true"/>
 	</target>
 </project>

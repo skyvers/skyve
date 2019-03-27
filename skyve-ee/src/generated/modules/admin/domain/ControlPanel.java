@@ -91,6 +91,12 @@ public class ControlPanel extends AbstractTransientBean {
 	/** @hidden */
 	public static final String sailPropertyName = "sail";
 	/** @hidden */
+	public static final String sailLoginCustomerPropertyName = "sailLoginCustomer";
+	/** @hidden */
+	public static final String sailLoginPasswordPropertyName = "sailLoginPassword";
+	/** @hidden */
+	public static final String sailBaseUrlPropertyName = "sailBaseUrl";
+	/** @hidden */
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
 	public static final String tabIndexPropertyName = "tabIndex";
@@ -455,6 +461,18 @@ public class ControlPanel extends AbstractTransientBean {
 	 * SAIL
 	 **/
 	private String sail;
+	/**
+	 * Login Customer
+	 **/
+	private String sailLoginCustomer;
+	/**
+	 * Login Password
+	 **/
+	private String sailLoginPassword;
+	/**
+	 * Base URL
+	 **/
+	private String sailBaseUrl;
 	/**
 	 * Results
 	 **/
@@ -970,6 +988,60 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setSail(String sail) {
 		preset(sailPropertyName, sail);
 		this.sail = sail;
+	}
+
+	/**
+	 * {@link #sailLoginCustomer} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailLoginCustomer() {
+		return sailLoginCustomer;
+	}
+
+	/**
+	 * {@link #sailLoginCustomer} mutator.
+	 * @param sailLoginCustomer	The new value.
+	 **/
+	@XmlElement
+	public void setSailLoginCustomer(String sailLoginCustomer) {
+		preset(sailLoginCustomerPropertyName, sailLoginCustomer);
+		this.sailLoginCustomer = sailLoginCustomer;
+	}
+
+	/**
+	 * {@link #sailLoginPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailLoginPassword() {
+		return sailLoginPassword;
+	}
+
+	/**
+	 * {@link #sailLoginPassword} mutator.
+	 * @param sailLoginPassword	The new value.
+	 **/
+	@XmlElement
+	public void setSailLoginPassword(String sailLoginPassword) {
+		preset(sailLoginPasswordPropertyName, sailLoginPassword);
+		this.sailLoginPassword = sailLoginPassword;
+	}
+
+	/**
+	 * {@link #sailBaseUrl} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailBaseUrl() {
+		return sailBaseUrl;
+	}
+
+	/**
+	 * {@link #sailBaseUrl} mutator.
+	 * @param sailBaseUrl	The new value.
+	 **/
+	@XmlElement
+	public void setSailBaseUrl(String sailBaseUrl) {
+		preset(sailBaseUrlPropertyName, sailBaseUrl);
+		this.sailBaseUrl = sailBaseUrl;
 	}
 
 	/**

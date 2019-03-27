@@ -146,6 +146,18 @@
 		<memo name="sail">
 			<displayName>SAIL</displayName>
 		</memo>
+		<text name="sailLoginCustomer">
+			<displayName>Login Customer</displayName>
+			<length>256</length>
+		</text>
+		<text name="sailLoginPassword">
+			<displayName>Login Password</displayName>
+			<length>256</length>
+		</text>
+		<text name="sailBaseUrl">
+			<displayName>Base URL</displayName>
+			<length>1024</length>
+		</text>
 		<!-- Results -->
 		<memo name="results">
 			<displayName>Results</displayName>

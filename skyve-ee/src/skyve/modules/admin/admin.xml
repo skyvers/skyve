@@ -190,6 +190,7 @@
 					<action name="GenerateMenuSAIL" />
 					<action name="GenerateModuleSAIL" />
 					<action name="ExecuteSAIL" />
+					<action name="DownloadSAIL" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
@@ -284,7 +285,10 @@
 				<document name="Content" permission="_R__C" />
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="DownloadFolder" permission="_R__C" />
+				<document name="DownloadFolder" permission="CRUDC">
+					<action name="Download" />
+					<action name="Test" />
+				</document>
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />

@@ -17,6 +17,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -207,6 +210,35 @@ public class FileUtil {
 		}
 	}
 	
+	/**
+	 * Create a jar archive for the directory.
+	 * 
+	 * @param directory
+	 * @param out
+	 * @throws IOException
+	 */
+	public static void createJarArchive(File directory, OutputStream out) throws IOException {
+		if (directory.exists() && directory.isDirectory()) {
+			Manifest manifest = new Manifest();
+			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+			try (JarOutputStream jos = new JarOutputStream(out, manifest)) {
+				List<File> fileList = new ArrayList<>();
+	
+				getAllFiles(directory, fileList);
+	
+				for (File file : fileList) {
+					if (! file.isDirectory()) { // we only zip files, not directories
+						addToZip(directory, file, jos);
+					}
+				}
+				
+				jos.flush();
+			}
+		}
+		
+		out.flush();
+	}
+
 	/**
 	 * Create a zip archive for the directory.
 	 * 

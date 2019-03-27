@@ -13,20 +13,24 @@ public class GenerateModuleSAIL extends GenerateSAIL {
 
 	@Override
 	protected Automation single(User user,
+									String loginCustomer,
+									String loginPassword,
 									String moduleName,
 									String uxui,
 									UserAgentType userAgentType,
 									TestStrategy testStrategy)
 	throws Exception {
-		return Generator.visitModule(user, moduleName, uxui, userAgentType, testStrategy);
+		return Generator.visitModule(user, loginCustomer, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 
 	@Override
 	protected List<Automation> multiple(User user,
+											String loginCustomer,
+											String loginPassword,
 											String uxui,
 											UserAgentType userAgentType,
 											TestStrategy testStrategy)
 	throws Exception {
-		return Generator.visitModules(user, uxui, userAgentType, testStrategy);
+		return Generator.visitModules(user, loginCustomer, loginPassword, uxui, userAgentType, testStrategy);
 	}
 }

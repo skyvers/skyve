@@ -23,11 +23,18 @@ public class ControlPanelExtension extends ControlPanel {
 	 */
 	@Override
 	public void setResults(String results) {
+		setResults(results, true);
+	}
+	
+	public void setResults(String results, boolean escapeAndFormat) {
 		if (results == null) {
 			super.setResults(null);
 		}
-		else {
+		else if (escapeAndFormat) {
 			super.setResults('\n' + results.replace("{", "\\{").replace("<", "&lt;").replace(">", "&gt;"));
+		}
+		else {
+			super.setResults(results);
 		}
 	}
 	

@@ -20,6 +20,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -27,6 +28,8 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 
@@ -50,6 +53,25 @@ System.out.println(visitModules(args[0]));
 												UserAgentType userAgentType,
 												TestStrategy testStrategy)
 	throws Exception {
+		return visitMenus(user, null, null, uxui, userAgentType, testStrategy);
+	}
+
+	public static List<Automation> visitMenus(User user,
+												String loginPassword,
+												String uxui,
+												UserAgentType userAgentType,
+												TestStrategy testStrategy)
+	throws Exception {
+		return visitMenus(user, null, loginPassword, uxui, userAgentType, testStrategy);
+	}
+
+	public static List<Automation> visitMenus(User user,
+												String loginCustomer,
+												String loginPassword,
+												String uxui,
+												UserAgentType userAgentType,
+												TestStrategy testStrategy)
+	throws Exception {
 		CORE.getRepository().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -68,6 +90,9 @@ System.out.println(visitModules(args[0]));
 
 			// some modules may have no access at all for this user
 			if (! interactions.isEmpty()) {
+				if (loginPassword != null) {
+					addLoginAndOut(automation, user, loginCustomer, loginPassword);
+				}
 				result.add(automation);
 			}
 		}
@@ -76,6 +101,27 @@ System.out.println(visitModules(args[0]));
 	}
 
 	public static Automation visitMenu(User user,
+										String moduleName,
+										String uxui,
+										UserAgentType userAgentType,
+										TestStrategy testStrategy)
+	throws Exception {
+		return visitMenu(user, null, null, moduleName, uxui, userAgentType, testStrategy);
+	}	
+
+	public static Automation visitMenu(User user,
+										String loginPassword,
+										String moduleName,
+										String uxui,
+										UserAgentType userAgentType,
+										TestStrategy testStrategy)
+	throws Exception {
+		return visitMenu(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
+	}
+	
+	public static Automation visitMenu(User user,
+										String loginCustomer,
+										String loginPassword,
 										String moduleName,
 										String uxui,
 										UserAgentType userAgentType,
@@ -93,6 +139,10 @@ System.out.println(visitModules(args[0]));
 		List<Interaction> interactions = result.getInteractions();
 		Menu menu = u.getModuleMenu(moduleName);
 		menu(u, c, m, null, menu.getItems(), uxui, interactions);
+
+		if (loginPassword != null) {
+			addLoginAndOut(result, user, loginCustomer, loginPassword);
+		}
 
 		return result;
 	}
@@ -172,21 +222,46 @@ System.out.println(visitModules(args[0]));
 		}
 	}
 	
-	public static List<Automation> visitModules(User u,
+	public static List<Automation> visitModules(User user,
+													String uxui,
+													UserAgentType userAgentType,
+													TestStrategy testStrategy)
+	throws Exception {
+		return visitModules(user, null, null, uxui, userAgentType, testStrategy);
+	}
+	
+	public static List<Automation> visitModules(User user,
+													String loginPassword,
+													String uxui,
+													UserAgentType userAgentType,
+													TestStrategy testStrategy)
+	throws Exception {
+		return visitModules(user, null, loginPassword, uxui, userAgentType, testStrategy);
+	}
+	
+	public static List<Automation> visitModules(User user,
+													String loginCustomer,
+													String loginPassword,
 													String uxui,
 													UserAgentType userAgentType,
 													TestStrategy testStrategy)
 	throws Exception {
 		List<Automation> result = new ArrayList<>();
 		
-		Customer c = u.getCustomer();
+		Customer c = user.getCustomer();
 		for (Module m : c.getModules()) {
 			String moduleName = m.getName();
 			// Don't process the test module as its cyclic and not required anyway
 			if ("test".equals(moduleName)) {
 				continue;
 			}
-			Automation automation = visitModule(u, moduleName, uxui, userAgentType, testStrategy);
+			Automation automation = visitModule(user, 
+													loginCustomer,
+													loginPassword,
+													moduleName,
+													uxui,
+													userAgentType,
+													testStrategy);
 			if (! automation.getInteractions().isEmpty()) {
 				result.add(automation);
 			}
@@ -195,13 +270,34 @@ System.out.println(visitModules(args[0]));
 		return result;
 	}
 
-	public static Automation visitModule(User u,
+	public static Automation visitModule(User user,
 											String moduleName,
 											String uxui,
 											UserAgentType userAgentType,
 											TestStrategy testStrategy)
 	throws Exception {
-		Customer c = u.getCustomer();
+		return visitModule(user, null, null, moduleName, uxui, userAgentType, testStrategy);
+	}
+	
+	public static Automation visitModule(User user,
+											String loginPassword,
+											String moduleName,
+											String uxui,
+											UserAgentType userAgentType,
+											TestStrategy testStrategy)
+	throws Exception {
+		return visitModule(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
+	}
+	
+	public static Automation visitModule(User user,
+											String loginCustomer,
+											String loginPassword,
+											String moduleName,
+											String uxui,
+											UserAgentType userAgentType,
+											TestStrategy testStrategy)
+	throws Exception {
+		Customer c = user.getCustomer();
 		Module m = c.getModule(moduleName);
 		
 		Automation result = new Automation();
@@ -217,7 +313,7 @@ System.out.println(visitModules(args[0]));
 				Document d = m.getDocument(c, documentName);
 				if ((! d.isAbstract()) && 
 						(d.getParentDocumentName() == null) && 
-						u.canAccessDocument(d)) {
+						user.canAccessDocument(d)) {
 					if (d.getPersistent() == null) {
 						Interaction interaction = new Interaction();
 						interaction.setName("Edit document " + documentName);
@@ -242,7 +338,7 @@ System.out.println(visitModules(args[0]));
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 						
-						crud(u, c, m, d, uxui, navigate, steps);
+						crud(user, c, m, d, uxui, navigate, steps);
 
 						interactions.add(interaction);
 					}
@@ -250,6 +346,10 @@ System.out.println(visitModules(args[0]));
 			}
 		}
 		
+		if (loginPassword != null) {
+			addLoginAndOut(result, user, loginCustomer, loginPassword);
+		}
+
 		return result;
 	}
 
@@ -291,5 +391,28 @@ System.out.println(visitModules(args[0]));
 				steps.add(new Delete());
 			}
 		}
+	}
+	
+	private static void addLoginAndOut(Automation automation, User user, String customer, String password) {
+		Procedure before = automation.getBefore();
+		Login login = new Login();
+		login.setCustomer(customer);
+		login.setUser(user.getName());
+		login.setPassword(password);
+		if (before == null) {
+			before = new Procedure();
+			before.getSteps().add(login);
+			automation.setBefore(before);
+		}
+		else {
+			before.getSteps().add(0, login);
+		}
+
+		Procedure after = automation.getAfter();
+		if (after == null) {
+			after = new Procedure();
+			automation.setAfter(after);
+		}
+		after.getSteps().add(new Logout());
 	}
 }

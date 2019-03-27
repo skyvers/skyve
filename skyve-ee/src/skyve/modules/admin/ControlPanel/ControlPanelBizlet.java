@@ -13,6 +13,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Util;
 
 import modules.ModulesUtil;
 import modules.ModulesUtil.DomainValueSortByCode;
@@ -28,6 +29,8 @@ public class ControlPanelBizlet extends Bizlet<ControlPanel> {
 		Contact contact = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, CORE.getUser().getContactId(), false);
 		bean.setEmailFrom(contact.getEmail1());
 
+		bean.setSailBaseUrl(Util.getSkyveContextUrl() + '/');
+		
 		return bean;
 	}
 

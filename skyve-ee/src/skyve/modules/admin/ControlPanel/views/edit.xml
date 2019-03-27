@@ -84,7 +84,22 @@
 				<column />
 				<row>
 					<item>
+						<textField binding="sailLoginCustomer" />
+					</item>
+				</row>
+				<row>
+					<item>
 						<lookupDescription binding="sailUser" descriptionBinding="bizKey" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="sailLoginPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sailBaseUrl" />
 					</item>
 				</row>
 			</form>
@@ -124,27 +139,31 @@
 				<column pixelWidth="120" />
 				<column />
 				<column pixelWidth="100" />
+				<column pixelWidth="100" />
 				<row>
-					<item>
-						<combo binding="sailExecutor" />
-					</item>
-				</row>
-				<row>
-					<item>
+					<item colspan="3">
 						<textField binding="sailComponentBuilder" />
 					</item>
 				</row>
 				<row>
-					<item>
+					<item colspan="3">
 						<textField binding="sailLayoutBuilder" />
 					</item>
 				</row>
 				<row>
-					<item>
+					<item colspan="3">
 						<textArea binding="sail" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailExecutor" />
 					</item>
 					<item align="right">
 						<button actionName="ExecuteSAIL" pixelWidth="90" />
+					</item>
+					<item align="right">
+						<button actionName="DownloadSAIL" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -297,5 +316,6 @@
 		<action className="GenerateMenuSAIL" displayName="Menu SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) menu" />
 		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
 		<action className="ExecuteSAIL" displayName="Execute" inActionPanel="false" toolTip="Execute SAIL and output results" />
+		<download className="DownloadSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
 	</actions>
 </view>
