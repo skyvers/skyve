@@ -23,11 +23,11 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
-		executeSAIL(bean, true);
+		executeSAIL(bean);
 		return new ServerSideActionResult<>(bean);
 	}
 	
-	static void executeSAIL(ControlPanelExtension bean, boolean escapeAndFormat) {
+	static void executeSAIL(ControlPanelExtension bean) {
 		bean.setResults(null);
 		bean.setTabIndex(null);
 		
@@ -102,7 +102,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			Class<?> type = loader.loadClass(executorClass.toCode());
 			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
 			automation.execute(executor);
-			bean.setResults(executor.toString(), escapeAndFormat);
+			bean.setResults(executor.toString());
 		}
 		catch (Exception e) {
 			bean.trapException(e);

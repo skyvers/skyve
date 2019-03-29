@@ -23,8 +23,8 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 	@Override
 	public Download download(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
-		ExecuteSAIL.executeSAIL(bean, false);
-		String sailSource = sailSource(bean.getResults(), bean.getSailBaseUrl());
+		ExecuteSAIL.executeSAIL(bean);
+		String sailSource = sailSource(bean.getUnescapedResults(), bean.getSailBaseUrl());
 		bean.setResults(null);
 		JavaFileObject java = RuntimeCompiler.javaSource("Sail", sailSource);
 		

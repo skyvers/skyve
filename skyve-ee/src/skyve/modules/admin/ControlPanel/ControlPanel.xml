@@ -170,4 +170,16 @@
 			<displayName>TabIndex</displayName>
 		</integer>
 	</attributes>
+	<conditions>
+		<condition name="fixedCustomer" usage="view">
+			<description>
+				<![CDATA[
+					If this instance is for 1 fixed customer only.
+				]]>
+			</description>
+			<expression>
+				org.skyve.impl.util.UtilImpl.CUSTOMER != null
+			</expression>
+		</condition>
+	</conditions>
 </document>

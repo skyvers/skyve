@@ -1079,4 +1079,23 @@ public class ControlPanel extends AbstractTransientBean {
 		preset(tabIndexPropertyName, tabIndex);
 		this.tabIndex = tabIndex;
 	}
+
+	/**
+	 * If this instance is for 1 fixed customer only.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isFixedCustomer() {
+		return (org.skyve.impl.util.UtilImpl.CUSTOMER != null);
+	}
+
+	/**
+	 * {@link #isFixedCustomer} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotFixedCustomer() {
+		return (! isFixedCustomer());
+	}
 }

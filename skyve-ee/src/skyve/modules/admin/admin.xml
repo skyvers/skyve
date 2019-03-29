@@ -191,6 +191,7 @@
 					<action name="GenerateModuleSAIL" />
 					<action name="ExecuteSAIL" />
 					<action name="DownloadSAIL" />
+					<action name="DownloadClientSAIL" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
@@ -385,6 +386,12 @@
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
 				<uxui name="desktop" />
+				<role name="DevOps" />
+			</edit>
+			<edit document="ControlPanel" name="SAIL UI Testing">
+				<uxui name="external" />
+				<uxui name="tablet" />
+				<uxui name="phone" />
 				<role name="DevOps" />
 			</edit>
 			<edit document="DataMaintenance" name="Data Maintenance">

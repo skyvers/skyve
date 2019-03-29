@@ -84,7 +84,7 @@
 				<column />
 				<row>
 					<item>
-						<textField binding="sailLoginCustomer" />
+						<textField binding="sailLoginCustomer" invisible="fixedCustomer" />
 					</item>
 				</row>
 				<row>
