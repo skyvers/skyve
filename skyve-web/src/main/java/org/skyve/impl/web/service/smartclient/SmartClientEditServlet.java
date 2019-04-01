@@ -44,6 +44,8 @@ import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -683,7 +685,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			manipulator.visit();
 
 			webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
-			message.append(manipulator.toJSON(webContext));
+			message.append(manipulator.toJSON(webContext, null));
 			message.append("]}}");
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
 			pw.append(message);
@@ -849,6 +851,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		Bean processedBean = processBean;
 		
+		// if we need to redirect once the XHR response is received by the browser, this will be not null
+		String redirectUrl = null;
+		
 		if (implicitAction == null) { // not an implicit action
 			if (mutableCustomActionName != null) { // a custom action
 				if (! user.canExecuteAction(processDocument, mutableCustomActionName)) {
@@ -856,20 +861,45 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 	
 				// execute an action
+				ServerSideAction<Bean> serverSideAction = null;
+				DownloadAction<Bean> downloadAction = null;
 				AbstractRepository repository = AbstractRepository.get();
-				ServerSideAction<Bean> customAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName, true);
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
-																					mutableCustomActionName,
-																					processedBean, 
-																					webContext);
-				if (! vetoed) {
-					ServerSideActionResult<Bean> result = customAction.execute(processedBean, webContext);
-					internalCustomer.interceptAfterServerSideAction(processDocument,
-																		mutableCustomActionName,
-																		result, 
-																		webContext);
-					processedBean = result.getBean();
+				try {
+					serverSideAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName, true);
+				}
+				catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e) {
+					try {
+						downloadAction = repository.getDownloadAction(customer, processDocument, mutableCustomActionName, true);
+					}
+					catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e1) {
+						throw new MetaDataException("Could not find " + mutableCustomActionName + " in document " + 
+														processDocument.getName() + " as a server-side action or a download action");
+					}
+				}
+				if (downloadAction != null) { // download action
+					downloadAction.prepare(processedBean, webContext);
+					redirectUrl = WebUtil.getDownloadActionUrl(mutableCustomActionName,
+																processDocument.getOwningModuleName(),
+																processDocument.getName(),
+																webContext.getWebId(),
+																formBinding,
+																gridBinding,
+																processBean.getBizId());
+				}
+				else if (serverSideAction != null) { // server-side action
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
+																						mutableCustomActionName,
+																						processedBean, 
+																						webContext);
+					if (! vetoed) {
+						ServerSideActionResult<Bean> result = serverSideAction.execute(processedBean, webContext);
+						internalCustomer.interceptAfterServerSideAction(processDocument,
+																			mutableCustomActionName,
+																			result, 
+																			webContext);
+						processedBean = result.getBean();
+					}
 				}
 			}
 			else if (source != null) { // rerender event
@@ -961,7 +991,7 @@ public class SmartClientEditServlet extends HttpServlet {
 												beanToRender.isCreated() ? 
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
-		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, pw);
+		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, redirectUrl, pw);
 	}
 
 	private static void pumpOutResponse(AbstractWebContext webContext,
@@ -972,6 +1002,7 @@ public class SmartClientEditServlet extends HttpServlet {
 											Bean formBean,
 											int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
+											String redirectUrl,
 											PrintWriter pw) 
 	throws Exception  {
 		StringBuilder result = new StringBuilder(256);
@@ -988,7 +1019,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		manipulator.visit();
 		try {
 			result.append("{\"response\":{\"status\":0,\"data\":");
-			result.append(manipulator.toJSON(webContext));
+			result.append(manipulator.toJSON(webContext, redirectUrl));
 			result.append("}}");
 
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent

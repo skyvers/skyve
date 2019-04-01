@@ -12,7 +12,7 @@ public class DownloadClientSAIL extends DownloadAction<ControlPanelExtension> {
 	private static final long serialVersionUID = 6509370665603777126L;
 
 	@Override
-	public Download download(ControlPanelExtension bean, WebContext webContext)
+	public void prepare(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
 		bean.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
 		bean.setSailUxUi(DefaultUxUiSelector.EXTERNAL.getName());
@@ -21,6 +21,12 @@ public class DownloadClientSAIL extends DownloadAction<ControlPanelExtension> {
 		new GenerateMenuSAIL().execute(bean, webContext);
 		bean.setSail(bean.getUnescapedResults());
 		
+		new DownloadSAIL().prepare(bean, webContext);
+	}
+	
+	@Override
+	public Download download(ControlPanelExtension bean, WebContext webContext)
+	throws Exception {
 		return new DownloadSAIL().download(bean, webContext);
 	}
 }

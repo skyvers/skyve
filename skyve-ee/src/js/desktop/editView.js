@@ -647,6 +647,11 @@ isc.EditView.addMethods({
 						if (successCallback) {
 							successCallback(data);
 						}
+						
+						// Used by the download action to redirect to the download.
+						if (data._redirectUrl) {
+							window.location.assign(data._redirectUrl);
+						}
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
@@ -1516,22 +1521,7 @@ isc.BizButton.addMethods({
 				}
 			}
 			else if (this.type == "L") { // Download Action
-				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
-				if (instance) {
-					var me = this;
-					// apply changes to current form before exporting
-					this._view.saveInstance(validate, null, function() {
-						var url = 'download?_n=' + me.actionName + 
-									'&_doc=' + me._view._mod + '.' + me._view._doc + 
-									'&_c=' + instance._c;
-						if (me._view._b) {
-							url += '&_b=' + me._view._b.replaceAll('_', '.');
-						}
-						url += '&_ctim=' + new Date().getTime();
-
-						window.location.assign(url);
-					});
-				}
+				this._view.doAction(this.actionName, validate);
 			}
 			else if (this.type == "U") { // Upload Action
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below

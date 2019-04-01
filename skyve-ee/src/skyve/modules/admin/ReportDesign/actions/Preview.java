@@ -28,6 +28,13 @@ public class Preview extends DownloadAction<ReportDesign> {
 	private static final long serialVersionUID = -8203773871581974793L;
 
 	@Override
+	public void prepare(ReportDesign bean, WebContext webContext)
+	throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
 	public Download download(ReportDesign bean, WebContext webContext) throws Exception {
 		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
 		final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()

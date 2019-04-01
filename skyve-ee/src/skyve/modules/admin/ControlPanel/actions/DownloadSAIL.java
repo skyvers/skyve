@@ -21,9 +21,14 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 	private static final long serialVersionUID = 6509370665603777126L;
 
 	@Override
-	public Download download(ControlPanelExtension bean, WebContext webContext)
+	public void prepare(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {
 		ExecuteSAIL.executeSAIL(bean);
+	}
+	
+	@Override
+	public Download download(ControlPanelExtension bean, WebContext webContext)
+	throws Exception {
 		String sailSource = sailSource(bean.getUnescapedResults(), bean.getSailBaseUrl());
 		bean.setResults(null);
 		JavaFileObject java = RuntimeCompiler.javaSource("Sail", sailSource);

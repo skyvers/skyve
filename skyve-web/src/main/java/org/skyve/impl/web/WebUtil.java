@@ -226,6 +226,47 @@ public class WebUtil {
 	}
 
 	/**
+	 * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
+	 */
+	public static String getDownloadActionUrl(String downloadActionName,
+												String targetModuleName,
+												String targetDocumentName,
+												String webId,
+												String viewBinding,
+												String dataWidgetBinding,
+												String elementBizId) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/download?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
+		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append(targetModuleName).append('.').append(targetDocumentName);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webId);
+		
+		String binding = null;
+		if (viewBinding != null) {
+			if (dataWidgetBinding != null) {
+				binding = BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
+			}
+			else {
+				binding = viewBinding;
+			}
+		}
+		else if (dataWidgetBinding != null) {
+			binding = dataWidgetBinding;
+		}
+		if (binding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
+		}
+		if (dataWidgetBinding != null) {
+			result.append('&').append(Bean.DOCUMENT_ID).append('=').append(elementBizId);
+		}
+
+		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
+
+		return result.toString();
+	}
+	
+	/**
 	 * Called from the resetPassword.jsp.
 	 * 
 	 * @param passwordResetToken

@@ -293,6 +293,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		Map<String, String> properties = action.getProperties();
+		
 		return downloadButton(label,
 								iconStyleClass,
 								toolTip,
@@ -304,7 +306,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								confirmationText,
 								action.getDisabledConditionName(), 
 								formDisabledConditionName,
-								action.getInvisibleConditionName());
+								action.getInvisibleConditionName(),
+								properties.get(PROCESS_KEY),
+								properties.get(UPDATE_KEY));
 	}
 	
 	@Override
@@ -1840,6 +1844,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		Map<String, String> properties = link.getProperties();
+
 		ImplicitActionName name = action.getImplicitName();
 		if (ImplicitActionName.Download.equals(name)) {
 			return downloadLink(value,
@@ -1851,10 +1857,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									action.getConfirmationText(),
 									action.getDisabledConditionName(), 
 									null,
-									action.getInvisibleConditionName());
+									action.getInvisibleConditionName(),
+									properties.get(PROCESS_KEY),
+									properties.get(UPDATE_KEY));
 		}
-
-		Map<String, String> properties = link.getProperties();
 
 		return actionLink(value,
 							action.getToolTip(),
@@ -1902,6 +1908,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 	
+		Map<String, String> properties = action.getProperties();
+
 		return downloadButton(action.getDisplayName(), 
 								action.getIconStyleClass(),
 								action.getToolTip(), 
@@ -1913,7 +1921,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								action.getConfirmationText(),
 								action.getDisabledConditionName(), 
 								null,
-								action.getInvisibleConditionName());
+								action.getInvisibleConditionName(),
+								properties.get(PROCESS_KEY),
+								properties.get(UPDATE_KEY));
 	}
 
 	@Override
@@ -2477,7 +2487,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String confirmationText,
 											String disabled,
 											String formDisabled,
-											String invisible) {
+											String invisible,
+											String processOverride,
+											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -2491,6 +2503,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 
 		downloadActionExpression(downloadActionName, dataWidgetBinding, dataWidgetVar, result);
+		
+		result.setProcess((processOverride == null) ? process : processOverride); // process the current form (by default)
+		result.setUpdate((updateOverride == null) ? update : updateOverride); // update all forms (by default)
+
 		return result;
 	}
 	
@@ -2580,7 +2596,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String confirmationText,
 										String disabled, 
 										String formDisabled,
-										String invisible) {
+										String invisible,
+										String processOverride,
+										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -2593,6 +2611,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 
 		downloadActionExpression(actionName, dataWidgetBinding, dataWidgetVar, result);
+		
+		result.setProcess((processOverride == null) ? process : processOverride); // process the current form (by default)
+		result.setUpdate((updateOverride == null) ? update : updateOverride); // update all forms (by default)
+
 		return result;
 	}
 	

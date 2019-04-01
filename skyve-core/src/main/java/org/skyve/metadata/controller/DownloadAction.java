@@ -16,7 +16,8 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -1360787878049667579L;
 
 	/**
-	 * 
+	 * Represents a file stream to a client.
+	 * This is the result of executing the download method.
 	 */
 	public static class Download {
 		private String fileName;
@@ -114,10 +115,22 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 	}
 	
 	/**
+	 * Called before the download method.
+	 * Use this method to validate the bean and prepare for the download.
 	 * 
 	 * @param bean	The bean to execute on.
-	 * @param file	The file to process.
 	 * @param webContext	The context to manipulate.
+	 * @throws Exception
+	 */
+	public abstract void prepare(T bean, WebContext webContext) throws Exception;
+	
+	/**
+	 * Called to get the download stream/file.
+	 * This method can not fail gracefully which is why prepare should be used to validate.
+	 * 
+	 * @param bean	The bean to execute on.
+	 * @param webContext	The context to manipulate.
+	 * @return file	The file to process.
 	 * @throws Exception
 	 */
 	public abstract Download download(T bean, WebContext webContext) throws Exception;

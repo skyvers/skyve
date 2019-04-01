@@ -302,10 +302,16 @@ class ViewJSONManipulator extends ViewVisitor {
 		this.forApply = forApply;
 	}
 	
-	String toJSON(AbstractWebContext webContextToReference)
+	String toJSON(AbstractWebContext webContextToReference,
+					String redirectUrl) // to redirect the browser location when the response is processed
 	throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 
+		// Put the redirecturl in if required
+		if (redirectUrl != null) {
+			result.put("_redirectUrl", redirectUrl);
+		}
+		
 		// Encode the context bean
 		String webId = webContextToReference.getWebId();
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
