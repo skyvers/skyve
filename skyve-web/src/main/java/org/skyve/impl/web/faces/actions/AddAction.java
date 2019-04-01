@@ -32,18 +32,18 @@ import org.skyve.web.WebContext;
  */
 public class AddAction extends FacesAction<Void> {
 	private FacesView<? extends Bean> facesView;
-	private String listBinding;
+	private String dataWidgetBinding;
 	private boolean inline;
-	public AddAction(FacesView<? extends Bean> facesView, String listBinding, boolean inline) {
+	public AddAction(FacesView<? extends Bean> facesView, String dataWidgetBinding, boolean inline) {
 		this.facesView = facesView;
-		this.listBinding = listBinding;
+		this.dataWidgetBinding = dataWidgetBinding;
 		this.inline = inline;
 	}
 
 	@Override
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding + 
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - dataWidgetBinding=" + dataWidgetBinding + 
 													" : facesView.viewBinding=" + viewBinding + 
 													" : facesView.inline=" + inline);
 		if ((! inline) && (! FacesAction.validateRequiredFields())) {
@@ -55,8 +55,8 @@ public class AddAction extends FacesAction<Void> {
 		if (viewBinding != null) {
 			newViewBinding.append(viewBinding).append('.');
 		}
-		newViewBinding.append(listBinding);
-		zoomInBinding.append(listBinding);
+		newViewBinding.append(dataWidgetBinding);
+		zoomInBinding.append(dataWidgetBinding);
 
 		Bean bean = facesView.getBean();
 		String bizModule = bean.getBizModule();

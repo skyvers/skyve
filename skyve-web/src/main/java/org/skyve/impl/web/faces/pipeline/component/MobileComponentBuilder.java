@@ -79,8 +79,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											ImplicitActionName implicitActionName,
 											String actionName, 
 											boolean inline, 
-											String listBinding, 
-											String listVar,
+											String dataWidgetBinding, 
+											String dataWidgetVar,
 											Integer pixelWidth, 
 											Integer pixelHeight,
 											Boolean clientValidation, 
@@ -96,8 +96,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													implicitActionName, 
 													actionName, 
 													inline, 
-													listBinding, 
-													listVar,
+													dataWidgetBinding, 
+													dataWidgetVar,
 													pixelWidth, 
 													pixelHeight,
 													clientValidation, 
@@ -118,7 +118,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String actionName, 
 									boolean inline, 
 									String collectionName, 
-									String listVar,
+									String dataWidgetVar,
 									Integer pixelWidth, 
 									Integer pixelHeight,
 									Boolean clientValidation, 
@@ -134,7 +134,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									actionName, 
 									inline, 
 									collectionName, 
-									listVar,
+									dataWidgetVar,
 									pixelWidth, 
 									pixelHeight,
 									clientValidation, 
@@ -148,7 +148,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent dataGrid(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									boolean ordered,
 									String title,
 									DataGrid grid) {
@@ -157,7 +157,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		}
 
 		DataList result = dataList(grid.getBinding(), 
-									listVar,
+									dataWidgetVar,
 		                			title,
 		                			grid.getInvisibleConditionName(),
 		                			grid.getWidgetId());
@@ -170,7 +170,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												UIComponent current, 
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
-												String listVar,
+												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
@@ -232,7 +232,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current, 
 												DataGrid grid, 
-												String listVar,
+												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
@@ -241,7 +241,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		}
 
 		UIComponent result = current;
-		String listBinding = grid.getBinding();
+		String dataWidgetBinding = grid.getBinding();
 		
 		UIOutput outputText = outputText(gridColumnExpression);
 		// If the grid is editable, add the ability to zoom
@@ -251,8 +251,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												ImplicitActionName.Navigate,
 												null,
 												false,
-												listBinding,
-												listVar,
+												dataWidgetBinding,
+												dataWidgetVar,
 												null,
 												null,
 												Boolean.TRUE,
@@ -285,7 +285,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent checkBox(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									CheckBox checkBox,
 									String formDisabledConditionName,
 									String title,
@@ -294,7 +294,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		SelectBooleanCheckbox result = (SelectBooleanCheckbox) checkbox(listVar,
+		SelectBooleanCheckbox result = (SelectBooleanCheckbox) checkbox(dataWidgetVar,
 																			checkBox.getBinding(), 
 																			title,
 																			required,
@@ -307,7 +307,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent colourPicker(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ColourPicker colour,
 										String formDisabledConditionName,
 										String title,
@@ -316,7 +316,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return colourPicker(listVar, 
+		return colourPicker(dataWidgetVar, 
 								colour.getBinding(), 
 								title, 
 								required, 
@@ -328,7 +328,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent lookupDescription(UIComponent component,
-											String listVar, 
+											String dataWidgetVar, 
 											LookupDescription lookup, 
 											String formDisabledConditionName,
 											String title, 
@@ -339,7 +339,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		UIComponent c = autoComplete(listVar,
+		UIComponent c = autoComplete(dataWidgetVar,
 										lookup.getBinding(),
 										title,
 										required,
@@ -354,7 +354,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		UIComponent result = panelGroup(false, false, false, null, null);
 		List<UIComponent> children = result.getChildren();
 		children.add(c);
-		InputText text = textField(listVar, 
+		InputText text = textField(dataWidgetVar, 
 									String.format("%s.%s", lookup.getBinding(), displayBinding), 
 									title,
 									required, 
@@ -378,7 +378,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent password(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
 									String formDisabledConditionName,
 									String title, 
@@ -387,7 +387,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return password(listVar,
+		return password(dataWidgetVar,
 							password.getBinding(), 
 			                title,
 			                required,
@@ -399,7 +399,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent textArea(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									TextArea text, 
 									String formDisabledConditionName,
 									String title, 
@@ -409,7 +409,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return textArea(listVar,
+		return textArea(dataWidgetVar,
 							text.getBinding(),
 							title,
 							required,
@@ -424,7 +424,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent text(UIComponent component,
-								String listVar, 
+								String dataWidgetVar, 
 								TextField text, 
 								String formDisabledConditionName,
 								String title, 
@@ -437,7 +437,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return textField(listVar,
+		return textField(dataWidgetVar,
 							text.getBinding(),
 							title,
 							required,

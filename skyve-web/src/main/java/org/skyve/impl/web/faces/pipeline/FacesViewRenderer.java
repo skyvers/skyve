@@ -626,15 +626,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		else if (ImplicitActionName.Download.equals(name)) {
 			c = cb.downloadButton(null,
+									dataWidgetBinding,
+									dataWidgetVar,
 									label,
 									iconStyleClass,
 									toolTip,
 									confirmationText,
 									button,
 									formDisabledConditionName,
-									action,
-									module.getName(),
-									document.getName());
+									action);
 		}
 		else if (ImplicitActionName.Upload.equals(name)) {
 			c = cb.uploadButton(null,
@@ -861,49 +861,24 @@ public class FacesViewRenderer extends ViewRenderer {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
-
-				final Document listDocument;
-				// Figure out the document type of the relation.
-				if (listTarget.getAttribute() instanceof Relation) {
-					final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
-					listDocument = module.getDocument(customer, documentName);
-				}
-				else {
-					listDocument = listTarget.getDocument();
-				}
-
-				final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
-				Action action = null;
-				for (ViewType viewType : viewTypesToSearch) {
-					final View listDocumentView = listDocument.getView(cb.userAgentType.name(), customer, viewType.name());
-					if (listDocumentView == null) {
-						continue;
-					}
-					action = listDocumentView.getAction(reference.getActionName());
-					if (action != null) {
-						// Found the action, we can stop looking.
-						break;
-					}
-				}
-
+				Action action = obtainActionForActionReference(reference, customer, module, document, dataWidgetBinding, cb.userAgentType);
 				if (action != null) {
 					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, link, action));
-				}
-				else {
-					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, link, reference.getActionName()));
 				}
 			}
 		}.process(outerReference);
 
-		addComponent(null, 
-						false, 
-						link.getInvisibleConditionName(), 
-						null,
-						c.get(), 
-						link.getPixelWidth(), 
-						null, 
-						null);
+		UIComponent component = c.get();
+		if (component != null) {
+			addComponent(null, 
+							false, 
+							link.getInvisibleConditionName(), 
+							null,
+							component, 
+							link.getPixelWidth(), 
+							null, 
+							null);
+		}
 	}
 
 	@Override
@@ -1243,7 +1218,8 @@ public class FacesViewRenderer extends ViewRenderer {
 															dataWidgetVar,
 															checkBox,
 															(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-															title, required);
+															title,
+															required);
 		eventSource = c;
 		addComponent(title,
 						required,
@@ -1292,7 +1268,8 @@ public class FacesViewRenderer extends ViewRenderer {
 																dataWidgetVar,
 																colour,
 																(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-																title, required);
+																title,
+																required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
@@ -1328,7 +1305,8 @@ public class FacesViewRenderer extends ViewRenderer {
 														dataWidgetVar,
 														combo,
 														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-														title, required);
+														title,
+														required);
 		eventSource = s;
 		addComponent(title, 
 						required, 
@@ -1474,8 +1452,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponentBase c = (UIComponentBase) cb.lookupDescription(null,
 																	dataWidgetVar, 
 																	lookup, 
-																	title, 
 																	(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+																	title, 
 																	required,
 																	descriptionBinding,
 																	query);
@@ -2207,9 +2185,9 @@ public class FacesViewRenderer extends ViewRenderer {
 					}
 					else if (ImplicitActionName.Download.equals(name)) {
 						toolbarLayout.getChildren().add(cb.download(null,
-																		action,
-																		module.getName(),
-																		document.getName()));
+																		dataWidgetBinding,
+																		dataWidgetVar,
+																		action));
 					}
 					else if (ImplicitActionName.Upload.equals(name)) {
 						toolbarLayout.getChildren().add(cb.upload(null, action));

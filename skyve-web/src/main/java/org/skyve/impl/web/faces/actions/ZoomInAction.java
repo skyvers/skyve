@@ -19,17 +19,17 @@ import org.skyve.web.WebContext;
 
 public class ZoomInAction extends FacesAction<Void> {
 	private FacesView<? extends Bean> facesView;
-	private String listBinding;
+	private String dataWidgetBinding;
 	private String bizId;
-	public ZoomInAction(FacesView<? extends Bean> facesView, String listBinding, String bizId) {
+	public ZoomInAction(FacesView<? extends Bean> facesView, String dataWidgetBinding, String bizId) {
 		this.facesView = facesView;
-		this.listBinding = listBinding;
+		this.dataWidgetBinding = dataWidgetBinding;
 		this.bizId = bizId;
 	}
 	
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomInAction - listBinding=" + listBinding + " : bizId=" + bizId);
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomInAction - dataWidgetBinding=" + dataWidgetBinding + " : bizId=" + bizId);
 
 		// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
 		// Its up to the app coder to disable the UI if appropriate.
@@ -38,7 +38,7 @@ public class ZoomInAction extends FacesAction<Void> {
 			Bean parentBean = facesView.getCurrentBean().getBean();
 			
 			StringBuilder sb = new StringBuilder(64);
-			sb.append(listBinding).append("ElementById(").append(bizId).append(')');
+			sb.append(dataWidgetBinding).append("ElementById(").append(bizId).append(')');
 			facesView.getZoomInBindings().push(sb.toString());
 			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("Push ZoomInBinding " + sb.toString());
 			if (viewBinding != null) {

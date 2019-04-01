@@ -32,6 +32,7 @@ import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
+import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
 import org.skyve.impl.web.faces.actions.GetBeansAction;
 import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
@@ -249,9 +250,9 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 
 	// This corresponds to the lower case action name used in data grid generation (there is already edit())
-	public void navigate(String listBinding, String bizId) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + listBinding + '.' + bizId);
-		new ZoomInAction(this, listBinding, bizId).execute();
+	public void navigate(String dataWidgetBinding, String bizId) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + dataWidgetBinding + '.' + bizId);
+		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
@@ -259,14 +260,14 @@ public class FacesView<T extends Bean> extends Harness {
 	public void navigate(SelectEvent evt) {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
-		String listBinding = ((DataTable) evt.getComponent()).getVar();
-		// change list var back to list binding - '_' to '.' and remove "Row" from the end.
-		navigate(BindUtil.unsanitiseBinding(listBinding).substring(0, listBinding.length() - 3), bizId);
+		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
+		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
+		navigate(BindUtil.unsanitiseBinding(dataWidgetBinding).substring(0, dataWidgetBinding.length() - 3), bizId);
 	}
 	
-	public void add(String listBinding, boolean inline) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + listBinding + (inline ? " inline" : " with zoom"));
-		new AddAction(this, listBinding, inline).execute();
+	public void add(String dataWidgetBinding, boolean inline) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + dataWidgetBinding + (inline ? " inline" : " with zoom"));
+		new AddAction(this, dataWidgetBinding, inline).execute();
 		if (inline && UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
@@ -279,15 +280,15 @@ public class FacesView<T extends Bean> extends Harness {
 	 * This method only removes elements from collections, it doesn't null out associations.
 	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
-	public void remove(String listBinding, String bizId, List<String> removedHandlerActionNames) {
+	public void remove(String dataWidgetBinding, String bizId, List<String> removedHandlerActionNames) {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
-		new RemoveAction(this, listBinding, bizId, removedHandlerActionNames).execute();
+		new RemoveAction(this, dataWidgetBinding, bizId, removedHandlerActionNames).execute();
 	}
 
-	public void action(String actionName, String listBinding, String bizId) {
+	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		new ExecuteActionAction<>(this, 
 									actionName, 
-									UtilImpl.processStringValue(listBinding),
+									UtilImpl.processStringValue(dataWidgetBinding),
 									UtilImpl.processStringValue(bizId)).execute();
 		new SetTitleAction(this).execute();
 	}
@@ -437,19 +438,16 @@ public class FacesView<T extends Bean> extends Harness {
 		return dualListModels;
  	}
 
-	// /skyve/download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
-	public String getDownloadUrl(String downloadActionName, String moduleName, String documentName) {
-		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append("/download?");
-		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
-		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
-		result.append(moduleName).append('.').append(documentName);
-		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
-		if (viewBinding != null) {
-			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
-		}
-		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
-		return result.toString();
+	public void download(String actionName, String dataWidgetBinding, String bizId) {
+		new ExecuteDownloadAction<>(this, 
+									actionName, 
+									UtilImpl.processStringValue(dataWidgetBinding),
+									UtilImpl.processStringValue(bizId)).execute();
+		new SetTitleAction(this).execute();
+	}
+	
+	public void download(String actionName) {
+		action(actionName, null, null);
 	}
 
 	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>

@@ -356,7 +356,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 													String dataWidgetBinding,
 													String dataWidgetVar,
 													Link link,
-													String actionName);
+													Action action);
 
 	public abstract RenderedComponent report(RenderedComponent component, Action action);
 	

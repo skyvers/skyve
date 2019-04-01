@@ -219,8 +219,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent actionButton(UIComponent component, 
-										String listBinding, 
-										String listVar,
+										String dataWidgetBinding, 
+										String dataWidgetVar,
 										String label,
 										String iconStyleClass,
 										String toolTip,
@@ -239,8 +239,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                action.getImplicitName(),
 				                action.getName(),
 				                false,
-				                listBinding,
-				                listVar,
+				                dataWidgetBinding,
+				                dataWidgetVar,
 				                button.getPixelWidth(),
 				                button.getPixelHeight(),
 				                action.getClientValidation(),
@@ -280,15 +280,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent downloadButton(UIComponent component, 
+										String dataWidgetBinding,
+										String dataWidgetVar,
 										String label,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button, 
 										String formDisabledConditionName,
-										Action action,
-										String moduleName, 
-										String documentName) {
+										Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -296,12 +296,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return downloadButton(label,
 								iconStyleClass,
 								toolTip,
+								dataWidgetBinding,
+								dataWidgetVar,
 								action.getName(),
-								moduleName, 
-								documentName, 
 								button.getPixelWidth(),
 								button.getPixelHeight(),
-								action.getClientValidation(),
 								confirmationText,
 								action.getDisabledConditionName(), 
 								formDisabledConditionName,
@@ -336,7 +335,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent blurb(UIComponent component, 
-								String listVar,
+								String dataWidgetVar,
 								String value,
 								String binding,
 								Blurb blurb) {
@@ -344,7 +343,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return outputText(listVar,
+		return outputText(dataWidgetVar,
 							value,
 							binding,
 							blurb.getTextAlignment(),
@@ -355,7 +354,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent label(UIComponent component, 
-								String listVar,
+								String dataWidgetVar,
 								String value,
 								String binding,
 								Label label) {
@@ -363,7 +362,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return outputText(listVar,
+		return outputText(dataWidgetVar,
 							value,
 							binding,
 							label.getTextAlignment(),
@@ -372,7 +371,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							label.getInvisibleConditionName());
 	}
 
-	private HtmlOutputText outputText(String listVar, 
+	private HtmlOutputText outputText(String dataWidgetVar, 
 										String value, 
 										String binding,
 										HorizontalAlignment textAlignment,
@@ -387,8 +386,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			// escape bindings with ' as \' as the binding could be for blurb expressions
 			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
-			if (listVar != null) {
-				result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, sanitisedBinding, true, null, Object.class));
+			if (dataWidgetVar != null) {
+				result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, Object.class));
 			}
 			else {
 				result.setValueExpression("value", createValueExpressionFromFragment(sanitisedBinding, true, null, Object.class));
@@ -406,7 +405,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, String title, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, String title, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -424,7 +423,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomConditionName, disabledConditionName});
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
-												listVar,
+												dataWidgetVar,
 												title,
 												grid.getInvisibleConditionName(),
 												((! Boolean.TRUE.equals(grid.getInline())) &&
@@ -454,7 +453,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * Any bound columns are editable inline.
 	 */
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String listVar, String title, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, String title, DataRepeater repeater) {
 		if (component != null) {
 			return component;
 		}
@@ -462,7 +461,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		columnPriority = 1;
 
 		DataTable result = dataTable(repeater.getBinding(),
-										listVar,
+										dataWidgetVar,
 										title,
 										repeater.getInvisibleConditionName(),
 										false,
@@ -483,7 +482,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												UIComponent current, 
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
-												String listVar,
+												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
@@ -491,7 +490,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		Column result = column(listVar,
+		Column result = column(dataWidgetVar,
 								null,
 								columnTitle,
 	                            column.getAlignment(),
@@ -511,7 +510,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
-	        result.getChildren().add(outputText(listVar, gridColumnExpression.toString()));
+	        result.getChildren().add(outputText(dataWidgetVar, gridColumnExpression.toString()));
 		}
 		
 		return result;
@@ -602,7 +601,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current, 
 												DataGrid grid, 
-												String listVar,
+												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
@@ -612,7 +611,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		// only add a column if grid is editable
 		if (! Boolean.FALSE.equals(grid.getEditable())) {
-			String listBinding = grid.getBinding();
+			String dataWidgetBinding = grid.getBinding();
 			
 			Column col = column(null,
 									null,
@@ -632,12 +631,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			col.getFacets().put("header", columnHeader);
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
-				CommandButton button = createDataGridAddButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
+				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
 				columnHeader.getChildren().add(button);
 			}
 			
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
-				CommandButton button = createDataGridZoomButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
+				CommandButton button = createDataGridZoomButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
 				children.add(button);
 			}
 
@@ -647,7 +646,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					children.add(label(null, " "));
 				}
 
-				CommandButton button = createDataGridRemoveButton(grid, listVar, singularDocumentAlias, listBinding, disabledConditionName);
+				CommandButton button = createDataGridRemoveButton(grid, dataWidgetVar, singularDocumentAlias, dataWidgetBinding, disabledConditionName);
 				children.add(button);
 			}
 
@@ -673,14 +672,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	protected CommandButton createDataGridAddButton(DataGrid grid, String listVar, String singularDocumentAlias,
-													boolean inline, String listBinding, String disabledConditionName) {
+	protected CommandButton createDataGridAddButton(DataGrid grid,
+														String dataWidgetVar,
+														String singularDocumentAlias,
+														boolean inline,
+														String dataWidgetBinding,
+														String disabledConditionName) {
 		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("Add a new " + singularDocumentAlias);
 		button.setIcon("fa fa-plus");
-		action(button, ImplicitActionName.Add, null, listBinding, listVar, inline, null);
+		action(button, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		// if we are in an inline data grid, update the grid on a new record
 		if (inline) {
 			button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
@@ -700,7 +703,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	protected CommandButton createDataGridRemoveButton(DataGrid grid, String listVar, String singularDocumentAlias, String listBinding, String disabledConditionName) {
+	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledConditionName) {
 		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
@@ -711,7 +714,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// There is no performance shortcut we can do as we dont know what is going on
 		button.setUpdate(update); // update all forms (by default)
 
-		action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, grid.getRemovedActions());
+		action(button, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
 		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 		String[] removeDisabled = (disableRemoveConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -727,13 +730,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	protected CommandButton createDataGridZoomButton(DataGrid grid, String listVar, String singularDocumentAlias, boolean inline, String listBinding, String disabledConditionName) {
+	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledConditionName) {
 		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("Edit this " + singularDocumentAlias);
 		button.setIcon("fa fa-chevron-right");
-		action(button, ImplicitActionName.Navigate, null, listBinding, listVar, inline, null);
+		action(button, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
 		String[] zoomDisabled = (disableZoomConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -1378,7 +1381,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent checkBox(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									CheckBox checkBox,
 									String formDisabledConditionName,
 									String title,
@@ -1387,7 +1390,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return checkbox(listVar,
+		return checkbox(dataWidgetVar,
 							checkBox.getBinding(), 
 							title,
 							required,
@@ -1398,7 +1401,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent colourPicker(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ColourPicker colour,
 										String formDisabledConditionName,
 										String title,
@@ -1407,7 +1410,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return colourPicker(listVar, 
+		return colourPicker(dataWidgetVar, 
 								colour.getBinding(), 
 								title, 
 								required, 
@@ -1419,7 +1422,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent combo(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								Combo combo,
 								String formDisabledConditionName,
 								String title,
@@ -1429,14 +1432,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		String binding = combo.getBinding();
-		HtmlSelectOneMenu s = selectOneMenu(listVar,
+		HtmlSelectOneMenu s = selectOneMenu(dataWidgetVar,
 												binding,
 								                title,
 								                required,
 								                combo.getDisabledConditionName(),
 								                formDisabledConditionName,
 								                null);
-		UISelectItems i = selectItems(null, null, listVar, binding, true);
+		UISelectItems i = selectItems(null, null, dataWidgetVar, binding, true);
 		s.getChildren().add(i);
 		
 		return s;
@@ -1444,7 +1447,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent contentImage(UIComponent component, 
-										String listVar,
+										String dataWidgetVar,
 										ContentImage image,
 										String formDisabledConditionName,
 										String title,
@@ -1490,7 +1493,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 */
 	@Override
 	public UIComponent contentLink(UIComponent component, 
-									String listVar,
+									String dataWidgetVar,
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
@@ -1603,7 +1606,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent html(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								HTML html,
 								String formDisabledConditionName,
 								String title,
@@ -1612,7 +1615,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return editor(listVar,
+		return editor(dataWidgetVar,
 						html.getBinding(),
 						title,
 						required,
@@ -1622,7 +1625,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent lookupDescription(UIComponent component,
-											String listVar, 
+											String dataWidgetVar, 
 											LookupDescription lookup, 
 											String formDisabledConditionName,
 											String title, 
@@ -1633,7 +1636,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return autoComplete(listVar,
+		return autoComplete(dataWidgetVar,
 							lookup.getBinding(),
 							title,
 							required,
@@ -1648,7 +1651,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent password(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
 									String formDisabledConditionName,
 									String title, 
@@ -1657,7 +1660,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return password(listVar,
+		return password(dataWidgetVar,
 							password.getBinding(), 
 			                title,
 			                required,
@@ -1669,7 +1672,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent radio(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								Radio radio,
 								String formDisabledConditionName,
 								String title,
@@ -1679,21 +1682,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		String binding = radio.getBinding();
-        UIComponent result = selectOneRadio(listVar,
+        UIComponent result = selectOneRadio(dataWidgetVar,
 												binding,
 				                                title,
 				                                required,
 				                                radio.getDisabledConditionName(),
 				                                formDisabledConditionName);
         result.getAttributes().put("binding", radio.getBinding());
-        UISelectItems i = selectItems(null, null, listVar, binding, false);
+        UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
 		result.getChildren().add(i);
 		return result;
 	}
 	
 	@Override
 	public UIComponent richText(UIComponent component, 
-									String listVar, 
+									String dataWidgetVar, 
 									RichText text, 
 									String formDisabledConditionName,
 									String title,
@@ -1702,7 +1705,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return editor(listVar,
+		return editor(dataWidgetVar,
 						text.getBinding(),
 						title,
 						required,
@@ -1712,7 +1715,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent spinner(UIComponent component,
-								String listVar, 
+								String dataWidgetVar, 
 								org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
 								String formDisabledConditionName,
 								String title, 
@@ -1721,7 +1724,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return spinner(listVar, 
+		return spinner(dataWidgetVar, 
 						spinner.getBinding(), 
 						title, 
 						required, 
@@ -1732,7 +1735,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent textArea(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									TextArea text, 
 									String formDisabledConditionName,
 									String title, 
@@ -1742,7 +1745,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return textArea(listVar,
+		return textArea(dataWidgetVar,
 							text.getBinding(),
 							title,
 							required,
@@ -1757,7 +1760,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent text(UIComponent component,
-								String listVar, 
+								String dataWidgetVar, 
 								TextField text, 
 								String formDisabledConditionName,
 								String title, 
@@ -1786,7 +1789,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
         UIComponent result = null;
         if (useCalendar) {
-            result = calendar(listVar,
+            result = calendar(dataWidgetVar,
 	            				text.getBinding(),
 	                            title,
 	                            required,
@@ -1796,7 +1799,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	                            facesConverter);
         }
         else if (mutableFormat != null) {
-            result = maskField(listVar,
+            result = maskField(dataWidgetVar,
 								text.getBinding(),
 								title,
 								required,
@@ -1810,7 +1813,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								true);
         }
         else {
-        	result = textField(listVar,
+        	result = textField(dataWidgetVar,
 								text.getBinding(),
 								title,
 								required,
@@ -1828,40 +1831,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent actionLink(UIComponent component,
-									String listBinding,
-									String listVar,
-									String value,
-									Link link,
-									String actionName) {
-		if (component != null) {
-			return component;
-		}
-
-		// TODO do the tooltip and client validation, disabled, invisible thing,
-		// Need the action, not just it's name
-		Map<String, String> properties = link.getProperties();
-		return actionLink(value,
-							null,
-							null,
-							actionName,
-							false,
-							listBinding,
-							listVar,
-							link.getPixelWidth(),
-							null,
-							Boolean.FALSE,
-							null,
-							null,
-							null,
-							link.getInvisibleConditionName(),
-							properties.get(PROCESS_KEY),
-							properties.get(UPDATE_KEY));
-	}
-
-	@Override
-	public UIComponent actionLink(UIComponent component,
-								  String listBinding,
-								  String listVar,
+								  String dataWidgetBinding,
+								  String dataWidgetVar,
 								  String value,
 								  Link link,
 								  Action action) {
@@ -1869,14 +1840,29 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
+		ImplicitActionName name = action.getImplicitName();
+		if (ImplicitActionName.Download.equals(name)) {
+			return downloadLink(value,
+									action.getToolTip(),
+									action.getName(),
+									dataWidgetBinding,
+									dataWidgetVar, 
+									link.getPixelWidth(), 
+									action.getConfirmationText(),
+									action.getDisabledConditionName(), 
+									null,
+									action.getInvisibleConditionName());
+		}
+
 		Map<String, String> properties = link.getProperties();
+
 		return actionLink(value,
 							action.getToolTip(),
 							null,
 							action.getName(),
 							false,
-							listBinding,
-							listVar,
+							dataWidgetBinding,
+							dataWidgetVar,
 							link.getPixelWidth(),
 							null,
 							action.getClientValidation(),
@@ -1909,9 +1895,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent download(UIComponent component,
-									Action action,
-									String moduleName,
-									String documentName) {
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -1919,12 +1905,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return downloadButton(action.getDisplayName(), 
 								action.getIconStyleClass(),
 								action.getToolTip(), 
+								dataWidgetBinding,
+								dataWidgetVar,
 								action.getName(), 
-								moduleName,
-								documentName,
 								null,
 								null,
-								action.getClientValidation(),
 								action.getConfirmationText(),
 								action.getDisabledConditionName(), 
 								null,
@@ -1952,8 +1937,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent action(UIComponent component,
-								String listBinding,
-								String listVar,
+								String dataWidgetBinding,
+								String dataWidgetVar,
 								Action action, 
 								ImplicitActionName name,
 								String title) {
@@ -1968,8 +1953,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								name,
 								action.getName(),
 								false,
-								listBinding,
-								listVar,
+								dataWidgetBinding,
+								dataWidgetVar,
 								null,
 								null,
 								action.getClientValidation(),
@@ -1990,7 +1975,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected Password password(String listVar, 
+	protected Password password(String dataWidgetVar, 
 									String binding, 
 									String title, 
 									boolean required, 
@@ -1998,13 +1983,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String formDisabled,
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
-		Password result = (Password) input(Password.COMPONENT_TYPE, listVar, binding, title, required, disabled, formDisabled);
+		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
-	protected InputText textField(String listVar, 
+	protected InputText textField(String dataWidgetVar, 
 									String binding, 
 									String title, 
 									boolean required, 
@@ -2016,7 +2001,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE, 
-												listVar, 
+												dataWidgetVar, 
 												binding, 
 												title, 
 												required,
@@ -2035,7 +2020,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private InputMask maskField(String listVar,
+	private InputMask maskField(String dataWidgetVar,
 									String binding, 
 									String title, 
 									boolean required, 
@@ -2048,7 +2033,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE, 
-												listVar, 
+												dataWidgetVar, 
 												binding, 
 												title, 
 												required,
@@ -2123,19 +2108,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private Spinner spinner(String listVar, 
+	private Spinner spinner(String dataWidgetVar, 
 								String binding, 
 								String title, 
 								boolean required, 
 								String disabled,
 								String formDisabled,
 								Integer pixelWidth) {
-		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, listVar, binding, title, required, disabled, formDisabled);
+		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		return result;
 	}
 
-	private Calendar calendar(String listVar,
+	private Calendar calendar(String dataWidgetVar,
 								String binding, 
 								String title, 
 								boolean required, 
@@ -2143,7 +2128,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String disabled,
 								String formDisabled,
 								Converter converter) {
-		Calendar result = (Calendar) input(Calendar.COMPONENT_TYPE, listVar, binding, title, required, disabled, formDisabled);
+		Calendar result = (Calendar) input(Calendar.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		if (! mobile) {
 			result.setMode("popup");
 			result.setShowOn("button");
@@ -2197,7 +2182,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected InputTextarea textArea(String listVar, 
+	protected InputTextarea textArea(String dataWidgetVar, 
 										String binding, 
 										String title, 
 										boolean required, 
@@ -2209,7 +2194,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										Integer pixelHeight, 
 										boolean applyDefaultWidth) {
 		InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE, 
-														listVar, 
+														dataWidgetVar, 
 														binding, 
 														title,
 														required, 
@@ -2231,8 +2216,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											ImplicitActionName implicitActionName,
 											String actionName,
 											boolean inline, 
-											String listBinding, 
-											String listVar,
+											String dataWidgetBinding, 
+											String dataWidgetVar,
 											Integer pixelWidth, 
 											Integer pixelHeight,
 											Boolean clientValidation, 
@@ -2248,7 +2233,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(tooltip);
 
-		action(result, implicitActionName, actionName, listBinding, listVar, inline, null);
+		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled, formDisabled);
 		setConfirmation(result, confirmationText);
@@ -2478,40 +2463,35 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
-	 * Create a button with a href URL that looks like...
+	 * Create a command button that redirects to a URL that looks like...
 	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
 	 */
-	private Button downloadButton(String title, 
-									String iconStyleClass,
-									String tooltip,
-									String downloadActionName,
-									String moduleName,
-									String documentName,
-									Integer pixelWidth, 
-									Integer pixelHeight,
-									@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemmented
-									// TODO LinkButton is not a Confirmable. ConfirmBehavior can only be attached to components that implement org.primefaces.component.api.Confirmable interface
-									@SuppressWarnings("unused") String confirmationText,
-									String disabled,
-									String formDisabled,
-									String invisible) {
-		String href = String.format("#{%s.getDownloadUrl('%s','%s','%s')}", 
-										managedBeanName,
-										downloadActionName,
-										moduleName,
-										documentName);
-		return linkButton((iconStyleClass == null) ? "fa fa-download" : iconStyleClass, 
-							null, 
-							null,
-							title,
-							tooltip,
-							href,
-							pixelWidth,
-							pixelHeight,
-							disabled,
-							formDisabled,
-							invisible,
-							null);
+	private CommandButton downloadButton(String title, 
+											String iconStyleClass,
+											String tooltip,
+											String dataWidgetBinding,
+											String dataWidgetVar,
+											String downloadActionName,
+											Integer pixelWidth, 
+											Integer pixelHeight,
+											String confirmationText,
+											String disabled,
+											String formDisabled,
+											String invisible) {
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+
+		result.setValue(title);
+		result.setIcon(iconStyleClass);
+		result.setTitle(tooltip);
+
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
+		setInvisible(result, invisible, null);
+		setDisabled(result, disabled, formDisabled);
+		setConfirmation(result, confirmationText);
+		setId(result, null);
+
+		downloadActionExpression(downloadActionName, dataWidgetBinding, dataWidgetVar, result);
+		return result;
 	}
 	
 	/**
@@ -2591,13 +2571,38 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 	
+	protected CommandLink downloadLink(String title,
+										String tooltip,
+										String actionName,
+										String dataWidgetBinding,
+										String dataWidgetVar, 
+										Integer pixelWidth, 
+										String confirmationText,
+										String disabled, 
+										String formDisabled,
+										String invisible) {
+		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
+
+		result.setValue(title);
+		result.setTitle(tooltip);
+
+		setSize(result, null, pixelWidth, null, null, null, null, null);
+		setDisabled(result, disabled, formDisabled);
+		setInvisible(result, dataWidgetVar, invisible, null);
+		setConfirmation(result, confirmationText);
+		setId(result, null);
+
+		downloadActionExpression(actionName, dataWidgetBinding, dataWidgetVar, result);
+		return result;
+	}
+	
 	protected CommandLink actionLink(String title, 
 										String tooltip, 
 										ImplicitActionName implicitActionName,
 										String actionName, 
 										boolean inline, 
-										String collectionBinding,
-										String listVar, 
+										String dataWidgetBinding,
+										String dataWidgetVar, 
 										Integer pixelWidth, 
 										Integer pixelHeight,
 										@SuppressWarnings("unused") Boolean clientValidation, 
@@ -2612,11 +2617,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValue(title);
 		result.setTitle(tooltip);
 
-		action(result, implicitActionName, actionName, collectionBinding, listVar, inline, null);
+		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled, formDisabled);
-		setInvisible(result, listVar, invisible, null);
+		setInvisible(result, dataWidgetVar, invisible, null);
 		setConfirmation(result, confirmationText);
 		setId(result, null);
 
@@ -2635,7 +2640,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							ImplicitActionName implicitActionName, 
 							String actionName,
 							String collectionBinding,
-							String listVar, 
+							String dataWidgetVar, 
 							boolean inline,
 							List<EventAction> eventHandlerActions) {
 		// Marshall the event actions into strings for the remove EL
@@ -2657,7 +2662,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				}
 			}
 		}
-		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionBinding, listVar, inline, eventHandlerActionNames));
+		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionBinding, dataWidgetVar, inline, eventHandlerActionNames));
 	}
 
 	private Button linkButton(String icon, 
@@ -2686,10 +2691,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIOutput outputText(String listVar, String binding) {
+	private UIOutput outputText(String dataWidgetVar, String binding) {
 		// escape bindings with ' as \' as the binding could be for blurb expressions
 		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
-		ValueExpression ve = createValueExpressionFromFragment(listVar, true, sanitisedBinding, true, null, String.class);
+		ValueExpression ve = createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
 		setId(result, null);
@@ -2815,7 +2820,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	// TODO do the grids
 
-	protected UIInput checkbox(String listVar, 
+	protected UIInput checkbox(String dataWidgetVar, 
 								String binding, 
 								String title, 
 								boolean required,
@@ -2824,7 +2829,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								boolean triState) {
 		if (triState) {
 			TriStateCheckbox result = (TriStateCheckbox) input(TriStateCheckbox.COMPONENT_TYPE,
-																listVar, 
+																dataWidgetVar, 
 																binding, 
 																title, 
 																required, 
@@ -2834,10 +2839,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return result;
 		}
 		
-		return input(SelectBooleanCheckbox.COMPONENT_TYPE, listVar, binding, title, required, disabled, formDisabled);
+		return input(SelectBooleanCheckbox.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 	}
 
-	protected ColorPicker colourPicker(String listVar, 
+	protected ColorPicker colourPicker(String dataWidgetVar, 
 										String binding, 
 										String title, 
 										boolean required,
@@ -2846,7 +2851,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										Integer pixelWidth, 
 										boolean applyDefaultWidth) {
 		ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE, 
-													listVar, 
+													dataWidgetVar, 
 													binding, 
 													title, 
 													required,
@@ -2856,7 +2861,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private SelectOneMenu selectOneMenu(String listVar, 
+	private SelectOneMenu selectOneMenu(String dataWidgetVar, 
 											String binding, 
 											String title, 
 											boolean required,
@@ -2864,7 +2869,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String formDisabled,
 											Integer pixelWidth) {
 		SelectOneMenu result = (SelectOneMenu) input(SelectOneMenu.COMPONENT_TYPE, 
-														listVar, 
+														dataWidgetVar, 
 														binding, 
 														title,
 														required, 
@@ -2877,14 +2882,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private SelectOneRadio selectOneRadio(String listVar, 
+	private SelectOneRadio selectOneRadio(String dataWidgetVar, 
 											String binding, 
 											String title, 
 											boolean required,
 											String disabled,
 											String formDisabled) {
 		SelectOneRadio result = (SelectOneRadio) input(SelectOneRadio.COMPONENT_TYPE, 
-														listVar, 
+														dataWidgetVar, 
 														binding, 
 														title,
 														required, 
@@ -2894,7 +2899,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected AutoComplete autoComplete(String listVar, 
+	protected AutoComplete autoComplete(String dataWidgetVar, 
 											String binding, 
 											String title, 
 											boolean required,
@@ -2906,7 +2911,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											Integer pixelWidth,
 											boolean dontDisplay) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
-													listVar, 
+													dataWidgetVar, 
 													binding, 
 													title, 
 													required,
@@ -2967,17 +2972,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	// this has a customisable toolbar for rich and html skyve editors.
-	private Editor editor(String listVar,
+	private Editor editor(String dataWidgetVar,
 							String binding,
 							String title,
 							boolean required,
 							String disabled,
 							String formDisabled) {
-		return (Editor) input(Editor.COMPONENT_TYPE, listVar, binding, title, required, disabled, formDisabled);
+		return (Editor) input(Editor.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 	}
 
 	private DataTable dataTable(String binding, 
-									String listVar,
+									String dataWidgetVar,
 									String title, 
 									String invisible, 
 									boolean clickToZoom,
@@ -2991,7 +2996,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
-		result.setVar(listVar);
+		result.setVar(dataWidgetVar);
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		if (selectedIdBinding != null) {
@@ -3002,7 +3007,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setSelectionMode("single");
 			result.setValueExpression("rowKey",
-										createValueExpressionFromFragment(listVar,
+										createValueExpressionFromFragment(dataWidgetVar,
 																			false,
 																			Bean.DOCUMENT_ID, 
 																			true, 
@@ -3046,13 +3051,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected DataList dataList(String binding, String listVar, String title, String invisible, String widgetId) {
+	protected DataList dataList(String binding, String dataWidgetVar, String title, String invisible, String widgetId) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
-		result.setVar(listVar);
+		result.setVar(dataWidgetVar);
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		return result;
@@ -3075,7 +3080,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private Column column(String listVar, 
+	private Column column(String dataWidgetVar, 
 							String sortBinding, 
 							String title, 
 							HorizontalAlignment alignment,
@@ -3087,7 +3092,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setHeaderText(title);
 		if (sortBinding != null) {
 			result.setValueExpression("sortBy",
-										createValueExpressionFromFragment(listVar, true, sortBinding, true, null, Object.class));
+										createValueExpressionFromFragment(dataWidgetVar, true, sortBinding, true, null, Object.class));
 		}
 
 		StringBuilder style = new StringBuilder(64);
@@ -3109,7 +3114,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	private UISelectItems selectItems(String moduleName,
 										String documentName,
-										String listVar,
+										String dataWidgetVar,
 										String binding,
 										boolean includeEmptyItems) {
 		UISelectItems result = (UISelectItems) a.createComponent(UISelectItems.COMPONENT_TYPE);
@@ -3126,8 +3131,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		else { // use the FacesView.currentBean.getSelectItems()
 			expression = String.format("getSelectItems('%s',%s)", binding, String.valueOf(includeEmptyItems));
-			if (listVar != null) {
-				valueExpression = createValueExpressionFromFragment(listVar, true, expression, false, null, List.class);
+			if (dataWidgetVar != null) {
+				valueExpression = createValueExpressionFromFragment(dataWidgetVar, true, expression, false, null, List.class);
 			}
 			else {
 				valueExpression = createValueExpressionFromFragment(expression, false, null, List.class);
@@ -3139,7 +3144,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	private UIInput input(String componentType, 
-							String listVar, 
+							String dataWidgetVar, 
 							String binding,
 							String title, 
 							boolean required,
@@ -3148,9 +3153,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		UIInput result = (UIInput) a.createComponent(componentType);
 		setId(result, null);
 		if (binding != null) { // data table filter components don't set a binding
-			if (listVar != null) {
+			if (dataWidgetVar != null) {
 				result.setValueExpression("value",
-											createValueExpressionFromFragment(listVar, true, binding, true, null, Object.class));
+											createValueExpressionFromFragment(dataWidgetVar, true, binding, true, null, Object.class));
 			}
 			else {
 				result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));

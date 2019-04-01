@@ -110,7 +110,7 @@ public abstract class FacesAction<T> {
 			}
 
 			// find components if this is an indexed compound binding
-			// eg listBinding[\d*].simpleBinding or listBinding[\d*].compound.binding etc
+			// eg dataWidgetBinding[\d*].simpleBinding or dataWidgetBinding[\d*].compound.binding etc
 			int lastOpeningSquareBraceIndex = binding.lastIndexOf('[');
 			int lastClosingSquareBraceIndex = binding.lastIndexOf(']');
 			if ((lastOpeningSquareBraceIndex > 0) && 

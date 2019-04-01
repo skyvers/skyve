@@ -18,15 +18,20 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	private static final String DATA_TABLE_STYLE_CLASS = "box-primary";
 	
 	@Override
-	public UIComponent action(UIComponent component, String listBinding, String listVar, Action action, ImplicitActionName name, String title) {
+	public UIComponent action(UIComponent component,
+								String dataWidgetBinding,
+								String dataWidgetVar,
+								Action action,
+								ImplicitActionName name,
+								String title) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
 
 	@Override
 	public UIComponent actionButton(UIComponent component,
-										String listBinding,
-										String listVar,
+										String dataWidgetBinding,
+										String dataWidgetVar,
 										String label,
 										String iconStyleClass,
 										String toolTip,
@@ -39,22 +44,22 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+	public UIComponent download(UIComponent component, String dataWidgetBinding, String dataWidgetVar, Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
 	
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String dataWidgetBinding,
+										String dataWidgetVar,
 										String label,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText, 
 										Button button,
 										String formDisabledConditionName,
-										Action action,
-										String moduleName,
-										String documentName) {
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -122,7 +127,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent dataGrid(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									boolean ordered,
 									String title,
 									DataGrid grid) {

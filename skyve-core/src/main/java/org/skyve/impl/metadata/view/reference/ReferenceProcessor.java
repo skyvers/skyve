@@ -1,5 +1,16 @@
 package org.skyve.impl.metadata.view.reference;
 
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.web.UserAgentType;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder.TargetMetaData;
+
 public abstract class ReferenceProcessor {
 	public final void process(Reference reference) {
 		if (reference instanceof ActionReference) {
@@ -43,4 +54,39 @@ public abstract class ReferenceProcessor {
 	public abstract void processQueryListViewReference(QueryListViewReference reference);
 	public abstract void processReportReference(ReportReference reference);
 	public abstract void processResourceReference(ResourceReference reference);
+	
+	public static final Action obtainActionForActionReference(ActionReference reference,
+																Customer customer,
+																Module module,
+																Document document,
+																String dataWidgetBinding,
+																UserAgentType userAgentType) {
+		final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
+
+		final Document listDocument;
+		// Figure out the document type of the relation.
+		if (listTarget.getAttribute() instanceof Relation) {
+			final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
+			listDocument = module.getDocument(customer, documentName);
+		}
+		else {
+			listDocument = listTarget.getDocument();
+		}
+
+		final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
+		Action result = null;
+		for (ViewType viewType : viewTypesToSearch) {
+			final View listDocumentView = listDocument.getView(userAgentType.name(), customer, viewType.name());
+			if (listDocumentView == null) {
+				continue;
+			}
+			result = listDocumentView.getAction(reference.getActionName());
+			if (result != null) {
+				// Found the action, we can stop looking.
+				break;
+			}
+		}
+
+		return result;
+	}
 }

@@ -494,7 +494,7 @@ System.out.println("action column " + current);
 											String dataWidgetBinding,
 											String dataWidgetVar,
 											Link link,
-											String actionName) {
+											Action action) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ActionLink</span>");

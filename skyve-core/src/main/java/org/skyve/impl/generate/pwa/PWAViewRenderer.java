@@ -691,35 +691,9 @@ public class PWAViewRenderer extends ViewRenderer {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
-
-				final Document listDocument;
-				// Figure out the document type of the relation.
-				if (listTarget.getAttribute() instanceof Relation) {
-					final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
-					listDocument = module.getDocument(customer, documentName);
-				} else {
-					listDocument = listTarget.getDocument();
-				}
-
-				final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
-				Action action = null;
-				for (ViewType viewType : viewTypesToSearch) {
-					final View listDocumentView = listDocument.getView(cr.userAgentType.name(), customer, viewType.name());
-					if (listDocumentView == null) {
-						continue;
-					}
-					action = listDocumentView.getAction(reference.getActionName());
-					if (action != null) {
-						// Found the action, we can stop looking.
-						break;
-					}
-				}
-
+				Action action = obtainActionForActionReference(reference, customer, module, document, value, cr.userAgentType);
 				if (action != null) {
-					c.set(cr.actionLink(null, dataWidgetBinding, dataWidgetVar, link, action.getName()));
-				} else {
-					c.set(cr.actionLink(null, dataWidgetBinding, dataWidgetVar, link, reference.getActionName()));
+					c.set(cr.actionLink(null, dataWidgetBinding, dataWidgetVar, link, action));
 				}
 			}
 		}.process(outerReference);
