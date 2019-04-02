@@ -55,7 +55,7 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 			if (msg == null) {
 				msg = "Something went wrong. The compiler threw a " + e.getClass();
 			}
-			msg = sailSource + '\n' + msg;
+			msg = sailSource + "\n" + msg;
 			result = new Download("sail.txt", new ByteArrayInputStream(msg.getBytes(Util.UTF8)), MimeType.plain);
 		}
 		finally {
@@ -69,16 +69,17 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 	static String sailSource(String methods, String baseUrl) {
 		StringBuilder result = new StringBuilder(2048);
 
-		result.append("import util.sail.BrowserConfiguration;\n");
-		result.append("import util.sail.Devices;\n");
-		result.append("import util.sail.PrimeFacesTest;\n\n");
+		result.append("import java.io.File;\n\n");
 		result.append("import org.junit.After;\n");
 		result.append("import org.junit.Before;\n");
 		result.append("import org.junit.Test;\n\n");
+		result.append("import util.sail.BrowserConfiguration;\n");
+		result.append("import util.sail.Devices;\n");
+		result.append("import util.sail.PrimeFacesTest;\n\n");
 		result.append("public class Sail extends PrimeFacesTest {\n");
 		result.append("\t@Before\n");
 		result.append("\tpublic void setup() throws Exception {\n");
-		result.append("\t\tsetupChrome(new BrowserConfiguration().baseUrl(\"").append(baseUrl).append("\").pathToDriver(\"").append(((File.pathSeparatorChar == ':') ? "./chromedriver" : "./chromedriver.exe")).append("\").userAgentString(Devices.ipad.userAgentString));\n");
+		result.append("\t\tsetupChrome(new BrowserConfiguration().baseUrl(\"").append(baseUrl).append("\").pathToDriver((File.pathSeparatorChar == ':') ? \"./chromedriver\" : \"./chromedriver.exe\").userAgentString(Devices.ipad.userAgentString));\n");
 		result.append("\t}\n\n");
 		result.append("\t@After\n");
 		result.append("\tpublic void teardown() {\n");
