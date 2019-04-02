@@ -315,7 +315,7 @@
 		<action className="ExecuteQuery" displayName="Execute" inActionPanel="false" />
 		<action className="GenerateMenuSAIL" displayName="Menu SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) menu" />
 		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
-		<action className="ExecuteSAIL" displayName="Execute" inActionPanel="false" toolTip="Execute SAIL and output results" />
+		<action className="ExecuteSAIL" displayName="Generate Test" inActionPanel="false" toolTip="Execute SAIL and output results" />
 		<download className="DownloadSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
 	</actions>
 </view>

@@ -55,6 +55,7 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 			if (msg == null) {
 				msg = "Something went wrong. The compiler threw a " + e.getClass();
 			}
+			msg = sailSource + '\n' + msg;
 			result = new Download("sail.txt", new ByteArrayInputStream(msg.getBytes(Util.UTF8)), MimeType.plain);
 		}
 		finally {
@@ -77,7 +78,7 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 		result.append("public class Sail extends PrimeFacesTest {\n");
 		result.append("\t@Before\n");
 		result.append("\tpublic void setup() throws Exception {\n");
-		result.append("\t\tsetupChrome(new BrowserConfiguration().baseUrl(\"").append(baseUrl).append("\").pathToDriver(\"./chromedriver\").userAgentString(Devices.ipad.userAgentString));\n");
+		result.append("\t\tsetupChrome(new BrowserConfiguration().baseUrl(\"").append(baseUrl).append("\").pathToDriver(\"").append(((File.pathSeparatorChar == ':') ? "./chromedriver" : "./chromedriver.exe")).append("\").userAgentString(Devices.ipad.userAgentString));\n");
 		result.append("\t}\n\n");
 		result.append("\t@After\n");
 		result.append("\tpublic void teardown() {\n");
