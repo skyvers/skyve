@@ -161,6 +161,6 @@
 			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
 		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" />
 		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" />
-		<download className="GetImportTemplate" displayName="Get Template for Import" inActionPanel="false" />
+		<download className="GetImportTemplate" displayName="Get Template for Import"  invisible="showExport" inActionPanel="false" />
 	</actions>
 </view>
