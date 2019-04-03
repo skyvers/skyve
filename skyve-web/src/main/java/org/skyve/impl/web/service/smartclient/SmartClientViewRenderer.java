@@ -92,6 +92,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
@@ -1780,8 +1781,20 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormTextField(TextField text) {
 		if (Boolean.TRUE.equals(text.getPreviousValues())) {
 		    preProcessFormItem(text, "comboBox");
-            TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, text.getBinding());
+		    String binding = text.getBinding();
+            TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
             Document targetDocument = target.getDocument();
+            String attributeName = binding;
+            Attribute attribute = target.getAttribute();
+            if (attribute != null) {
+            	attributeName = attribute.getName();
+            }
+            else { // implicit attribute
+            	int lastDotIndex = binding.lastIndexOf('.');
+            	if (lastDotIndex >= 0) {
+            		attributeName = binding.substring(lastDotIndex + 1);
+            	}
+            }
             // have the options of 
 			// 1) pickListCriteria:{}
 			// 2) optionCriteria:{}
@@ -1791,7 +1804,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("optionFilterContext:{params:{").append(AbstractWebContext.MODULE_NAME).append(":'");
 			code.append(targetDocument.getOwningModuleName());
 			code.append("',").append(AbstractWebContext.DOCUMENT_NAME).append(":'").append(targetDocument.getName());
-			code.append("',").append(AbstractWebContext.BINDING_NAME).append(":'").append(target.getAttribute().getName());
+			code.append("',").append(AbstractWebContext.BINDING_NAME).append(":'").append(attributeName);
 			// Use the home-grown previous values style override in basec.css and don't show the picker icon
 			code.append("'}},textBoxStyle:'bizhubPreviousValuesText',showPickerIcon:false,");
 			// Set the dropdown selection field mapping

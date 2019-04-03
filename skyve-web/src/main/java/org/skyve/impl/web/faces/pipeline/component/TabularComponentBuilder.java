@@ -1816,6 +1816,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								text.getPixelWidth(),
 								true);
         }
+        else if (Boolean.TRUE.equals(text.getPreviousValues())) {
+        	result = previousValues(dataWidgetVar,
+			        					text.getBinding(),
+			        					title,
+			        					required,
+			        					text.getDisabledConditionName(),
+			        					length,
+			        					formDisabledConditionName,
+			        					text.getPixelWidth());
+        }
         else {
         	result = textField(dataWidgetVar,
 								text.getBinding(),
@@ -2973,6 +2983,44 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					null,
 					// width cannot be set correctly on this component when laid out in a table
 					null); // applyDefaultWidth ? ONE_HUNDRED : null); 
+
+		return result;
+	}
+
+	protected AutoComplete previousValues(String dataWidgetVar, 
+											String binding, 
+											String title, 
+											boolean required,
+											String disabled,
+											Integer length,
+											String formDisabled,
+											Integer pixelWidth) {
+		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
+													dataWidgetVar, 
+													binding, 
+													title, 
+													required,
+													disabled,
+													formDisabled);
+		result.setForceSelection(false);
+		result.setDropdown(false);
+		if (length != null) {
+			result.setMaxlength(length.intValue());
+		}
+		result.setScrollHeight(200);
+
+		StringBuilder expression = new StringBuilder(32);
+		expression.append("#{").append(managedBeanName).append(".previousValues}");
+		result.setCompleteMethod(ef.createMethodExpression(elc, 
+															expression.toString(), 
+															List.class, 
+															new Class[] {String.class}));
+
+		Map<String, Object> attributes = result.getAttributes();
+		attributes.put("binding", binding);
+
+		// NB width cannot be set correctly on this component when laid out in a table
+		setSize(result, null, pixelWidth, null, null, null, null, null);
 
 		return result;
 	}
