@@ -1,0 +1,26 @@
+run skyve-build.xml build target
+run skyve-build.xml buildXmlSchemas target
+run skyve-build.xml compressJavascript target
+Ensure any changes required are committed.
+Make a release version
+	In a shell, cd to skyve project folder and run mvn versions:set -DnewVersion=<new-version>
+	Refresh projects in IDE
+	Delete *.versionBackup files
+	Search for old version number in all skyve pom.xmls and update them (should be in skyve/pom.xml and skyve-ee/pom.xml)
+	Open UtilImpl.java and change WEB_RESOURCE_FILE_VERSION and SKYVE_VERSION static final Strings to the new version.
+	Commit and tag the pom.xmls and UtilImpl.java changes with the version number as the tag name.
+	
+Release
+	Run maven install on the skyve project.
+	Run maven install on the skyve-ee project.
+	Run maven deploy on the skyve project.
+	Run maven deploy on the skyve-ee project.
+	Check the 6 components/libraries are on nexus by browsing to http://repo.skyve.org
+	
+Make new snapshot version
+	In a shell, cd to skyve project folder and run mvn versions:set -DnewVersion=<new-version + 1 day>-SNAPSHOT
+	Refresh projects in IDE
+	Delete *.versionBackup files
+	Search for old version number in all skyve pom.xmls and update them (should be in skyve/pom.xml and skyve-ee/pom.xml)
+	Open UtilImpl.java and change WEB_RESOURCE_FILE_VERSION and SKYVE_VERSION static final Strings to the new version.
+	Commit the pom.xmls and UtilImpl.java changes.
