@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" 
-xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
 		<hbox border="true" borderTitle="Details">
@@ -55,7 +54,7 @@ xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xs
 				<column />
 				<row>
 					<item>
-						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200"  editable="false"/>
+						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
 					</item>
 				</row>
 
@@ -66,7 +65,14 @@ xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xs
 			<column />
 			<row>
 				<item>
-					<default binding="status" />
+					<default binding="location" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<combo binding="status" >
+						<onChangedHandlers><rerender/></onChangedHandlers>
+					</combo>
 				</item>
 			</row>
 			<row>
