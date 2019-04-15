@@ -76,7 +76,7 @@ public class Office extends AbstractPersistentBean {
 	 **/
 	private String phone;
 	/**
-	 * Description of Office
+	 * Description
 	 **/
 	private String description;
 	/**
