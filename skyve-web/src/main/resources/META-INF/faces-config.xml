@@ -8,7 +8,6 @@
 		<el-resolver>
 			org.skyve.impl.web.faces.EmptyStringResolver
 		</el-resolver>
-		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
 	</application>
 
     <factory>

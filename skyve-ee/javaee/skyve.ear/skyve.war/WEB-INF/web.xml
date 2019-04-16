@@ -64,10 +64,6 @@
 		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'casablanca' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
 	</context-param>
 	<context-param>
-		<param-name>primefaces.mobile.THEME</param-name>
-		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'water' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
-	</context-param>
-	<context-param>
 		<param-name>primefaces.FONT_AWESOME</param-name>
 		<param-value>true</param-value>
 	</context-param>
