@@ -71,6 +71,8 @@ public class RestoreJob extends CancellableJob {
 			return;
 		}
 		
+		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
+		
 		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
 		File extractDir = new File(backup.getParentFile(), extractDirName);
 		trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
@@ -161,7 +163,8 @@ public class RestoreJob extends CancellableJob {
 		log.add(trace);
 		Util.LOGGER.info(trace);
 		setPercentComplete(100);
-		EXT.push(new PushMessage().user().growl(MessageSeverity.info, "Restore Completed"));
+		
+		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 	}
 	
 	private void restore(String extractDirName,
