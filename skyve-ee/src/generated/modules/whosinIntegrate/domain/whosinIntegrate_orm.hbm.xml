@@ -26,6 +26,7 @@
 		<property name="suburb" length="200" />
 		<property name="postCode" length="4" />
 		<property name="phone" length="14" />
+		<property name="description" type="text" />
 		<property name="boundary" />
 		<filter name="whosinIntegrateOfficeNoneFilter" condition="1=0"/>
 		<filter name="whosinIntegrateOfficeCustomerFilter" condition="bizCustomer=:customerParam"/>

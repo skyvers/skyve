@@ -55,15 +55,15 @@ public class StaffBizlet extends Bizlet<Staff> {
 				newPosition = pers.save(newPosition);
 			}
 
-			//if location is within the office, set the status
-			if(bean.getLocation().within(bean.getBaseOffice().getBoundary())) {
-				bean.setStatus(Status.inTheOffice);
-				
-				// otherwise, if status was "in the office", set new status to "out of the office"
-			} else if(Status.inTheOffice.equals(bean.getStatus())) {
-				bean.setStatus(Status.outOfTheOffice);
+			// if location is within the office, set the status
+			if (bean.getBaseOffice() != null && bean.getBaseOffice().getBoundary() != null) {
+				if (bean.getLocation().within(bean.getBaseOffice().getBoundary())) {
+					bean.setStatus(Status.inTheOffice);
+					// otherwise, if status was "in the office", set new status to "out of the office"
+				} else if (Status.inTheOffice.equals(bean.getStatus())) {
+					bean.setStatus(Status.outOfTheOffice);
+				}
 			}
-			
 		}
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
@@ -72,13 +72,13 @@ public class StaffBizlet extends Bizlet<Staff> {
 	@Override
 	public void preRerender(String source, Staff bean, WebContext webContext) throws Exception {
 
-		if(Staff.statusPropertyName.equals(source)) {
-			//if status is "in the office" then set the location to be the centroid of the office boundary
-			if(Status.inTheOffice.equals(bean.getStatus()) && bean.getBaseOffice()!=null && bean.getBaseOffice().getBoundary()!=null) {
+		if (Staff.statusPropertyName.equals(source)) {
+			// if status is "in the office" then set the location to be the centroid of the office boundary
+			if (Status.inTheOffice.equals(bean.getStatus()) && bean.getBaseOffice() != null && bean.getBaseOffice().getBoundary() != null) {
 				bean.setLocation(bean.getBaseOffice().getBoundary().getCentroid());
-			} 
+			}
 		}
-		
+
 		super.preRerender(source, bean, webContext);
 	}
 

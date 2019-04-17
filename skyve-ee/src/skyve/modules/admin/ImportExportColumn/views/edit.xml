@@ -22,11 +22,6 @@
 				<textField visible="showExpression" binding="bindingExpression"/>
 			</item>
 		</row>
-		<row>
-			<item>
-				<combo visible="showLoadAction" binding="loadAction"/>
-			</item>
-		</row>
 	</form>
 	<actions>
 		<defaults />

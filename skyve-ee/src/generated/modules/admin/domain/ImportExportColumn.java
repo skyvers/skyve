@@ -285,26 +285,6 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 		return (! isShowExpression());
 	}
 
-	/**
-	 * Whether to show the load action
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isShowLoadAction() {
-		return (bindingName!=null
-				&& (parent.getMode()!=null && modules.admin.domain.ImportExport.Mode.importData.equals(parent.getMode())));
-	}
-
-	/**
-	 * {@link #isShowLoadAction} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotShowLoadAction() {
-		return (! isShowLoadAction());
-	}
-
 	@Override
 	public ImportExportExtension getParent() {
 		return parent;
