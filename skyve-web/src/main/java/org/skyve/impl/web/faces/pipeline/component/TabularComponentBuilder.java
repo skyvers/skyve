@@ -1566,7 +1566,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		uploadButton.setType("button");
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
-		setSize(uploadButton, null, Integer.valueOf(40), null, null, null, null, null);
+		setSize(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
 
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
@@ -1609,7 +1609,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
-		setSize(clearButton, null, Integer.valueOf(40), null, null, null, null, null);
+		setSize(clearButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(clearButton);
 	}
 	
