@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.coobird.thumbnailator.Thumbnails;
-
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -30,7 +28,6 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -39,6 +36,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import net.coobird.thumbnailator.Thumbnails;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	/**
@@ -58,8 +57,10 @@ public class CustomerResourceServlet extends HttpServlet {
 		void dispose() throws Exception {
 			if (cm != null) {
 				cm.close();
-				cm = null;
 			}
+			content = null;
+			file = null;
+			cm = null;
 		}
 
 		public long getLastModified() {
@@ -81,6 +82,19 @@ public class CustomerResourceServlet extends HttpServlet {
 			return bytes;
 		}
 		
+		/*
+		 * I might need to check the size of the source image
+		 * 		ImageReader i = ImageIO.getImageReaders(bis).next();
+		 *		try {
+		 *			int width = i.getWidth(0);
+		 *			int height = i.getHeight(0);
+		 *		}
+		 *		finally {
+		 *			i.dispose();
+		 *		}
+		 * and if too big - whatever this may mean and maybe in relation to the width and height required for the tumbnail
+		 * sub-sample the input stream - see net.coobird.thumbnailator.tasks.io.nputStreamImageSource
+		 */
 		private void load()
 		throws FileNotFoundException, IOException {
 			if (bytes == null) {
@@ -98,6 +112,7 @@ public class CustomerResourceServlet extends HttpServlet {
 									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
 									bytes = baos.toByteArray();
 								}
+								image = null; // encourage garbage collection
 							}
 						}
 						// Full content
@@ -127,6 +142,7 @@ public class CustomerResourceServlet extends HttpServlet {
 									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
 									bytes = baos.toByteArray();
 								}
+								image = null; // encourage garbage collection
 							}
 						}
 					}

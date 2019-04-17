@@ -49,12 +49,21 @@
 		<route outcome="/whosinIntegrate/mystatus.xhtml">
 			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
 		</route>
-		<route outcome="/mobile/list.xhtml">
+		<route outcome="/admin/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/mobile/edit.xhtml">
+		<route outcome="/admin/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/mobile/home.xhtml" />
+		<route outcome="/admin/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/admin/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/admin/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/admin/home.xhtml" />
 	</uxui>
 </router>

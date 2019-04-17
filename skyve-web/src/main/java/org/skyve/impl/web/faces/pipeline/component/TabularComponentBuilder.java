@@ -1562,8 +1562,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String uploadButtonId = uploadButton.getId();
 		uploadButton.setIcon("fa fa-upload");
 		uploadButton.setTitle("Upload Content");
+		uploadButton.setValue(null);
 		uploadButton.setType("button");
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
+		// for admin theme
+		setSize(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
 
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
@@ -1595,8 +1598,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(clearButton, null);
 		clearButton.setIcon("fa fa-trash");
-		clearButton.setValue(null);
 		clearButton.setTitle("Clear Content");
+		clearButton.setValue(null);
 		clearButton.setType("button");
 		if (image) {
 			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s')", sanitisedBinding));
@@ -1605,6 +1608,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s')", sanitisedBinding));
 		}
 		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
+		// for admin theme
+		setSize(clearButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(clearButton);
 	}
 	
@@ -2565,7 +2570,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setConfirmation(uploadButton, confirmationText);
 		children.add(uploadButton);
 		
-		// Overlay panel attac hed to the upload button that houses the iframe
+		// Overlay panel attached to the upload button that houses the iframe
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 		setId(overlay, null);
 		String overlayId = overlay.getId();

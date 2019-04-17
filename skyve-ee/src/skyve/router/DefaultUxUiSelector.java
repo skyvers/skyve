@@ -12,7 +12,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 
 public class DefaultUxUiSelector implements UxUiSelector {
-	public static final UxUi PHONE = new UxUi("phone", "water");
+	public static final UxUi PHONE = new UxUi("phone", "admin");
 	public static final UxUi TABLET = new UxUi("tablet", "admin");
 	public static final UxUi DESKTOP = new UxUi("desktop", "casablanca");
 	public static final UxUi EXTERNAL = new UxUi("external", "admin");
