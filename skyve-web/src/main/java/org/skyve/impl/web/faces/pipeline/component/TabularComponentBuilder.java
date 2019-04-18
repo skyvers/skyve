@@ -816,7 +816,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         result.setLazy(true);
     	result.setRows(50);
-		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+    	
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+        emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+        result.getFacets().put("emptyMessage", emptyMessage);
+
 		result.setSortMode("multiple");
 
         setId(result, null);
