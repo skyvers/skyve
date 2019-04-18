@@ -48,14 +48,5 @@
 				]]>
 			</expression>
 		</condition>
-		<condition name="showLoadAction">
-			<description>Whether to show the load action</description>
-			<expression>
-				<![CDATA[
-				bindingName!=null
-				&& (parent.getMode()!=null && modules.admin.domain.ImportExport.Mode.importData.equals(parent.getMode())) 
-				]]>
-			</expression>
-		</condition>
 	</conditions>
 </document>

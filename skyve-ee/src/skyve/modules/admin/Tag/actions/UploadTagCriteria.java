@@ -42,6 +42,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 			// skip headers
 			loader.setDataIndex(1);
 		}
+		loader.setDebugMode(true);
 
 		DataFileField searchField = new DataFileField(tag.getAttributeName(), 0);
 		switch (tag.getFilterOperator()) {

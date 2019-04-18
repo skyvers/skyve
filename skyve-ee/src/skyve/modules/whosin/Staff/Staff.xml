@@ -23,7 +23,7 @@
 		</date>
 		<text name="roleTitle">
 			<displayName>Role Title</displayName>
-			<description>The person's organisational title or role</description>
+			<description>The person's organisational title or role.</description>
 			<length>200</length>
 		</text>
 		<association type="aggregation" name="baseOffice">

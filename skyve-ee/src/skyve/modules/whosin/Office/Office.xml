@@ -38,7 +38,7 @@
 			<length>14</length>
 		</text>
 		<memo name="description">
-			<displayName>Description of Office</displayName>
+			<displayName>Description</displayName>
 		</memo>
 		<geometry name="boundary">
 			<displayName>Boundary</displayName>

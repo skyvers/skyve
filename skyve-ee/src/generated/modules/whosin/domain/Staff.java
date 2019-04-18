@@ -164,7 +164,7 @@ public class Staff extends AbstractPersistentBean {
 	/**
 	 * Role Title
 	 * <br/>
-	 * The person's organisational title or role
+	 * The person's organisational title or role.
 	 **/
 	private String roleTitle;
 	/**
