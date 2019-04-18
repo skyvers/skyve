@@ -631,7 +631,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			columnHeader.setLayout("block");
-			columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
@@ -1194,7 +1194,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
-		columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+		columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 		column.getFacets().put("header", columnHeader);
 		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
 
