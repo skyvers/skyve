@@ -27,6 +27,7 @@ public class New implements ServerSideAction<User> {
 		adminUser.setContact(contact);
 		
 		adminUser.setWizardState(WizardState.createContact);
+		Next.next(adminUser);
 
 		return new ServerSideActionResult<>(adminUser);
 	}

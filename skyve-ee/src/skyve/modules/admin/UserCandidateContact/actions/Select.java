@@ -1,13 +1,13 @@
 package modules.admin.UserCandidateContact.actions;
 
-import modules.admin.User.actions.GenerateUniqueUserName;
-import modules.admin.domain.User;
-import modules.admin.domain.UserCandidateContact;
-import modules.admin.domain.User.WizardState;
-
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
+
+import modules.admin.User.actions.GenerateUniqueUserName;
+import modules.admin.domain.User;
+import modules.admin.domain.User.WizardState;
+import modules.admin.domain.UserCandidateContact;
 
 public class Select implements ServerSideAction<UserCandidateContact> {
 	/**
@@ -24,7 +24,7 @@ public class Select implements ServerSideAction<UserCandidateContact> {
 		
 		user.setWizardState(WizardState.confirmUserNameAndPassword);
 		user.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(user));
-		
+
 		return new ServerSideActionResult<>(candidate);
 	}
 }

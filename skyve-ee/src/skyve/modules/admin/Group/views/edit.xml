@@ -6,22 +6,8 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
 	<tabPane>
 		<tab title="Group Details">
-			<vbox responsiveWidth="12">
-				<form border="true" percentageWidth="50">
-					<column percentageWidth="30" />
-					<column />
-					<row>
-						<item>
-							<default binding="name" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<default binding="description" />
-						</item>
-					</row>
-				</form>
-				<listMembership binding="roles"/>
+			<vbox >
+				<component name="_groupCreator"/>
 			</vbox>
 		</tab>
 		<tab title="Users in Group">

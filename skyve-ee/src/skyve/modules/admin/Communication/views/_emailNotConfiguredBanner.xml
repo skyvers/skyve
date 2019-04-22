@@ -7,10 +7,25 @@
 			<column />
 			<row>
 				<item>
-					<blurb><![CDATA[<font style="color:red;"><b>It looks like you haven't set up a valid email configuration. You may not be able to send emails.</b></font>]]></blurb>
+					<blurb>
+						<![CDATA[
+							<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
+								<div class="ui-messages-info ui-corner-all">
+									<span class="ui-messages-warn-icon"></span>
+									<ul>
+										<li role="alert" aria-atomic="true">
+											<span class="ui-messages-warn-detail">
+												It looks like you haven't set up a valid email configuration. You may not be able to send emails.
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>				
+						]]>
+					</blurb>
 				</item>
 			</row>
-		</form>
+		</form>		
 	</vbox>
 	<actions>
 	</actions>
