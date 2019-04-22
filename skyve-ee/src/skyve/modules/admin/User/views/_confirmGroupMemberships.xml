@@ -37,12 +37,12 @@
 					</row>
 					<row>
 						<item required="true">
-							<textField disabled="true" binding="contact.email1" />
+							<textField binding="contact.email1" />
 						</item>
 					</row>
 					<row>
 						<item>
-							<textField disabled="true" binding="userName" />
+							<textField binding="userName" />
 						</item>
 					</row>
 				</form>

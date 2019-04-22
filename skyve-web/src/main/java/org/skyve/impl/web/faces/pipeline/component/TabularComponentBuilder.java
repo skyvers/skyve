@@ -174,7 +174,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
-			stickyTabScript.append(String.format("PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);",
+			stickyTabScript.append(String.format("$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);});",
 													id,
 													moduleName, documentName, id,
 													moduleName, documentName, id));
@@ -631,7 +631,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			columnHeader.setLayout("block");
-			columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
@@ -816,7 +816,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         result.setLazy(true);
     	result.setRows(50);
-		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+    	
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+        emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+        result.getFacets().put("emptyMessage", emptyMessage);
+
 		result.setSortMode("multiple");
 
         setId(result, null);
@@ -1190,7 +1194,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
-		columnHeader.setStyle("display:flex;flex-direction:column;height:65px;justify-content:space-evenly;align-items:center");
+		columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 		column.getFacets().put("header", columnHeader);
 		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
 

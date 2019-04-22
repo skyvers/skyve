@@ -497,8 +497,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		setId(result, null);
 		result.setVar("row");
         result.setLazy(true);
-		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
 
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+        emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+        result.getFacets().put("emptyMessage", emptyMessage);
+		
 		Document drivingDocument = model.getDrivingDocument();
 		String owningModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();

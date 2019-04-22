@@ -28,11 +28,11 @@
 		</vbox>
 	</vbox>
 	<actions>
-		<defaults invisible="notConfirmGroupMemberships" />
-		<cancel invisible="confirmGroupMemberships" />
-		<action className="New" displayName="New Contact" invisible="notConfirmContact" inActionPanel="false" relativeIconFileName="actions/New.gif" />
-		<action className="Check" displayName="Search" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
-		<action className="Back" displayName="Back" clientValidation="false" relativeIconFileName="shared/icons/Back.gif" invisible="confirmContact" />
-		<action className="Next" displayName="Next" clientValidation="false" relativeIconFileName="shared/icons/Next.gif" invisible="notShowNextButton" />
+		<cancel/>
+		<action className="New" displayName="New Contact" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fa fa-user-plus"/>
+		<action className="Check" displayName="Search" inActionPanel="false" iconStyleClass="fa fa-search"/>
+		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
+		<action className="Next" displayName="Next" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
+		<save visible="confirmGroupMemberships" displayName="Finish"/>
 	</actions>
 </view>
