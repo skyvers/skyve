@@ -7,7 +7,7 @@
 		</tab>
 		<tab title="Invite Users">
 			<component document="Communication" name="_emailNotConfiguredBanner" />
-			<vbox border="true" borderTitle="User Invitations" percentageWidth="60" shrinkWrap="height">
+			<vbox border="true" borderTitle="User Invitations" >
 				<form>
 					<column />
 					<row>
@@ -17,7 +17,7 @@
 					</row>
 				</form>
 				<vbox percentageHeight="40">
-					<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
+					<listMembership binding="userInvitationGroups" candidatesHeading="Available Groups" membersHeading="Assigned Groups" listWidth="300" />
 				</vbox>
 				<form>
 					<column />
@@ -37,10 +37,10 @@
 					</row>
 					<row>
 						<item>
-							<button actionName="CreateUsers" pixelWidth="200" />
+							<button actionName="InviteUsers" pixelWidth="250" />
 						</item>
 						<item>
-							<button actionName="InviteUsers" pixelWidth="200" />
+							<button actionName="CreateUsers" pixelWidth="250" />
 						</item>
 					</row>
 				</form>
@@ -48,7 +48,9 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="InviteUsers" displayName="Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to invite the users?" />
-		<action className="CreateUsers" displayName="Create Users without Email" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to create the users?" />
+		<action className="InviteUsers" displayName="Create and Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create users and send each user an invitation?" />
+		<action className="CreateUsers" displayName="Create Users (no invitation)" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create the users (no invitation email will be sent)?" />
 	</actions>
 </view>

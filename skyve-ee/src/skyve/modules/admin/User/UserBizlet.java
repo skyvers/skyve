@@ -11,6 +11,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.document.Bizlet;
@@ -19,6 +20,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ComplexityModel;
 import modules.admin.domain.ChangePassword;
@@ -27,6 +29,7 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
+import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
 
 public class UserBizlet extends Bizlet<User> {
@@ -40,6 +43,7 @@ public class UserBizlet extends Bizlet<User> {
 	 */
 	@Override
 	public User newInstance(User bean) throws Exception {
+		
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		String myDataGroupId = user.getDataGroupId();
@@ -57,8 +61,57 @@ public class UserBizlet extends Bizlet<User> {
 		// set defaults
 		bean.setCreatedDateTime(new DateTime());
 		bean.setWizardState(WizardState.confirmContact);
-
+		
+		// check whether creating a new security group will be mandatory when creating a user
+		// this occurs if there are no security groups yet defined
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		bean.setGroupSelection((q.beanResults().isEmpty()?GroupSelection.newGroup:GroupSelection.existingGroups));
+		bean.setGroupsExist((q.beanResults().isEmpty()?Boolean.FALSE:Boolean.TRUE));
+		
 		return bean;
+	}
+
+	public static String bizKey(User user) {
+		org.skyve.metadata.user.User mUser = CORE.getUser();
+
+		StringBuilder sb = new StringBuilder(64);
+		try {
+			Customer customer = mUser.getCustomer();
+			if (Boolean.TRUE.equals(user.getInactive())) {
+				sb.append("INACTIVE ");
+			}
+			sb.append(Binder.formatMessage(customer, "{userName} - {contact.bizKey}", user));
+
+		} catch (Exception e) {
+			sb.append("Unknown");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void preRerender(String source, User bean, WebContext webContext) throws Exception {
+		
+		if(User.groupSelectionPropertyName.equals(source)) {
+			if(GroupSelection.newGroup.equals(bean.getGroupSelection())) {
+				bean.setNewGroup(Group.newInstance());
+			} else {
+				bean.setNewGroup(null);
+			}
+		}
+		
+		super.preRerender(source, bean, webContext);
+	}
+
+	@Override
+	public User preExecute(ImplicitActionName actionName, User bean, Bean parentBean, WebContext webContext) throws Exception {
+		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
+			
+			//if a new group was created, assign the user to the group membership
+			if(bean.getNewGroup()!=null) {
+				bean.getGroups().add(bean.getNewGroup());
+			}
+		}
+		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
 	/**
@@ -153,6 +206,7 @@ public class UserBizlet extends Bizlet<User> {
 
 	@Override
 	public void preSave(User bean) throws Exception {
+		
 		if (bean.getGeneratedPassword() != null) {
 			bean.setPasswordExpired(Boolean.TRUE);
 		}
@@ -254,21 +308,4 @@ public class UserBizlet extends Bizlet<User> {
 		}
 	}
 
-	public static String bizKey(User user) {
-		org.skyve.metadata.user.User mUser = CORE.getUser();
-
-		StringBuilder sb = new StringBuilder(64);
-		try {
-			Customer customer = mUser.getCustomer();
-			if (Boolean.TRUE.equals(user.getInactive())) {
-				sb.append("INACTIVE ");
-			}
-			sb.append(Binder.formatMessage(customer, "{userName} - {contact.bizKey}", user));
-
-		} catch (Exception e) {
-			sb.append("Unknown");
-		}
-		return sb.toString();
-
-	}
 }

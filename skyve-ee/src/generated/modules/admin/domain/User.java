@@ -22,10 +22,12 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * User
  * 
  * @depend - - - WizardState
+ * @depend - - - GroupSelection
  * @navhas n dataGroup 0..1 DataGroup
  * @navhas n contact 1 Contact
  * @navcomposed 1 roles 0..n UserRole
  * @navhas n groups 0..n Group
+ * @navhas n newGroup 0..1 Group
  * @navcomposed 1 candidateContacts 0..n UserCandidateContact
  * @stereotype "persistent"
  */
@@ -85,6 +87,12 @@ public class User extends AbstractPersistentBean {
 	public static final String contactSelectedPropertyName = "contactSelected";
 	/** @hidden */
 	public static final String inactivePropertyName = "inactive";
+	/** @hidden */
+	public static final String groupSelectionPropertyName = "groupSelection";
+	/** @hidden */
+	public static final String groupsExistPropertyName = "groupsExist";
+	/** @hidden */
+	public static final String newGroupPropertyName = "newGroup";
 
 	/**
 	 * Wizard State
@@ -164,6 +172,83 @@ public class User extends AbstractPersistentBean {
 				WizardState[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (WizardState value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Groups
+	 **/
+	@XmlEnum
+	public static enum GroupSelection implements Enumeration {
+		existingGroups("existingGroups", "Existing groups"),
+		newGroup("newGroup", "New group");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private GroupSelection(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static GroupSelection fromCode(String code) {
+			GroupSelection result = null;
+
+			for (GroupSelection value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static GroupSelection fromDescription(String description) {
+			GroupSelection result = null;
+
+			for (GroupSelection value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				GroupSelection[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (GroupSelection value : values) {
 					domainValues.add(value.domainValue);
 				}
 			}
@@ -253,9 +338,9 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private DataGroup dataGroup = null;
 	/**
-	 * Groups
+	 * Security Groups
 	 * <br/>
-	 * The collection of groups that this user belongs to.
+	 * The collection of security groups that this user belongs to.
 	 **/
 	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
@@ -307,6 +392,18 @@ public class User extends AbstractPersistentBean {
 	 * Indicates that this account has been marked as inactive and no longer in use.
 	 **/
 	private Boolean inactive;
+	/**
+	 * Groups
+	 **/
+	private GroupSelection groupSelection;
+	/**
+	 * Groups Exist
+	 **/
+	private Boolean groupsExist;
+	/**
+	 * New Group
+	 **/
+	private Group newGroup = null;
 
 	@Override
 	@XmlTransient
@@ -753,6 +850,57 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * {@link #groupSelection} accessor.
+	 * @return	The value.
+	 **/
+	public GroupSelection getGroupSelection() {
+		return groupSelection;
+	}
+
+	/**
+	 * {@link #groupSelection} mutator.
+	 * @param groupSelection	The new value.
+	 **/
+	@XmlElement
+	public void setGroupSelection(GroupSelection groupSelection) {
+		this.groupSelection = groupSelection;
+	}
+
+	/**
+	 * {@link #groupsExist} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getGroupsExist() {
+		return groupsExist;
+	}
+
+	/**
+	 * {@link #groupsExist} mutator.
+	 * @param groupsExist	The new value.
+	 **/
+	@XmlElement
+	public void setGroupsExist(Boolean groupsExist) {
+		this.groupsExist = groupsExist;
+	}
+
+	/**
+	 * {@link #newGroup} accessor.
+	 * @return	The value.
+	 **/
+	public Group getNewGroup() {
+		return newGroup;
+	}
+
+	/**
+	 * {@link #newGroup} mutator.
+	 * @param newGroup	The new value.
+	 **/
+	@XmlElement
+	public void setNewGroup(Group newGroup) {
+		this.newGroup = newGroup;
+	}
+
+	/**
 	 * Candidate Contacts is empty
 	 *
 	 * @return The condition
@@ -923,6 +1071,44 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	public boolean isNotSecurityAdministrator() {
 		return (! isSecurityAdministrator());
+	}
+
+	/**
+	 * showExistingGroups
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowExistingGroups() {
+		return (Boolean.TRUE.equals(groupsExist));
+	}
+
+	/**
+	 * {@link #isShowExistingGroups} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowExistingGroups() {
+		return (! isShowExistingGroups());
+	}
+
+	/**
+	 * showGroupCreator
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowGroupCreator() {
+		return (GroupSelection.newGroup.equals(groupSelection));
+	}
+
+	/**
+	 * {@link #isShowGroupCreator} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowGroupCreator() {
+		return (! isShowGroupCreator());
 	}
 
 	/**

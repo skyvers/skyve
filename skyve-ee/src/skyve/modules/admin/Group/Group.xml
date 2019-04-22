@@ -21,6 +21,7 @@
 		</text>
 		<collection name="roles" type="child">
 			<displayName>Roles</displayName>
+			<domain>dynamic</domain>
 			<documentName>GroupRole</documentName>
 			<minCardinality>1</minCardinality>
 			<ordering>

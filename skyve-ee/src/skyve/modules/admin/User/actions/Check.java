@@ -74,17 +74,7 @@ public class Check implements ServerSideAction<User> {
 				}
 			}
 		}
-		
-		// Find anything by name
-//		q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-//		String searchName = adminUser.getSearchContactName();
-//		if (searchName != null) {
-//			searchName = searchName.replace(' ', '%');
-//		}
-//		q.getFilter().addLike(Contact.namePropertyName, searchName);
-//		List<Contact> nameMatches = persistence.retrieve(q);
-//		distinctContacts.addAll(nameMatches);
-		
+				
 		// Add to the resulting collection
 		for (Contact contact : distinctContacts.keySet()) {
 			UserCandidateContact c = UserCandidateContact.newInstance();

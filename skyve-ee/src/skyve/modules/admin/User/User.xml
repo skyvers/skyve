@@ -7,8 +7,6 @@
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
 	<iconStyleClass>fa fa-user</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey >
 		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
 	</bizKey>
@@ -86,8 +84,8 @@
 			<documentName>DataGroup</documentName>
 		</association>
 		<collection name="groups" type="aggregation">
-			<displayName>Groups</displayName>
-			<description>The collection of groups that this user belongs to.</description>
+			<displayName>Security Groups</displayName>
+			<description>The collection of security groups that this user belongs to.</description>
 			<domain>variant</domain>
 			<documentName>Group</documentName>
 			<minCardinality>0</minCardinality>
@@ -165,6 +163,20 @@
 			<displayName>Inactive</displayName>
 			<description>Indicates that this account has been marked as inactive and no longer in use.</description>
 		</boolean>
+		<enum name="groupSelection" persistent="false" audited="false" trackChanges="false">
+			<displayName>Groups</displayName>
+			<values>
+				<value code="existingGroups" description="Existing groups"/>
+				<value code="newGroup" description="New group"/>
+			</values>
+		</enum>
+		<boolean name="groupsExist" persistent="false" audited="false" trackChanges="false">
+			<displayName>Groups Exist</displayName>
+		</boolean>
+		<association type="aggregation" name="newGroup"  persistent="false" audited="false" trackChanges="false">
+			<displayName>New Group</displayName>
+			<documentName>Group</documentName>
+		</association>
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->
@@ -226,6 +238,16 @@
 			<description>Candidate Contacts is empty</description>
 			<expression>
 				<![CDATA[candidateContacts.isEmpty()]]>
+			</expression>
+		</condition>
+		<condition name="showExistingGroups">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(groupsExist)]]>
+			</expression>
+		</condition>
+		<condition name="showGroupCreator">
+			<expression>
+				<![CDATA[GroupSelection.newGroup.equals(groupSelection)]]>
 			</expression>
 		</condition>
 	</conditions>
