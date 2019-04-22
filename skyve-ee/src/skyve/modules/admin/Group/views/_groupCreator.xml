@@ -16,5 +16,5 @@
 			</item>
 		</row>
 	</form>
-	<listMembership binding="roles" listWidth="300" candidatesHeading="Available Roles" membersHeading="Assigned Roles"/>
+	<listMembership binding="roles" candidatesHeading="Available Roles" membersHeading="Assigned Roles"/>
 </view>

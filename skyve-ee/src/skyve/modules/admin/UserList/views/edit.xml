@@ -17,7 +17,7 @@
 					</row>
 				</form>
 				<vbox percentageHeight="40">
-					<listMembership binding="userInvitationGroups" candidatesHeading="Available Groups" membersHeading="Assigned Groups" listWidth="300" />
+					<listMembership binding="userInvitationGroups" candidatesHeading="Available Groups" membersHeading="Assigned Groups" />
 				</vbox>
 				<form>
 					<column />

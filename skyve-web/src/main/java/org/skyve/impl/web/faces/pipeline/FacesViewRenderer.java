@@ -1415,7 +1415,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		UIComponentBase c = (UIComponentBase) cb.listMembership(null, membership);
 		eventSource = c;
-		addToContainer(c, membership.getListWidthInPixels(), null, null, membership.getInvisibleConditionName());
+		Integer pixelWidth = membership.getPixelWidth();
+		addToContainer(c, pixelWidth, null, null, membership.getInvisibleConditionName());
 	}
 
 	@Override
