@@ -39,7 +39,7 @@
 
 		<tab title="Groups">
 			<vbox border="true" percentageHeight="50">
-				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
+				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" />
 			</vbox>
 			<vbox />
 		</tab>

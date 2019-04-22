@@ -1156,7 +1156,7 @@ public class PWAViewRenderer extends ViewRenderer {
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		RenderedComponent c = cr.listMembership(null, membership);
 		eventSource = c;
-		addToContainer(c, membership.getListWidthInPixels(), null, null, membership.getInvisibleConditionName());
+		addToContainer(c, membership.getPixelWidth(), null, null, membership.getInvisibleConditionName());
 	}
 
 	@Override

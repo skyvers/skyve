@@ -1362,6 +1362,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setShowTargetControls(false);
 		result.setShowSourceFilter(false);
 		result.setShowTargetFilter(false);
+		result.setResponsive(true);
 		
         StringBuilder value = new StringBuilder(128);
         value.append("#{").append(managedBeanName).append(".dualListModels['");
