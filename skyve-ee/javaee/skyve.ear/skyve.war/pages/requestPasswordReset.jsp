@@ -25,6 +25,8 @@
 	String emailValue = request.getParameter("email");
 	String oldCaptcha = (String) session.getAttribute("g-recaptcha-response");
 	String newCaptcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
+	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY!=null);
+	
 	boolean postback = (emailValue != null) && (newCaptcha != null) && (! newCaptcha.equals(oldCaptcha));
 	if (postback) {
 		session.setAttribute("g-recaptcha-response", newCaptcha);
@@ -161,9 +163,12 @@
 		    	<% } else { %>
 		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 			    		<div class="ui segment">
+
 				    		<div class="ui header">
 				    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
 				    		</div>
+
+							<% if (recaptchaSet) { %>
 			    			<div class="field">
 								<%=Util.i18n("page.requestPasswordReset.message", locale)%>
 			    			</div>
@@ -184,6 +189,7 @@
 									<% } %>
 			                    </div>
 			                </div>
+
 			                <div class="field">
 			                	<!-- A table to brute force the captcha to centre as it is an iframe -->
 								<table>
@@ -197,6 +203,12 @@
 								</table>
 			                </div>
 		                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
+			                <% } else { %>
+			                <div class="field">
+		                		<%=Util.i18n("page.resetPassword.recaptchaNotConfiguredMessage", locale)%>
+			                </div>
+			                <% } %>
+			                
 			                <div style="margin-top: 5px;">
 			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 			                </div>
