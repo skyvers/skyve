@@ -203,7 +203,7 @@ If you inspect our new `ToDo.xml` you will see that it is pretty empty, so lets 
 	<persistent name="TODO_ToDo"/>
     <singularAlias>ToDo</singularAlias>
     <pluralAlias>ToDos</pluralAlias>
-    <bizKey>{description}</bizKey>
+    <bizKey expression="{description}"/>
     <attributes>
     	<text name="description" required="true">
     		<displayName>Description</displayName>
