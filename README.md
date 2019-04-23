@@ -216,7 +216,7 @@ If you inspect our new `ToDo.xml` you will see that it is pretty empty, so lets 
     		<displayName>Description</displayName>
     		<length>200</length>
     	</text>
-    	<boolean name="complete" required="true">
+    	<boolean name="complete">
     		<displayName>Complete</displayName>
     		<defaultValue>false</defaultValue>
     	</boolean>
