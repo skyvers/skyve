@@ -895,9 +895,9 @@ public abstract class AbstractDataFileLoader {
 							}
 						} else {
 							if (debugMode) {
-								Util.LOGGER.info("Loading Activity Type=" + activityType.toString() + " Field Load Action= " + field.getLoadAction().toString());
+								Util.LOGGER.info("Loading Activity Type=" + (activityType==null?"null":activityType.toString()) + " Field Load Action= " + (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
 							}
-							
+
 							switch (activityType) {
 							case CREATE_ALL:
 								if (binding.indexOf('.') > 0) {
@@ -907,7 +907,9 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
-								// Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+								if (debugMode) {
+									Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
+								}
 								debugFilter.append(field.getAttribute().getDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
@@ -931,12 +933,16 @@ public abstract class AbstractDataFileLoader {
 							default:
 
 								// check for compound binding
-								// Util.LOGGER.info("CREATE FIND");
 								if (binding.indexOf('.') > 0) {
-									Util.LOGGER.info("Compound Binding " + binding);
+									if (debugMode) {
+										Util.LOGGER.info("Compound Binding " + binding);
+									}
 									lookupBean(result, field, loadValue, what);
 									break;
-								} else if (LoadAction.SET_VALUE.equals(field.getLoadAction())) {
+								} else if (field.getLoadAction()==null || LoadAction.SET_VALUE.equals(field.getLoadAction())) {
+									if (debugMode) {
+										Util.LOGGER.info("Setting binding " + binding + " with value " + loadValue);
+									}
 									Binder.convertAndSet(result, binding, loadValue);
 								}
 								break;
@@ -957,7 +963,7 @@ public abstract class AbstractDataFileLoader {
 		}
 
 		// now perform the query
-		if (LoaderActivityType.FIND.equals(activityType)) {
+		if (LoaderActivityType.FIND.equals(activityType) ) {
 			if (qFind.getFilter().isEmpty()) {
 				if (debugMode) {
 					Util.LOGGER.info(getWhere() + " No filter set for Find operation.");

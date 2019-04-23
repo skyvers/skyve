@@ -70,7 +70,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email.
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application server security domain, create an empty database, and deploy your application.
-4. Log into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
+4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions
 
@@ -104,10 +104,17 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
-#### Log in
+#### Sign in
 * Open your preferred browser and navigate to `localhost:8080/<projectName>`.
-* Log in with the credentials specified in the `boostrap` stanza of the json settings file.
-* Once logged in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
+* Sign in with the credentials specified in the `boostrap` stanza of the json settings file.
+* Once signed in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
+
+Note that the bootstrap user only has effect if there is no user with the same name, so if you already had a bootstrap user in your database, you can either:
+• truncate your database and start again, OR
+• add the role to your user via the admin module, OR
+• create a security group with the roles you need, and assign membership to your user
+
+For either of the last two, you'll need to sign-out and then sign back in again for the change to permissions to take effect.
 
 ## Quick start
 
@@ -161,7 +168,7 @@ You may need to refresh your IDE workspace, but you should be able to see a new 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="todo" name="todo" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
+<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="todo" name="todo" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd" prototype="true">
     <homeRef>list</homeRef>
     <homeDocument>ToDo</homeDocument>
     <documents>
@@ -183,7 +190,9 @@ You may need to refresh your IDE workspace, but you should be able to see a new 
 </module>
 ```
 
-This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu.
+This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu. 
+
+Note - this example module has `prototype="true"` set - this means Skyve will make some basic assumptions to simplify the experience for the user - for more information see  [skyvers.github.io/skyve-dev-guide/modules/#prototype-mode](https://skyvers.github.io/skyve-dev-guide/modules/#prototype-mode).
 
 **Add a new document**
 
@@ -203,13 +212,13 @@ If you inspect our new `ToDo.xml` you will see that it is pretty empty, so lets 
 	<persistent name="TODO_ToDo"/>
     <singularAlias>ToDo</singularAlias>
     <pluralAlias>ToDos</pluralAlias>
-    <bizKey>{description}</bizKey>
+    <bizKey expression="{description}"/>
     <attributes>
     	<text name="description" required="true">
     		<displayName>Description</displayName>
     		<length>200</length>
     	</text>
-    	<boolean name="complete" required="true">
+    	<boolean name="complete">
     		<displayName>Complete</displayName>
     		<defaultValue>false</defaultValue>
     	</boolean>
@@ -227,7 +236,11 @@ mvn skyve:generateDomain
 ```
 This will validate all your project metadata and warn you if there are any errors. If everything is ok, it will generate application code based on the metadata, and you will see a build success message.
 
-You should now be able to start your server and deploy your application to test it. Once delployed, hopefully you can see a todo module menu, with a child menu item of All ToDos. Clicking on All ToDos, then clicking the `+` button, you should be able to create a new ToDo. This is the Skyve generated view, which contains our two Document attributes, _description_ and _complete_.
+You should now be able to start your server and deploy your application to test it.
+
+Once deployed, you will need to give your user the role "Maintainer" - you can either do this by adding the role to your user, or by creating a security group with that role, and assigning that group membership to your user - then sign out - the new role permissions will only take effect once you sign out and sign back in again.
+
+When you sign back in, you will see a todo module menu, with a child menu item of All ToDos. Clicking on All ToDos, then clicking the `+` button, you should be able to create a new ToDo. This is the Skyve generated view, which contains our two Document attributes, _description_ and _complete_.
 
 ## Skyve Maven commands
 New projects created from the website come with pre-configured maven run configurations for Eclipse. These are standard maven goals using the Skyve maven plugin and can be run from the command line or another IDE. The 6 main goals are described here:

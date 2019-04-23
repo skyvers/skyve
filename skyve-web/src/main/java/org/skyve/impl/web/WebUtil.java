@@ -194,20 +194,30 @@ public class WebUtil {
 			p.setUser(u);
 			DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
 			q.getFilter().addEquals(Binder.createCompoundBinding(SQLMetaDataUtil.CONTACT_PROPERTY_NAME, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME), email);
-			PersistentBean user = q.beanResult();
-			if (user != null) { // this is a user
+			
+			// set reset password token for all users with the same email address across all customers
+			List<PersistentBean> users = q.beanResults();
+			if(!users.isEmpty()) {
+				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
-				Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
-				p.upsertBeanTuple(user);
+				for(PersistentBean user: users) {
+					Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
+					p.upsertBeanTuple(user);
+					if(firstUser==null) {
+						firstUser = user;
+					}
+				}
 
+				// send a single email to the user's email address 
+				// (if multiple user with the same email, only 1 email should be sent)
 				Module m = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
 				Document d = m.getDocument(c, SQLMetaDataUtil.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
-				subject = Binder.formatMessage(c, subject, user);
+				subject = Binder.formatMessage(c, subject, firstUser);
 				String body = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
 				body = body.replace("{url}", Util.getSkyveContextUrl());
-				body = Binder.formatMessage(c, body, user);
+				body = Binder.formatMessage(c, body, firstUser);
 				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
 				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}
@@ -276,6 +286,7 @@ public class WebUtil {
 	throws Exception {
 		String customerName = null;
 		String userName = null;
+		String errorMsg = null;
 		try (Connection c = EXT.getDataStoreConnection()) {
 			try (PreparedStatement s = c.prepareStatement(String.format("select %s, %s from ADM_SecurityUser where %s = ?",
 																			Bean.CUSTOMER_NAME,
@@ -283,20 +294,22 @@ public class WebUtil {
 																			SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME))) {
 				s.setString(1, passwordResetToken);
 				try (ResultSet rs = s.executeQuery()) {
-					if (rs.next()) {
+					if (!rs.isBeforeFirst() ) {
+						return "Reset link used is invalid";
+					}
+					while (rs.next()) {
 						customerName = rs.getString(1);
 						userName = rs.getString(2);
-					}
-					else {
-						return "Reset link used is invalid";
+
+						AbstractRepository r = AbstractRepository.get();
+						org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+						errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
 					}
 				}
 			}
 		}
 
-		AbstractRepository r = AbstractRepository.get();
-		org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
-		return makePasswordChange(u, null, newPassword, confirmPassword);
+		return errorMsg;
 	}
 	
 	// find the existing bean with retrieve
