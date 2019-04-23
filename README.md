@@ -70,7 +70,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email.
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application server security domain, create an empty database, and deploy your application.
-4. Log into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
+4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions
 
@@ -104,10 +104,17 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
-#### Log in
+#### Sign in
 * Open your preferred browser and navigate to `localhost:8080/<projectName>`.
-* Log in with the credentials specified in the `boostrap` stanza of the json settings file.
-* Once logged in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
+* Sign in with the credentials specified in the `boostrap` stanza of the json settings file.
+* Once signed in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
+
+Note that the bootstrap user only has effect if there is no user with the same name, so if you already had a bootstrap user in your database, you can either:
+• truncate your database and start again, OR
+• add the role to your user via the admin module, OR
+• create a security group with the roles you need, and assign membership to your user
+
+For either of the last two, you'll need to sign-out and then sign back in again for the change to permissions to take effect.
 
 ## Quick start
 
