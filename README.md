@@ -168,7 +168,7 @@ You may need to refresh your IDE workspace, but you should be able to see a new 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="todo" name="todo" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
+<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="todo" name="todo" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd" prototype="true">
     <homeRef>list</homeRef>
     <homeDocument>ToDo</homeDocument>
     <documents>
@@ -190,7 +190,9 @@ You may need to refresh your IDE workspace, but you should be able to see a new 
 </module>
 ```
 
-This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu.
+This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu. 
+
+Note - this example module has `prototype="true"` set - this means Skyve will make some basic assumptions to simplify the experience for the user - for more information see [github.com/skyvers/skyve-dev-guide/modules/#prototype-mode](https://github.com/skyvers/skyve-dev-guide/modules/#prototype-mode).
 
 **Add a new document**
 
