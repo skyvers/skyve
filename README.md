@@ -192,7 +192,7 @@ You may need to refresh your IDE workspace, but you should be able to see a new 
 
 This basic module definition specifies the home document (landing page), which documents are in the module, the roles and their permissions per document, and the menu. 
 
-Note - this example module has `prototype="true"` set - this means Skyve will make some basic assumptions to simplify the experience for the user - for more information see [github.com/skyvers/skyve-dev-guide/modules/#prototype-mode](https://github.com/skyvers/skyve-dev-guide/modules/#prototype-mode).
+Note - this example module has `prototype="true"` set - this means Skyve will make some basic assumptions to simplify the experience for the user - for more information see  [skyvers.github.io/skyve-dev-guide/modules/#prototype-mode](https://skyvers.github.io/skyve-dev-guide/modules/#prototype-mode).
 
 **Add a new document**
 
