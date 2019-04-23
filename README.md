@@ -229,7 +229,7 @@ This will validate all your project metadata and warn you if there are any error
 
 You should now be able to start your server and deploy your application to test it.
 
-Once delployed, you will need to give your user the role "Maintainer" - you can either do this by adding the role to your bootstrap user, or by creating a security group with that role, and assigning that group membership to your user - then sign out - the new role permissions will only take effect once you sign out and sign back in again.
+Once deployed, you will need to give your user the role "Maintainer" - you can either do this by adding the role to your user, or by creating a security group with that role, and assigning that group membership to your user - then sign out - the new role permissions will only take effect once you sign out and sign back in again.
 
 When you sign back in, you will see a todo module menu, with a child menu item of All ToDos. Clicking on All ToDos, then clicking the `+` button, you should be able to create a new ToDo. This is the Skyve generated view, which contains our two Document attributes, _description_ and _complete_.
 
