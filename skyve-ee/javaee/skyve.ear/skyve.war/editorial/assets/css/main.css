@@ -2641,7 +2641,7 @@ mark {
 		-webkit-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		-ms-transition: margin-left 0.5s ease, box-shadow 0.5s ease;
 		transition: margin-left 0.5s ease, box-shadow 0.5s ease;
-		background-color: #f5f6f7;
+		background-color: white;
 		font-size: 0.9em;
 		position: relative;
 		width: 26em;
