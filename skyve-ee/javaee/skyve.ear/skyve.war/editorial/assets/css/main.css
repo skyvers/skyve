@@ -2023,7 +2023,7 @@ mark {
 
 		ul.icons li {
 			display: inline-block;
-			padding: 0 1em 0 0;
+			padding: 0 0.5em 0 0.5em;
 		}
 
 			ul.icons li:last-child {
@@ -2617,7 +2617,7 @@ mark {
 		@media screen and (max-width: 736px) {
 
 			#main > .inner {
-				padding: 0 2em 0.1em 2em ;
+				padding: 0 0.5em 0.1em 0.5em ;
 			}
 
 				#main > .inner > section {
@@ -2851,7 +2851,7 @@ mark {
 		position: relative;
 	}
 
-		#header > * {
+		#header .title {
 			-moz-flex: 1;
 			-webkit-flex: 1;
 			-ms-flex: 1;
