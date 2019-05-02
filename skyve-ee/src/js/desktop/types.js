@@ -1221,8 +1221,7 @@ isc.BizContentLinkItem.addMethods({
 				var url = isc.BizUtil.URL_PREFIX + 
 				"content?_n=" + newValue +
 				"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
-				"&_b=" + this.name.replaceAll('_', '.') +
-				"&_ctim=" + new Date().getTime();
+				"&_b=" + this.name.replaceAll('_', '.');
 
 				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">' + this.canvas.linkHTML(url, (this.value ? this.value : "Content"), "_blank") + '</div>');
 			}
@@ -1308,8 +1307,7 @@ isc.BizContentImageItem.addMethods({
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +
 							"&_w=" + (this._img.getWidth() - 20) + // -20 for the border
-							"&_h=" + (this._img.getHeight() - 20) + // -20 for the border
-							"&_ctim=" + new Date().getTime();
+							"&_h=" + (this._img.getHeight() - 20); + // -20 for the border
 				this._img.setSrc(url);
 			}
 			else {

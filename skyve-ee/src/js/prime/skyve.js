@@ -15,7 +15,7 @@ SKYVE = function() {
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
 			top.$('[id$="_' + binding + '"]').val(contentId);
-			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.') + '&_ctim=' + new Date().getTime();
+			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
 			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName);
 			top.$('[id$="_' + binding + '_image"]').attr('src', url);
 			top.PF(binding + 'Overlay').hide();

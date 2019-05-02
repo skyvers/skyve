@@ -74,6 +74,27 @@ public class UtilImpl {
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
 
+	// The number of threads that are allowed to serv thumbnails at once.
+	// Too many threads can cause out of memory errors.
+	// You can calculate this as concurrentThreads * memory usage determined by targetSize below
+	// For the default of 10 concurrentThreads at 4MB the approx max memory usage is 40MB.
+	public static int THUMBNAIL_CONCURRENT_THREADS = 10;
+
+	// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
+	// Then it sub-samples pixels by 2, 3 etc.
+	// You can calculate the approximate max memory used per image with
+	// targetSize * 2 (double width) * targetSize * 2 (double height) * 4 (ARGB bytes per pixel) / 1024 (KB) / 1024 (MB)
+	// assuming the images are relatively square.
+	// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
+	public static int THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
+
+	// Thumbnails can be stored on the file system or generated on the fly each time
+	public static boolean THUMBNAIL_FILE_STORAGE = true;
+
+	// Where to put thumbnails if fileStorage is true - defaults to <content.directory>/SKYVE_THUMBNAILS/
+	// Skyve will recreate this folder if it is deleted whilst running but if defined it must exist at startup.
+	public static String THUMBNAIL_DIRECTORY = null;
+	
 	// This is set in web.xml and should only be used when the APP server in use
 	// doesn't allow us to get the absolute path of a resource - jboss 4.0.5.GA, WebLogic or any zipped deployment
 	public static String APPS_JAR_DIRECTORY;

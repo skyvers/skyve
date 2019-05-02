@@ -1,0 +1,136 @@
+package org.skyve.impl.util;
+
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
+import org.apache.commons.io.FilenameUtils;
+import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.util.FileUtil;
+import org.skyve.util.Util;
+
+import net.coobird.thumbnailator.util.exif.ExifFilterUtils;
+import net.coobird.thumbnailator.util.exif.ExifUtils;
+import net.coobird.thumbnailator.util.exif.Orientation;
+
+/**
+ * Image Utility methods.
+ */
+public class ImageUtil {
+	private static final int FIRST_IMAGE_INDEX = 0;
+	
+	/**
+	 * Just like javax.imageio.ImageIO.read() but will subs-sample pixels for large images
+	 * to constrain memory usage and apply EXIF rotation.
+	 * 
+	 * @param is	input stream
+	 * @param subsamplingMinimumTargetSize	If the images smallest dimension is twice or more this value
+	 * 											the image will be sub-sampled as its loaded to conserve memory.
+	 * @return	The buffered image.
+	 * @throws IOException
+	 */
+	public static final BufferedImage read(InputStream is, int subsamplingMinimumTargetSize) throws IOException {
+		BufferedImage result = null;
+		
+		try (ImageInputStream iis = ImageIO.createImageInputStream(is)) {
+			Iterator<ImageReader> i = ImageIO.getImageReaders(iis);
+			if (i.hasNext()) {
+				ImageReader ir = i.next();
+				try {
+					ir.setInput(iis);
+					ImageReadParam irp = ir.getDefaultReadParam();
+					int smallestDimension = Math.min(ir.getWidth(FIRST_IMAGE_INDEX), ir.getHeight(FIRST_IMAGE_INDEX));
+					int subsampling = smallestDimension / subsamplingMinimumTargetSize;
+					
+					Orientation orientation = null;
+					try {
+						orientation = ExifUtils.getExifOrientation(ir, FIRST_IMAGE_INDEX);
+					}
+					catch (@SuppressWarnings("unused") Exception e) {
+						// do nothing - could not get orientation information so just continue on
+					}
+
+					if (subsampling > 1) {
+						irp.setSourceSubsampling(subsampling, subsampling, 0, 0);
+					}
+					
+					result = ir.read(FIRST_IMAGE_INDEX, irp);
+	
+					// Set EXIF
+					if ((orientation != null) && (! Orientation.TOP_LEFT.equals(orientation))) {
+						result = ExifFilterUtils.getFilterForOrientation(orientation).apply(result);
+					}
+				}
+				finally {
+					ir.dispose();
+				}
+			}
+		}
+
+		return result;
+	}
+	
+	/**
+	 * Return UTF-8 byte array for an SVG representing the type of the file.
+	 * 
+	 * @param fileName	The filename suffix is used to get the svg file type icon
+	 * @param imageWidth	The requested width.
+	 * @param imageHeight	The requested height.
+	 * @return	A byte[] to stream to a client.
+	 * @throws IOException
+	 */
+	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-ee/src/skyve/resources/files/
+	public static byte[] svg(String fileName, int imageWidth, int imageHeight) throws IOException {
+		String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
+		AbstractRepository repository = AbstractRepository.get();
+		File svgFile = null;
+		if (suffix == null) {
+			svgFile = repository.findResourceFile("files/blank.svg", null, null);
+		}
+		else {
+			suffix = suffix.toLowerCase();
+			svgFile = repository.findResourceFile(String.format("files/%s.svg", suffix) , null, null);
+			if (! svgFile.exists()) {
+				svgFile = repository.findResourceFile("files/blank.svg", null, null);
+			}
+		}
+		// Add the requested width and height to the SVG so that it can be scaled 
+		// and keep its aspect ratio in the browser <img/>.
+		String xml = FileUtil.getFileAsString(svgFile);
+		xml = String.format("<svg width=\"%dpx\" height=\"%dpx\" %s",
+								Integer.valueOf(imageWidth),
+								Integer.valueOf(imageHeight),
+								xml.substring(5));
+		return xml.getBytes(Util.UTF8);
+	}
+	
+	/**
+	 * Read the bytes from an image file.
+	 * 
+	 * @param file	The file to read.
+	 * @return	the bytes.
+	 * @throws IOException
+	 */
+	public static byte[] image(File file) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file); BufferedInputStream bis = new BufferedInputStream(fis)) {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				byte[] bytes = new byte[1024]; // 1K
+				int bytesRead = 0;
+				while ((bytesRead = bis.read(bytes)) > 0) {
+					baos.write(bytes, 0, bytesRead);
+				}
+				return baos.toByteArray();
+			}
+		}
+	}
+}

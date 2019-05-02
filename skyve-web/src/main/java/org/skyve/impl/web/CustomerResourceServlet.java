@@ -1,23 +1,16 @@
 package org.skyve.impl.web;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
 
-import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FilenameUtils;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -27,17 +20,16 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.FileUtil;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
-
-import net.coobird.thumbnailator.Thumbnails;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	/**
@@ -51,8 +43,7 @@ public class CustomerResourceServlet extends HttpServlet {
 		private File file;
 		int imageWidth = 0;
 		int imageHeight = 0;
-		private boolean svg = false;
-		private byte[] bytes;
+		private Thumbnail image;
 
 		void dispose() throws Exception {
 			if (cm != null) {
@@ -77,107 +68,31 @@ public class CustomerResourceServlet extends HttpServlet {
 		}
 
 		public byte[] getBytes()
-		throws FileNotFoundException, IOException {
+		throws IOException, NoSuchAlgorithmException, InterruptedException {
 			load();
-			return bytes;
+			return image.getBytes();
 		}
 		
-		/*
-		 * I might need to check the size of the source image
-		 * 		ImageReader i = ImageIO.getImageReaders(bis).next();
-		 *		try {
-		 *			int width = i.getWidth(0);
-		 *			int height = i.getHeight(0);
-		 *		}
-		 *		finally {
-		 *			i.dispose();
-		 *		}
-		 * and if too big - whatever this may mean and maybe in relation to the width and height required for the tumbnail
-		 * sub-sample the input stream - see net.coobird.thumbnailator.tasks.io.nputStreamImageSource
-		 */
 		private void load()
-		throws FileNotFoundException, IOException {
-			if (bytes == null) {
+		throws IOException, NoSuchAlgorithmException, InterruptedException {
+			if (image == null) {
 				if (file != null) {
-					try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-						// A thumbnail image
-						if ((imageWidth > 0) && (imageHeight > 0)) {
-							BufferedImage image = ImageIO.read(bis);
-							if (image == null) { // not an image or can't be read
-								svg(file.getName());
-							}
-							else {
-								image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
-								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
-									bytes = baos.toByteArray();
-								}
-								image = null; // encourage garbage collection
-							}
-						}
-						// Full content
-						else {
-							try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-								bytes = new byte[1024]; // 1K
-								int bytesRead = 0;
-								while ((bytesRead = bis.read(bytes)) > 0) {
-									baos.write(bytes, 0, bytesRead);
-								}
-								bytes = baos.toByteArray();
-							}
-						}
+					if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
+						image = new Thumbnail(file, imageWidth, imageHeight);
+					}
+					else { // full content
+						image = new Thumbnail(ImageUtil.image(file));
 					}
 				}
 				else if (content != null) {
-					// A thumbnail image
-					if ((imageWidth > 0) && (imageHeight > 0)) {
-						try (InputStream stream = content.getContentStream()) {
-							BufferedImage image = ImageIO.read(stream);
-							if (image == null) {
-								svg(content.getFileName());
-							}
-							else {
-								image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
-								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-									Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
-									bytes = baos.toByteArray();
-								}
-								image = null; // encourage garbage collection
-							}
-						}
+					if ((imageWidth > 0) && (imageHeight > 0)) { // a thumbnail image
+						image = new Thumbnail(content, imageWidth, imageHeight);
 					}
-					// Full content
-					else {
-						bytes = content.getContentBytes();
+					else { // full content
+						image = new Thumbnail(content.getContentBytes());
 					}
 				}
 			}
-		}
-
-		// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-ee/src/skyve/resources/files/
-		private void svg(String fileName) throws IOException {
-			String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
-			svg = true;
-			AbstractRepository repository = AbstractRepository.get();
-			File svgFile = null;
-			if (suffix == null) {
-				svgFile = repository.findResourceFile("files/blank.svg", null, null);
-			}
-			else {
-				suffix = suffix.toLowerCase();
-				svgFile = repository.findResourceFile(String.format("files/%s.svg", suffix) , null, null);
-				if (! svgFile.exists()) {
-					svgFile = repository.findResourceFile("files/blank.svg", null, null);
-				}
-			}
-			// Add the requested width and height to the SVG so that it can be scaled 
-			//and keep its aspect ratio in the browser <img/>.
-			String xml = FileUtil.getFileAsString(svgFile);
-			xml = String.format("<svg width=\"%dpx\" height=\"%dpx\" %s",
-									Integer.valueOf(imageWidth),
-									Integer.valueOf(imageHeight),
-									xml.substring(5));
-			bytes = xml.getBytes(Util.UTF8);
 		}
 		
 		public boolean isContent() {
@@ -192,17 +107,12 @@ public class CustomerResourceServlet extends HttpServlet {
 			return file;
 		}
 
-		public String getContentType() throws IOException {
+		public String getContentType() throws IOException, NoSuchAlgorithmException, InterruptedException {
 			String result = null;
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				load();
-				if (svg) {
-					result = MimeType.svg.toString();
-				}
-				else {
-					result = MimeType.png.toString();
-				}
+				result = image.getMimeType().toString();
 			}
 			else if (file != null) {
 				MimeType mimeType = MimeType.fromFileName(file.getName());
@@ -217,17 +127,12 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 		
-		public String getFileName() throws IOException {
+		public String getFileName() throws IOException, NoSuchAlgorithmException, InterruptedException {
 			String result = null;
 			
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				load();
-				if (svg) {
-					result = "thumbnail.svg";
-				}
-				else {
-					result = "thumbnail.png";
-				}
+				result = "thumbnail." + image.getMimeType().getStandardFileSuffix();
 			}
 			else if (file != null) {
 				result = file.getName();

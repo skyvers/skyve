@@ -152,8 +152,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			
 			htmlGuts.append("content?").append(AbstractWebContext.REPORT_NAME).append("={").append(binding);
 			htmlGuts.append("}&").append(AbstractWebContext.DOCUMENT_NAME).append("={bizModule}.{bizDocument}&");
-			htmlGuts.append(AbstractWebContext.BINDING_NAME).append('=').append(binding).append("&_ctim=");
-			htmlGuts.append(System.currentTimeMillis());
+			htmlGuts.append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
 		}
 
 		@Override

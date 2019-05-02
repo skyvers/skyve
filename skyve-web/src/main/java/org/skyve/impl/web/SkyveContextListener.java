@@ -87,30 +87,29 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.BIZLET_TRACE = getBoolean("trace", "bizlet", trace);
 		UtilImpl.DIRTY_TRACE = getBoolean("trace", "dirty", trace);
 
+		// Content settings
 		Map<String, Object> content = getObject(null, "content", properties, true);
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 		// clean up the content directory path
-		UtilImpl.CONTENT_DIRECTORY = cleanupContentDirectory(UtilImpl.CONTENT_DIRECTORY);
-		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
-		if (!contentDirectory.exists()) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
-		}
-		if (!contentDirectory.isDirectory()) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
-		}
-		// Check the content directory is writable
-		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
-		try {
-			testFile.createNewFile();
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
-		} finally {
-			testFile.delete();
-		}
+		UtilImpl.CONTENT_DIRECTORY = cleanupDirectory(UtilImpl.CONTENT_DIRECTORY);
+		testWritableDirectory("content.directory", UtilImpl.CONTENT_DIRECTORY);
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
+
+		// Thumb nail settings
+		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
+		if (thumbnail != null) {
+			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = getInt("thumbnail", "concurrentThreads", thumbnail);
+			UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt("thumbnail", "subsamplingMinimumTargetSize", thumbnail);
+			UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean("thumbnail", "fileStorage", thumbnail);
+			UtilImpl.THUMBNAIL_DIRECTORY = getString("thumbnail", "directory", thumbnail, false);
+			if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
+				// clean up the thumb nail directory path
+				UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
+				testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
+			}
+		}
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
 		// There are container specific ways but we don't want that.
@@ -373,7 +372,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param path The supplied content path
 	 * @return The updated path if any slashes need to be added
 	 */
-	static String cleanupContentDirectory(final String path) {
+	static String cleanupDirectory(final String path) {
 		if (path != null && path.length() > 0) {
 			String updatedPath = path.replace("\\", "/");
 
@@ -387,6 +386,35 @@ public class SkyveContextListener implements ServletContextListener {
 		return path;
 	}
 
+	/**
+	 * Checks a directory path property value exists, is a directory and is writable.
+	 * @param propertyName	The property name to report in exceptions.
+	 * @param directoryPath	The property value to test.
+	 */
+	private static void testWritableDirectory(String propertyName, String directoryPath) {
+		File directory = new File(directoryPath);
+		
+		if (! directory.exists()) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " does not exist.");
+		}
+		
+		if (! directory.isDirectory()) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " is not a directory.");
+		}
+		
+		// Check the directory is writable
+		File testFile = new File(directory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
+		try {
+			testFile.createNewFile();
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " is not writeable.");
+		}
+		finally {
+			testFile.delete();
+		}
+	}
+	
 	/**
 	 * Checks that the module directory:
 	 * <ul>

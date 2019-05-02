@@ -14,8 +14,8 @@ public class SkyveContextListenerTest {
 		final String test1 = null, test2 = "";
 
 		// perform the method under test
-		String result1 = SkyveContextListener.cleanupContentDirectory(test1);
-		String result2 = SkyveContextListener.cleanupContentDirectory(test2);
+		String result1 = SkyveContextListener.cleanupDirectory(test1);
+		String result2 = SkyveContextListener.cleanupDirectory(test2);
 
 		// verify the results
 		assertThat(result1, is(test1));
@@ -33,10 +33,10 @@ public class SkyveContextListenerTest {
 		final String expected = "C:/workspace/content/";
 
 		// perform the method under test
-		String result1 = SkyveContextListener.cleanupContentDirectory(test1);
-		String result2 = SkyveContextListener.cleanupContentDirectory(test2);
-		String result3 = SkyveContextListener.cleanupContentDirectory(test3);
-		String result4 = SkyveContextListener.cleanupContentDirectory(test4);
+		String result1 = SkyveContextListener.cleanupDirectory(test1);
+		String result2 = SkyveContextListener.cleanupDirectory(test2);
+		String result3 = SkyveContextListener.cleanupDirectory(test3);
+		String result4 = SkyveContextListener.cleanupDirectory(test4);
 
 		// verify the results
 		assertThat(result1, is(expected));
