@@ -2594,7 +2594,7 @@ mark {
 		@media screen and (max-width: 1680px) {
 
 			#main > .inner {
-				padding: 0 5em 0.1em 5em ;
+				padding: 0 3em 0.1em 3em ;
 			}
 
 				#main > .inner > section {
@@ -2606,7 +2606,7 @@ mark {
 		@media screen and (max-width: 1280px) {
 
 			#main > .inner {
-				padding: 0 4em 0.1em 4em ;
+				padding: 0 2em 0.1em 2em ;
 			}
 
 				#main > .inner > section {
@@ -2765,7 +2765,7 @@ mark {
 				}
 
 				#sidebar.inactive .toggle {
-					left: 24em;
+					left: 23em;
 				}
 
 		}
