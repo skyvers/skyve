@@ -2024,6 +2024,7 @@ mark {
 		ul.icons li {
 			display: inline-block;
 			padding: 0 0.5em 0 0.5em;
+			vertical-align: middle;
 		}
 
 			ul.icons li:last-child {
@@ -2868,6 +2869,7 @@ mark {
 
 		#header .icons {
 			text-align: right;
+			padding: 10px;
 		}
 
 		@media screen and (max-width: 1280px) {
