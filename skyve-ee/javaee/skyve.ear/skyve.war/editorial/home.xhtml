@@ -32,10 +32,12 @@
 					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}"
 								managedBean="skyve"
+								update="@form"
 								rendered="#{'e' eq skyve.webActionParameter}" />
 					<s:listGrid module="#{skyve.bizModuleParameter}"
 									query="#{skyve.queryNameParameter}"
 									managedBean="skyve"
+									update="@form"
 									rendered="#{'l' eq skyve.webActionParameter}" />
 				</h:form>
 			</ui:define>
