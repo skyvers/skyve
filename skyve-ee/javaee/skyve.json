@@ -33,10 +33,10 @@
 	},
 	// Thumbnail settings
 	thumbnail: {
-		// The number of threads that are allowed to serv thumbnails at once.
+		// The number of threads that are allowed to serve thumb nails at once.
 		// Too many threads can cause out of memory errors.
 		// You can calculate this as concurrentThreads * memory usage determined by targetSize below
-		// For the default of 10 concurrentThreads at 4MB the approx max memory usage is 40MB.
+		// For the default of 10 concurrentThreads at 4MB the approximately max memory usage is 40MB.
 		concurrentThreads: 10,
 		// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
 		// Then it sub-samples pixels by 2, 3 etc.

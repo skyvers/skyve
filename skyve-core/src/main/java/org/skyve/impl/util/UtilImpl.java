@@ -74,10 +74,10 @@ public class UtilImpl {
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
 
-	// The number of threads that are allowed to serv thumbnails at once.
+	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
 	// You can calculate this as concurrentThreads * memory usage determined by targetSize below
-	// For the default of 10 concurrentThreads at 4MB the approx max memory usage is 40MB.
+	// For the default of 10 concurrentThreads at 4MB the approximately max memory usage is 40MB.
 	public static int THUMBNAIL_CONCURRENT_THREADS = 10;
 
 	// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
