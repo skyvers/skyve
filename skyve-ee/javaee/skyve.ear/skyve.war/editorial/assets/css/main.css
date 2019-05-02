@@ -2653,7 +2653,6 @@ mark {
 		}
 
 		#sidebar > .inner {
-/*			padding: 2.2222222222em 2.2222222222em 2.4444444444em 2.2222222222em ; */
 			position: relative;
 			width: 26em;
 		}
@@ -2692,7 +2691,7 @@ mark {
 			border: 0;
 			display: block;
 			height: 7.5em;
-			left: 26em;
+			left: 22em;
 			line-height: 7.5em;
 			outline: 0;
 			overflow: hidden;
@@ -2729,6 +2728,10 @@ mark {
 			margin-left: -26em;
 		}
 
+		#sidebar.inactive .toggle {
+			left: 26em;
+		}
+
 		@media screen and (max-width: 1680px) {
 
 			#sidebar {
@@ -2736,7 +2739,6 @@ mark {
 			}
 
 				#sidebar > .inner {
-/*					padding: 1.6666666667em 1.6666666667em 1.3333333333em 1.6666666667em ; */
 					width: 24em;
 				}
 
@@ -2748,7 +2750,7 @@ mark {
 
 				#sidebar .toggle {
 					height: 6.25em;
-					left: 24em;
+					left: 20.75em;
 					line-height: 6.25em;
 					text-indent: 5em;
 					width: 5em;
@@ -2760,6 +2762,10 @@ mark {
 
 				#sidebar.inactive {
 					margin-left: -24em;
+				}
+
+				#sidebar.inactive .toggle {
+					left: 24em;
 				}
 
 		}
@@ -2797,6 +2803,7 @@ mark {
 					}
 
 				#sidebar .toggle {
+					left: 24em;
 					text-indent: 6em;
 					width: 6em;
 				}
