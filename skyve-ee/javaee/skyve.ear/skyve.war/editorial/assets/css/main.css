@@ -2577,7 +2577,7 @@ mark {
 	}
 
 		#main > .inner {
-			padding: 0 6em 0.1em 6em ;
+			padding: 0 0.5em 0.1em 1em ;
 			margin: 0 auto;
 			max-width: 110em;
 		}
@@ -2594,7 +2594,7 @@ mark {
 		@media screen and (max-width: 1680px) {
 
 			#main > .inner {
-				padding: 0 3em 0.1em 3em ;
+				padding: 0 0.5em 0.1em 1em ;
 			}
 
 				#main > .inner > section {
@@ -2606,7 +2606,7 @@ mark {
 		@media screen and (max-width: 1280px) {
 
 			#main > .inner {
-				padding: 0 2em 0.1em 2em ;
+				padding: 0 0.5em 0.1em 3em ;
 			}
 
 				#main > .inner > section {
@@ -2645,7 +2645,7 @@ mark {
 		background-color: white;
 		font-size: 0.9em;
 		position: relative;
-		width: 26em;
+		width: 22em;
 	}
 
 		#sidebar h2 {
@@ -2654,7 +2654,7 @@ mark {
 
 		#sidebar > .inner {
 			position: relative;
-			width: 26em;
+			width: 22em;
 		}
 
 			#sidebar > .inner > * {
@@ -2689,9 +2689,9 @@ mark {
 			transition: left 0.5s ease;
 			-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 			border: 0;
-			display: block;
+			display: none;
 			height: 7.5em;
-			left: 22em;
+			left: 18em;
 			line-height: 7.5em;
 			outline: 0;
 			overflow: hidden;
@@ -2725,21 +2725,21 @@ mark {
 			}
 
 		#sidebar.inactive {
-			margin-left: -26em;
+			margin-left: -22em;
 		}
 
 		#sidebar.inactive .toggle {
-			left: 26em;
+			left: 21em;
 		}
 
 		@media screen and (max-width: 1680px) {
 
 			#sidebar {
-				width: 24em;
+				width: 23em;
 			}
 
 				#sidebar > .inner {
-					width: 24em;
+					width: 23em;
 				}
 
 					#sidebar > .inner > .alt {
@@ -2750,7 +2750,7 @@ mark {
 
 				#sidebar .toggle {
 					height: 6.25em;
-					left: 20.75em;
+					left: 19.5em;
 					line-height: 6.25em;
 					text-indent: 5em;
 					width: 5em;
@@ -2761,13 +2761,30 @@ mark {
 					}
 
 				#sidebar.inactive {
-					margin-left: -24em;
+					margin-left: -23em;
 				}
 
 				#sidebar.inactive .toggle {
-					left: 23em;
+					left: 22.1em;
 				}
+		}
 
+		@media screen and (max-width: 1480px) {
+			#sidebar {
+				width: 22em;
+			}
+			#sidebar > .inner {
+				width: 22em;
+			}
+			#sidebar .toggle {
+				left: 18.5em;
+			}
+			#sidebar.inactive {
+				margin-left: -22em;
+			}
+			#sidebar.inactive .toggle {
+				left: 21.1em;
+			}
 		}
 
 		@media screen and (max-width: 1280px) {
@@ -2779,10 +2796,12 @@ mark {
 				position: fixed;
 				top: 0;
 				z-index: 10000;
+				width: 24em;
 			}
 
 				#sidebar.inactive {
 					box-shadow: none;
+					margin-left: -24em;
 				}
 
 				#sidebar > .inner {
@@ -2793,6 +2812,7 @@ mark {
 					overflow-y: auto;
 					position: absolute;
 					top: 0;
+					width: 24em;
 				}
 
 					#sidebar > .inner:after {
@@ -2806,12 +2826,17 @@ mark {
 					left: 24em;
 					text-indent: 6em;
 					width: 6em;
+					display: block;
 				}
 
 					#sidebar .toggle:before {
 						font-size: 1.5rem;
 						margin-left: -0.4375em;
 					}
+
+				#sidebar.inactive .toggle {
+					left: 23.5em;
+				}
 
 				body.is-preload #sidebar {
 					display: none;
