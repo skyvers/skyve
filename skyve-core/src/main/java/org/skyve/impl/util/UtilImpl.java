@@ -170,6 +170,9 @@ public class UtilImpl {
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
 
+	// Show setup screen on sign-in for DevOps users
+	public static boolean SHOW_SETUP = false;
+	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
 	public static String BOOTSTRAP_USER = null;
