@@ -119,7 +119,7 @@ public class PerformDocumentActionForTagJob extends Job {
 							 * evicting any cached records will cause later actions to fail if they refer to the same beans
 							 */
 //							pers.evictCached(pb);
-//							pers.begin();
+							pers.begin();
 						}
 						sb.append(" - Successful");
 

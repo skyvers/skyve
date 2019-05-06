@@ -8,8 +8,6 @@
 	<singularAlias>Staff</singularAlias>
 	<pluralAlias>Staff Members</pluralAlias>
 	<iconStyleClass>fa fa-users</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/group16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{contact.name} ({contact.mobile})"/>
 	<attributes>
 		<association name="contact" type="aggregation">
@@ -25,7 +23,7 @@
 		</date>
 		<text name="roleTitle">
 			<displayName>Role Title</displayName>
-			<description>The person's organisational title or role</description>
+			<description>The person's organisational title or role.</description>
 			<length>200</length>
 		</text>
 		<association type="aggregation" name="baseOffice">

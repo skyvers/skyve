@@ -13,11 +13,14 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Util;
 
 import modules.ModulesUtil;
 import modules.ModulesUtil.DomainValueSortByCode;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ControlPanel;
+import modules.admin.domain.ControlPanel.SailTestStrategy;
+import modules.admin.domain.User;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanel> {
 	private static final long serialVersionUID = -6033906392152210002L;
@@ -25,8 +28,22 @@ public class ControlPanelBizlet extends Bizlet<ControlPanel> {
 	@Override
 	public ControlPanel newInstance(ControlPanel bean) throws Exception {
 		Persistence p = CORE.getPersistence();
-		Contact contact = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, CORE.getUser().getContactId(), false);
+		// Set the user name and email to the logged in user
+		User user = p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, CORE.getUser().getId(), false);
+		bean.setSailUser(user);
+		Contact contact = user.getContact();
 		bean.setEmailFrom(contact.getEmail1());
+
+		bean.setSailBaseUrl(Util.getSkyveContextUrl() + '/');
+		bean.setSailTestStrategy(SailTestStrategy.None);
+
+		// Set module name to the first non-admin module found
+		AbstractRepository r = AbstractRepository.get();
+		for (String moduleName : r.getAllVanillaModuleNames()) {
+			if (! ControlPanel.MODULE_NAME.equals(moduleName)) {
+				bean.setSailModuleName(moduleName);
+			}
+		}
 
 		return bean;
 	}
@@ -67,7 +84,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanel> {
 		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
 			AbstractRepository r = AbstractRepository.get();
 			for (String moduleName : r.getAllVanillaModuleNames()) {
-				result.add(new DomainValue(moduleName));
+					result.add(new DomainValue(moduleName));
 			}
 		}
 		else if (ControlPanel.sailUxUiPropertyName.equals(attributeName)) {

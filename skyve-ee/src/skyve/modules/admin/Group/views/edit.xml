@@ -4,41 +4,25 @@
 		xmlns="http://www.skyve.org/xml/view"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
-	<hbox>
-		<vbox percentageWidth="50" responsiveWidth="12">
-			<form border="true">
-				<column percentageWidth="30" />
-				<column />
-				<row>
-					<item>
-						<default binding="name" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<default binding="description" />
-					</item>
-				</row>
-			</form>
-			<dataGrid title="Group Roles" binding="roles">
-				<boundColumn binding="roleName" />
-				<onAddedHandlers />
-				<onEditedHandlers />
-				<onRemovedHandlers />
-				<onSelectedHandlers />
-			</dataGrid>
-		</vbox>
-		<listGrid title="Users In Group"
-					query="qUsersInGroup"
-					continueConversation="false"
-					showAdd="false"
-					showEdit="false"
-					showRemove="false"
-					percentageWidth="50"
-					responsiveWidth="12">
-			<filterParameter name=":bizId" operator="equal" binding="bizId" />
-		</listGrid>
-	</hbox>
+	<tabPane>
+		<tab title="Group Details">
+			<vbox >
+				<component name="_groupCreator"/>
+			</vbox>
+		</tab>
+		<tab title="Users in Group">
+			<listGrid title="Users In Group"
+						query="qUsersInGroup"
+						continueConversation="false"
+						showAdd="false"
+						showEdit="false"
+						showRemove="false"
+						percentageWidth="50"
+						responsiveWidth="12">
+				<filterParameter name=":bizId" operator="equal" binding="bizId" />
+			</listGrid>
+		</tab>
+	</tabPane>
 	<actions>
 		<defaults />
 	</actions>

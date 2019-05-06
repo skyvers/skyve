@@ -6,7 +6,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -26,6 +28,7 @@ public class ModuleRoleMetaData extends NamedMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -41,6 +44,7 @@ public class ModuleRoleMetaData extends NamedMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}

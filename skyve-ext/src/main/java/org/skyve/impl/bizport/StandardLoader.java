@@ -599,7 +599,7 @@ public class StandardLoader {
 							Object sheetId = refs.get(targetBean.getBizId());
 							if (sheetId != null) {
 								if (targetSheet.moveToRow(sheetId)) {
-									targetSheet.addErrorAtCurrentRow(problems, column, em.getErrorMessage());
+									targetSheet.addErrorAtCurrentRow(problems, column, em.getText());
 									noBindings = false;
 								}								
 							}
@@ -614,14 +614,14 @@ public class StandardLoader {
 				if (column == null) {
 					column = sheet.getColumn(Bean.DOCUMENT_ID);
 				}
-				sheet.addErrorAtCurrentRow(problems, column, em.getErrorMessage());
+				sheet.addErrorAtCurrentRow(problems, column, em.getText());
 				noBindings = false;
 			}
 		}
 		
 		if (noBindings) {
 			BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
-			sheet.addErrorAtCurrentRow(problems, column, em.getErrorMessage());
+			sheet.addErrorAtCurrentRow(problems, column, em.getText());
 		}
 	}
 }

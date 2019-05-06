@@ -11,10 +11,12 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.generate.OverridableDomainGenerator;
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.metadata.model.InterfaceImpl;
@@ -203,6 +205,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -278,6 +281,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}

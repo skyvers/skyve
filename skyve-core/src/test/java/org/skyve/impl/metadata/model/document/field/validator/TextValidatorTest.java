@@ -2,9 +2,12 @@ package org.skyve.impl.metadata.model.document.field.validator;
 
 import static org.junit.Assert.fail;
 
+import java.util.Locale;
+
 import org.junit.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.metadata.user.SuperUser;
 
 public class TextValidatorTest {
 
@@ -26,7 +29,9 @@ public class TextValidatorTest {
 		// call the method under test
 		for (String email : testEmails) {
 			ValidationException e = new ValidationException();
-			v.validate(email, "binding", "Binding", null, e);
+			SuperUser u = new SuperUser();
+			u.setWebLocale(Locale.getDefault());
+			v.validate(u, email, "binding", "Binding", null, e);
 
 			// verify the result
 			if (e.getMessages().isEmpty()) {
@@ -63,7 +68,9 @@ public class TextValidatorTest {
 		// call the method under test
 		for (String email : testEmails) {
 			ValidationException e = new ValidationException();
-			v.validate(email, "binding", "Binding", null, e);
+			SuperUser u = new SuperUser();
+			u.setWebLocale(Locale.getDefault());
+			v.validate(u, email, "binding", "Binding", null, e);
 
 			if (!e.getMessages().isEmpty()) {
 				fail("Email " + email + " should have passed validation.");

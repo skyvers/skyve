@@ -3,26 +3,27 @@
 			xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
-<!-- NOT USED FOR THIS WEB SITE 
-	<context-param>
-		<description>Single Sign On Security Customer Default</description>
-		<param-name>SSO_SECURITY_CUSTOMER</param-name>
-		<param-value>bizhub</param-value>
-	</context-param>
--->	
+	<!-- Needs to be first to set up Skyve configuration state for Spring to use -->
+	<listener>
+		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
+	</listener>
 
 	<!-- Spring Security Configuration -->
 	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/*.xml</param-value>
+		<param-value>org.skyve.impl.web</param-value>
 	</context-param>
 	<filter>                                                                                  
 		<filter-name>springSecurityFilterChain</filter-name>                                  
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>     
 	</filter>
-	<filter-mapping>                                                                          
-		<filter-name>springSecurityFilterChain</filter-name>                                  
-		<url-pattern>/*</url-pattern>                                                         
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	
 	<listener>                                                                                
@@ -63,36 +64,22 @@
 		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'casablanca' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
 	</context-param>
 	<context-param>
-		<param-name>primefaces.mobile.THEME</param-name>
-		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'water' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
-	</context-param>
-	<context-param>
 		<param-name>primefaces.FONT_AWESOME</param-name>
 		<param-value>true</param-value>
 	</context-param>
-    <filter>
-        <filter-name>PrimeFaces FileUpload Filter</filter-name>
-        <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>PrimeFaces FileUpload Filter</filter-name>
-        <servlet-name>FacesServlet</servlet-name>
-    </filter-mapping>
-    
-    <servlet>
-	    <servlet-name>Push Servlet</servlet-name>
-	    <servlet-class>org.primefaces.push.PushServlet</servlet-class>
-        <init-param>
-            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
-            <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-	    <async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-	    <servlet-name>Push Servlet</servlet-name>
-	    <url-pattern>/primepush/*</url-pattern>
-	</servlet-mapping>
+	<!--Skyve runs its own endpoint extension so it can get hold of the WebSocket sessions -->
+	<context-param>
+		<param-name>org.omnifaces.SOCKET_ENDPOINT_ENABLED</param-name>
+		<param-value>false</param-value>
+	</context-param>
+	<filter>
+		<filter-name>PrimeFaces FileUpload Filter</filter-name>
+		<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>PrimeFaces FileUpload Filter</filter-name>
+		<servlet-name>FacesServlet</servlet-name>
+	</filter-mapping>
 
     <filter>
         <display-name>SkyveFacesFilter</display-name>
@@ -129,10 +116,6 @@
         <filter-name>SkyveFacesFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
     </filter-mapping>
-
-	<listener>
-		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
-	</listener>
 
 	<filter>
 		<filter-name>SkyveFilter</filter-name>
@@ -329,6 +312,20 @@
         <filter-name>RestFilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
     </filter-mapping>
+    
+    <!-- API documentation servlet -->
+	<!-- <servlet>
+		<servlet-name>DocsServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.DocsServlet</servlet-class>
+		<init-param>
+			<param-name>docsPath</param-name>
+			<param-value>/swagger/swagger.xhtml</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DocsServlet</servlet-name>
+		<url-pattern>/docs</url-pattern>
+	</servlet-mapping> -->
 	
 	<servlet>
 		<servlet-name>H2Console</servlet-name>

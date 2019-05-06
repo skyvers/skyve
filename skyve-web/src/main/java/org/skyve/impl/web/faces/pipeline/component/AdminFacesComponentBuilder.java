@@ -18,25 +18,48 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	private static final String DATA_TABLE_STYLE_CLASS = "box-primary";
 	
 	@Override
-	public UIComponent action(UIComponent component, String listBinding, String listVar, Action action, ImplicitActionName name, String title) {
+	public UIComponent action(UIComponent component,
+								String dataWidgetBinding,
+								String dataWidgetVar,
+								Action action,
+								ImplicitActionName name,
+								String title) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
 
 	@Override
-	public UIComponent actionButton(UIComponent component, String listBinding, String listVar, Button button, Action action) {
+	public UIComponent actionButton(UIComponent component,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
 	
 	@Override
-	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+	public UIComponent download(UIComponent component, String dataWidgetBinding, String dataWidgetVar, Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
 	
 	@Override
-	public UIComponent downloadButton(UIComponent component, Button button, Action action, String moduleName, String documentName) {
+	public UIComponent downloadButton(UIComponent component,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -48,7 +71,14 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent reportButton(UIComponent component, Button button, Action action) {
+	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		FacesUtil.setStyleCLass(component, BUTTON_STYLE_CLASS);
 		return component;
 	}
@@ -60,7 +90,14 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		styleUploadButton(component);
 		return component;
 	}
@@ -76,17 +113,24 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		FacesUtil.setStyleCLass(component, DATA_TABLE_STYLE_CLASS);
 		return component;
 	}
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component,
+									String dataWidgetVar,
+									boolean ordered,
+									String title,
+									DataGrid grid) {
 		FacesUtil.setStyleCLass(component, DATA_TABLE_STYLE_CLASS);
 		return component;
 	}

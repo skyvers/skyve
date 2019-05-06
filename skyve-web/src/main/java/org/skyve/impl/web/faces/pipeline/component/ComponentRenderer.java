@@ -65,7 +65,6 @@ import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
-import org.primefaces.mobile.component.field.Field;
 
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
@@ -237,9 +236,6 @@ public class ComponentRenderer {
 			Editor editor = (Editor) component;
 			putValue(attributes, "style", editor.getStyle());
 			putValue(attributes, "styleClass", editor.getStyleClass());
-		}
-		else if (component instanceof Field) {
-			tagName = "pm:field";
 		}
 		else if (component instanceof Fieldset) {
 			tagName = "p:fieldset";
@@ -521,9 +517,11 @@ public class ComponentRenderer {
 		else if (component instanceof UIOutput) {
 			UIOutput output = (UIOutput) component;
 
-			putValue(attributes, "value", output.getValue());
 			putValueExpression(attributes, "value", component);
-
+			if (! attributes.containsKey("value")) {
+				putValue(attributes, "value", output.getValue());
+			}
+			
 			if (tagName == null) { // no tag
 				out.append(indentation).append(attributes.get("value")).append('\n');
 				return;

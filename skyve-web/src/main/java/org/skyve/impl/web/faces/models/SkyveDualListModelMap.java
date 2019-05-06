@@ -161,7 +161,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 						String thisBizId = domainValue.getCode();
 						Bean thisBean = BindUtil.getElementInCollection(collection, thisBizId);
 						if (thisBean == null) { // DNE in collection
-							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p);
+							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, view.getWebContext());
 							collection.add(newIndex, thisBean);
 						}
 						else { // found in collection

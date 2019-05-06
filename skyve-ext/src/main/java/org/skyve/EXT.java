@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.skyve.bizport.BizPortSheet;
@@ -22,8 +24,11 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
@@ -33,6 +38,7 @@ import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.ReportUtil;
+import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobDescription;
@@ -41,12 +47,17 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
+import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -152,6 +163,28 @@ public class EXT {
 		MailUtil.sendMail(mail);
 	}
 
+	/**
+	 * Push a message to connected client user interfaces.
+	 */
+	public static void push(PushMessage message) {
+		// Note Sessions are thread-safe
+		Set<String> userIds = message.getUserIds();
+		boolean broadcast = userIds.isEmpty();
+		for (Session session : PushMessage.SESSIONS) {
+			if (session.isOpen()) {
+				if (broadcast) {
+					session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+				}
+				else {
+					Object userId = session.getUserProperties().get("user");
+					if ((userId == null) || userIds.contains(userId)) {
+						session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Run a job once. The job disappears from the Scheduler once it is run and
 	 * a record of the run in placed in admin.Job. User must look in admin to
@@ -646,4 +679,64 @@ public class EXT {
 		dpe.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
 		return dpe.matches(clearText, hashedPassword);
 	}
+	
+	/**
+	 * Inject a bootstrap user according to the settings in the .json Bootstrap stanza
+	 * 
+	 * @param p
+	 * @throws Exception
+	 */
+	public static void bootstrap(Persistence p) throws Exception {
+		User u = p.getUser();
+		Customer c = u.getCustomer();
+		Module adminMod = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
+		Document contactDoc = adminMod.getDocument(c, SQLMetaDataUtil.CONTACT_DOCUMENT_NAME);
+		Document userDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_DOCUMENT_NAME);
+		Document userRoleDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_ROLE_DOCUMENT_NAME);
+		DocumentQuery q = p.newDocumentQuery(userDoc);
+		q.getFilter().addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+		PersistentBean user = q.beanResult();
+		if (user == null) {
+			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s (%s)",
+												UtilImpl.BOOTSTRAP_CUSTOMER,
+												UtilImpl.BOOTSTRAP_USER,
+												UtilImpl.BOOTSTRAP_EMAIL));
+
+			// Create user
+			user = userDoc.newInstance(u);
+			u.setId(user.getBizId());
+			user.setBizUserId(u.getId());
+			BindUtil.set(user, SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
+
+			// Create contact
+			Bean contact = contactDoc.newInstance(u);
+			BindUtil.set(contact, SQLMetaDataUtil.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+			BindUtil.convertAndSet(contact, SQLMetaDataUtil.CONTACT_TYPE_PROPERTY_NAME, "Person");
+			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_EMAIL);
+
+			BindUtil.set(user, SQLMetaDataUtil.CONTACT_PROPERTY_NAME, contact);
+
+			// Add roles
+			@SuppressWarnings("unchecked")
+			List<Bean> roles = (List<Bean>) BindUtil.get(user, SQLMetaDataUtil.ROLES_PROPERTY_NAME);
+			for (Module m : c.getModules()) {
+				String moduleName = m.getName();
+				for (Role r : m.getRoles()) {
+					Bean role = userRoleDoc.newInstance(u);
+					BindUtil.set(role, ChildBean.PARENT_NAME, user);
+					BindUtil.set(role, SQLMetaDataUtil.ROLE_NAME_PROPERTY_NAME, String.format("%s.%s", moduleName, r.getName()));
+					roles.add(role);
+				}
+			}
+
+			// Save the bootstrap user
+			p.save(user);
+		}
+		else {
+			UtilImpl.LOGGER.info(String.format("BOOTSTRAP USER %s/%s ALREADY EXISTS",
+												UtilImpl.BOOTSTRAP_CUSTOMER,
+												UtilImpl.BOOTSTRAP_USER));
+		}
+	}	
 }

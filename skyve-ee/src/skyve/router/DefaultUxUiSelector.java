@@ -12,10 +12,10 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 
 public class DefaultUxUiSelector implements UxUiSelector {
-	private static final UxUi PHONE = new UxUi("phone", "water");
-	private static final UxUi TABLET = new UxUi("tablet", "admin");
-	private static final UxUi DESKTOP = new UxUi("desktop", "casablanca");
-	public static final UxUi EXTERNAL = new UxUi("external", "admin");
+	public static final UxUi PHONE = new UxUi("phone", "nova-light");
+	public static final UxUi TABLET = new UxUi("tablet", "nova-light");
+	public static final UxUi DESKTOP = new UxUi("desktop", "casablanca");
+	public static final UxUi EXTERNAL = new UxUi("external", "nova-light");
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);

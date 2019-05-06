@@ -3,7 +3,9 @@ package org.skyve.impl.metadata.repository.document;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -27,6 +29,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
@@ -37,6 +40,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -47,6 +51,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setExpression(String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}

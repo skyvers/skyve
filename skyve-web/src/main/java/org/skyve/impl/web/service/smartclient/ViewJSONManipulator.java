@@ -129,6 +129,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
+import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
@@ -151,8 +152,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			
 			htmlGuts.append("content?").append(AbstractWebContext.REPORT_NAME).append("={").append(binding);
 			htmlGuts.append("}&").append(AbstractWebContext.DOCUMENT_NAME).append("={bizModule}.{bizDocument}&");
-			htmlGuts.append(AbstractWebContext.BINDING_NAME).append('=').append(binding).append("&_ctim=");
-			htmlGuts.append(System.currentTimeMillis());
+			htmlGuts.append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
 		}
 
 		@Override
@@ -301,10 +301,16 @@ class ViewJSONManipulator extends ViewVisitor {
 		this.forApply = forApply;
 	}
 	
-	String toJSON(AbstractWebContext webContextToReference)
+	String toJSON(AbstractWebContext webContextToReference,
+					String redirectUrl) // to redirect the browser location when the response is processed
 	throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 
+		// Put the redirecturl in if required
+		if (redirectUrl != null) {
+			result.put("_redirectUrl", redirectUrl);
+		}
+		
 		// Encode the context bean
 		String webId = webContextToReference.getWebId();
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
@@ -436,7 +442,7 @@ class ViewJSONManipulator extends ViewVisitor {
 /*	
 	private static void displayViewBindings(ViewBindings bindings) {
 		for (String binding : bindings.getBindings()) {
-			Util.LOGGER.info(bindings.getFullyQualifiedBindingPrefix() + " - " + bindings.getBindingPrefix() + " : " + binding);
+			UtilImpl.LOGGER.info(bindings.getFullyQualifiedBindingPrefix() + " - " + bindings.getBindingPrefix() + " : " + binding);
 		}
 		
 		for (String binding : bindings.getChildren()) {
@@ -445,12 +451,12 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 */	
-	void applyJSON(String json, AbstractPersistence persistence) throws Exception {
+	void applyJSON(String json, AbstractPersistence persistence, WebContext webContext) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, json);
 
 //		displayViewBindings(bindingTree);
-		applyJSON(bindingTree, document, values, bean, persistence);
+		applyJSON(bindingTree, document, values, bean, persistence, webContext);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -458,11 +464,12 @@ class ViewJSONManipulator extends ViewVisitor {
 							Document appliedToDoc,
 							Map<String, Object> values,
 							Bean appliedTo,
-							AbstractPersistence persistence)
+							AbstractPersistence persistence,
+							WebContext webContext)
 	throws Exception {
-//Util.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
+//UtilImpl.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
 
-		applyJSONProperties(bindings, appliedToDoc, values, appliedTo, persistence);
+		applyJSONProperties(bindings, appliedToDoc, values, appliedTo, persistence, webContext);
 
 		for (String childBindingPrefix : bindings.getChildren()) {
 			ViewBindings childBindings = bindings.putOrGetChild(childBindingPrefix, null);
@@ -531,7 +538,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 						if (thisBean == null) { // DNE in beanList
 							if (thisMap == null) { // reference
-								thisBean = WebUtil.findReferencedBean(relatedDocument, thisBizId, persistence);
+								thisBean = WebUtil.findReferencedBean(relatedDocument, thisBizId, persistence, bean, webContext);
 							}
 							else {
 								// create a new one with new Instance
@@ -540,7 +547,8 @@ class ViewJSONManipulator extends ViewVisitor {
 											relatedDocument,
 											thisMap,
 											thisBean,
-											persistence);
+											persistence,
+											webContext);
 							}
 	
 							// Determine whether link the bean in as the parent
@@ -586,7 +594,8 @@ class ViewJSONManipulator extends ViewVisitor {
 											relatedDocument,
 											thisMap,
 											thisBean,
-											persistence);
+											persistence,
+											webContext);
 							}
 						}
 						newIndex++;
@@ -659,7 +668,7 @@ class ViewJSONManipulator extends ViewVisitor {
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
 							Bean oldReferencedBean = referencedBean;
-							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence);
+							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence, bean, webContext);
 							BindUtil.set(appliedTo, childBindingPrefix, referencedBean);
 
 							// Determine whether to set the other side of an inverse
@@ -703,7 +712,7 @@ class ViewJSONManipulator extends ViewVisitor {
 						if (referencedBean == null) {
 							referencedBean = relatedDocument.newInstance(user);
 						}
-						applyJSON(childBindings, relatedDocument, referencedMap, referencedBean, persistence);
+						applyJSON(childBindings, relatedDocument, referencedMap, referencedBean, persistence, webContext);
 					}
 				}
 			}
@@ -714,12 +723,13 @@ class ViewJSONManipulator extends ViewVisitor {
 										Document documentToApply,
 										Map<String, Object> valuesToApply,
 										Bean beanToApplyTo,
-										AbstractPersistence persistence)
+										AbstractPersistence persistence,
+										WebContext webContext)
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
-//Util.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
+//UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
 			if (bindings.isWritable(binding)) {
-				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence);
+				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
 			}
 		}
 	}
@@ -728,7 +738,8 @@ class ViewJSONManipulator extends ViewVisitor {
 									String binding, 
 									Map<String, Object> values, 
 									Bean targetBean,
-									AbstractPersistence persistence) 
+									AbstractPersistence persistence,
+									WebContext webContext) 
 	throws Exception {
 		String valueKey = BindUtil.sanitiseBinding(binding);
 		if (! values.containsKey(valueKey)) {
@@ -761,7 +772,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					String relatedId = (String) relatedValue;
 					// old value id and new value id are different
 					if ((oldRelatedBean == null) || (! oldRelatedBean.getBizId().equals(relatedId))) {
-						newRelatedBean = WebUtil.findReferencedBean(relatedDocument, relatedId, persistence);
+						newRelatedBean = WebUtil.findReferencedBean(relatedDocument, relatedId, persistence, bean, webContext);
 						dirty = true;
 					}
 				}
@@ -796,7 +807,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
-//Util.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
+//UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
 				BindUtil.populateProperty(user, 
 											targetBean, 
 											binding, 

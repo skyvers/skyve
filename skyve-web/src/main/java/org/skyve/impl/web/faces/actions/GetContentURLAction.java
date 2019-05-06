@@ -33,7 +33,6 @@ public class GetContentURLAction extends FacesAction<String> {
 		result.append("content?").append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(contentId);
 		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=').append(bean.getBizModule()).append('.').append(bean.getBizDocument());
 		result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
-		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
 		
 		return result.toString();
 	}

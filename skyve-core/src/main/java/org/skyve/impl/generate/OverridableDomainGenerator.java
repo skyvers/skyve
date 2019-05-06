@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -207,6 +213,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		populateDataStructures();
 
+		// delete generated and generatedTest directories
+		deleteGeneratedDirectories(repository.getAllVanillaModuleNames());
+
 		// generate the domain classes for vanilla modules
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Module module = repository.getModule(null, moduleName);
@@ -406,24 +415,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// clear out the domain folder
 		final String packagePath = repository.MODULES_NAMESPACE + moduleName + '/' + repository.DOMAIN_NAME;
 		File domainFolder = new File(GENERATED_PATH + packagePath + '/');
-		if (domainFolder.exists()) {
-			for (File domainFile : domainFolder.listFiles()) {
-				domainFile.delete();
-			}
-		} else {
+		if (!domainFolder.exists()) {
 			domainFolder.mkdirs();
 		}
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
 		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
-
-		if (domainTestPath.exists()) {
-			for (File testFile : domainTestPath.listFiles()) {
-				testFile.delete();
-			}
-			domainTestPath.delete();
-		}
 
 		// Make a orm.hbm.xml file
 		File mappingFile = new File(GENERATED_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
@@ -542,7 +540,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 					.replace(SRC_PATH.replaceAll("\\\\|\\/", "."), "");
 
-			System.out.println("Found factory " + className);
+			UtilImpl.LOGGER.fine("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -1988,7 +1986,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		if (reference instanceof Collection) {
 			imports.add("java.util.List");
-			imports.add("java.util.ArrayList");
 
 			attributeJavadoc(reference, attributes);
 			if (deprecated) {
@@ -1999,7 +1996,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				attributes.append("transient ");
 			}
 			attributes.append("List<").append(propertyClassName).append("> ").append(name);
-			attributes.append(" = new ArrayList<>();\n");
+			if (reference.isTrackChanges()) {
+				imports.add("org.skyve.impl.domain.ChangeTrackingArrayList");
+				attributes.append(" = new ChangeTrackingArrayList<>(\"");
+				attributes.append(name).append("\", this);\n");
+			}
+			else {
+				imports.add("java.util.ArrayList");
+				attributes.append(" = new ArrayList<>();\n");
+			}
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);
@@ -3183,16 +3188,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (attribute.getName().contains("_")) {
 					throw new MetaDataException(
 							String.format(
-									"Document %s.%s cannot contain attribute named %s because it contains an underscore. Try using %s instead.",
-									document.getOwningModuleName(), document.getName(), attribute.getName(),
-									attribute.getName().replaceAll("_", "-")));
+									"Document %s.%s cannot contain attribute named %s because it contains an "
+											+ "underscore. Underscores are reserved for JSON serialisation.",
+									document.getOwningModuleName(), document.getName(), attribute.getName()));
 				}
 
 				AttributeType type = attribute.getAttributeType();
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
-					System.out.println(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
+					UtilImpl.LOGGER.fine(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
 							document.getName()));
 					return;
 				}
@@ -3238,5 +3243,68 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"Document %s.%s cannot contain attribute named \"%s\" because it is a reserved word in database dialect %s.",
 				document.getOwningModuleName(), document.getName(), attribute.getName(),
 				DIALECT_OPTIONS.getDescription());
+	}
+
+	/**
+	 * Deletes the specified directory and all subfolders/files
+	 * 
+	 * @param directory The path to the directory to delete
+	 * @throws IOException
+	 */
+	private static void deleteDirectory(Path directory) throws IOException {
+		if (Files.exists(directory)) {
+			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+					Files.delete(path);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path subDir, IOException ioException) throws IOException {
+					Files.delete(subDir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		}
+	}
+
+	/**
+	 * Deletes the generated source domain and test directories and all files below them for all active
+	 * modules. Deletes the entire source and test generated directories for unreferenced modules. This
+	 * is to ensure a clean start for generating the domain.
+	 * 
+	 * @param moduleNames The list of all active module names
+	 * 
+	 * @throws IOException
+	 */
+	private static void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
+		// src/main/java/generated/modules
+		final Path generatedDirectory = Paths.get(GENERATED_PATH, AbstractRepository.get().MODULES_NAMESPACE);
+
+		// get all directories at this level
+		for (File child : generatedDirectory.toFile().listFiles()) {
+			if (child.isDirectory() && moduleNames.contains(child.getName())) {
+				final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(AbstractRepository.get().DOMAIN_NAME);
+				if (packagePath.toFile().exists()) {
+					for (File domainFile : packagePath.toFile().listFiles()) {
+						domainFile.delete();
+					}
+				} else {
+					packagePath.toFile().mkdirs();
+				}
+			} else {
+				System.out
+						.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
+				deleteDirectory(child.toPath());
+			}
+		}
+		
+		// delete the generated test directory
+		final Path generatedTestDirectory = Paths.get(GENERATED_TEST_PATH);
+		if (generatedTestDirectory.toFile().exists()) {
+			System.out.println(String.format("Deleting generated test directory %s", generatedTestDirectory.toString()));
+			deleteDirectory(generatedTestDirectory);
+		}
 	}
 }

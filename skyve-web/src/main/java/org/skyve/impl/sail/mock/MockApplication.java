@@ -70,10 +70,6 @@ import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
-import org.primefaces.mobile.component.content.Content;
-import org.primefaces.mobile.component.field.Field;
-import org.primefaces.mobile.component.header.Header;
-import org.primefaces.mobile.component.page.Page;
 
 @SuppressWarnings("deprecation") // This super class has a whole bunch of deprecated shit in it
 public class MockApplication extends Application {
@@ -113,9 +109,6 @@ public class MockApplication extends Application {
 		else if (CommandLink.COMPONENT_TYPE.equals(componentType)) {
 			return new CommandLink();
 		}
-		else if (Content.COMPONENT_TYPE.equals(componentType)) {
-			return new Content();
-		}
 		else if (DataList.COMPONENT_TYPE.equals(componentType)) {
 			return new DataList();
 		}
@@ -128,14 +121,8 @@ public class MockApplication extends Application {
 		else if (Editor.COMPONENT_TYPE.equals(componentType)) {
 			return new Editor();
 		}
-		else if (Field.COMPONENT_TYPE.equals(componentType)) {
-			return new Field();
-		}
 		else if (GraphicImage.COMPONENT_TYPE.equals(componentType)) {
 			return new GraphicImage();
-		}
-		else if (Header.COMPONENT_TYPE.equals(componentType)) {
-			return new Header();
 		}
 		else if (HtmlInputHidden.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlInputHidden();
@@ -172,9 +159,6 @@ public class MockApplication extends Application {
 		}
 		else if (OverlayPanel.COMPONENT_TYPE.equals(componentType)) {
 			return new OverlayPanel();
-		}
-		else if (Page.COMPONENT_TYPE.equals(componentType)) {
-			return new Page();
 		}
 		else if (Panel.COMPONENT_TYPE.equals(componentType)) {
 			return new Panel();

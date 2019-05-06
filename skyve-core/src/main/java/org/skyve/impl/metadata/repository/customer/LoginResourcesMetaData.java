@@ -12,7 +12,6 @@ public class LoginResourcesMetaData implements LoginResources {
 	private static final long serialVersionUID = -6851698152410454808L;
 
 	private String loginPageURL;
-	private String loginErrorPageURL;
 	private String loggedOutPageURL;
 	private String smartClientJavascriptURL;
 
@@ -24,16 +23,6 @@ public class LoginResourcesMetaData implements LoginResources {
 	@XmlAttribute(name = "loginPage")
 	public void setLoginPageURL(String loginPageURL) {
 		this.loginPageURL = UtilImpl.processStringValue(loginPageURL);
-	}
-	
-	@Override
-	public String getLoginErrorPageURL() {
-		return loginErrorPageURL;
-	}
-	
-	@XmlAttribute(name = "loginErrorPage")
-	public void setLoginErrorPageURL(String loginErrorPageURL) {
-		this.loginErrorPageURL = UtilImpl.processStringValue(loginErrorPageURL);
 	}
 	
 	@Override

@@ -6,25 +6,41 @@
 			<listGrid continueConversation="false" query="qUsers"></listGrid>
 		</tab>
 		<tab title="Invite Users">
-			<vbox border="true" borderTitle="User Invitations" percentageWidth="60" shrinkWrap="height">
+			<component document="Communication" name="_emailNotConfiguredBanner" />
+			<vbox border="true" borderTitle="User Invitations" >
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>1. To invite users, select which permission group(s) to add them to.</blurb>
+						</item>
+					</row>
+				</form>
 				<vbox percentageHeight="40">
-					<listMembership binding="userInvitationGroups" candidatesHeading="Unassigned Groups" membersHeading="Assigned Groups" listWidth="300" />
+					<listMembership binding="userInvitationGroups" candidatesHeading="Available Groups" membersHeading="Assigned Groups" />
 				</vbox>
 				<form>
 					<column />
 					<row>
 						<item>
-							<label for="userInvitiationEmailList" />
+							<blurb>2. Then enter the email addresses of the new users.</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item showLabel="false" colspan="2">
+							<textArea binding="userInvitiationEmailList" pixelHeight="200" />
 						</item>
 					</row>
 					<row>
-						<item showLabel="false">
-							<textArea binding="userInvitiationEmailList" pixelHeight="200"/>
+						<item>
+							<button actionName="InviteUsers" pixelWidth="250" />
 						</item>
-					</row>
-					<row>
-						<item align="centre">
-							<button actionName="InviteUsers" pixelWidth="150" />
+						<item>
+							<button actionName="CreateUsers" pixelWidth="250" />
 						</item>
 					</row>
 				</form>
@@ -32,6 +48,9 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="InviteUsers" displayName="Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" confirm="Ok to invite the users?" />
+		<action className="InviteUsers" displayName="Create and Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create users and send each user an invitation?" />
+		<action className="CreateUsers" displayName="Create Users (no invitation)" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create the users (no invitation email will be sent)?" />
 	</actions>
 </view>

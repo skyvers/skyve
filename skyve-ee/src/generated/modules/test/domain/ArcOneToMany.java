@@ -1,6 +1,5 @@
 package modules.test.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * ArcOneToMany
@@ -38,7 +38,7 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	/**
 	 * Arcs
 	 **/
-	private List<AnyBase> arcs = new ArrayList<>();
+	private List<AnyBase> arcs = new ChangeTrackingArrayList<>("arcs", this);
 
 	@Override
 	@XmlTransient

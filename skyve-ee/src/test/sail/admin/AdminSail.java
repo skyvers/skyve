@@ -9,7 +9,8 @@ import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
 public class AdminSail extends PrimeFacesTest {
-	private String pathToChromeDriver = "/Users/mike/chromedriver";
+
+	private String pathToChromeDriver = "/Users/RBB/chromedriver.exe";
 //	private String pathToFirefoxDriver = "/usr/local/bin/geckodriver";
 	
 	@Before
@@ -24,6 +25,7 @@ public class AdminSail extends PrimeFacesTest {
 	}
 	
 	protected void login(String customer, String username, String password) throws Exception {
+
 		driver.get(baseUrl);
 
 		driver.findElement(By.name("customer")).clear();
@@ -38,6 +40,7 @@ public class AdminSail extends PrimeFacesTest {
 		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
 	}
 
+
 	/**
 	 * Menu Password
 	 */
@@ -47,9 +50,9 @@ public class AdminSail extends PrimeFacesTest {
 		trace("set oldPassword (s7password) if it exists and is not disabled");
 		text("s7password", "Maecenas vestibul");
 		trace("set newPassword (s14password) if it exists and is not disabled");
-		text("s14password", "Vestibulum tincidunt placerat euismod");
+		text("s14password", "Maecenas vestibul");
 		trace("set confirmPassword (s21password) if it exists and is not disabled");
-		text("s21password", "In cursus dignissim e");
+		text("s21password", "Maecenas vestibul");
 		trace("click [MakePasswordChange] (s32) if it exists and is not disabled");
 		button("s32", true, false);
 		trace("Test Success");

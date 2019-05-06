@@ -49,7 +49,7 @@ public abstract class InlineSeleneseExecutor<T extends AutomationContext> extend
 		Procedure after = interaction.getAfter();
 		if (after != null) {
 			indent().append("<!-- After ").append(interaction.getName()).append(" -->").newline();
-			for (Step step : interaction.getSteps()) {
+			for (Step step : after.getSteps()) {
 				step.execute(this);
 			}
 		}

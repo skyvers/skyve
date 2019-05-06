@@ -83,13 +83,36 @@ public interface WebContext {
 	// should the state of the views (ie history) be available for server-side interrogation?
 	
 	/**
-	 * This method is used to push to all clients using atmosphere.
-	 * @param path	The path (topic) that the message is intended for
-	 * @param o	The object to push
+	 * Add a message to the current view to be displayed.
+	 * @param severity
+	 * @param message
 	 */
-	public void push(String path, Object o);
-	
 	public void message(MessageSeverity severity, String message);
 	
+	/**
+	 * Add a growl (toast) to the current view to be popped.
+	 * @param severity
+	 * @param message
+	 */
 	public void growl(MessageSeverity severity, String message);
+	
+	/**
+	 * Put this conversation into the conversation cache.
+	 * @throws Exception
+	 */
+	public void cacheConversation() throws Exception;
+	
+	/**
+	 * Kick off a new background task backed by this conversation.
+	 * @param taskClass	The class of the task to execute.
+	 * @throws Exception
+	 */
+	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	
+	/**
+	 * Kick off a new background task backed by this conversation without caching the conversation first.
+	 * @param taskClass	The class of the task to execute.
+	 * @throws Exception
+	 */
+	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) throws Exception;
 }

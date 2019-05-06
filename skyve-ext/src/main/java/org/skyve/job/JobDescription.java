@@ -1,6 +1,7 @@
 package org.skyve.job;
 
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.user.User;
 
 public class JobDescription {
 	private Timestamp startTime;
@@ -9,6 +10,7 @@ public class JobDescription {
 	private int percentComplete;
 	private String logging;
 	private JobStatus status;
+	private User user;
 
 	public String getName() {
 		return name;
@@ -56,5 +58,13 @@ public class JobDescription {
 
 	public void setStartTime(Timestamp startTime) {
 		this.startTime = startTime;
+	}
+	
+	public User getUser() {
+		return user;
+	}
+	
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

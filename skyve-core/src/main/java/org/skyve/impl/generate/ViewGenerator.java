@@ -468,5 +468,6 @@ public class ViewGenerator {
 			out.println(generateEditViewXML(customer, document, customerOverridden, uxui != null));
 			out.flush();
 		}
+		UtilImpl.LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
 	}
 }

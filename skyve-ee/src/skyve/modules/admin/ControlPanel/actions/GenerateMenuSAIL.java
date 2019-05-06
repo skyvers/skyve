@@ -12,21 +12,25 @@ public class GenerateMenuSAIL extends GenerateSAIL {
 	private static final long serialVersionUID = 3235202497294674514L;
 
 	@Override
-	protected Automation single(User user,
-									String moduleName,
-									String uxui,
-									UserAgentType userAgentType,
-									TestStrategy testStrategy)
+	public Automation single(User user,
+								String loginCustomer,
+								String loginPassword,
+								String moduleName,
+								String uxui,
+								UserAgentType userAgentType,
+								TestStrategy testStrategy)
 	throws Exception {
-		return Generator.visitMenu(user, moduleName, uxui, userAgentType, testStrategy);
+		return Generator.visitMenu(user, loginCustomer, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 
 	@Override
-	protected List<Automation> multiple(User user,
-											String uxui,
-											UserAgentType userAgentType,
-											TestStrategy testStrategy)
+	public List<Automation> multiple(User user,
+										String loginCustomer,
+										String loginPassword,
+										String uxui,
+										UserAgentType userAgentType,
+										TestStrategy testStrategy)
 	throws Exception {
-		return Generator.visitMenus(user, uxui, userAgentType, testStrategy);
+		return Generator.visitMenus(user, loginCustomer, loginPassword, uxui, userAgentType, testStrategy);
 	}
 }

@@ -45,6 +45,6 @@ public class DataGridEdit implements Step {
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return String.format("%s[%d].edit", binding, row);
+		return binding + ".edit";
 	}
 }

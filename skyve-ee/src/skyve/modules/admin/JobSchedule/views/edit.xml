@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Jobs"
-		name="edit"
-		refreshTimeInSeconds="30"
-		xmlns="http://www.skyve.org/xml/view"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="Jobs" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<form border="true" borderTitle="Job Details">
-		<column percentageWidth="20" />
-		<column percentageWidth="40" />
-		<column percentageWidth="40" />
+		<column responsiveWidth="2"/>
+		<column />
+		<column />
 		<row>
 			<item>
 				<combo binding="jobName" />
 			</item>
+		</row>
+		<row>
 			<item>
 				<lookupDescription binding="runAs" descriptionBinding="bizKey" />
 			</item>
@@ -20,36 +18,34 @@
 	</form>
 	<vbox border="true" borderTitle="When To Execute">
 		<form>
-			<column pixelWidth="100" />
-			<column />
+			<column responsiveWidth="2"/>
 			<column />
 			<row>
-				<item label="Disabled">
+				<item>
 					<checkBox binding="disabled" triState="false" />
 				</item>
 			</row>
 		</form>
 		<hbox>
-			<vbox border="true" borderTitle="Minutes" pixelWidth="200">
+			<vbox border="true" borderTitle="Minutes" responsiveWidth="6">
 				<form>
-					<column pixelWidth="0" />
 					<column />
 					<row>
-						<item label="">
+						<item showLabel="false">
 							<radio binding="allMinutes" />
 						</item>
 					</row>
 				</form>
 				<form>
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
 					<row>
 						<item>
@@ -257,20 +253,19 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Hours" pixelWidth="80">
+			<vbox border="true" borderTitle="Hours" responsiveWidth="4">
 				<form>
-					<column pixelWidth="0" />
 					<column />
 					<row>
-						<item label="">
+						<item showLabel="false">
 							<radio binding="allHours" />
 						</item>
 					</row>
 				</form>
 				<form>
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
 					<row>
 						<item>
@@ -370,24 +365,25 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Days" pixelWidth="160">
+			</hbox>
+			<hbox>
+			<vbox border="true" borderTitle="Days" responsiveWidth="4">
 				<form>
-					<column pixelWidth="0" />
 					<column />
 					<row>
-						<item label="">
+						<item showLabel="false">
 							<radio binding="allDays" />
 						</item>
 					</row>
 				</form>
 				<form>
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
 					<row>
 						<item>
@@ -504,18 +500,17 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Months" pixelWidth="60">
+			<vbox border="true" borderTitle="Months" responsiveWidth="4">
 				<form>
-					<column pixelWidth="0" />
 					<column />
 					<row>
-						<item label="">
+						<item showLabel="false">
 							<radio binding="allMonths" />
 						</item>
 					</row>
 				</form>
 				<form>
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
 					<row>
 						<item>
@@ -579,18 +574,17 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Weekdays" pixelWidth="60">
+			<vbox border="true" borderTitle="Weekdays" responsiveWidth="4">
 				<form>
-					<column pixelWidth="0" />
 					<column />
 					<row>
-						<item label="">
+						<item showLabel="false">
 							<radio binding="allWeekdays" />
 						</item>
 					</row>
 				</form>
 				<form>
-					<column pixelWidth="20" />
+					<column responsiveWidth="1"/>
 					<column />
 					<row>
 						<item>
@@ -631,10 +625,10 @@
 			</vbox>
 		</hbox>
 	</vbox>
-	<form percentageWidth="100" border="true" borderTitle="Date Range To Execute">
-		<column percentageWidth="20" />
+	<form border="true" borderTitle="Date Range To Execute">
 		<column />
-		<column percentageWidth="20" />
+		<column />
+		<column />
 		<column />
 		<row>
 			<item>
@@ -649,11 +643,11 @@
 		<ok disabled="scheduledImmediately" />
 		<save disabled="scheduledImmediately" />
 		<cancel />
-		<delete />
+		<delete disabled="scheduledImmediately" />
 		<action className="RunJobNow" displayName="Schedule Job for Now" inActionPanel="true" 
-		confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
-		relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
-		clientValidation="false"
-		/>
+			confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
+			clientValidation="false"
+			disabled="scheduledImmediately" />
 	</actions>
 </view>

@@ -1,11 +1,8 @@
 package modules.admin.Configuration;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
+import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
@@ -13,7 +10,7 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 
-public class ConfigurationBizlet extends Bizlet<Configuration> {
+public class ConfigurationBizlet extends SingletonCachedBizlet<Configuration> {
 	/**
 	 * For Serialization
 	 */
@@ -21,13 +18,8 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 	
 	@Override
 	public Configuration newInstance(Configuration bean) throws Exception {
-		Persistence persistence = CORE.getPersistence();
-		DocumentQuery q = persistence.newDocumentQuery(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
-		Configuration result = q.beanResult();
-		if (result == null) {
-			result = bean;
-		}
-
+		Configuration result = super.newInstance(bean);
+		
 		if (result.getPasswordComplexityModel() == null) {
 			result.setPasswordComplexityModel(ComplexityModel.DEFAULT_COMPLEXITY_MODEL);
 		}

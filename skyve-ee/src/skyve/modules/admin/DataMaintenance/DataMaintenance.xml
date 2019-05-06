@@ -9,17 +9,28 @@
 	<iconStyleClass>fa fa-wrench</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/maintenance16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/maintenance32.png</icon32x32RelativeFilePath>
-	<bizKey expression="Data Maintenance{modDocName}"/>
+	<bizKey expression="Data Maintenance"/>
 	<attributes>
 		<text name="modDocName">
 			<displayName>Module.Document</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
+
+		<!-- Schema Truncation -->
+		<text name="confirmPassword" persistent="false" trackChanges="false" >
+			<displayName>Confirm password</displayName>
+			<length>50</length>
+		</text>
+		<boolean name="injectBootstrapUser">
+			<displayName>Inject bootstrap user</displayName>
+		</boolean>
 		<text name="schemaName">
 			<displayName>Schema Name</displayName>
 			<length>1024</length>
 		</text>
+		
+		
 		
 		<!-- Data Refresh -->
 		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">

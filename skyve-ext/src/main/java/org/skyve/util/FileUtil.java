@@ -17,6 +17,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -101,7 +106,30 @@ public class FileUtil {
 	 */
 	public static String safeFileName(String unsafeName) {
 
-		return unsafeName.replace(',', '_').replace('&', '_').replace('/', '_').replace('\\', '_').replace(" ", "").replace(":", "_").replace("-","_");
+		// suitable for FAT32 - thanks to SharkAlley@Stack Overflow
+		final Pattern PATTERN = Pattern.compile("[%\\.\"\\*/:<>\\?\\\\\\|\\+,\\.;=\\[\\]]");
+
+		final int MAX_LENGTH = 127;
+
+	    StringBuffer sb = new StringBuffer();
+
+	    // Apply the regex
+	    Matcher m = PATTERN.matcher(unsafeName);
+
+	    while (m.find()) {
+
+	        // Convert matched character to percent-encoded.
+	        String replacement = "%"+Integer.toHexString(m.group().charAt(0)).toUpperCase();
+
+	        m.appendReplacement(sb,replacement);
+	    }
+	    m.appendTail(sb);
+
+	    String encoded = sb.toString();
+
+	    // Truncate the string.
+	    int end = Math.min(encoded.length(),MAX_LENGTH);
+	    return encoded.substring(0,end);
 	}
 
 	/**
@@ -182,6 +210,35 @@ public class FileUtil {
 		}
 	}
 	
+	/**
+	 * Create a jar archive for the directory.
+	 * 
+	 * @param directory
+	 * @param out
+	 * @throws IOException
+	 */
+	public static void createJarArchive(File directory, OutputStream out) throws IOException {
+		if (directory.exists() && directory.isDirectory()) {
+			Manifest manifest = new Manifest();
+			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+			try (JarOutputStream jos = new JarOutputStream(out, manifest)) {
+				List<File> fileList = new ArrayList<>();
+	
+				getAllFiles(directory, fileList);
+	
+				for (File file : fileList) {
+					if (! file.isDirectory()) { // we only zip files, not directories
+						addToZip(directory, file, jos);
+					}
+				}
+				
+				jos.flush();
+			}
+		}
+		
+		out.flush();
+	}
+
 	/**
 	 * Create a zip archive for the directory.
 	 * 

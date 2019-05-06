@@ -79,73 +79,73 @@ public abstract class ActionVisitor {
 	}
 
 	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
-		if (implicitName == ImplicitActionName.DEFAULTS) {
+		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {
 				visit(viewName, ImplicitActionName.New, action);
 			}
 			else { // edit view
 				for (ImplicitActionName value : ImplicitActionName.values()) {
 					// Render implicit actions that appear on edit views
-					if ((value != ImplicitActionName.DEFAULTS) && 
-							(value != ImplicitActionName.New) &&
-							(value != ImplicitActionName.Report) && 
-							(value != ImplicitActionName.BizExport) &&
-							(value != ImplicitActionName.BizImport) && 
-							(value != ImplicitActionName.Download) && 
-							(value != ImplicitActionName.Upload) && 
-							(value != ImplicitActionName.Navigate) &&
-							(value != ImplicitActionName.Print)) {
+					if ((! ImplicitActionName.DEFAULTS.equals(value)) && 
+							(! ImplicitActionName.New.equals(value)) &&
+							(! ImplicitActionName.Report.equals(value)) &&
+							(! ImplicitActionName.BizExport.equals(value)) &&
+							(! ImplicitActionName.BizImport.equals(value)) &&
+							(! ImplicitActionName.Download.equals(value)) &&
+							(! ImplicitActionName.Upload.equals(value)) &&
+							(! ImplicitActionName.Navigate.equals(value)) &&
+							(! ImplicitActionName.Print.equals(value))) {
 						visit(viewName, value, action);
 					}
 				}
 			}
 		}
-		else if (implicitName == ImplicitActionName.Add) {
+		else if (ImplicitActionName.Add.equals(implicitName)) {
 			visitAddAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Remove) {
+		else if (ImplicitActionName.Remove.equals(implicitName)) {
 			visitRemoveAction(action);
 		}
-		else if (implicitName == ImplicitActionName.ZoomOut) {
+		else if (ImplicitActionName.ZoomOut.equals(implicitName)) {
 			visitZoomOutAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Navigate) {
+		else if (ImplicitActionName.Navigate.equals(implicitName)) {
 			visitNavigateAction(action);
 		}
-		else if (implicitName == ImplicitActionName.OK) {
+		else if (ImplicitActionName.OK.equals(implicitName)) {
 			visitOKAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Save) {
+		else if (ImplicitActionName.Save.equals(implicitName)) {
 			visitSaveAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Cancel) {
+		else if (ImplicitActionName.Cancel.equals(implicitName)) {
 			visitCancelAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Delete) {
+		else if (ImplicitActionName.Delete.equals(implicitName)) {
 			visitDeleteAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Report) {
+		else if (ImplicitActionName.Report.equals(implicitName)) {
 			visitReportAction(action);
 		}
-		else if (implicitName == ImplicitActionName.BizExport) {
+		else if (ImplicitActionName.BizExport.equals(implicitName)) {
 			visitBizExportAction(action);
 		}
-		else if (implicitName == ImplicitActionName.BizImport) {
+		else if (ImplicitActionName.BizImport.equals(implicitName)) {
 			visitBizImportAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Download) {
+		else if (ImplicitActionName.Download.equals(implicitName)) {
 			visitDownloadAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Upload) {
+		else if (ImplicitActionName.Upload.equals(implicitName)) {
 			visitUploadAction(action);
 		}
-		else if (implicitName == ImplicitActionName.New) {
+		else if (ImplicitActionName.New.equals(implicitName)) {
 			visitNewAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Edit) {
+		else if (ImplicitActionName.Edit.equals(implicitName)) {
 			visitEditAction(action);
 		}
-		else if (implicitName == ImplicitActionName.Print) {
+		else if (ImplicitActionName.Print.equals(implicitName)) {
 			visitPrintAction(action);
 		}
 		else {

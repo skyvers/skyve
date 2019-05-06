@@ -55,6 +55,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 	private String documentName;
 	private Boolean polymorphic;
+	private boolean aggregate;
 
 	private String fromClause;
 
@@ -90,6 +91,15 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 	public void setPolymorphic(Boolean polymorphic) {
 		this.polymorphic = polymorphic;
+	}
+
+	@Override
+	public boolean isAggregate() {
+		return aggregate;
+	}
+
+	public void setAggregate(boolean aggregate) {
+		this.aggregate = aggregate;
 	}
 
 	@Override
@@ -136,20 +146,22 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		}
 		
 		if (summaryType == null) {
-			result.addBoundProjection(Bean.DOCUMENT_ID);
-			result.addBoundProjection(PersistentBean.LOCK_NAME);
-			result.addBoundProjection(Bean.BIZ_KEY);
-			result.addBoundProjection(Bean.CUSTOMER_NAME);
-			if (tagId != null) {
-				StringBuilder tagSubSelect = new StringBuilder(64);
-				tagSubSelect.append("(select distinct 'true' from adminTagged as tagged where tagged.tag.bizId = '");
-				tagSubSelect.append(tagId);
-				tagSubSelect.append("' and tagged.bizUserId = '");
-				tagSubSelect.append(user.getId());
-				tagSubSelect.append("' and tagged.taggedBizId = bean.bizId)");
-				result.addExpressionProjection(tagSubSelect.toString(), PersistentBean.TAGGED_NAME);
+			if (! aggregate) {
+				result.addBoundProjection(Bean.DOCUMENT_ID);
+				result.addBoundProjection(PersistentBean.LOCK_NAME);
+				result.addBoundProjection(Bean.BIZ_KEY);
+				result.addBoundProjection(Bean.CUSTOMER_NAME);
+				if (tagId != null) {
+					StringBuilder tagSubSelect = new StringBuilder(64);
+					tagSubSelect.append("(select distinct 'true' from adminTagged as tagged where tagged.tag.bizId = '");
+					tagSubSelect.append(tagId);
+					tagSubSelect.append("' and tagged.bizUserId = '");
+					tagSubSelect.append(user.getId());
+					tagSubSelect.append("' and tagged.taggedBizId = bean.bizId)");
+					result.addExpressionProjection(tagSubSelect.toString(), PersistentBean.TAGGED_NAME);
+				}
+				result.addBoundProjection(PersistentBean.FLAG_COMMENT_NAME);
 			}
-			result.addBoundProjection(PersistentBean.FLAG_COMMENT_NAME);
 		}
 
 		// These are used to determine if we need to add the "this" projection to the query or not

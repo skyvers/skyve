@@ -13,13 +13,19 @@
 			</item>
 		</row>
 		<row>
-			<item colspan="3">
-				<textField binding="startTime" disabled="true" />
+			<item align="right">
+				<label for="startTime"/>
+			</item>
+			<item>
+				<blurb><![CDATA[{startTime}]]></blurb>
 			</item>
 		</row>
 		<row>
-			<item colspan="3">
-				<textField binding="endTime" disabled="true" />
+			<item align="right">
+				<label for="endTime"/>
+			</item>
+			<item>
+				<blurb><![CDATA[{endTime}]]></blurb>
 			</item>
 		</row>
 		<row>

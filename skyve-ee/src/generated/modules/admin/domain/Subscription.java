@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Communication.CommunicationExtension;
 import modules.admin.domain.Communication.FormatType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -25,7 +26,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 		accept or decline receiving communications and in what manner they are delivered.
  * 
  * @depend - - - FormatType
- * @navhas n communication 0..1 Communication
+ * @navhas n communication 1 Communication
  * @stereotype "persistent"
  */
 @XmlType
@@ -56,7 +57,7 @@ public class Subscription extends AbstractPersistentBean {
 	/**
 	 * Communication
 	 **/
-	private Communication communication = null;
+	private CommunicationExtension communication = null;
 	/**
 	 * Receiver
 	 * <br/>
@@ -125,7 +126,7 @@ public class Subscription extends AbstractPersistentBean {
 	 * {@link #communication} accessor.
 	 * @return	The value.
 	 **/
-	public Communication getCommunication() {
+	public CommunicationExtension getCommunication() {
 		return communication;
 	}
 
@@ -134,7 +135,7 @@ public class Subscription extends AbstractPersistentBean {
 	 * @param communication	The new value.
 	 **/
 	@XmlElement
-	public void setCommunication(Communication communication) {
+	public void setCommunication(CommunicationExtension communication) {
 		preset(communicationPropertyName, communication);
 		this.communication = communication;
 	}

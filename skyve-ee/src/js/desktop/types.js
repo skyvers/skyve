@@ -1221,8 +1221,7 @@ isc.BizContentLinkItem.addMethods({
 				var url = isc.BizUtil.URL_PREFIX + 
 				"content?_n=" + newValue +
 				"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
-				"&_b=" + this.name.replaceAll('_', '.') +
-				"&_ctim=" + new Date().getTime();
+				"&_b=" + this.name.replaceAll('_', '.');
 
 				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">' + this.canvas.linkHTML(url, (this.value ? this.value : "Content"), "_blank") + '</div>');
 			}
@@ -1308,8 +1307,7 @@ isc.BizContentImageItem.addMethods({
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +
 							"&_w=" + (this._img.getWidth() - 20) + // -20 for the border
-							"&_h=" + (this._img.getHeight() - 20) + // -20 for the border
-							"&_ctim=" + new Date().getTime();
+							"&_h=" + (this._img.getHeight() - 20); + // -20 for the border
 				this._img.setSrc(url);
 			}
 			else {
@@ -1936,8 +1934,8 @@ isc.BizMapPicker.addMethods({
 				this._map.fitBounds(bounds);
             }
             else { // But points (Markers) are different
-                if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-                    this._map.panTo(obj.getPosition());
+            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
+            		this._map.panTo(obj.getPosition());
                 }
                 if (this._map.getZoom() < 15) {
                     this._map.setZoom(15);
@@ -2002,7 +2000,9 @@ isc.BizMapPicker.addMethods({
             });
 
 			this.clearIt();
-			this.mapIt();
+			// delay the mapIt call because even though the maps API is synchronous, sometimes the
+			// maps JS calls seem to beat the initialisation of the map.
+			this.delayCall('mapIt', null, 100);
 		}
 		else {
 			this.delayCall('build', null, 100);

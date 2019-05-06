@@ -84,9 +84,10 @@ public abstract class AbstractBean implements Bean {
 			// do nothing - we can continue
 		}
 
-		// if this bean is unchanged, check the collections to see if they're dirty
+		// if this bean is unchanged, check the persistent collections to see if they're dirty
 		if (originalValues.isEmpty()) {
 			Class<?> type = getClass();
+			// Drive off of the bean as it could be an extension class or a domain object that was hand coded.
 			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(type)) {
 				Class<?> propertyType = descriptor.getPropertyType();
 				// malformed bean property in the code somehow (maybe in the extension class)
@@ -102,6 +103,7 @@ public abstract class AbstractBean implements Bean {
 							continue;
 						}
 						
+						// Determine if we are tracking changes for this collection
 						boolean trackChanges = true;
 						if ((customer != null) && (module != null) && (document != null)) {
 							try {
@@ -132,16 +134,12 @@ public abstract class AbstractBean implements Bean {
 						}
 
 						if (trackChanges) {
+							// Note transient collections place their original state in their 
+							// owning bean's originalValues which is tested up above first. 
 							Object collection = BindUtil.get(this, propertyName);
 							if (collection instanceof PersistentCollection) { // persistent
 								if (((PersistentCollection) collection).isDirty()) {
 									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : persistent collection " + propertyName + " is dirty ");
-									return true;
-								}
-							}
-							else { // transient
-								if (! ((Collection<?>) collection).isEmpty()) {
-									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
 									return true;
 								}
 							}

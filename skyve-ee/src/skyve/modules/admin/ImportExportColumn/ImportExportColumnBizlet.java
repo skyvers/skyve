@@ -25,7 +25,7 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
-	public static final String ADVANCED = "advanced...";
+	public static final String EXPRESSION = "expression...";
 
 	/**
 	 * 
@@ -53,8 +53,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				for (Attribute a : document.getAttributes()) {
 
 					// exclude unimplemented types - some of these can be handled later
-					if (!AttributeType.association.equals(a.getAttributeType())
-							&& !AttributeType.collection.equals(a.getAttributeType())
+					if (!AttributeType.collection.equals(a.getAttributeType())
 							&& !AttributeType.content.equals(a.getAttributeType())
 							&& !AttributeType.geometry.equals(a.getAttributeType())
 							&& !AttributeType.inverseMany.equals(a.getAttributeType())
@@ -62,12 +61,17 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
 						// also exclude non persistent fields
 						if (a.isPersistent()) {
-							bindings.add(new DomainValue(a.getName(), a.getDisplayName()));
+							if(AttributeType.association.equals(a.getAttributeType())) {
+//								bindings.add(new DomainValue(a.getName()+ Bean.BIZ_KEY, a.getDisplayName()));
+								bindings.add(new DomainValue(a.getName(), a.getDisplayName()));
+							} else {
+								bindings.add(new DomainValue(a.getName(), a.getDisplayName()));
+							}
 						}
 					}
 				}
 
-				bindings.add(new DomainValue(ADVANCED));
+				bindings.add(new DomainValue(EXPRESSION));
 			}
 
 			return bindings;

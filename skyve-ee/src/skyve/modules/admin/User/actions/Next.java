@@ -1,14 +1,16 @@
 package modules.admin.User.actions;
 
-import modules.admin.User.UserBizlet;
-import modules.admin.domain.User;
-import modules.admin.domain.User.WizardState;
-
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
+
+import modules.admin.User.UserBizlet;
+import modules.admin.domain.Group;
+import modules.admin.domain.User;
+import modules.admin.domain.User.GroupSelection;
+import modules.admin.domain.User.WizardState;
 
 public class Next implements ServerSideAction<User> {
 	/**
@@ -19,28 +21,45 @@ public class Next implements ServerSideAction<User> {
 	@Override
 	public ServerSideActionResult<User> execute(User adminUser, WebContext webContext) throws Exception {
 
+		next(adminUser);
+		
+		return new ServerSideActionResult<>(adminUser);
+	}
+	
+	public static void next(User adminUser) throws Exception{
 		ValidationException e = new ValidationException();
 		
 		if(WizardState.confirmContact.equals(adminUser.getWizardState())){
-			throw new ValidationException(new Message("You must either search for an existing contact or choose to create a new contact."));
-		} else if(WizardState.createContact.equals(adminUser.getWizardState())){
-			UserBizlet.validateUserContact(adminUser, e);
-			if(e.getMessages().size()>0){
-				throw e;
-			}
 			
+			e.getMessages().add(new Message("You must either search for an existing contact or choose to create a new contact."));
+			
+		} else if(WizardState.createContact.equals(adminUser.getWizardState())){
+			
+			// validate previous data entry
+			UserBizlet.validateUserContact(adminUser, e);
+			
+			// propose a new username
 			adminUser.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(adminUser));
 			adminUser.setWizardState(WizardState.confirmUserNameAndPassword);
+			
 		} else if(WizardState.confirmUserNameAndPassword.equals(adminUser.getWizardState())){
+			
+			// validate previous data entry
 			UserBizlet.validateUserNameAndPassword(adminUser,e );
-			if(e.getMessages().size()>0){
-				throw e;
+			
+			// create a new empty group for group creation, if selected
+			if(GroupSelection.newGroup.equals(adminUser.getGroupSelection())) {
+				adminUser.setNewGroup(Group.newInstance());
+			} else {
+				adminUser.setNewGroup(null);
 			}
 			
 			adminUser.setWizardState(WizardState.confirmGroupMemberships);
 		}
 		
-		
-		return new ServerSideActionResult<>(adminUser);
+		// throw any validation exceptions collected so far
+		if(e.getMessages().size()>0){
+			throw e;
+		}
 	}
 }

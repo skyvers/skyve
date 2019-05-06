@@ -18,10 +18,13 @@ public abstract class CrossBrowserTest {
 	private static final String CHROME_ADD_ARGUMENTS_METHOD = "addArguments";
 	
 	private static final String FIREFOX_DRIVER_CLASS = "org.openqa.selenium.firefox.FirefoxDriver";
+	private static final String FIREFOX_BINARY_CLASS = "org.openqa.selenium.firefox.FirefoxBinary";
 	private static final String FIREFOX_OPTIONS_CLASS = "org.openqa.selenium.firefox.FirefoxOptions";
 	private static final String FIREFOX_PROFILE_CLASS = "org.openqa.selenium.firefox.FirefoxProfile";
 	private static final String FIREFOX_SET_PREFERENCE_METHOD = "setPreference";
 	private static final String FIREFOX_SET_PROFILE_METHOD = "setProfile";
+	private static final String FIREFOX_ADD_COMMAND_LINE_OPTIONS_METHOD = "addCommandLineOptions";
+	private static final String FIREFOX_SET_BINARY_METHOD = "setBinary";
 
 	protected WebDriver driver;
 	protected String baseUrl;
@@ -68,8 +71,11 @@ public abstract class CrossBrowserTest {
 		Object options = optionsClass.newInstance();
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
-			List<String> arguments = new ArrayList<>();
+			List<String> arguments = new ArrayList<>(2);
 			arguments.add("--user-agent=" + userAgentString);
+			if (config.isHeadless()) {
+				arguments.add("--headless");
+			}
 			optionsClass.getMethod(CHROME_ADD_ARGUMENTS_METHOD, List.class).invoke(options, arguments);
 		}
 		Class<?> driverClass = cl.loadClass(CHROME_DRIVER_CLASS);
@@ -92,20 +98,33 @@ public abstract class CrossBrowserTest {
 		}
 		
 		// FirefoxOptions options = new FirefoxOptions();
-		// FirefoxProfile profile = new FirefoxProfile();
-		// profile.setPreference("general.useragent.override", "USER AGENT STRING");
-		// options.setProfile(profile);
+		// if (config.isHeadless()) {
+		//	FirefoxBinary binary = new FirefoxBinary();
+		//	binary.addCommandLineOptions("--headless");
+		//  options.setBinary(binary);
+		// }
+		// if (config.getUserAgentString() != null) {
+		//  FirefoxProfile profile = new FirefoxProfile();
+		//  profile.setPreference("general.useragent.override", "USER AGENT STRING");
+		//  options.setProfile(profile);
+		// }
 		// driver = new FirefoxDriver(options);
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Class<?> optionsClass = cl.loadClass(FIREFOX_OPTIONS_CLASS);
 		Object options = optionsClass.newInstance();
-		Class<?> profileClass = cl.loadClass(FIREFOX_PROFILE_CLASS);
-		Object profile = profileClass.newInstance();
+		if (config.isHeadless()) {
+			Class<?> binaryClass = cl.loadClass(FIREFOX_BINARY_CLASS);
+			Object binary = binaryClass.newInstance();
+			binaryClass.getMethod(FIREFOX_ADD_COMMAND_LINE_OPTIONS_METHOD, String[].class).invoke(binary, new Object[] {new String[] {"--headless"}});
+			optionsClass.getMethod(FIREFOX_SET_BINARY_METHOD, binaryClass).invoke(options, binary);
+		}
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
+			Class<?> profileClass = cl.loadClass(FIREFOX_PROFILE_CLASS);
+			Object profile = profileClass.newInstance();
 			profileClass.getMethod(FIREFOX_SET_PREFERENCE_METHOD, String.class, String.class).invoke(profile, "general.useragent.override", userAgentString);
+			optionsClass.getMethod(FIREFOX_SET_PROFILE_METHOD, profileClass).invoke(options, profile);
 		}
-		optionsClass.getMethod(FIREFOX_SET_PROFILE_METHOD, profileClass).invoke(options, profile);
 		Class<?> driverClass = cl.loadClass(FIREFOX_DRIVER_CLASS);
 		driver = (WebDriver) driverClass.getConstructor(optionsClass).newInstance(options);
 
@@ -142,7 +161,9 @@ public abstract class CrossBrowserTest {
 	}
 	
 	protected void tearDownBrowser() {
-		driver.quit();
+		if (driver != null) {
+			driver.quit();
+		}
 //		Assert.assertEquals("", verificationErrors.toString());
 	}
 	

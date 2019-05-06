@@ -5,7 +5,6 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -38,6 +37,9 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
 																	facesView.getViewBinding()));
+		// We cannot do security tests at this point because ZoomOut is the only way out of the UI.
+		// Create privilege is checked at instantiation time - in AddAction and EditAction.
+
 		if (FacesAction.validateRequiredFields()) {
 			// Call the bizlet
 			Bean elementBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
@@ -57,10 +59,6 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + elementBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
-			}
-	
-			if (elementBean.isNotPersisted() && (! user.canCreateDocument(elementDocument))) {
-				throw new SecurityException("create this data", user.getName());
 			}
 	
 			ValidationUtil.validateBeanAgainstDocument(elementDocument, elementBean);

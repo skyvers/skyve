@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit" title="Communication" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+	xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<component name="_emailNotConfiguredBanner" />
 	<tabPane>
 		<tab title="Manage">
 			<form border="true" borderTitle="Configuration">
-				<column percentageWidth="20" />
 				<column />
 				<column />
-				<column percentageWidth="5" />
+				<column />
 				<column />
 				<row>
 					<item>
@@ -15,7 +15,7 @@
 					</item>
 					<item>
 						<checkBox binding="system" triState="false" />
-					</item>				
+					</item>
 				</row>
 				<row>
 					<item colspan="3">
@@ -31,59 +31,109 @@
 						<combo binding="documentName" disabled="locked" />
 					</item>
 				</row>
-				<row>
-					<item>
-						<default binding="tag" />
-					</item>
-					<item align="right" colspan="2">
-						<button actionName="GetCount" pixelWidth="200" />
-					</item>
-				</row>
 			</form>
-			<hbox border="true" borderTitle="Results" shrinkWrap="height">
-				<form percentageWidth="80">
-					<column percentageWidth="20" />
+			<vbox border="true" borderTitle="Results" widgetId="results">
+				<hbox>
+					<form responsiveWidth="8">
+						<column />
+						<column />
+						<row>
+							<item>
+								<default binding="tag" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="unTagSuccessful" triState="false" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="notification" triState="false" />
+							</item>
+						</row>
+					</form>
+					<form responsiveWidth="4" >
+						<column />
+						<row>
+							<item>
+								<button actionName="GetCount" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="GetResults" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="CreateFiles" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button actionName="SendNow" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+					</form>
+				</hbox>
+				<form>
 					<column />
 					<row>
-						<item>
+						<item showLabel="false">
 							<textArea binding="results" pixelHeight="100" disabled="true" />
 						</item>
 					</row>
 				</form>
-				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="100">
-					<button actionName="GetResults" pixelWidth="200" />
-					<button actionName="CreateFiles" pixelWidth="200" />
-					<button actionName="SendNow" pixelWidth="200" />
-				</vbox>
-			</hbox>
-			<vbox border="true" borderTitle="Batches">
-				<listGrid model="BatchesModel"
-							selectedIdBinding="selectedBatchTimestampFolderName"
-							continueConversation="false" 
-							showAdd="false" 
-							showEdit="false" 
-							showExport="false"
-							showFilter="false" 
-							showRemove="false"
-							showSnap="false" 
-							showSummary="false" 
-							showTag="false" 
-							showZoom="false"
-						postRefresh="batchesRefreshRequired">
+			</vbox>
+			<vbox border="true" borderTitle="Batches" widgetId="batches">
+				<listGrid visible="showBatches" model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false"
+					showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BatchSelected" />
 					</onSelectedHandlers>
 				</listGrid>
-				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button actionName="ZipBatch" pixelWidth="100" />
-					<button actionName="DeleteBatch" pixelWidth="100" />
-				</hbox>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item>
+							<button actionName="ZipBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
+						</item>
+						<item>
+							<button actionName="DeleteBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
+						</item>
+					</row>
+				</form>
 			</vbox>
-			
 		</tab>
 		<tab title="Contents">
 			<form border="true" borderTitle="Email">
-				<column percentageWidth="20" />
+				<column />
 				<column />
 				<column />
 				<column />
@@ -104,10 +154,10 @@
 				<row>
 					<item>
 						<textField binding="sendFrom" invisible="notEmailType" />
-					</item>				
+					</item>
 					<item>
-						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false"/>
-					</item>				
+						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false" />
+					</item>
 				</row>
 				<row>
 					<item>
@@ -157,7 +207,7 @@
 				</row>
 				<row>
 					<item showLabel="true" colspan="4">
-						<html binding="body" pixelHeight="300" pixelWidth="800" />
+						<textArea binding="body" />
 					</item>
 				</row>
 				<row>
@@ -167,12 +217,10 @@
 				</row>
 			</form>
 			<form border="true" borderTitle="Options">
-				<column percentageWidth="20"/>
-				<column percentageWidth="10"/>
-				<column/>
-				<column/>
-				<column/>
-				<column/>
+				<column />
+				<column />
+				<column />
+				<column />
 				<row>
 					<item>
 						<checkBox binding="includeCalendar" triState="false" />
@@ -188,7 +236,6 @@
 		</tab>
 		<tab title="Options">
 			<form border="true" borderTitle="Attachments">
-				<column percentageWidth="20" />
 				<column />
 				<column />
 				<column />
@@ -253,31 +300,30 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action clientValidation="true" className="GetResults" displayName="Check Results" inActionPanel="false"
-			relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-rotate-right"/>
-		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false"
-			relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-calculator"/>
-		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false"
-			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" confirm="OK to create email files?"/>
-		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
-			relativeIconFileName="shared/icons/Mail.gif" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
-		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false"
-			relativeIconFileName="shared/icons/Mail.gif" iconStyleClass="fa fa-envelope-square" confirm="Send test email to yourself?" />
-		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link"
-			inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" iconStyleClass="fa fa-link"/>
+		<action clientValidation="true" className="GetResults" displayName="Run Result Check Job" inActionPanel="false" iconStyleClass="fa fa-rotate-right" />
 
-		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" 
-		relativeIconFileName="shared/icons/Globe.gif" iconStyleClass="fa fa-file-photo-o" />
+		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fa fa-calculator" />
+
+		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa fa-cogs"
+			confirm="OK to create email files?" />
+
+		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
+
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa fa-envelope-square"
+			confirm="Send test email to yourself?" />
+
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fa fa-link" inActionPanel="false" />
+
+		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" iconStyleClass="fa fa-file-photo-o" />
 
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
-		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" 
-		confirm="Are you sure you want to delete this batch folder from the server filesystem?" 
-		relativeIconFileName="shared/icons/Trash.gif" iconStyleClass="fa fa-delete"/>
-		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected" 
-		confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" 
-		iconStyleClass="fa fa-file-zip-o"
-		/>
-		
+
+		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected"
+			confirm="Are you sure you want to delete this batch folder from the server filesystem?" iconStyleClass="fa fa-trash" />
+
+		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected"
+			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
+
 	</actions>
 	<newParameters />
 </view>

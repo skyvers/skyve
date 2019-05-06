@@ -30,10 +30,8 @@ public class Clear implements ServerSideAction<Tag> {
 		Persistence persistence = CORE.getPersistence();
 		persistence.newSQL(deleteSQL.toString()).execute();
 		
-		bean.setNumberTagged(new Integer(0));
-		bean.setNumberLoaded(new Integer(0));
-		bean.setNumberMatched(new Integer(0));
-
+		bean.setUploadTagged(new Long(0));
+		bean.setTotalTagged(new Long(0));
 		
 		return new ServerSideActionResult<>(bean);
 	}

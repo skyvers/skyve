@@ -1,6 +1,5 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Group
@@ -48,7 +48,7 @@ public class Group extends AbstractPersistentBean {
 	/**
 	 * Roles
 	 **/
-	private List<GroupRole> roles = new ArrayList<>();
+	private List<GroupRole> roles = new ChangeTrackingArrayList<>("roles", this);
 
 	@Override
 	@XmlTransient

@@ -16,6 +16,7 @@
         </text>
         <markup required="true" name="template">
             <displayName>Template</displayName>
+            <description>Include "{body}" to designate where the body of the communication will be placed.</description>
         </markup>
     </attributes>
 </document>

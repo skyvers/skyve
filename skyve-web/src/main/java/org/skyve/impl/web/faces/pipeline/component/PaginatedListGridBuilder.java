@@ -10,11 +10,14 @@ import org.skyve.metadata.view.model.list.ListModel;
 public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			UIData dt = (UIData) component;
 			dt.setPaginator(true);

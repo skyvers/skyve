@@ -3,7 +3,9 @@ package org.skyve.impl.metadata.repository.module;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -19,6 +21,7 @@ public class BizQLMetaData extends QueryMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setQuery(String query) {
 		this.query = UtilImpl.processStringValue(query);
 	}

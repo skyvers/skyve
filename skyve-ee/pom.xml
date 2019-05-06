@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20181211</version>
+		<version>20190405-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -130,7 +130,7 @@
 							<tasks>
 								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
 									<fileset dir="${ear-path}/lib" 
-												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,admin-t*-*.jar,omnifaces-*.jar,skyve-web-*.jar" />
+												includes="all-themes-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,admin-t*-*.jar,omnifaces-*.jar,skyve-web-*.jar" />
 								</move>
 								<move file="${ear-path}/lib/skyve-core-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-core.jar" />
 								<move file="${ear-path}/lib/skyve-ext-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-ext.jar" />
@@ -413,11 +413,6 @@
 			<version>${adminfaces.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.atmosphere</groupId>
-			<artifactId>atmosphere-runtime</artifactId>
-			<version>${atmosphere-runtime.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<version>${commons-fileupload.version}</version>
@@ -443,6 +438,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+			<dependency>
+				<groupId>org.omnifaces</groupId>
+				<artifactId>omnifaces</artifactId>
+				<version>${omnifaces.version}</version>
+			</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-common</artifactId>

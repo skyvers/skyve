@@ -136,10 +136,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tab(UIComponent component, Tab tab) {
+	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.tab(result, tab);
+			result = builder.tab(result, title, tab);
 		}
 		return result;
 	}
@@ -173,53 +173,109 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent actionButton(UIComponent component, 
-										String listBinding,
-										String listVar,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
+										String formDisabledConditionName,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionButton(result, listBinding, listVar, button, action);
+			result = builder.actionButton(result, 
+											dataWidgetBinding,
+											dataWidgetVar,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent reportButton(UIComponent component, Button button, Action action) {
+	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.reportButton(result, button, action);
+			result = builder.reportButton(result,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										Button button,
-										Action action,
-										String moduleName,
-										String documentName) {
+										String formDisabledConditionName,
+										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.downloadButton(result, button, action, moduleName, documentName);
+			result = builder.downloadButton(result,
+												dataWidgetBinding,
+												dataWidgetVar,
+												label,
+												iconStyleClass,
+												toolTip,
+												confirmationText,
+												button,
+												formDisabledConditionName,
+												action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component, Button button, Action action) {
+	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.uploadButton(result, button, action);
+			result = builder.uploadButton(result,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent staticImage(UIComponent component, StaticImage image) {
+	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.staticImage(result, image);
+			result = builder.staticImage(result, fileUrl, image);
 		}
 		return result;
 	}
@@ -234,37 +290,37 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent blurb(UIComponent component, String listVar, String value, String binding, Blurb blurb) {
+	public UIComponent blurb(UIComponent component, String dataWidgetVar, String value, String binding, Blurb blurb) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.blurb(result, listVar, value, binding, blurb);
+			result = builder.blurb(result, dataWidgetVar, value, binding, blurb);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent label(UIComponent component, String listVar, String value, String binding, Label label) {
+	public UIComponent label(UIComponent component, String dataWidgetVar, String value, String binding, Label label) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.label(result, listVar, value, binding, label);
+			result = builder.label(result, dataWidgetVar, value, binding, label);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, String title, DataGrid grid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataGrid(result, listVar, ordered, grid);
+			result = builder.dataGrid(result, dataWidgetVar, ordered, title, grid);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, String title, DataRepeater repeater) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataRepeater(result, listVar, repeater);
+			result = builder.dataRepeater(result, dataWidgetVar, title, repeater);
 		}
 		return result;
 	}
@@ -274,7 +330,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												UIComponent current,
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
-												String listVar,
+												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
@@ -284,7 +340,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														current,
 														widget,
 														column,
-														listVar,
+														dataWidgetVar,
 														columnTitle,
 														columnBinding,
 														gridColumnExpression);
@@ -305,10 +361,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current,
 													AbstractDataWidget widget,
+													String title,
 													DataGridContainerColumn column) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addDataGridContainerColumn(result, current, widget, column);
+			result = builder.addDataGridContainerColumn(result, current, widget, title, column);
 		}
 		return result;
 	}
@@ -326,7 +383,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current,
 												DataGrid grid,
-												String listVar,
+												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
 												boolean inline) {
@@ -335,7 +392,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			result = builder.addDataGridActionColumn(result,
 														current,
 														grid,
-														listVar,
+														dataWidgetVar,
 														gridColumnExpression,
 														singluarDocumentAlias,
 														inline);
@@ -345,19 +402,25 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
+										moduleName,
 										modelDocumentName,
 										modelName,
 										model,
+										title,
 										listGrid,
-										canCreateDocument);
+										canCreateDocument,
+										aggregateQuery);
 		}
 		return result;
 	}
@@ -396,147 +459,197 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent checkBox(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.checkBox(result, listVar, checkBox, title, required);
+			result = builder.checkBox(result,
+										dataWidgetVar,
+										checkBox,
+										formDisabledConditionName,
+										title,
+										required);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent colourPicker(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.colourPicker(result, listVar, colour, title, required);
+			result = builder.colourPicker(result,
+											dataWidgetVar,
+											colour,
+											formDisabledConditionName,
+											title,
+											required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String dataWidgetVar,
+								Combo combo,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.combo(result, listVar, combo, title, required);
+			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, required);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent contentImage(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ContentImage image,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentImage(result, listVar, image, title, required);
+			result = builder.contentImage(result, dataWidgetVar, image, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent contentLink(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									ContentLink link,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentLink(result, listVar, link, title, required);
+			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component,
+								String dataWidgetVar,
+								HTML html,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.html(result, listVar, html, title, required);
+			result = builder.html(result, dataWidgetVar, html, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent lookupDescription(UIComponent component,
-											String listVar,
+											String dataWidgetVar,
 											LookupDescription lookup,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											String displayBinding,
 											QueryDefinition query) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.lookupDescription(result, listVar, lookup, title, required, displayBinding, query);
+			result = builder.lookupDescription(result,
+												dataWidgetVar,
+												lookup,
+												formDisabledConditionName,
+												title,
+												required,
+												displayBinding,
+												query);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent password(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									Password password,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, listVar, password, title, required);
+			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent radio(UIComponent component, String listVar, Radio radio, String title, boolean required) {
+	public UIComponent radio(UIComponent component,
+								String dataWidgetVar,
+								Radio radio,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.radio(result, listVar, radio, title, required);
+			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+	public UIComponent richText(UIComponent component,
+									String dataWidgetVar,
+									RichText text,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.richText(result, listVar, text, title, required);
+			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+	public UIComponent spinner(UIComponent component,
+								String dataWidgetVar,
+								Spinner spinner,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, listVar, spinner, title, required);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent textArea(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									TextArea text,
+									String formDisabledConditionName,
 									String title,
 									boolean required,
 									Integer length) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, listVar, text, title, required, length);
+			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, required, length);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent text(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								TextField text,
+								String formDisabledConditionName,
 								String title,
 								boolean required,
 								Integer length,
@@ -545,33 +658,30 @@ public class ComponentBuilderChain extends ComponentBuilder {
 								javax.faces.convert.Converter facesConverter) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.text(result, listVar, text, title, required, length, converter, format, facesConverter);
+			result = builder.text(result,
+									dataWidgetVar,
+									text,
+									formDisabledConditionName,
+									title,
+									required,
+									length,
+									converter,
+									format,
+									facesConverter);
 		}
 		return result;
 	}
 
 	@Override
 	public UIComponent actionLink(UIComponent component,
-									String listBinding,
-									String listVar,
-									Link link,
-									String actionName) {
-		UIComponent result = component;
-		for (ComponentBuilder builder : builders) {
-			result = builder.actionLink(result, listBinding, listVar, link, actionName);
-		}
-		return result;
-	}
-
-	@Override
-	public UIComponent actionLink(UIComponent component,
-								  String listBinding,
-								  String listVar,
+								  String dataWidgetBinding,
+								  String dataWidgetVar,
+								  String value,
 								  Link link,
 								  Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionLink(result, listBinding, listVar, link, action);
+			result = builder.actionLink(result, dataWidgetBinding, dataWidgetVar, value, link, action);
 		}
 		return result;
 	}
@@ -586,10 +696,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+	public UIComponent download(UIComponent component,
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.download(result, action, moduleName, documentName);
+			result = builder.download(result, dataWidgetBinding, dataWidgetVar, action);
 		}
 		return result;
 	}
@@ -605,14 +718,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent action(UIComponent component,
-								String listBinding,
-								String listVar,
+								String dataWidgetBinding,
+								String dataWidgetVar,
 								Action action,
 								ImplicitActionName name,
 								String title) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.action(result, listBinding, listVar, action, name, title);
+			result = builder.action(result, dataWidgetBinding, dataWidgetVar, action, name, title);
 		}
 		return result;
 	}

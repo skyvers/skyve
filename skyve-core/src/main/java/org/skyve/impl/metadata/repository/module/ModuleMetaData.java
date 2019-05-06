@@ -12,7 +12,9 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
@@ -142,6 +144,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
@@ -284,6 +287,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 					}
 					documentQueryImpl.setDocumentName(value);
 					documentQueryImpl.setPolymorphic(documentQueryMetaData.getPolymorphic());
+					documentQueryImpl.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
 					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
 					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
 

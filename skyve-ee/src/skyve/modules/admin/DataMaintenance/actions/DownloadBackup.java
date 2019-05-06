@@ -17,9 +17,7 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 	private static final long serialVersionUID = 4544317770456317465L;
 
 	@Override
-	@SuppressWarnings("resource")
-	public Download download(DataMaintenance bean, WebContext webContext)
-	throws Exception {
+	public void prepare(DataMaintenance bean, WebContext webContext) throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();
 		File backup = new File(String.format("%sbackup_%s%s%s", 
 												Util.getContentDirectory(),
@@ -30,7 +28,18 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 			Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " DNE");
 			throw new ValidationException(new Message("Backup " + selectedBackupName + " no longer exists"));
 		}
-		
+	}
+	
+	@Override
+	@SuppressWarnings("resource")
+	public Download download(DataMaintenance bean, WebContext webContext)
+	throws Exception {
+		String selectedBackupName = bean.getSelectedBackupName();
+		File backup = new File(String.format("%sbackup_%s%s%s", 
+												Util.getContentDirectory(),
+												CORE.getUser().getCustomerName(),
+												File.separator,
+												selectedBackupName));
 		return new Download(selectedBackupName, new FileInputStream(backup), MimeType.zip);
 	}
 }

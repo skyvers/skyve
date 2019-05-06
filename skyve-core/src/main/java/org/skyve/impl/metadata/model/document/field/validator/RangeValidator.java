@@ -6,6 +6,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class RangeValidator<T> extends FieldValidator<T> {
@@ -51,8 +53,8 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	}
 
 	@Override
-	public String constructMessage(String displayName, Converter<T> converter) {
-		String message = getValidationMessage();
+	public String constructMessage(User user, String displayName, Converter<T> converter) {
+		String message = Util.i18n(getValidationMessage(), user.getLocale());
 		if (message == null) {
 			StringBuilder sb = new StringBuilder(128);
 			try {

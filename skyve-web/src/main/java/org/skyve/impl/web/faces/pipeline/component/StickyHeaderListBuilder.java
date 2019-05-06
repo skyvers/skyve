@@ -13,11 +13,14 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			((DataTable) component).setStickyHeader(true);
 		}

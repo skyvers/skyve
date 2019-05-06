@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Import Export" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox shrinkWrap="height">
+		<vbox border="true" borderTitle="Select Mode">
+			<form>
+				<column responsiveWidth="2" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<radio binding="mode" vertical="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</radio>
+					</item>
+					<item>
+						<button pixelWidth="250" actionName="GetImportTemplate" />
+					</item>
+				</row>
+			</form>
+		</vbox>
+		<vbox border="true" borderTitle="Configure Options">
+			<hbox>
+				<form responsiveWidth="6">
+					<column responsiveWidth="2" />
+					<column />
+					<row>
+						<item>
+							<combo binding="moduleName">
+								<onChangedHandlers>
+									<rerender clientValidation="false"/>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="documentName">
+								<onChangedHandlers>
+									<rerender clientValidation="false"/>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="fileContainsHeaders" />
+						</item>
+					</row>
+				</form>
+				<vbox border="true" borderTitle="Advanced" visible="showExport">
+					<form >
+						<column responsiveWidth="4"/>
+						<column />
+						<row>
+							<item>
+								<spacer />
+							</item>
+						</row>
+					</form>
+				</vbox>
+				<vbox border="true" borderTitle="Advanced" invisible="showExport">
+					<form >
+						<column responsiveWidth="4"/>
+						<column />
+						<row>
+							<item>
+								<combo binding="loadType" />
+							</item>
+						</row>
+					</form>
+				</vbox>
+			</hbox>
+			<form visible="showExport">
+				<column responsiveWidth="2" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="ResetColumns" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="RunExport" />
+					</item>
+				</row>
+			</form>
+			<form invisible="showExport">
+				<column responsiveWidth="2" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="UploadSimpleImportDataFile" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer></spacer>
+					</item>
+					<item>
+						<button pixelWidth="150" actionName="RunImport" />
+					</item>
+				</row>
+			</form>
+		</vbox>
+	</vbox>
+	<form>
+		<column />
+		<row>
+			<item>
+				<blurb visible="showResults"><![CDATA[{results}]]></blurb>
+			</item>
+		</row>
+	</form>
+	<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
+		<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
+			<boundColumn binding="columnName" />
+			<boundColumn binding="bindingName" />
+		</dataGrid>
+		<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
+			<boundColumn binding="columnName" />
+			<boundColumn binding="bindingExpression" />
+		</dataGrid>
+	</vbox>
+	<vbox visible="showExport" border="true" borderTitle="Configure Export Columns">
+		<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
+			<boundColumn binding="bindingName" />
+			<boundColumn binding="columnName" />
+		</dataGrid>
+		<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
+			<boundColumn binding="bindingName" />
+			<boundColumn binding="bindingExpression" />
+			<boundColumn binding="columnName" />
+		</dataGrid>
+	</vbox>
+	<actions>
+		<defaults />
+		<upload className="UploadSimpleImportDataFile" displayName="Upload file" invisible="showExport" inActionPanel="false" />
+		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" inActionPanel="false"
+			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
+		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" />
+		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" />
+		<download className="GetImportTemplate" displayName="Get Template for Import"  invisible="showExport" inActionPanel="false" />
+	</actions>
+</view>

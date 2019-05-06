@@ -61,13 +61,9 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param invisible
 	 * @return
 	 */
-	public abstract RenderedComponent tabPane(RenderedComponent component,
-												TabPane tabPane,
-												String moduleName,
-												String documentName,
-												StringBuilder stickyTabScript);
+	public abstract RenderedComponent tabPane(RenderedComponent component, TabPane tabPane);
 	
-	public abstract RenderedComponent tab(RenderedComponent component, Tab tab);
+	public abstract RenderedComponent tab(RenderedComponent component, String title, Tab tab);
 	
 	public abstract RenderedComponent border(RenderedComponent component,
 												String title,
@@ -78,8 +74,8 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public abstract RenderedComponent spacer(RenderedComponent component, Spacer spacer);
 	
 	public abstract RenderedComponent actionButton(RenderedComponent component,
-													String listBinding, 
-													String listVar, 
+													String dataWidgetBinding, 
+													String dataWidgetVar, 
 													Button button, 
 													Action action);
 	public abstract RenderedComponent reportButton(RenderedComponent component, 
@@ -91,24 +87,28 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 														String moduleName, 
 														String documentName);
 	
-	public abstract RenderedComponent staticImage(RenderedComponent component, StaticImage image);
+	public abstract RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image);
 	public abstract RenderedComponent dynamicImage(RenderedComponent component, 
 													DynamicImage image, 
 													String moduleName, 
 													String documentName);
 	
 	public abstract RenderedComponent blurb(RenderedComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												String value, 
 												String binding, 
 												Blurb blurb);
 	public abstract RenderedComponent label(RenderedComponent component,
-												String listVar,
+												String dataWidgetVar,
 												String value,
 												String binding,
 												Label label);
 
-	public abstract RenderedComponent dataGrid(RenderedComponent component, String listVar, boolean ordered, DataGrid grid);
+	public abstract RenderedComponent dataGrid(RenderedComponent component,
+												String dataWidgetVar,
+												boolean ordered,
+												String title,
+												DataGrid grid);
 
 	/*
 	 * Data Repeater is just like a data grid but...
@@ -117,12 +117,15 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * Any bound columns are editable inline.
 	 * There is no action column.
 	 */
-	public abstract RenderedComponent dataRepeater(RenderedComponent component, String listVar, DataRepeater repeater);
+	public abstract RenderedComponent dataRepeater(RenderedComponent component,
+													String dataWidgetVar,
+													String title,
+													DataRepeater repeater);
 	public abstract RenderedComponent addDataGridBoundColumn(RenderedComponent component,
 																RenderedComponent current, 
 																AbstractDataWidget widget,
 																DataGridBoundColumn column,
-																String listVar,
+																String dataWidgetVar,
 																String columnTitle,
 																String columnBinding,
 																StringBuilder gridColumnExpression);
@@ -130,12 +133,13 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public abstract RenderedComponent addDataGridContainerColumn(RenderedComponent component,
 																	RenderedComponent current,
 																	AbstractDataWidget widget,
+																	String columnTitle,
 																	DataGridContainerColumn column);
 	public abstract RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current);
 	public abstract RenderedComponent addDataGridActionColumn(RenderedComponent component,
 																RenderedComponent current, 
 																DataGrid grid,
-																String listVar,
+																String dataWidgetVar,
 																String gridColumnExpression,
 																String singluarDocumentAlias,
 																boolean inline);
@@ -144,8 +148,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												String modelDocumentName,
 												String modelName,
 												ListModel<? extends Bean> model,
+												String title,
 												ListGrid listGrid,
-												boolean canCreateDocument);
+												boolean canCreateDocument,
+												boolean aggregateQuery);
 
 	/*
 	 * List Repeater is just like a list grid but...
@@ -168,43 +174,43 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public abstract RenderedComponent listMembership(RenderedComponent component, ListMembership membership);
 	
 	public abstract RenderedComponent checkBox(RenderedComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												CheckBox checkBox, 
 												String title, 
 												boolean required);
 
 	public abstract RenderedComponent colourPicker(RenderedComponent component, 
-													String listVar, 
+													String dataWidgetVar, 
 													ColourPicker colour, 
 													String title, 
 													boolean required);
 	
 	public abstract RenderedComponent combo(RenderedComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												Combo combo, 
 												String title, 
 												boolean required);
 
 	public abstract RenderedComponent contentImage(RenderedComponent component, 
-													String listVar, 
+													String dataWidgetVar, 
 													ContentImage image, 
 													String title, 
 													boolean required);
 
 	public abstract RenderedComponent contentLink(RenderedComponent component, 
-													String listVar, 
+													String dataWidgetVar, 
 													ContentLink link, 
 													String title, 
 													boolean required);
 	
 	public abstract RenderedComponent html(RenderedComponent component, 
-											String listVar, 
+											String dataWidgetVar, 
 											HTML html, 
 											String title, 
 											boolean required);
 
 	public abstract RenderedComponent lookupDescription(RenderedComponent component, 
-															String listVar,
+															String dataWidgetVar,
 															LookupDescription lookup,
 															String title,
 															boolean required,
@@ -212,31 +218,31 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 															QueryDefinition query);
 	
 	public abstract RenderedComponent password(RenderedComponent component, 
-												String listVar,
+												String dataWidgetVar,
 												Password password,
 												String title,
 												boolean required);
 
 	public abstract RenderedComponent radio(RenderedComponent component, 
-												String listVar,
+												String dataWidgetVar,
 												Radio radio,
 												String title,
 												boolean required);
 	
 	public abstract RenderedComponent richText(RenderedComponent component, 
-												String listVar,
+												String dataWidgetVar,
 												RichText text,
 												String title,
 												boolean required);
 	
 	public abstract RenderedComponent spinner(RenderedComponent component, 
-												String listVar,
+												String dataWidgetVar,
 												Spinner spinner,
 												String title,
 												boolean required);
 	
 	public abstract RenderedComponent text(RenderedComponent component, 
-											String listVar, 
+											String dataWidgetVar, 
 											TextField text, 
 											String title, 
 											boolean required,
@@ -245,21 +251,21 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 											Format<?> format);
 
 	public abstract RenderedComponent textArea(RenderedComponent component, 
-												String listVar,
+												String dataWidgetVar,
 												TextArea text,
 												String title,
 												boolean required,
 												Integer length);
 	
-	public String outputLink(String listVar, 
+	public String outputLink(String dataWidgetVar, 
 										String value, 
 										String href, 
 										String invisible,
 										ReferenceTarget target) {
 /*
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		if (listVar != null) {
-			result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, href, true, null, String.class));
+		if (dataWidgetVar != null) {
+			result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, href, true, null, String.class));
 		}
 		else {
 			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class));
@@ -316,7 +322,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public void addAjaxBehavior(RenderedComponent component, 
 									String eventName,
 									String collectionBinding,
-									String listVar,
+									String dataWidgetVar,
 									String rerenderSource, 
 									List<EventAction> actions) {
 /*
@@ -336,7 +342,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 			MethodExpression me = methodExpressionForAction(null, 
 																attributes.actionName, 
 																collectionBinding, 
-																listVar, 
+																dataWidgetVar, 
 																false, 
 																null);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
@@ -347,10 +353,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	}
 
 	public abstract RenderedComponent actionLink(RenderedComponent component,
-													String listBinding,
-													String listVar,
+													String dataWidgetBinding,
+													String dataWidgetVar,
 													Link link,
-													String actionName);
+													Action action);
 
 	public abstract RenderedComponent report(RenderedComponent component, Action action);
 	
@@ -358,10 +364,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												Action action,
 												String moduleName,
 												String documentName);
-	
+
+	public abstract RenderedComponent upload(RenderedComponent component, Action action);
+
 	public abstract RenderedComponent action(RenderedComponent component, 
-												String listBinding, 
-												String listVar,
+												String dataWidgetBinding, 
+												String dataWidgetVar,
 												Action action, 
 												ImplicitActionName name, 
 												String title);

@@ -71,7 +71,13 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			@SuppressWarnings("null")
 			TestStrategy testStrategy = TestStrategy.valueOf(sailTestStrategy.toCode());
 			if (moduleName != null) {
-				Automation result = single(u, moduleName, uxui, userAgentType, testStrategy);
+				Automation result = single(u,
+											bean.getSailLoginCustomer(),
+											bean.getSailLoginPassword(),
+											moduleName,
+											uxui,
+											userAgentType,
+											testStrategy);
 				if (result.getInteractions().isEmpty()) {
 					bean.setResults("NOTHING WAS GENERATED");
 				}
@@ -80,7 +86,12 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 				}
 			}
 			else {
-				List<Automation> result = multiple(u, uxui, userAgentType, testStrategy);
+				List<Automation> result = multiple(u,
+													bean.getSailLoginCustomer(),
+													bean.getSailLoginPassword(),
+													uxui,
+													userAgentType,
+													testStrategy);
 				if (result.isEmpty()) {
 					bean.setResults("NOTHING WAS GENERATED");
 				}
@@ -106,12 +117,16 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 	}
 	
 	protected abstract Automation single(User user,
+											String loginCustomer,
+											String loginPassword,
 											String moduleName,
 											String uxui,
 											UserAgentType userAgentType,
 											TestStrategy testStrategy)
 	throws Exception;
 	protected abstract List<Automation> multiple(User user,
+													String loginCustomer,
+													String loginPassword,
 													String uxui,
 													UserAgentType userAgentType,
 													TestStrategy testStrategy)

@@ -39,7 +39,7 @@
 		<filter name="adminAuditUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Communication" table="ADM_Communication" entity-name="adminCommunication">
+	<class name="modules.admin.Communication.CommunicationExtension" table="ADM_Communication" entity-name="adminCommunication">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -49,7 +49,6 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="description" length="250" />
-		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_tag" />
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
@@ -106,7 +105,7 @@
 		<filter name="adminCommunicationTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Configuration" table="ADM_Configuration" entity-name="adminConfiguration">
+	<class name="modules.admin.Configuration.ConfigurationExtension" table="ADM_Configuration" entity-name="adminConfiguration">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -182,6 +181,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="modDocName" length="100" />
+		<property name="injectBootstrapUser" />
 		<property name="schemaName" length="1024" />
 		<property name="notification" />
 		<property name="dailyBackupRetention" />
@@ -276,7 +276,7 @@
 		<filter name="adminGroupRoleUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.ImportExport" table="ADM_ImportExport" entity-name="adminImportExport">
+	<class name="modules.admin.ImportExport.ImportExportExtension" table="ADM_ImportExport" entity-name="adminImportExport">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -302,6 +302,16 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="adminImportExportColumn" />
 		</bag>
+		<property name="rollbackErrors" length="16">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$RollbackErrors</param>
+			</type>
+		</property>
+		<property name="loadType" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$LoadType</param>
+			</type>
+		</property>
 		<filter name="adminImportExportNoneFilter" condition="1=0"/>
 		<filter name="adminImportExportCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminImportExportDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -322,6 +332,11 @@
 		<property name="columnName" length="100" />
 		<property name="bindingName" length="100" />
 		<property name="bindingExpression" length="200" />
+		<property name="loadAction" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExportColumn$LoadAction</param>
+			</type>
+		</property>
 		<filter name="adminImportExportColumnNoneFilter" condition="1=0"/>
 		<filter name="adminImportExportColumnCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminImportExportColumnDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

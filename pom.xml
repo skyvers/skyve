@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20181211</version>
+	<version>20190405-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,9 +15,8 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20181211</skyve.version>
+		<skyve.version>20190405-SNAPSHOT</skyve.version>
 		<asm.version>5.0.4</asm.version>
-		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
 		<cglib.version>3.1</cglib.version>
 		<commons-beanutils.version>1.9.2</commons-beanutils.version>
@@ -44,13 +43,14 @@
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.13</jts.version>
 		<lucene.version>4.10.2</lucene.version>
+		<omnifaces.version>2.7</omnifaces.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<!--This is the version tika 1.5 requires -->
 		<poi.version>3.10.1</poi.version>
-		<primefaces.version>6.2</primefaces.version>
-		<primefaces-extensions.version>6.2.8</primefaces-extensions.version>
+		<primefaces.version>7.0</primefaces.version>
+		<primefaces-extensions.version>7.0</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
-        <adminfaces.version>1.0.0-RC19</adminfaces.version>
+        <adminfaces.version>1.0.0</adminfaces.version>
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
@@ -308,11 +308,6 @@
 				<version>${adminfaces.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.atmosphere</groupId>
-				<artifactId>atmosphere-runtime</artifactId>
-				<version>${atmosphere-runtime.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-fileupload</groupId>
 				<artifactId>commons-fileupload</artifactId>
 				<version>${commons-fileupload.version}</version>
@@ -331,6 +326,11 @@
 				<groupId>org.primefaces.extensions</groupId>
 				<artifactId>primefaces-extensions</artifactId>
 				<version>${primefaces-extensions.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.omnifaces</groupId>
+				<artifactId>omnifaces</artifactId>
+				<version>${omnifaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>

@@ -1,10 +1,8 @@
 package modules.admin.Communication;
 
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -15,6 +13,9 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -32,6 +33,7 @@ import org.skyve.web.WebContext;
 
 import modules.ModulesUtil;
 import modules.admin.Communication.actions.GetResults;
+import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.CommunicationTemplate;
@@ -39,9 +41,9 @@ import modules.admin.domain.Subscription;
 
 public class CommunicationUtil {
 
+	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
-	public static final String DEFAULT_SENDER = "default.sender@skyve.org";
 	public static final String SENT_SUCCESSFULLY_MESSAGE = "Communication sent";
 
 	/**
@@ -102,7 +104,7 @@ public class CommunicationUtil {
 		String sendFromExpression = communication.getSendFrom();
 		String sendFrom = null;
 		if(sendFromExpression==null){
-			sendFrom = DEFAULT_SENDER;
+			sendFrom = ConfigurationExtension.defaultSMTPSender();
 		} else {
 			//resolve biding expression
 			sendFrom =  Binder.formatMessage(customer, sendFromExpression, specificBeans);
@@ -111,13 +113,13 @@ public class CommunicationUtil {
 		FormatType format = communication.getFormatType();
 
 		// handle addressee with optional override
-		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
+		String resolvedSendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
 		if (communication.getSendToOverride() != null) {
-			sendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
+			resolvedSendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
 		} else {
 			// handle Subscriptions
 			DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-			q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, sendTo);
+			q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, resolvedSendTo);
 			Subscription subscription = q.beanResult();
 
 			if (subscription != null) {
@@ -126,7 +128,7 @@ public class CommunicationUtil {
 					StringBuilder msg = new StringBuilder(128);
 					if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
 						msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
-						msg.append(sendTo).append(" has a ").append(subDoc.getSingularAlias());
+						msg.append(resolvedSendTo).append(" has a ").append(subDoc.getSingularAlias());
 						msg.append(" set ").append(Subscription.declinedPropertyName);
 						if (subscription.getFormatType() != null) {
 							msg.append(" for ").append(subscription.getFormatType().toDescription());
@@ -139,11 +141,28 @@ public class CommunicationUtil {
 					}
 				} else {
 					format = subscription.getFormatType();
-					sendTo = subscription.getPreferredReceiverIdentifier();
+					resolvedSendTo = subscription.getPreferredReceiverIdentifier();
 				}
 			}
 		}
-		
+
+		// Validate resolved email address
+		if(resolvedSendTo==null || resolvedSendTo.trim().length()<1) {
+			throw new IllegalArgumentException(INVALID_RESOLVED_EMAIL_ADDRESS); 
+		}
+		ValidationException ve = new ValidationException();
+		TextValidator v = new TextValidator();
+        v.setType(ValidatorType.email);
+        v.validate(user, resolvedSendTo, "email1", "Email", null, ve);
+        if(!ve.getMessages().isEmpty()) {
+        	if (ResponseMode.SILENT.equals(responseMode)) {
+				Util.LOGGER.log(Level.ALL, "The resolved email sendTo address " + resolvedSendTo + " could not be validated.");
+			} else {
+				throw ve;
+			}  
+        }
+        
+       //Resolve email message contents
 		String ccTo = formatCommunicationMessage(customer, communication.getCcTo(), beans);
 		if(communication.getCcToOverride()!=null){
 			ccTo = formatCommunicationMessage(customer, communication.getCcToOverride(), beans);
@@ -152,7 +171,6 @@ public class CommunicationUtil {
 		if(ccTo!=null){
 			cc = new String[] {ccTo};
 		}
-		
 		
 		//add myself to bcc if monitoring outgoing email
 		String[] bcc = null;
@@ -207,18 +225,10 @@ public class CommunicationUtil {
 
 		switch (actionType) {
 		case FILE:
-			// Generate file name - Communication_Description_To
-			StringBuilder subFolder = new StringBuilder();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-			subFolder.append(sdf.format(new Date()));
-
-			String customerName = CORE.getUser().getCustomerName();
-			String batchDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
-			String fileName = sendTo.replace("@", "_").replace(".", "_");
-
-			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, fileName, ".eml", true, subFolder.toString());
-			result = filePath;
-
+		
+			String fileName = resolvedSendTo.replace("@", "_").replace(".", "_");
+			String filePath = FileUtil.constructSafeFilePath(communication.getBasePath(), fileName, ".eml", true, communication.getBatch());
+			
 			try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
 				// add attachments
@@ -226,7 +236,7 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
 					case email:
-						EXT.writeMail(new Mail().addTo(sendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
+						EXT.writeMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
 						break;
 					default:
 						break;
@@ -246,7 +256,7 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					EXT.sendMail(new Mail().addTo(sendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
+					EXT.sendMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
 					
 					if(webContext!=null) {
 						webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
@@ -263,7 +273,7 @@ public class CommunicationUtil {
 	}
 	
 	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
-		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode, additionalAttachments, specificBeans);
+		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode,additionalAttachments, specificBeans);
 	}
 
 	/**
@@ -371,7 +381,7 @@ public class CommunicationUtil {
 			result.setDescription(description);
 			result.setFormatType(FormatType.email);
 			result.setSystem(Boolean.TRUE);
-			result.setSendFrom(DEFAULT_SENDER);
+			result.setSendFrom(ConfigurationExtension.defaultSMTPSender());
 			result.setSendTo(sendToExpression);
 			result.setCcTo(ccExpression);
 			result.setSubject(defaultSubject);
@@ -445,8 +455,10 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Communication kickOffJob(Communication communication) throws Exception {
+	public static Communication kickOffJob(Communication bean) throws Exception {
 
+		Communication communication = bean;
+		
 		String results = GetResults.getResults(communication);
 
 		// save this communication if it has not been saved yet
@@ -643,5 +655,5 @@ public class CommunicationUtil {
 		}
 
 		return sb.toString();
-	}
+	}	
 }

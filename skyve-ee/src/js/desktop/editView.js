@@ -647,6 +647,11 @@ isc.EditView.addMethods({
 						if (successCallback) {
 							successCallback(data);
 						}
+						
+						// Used by the download action to redirect to the download.
+						if (data._redirectUrl) {
+							window.location.assign(data._redirectUrl);
+						}
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
@@ -697,7 +702,7 @@ isc.EditView.addMethods({
 			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + isc.BizUtil.version + '"/>';
 		}
 		else if (this._fontIcon) {
-			icon = '<i style="padding-left:5px;font-size:32px" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
+			icon = '<i style="padding-left:5px;font-size:32px;width:32px" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
 		}
 		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
@@ -1447,15 +1452,7 @@ isc.BizButton.addMethods({
 				}
 			}
 			else if (this.type == "D") { // Delete on edit view
-				var me = this;
-				isc.ask('Do you want to delete this ' + this._view._singular + '?',
-							function(value) {
-								if (value) {
-									me._view.deleteInstance(validate);
-								}
-							},
-							{title: 'Delete?'}
-				);
+				this._view.deleteInstance(validate);
 			}
 			else if (this.type == "R") { // Remove on child edit view
 				var bizId = this._view.gather(false).bizId;
@@ -1524,22 +1521,7 @@ isc.BizButton.addMethods({
 				}
 			}
 			else if (this.type == "L") { // Download Action
-				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
-				if (instance) {
-					var me = this;
-					// apply changes to current form before exporting
-					this._view.saveInstance(validate, null, function() {
-						var url = 'download?_n=' + me.actionName + 
-									'&_doc=' + me._view._mod + '.' + me._view._doc + 
-									'&_c=' + instance._c;
-						if (me._view._b) {
-							url += '&_b=' + me._view._b.replaceAll('_', '.');
-						}
-						url += '&_ctim=' + new Date().getTime();
-
-						window.location.assign(url);
-					});
-				}
+				this._view.doAction(this.actionName, validate);
 			}
 			else if (this.type == "U") { // Upload Action
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
@@ -1567,7 +1549,7 @@ isc.BizButton.addMethods({
 			}
             else if (this.type == "V") { // Print this edit view
                 var params = {_mod: this._view._mod,
-                    _doc: this._view._doc}
+                				_doc: this._view._doc}
                 isc.ReportDialog.popupReport(this._view, params);
             }
 			else {

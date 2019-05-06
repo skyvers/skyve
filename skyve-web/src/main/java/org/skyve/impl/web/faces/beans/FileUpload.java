@@ -31,7 +31,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.WebUtil;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.model.document.Document;
@@ -118,7 +118,7 @@ public class FileUpload extends Localisable {
 
 		UploadedFile file = event.getFile();
 
-		AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -191,7 +191,7 @@ public class FileUpload extends Localisable {
 			}
 			
 			// only put conversation in cache if we have been successful in executing
-			WebUtil.putConversationInCache(webContext);
+			ConversationUtil.cacheConversation(webContext);
 			
 			if (exception.hasProblems()) {
 				for (Problem error : exception.getErrors()) {

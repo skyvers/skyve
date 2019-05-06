@@ -6,8 +6,9 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pt="http://primefaces.org/ui/extensions"
 		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:o="http://omnifaces.org/ui"
 		dir="#{skyve.dir}">
-	<f:view contentType="text/html" encoding="UTF-8">
+	<f:view encoding="UTF-8">
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />
 		<f:metadata>
 			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
@@ -17,7 +18,6 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
-		<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="topMenu" value="true" />
 			<ui:param name="leftMenu" value="true" />
@@ -25,8 +25,13 @@
 			<ui:define name="head">
 			</ui:define>
 			<ui:define name="body">
+				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.onPushMessage(message) }" />
+				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
+				<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
 				<h:form prependId="false">
 					<p:focus />
+					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@this" update="@form" />
 					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}" 
 								managedBean="skyve"

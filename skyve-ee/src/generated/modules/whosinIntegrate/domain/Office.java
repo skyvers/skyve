@@ -45,6 +45,8 @@ public class Office extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String phonePropertyName = "phone";
 	/** @hidden */
+	public static final String descriptionPropertyName = "description";
+	/** @hidden */
 	public static final String boundaryPropertyName = "boundary";
 
 	/**
@@ -71,6 +73,10 @@ public class Office extends AbstractPersistentBean {
 	 * Phone
 	 **/
 	private String phone;
+	/**
+	 * Description
+	 **/
+	private String description;
 	/**
 	 * Boundary
 	 * <br/>
@@ -220,6 +226,24 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 	public void setPhone(String phone) {
 		preset(phonePropertyName, phone);
 		this.phone = phone;
+	}
+
+	/**
+	 * {@link #description} accessor.
+	 * @return	The value.
+	 **/
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * {@link #description} mutator.
+	 * @param description	The new value.
+	 **/
+	@XmlElement
+	public void setDescription(String description) {
+		preset(descriptionPropertyName, description);
+		this.description = description;
 	}
 
 	/**

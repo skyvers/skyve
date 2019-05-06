@@ -193,60 +193,53 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	@Override
-	public void layoutFormItem(UIComponent formOrRowLayout,
-								UIComponent formItemComponent,
-								Form currentForm,
-								FormItem currentFormItem,
-								int currentFormColumn,
-								String widgetLabel,
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
-		int mutableCurrentFormColumn = currentFormColumn;
-		UIComponent columnOrField = null;
-
+	public void layoutFormItemLabel(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		// The label
-		if (! Boolean.FALSE.equals(currentFormItem.getShowLabel())) {
-			String label = currentFormItem.getLabel();
-			if (label == null) {
-				label = widgetLabel;
-			}
-			if (label != null) {
-				List<FormColumn> formColumns = currentForm.getColumns();
-				if (currentFormColumn >= formColumns.size()) {
-					mutableCurrentFormColumn = 0;
-				}
-				FormColumn formColumn = formColumns.get(mutableCurrentFormColumn++);
-				columnOrField = column(widgetInvisible, 
-											true,
-											false,
-											formColumn.getPixelWidth(), 
-											formColumn.getResponsiveWidth(),
-											formColumn.getPercentageWidth(),
-											null,
-											null);
-				formOrRowLayout.getChildren().add(columnOrField);
-				HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
-				columnOrField.getChildren().add(pg);
-				OutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
-				pg.getChildren().add(l);
-				Message m = message(formItemComponent.getId());
-				pg.getChildren().add(m);
-			}
+		String label = currentFormItem.getLabel();
+		if (label == null) {
+			label = widgetLabel;
 		}
-		// The field
-		List<FormColumn> formColumns = currentForm.getColumns();
-		if (currentFormColumn >= formColumns.size()) {
-			mutableCurrentFormColumn = 0;
-		}
-		FormColumn formColumn = formColumns.get(mutableCurrentFormColumn++);
+		Column column = column(widgetInvisible, 
+								true,
+								false,
+								currentFormColumn.getPixelWidth(), 
+								currentFormColumn.getResponsiveWidth(),
+								currentFormColumn.getPercentageWidth(),
+								null,
+								null);
+		formOrRowLayout.getChildren().add(column);
+		HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
+		column.getChildren().add(pg);
+		OutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
+		pg.getChildren().add(l);
+		Message m = message(formItemComponent.getId());
+		pg.getChildren().add(m);
+	}
+
+	@Override
+	public void layoutFormItemWidget(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		Column col = column(widgetInvisible,
 								true,
 								false,
-								formColumn.getPixelWidth(),
-								formColumn.getResponsiveWidth(),
-								formColumn.getPercentageWidth(),
+								currentFormColumn.getPixelWidth(),
+								currentFormColumn.getResponsiveWidth(),
+								currentFormColumn.getPercentageWidth(),
 								currentFormItem.getColspan(),
 								currentFormItem.getRowspan());
 		formOrRowLayout.getChildren().add(col);

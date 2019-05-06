@@ -1,7 +1,5 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Stack;
 
 import javax.faces.bean.ManagedBean;
@@ -81,23 +79,22 @@ public class Menu extends Harness {
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
-		UserImpl user = (UserImpl) CORE.getUser();
-		Customer customer = user.getCustomer();
-
 		// render each module menu
 		new MenuRenderer(uxui, getLocale(), bizModule) {
 			private Stack<Submenu> subs = new Stack<>();
 			
 			@Override
-			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module module, boolean open) {
-				DefaultSubMenu moduleSub = new DefaultSubMenu(module.getTitle());
+			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
+											Module menuModule,
+											boolean open) {
+				DefaultSubMenu moduleSub = new DefaultSubMenu(menuModule.getTitle());
 				result.addElement(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
 			}
 
 			@Override
-			public void renderMenuGroup(MenuGroup group) {
+			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				Submenu sub = new DefaultSubMenu(group.getName());
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
@@ -106,66 +103,78 @@ public class Menu extends Harness {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderCalendarItem(CalendarItem item,
+											Module menuModule,
 											Module itemModule,
 											Document itemDocument,
 											String itemQueryName, 
 											String icon16,
 											String iconStyleClass) {
-				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, customer, itemModule));
+				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void renderEditItem(EditItem item, Module itemModule, Document itemDocument, String icon16, String iconStyleClass) {
-				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, customer, itemModule));
+			public void renderEditItem(EditItem item,
+										Module menuModule,
+										Module itemModule,
+										Document itemDocument,
+										String icon16,
+										String iconStyleClass) {
+				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, null, null));
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void renderLinkItem(LinkItem item, boolean relative, String absoluteHref) {
-				subs.peek().getElements().add(createMenuItem(item, null, customer, null));
+			public void renderLinkItem(LinkItem item,
+										Module menuModule,
+										boolean relative,
+										String absoluteHref) {
+				subs.peek().getElements().add(createMenuItem(item, null, menuModule, null, null, absoluteHref));
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderListItem(ListItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
-				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, customer, itemModule));
+				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderMapItem(MapItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
-				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, customer, itemModule));
+				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void renderTreeItem(TreeItem item,
+										Module menuModule,
 										Module itemModule,
 										Document itemDocument,
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
-				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, customer, itemModule));
+				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 
 			@Override
-			public void renderedMenuGroup(MenuGroup group) {
+			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
 				subs.pop();
 			}
 			
 			@Override
-			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module module, boolean open) {
+			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module menuModule, boolean open) {
 				subs.pop();
 			}
 		}.render(getUser());
@@ -175,78 +184,81 @@ public class Menu extends Harness {
 
 	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
 																		String iconStyleClass,
-																		Customer customer,
-																		Module module) {
-		String url = createMenuItemUrl(customer, module, item);
+																		Module menuModule,
+																		Module itemModule,
+																		String itemQueryName,
+																		String itemAbsoluteHref) {
+		String url = (itemAbsoluteHref == null) ?
+						createMenuItemUrl(menuModule, itemModule, item, itemQueryName) :
+							itemAbsoluteHref;
 		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass, url);
 		result.setAjax(false);
 		result.setHref(url);
 		return result;
 	}
 
-	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) {
+	public static String createMenuItemUrl(Module menuModule,
+											Module itemModule,
+											MenuItem item,
+											String itemQueryName) {
 		StringBuilder url = new StringBuilder(64);
 		if (item instanceof ListItem) {
-			ListItem gridItem = (ListItem) item;
+			ListItem listItem = (ListItem) item;
 			url.append(Util.getSkyveContextUrl());
-			url.append("/?a=").append(WebAction.l.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
-																		module,
-																		item,
-																		gridItem.getQueryName(),
-																		gridItem.getDocumentName()).getName());
+			url.append("/?a=").append(WebAction.l.toString()).append("&m=").append(menuModule.getName());
+			String modelName = listItem.getModelName();
+			if (modelName != null) {
+				url.append("&d=").append(listItem.getDocumentName());
+				url.append("&q=").append(listItem.getModelName());
+			}
+			else {
+				url.append("&q=").append(itemQueryName);
+			}
 		}
 		else if (item instanceof EditItem) {
 			url.append(Util.getSkyveContextUrl());
-			url.append("/?a=").append(WebAction.e.toString()).append("&m=").append(module.getName());
+			url.append("/?a=").append(WebAction.e.toString()).append("&m=").append(itemModule.getName());
 			url.append("&d=").append(((EditItem) item).getDocumentName());
 		}
 		else if (item instanceof CalendarItem) {
-            CalendarItem calendarItem = (CalendarItem) item;
+			CalendarItem calendarItem = (CalendarItem) item;
     		url.append(Util.getSkyveContextUrl());
-            url.append("/?a=").append(WebAction.c.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
-																		module,
-																		item,
-																		calendarItem.getQueryName(),
-																		calendarItem.getDocumentName()).getName());
+            url.append("/?a=").append(WebAction.c.toString()).append("&m=").append(menuModule.getName());
+			String modelName = calendarItem.getModelName();
+			if (modelName != null) {
+				url.append("&d=").append(calendarItem.getDocumentName());
+				url.append("&q=").append(calendarItem.getModelName());
+			}
+			else {
+				url.append("&q=").append(itemQueryName);
+			}
         }
         else if (item instanceof TreeItem) {
-    		TreeItem treeItem = (TreeItem) item;
+        	TreeItem treeItem = (TreeItem) item;
     		url.append(Util.getSkyveContextUrl());
-    		url.append("/?a=").append(WebAction.t.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
-																		module,
-																		item,
-																		treeItem.getQueryName(),
-																		treeItem.getDocumentName()).getName());
+    		url.append("/?a=").append(WebAction.t.toString()).append("&m=").append(menuModule.getName());
+			String modelName = treeItem.getModelName();
+			if (modelName != null) {
+				url.append("&d=").append(treeItem.getDocumentName());
+				url.append("&q=").append(treeItem.getModelName());
+			}
+			else {
+				url.append("&q=").append(itemQueryName);
+			}
         }
         else if (item instanceof MapItem) {
             MapItem mapItem = (MapItem) item;
     		url.append(Util.getSkyveContextUrl());
-            url.append("/?a=").append(WebAction.m.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(MenuRenderer.deriveDocumentQuery(customer,
-																		module,
-																		item,
-																		mapItem.getQueryName(),
-																		mapItem.getDocumentName()).getName());
-			url.append("&b=").append(mapItem.getGeometryBinding());
-        }
-        else if (item instanceof LinkItem) {
-        	String href = ((LinkItem) item).getHref();
-        	try {
-				if (new URI(href).isAbsolute()) {
-					return href;
-				}
-			} catch (@SuppressWarnings("unused") URISyntaxException e) {
-				// do nothing here if its not known to be absolute
+            url.append("/?a=").append(WebAction.m.toString()).append("&m=").append(menuModule.getName());
+            String modelName = mapItem.getModelName();
+			if (modelName != null) {
+				url.append("&d=").append(mapItem.getDocumentName());
+				url.append("&q=").append(mapItem.getModelName());
 			}
-        	
-    		url.append(Util.getSkyveContextUrl());
-    		if (href.charAt(0) != '/') {
-    			url.append('/');
-    		}
-    		url.append(href);
+			else {
+				url.append("&q=").append(itemQueryName);
+			}
+			url.append("&b=").append(mapItem.getGeometryBinding());
         }
 
 		return url.toString();

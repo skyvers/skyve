@@ -7,12 +7,12 @@
 		<column />
 		<row>
 			<item>
-				<default binding="moduleName" />
+				<combo binding="moduleName" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="queryName" />
+				<combo binding="queryName" />
 			</item>
 		</row>
 		<row>
@@ -33,11 +33,6 @@
 		<row>
 			<item>
 				<default binding="copyToUser" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<default binding="copyToUserSnapshotName" />
 			</item>
 		</row>
 		<row>

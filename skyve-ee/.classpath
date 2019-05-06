@@ -149,6 +149,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlschema-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-5.1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xz-1.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-7.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

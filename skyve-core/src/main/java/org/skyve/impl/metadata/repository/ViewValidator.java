@@ -800,7 +800,7 @@ class ViewValidator extends ViewVisitor {
 							boolean parentEnabled) {
 		String blurbIdentifier = "A Blurb";
 		if (dataWidgetBinding != null) {
-			blurbIdentifier += " in" + dataWidgetIdentifier;
+			blurbIdentifier += " in " + dataWidgetIdentifier;
 		}
 		String markup = blurb.getMarkup();
 		if (markup == null) {

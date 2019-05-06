@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Configuration.ConfigurationExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -56,7 +57,8 @@ public class Configuration extends AbstractPersistentBean {
 	public static enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
-		maximumMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Maximum - min 8 chars, upper, lower, numeric and punctuation");
+		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
+		strongMin10CharsUpperLowerNumericAndPunctuation("STRONG", "Strong - min 10 chars, upper, lower, numeric and punctuation");
 
 		private String code;
 		private String description;
@@ -178,7 +180,7 @@ public class Configuration extends AbstractPersistentBean {
 		return Configuration.DOCUMENT_NAME;
 	}
 
-	public static Configuration newInstance() {
+	public static ConfigurationExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -315,5 +317,26 @@ public class Configuration extends AbstractPersistentBean {
 	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
 		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
 		this.allowUserSelfRegistration = allowUserSelfRegistration;
+	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (this))
+						.validSMTPHost()));
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
 	}
 }

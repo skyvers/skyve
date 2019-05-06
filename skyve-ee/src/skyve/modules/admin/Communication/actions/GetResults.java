@@ -44,7 +44,7 @@ public class GetResults implements ServerSideAction<Communication> {
 			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
 		}
 
-		Long count = TagBizlet.getTaggedCountForDocument(bean.getTag(), bean.getModuleName(), bean.getDocumentName());
+		Long count = TagBizlet.getCountOfDocument(bean.getTag(), bean.getModuleName(), bean.getDocumentName());
 
 		StringBuilder results = new StringBuilder();
 		results.append(count).append(" communications for ");

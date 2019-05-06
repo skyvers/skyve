@@ -54,7 +54,7 @@ public class BeanValidatorTests extends AbstractSkyveTest {
 	public void testValidateBeanPropertyAgainstAttributeSuccess() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 		ValidationException ve = new ValidationException();
-		BeanValidator.validateBeanPropertyAgainstAttribute(CORE.getUser().getCustomer(),
+		BeanValidator.validateBeanPropertyAgainstAttribute(CORE.getUser(),
 				aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);
@@ -66,7 +66,7 @@ public class BeanValidatorTests extends AbstractSkyveTest {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
 		test.setColour(null);
 		ValidationException ve = new ValidationException();
-		BeanValidator.validateBeanPropertyAgainstAttribute(CORE.getUser().getCustomer(),
+		BeanValidator.validateBeanPropertyAgainstAttribute(CORE.getUser(),
 				aarpd.getAttribute(AllAttributesRequiredPersistent.colourPropertyName),
 				test,
 				ve);

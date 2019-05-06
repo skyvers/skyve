@@ -50,8 +50,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent action(UIComponent component,
-								String listBinding,
-								String listVar,
+								String dataWidgetBinding,
+								String dataWidgetVar,
 								Action action,
 								ImplicitActionName name,
 								String title) {
@@ -68,9 +68,14 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent actionButton(UIComponent component,
-										String listBinding,
-										String listVar,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(button.getActionName(), component, button);
@@ -79,7 +84,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+	public UIComponent download(UIComponent component, String dataWidgetBinding, String dataWidgetVar, Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -89,10 +94,15 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent downloadButton(UIComponent component,
+										String dataWidgetBinding,
+										String dataWidgetVar,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
-										Action action,
-										String moduleName,
-										String documentName) {
+										String formDisabledConditionName,
+										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -111,7 +121,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent reportButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -131,7 +146,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent uploadButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
+										String formDisabledConditionName,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -142,11 +162,14 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext) { // an edit view
@@ -196,7 +219,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current,
 												DataGrid grid,
-												String listVar,
+												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
 												boolean inline) {
@@ -239,8 +262,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 
 	@Override
 	public UIComponent checkBox(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(checkBox, component);
@@ -248,22 +272,29 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent colourPicker(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return putByBinding(colour, component);
 	}
 	
 	@Override
-	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String dataWidgetVar,
+								Combo combo,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return putByBinding(combo, component);
 	}
 	
 	@Override
 	public UIComponent contentImage(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ContentImage image,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		return putByBinding(image, component);
@@ -271,22 +302,29 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent contentLink(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									ContentLink link,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(link, component);
 	}
 	
 	@Override
-	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component,
+								String dataWidgetVar,
+								HTML html,
+								String formDisabledConditionName,
+								String title,
+								boolean required) {
 		return putByBinding(html, component);
 	}
 	
 	@Override
 	public UIComponent lookupDescription(UIComponent component,
-											String listVar,
+											String dataWidgetVar,
 											LookupDescription lookup,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											String displayBinding,
@@ -296,8 +334,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent password(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									Password password,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		return putByBinding(password, component);
@@ -305,25 +344,36 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent radio(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								Radio radio,
+								String formDisabledConditionName,
 								String title,
 								boolean required) {
 		return putByBinding(radio, component);
 	}
 	
 	@Override
-	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+	public UIComponent richText(UIComponent component,
+									String dataWidgetVar,
+									RichText text,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return putByBinding(text, component);
 	}
 	
 	@Override
-	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+	public UIComponent spinner(UIComponent component,
+									String dataWidgetVar,
+									Spinner spinner,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
 		return putByBinding(spinner, component);
 	}
 	
 	@Override
-	public UIComponent tab(UIComponent component, Tab tab) {
+	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		if (component != null) {
 			// TODO this needs to take into account that it could be nested in other tabs and have a name clash
 			context.put(tab.getTitle() + " Tab", component, tab);
@@ -333,8 +383,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	
 	@Override
 	public UIComponent text(UIComponent component,
-								String listVar,
+								String dataWidgetVar,
 								TextField text,
+								String formDisabledConditionName,
 								String title,
 								boolean required,
 								Integer length,
@@ -346,8 +397,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 
 	@Override
 	public UIComponent textArea(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									TextArea text,
+									String formDisabledConditionName,
 									String title,
 									boolean required,
 									Integer length) {

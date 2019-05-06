@@ -8,6 +8,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.user.User;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class FieldValidator<T extends Object> extends Validator<T> implements MetaData {
@@ -24,5 +25,5 @@ public abstract class FieldValidator<T extends Object> extends Validator<T> impl
 		this.validationMessage = UtilImpl.processStringValue(validationMessage);
 	}
 	
-	public abstract String constructMessage(String displayName, Converter<T> converter);
+	public abstract String constructMessage(User user, String displayName, Converter<T> converter);
 }

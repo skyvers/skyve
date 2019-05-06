@@ -584,6 +584,7 @@ public class XMLMetaDataTest {
 	private static DocumentMetaData createDocument() {
 		DocumentMetaData document = new DocumentMetaData();
 		document.setName("TestDocument");
+		document.setDocumentation("<&\">");
 		document.setSingularAlias("Test Document");
 		document.setPluralAlias("Test Document");
 		BizKey bizKey = new BizKey();

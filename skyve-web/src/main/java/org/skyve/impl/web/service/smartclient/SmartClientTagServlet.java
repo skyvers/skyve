@@ -20,6 +20,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -80,7 +81,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					else if ("T".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-			        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
@@ -95,7 +96,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					else if ("U".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-			        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 

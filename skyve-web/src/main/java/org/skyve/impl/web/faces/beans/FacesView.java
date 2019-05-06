@@ -32,11 +32,13 @@ import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
+import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
 import org.skyve.impl.web.faces.actions.GetBeansAction;
 import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
+import org.skyve.impl.web.faces.actions.PreviousValuesAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -85,6 +87,16 @@ public class FacesView<T extends Bean> extends Harness {
 	private Map<String, SkyveLazyDataModel> lazyDataModels = new TreeMap<>();
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
+
+	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel - q becomes the model name
+	private String modelName;
+
+	public String getModelName() {
+		return modelName;
+	}
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
 
 	@PostConstruct
 	protected void postConstruct() {
@@ -144,6 +156,13 @@ public class FacesView<T extends Bean> extends Harness {
 		return history;
 	}
 	
+	/**
+	 * Called by "renderer" EL expressions in the generated view components - OK, Cancel & Delete buttons.
+	 */
+	public boolean isHasHistory() {
+		return (! history.isEmpty());
+	}
+	
 	// The edited bean
 	@SuppressWarnings("unchecked")
 	public T getBean() {
@@ -181,7 +200,9 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			try {
-				c.getExternalContext().redirect(history.pop());
+				if (! history.isEmpty()) {
+					c.getExternalContext().redirect(history.pop());
+				}
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -203,7 +224,9 @@ public class FacesView<T extends Bean> extends Harness {
 	public void cancel() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - cancel");
 		try {
-			FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
+			if (! history.isEmpty()) {
+				FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -217,7 +240,9 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
 			try {
-				c.getExternalContext().redirect(history.pop());
+				if (! history.isEmpty()) {
+					c.getExternalContext().redirect(history.pop());
+				}
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -226,9 +251,9 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 
 	// This corresponds to the lower case action name used in data grid generation (there is already edit())
-	public void navigate(String listBinding, String bizId) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + listBinding + '.' + bizId);
-		new ZoomInAction(this, listBinding, bizId).execute();
+	public void navigate(String dataWidgetBinding, String bizId) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + dataWidgetBinding + '.' + bizId);
+		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
@@ -236,14 +261,14 @@ public class FacesView<T extends Bean> extends Harness {
 	public void navigate(SelectEvent evt) {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
-		String listBinding = ((DataTable) evt.getComponent()).getVar();
-		// change list var back to list binding - '_' to '.' and remove "Row" from the end.
-		navigate(BindUtil.unsanitiseBinding(listBinding).substring(0, listBinding.length() - 3), bizId);
+		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
+		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
+		navigate(BindUtil.unsanitiseBinding(dataWidgetBinding).substring(0, dataWidgetBinding.length() - 3), bizId);
 	}
 	
-	public void add(String listBinding, boolean inline) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + listBinding + (inline ? " inline" : " with zoom"));
-		new AddAction(this, listBinding, inline).execute();
+	public void add(String dataWidgetBinding, boolean inline) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + dataWidgetBinding + (inline ? " inline" : " with zoom"));
+		new AddAction(this, dataWidgetBinding, inline).execute();
 		if (inline && UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
@@ -256,17 +281,21 @@ public class FacesView<T extends Bean> extends Harness {
 	 * This method only removes elements from collections, it doesn't null out associations.
 	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
-	public void remove(String listBinding, String bizId, List<String> removedHandlerActionNames) {
+	public void remove(String dataWidgetBinding, String bizId, List<String> removedHandlerActionNames) {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
-		new RemoveAction(this, listBinding, bizId, removedHandlerActionNames).execute();
+		new RemoveAction(this, dataWidgetBinding, bizId, removedHandlerActionNames).execute();
 	}
 
-	public void action(String actionName, String listBinding, String bizId) {
+	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		new ExecuteActionAction<>(this, 
 									actionName, 
-									UtilImpl.processStringValue(listBinding),
+									UtilImpl.processStringValue(dataWidgetBinding),
 									UtilImpl.processStringValue(bizId)).execute();
 		new SetTitleAction(this).execute();
+	}
+	
+	public void action(String actionName) {
+		action(actionName, null, null);
 	}
 
 	public void rerender(String source, boolean validate) {
@@ -335,7 +364,7 @@ public class FacesView<T extends Bean> extends Harness {
 	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
 												String documentName, 
 												String queryName,
-												String modelName,
+												@SuppressWarnings("hiding") String modelName,
 												List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
@@ -373,8 +402,10 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	// Note - this is also called from EL in ListGrid tag
- 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule, 
+ 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule,
+ 												final String bizDocument,
 												final String queryName,
+												@SuppressWarnings("hiding") final String modelName,
 												final List<FilterParameter> parameters) {
  		List<BeanMapAdapter<Bean>> result = null;
  		
@@ -396,7 +427,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				result = new GetBeansAction(this, bizModule, queryName, parameters).execute();
+				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -408,19 +439,16 @@ public class FacesView<T extends Bean> extends Harness {
 		return dualListModels;
  	}
 
-	// /skyve/download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
-	public String getDownloadUrl(String downloadActionName, String moduleName, String documentName) {
-		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append("/download?");
-		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
-		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
-		result.append(moduleName).append('.').append(documentName);
-		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
-		if (viewBinding != null) {
-			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
-		}
-		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
-		return result.toString();
+	public void download(String actionName, String dataWidgetBinding, String bizId) {
+		new ExecuteDownloadAction<>(this, 
+									actionName, 
+									UtilImpl.processStringValue(dataWidgetBinding),
+									UtilImpl.processStringValue(bizId)).execute();
+		new SetTitleAction(this).execute();
+	}
+	
+	public void download(String actionName) {
+		action(actionName, null, null);
 	}
 
 	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
@@ -502,12 +530,22 @@ public class FacesView<T extends Bean> extends Harness {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
 		return new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
 	}
+
+	public List<String> previousValues(String query) {
+		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
+		Map<String, Object> attributes = currentComponent.getAttributes();
+		String binding = (String) attributes.get("binding");
+
+		return new PreviousValuesAction<>(this, query, binding).execute();
+	}
 	
  	public List<BeanMapAdapter<Bean>> complete(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");
+		String completeDocument = (String) attributes.get("document");
 		String completeQuery = (String) attributes.get("query");
+		String completeModel = (String) attributes.get("model");
 		String displayBinding = (String) attributes.get("display");
 
 		// Take a defensive copy of the parameters collection and add the query to the description binding
@@ -531,7 +569,7 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 		
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
-		return getBeans(completeModule, completeQuery, parameters);
+		return getBeans(completeModule, completeDocument, completeQuery, completeModel, parameters);
 	}
 
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()

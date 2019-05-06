@@ -36,6 +36,7 @@
 		<list name="Offices" document="Office">
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
+			<uxui name="external"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</list>
@@ -45,13 +46,6 @@
 			<role name="StaffMember" />
 		</list>
 		<list name="All Staff" query="qStaff">
-			<uxui name="desktop" />
-			<role name="Manager" />
-			<role name="StaffMember" />
-		</list>
-		<list name="All Staff" query="qStaffMobile">
-			<uxui name="phone" />
-			<uxui name="tablet"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</list>
@@ -69,30 +63,8 @@
 		<query name="qStaff" documentName="Staff">
 			<description>All Staff</description>
 			<columns>
-				<column displayName="Image" editable="false" filterable="false" sortable="false" alignment="centre" pixelWidth="70">
-					<name>image</name>
-					<expression>
-						<![CDATA[
-							 case when bean.contact.image is null then 
-							 	'<img style="width:64px;height:64px" src="resources?_doc=whosin.Staff&_n=shared/images/UnknownContact.jpg">'
-							 else
-							 	concat(concat('<img src="content?_n=', bean.contact.image), '&_doc=admin.Contact&_b=image&_w=64&_h=64" />')
-							 end
-						]]>
-					</expression>
-				</column>
-				<column binding="contact.name" sortOrder="ascending"/>
-				<column binding="roleTitle" />
-				<column binding="status" />
-				<column binding="contact.mobile" />
-				<column binding="dueBack" />
-				<column binding="baseOffice.bizKey"/>
-				<column binding="location" hidden="true"/>
-			</columns>
-		</query>
-		<query name="qStaffMobile" documentName="Staff">
-			<description>All Staff</description>
-			<columns>
+				<content display="thumbnail" binding="contact.image" displayName="Image"
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
 				<column binding="contact.name" sortOrder="ascending"/>
 				<column binding="roleTitle" />
 				<column binding="status" />

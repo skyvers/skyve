@@ -45,6 +45,6 @@ public class DataGridSelect implements Step {
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return String.format("%s[%d].select", binding, row);
+		return binding + ".select";
 	}
 }

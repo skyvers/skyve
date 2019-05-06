@@ -16,6 +16,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
@@ -48,6 +49,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
+	/** @hidden */
+	public static final String confirmPasswordPropertyName = "confirmPassword";
+	/** @hidden */
+	public static final String injectBootstrapUserPropertyName = "injectBootstrapUser";
 	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
 	/** @hidden */
@@ -503,13 +508,21 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	private String modDocName;
 	/**
+	 * Confirm password
+	 **/
+	private String confirmPassword;
+	/**
+	 * Inject bootstrap user
+	 **/
+	private Boolean injectBootstrapUser;
+	/**
 	 * Schema Name
 	 **/
 	private String schemaName;
 	/**
 	 * Refresh Documents
 	 **/
-	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
+	private List<DataMaintenanceModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
 	/**
 	 * Notify me on completion
 	 **/
@@ -640,7 +653,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Data Maintenance{modDocName}",
+														"Data Maintenance",
 														this);
 		}
 		catch (Exception e) {
@@ -670,6 +683,41 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setModDocName(String modDocName) {
 		preset(modDocNamePropertyName, modDocName);
 		this.modDocName = modDocName;
+	}
+
+	/**
+	 * {@link #confirmPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	/**
+	 * {@link #confirmPassword} mutator.
+	 * @param confirmPassword	The new value.
+	 **/
+	@XmlElement
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
+
+	/**
+	 * {@link #injectBootstrapUser} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getInjectBootstrapUser() {
+		return injectBootstrapUser;
+	}
+
+	/**
+	 * {@link #injectBootstrapUser} mutator.
+	 * @param injectBootstrapUser	The new value.
+	 **/
+	@XmlElement
+	public void setInjectBootstrapUser(Boolean injectBootstrapUser) {
+		preset(injectBootstrapUserPropertyName, injectBootstrapUser);
+		this.injectBootstrapUser = injectBootstrapUser;
 	}
 
 	/**

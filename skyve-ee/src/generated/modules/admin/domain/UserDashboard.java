@@ -1,6 +1,5 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -12,6 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
@@ -62,11 +62,11 @@ public class UserDashboard extends AbstractTransientBean {
 	/**
 	 * Groups
 	 **/
-	private List<Group> groups = new ArrayList<>();
+	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
 	 * Roles
 	 **/
-	private List<UserRole> roles = new ArrayList<>();
+	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
 
 	@Override
 	@XmlTransient

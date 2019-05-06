@@ -1,0 +1,1 @@
+jre\bin\java -cp junit-4.12.jar;hamcrest-core-1.3.jar;selenium-api-3.11.0.jar;selenium-remote-driver-3.11.0.jar;selenium-support-3.11.0.jar;selenium-chrome-driver-3.11.0.jar;guava-23.6-jre.jar;okhttp-3.9.1.jar;okio-1.13.0.jar;commons-exec-1.3.jar;gson-2.8.2.jar;test.jar;sail.jar org.junit.runner.JUnitCore Sail

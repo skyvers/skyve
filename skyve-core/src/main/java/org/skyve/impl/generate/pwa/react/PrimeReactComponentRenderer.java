@@ -56,7 +56,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	
 	@Override
 	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
-		imports.put("{VBox}", PrimeReactViewVisitor.PRIME_REACT_VIEW_FILE);
+		imports.put("{VBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
 		output.append("<VBox>");
@@ -73,11 +73,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent tabPane(RenderedComponent component,
-										TabPane tabPane,
-										String moduleName,
-										String documentName,
-										StringBuilder stickyTabScript) {
+	public RenderedComponent tabPane(RenderedComponent component, TabPane tabPane) {
 		imports.put("{TabView, TabPanel}", "primereact/tabview");
 		RenderedComponent result = new RenderedComponent().setAfter("</TabView>");
 		StringBuilder output = result.getOutput();
@@ -86,10 +82,10 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent tab(RenderedComponent component, Tab tab) {
+	public RenderedComponent tab(RenderedComponent component, String title, Tab tab) {
 		RenderedComponent result = new RenderedComponent().setAfter("</TabPanel>");
 		StringBuilder output = result.getOutput();
-		output.append("<TabPanel header=\"").append(tab.getTitle()).append("\">");
+		output.append("<TabPanel header=\"").append(title).append("\">");
 		return result;
 	}
 
@@ -128,8 +124,8 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent actionButton(RenderedComponent component,
-											String listBinding,
-											String listVar,
+											String dataWidgetBinding,
+											String dataWidgetVar,
 											Button button,
 											Action action) {
 		imports.put("{Button}", "primereact/button");
@@ -162,7 +158,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent staticImage(RenderedComponent component, StaticImage image) {
+	public RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>StaticImage</span>");
@@ -182,7 +178,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent blurb(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									String value,
 									String binding,
 									Blurb blurb) {
@@ -194,7 +190,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent label(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									String value,
 									String binding,
 									Label label) {
@@ -205,7 +201,11 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent dataGrid(RenderedComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public RenderedComponent dataGrid(RenderedComponent component,
+										String dataWidgetVar,
+										boolean ordered,
+										String title,
+										DataGrid grid) {
 		imports.put("{DataTable}", "primereact/datatable");
 		RenderedComponent result = new RenderedComponent().setAfter("</DataTable>").setIndent("");
 		StringBuilder output = result.getOutput();
@@ -215,7 +215,10 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent dataRepeater(RenderedComponent component, String listVar, DataRepeater repeater) {
+	public RenderedComponent dataRepeater(RenderedComponent component,
+											String dataWidgetVar,
+											String title,
+											DataRepeater repeater) {
 		RenderedComponent result = new RenderedComponent().setAfter("</div>").setIndent("");
 		StringBuilder output = result.getOutput();
 		output.append("<div>dataRepeater");
@@ -227,7 +230,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 														RenderedComponent current,
 														AbstractDataWidget widget,
 														DataGridBoundColumn column,
-														String listVar,
+														String dataWidgetVar,
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression) {
@@ -242,7 +245,6 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent addedDataGridBoundColumn(RenderedComponent component, RenderedComponent current) {
-System.out.println("end column " + current);
 		return current.getParent();
 	}
 
@@ -250,8 +252,8 @@ System.out.println("end column " + current);
 	public RenderedComponent addDataGridContainerColumn(RenderedComponent component,
 															RenderedComponent current,
 															AbstractDataWidget widget,
+															String columnTitle,
 															DataGridContainerColumn column) {
-System.out.println("conatin column " + column.getTitle());
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>addDataGridContainerColumn</span>");
@@ -261,7 +263,6 @@ System.out.println("conatin column " + column.getTitle());
 
 	@Override
 	public RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current) {
-System.out.println("end column " + current);
 		return current.getParent();
 	}
 
@@ -269,11 +270,10 @@ System.out.println("end column " + current);
 	public RenderedComponent addDataGridActionColumn(RenderedComponent component,
 														RenderedComponent current,
 														DataGrid grid,
-														String listVar,
+														String dataWidgetVar,
 														String gridColumnExpression,
 														String singluarDocumentAlias,
 														boolean inline) {
-System.out.println("action column " + current);
 		return current;
 	}
 
@@ -282,8 +282,10 @@ System.out.println("action column " + current);
 										String modelDocumentName,
 										String modelName,
 										ListModel<? extends Bean> model,
+										String title,
 										ListGrid listGrid,
-										boolean canCreateDocument) {
+										boolean canCreateDocument,
+										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ListGrid</span>");
@@ -315,7 +317,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent checkBox(RenderedComponent component,
-										String listVar,
+										String dataWidgetVar,
 										CheckBox checkBox,
 										String title,
 										boolean required) {
@@ -327,7 +329,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent colourPicker(RenderedComponent component,
-											String listVar,
+											String dataWidgetVar,
 											ColourPicker colour,
 											String title,
 											boolean required) {
@@ -339,7 +341,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent combo(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									Combo combo,
 									String title,
 									boolean required) {
@@ -352,7 +354,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent contentImage(RenderedComponent component,
-											String listVar,
+											String dataWidgetVar,
 											ContentImage image,
 											String title,
 											boolean required) {
@@ -364,7 +366,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent contentLink(RenderedComponent component,
-											String listVar,
+											String dataWidgetVar,
 											ContentLink link,
 											String title,
 											boolean required) {
@@ -376,7 +378,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent html(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									HTML html,
 									String title,
 									boolean required) {
@@ -388,7 +390,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent lookupDescription(RenderedComponent component,
-												String listVar,
+												String dataWidgetVar,
 												LookupDescription lookup,
 												String title,
 												boolean required,
@@ -402,7 +404,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent password(RenderedComponent component,
-										String listVar,
+										String dataWidgetVar,
 										Password password,
 										String title,
 										boolean required) {
@@ -415,7 +417,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent radio(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									Radio radio,
 									String title,
 									boolean required) {
@@ -427,7 +429,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent richText(RenderedComponent component,
-										String listVar,
+										String dataWidgetVar,
 										RichText text,
 										String title,
 										boolean required) {
@@ -439,7 +441,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent spinner(RenderedComponent component,
-										String listVar,
+										String dataWidgetVar,
 										Spinner spinner,
 										String title,
 										boolean required) {
@@ -451,7 +453,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent text(RenderedComponent component,
-									String listVar,
+									String dataWidgetVar,
 									TextField text,
 									String title,
 									boolean required,
@@ -469,7 +471,7 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent textArea(RenderedComponent component,
-										String listVar,
+										String dataWidgetVar,
 										TextArea text,
 										String title,
 										boolean required,
@@ -485,10 +487,10 @@ System.out.println("action column " + current);
 
 	@Override
 	public RenderedComponent actionLink(RenderedComponent component,
-											String listBinding,
-											String listVar,
+											String dataWidgetBinding,
+											String dataWidgetVar,
 											Link link,
-											String actionName) {
+											Action action) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ActionLink</span>");
@@ -515,9 +517,17 @@ System.out.println("action column " + current);
 	}
 
 	@Override
+	public RenderedComponent upload(RenderedComponent component, Action action) {
+		RenderedComponent result = new RenderedComponent();
+		StringBuilder output = result.getOutput();
+		output.append("upload");
+		return result;
+	}
+	
+	@Override
 	public RenderedComponent action(RenderedComponent component,
-										String listBinding,
-										String listVar,
+										String dataWidgetBinding,
+										String dataWidgetVar,
 										Action action,
 										ImplicitActionName name,
 										String title) {

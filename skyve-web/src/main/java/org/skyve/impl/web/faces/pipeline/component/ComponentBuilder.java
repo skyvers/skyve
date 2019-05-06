@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.el.MethodExpression;
+import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIOutput;
@@ -82,7 +83,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String documentName,
 											StringBuilder stickyTabScript);
 	
-	public abstract UIComponent tab(UIComponent component, Tab tab);
+	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,
@@ -93,40 +94,64 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent spacer(UIComponent component, Spacer spacer);
 	
 	public abstract UIComponent actionButton(UIComponent component,
-												String listBinding, 
-												String listVar, 
+												String dataWidgetBinding, 
+												String dataWidgetVar, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	public abstract UIComponent reportButton(UIComponent component, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	public abstract UIComponent downloadButton(UIComponent component,
+												String dataWidgetBinding, 
+												String dataWidgetVar, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
-												Action action, 
-												String moduleName, 
-												String documentName);
+												String formDisabledConditionName,
+												Action action);
 	public abstract UIComponent uploadButton(UIComponent component, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
 												Button button, 
+												String formDisabledConditionName,
 												Action action);
 	
-	public abstract UIComponent staticImage(UIComponent component, StaticImage image);
+	public abstract UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image);
 	public abstract UIComponent dynamicImage(UIComponent component, 
 												DynamicImage image, 
 												String moduleName, 
 												String documentName);
 	
 	public abstract UIComponent blurb(UIComponent component, 
-										String listVar, 
+										String dataWidgetVar, 
 										String value, 
 										String binding, 
 										Blurb blurb);
 	public abstract UIComponent label(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										String value,
 										String binding,
 										Label label);
 
-	public abstract UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid);
+	public abstract UIComponent dataGrid(UIComponent component,
+											String dataWidgetVar,
+											boolean ordered,
+											String title,
+											DataGrid grid);
 
 	/*
 	 * Data Repeater is just like a data grid but...
@@ -135,12 +160,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * Any bound columns are editable inline.
 	 * There is no action column.
 	 */
-	public abstract UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater);
+	public abstract UIComponent dataRepeater(UIComponent component,
+												String dataWidgetVar,
+												String title,
+												DataRepeater repeater);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
 														UIComponent current, 
 														AbstractDataWidget widget,
 														DataGridBoundColumn column,
-														String listVar,
+														String dataWidgetVar,
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression);
@@ -148,22 +176,26 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
 															UIComponent current,
 															AbstractDataWidget widget,
+															String title,
 															DataGridContainerColumn column);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent component,
 															UIComponent current, 
 															DataGrid grid,
-															String listVar,
+															String dataWidgetVar,
 															String gridColumnExpression,
 															String singluarDocumentAlias,
 															boolean inline);
 	
 	public abstract UIComponent listGrid(UIComponent component,
+											String moduleName,
 											String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model,
+											String title,
 											ListGrid listGrid,
-											boolean canCreateDocument);
+											boolean canCreateDocument,
+											boolean aggregateQuery);
 
 	/*
 	 * List Repeater is just like a list grid but...
@@ -186,76 +218,88 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	
 	public abstract UIComponent checkBox(UIComponent component, 
-											String listVar, 
+											String dataWidgetVar, 
 											CheckBox checkBox, 
+											String formDisabledConditionName,
 											String title, 
 											boolean required);
 
 	public abstract UIComponent colourPicker(UIComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												ColourPicker colour, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 	
 	public abstract UIComponent combo(UIComponent component, 
-										String listVar, 
+										String dataWidgetVar, 
 										Combo combo, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required);
 
 	public abstract UIComponent contentImage(UIComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												ContentImage image, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 
 	public abstract UIComponent contentLink(UIComponent component, 
-												String listVar, 
+												String dataWidgetVar, 
 												ContentLink link, 
+												String formDisabledConditionName,
 												String title, 
 												boolean required);
 	
 	public abstract UIComponent html(UIComponent component, 
-										String listVar, 
+										String dataWidgetVar, 
 										HTML html, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required);
 
 	public abstract UIComponent lookupDescription(UIComponent component, 
-													String listVar,
+													String dataWidgetVar,
 													LookupDescription lookup,
+													String formDisabledConditionName,
 													String title,
 													boolean required,
 													String displayBinding,
 													QueryDefinition query);
 	
 	public abstract UIComponent password(UIComponent component, 
-											String listVar,
+											String dataWidgetVar,
 											Password password,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 
 	public abstract UIComponent radio(UIComponent component, 
-										String listVar,
+										String dataWidgetVar,
 										Radio radio,
+										String formDisabledConditionName,
 										String title,
 										boolean required);
 	
 	public abstract UIComponent richText(UIComponent component, 
-											String listVar,
+											String dataWidgetVar,
 											RichText text,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 	
 	public abstract UIComponent spinner(UIComponent component, 
-											String listVar,
+											String dataWidgetVar,
 											Spinner spinner,
+											String formDisabledConditionName,
 											String title,
 											boolean required);
 	
 	public abstract UIComponent text(UIComponent component, 
-										String listVar, 
+										String dataWidgetVar, 
 										TextField text, 
+										String formDisabledConditionName,
 										String title, 
 										boolean required,
 										Integer length,
@@ -264,20 +308,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										javax.faces.convert.Converter facesConverter);
 
 	public abstract UIComponent textArea(UIComponent component, 
-											String listVar,
+											String dataWidgetVar,
 											TextArea text,
+											String formDisabledConditionName,
 											String title,
 											boolean required,
 											Integer length);
 	
-	public HtmlOutputLink outputLink(String listVar, 
+	public HtmlOutputLink outputLink(String dataWidgetVar, 
 										String value, 
 										String href, 
 										String invisible,
 										ReferenceTarget target) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		if (listVar != null) {
-			result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, href, true, null, String.class));
+		if (dataWidgetVar != null) {
+			result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, href, true, null, String.class));
 		}
 		else {
 			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class));
@@ -339,7 +384,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public void addAjaxBehavior(UIComponentBase component, 
 									String eventName,
 									String collectionBinding,
-									String listVar,
+									String dataWidgetVar,
 									String rerenderSource, 
 									List<EventAction> actions) {
 		ActionFacesAttributes attributes = determineActionFacesAttributes(actions);
@@ -358,7 +403,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			MethodExpression me = methodExpressionForAction(null, 
 																attributes.actionName, 
 																collectionBinding, 
-																listVar, 
+																dataWidgetVar, 
 																false, 
 																null);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
@@ -367,32 +412,25 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		component.addClientBehavior(eventName, ajax);
 	}
 
-	public UIComponent actionLink(UIComponent component,
-										   String listBinding,
-										   String listVar,
-										   Link link,
-										   Action action) {
-		return actionLink(component, listBinding, listVar, link, action.getName());
-	}
-
 	public abstract UIComponent actionLink(UIComponent component,
-											String listBinding,
-											String listVar,
-											Link link,
-											String actionName);
+											   String dataWidgetBinding,
+											   String dataWidgetVar,
+											   String value,
+											   Link link,
+											   Action action);
 
 	public abstract UIComponent report(UIComponent component, Action action);
 	
 	public abstract UIComponent download(UIComponent component, 
-											Action action,
-											String moduleName,
-											String documentName);
+											String dataWidgetBinding,
+											String dataWidgetVar,
+											Action action);
 	
 	public abstract UIComponent upload(UIComponent component, Action action);
 
 	public abstract UIComponent action(UIComponent component, 
-										String listBinding, 
-										String listVar,
+										String dataWidgetBinding, 
+										String dataWidgetVar,
 										Action action, 
 										ImplicitActionName name, 
 										String title);
@@ -416,11 +454,33 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 
 		return ef.createMethodExpression(elc, expression.toString(), null, STRING_BOOLEAN);
 	}
-	
+
+	protected void downloadActionExpression(String downloadActionName,
+											String dataWidgetBinding,
+											String dataWidgetVar,
+											UICommand command) {
+		if (dataWidgetBinding != null) {
+			StringBuilder expression = new StringBuilder(64);
+			expression.append("#{").append(managedBeanName).append(".download('");
+			expression.append(downloadActionName).append("','").append(dataWidgetBinding);
+			expression.append("',").append(dataWidgetVar).append("['");
+			expression.append(Bean.DOCUMENT_ID).append("'])}");
+			MethodExpression method = ef.createMethodExpression(elc, expression.toString(), null, STRING_STRING_STRING);
+			command.setActionExpression(method);
+		}
+		else {
+			StringBuilder expression = new StringBuilder(48);
+			expression.append("#{").append(managedBeanName).append(".download('");
+			expression.append(downloadActionName).append("', null, null)}");
+			MethodExpression method = ef.createMethodExpression(elc, expression.toString(), null, STRING_STRING_STRING);
+			command.setActionExpression(method);
+		}
+	}
+
 	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
 															String actionName,
 															String collectionBinding, 
-															String listVar,
+															String dataWidgetVar,
 															boolean inline,
 															List<String> eventHandlerActionNames) {
 		StringBuilder expression = new StringBuilder(64);
@@ -436,7 +496,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
 					parameterTypes = STRING_STRING_LIST;
 					expression.append("('").append(collectionBinding).append("',");
-					expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'],");
+					expression.append(dataWidgetVar).append("['").append(Bean.DOCUMENT_ID).append("'],");
 
 					// Add filter parameters to getModel call
 					if ((eventHandlerActionNames != null) && (! eventHandlerActionNames.isEmpty())) {
@@ -454,7 +514,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				else {
 					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionBinding).append("', ");
-					expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append(dataWidgetVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 			} 
 			else {
@@ -472,7 +532,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			expression.append("action('").append(actionName).append('\'');
 			if (collectionBinding != null) {
 				expression.append(", '").append(collectionBinding).append("', ");
-				expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
+				expression.append(dataWidgetVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
 			} 
 			else {
 				expression.append(", null, null)");

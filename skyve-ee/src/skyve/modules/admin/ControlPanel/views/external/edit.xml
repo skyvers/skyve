@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="SAIL UI Testing"
+		name="edit"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true">
+		<column responsiveWidth="3" />
+		<column />
+		<column responsiveWidth="2" />
+		<row>
+			<item required="true">
+				<textField binding="sailLoginCustomer" invisible="fixedCustomer" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<lookupDescription binding="sailUser" descriptionBinding="bizKey" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<password binding="sailLoginPassword" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="sailModuleName" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<radio binding="sailTestStrategy" vertical="false" />
+			</item>
+			<item align="right">
+				<button actionName="DownloadClientSAIL" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<download className="DownloadClientSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
+	</actions>
+</view>

@@ -2,16 +2,17 @@ package modules.admin.Tag.actions;
 
 import java.util.List;
 
-import modules.admin.domain.Tag;
-import modules.admin.domain.Tagged;
-
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
+
+import modules.admin.Tag.TagBizlet;
+import modules.admin.domain.Tag;
 
 public class TagAll implements ServerSideAction<Tag> {
 	/**
@@ -31,16 +32,10 @@ public class TagAll implements ServerSideAction<Tag> {
 		DocumentQuery q = pers.newDocumentQuery(bean.getUploadModuleName(), bean.getUploadDocumentName());
 		
 		List<Bean> beans = q.projectedResults();
-		for(Bean b: beans){
-			//add bean to tagged
-			Tagged tagged = Tagged.newInstance();
-			tagged.setTag(bean);
-			tagged.setTaggedModule(bean.getUploadModuleName());
-			tagged.setTaggedDocument(bean.getUploadDocumentName());
-			tagged.setTaggedBizId(b.getBizId());
-			
-			pers.upsertBeanTuple(tagged);
-		}
+		EXT.tag(bean.getBizId(), beans);
+		
+		bean.setUploadTagged(TagBizlet.getCountOfDocument(bean, bean.getUploadModuleName(), bean.getUploadDocumentName()));
+		bean.setTotalTagged(TagBizlet.getCount(bean));
 		
 		return new ServerSideActionResult<>(bean);
 	}

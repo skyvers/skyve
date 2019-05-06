@@ -26,7 +26,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx);
+		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
 				json.contains("_0") && json.contains("_1"));
 	}
@@ -43,7 +43,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx);
+		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
 				json.contains("_0") && (!json.contains("_1")));
 	}
@@ -60,7 +60,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx);
+		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
 				(!json.contains("_0")) && json.contains("_1"));
 	}
@@ -77,7 +77,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
-		String json = vjm.toJSON(ctx);
+		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
 				(!json.contains("_0")) && (!json.contains("_1") &&
 						json.contains("_2") && json.contains("_3")));

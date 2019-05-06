@@ -99,18 +99,18 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
-					SmartClientViewVisitor visitor = new SmartClientViewVisitor(user, customer, module, document, editView, true);
-					visitor.visit();
-					editString = visitor.getCode().toString();
+					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, true);
+					renderer.visit();
+					editString = renderer.getCode().toString();
 				}
 				else {
-					SmartClientViewVisitor visitor = new SmartClientViewVisitor(user, customer, module, document, editView, false);
-					visitor.visit();
-					editString = visitor.getCode().toString();
+					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, false);
+					renderer.visit();
+					editString = renderer.getCode().toString();
 	
-					visitor = new SmartClientViewVisitor(user, customer, module, document, createView, false);
-					visitor.visit();
-					createString = visitor.getCode().toString();
+					renderer = new SmartClientViewRenderer(user, module, document, createView, false);
+					renderer.visit();
+					createString = renderer.getCode().toString();
 				}
 	
 				pw.append(module.getName()).append('.').append(document.getName()).append(SmartClientWebContext.EDIT_ID_COUNTER).append("=0;");

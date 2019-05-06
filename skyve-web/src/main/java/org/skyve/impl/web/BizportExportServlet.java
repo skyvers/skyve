@@ -37,7 +37,7 @@ public class BizportExportServlet extends HttpServlet {
 		try (OutputStream out = response.getOutputStream()) {
 			try {
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-	        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException();
 	        	}
@@ -110,7 +110,7 @@ public class BizportExportServlet extends HttpServlet {
 
 						// lastly put the conversation in the cache, after the response is sent
 						// and all lazy loading of domain objects has been realised
-						WebUtil.putConversationInCache(webContext);
+						ConversationUtil.cacheConversation(webContext);
 					}
 					catch (InvocationTargetException e) {
 						throw e.getTargetException();

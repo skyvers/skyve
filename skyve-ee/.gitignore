@@ -8,8 +8,11 @@
 /javaee/skyve.ear.deployed
 /javaee/skyve-ds.xml.deployed
 /lib
+/libs.zip
 /src/js/desktop/skyve.js
 /tools/lib
-/demo
-/demo.zip
-/libs.zip
+/tools/sail/jre
+/tools/sail/chrome*
+/tools/sail/*.jar
+/tools/sail/sail.exe
+/sail.zip

@@ -4,10 +4,14 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.Job;
+import org.skyve.persistence.Persistence;
 
+import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 
@@ -25,7 +29,8 @@ public class ProcessCommunicationForTagJob extends Job {
 		List<String> log = getLog();
 
 		Communication communication = (Communication) getBean();
-
+		Persistence pers = CORE.getPersistence();
+		
 		if (communication.getActionType() != null) {
 
 			// get relevant document to action
@@ -51,6 +56,10 @@ public class ProcessCommunicationForTagJob extends Job {
 
 						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Saved OK");
+
+						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
+							EXT.untag(communication.getTag().getBizId(), pb);
+						}
 						break;
 					case testBindingsAndOutput:
 
@@ -61,21 +70,39 @@ public class ProcessCommunicationForTagJob extends Job {
 
 						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Sent OK");
+						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
+							EXT.untag(communication.getTag().getBizId(), pb);
+						}
 						break;
 					default:
 						break;
 					}
+
 				} catch (Exception e) {
 					sb.append(" - Unsuccessful");
 					sb.append("\n");
 					sb.append(e);
 				}
+				pers.commit(false);
+				pers.evictCached(pb);
+				pers.begin();
+
 				setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
 
 				log.add(sb.toString());
 			}
 			setPercentComplete(100);
 			log.add("Finished Processing Communication Action for Tagged Items Job at " + new Date());
+			
+			if (Boolean.TRUE.equals(communication.getNotification())) {
+				
+				// send email notification for completion of Job
+				try {
+					CommunicationUtil.sendFailSafeSystemCommunication(CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_NOTIFICATION, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY, ResponseMode.SILENT, null, communication);
+				} catch (Exception e) {
+					log.add("The job completed successfully, but the final notification could not be sent.");
+				}
+			}
 
 		} else {
 			throw new Exception("Communication job failed to commence because no valid action type was selected.");

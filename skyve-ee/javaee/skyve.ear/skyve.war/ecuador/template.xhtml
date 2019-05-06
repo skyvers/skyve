@@ -7,7 +7,7 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://primefaces.org/ecuador"
 		dir="#{bean.dir}">
-	<f:view contentType="text/html" encoding="UTF-8">
+	<f:view encoding="UTF-8">
 		<h:head>
 			<f:facet name="first">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -119,8 +119,8 @@
 			</p:ajaxStatus>
 	
 			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
-			<h:outputStylesheet name="#{'css/layout-'.concat(not empty request.getAttribute('skyveUxUi' 
-				and not empty request.getAttribute('skyveUxUi').getPfThemeColour()) ? 
+			<h:outputStylesheet name="#{'css/layout-'.concat(not empty request.getAttribute('skyveUxUi') 
+				and not empty request.getAttribute('skyveUxUi').getPfThemeColour() ? 
 				request.getAttribute('skyveUxUi').getPfThemeColour() : 'indigo')
 				.concat('.css')}" library="ecuador-layout" />
 		</h:body>

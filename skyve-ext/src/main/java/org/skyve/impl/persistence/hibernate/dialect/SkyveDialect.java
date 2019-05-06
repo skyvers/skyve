@@ -7,6 +7,10 @@ import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import com.vividsolutions.jts.geom.Geometry;
 
 public interface SkyveDialect {
+	public static enum RDBMS {
+		h2, mysql, sqlserver
+	}
+	
 	public int getGeometrySqlType();
 	public JTSGeometryType getGeometryType();
 	public Object convertToPersistedValue(Geometry geometry);
@@ -14,4 +18,6 @@ public interface SkyveDialect {
 	
 	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo);
 	public String getModifyColumnString();
+	
+	public RDBMS getRDBMS();
 }

@@ -45,6 +45,6 @@ public class DataGridRemove implements Step {
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return String.format("%s[%d].remove", binding, row);
+		return binding + ".remove";
 	}
 }

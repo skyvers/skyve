@@ -42,6 +42,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.util.BeanVisitor;
 
 public class ValidationUtil {
@@ -57,13 +58,14 @@ public class ValidationUtil {
 	 * @param e The exception to populate.
 	 */
 	public static void validateBeanAgainstDocument(Document document, Bean bean) {
-		validateBeanAgainstDocument(CORE.getUser().getCustomer(), document, bean);
+		validateBeanAgainstDocument(CORE.getUser(), document, bean);
 	}
 
-	private static void validateBeanAgainstDocument(Customer customer, Document document, Bean bean) {
+	private static void validateBeanAgainstDocument(User user, Document document, Bean bean) {
+		Customer customer = user.getCustomer();
 		ValidationException e = new ValidationException();
 		for (Attribute attribute : document.getAttributes()) {
-			validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
+			validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
 		}
 
 		Extends inherits = document.getExtends();
@@ -72,7 +74,7 @@ public class ValidationUtil {
 			Module baseModule = customer.getModule(baseDocument.getOwningModuleName());
 			baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
 			for (Attribute attribute : baseDocument.getAttributes()) {
-				validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
+				validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
 			}
 			inherits = baseDocument.getExtends();
 		}
@@ -91,7 +93,7 @@ public class ValidationUtil {
 	 * @param e The exception to populate
 	 */
 	@SuppressWarnings("unchecked")
-	public static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e) {
+	public static void validateBeanPropertyAgainstAttribute(User user, Attribute attribute, Bean bean, ValidationException e) {
 		String binding = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
 		if (AttributeType.inverseOne.equals(type) || 
@@ -102,7 +104,7 @@ public class ValidationUtil {
 
 		String displayName = attribute.getDisplayName();
 		Converter<?> converter = (attribute instanceof ConvertableField) ? 
-									((ConvertableField) attribute).getConverterForCustomer(customer) : 
+									((ConvertableField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {
@@ -117,7 +119,7 @@ public class ValidationUtil {
 				@SuppressWarnings("rawtypes")
 				Validator validator = converter.getValidator();
 				if (validator != null) {
-					validator.validate(attributeValue, binding, displayName, converter, e);
+					validator.validate(user, attributeValue, binding, displayName, converter, e);
 				}
 			}
 		}
@@ -166,7 +168,7 @@ public class ValidationUtil {
 				}
 				TextValidator validator = text.getValidator();
 				if (validator != null) {
-					validator.validate(stringValue, binding, displayName, (Converter<String>) converter, e);
+					validator.validate(user, stringValue, binding, displayName, (Converter<String>) converter, e);
 				}
 			}
 		}
@@ -175,7 +177,7 @@ public class ValidationUtil {
 			IntegerValidator validator = integer.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof Integer) {
-					validator.validate((Integer) attributeValue, binding, displayName, (Converter<Integer>) converter, e);
+					validator.validate(user, (Integer) attributeValue, binding, displayName, (Converter<Integer>) converter, e);
 				}
 			}
 		}
@@ -184,7 +186,7 @@ public class ValidationUtil {
 			LongValidator validator = integer.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof Long) {
-					validator.validate((Long) attributeValue, binding, displayName, (Converter<Long>) converter, e);
+					validator.validate(user, (Long) attributeValue, binding, displayName, (Converter<Long>) converter, e);
 				}
 			}
 		}
@@ -193,7 +195,8 @@ public class ValidationUtil {
 			DateValidator validator = date.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof java.util.Date) {
-					validator.validate((java.util.Date) attributeValue,
+					validator.validate(user,
+										(java.util.Date) attributeValue,
 										binding,
 										displayName,
 										(Converter<java.util.Date>) converter,
@@ -206,7 +209,8 @@ public class ValidationUtil {
 			DateValidator validator = dateTime.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof java.util.Date) {
-					validator.validate((java.util.Date) attributeValue,
+					validator.validate(user,
+										(java.util.Date) attributeValue,
 										binding,
 										displayName,
 										(Converter<java.util.Date>) converter,
@@ -219,7 +223,8 @@ public class ValidationUtil {
 			DateValidator validator = time.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof java.util.Date) {
-					validator.validate((java.util.Date) attributeValue,
+					validator.validate(user,
+										(java.util.Date) attributeValue,
 										binding,
 										displayName,
 										(Converter<java.util.Date>) converter,
@@ -232,7 +237,8 @@ public class ValidationUtil {
 			DateValidator validator = timestamp.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof java.util.Date) {
-					validator.validate((java.util.Date) attributeValue,
+					validator.validate(user,
+										(java.util.Date) attributeValue,
 										binding,
 										displayName,
 										(Converter<java.util.Date>) converter,
@@ -245,7 +251,8 @@ public class ValidationUtil {
 			DecimalValidator validator = decimal2.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof org.skyve.domain.types.Decimal2) {
-					validator.validate((org.skyve.domain.types.Decimal2) attributeValue,
+					validator.validate(user,
+										(org.skyve.domain.types.Decimal2) attributeValue,
 										binding,
 										displayName,
 										(Converter<Decimal>) converter,
@@ -258,7 +265,8 @@ public class ValidationUtil {
 			DecimalValidator validator = decimal5.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof org.skyve.domain.types.Decimal5) {
-					validator.validate((org.skyve.domain.types.Decimal5) attributeValue,
+					validator.validate(user,
+										(org.skyve.domain.types.Decimal5) attributeValue,
 										binding,
 										displayName,
 										(Converter<Decimal>) converter,
@@ -271,7 +279,8 @@ public class ValidationUtil {
 			DecimalValidator validator = decimal10.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof org.skyve.domain.types.Decimal10) {
-					validator.validate((org.skyve.domain.types.Decimal10) attributeValue,
+					validator.validate(user,
+										(org.skyve.domain.types.Decimal10) attributeValue,
 										binding,
 										displayName,
 										(Converter<Decimal>) converter,

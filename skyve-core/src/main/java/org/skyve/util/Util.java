@@ -184,6 +184,10 @@ public class Util {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}
 	
+	public static String getSupportEmailAddress() {
+		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
+	}
+
 	private static Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {

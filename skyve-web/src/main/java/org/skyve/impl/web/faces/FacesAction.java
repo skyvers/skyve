@@ -99,7 +99,7 @@ public abstract class FacesAction<T> {
 	private static void processErrors(FacesContext context,
 										Message em,
 										TreeSet<String> globalMessageSet) {
-		String message = em.getErrorMessage();
+		String message = em.getText();
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
 		for (String binding : em.getBindings()) {
 			List<UIComponent> components = findComponentsByBinding(context.getViewRoot(), binding);
@@ -110,7 +110,7 @@ public abstract class FacesAction<T> {
 			}
 
 			// find components if this is an indexed compound binding
-			// eg listBinding[\d*].simpleBinding or listBinding[\d*].compound.binding etc
+			// eg dataWidgetBinding[\d*].simpleBinding or dataWidgetBinding[\d*].compound.binding etc
 			int lastOpeningSquareBraceIndex = binding.lastIndexOf('[');
 			int lastClosingSquareBraceIndex = binding.lastIndexOf(']');
 			if ((lastOpeningSquareBraceIndex > 0) && 

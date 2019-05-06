@@ -9,138 +9,121 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 		dir="#{myStatusView.dir}">
-    <f:view renderKitId="PRIMEFACES_MOBILE" encoding="UTF-8">
+    <f:view encoding="UTF-8">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{myStatusView.preRender}"/>
 		</f:metadata>
-		<s:conversation managedBean="myStatusView" />
-		<ui:composition template="../mobile/template.xhtml">
-			<ui:param name="baseHref" value="#{myStatusView.baseHref}" />
-			<ui:param name="skyveVersionComment" value="#{myStatusView.skyveVersionComment}" />
+		<ui:composition template="../admin/template.xhtml">
+			<ui:param name="bean" value="#{inOutView}" />
 			<ui:define name="head">
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/load-image.min.js"></script>
 			</ui:define>
-			<ui:define name="pages">
-				<pm:page id="mystatus">
-					<pm:header id="staffHeader" title="Status" fixed="true">
-						<p:button value="Home"
-									styleClass="ui-btn-left ui-btn-inline"
-									icon="ui-icon-home"
-									href="/"  />
-						<p:button value="Logout"
-									styleClass="ui-btn-right ui-btn-inline"
-									icon="ui-icon-gear"
-									href="/loggedOut" />
-					</pm:header>
-					<pm:content>
-						<h:panelGroup rendered="#{empty myStatusView.currentBean['myStaff.bizId']}">
-							<b>Your user is not a staff member.</b>
-							<p/>
-							<i>Only staff members can update their status.</i>
-						</h:panelGroup>
-						<h:form id="staffForm" rendered="#{not empty myStatusView.currentBean['myStaff.bizId']}">
-							<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
-							<script type="text/javascript">
-							    geoLocate = function() {
-							    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});
-					                navigator.geolocation.getCurrentPosition(
-					                    function(position) {
-					                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:location')).val(
-												'POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')'
-					                    	);
-					    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Done', severity: 'info'}]});});
-					                    },
-					                    function(error) {
-					    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: error.message, severity: 'warn'}]});});
-					                    },
-					                    {
-					                       enableHighAccuracy: true
-					                    });
-					            };
-				
-					            photo = function(input) {
-					                if (input.files &amp;&amp; input.files[0]) {
-					                    var file = input.files[0];
-										var options = {maxWidth: 250,
-														maxHeight: 250,
-														canvas: true,
-														crop: true};
-					                    loadImage.parseMetaData(file, function(data) {
-					                        if (data.exif) {
-					                            options.orientation = data.exif.get('Orientation');
-					                        }
-					                        
-					                        if (! loadImage(file, 
-							                        			function(img) {
-										                            if (! (img instanceof HTMLCanvasElement)) {
-										                                alert('Loading image file failed');
-										                            }
-										                            else {
-											                            var dataUrl = img.toDataURL();
-												                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).attr('src', dataUrl);
-																		$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(dataUrl);
-										                            }
-										                        },
-							                        			options)) {
-				                                alert('Your browser does not support the URL or FileReader API.');
-					                        }
-					                    });
-					                }
-					            };
-						        
-					            $(function() {
-									$('#PhotoButton').click(function() {
-										$('#PhotoPicker').trigger('click');
-											return false;
-										});
-							        $('#PhotoPicker').on('change', function(e) {
-							            e.preventDefault();
-							            if (this.files.length === 0) return;
-										photo(this);
-							        });
-					            });
-							</script>
+			<ui:define name="body">
+				<s:conversation managedBean="myStatusView" />
+				<h:panelGroup rendered="#{empty myStatusView.currentBean['myStaff.bizId']}">
+					<b>Your user is not a staff member.</b>
+					<p/>
+					<i>Only staff members can update their status.</i>
+				</h:panelGroup>
+				<h:form id="staffForm" rendered="#{not empty myStatusView.currentBean['myStaff.bizId']}">
+					<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
+					<script type="text/javascript">
+					    geoLocate = function() {
+					    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});
+			                navigator.geolocation.getCurrentPosition(
+			                    function(position) {
+			                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:location')).val(
+										'POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')'
+			                    	);
+			    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Done', severity: 'info'}]});});
+			                    },
+			                    function(error) {
+			    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: error.message, severity: 'warn'}]});});
+			                    },
+			                    {
+			                       enableHighAccuracy: true
+			                    });
+			            };
+		
+			            photo = function(input) {
+			                if (input.files &amp;&amp; input.files[0]) {
+			                    var file = input.files[0];
+								var options = {maxWidth: 250,
+												maxHeight: 250,
+												canvas: true,
+												crop: true};
+			                    loadImage.parseMetaData(file, function(data) {
+			                        if (data.exif) {
+			                            options.orientation = data.exif.get('Orientation');
+			                        }
+			                        
+			                        if (! loadImage(file, 
+					                        			function(img) {
+								                            if (! (img instanceof HTMLCanvasElement)) {
+								                                alert('Loading image file failed');
+								                            }
+								                            else {
+									                            var dataUrl = img.toDataURL();
+										                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).attr('src', dataUrl);
+																$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(dataUrl);
+								                            }
+								                        },
+					                        			options)) {
+		                                alert('Your browser does not support the URL or FileReader API.');
+			                        }
+			                    });
+			                }
+			            };
+				        
+			            $(function() {
+							$('#PhotoButton').click(function() {
+								$('#PhotoPicker').trigger('click');
+									return false;
+								});
+					        $('#PhotoPicker').on('change', function(e) {
+					            e.preventDefault();
+					            if (this.files.length === 0) return;
+								photo(this);
+					        });
+			            });
+					</script>
 
-							<p:commandButton value="Save" 
-												icon="ui-icon-check"
-												action="#{myStatusView.saveStaff}" 
-												update=":mystatus:staffForm" />
+					<p:commandButton value="Save" 
+										icon="ui-icon-check"
+										action="#{myStatusView.saveStaff}" 
+										update=":mystatus:staffForm" />
 
-							<!-- Place file upload in a div size 0 with no overflow -->
-							<div style="width: 0; height: 0; overflow: hidden;">
-								<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
-							</div>
-							<button id="PhotoButton"
-										class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera"
-										style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
-								Photo
-							</button>
-							<div style="width:100%;text-align:center">
-								<p:graphicImage id="photo" value="#{empty myStatusView.currentBean['myStaff.contact.image'] ? 
-																	'/whosinIntegrate/UnknownContact.gif' :
-																	'/content?_n='.concat(myStatusView.currentBean['myStaff.contact.image']).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
-																	cache="false" />
-							</div>
-							<h:inputHidden id="base64Image" value="#{myStatusView.base64Image}" />
-							<pm:field>
-							    <p:outputLabel for="status" value="Status:" />
-								<p:selectOneRadio id="status" value="#{myStatusView.currentBean['myStaff.status']}" converter="SelectItemsBean">
-									<f:selectItem itemLabel="In the Office" itemValue="inTheOffice" />
-									<f:selectItem itemLabel="Out of the Office" itemValue="outOfTheOffice" />
-									<f:selectItem itemLabel="On Leave" itemValue="onLeave" />
-									<f:selectItem itemLabel="At Lunch" itemValue="atLunch" />
-								</p:selectOneRadio>
-							</pm:field>
-							<h:inputHidden id="location" value="#{myStatusView.currentBean['myStaff.location']}" converter="Geometry" />
-							<button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-navigation"
-										style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}"
-										onclick="geoLocate(); return false">
-								Set Current Location
-							</button>
-							<br/>
-						</h:form>
-					</pm:content>
-				</pm:page>
+					<!-- Place file upload in a div size 0 with no overflow -->
+					<div style="width: 0; height: 0; overflow: hidden;">
+						<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
+					</div>
+					<button id="PhotoButton"
+								class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera"
+								style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
+						Photo
+					</button>
+					<div style="width:100%;text-align:center">
+						<p:graphicImage id="photo" value="#{empty myStatusView.currentBean['myStaff.contact.image'] ? 
+															'/whosinIntegrate/UnknownContact.gif' :
+															'/content?_n='.concat(myStatusView.currentBean['myStaff.contact.image']).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
+															cache="false" />
+					</div>
+					<h:inputHidden id="base64Image" value="#{myStatusView.base64Image}" />
+				    <p:outputLabel for="status" value="Status:" />
+					<p:selectOneRadio id="status" value="#{myStatusView.currentBean['myStaff.status']}" converter="SelectItemsBean">
+						<f:selectItem itemLabel="In the Office" itemValue="inTheOffice" />
+						<f:selectItem itemLabel="Out of the Office" itemValue="outOfTheOffice" />
+						<f:selectItem itemLabel="On Leave" itemValue="onLeave" />
+						<f:selectItem itemLabel="At Lunch" itemValue="atLunch" />
+					</p:selectOneRadio>
+					<h:inputHidden id="location" value="#{myStatusView.currentBean['myStaff.location']}" converter="Geometry" />
+					<button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-navigation"
+								style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}"
+								onclick="geoLocate(); return false">
+						Set Current Location
+					</button>
+					<br/>
+				</h:form>
 			</ui:define>
 		</ui:composition>
 	</f:view>

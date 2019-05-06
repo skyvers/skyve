@@ -46,7 +46,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 	private String language;
 	private UIResources uiResources;
-	private HTMLResources htmlResources;
+	private HTMLResourcesMetaData htmlResources;
 	private LoginResourcesMetaData loginResources;
 	private ConverterName defaultDateConverter;
 	private ConverterName defaultTimeConverter;
@@ -74,12 +74,12 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		this.uiResources = uiResources;
 	}
 
-	public HTMLResources getHtmlResources() {
+	public HTMLResourcesMetaData getHtmlResources() {
 		return htmlResources;
 	}
 
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setHtmlResources(HTMLResources htmlResources) {
+	public void setHtmlResources(HTMLResourcesMetaData htmlResources) {
 		this.htmlResources = htmlResources;
 	}
 
@@ -163,7 +163,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setLanguageTag(getLanguage());
 		result.setUiResources((uiResources == null) ? new UIResources() : uiResources);
-		result.setHtmlResources((htmlResources == null) ? new HTMLResources() : htmlResources);
+		result.setHtmlResources((htmlResources == null) ? new HTMLResourcesMetaData() : htmlResources);
 		result.setLoginResources((loginResources == null) ? new LoginResourcesMetaData() : loginResources);
 
 		ConverterName converterName = getDefaultDateConverter();

@@ -247,7 +247,8 @@ public class SmartClientGenerateUtils {
 		protected TargetMetaData target;
 		
 		@SuppressWarnings("synthetic-access")
-		protected SmartClientAttributeDefinition(Customer customer, 
+		protected SmartClientAttributeDefinition(User user,
+													Customer customer, 
 													Module module,
 													Document document,
 													Locale locale,
@@ -315,7 +316,7 @@ public class SmartClientGenerateUtils {
 							// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
 							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
 							sb.append("',type:'regexp',errorMessage:'");
-							sb.append(processString(validator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(validator.constructMessage(user, title, converter)));
 							sb.append("'}");
 							validation = sb.toString();
 						}
@@ -363,7 +364,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:Date.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
 							}
 							sb.append("type:'dateRange',errorMessage:'");
-							sb.append(processString(dateValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(dateValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -382,13 +383,13 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'floatRange',errorMessage:'");
-							sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(decimalValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							Integer precision = decimalValidator.getPrecision();
 							if (precision != null) {
 								sb.append(",{precision:").append(precision).append(",roundToPrecision:true,type:'floatPrecision',errorMessage:'");
-								sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
+								sb.append(processString(decimalValidator.constructMessage(user, title, converter)));
 								sb.append("'}");
 							}
 							validation = sb.toString();
@@ -407,7 +408,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(integerValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(integerValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -426,7 +427,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(longValidator.constructMessage(Util.i18n(title, locale), converter)));
+							sb.append(processString(longValidator.constructMessage(user, title, converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -657,7 +658,7 @@ public class SmartClientGenerateUtils {
 				}
 				else if ("image".equals(type)) { // content thumbnail column
 	            	result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
-	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
             		result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
             		result.append("&_w=").append((pixelWidth == null) ? 
 													((pixelHeight == null) ? "64" : pixelHeight.toString()) :
@@ -684,7 +685,7 @@ public class SmartClientGenerateUtils {
 				}
 				else if ("link".equals(type)) {
         			result.append(",formatCellValue:function(v,rec,row,col){return (v ? '<a href=\"content?_n='+v+'");
-	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(name);
+	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
 	            	result.append("\" target=\"_blank\">Content</a>' : '')}");
 				}
 				else {
@@ -801,7 +802,8 @@ public class SmartClientGenerateUtils {
                                             InputWidget widget,
                                             String dataGridBindingOverride,
                                             boolean runtime) {
-            super(customer,
+            super(user,
+        			customer,
                     module, 
                     document, 
                     user.getLocale(),
@@ -1062,7 +1064,8 @@ public class SmartClientGenerateUtils {
 											Document document, 
 											MetaDataQueryColumn column,
 											boolean runtime) {
-			super(customer, 
+			super(user,
+					customer, 
 					module,
 					document,
 					(user == null) ? null : user.getLocale(),
@@ -1135,15 +1138,18 @@ public class SmartClientGenerateUtils {
 				canFilter = false;
 				canSortClientOnly = false;
 				canSave = false;
+				pixelWidth = contentColumn.getPixelWidth();
+				pixelHeight = contentColumn.getPixelHeight();
+				emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 				if (DisplayType.thumbnail.equals(contentColumn.getDisplay())) {
 					type = "image";
+					if (pixelHeight == null) {
+						pixelHeight = Integer.valueOf(64);
+					}
 				}
 				else {
 					type = "link";
 				}
-				pixelWidth = contentColumn.getPixelWidth();
-				pixelHeight = contentColumn.getPixelHeight();
-				emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
 			}
 		}
 
@@ -1516,6 +1522,7 @@ public class SmartClientGenerateUtils {
 											drivingDocumentModule,
 											drivingDocument,
 											null,
+											false,
 											modelName,
 											model.getDescription(),
 											model.getColumns(),
@@ -1556,6 +1563,7 @@ public class SmartClientGenerateUtils {
 											documentModule, 
 											drivingDocument, 
 											query.getName(), 
+											query.isAggregate(),
 											null, 
 											query.getDescription(),
 											query.getColumns(),
@@ -1574,6 +1582,7 @@ public class SmartClientGenerateUtils {
 														Module drivingDocumentModule,
 														Document drivingDocument,
 														String queryName,
+														boolean aggregateQuery,
 														String modelName,
 														String description,
 														List<MetaDataQueryColumn> columns,
@@ -1639,7 +1648,8 @@ public class SmartClientGenerateUtils {
 			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
 			toAppendTo.append(",criteriaPolicy:'dropOnChange");
 		}
-		toAppendTo.append("',canCreate:").append(user.canCreateDocument(drivingDocument));
+		toAppendTo.append("',aggregate:").append(aggregateQuery);
+		toAppendTo.append(",canCreate:").append(user.canCreateDocument(drivingDocument));
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");
@@ -1673,6 +1683,8 @@ public class SmartClientGenerateUtils {
 			}
 		}
 		
+		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
+		
 		for (MetaDataQueryColumn column : columns) {
 			if ((column instanceof MetaDataQueryProjectedColumn) && 
 					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
@@ -1681,6 +1693,16 @@ public class SmartClientGenerateUtils {
 
 			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
+
+			// define the minimum fixed cell height for the grid (dataSource) based on any content image columns
+			Integer pixelHeight = def.getPixelHeight();
+			if (pixelHeight != null) {
+				int h = pixelHeight.intValue();
+				if (h > cellHeight) {
+					cellHeight = h;
+				}
+			}
+
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {
 				StringBuilder childDataSourceDefinition = new StringBuilder(512);
@@ -1719,6 +1741,12 @@ public class SmartClientGenerateUtils {
 			toAppendTo.setLength(toAppendTo.length() - 1); // remove the last field comma
 		}
 		toAppendTo.append("]");
+		
+		// Add cellHeight if applicable
+		if (cellHeight > 0) {
+			toAppendTo.append(",cellHeight:").append(cellHeight);
+		}
+		
 		if (visitedQueryNames == null) {
 			toAppendTo.append("});}\n");
 		}

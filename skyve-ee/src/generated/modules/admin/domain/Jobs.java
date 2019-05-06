@@ -1,6 +1,5 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Jobs
@@ -36,7 +36,7 @@ public class Jobs extends AbstractTransientBean {
 	/**
 	 * Running Jobs
 	 **/
-	private List<Job> runningJobs = new ArrayList<>();
+	private List<Job> runningJobs = new ChangeTrackingArrayList<>("runningJobs", this);
 
 	@Override
 	@XmlTransient

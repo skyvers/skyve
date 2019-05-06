@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.web.UserAgentType;
@@ -207,27 +208,48 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	}
 
 	@Override
-	public void layoutFormItem(UIComponent formOrRowLayout,
-								UIComponent formItemComponent,
-								Form currentForm,
-								FormItem currentFormItem,
-								int currentFormColumn,
-								String widgetLabel,
-								boolean widgetRequired,
-								String widgetInvisible,
-								boolean widgetShowsLabelByDefault,
-								String widgetHelpText) {
+	public void layoutFormItemLabel(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
 		for (LayoutBuilder builder : builders) {
-			builder.layoutFormItem(formOrRowLayout,
-									formItemComponent,
-									currentForm,
-									currentFormItem,
-									currentFormColumn,
-									widgetLabel,
-									widgetRequired,
-									widgetInvisible,
-									widgetShowsLabelByDefault,
-									widgetHelpText);
+			builder.layoutFormItemLabel(formOrRowLayout,
+											formItemComponent,
+											currentForm,
+											currentFormItem,
+											currentFormColumn,
+											widgetLabel,
+											widgetRequired,
+											widgetInvisible,
+											widgetHelpText);
+		}
+	}
+
+	@Override
+	public void layoutFormItemWidget(UIComponent formOrRowLayout,
+										UIComponent formItemComponent,
+										Form currentForm,
+										FormItem currentFormItem,
+										FormColumn currentFormColumn,
+										String widgetLabel,
+										boolean widgetRequired,
+										String widgetInvisible,
+										String widgetHelpText) {
+		for (LayoutBuilder builder : builders) {
+			builder.layoutFormItemWidget(formOrRowLayout,
+											formItemComponent,
+											currentForm,
+											currentFormItem,
+											currentFormColumn,
+											widgetLabel,
+											widgetRequired,
+											widgetInvisible,
+											widgetHelpText);
 		}
 	}
 

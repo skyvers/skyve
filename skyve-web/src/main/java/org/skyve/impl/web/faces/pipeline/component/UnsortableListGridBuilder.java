@@ -10,11 +10,14 @@ import org.skyve.metadata.view.model.list.ListModel;
 public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column) {

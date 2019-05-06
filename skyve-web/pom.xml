@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20181211</version>
+		<version>20190405-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-web</artifactId>
 
@@ -43,13 +43,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>net.coobird</groupId>
-			<artifactId>thumbnailator</artifactId>
+			<groupId>org.omnifaces</groupId>
+			<artifactId>omnifaces</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

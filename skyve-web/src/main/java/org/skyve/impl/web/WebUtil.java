@@ -5,16 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.hibernate.internal.util.SerializationHelper;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
@@ -26,7 +24,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -37,83 +37,9 @@ import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.statistics.StatisticsGateway;
-
 public class WebUtil {
-	private static final String CONVERSATIONS_CACHE_NAME = "conversations";
-	
 	private WebUtil() {
 		// Disallow instantiation.
-	}
-
-	public static void initConversationsCache() {
-		CacheManager singletonManager = CacheManager.getInstance();
-		Cache conversations = new Cache(CONVERSATIONS_CACHE_NAME, 
-											UtilImpl.MAX_CONVERSATIONS_IN_MEMORY, 
-											true, 
-											false, 
-											0, 
-											UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES * 60);
-		singletonManager.addCache(conversations);
-	}
-
-	private static Cache getConversations() {
-		return CacheManager.getInstance().getCache(CONVERSATIONS_CACHE_NAME);
-	}
-
-	public static void destroyConversationsCache() {
-		CacheManager.getInstance().shutdown();
-	}
-	
-	public static void putConversationInCache(AbstractWebContext webContext)
-	throws Exception {
-		if (webContext != null) {
-			getConversations().put(new Element(webContext.getKey(), SerializationHelper.serialize(webContext)));
-		}
-	}
-	
-	public static AbstractWebContext getCachedConversation(String webId,
-															HttpServletRequest request,
-															HttpServletResponse response)
-	throws Exception {
-		AbstractWebContext result = null;
-
-        // Context key here is a UUID with a bizId smashed together
-        // The first 1 is the web context ID, the second 1 is the bizId of the context bean to use
-		// NB - Can't check for 72 char webId as bizIds could be non UUIDs for legacy data stores...
-		// So check that they are > 36 (UUID length + something at least)
-		if ((webId != null) && (webId.length() > 36)) {
-			String conversationKey = webId.substring(0, 36);
-			String currentBeanId = webId.substring(36);
-			Element element = getConversations().get(conversationKey);
-			if (element == null) {
-				throw new ConversationEndedException();
-			}
-
-			result = (AbstractWebContext) SerializationHelper.deserialize((byte[]) element.getObjectValue());
-			result.setHttpServletRequest(request);
-            result.setHttpServletResponse(response);
-            result.setKey(conversationKey);
-            result.setCurrentBean(result.getBean(currentBeanId));
-		}
-		
-		return result;
-	}
-	
-	public static void logConversationsStats() {
-		Cache conversations = WebUtil.getConversations();
-		UtilImpl.LOGGER.info("Count = " + conversations.getSize());
-		StatisticsGateway statistics = conversations.getStatistics();
-		if (statistics != null) {
-			UtilImpl.LOGGER.info("Count in memory = " + statistics.getLocalHeapSize());
-			UtilImpl.LOGGER.info("Count on disk = " + statistics.getLocalDiskSize());
-			// NB - This method takes a long time for large object graphs, so don't use it on prod systems.
-			//UtilImpl.LOGGER.info("In-Memory (MB) = " + (statistics.getLocalHeapSizeInBytes() / 1048576.0));
-		}
-		UtilImpl.LOGGER.info("**************************************************************");
 	}
 	
 	public static User processUserPrincipalForRequest(HttpServletRequest request,
@@ -240,7 +166,7 @@ public class WebUtil {
 				errorMessage = e.getLocalizedMessage();
 			}
 			else {
-				errorMessage = messages.get(0).getErrorMessage();
+				errorMessage = messages.get(0).getText();
 			}
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
@@ -268,20 +194,30 @@ public class WebUtil {
 			p.setUser(u);
 			DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
 			q.getFilter().addEquals(Binder.createCompoundBinding(SQLMetaDataUtil.CONTACT_PROPERTY_NAME, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME), email);
-			PersistentBean user = q.beanResult();
-			if (user != null) { // this is a user
+			
+			// set reset password token for all users with the same email address across all customers
+			List<PersistentBean> users = q.beanResults();
+			if(!users.isEmpty()) {
+				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
-				Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
-				p.upsertBeanTuple(user);
+				for(PersistentBean user: users) {
+					Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
+					p.upsertBeanTuple(user);
+					if(firstUser==null) {
+						firstUser = user;
+					}
+				}
 
+				// send a single email to the user's email address 
+				// (if multiple user with the same email, only 1 email should be sent)
 				Module m = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
 				Document d = m.getDocument(c, SQLMetaDataUtil.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
-				subject = Binder.formatMessage(c, subject, user);
+				subject = Binder.formatMessage(c, subject, firstUser);
 				String body = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
 				body = body.replace("{url}", Util.getSkyveContextUrl());
-				body = Binder.formatMessage(c, body, user);
+				body = Binder.formatMessage(c, body, firstUser);
 				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
 				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}
@@ -300,6 +236,47 @@ public class WebUtil {
 	}
 
 	/**
+	 * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
+	 */
+	public static String getDownloadActionUrl(String downloadActionName,
+												String targetModuleName,
+												String targetDocumentName,
+												String webId,
+												String viewBinding,
+												String dataWidgetBinding,
+												String elementBizId) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/download?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
+		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append(targetModuleName).append('.').append(targetDocumentName);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webId);
+		
+		String binding = null;
+		if (viewBinding != null) {
+			if (dataWidgetBinding != null) {
+				binding = BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
+			}
+			else {
+				binding = viewBinding;
+			}
+		}
+		else if (dataWidgetBinding != null) {
+			binding = dataWidgetBinding;
+		}
+		if (binding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
+		}
+		if (dataWidgetBinding != null) {
+			result.append('&').append(Bean.DOCUMENT_ID).append('=').append(elementBizId);
+		}
+
+		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
+
+		return result.toString();
+	}
+	
+	/**
 	 * Called from the resetPassword.jsp.
 	 * 
 	 * @param passwordResetToken
@@ -309,6 +286,7 @@ public class WebUtil {
 	throws Exception {
 		String customerName = null;
 		String userName = null;
+		String errorMsg = null;
 		try (Connection c = EXT.getDataStoreConnection()) {
 			try (PreparedStatement s = c.prepareStatement(String.format("select %s, %s from ADM_SecurityUser where %s = ?",
 																			Bean.CUSTOMER_NAME,
@@ -316,32 +294,62 @@ public class WebUtil {
 																			SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME))) {
 				s.setString(1, passwordResetToken);
 				try (ResultSet rs = s.executeQuery()) {
-					if (rs.next()) {
+					if (!rs.isBeforeFirst() ) {
+						return "Reset link used is invalid";
+					}
+					while (rs.next()) {
 						customerName = rs.getString(1);
 						userName = rs.getString(2);
-					}
-					else {
-						return "Reset link used is invalid";
+
+						AbstractRepository r = AbstractRepository.get();
+						org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+						errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
 					}
 				}
 			}
 		}
 
-		AbstractRepository r = AbstractRepository.get();
-		org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
-		return makePasswordChange(u, null, newPassword, confirmPassword);
+		return errorMsg;
 	}
 	
 	// find the existing bean with retrieve
 	public static Bean findReferencedBean(Document referenceDocument, 
 											String bizId, 
-											Persistence persistence) {
-		Bean result = persistence.retrieve(referenceDocument, bizId, false);
+											Persistence persistence,
+											Bean conversationBean,
+											WebContext webContext) {
+		Bean result = null;
+		
+		User user = persistence.getUser();
+		Customer customer = user.getCustomer();
+		Bizlet<Bean> bizlet = AbstractRepository.get().getBizlet(customer, referenceDocument, true);
+		if (bizlet != null) {
+			try {
+				result = bizlet.resolve(bizId, conversationBean, webContext);
+			}
+			catch (ValidationException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				UtilImpl.LOGGER.log(Level.SEVERE, 
+										String.format("Failed to resolve document %s.%s with bizId %s",
+														referenceDocument.getOwningModuleName(),
+														referenceDocument.getName(),
+														bizId),
+										e);
+				throw new MetaDataException(String.format("Failed to resolve this %s.", 
+															referenceDocument.getSingularAlias()),
+												e);
+				
+			}
+		}
+		if (result == null) {
+			result = persistence.retrieve(referenceDocument, bizId, false);
+		}
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
 																		referenceDocument.getSingularAlias())));
 		}
-		User user = persistence.getUser();
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 
 								result.getBizDocument(), 
@@ -351,6 +359,19 @@ public class WebUtil {
 			throw new SecurityException("read this data", user.getName());
 		}
 		
+		return result;
+	}
+	
+	public static String getRefererHeader(HttpServletRequest request) {
+		String result = Util.processStringValue(request.getHeader("referer"));
+		if (result != null) {
+			if (! result.startsWith(Util.getSkyveContextUrl())) {
+				Util.LOGGER.warning("referer header " + result +
+										" looks tamplered with because it does not start with " + Util.getSkyveContextUrl() + 
+										". This looks like a doctored request because Referrer-Policy should be same-origin!");
+				result = null;
+			}
+		}
 		return result;
 	}
 }

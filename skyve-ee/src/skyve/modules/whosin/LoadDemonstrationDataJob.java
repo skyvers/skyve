@@ -5,13 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import modules.admin.domain.Contact;
-import modules.admin.domain.Contact.ContactType;
-import modules.whosin.domain.Office;
-import modules.whosin.domain.Position;
-import modules.whosin.domain.Staff;
-import modules.whosin.domain.Staff.Status;
-
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.util.TimeUtil;
@@ -19,10 +12,19 @@ import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+
+import modules.admin.domain.Contact;
+import modules.admin.domain.Contact.ContactType;
+import modules.whosin.domain.Office;
+import modules.whosin.domain.Position;
+import modules.whosin.domain.Staff;
+import modules.whosin.domain.Staff.Status;
 
 /**
  * Load Demonstration Data for the Who's In? module
@@ -52,7 +54,8 @@ public class LoadDemonstrationDataJob extends Job {
 			clearPreviousData(persistence);
 
 			// In this case, it's so quick, it's one step
-			generateExampleData(persistence);
+			//generateExampleData(persistence);
+			generateRandomData();
 
 			setPercentComplete(100);
 			log.add("Finished Loading Demonstration Data at " + new Date());
@@ -62,6 +65,19 @@ public class LoadDemonstrationDataJob extends Job {
 		}
 	}
 
+	private static void generateRandomData() {
+		
+		//generate a random number of staff
+		int staffCount = new Random().nextInt(1000) + 50;
+		for(int i=0;i<staffCount;i++) {
+			
+			Staff bean = new DataBuilder().fixture(FixtureType.seed).build(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+			bean = CORE.getPersistence().save(bean);
+			CORE.getPersistence().evictCached(bean);
+		}
+	}
+	
+	
 	/**
 	 * Generates a set of example data for demonstration
 	 * 

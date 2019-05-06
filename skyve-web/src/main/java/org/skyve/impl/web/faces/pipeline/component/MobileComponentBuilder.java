@@ -34,6 +34,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebAction;
 
@@ -78,13 +79,14 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											ImplicitActionName implicitActionName,
 											String actionName, 
 											boolean inline, 
-											String listBinding, 
-											String listVar,
+											String dataWidgetBinding, 
+											String dataWidgetVar,
 											Integer pixelWidth, 
 											Integer pixelHeight,
 											Boolean clientValidation, 
 											String confirmationText, 
-											String disabled, 
+											String disabled,
+											String formDisabled,
 											String invisible,
 											String processOverride,
 											String updateOverride) {
@@ -94,13 +96,14 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													implicitActionName, 
 													actionName, 
 													inline, 
-													listBinding, 
-													listVar,
+													dataWidgetBinding, 
+													dataWidgetVar,
 													pixelWidth, 
 													pixelHeight,
 													clientValidation, 
 													null, // confirmation dialogs don't work in mobile
 													disabled, 
+													formDisabled,
 													invisible,
 													processOverride,
 													updateOverride);
@@ -115,12 +118,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String actionName, 
 									boolean inline, 
 									String collectionName, 
-									String listVar,
+									String dataWidgetVar,
 									Integer pixelWidth, 
 									Integer pixelHeight,
 									Boolean clientValidation, 
 									String confirmationText, 
 									String disabled, 
+									String formDisabled,
 									String invisible,
 									String processOverride,
 									String updateOverride) {
@@ -130,26 +134,31 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									actionName, 
 									inline, 
 									collectionName, 
-									listVar,
+									dataWidgetVar,
 									pixelWidth, 
 									pixelHeight,
 									clientValidation, 
 									null, // confirmation dialogs don't work in mobile
-									disabled, 
+									disabled,
+									formDisabled,
 									invisible,
 									processOverride,
 									updateOverride);
 	}
 	
 	@Override
-	public UIComponent dataGrid(UIComponent component, String listVar, boolean ordered, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component,
+									String dataWidgetVar,
+									boolean ordered,
+									String title,
+									DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
 
 		DataList result = dataList(grid.getBinding(), 
-									listVar,
-		                			grid.getTitle(),
+									dataWidgetVar,
+		                			title,
 		                			grid.getInvisibleConditionName(),
 		                			grid.getWidgetId());
 		result.getPassThroughAttributes().put("data-inset", createValueExpressionFromCondition("true", null));
@@ -161,7 +170,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												UIComponent current, 
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
-												String listVar,
+												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
@@ -201,6 +210,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addDataGridContainerColumn(UIComponent component,
 													UIComponent current, 
 													AbstractDataWidget widget, 
+													String title,
 													DataGridContainerColumn column) {
 		if (component != null) {
 			return component;
@@ -222,7 +232,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addDataGridActionColumn(UIComponent component,
 												UIComponent current, 
 												DataGrid grid, 
-												String listVar,
+												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
@@ -231,7 +241,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		}
 
 		UIComponent result = current;
-		String listBinding = grid.getBinding();
+		String dataWidgetBinding = grid.getBinding();
 		
 		UIOutput outputText = outputText(gridColumnExpression);
 		// If the grid is editable, add the ability to zoom
@@ -241,11 +251,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												ImplicitActionName.Navigate,
 												null,
 												false,
-												listBinding,
-												listVar,
+												dataWidgetBinding,
+												dataWidgetVar,
 												null,
 												null,
 												Boolean.TRUE,
+												null,
 												null,
 												null,
 												null,
@@ -274,19 +285,21 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent checkBox(UIComponent component,
-									String listVar,
+									String dataWidgetVar,
 									CheckBox checkBox,
+									String formDisabledConditionName,
 									String title,
 									boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		SelectBooleanCheckbox result = (SelectBooleanCheckbox) checkbox(listVar,
+		SelectBooleanCheckbox result = (SelectBooleanCheckbox) checkbox(dataWidgetVar,
 																			checkBox.getBinding(), 
 																			title,
 																			required,
 																			checkBox.getDisabledConditionName(),
+																			formDisabledConditionName,
 																			false);
 		result.setItemLabel(title);
 		return result;
@@ -294,26 +307,30 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent colourPicker(UIComponent component,
-										String listVar,
+										String dataWidgetVar,
 										ColourPicker colour,
+										String formDisabledConditionName,
 										String title,
 										boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return colourPicker(listVar, 
+		return colourPicker(dataWidgetVar, 
 								colour.getBinding(), 
 								title, 
 								required, 
+								colour.getDisabledConditionName(),
+								formDisabledConditionName,
 								colour.getPixelWidth(),
 								false);
 	}
 	
 	@Override
 	public UIComponent lookupDescription(UIComponent component,
-											String listVar, 
+											String dataWidgetVar, 
 											LookupDescription lookup, 
+											String formDisabledConditionName,
 											String title, 
 											boolean required,
 											String displayBinding,
@@ -322,11 +339,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		UIComponent c = autoComplete(listVar,
+		UIComponent c = autoComplete(dataWidgetVar,
 										lookup.getBinding(),
 										title,
 										required,
 										lookup.getDisabledConditionName(),
+										formDisabledConditionName,
 										displayBinding,
 										query,
 										lookup.getParameters(),
@@ -336,12 +354,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		UIComponent result = panelGroup(false, false, false, null, null);
 		List<UIComponent> children = result.getChildren();
 		children.add(c);
-		InputText text = textField(listVar, 
+		InputText text = textField(dataWidgetVar, 
 									String.format("%s.%s", lookup.getBinding(), displayBinding), 
 									title,
 									required, 
 									false,
 									"true", 
+									null,
 									null, 
 									null, 
 									null, 
@@ -359,27 +378,30 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent password(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
+									String formDisabledConditionName,
 									String title, 
 									boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return password(listVar,
+		return password(dataWidgetVar,
 							password.getBinding(), 
 			                title,
 			                required,
 			                password.getDisabledConditionName(),
+							formDisabledConditionName,
 			                password.getPixelWidth(),
 			                false);
 	}
 
 	@Override
 	public UIComponent textArea(UIComponent component,
-									String listVar, 
+									String dataWidgetVar, 
 									TextArea text, 
+									String formDisabledConditionName,
 									String title, 
 									boolean required,
 									Integer length) {
@@ -387,12 +409,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return textArea(listVar,
+		return textArea(dataWidgetVar,
 							text.getBinding(),
 							title,
 							required,
 							Boolean.FALSE.equals(text.getEditable()),
 							text.getDisabledConditionName(),
+							formDisabledConditionName,
 							length,
 							text.getPixelWidth(),
 							text.getPixelHeight(),
@@ -401,8 +424,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent text(UIComponent component,
-								String listVar, 
+								String dataWidgetVar, 
 								TextField text, 
+								String formDisabledConditionName,
 								String title, 
 								boolean required,
 								Integer length,
@@ -413,12 +437,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		return textField(listVar,
+		return textField(dataWidgetVar,
 							text.getBinding(),
 							title,
 							required,
 							Boolean.FALSE.equals(text.getEditable()),
 							text.getDisabledConditionName(),
+							formDisabledConditionName,
 							length,
 							facesConverter,
 							text.getPixelWidth(),
@@ -430,7 +455,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 						var="row"
 						paginator="true" 
 						rows="10" 
-						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.queryNameParameter)}">
+						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.bizDocumentParameter, skyve.queryNameParameter, skyve.modelName)}">
 			<f:facet name="header">
 				<p:button href="./?a=#{WebAction.e.toString()}&amp;m=#{skyve.bizModuleParameter}&amp;d=#{skyve.bizDocumentParameter}" value="New" />
 			</f:facet>
@@ -444,35 +469,41 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	 */
 	@Override
 	public UIComponent listGrid(UIComponent component,
+									String moduleName,
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									String title,
 									ListGrid grid,
-									boolean canCreateDocument) {
+									boolean canCreateDocument,
+									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
 
-		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
 		String[] createDisabledConditionNames = (disableAddConditionName == null) ?
-				((disabledConditionName == null) ?
-						null :
-						new String[] {disabledConditionName}) :
-				((disabledConditionName == null) ?
-						new String[] {disableAddConditionName} :
-						new String[] {disableAddConditionName, disabledConditionName});
-		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
+													((disabledConditionName == null) ?
+															null :
+															new String[] {disabledConditionName}) :
+													((disabledConditionName == null) ?
+															new String[] {disableAddConditionName} :
+															new String[] {disableAddConditionName, disabledConditionName});
+		boolean zoomRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, null);
 		result.setVar("row");
         result.setLazy(true);
-		result.setEmptyMessage((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
 
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+        emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
+        result.getFacets().put("emptyMessage", emptyMessage);
+		
 		Document drivingDocument = model.getDrivingDocument();
-		String moduleName = drivingDocument.getOwningModuleName();
+		String owningModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 // Lazy data models don't seem to work on mobile data lists 		
 /*
@@ -483,20 +514,31 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 											drivingDocumentName, 
 											modelName) :
     						String.format("#{%s.getLazyDataModel('%s','%s',null,'%s')}", 
-										managedBeanName, 
-										moduleName, 
-										modelDocumentName, 
-										modelName);
+											managedBeanName, 
+											moduleName, 
+											modelDocumentName, 
+											modelName);
         result.setValueExpression("value", ef.createValueExpression(elc, value, SkyveLazyDataModel.class));
 */
-        String value = String.format("#{%s.getBeans('%s','%s',null)}", 
-        								managedBeanName, 
-        								moduleName,
-        								modelName);
+		String value = null;
+		if (model instanceof DocumentQueryListModel) {
+			value = String.format("#{%s.getBeans('%s','%s', '%s', null, null)}", 
+									managedBeanName, 
+									moduleName,
+									drivingDocumentName,
+									modelName);
+		}
+		else {
+			value = String.format("#{%s.getBeans('%s','%s', null, '%s', null)}", 
+									managedBeanName, 
+									moduleName,
+									modelDocumentName,
+									modelName);
+		}
         result.setValueExpression("value", ef.createValueExpression(elc, value, List.class));
 
 		if (canCreateDocument && createRendered) {
-        	addListGridHeader(result, moduleName, drivingDocumentName, createDisabledConditionNames);
+        	addListGridHeader(result, owningModuleName, drivingDocumentName, createDisabledConditionNames);
         }
 		addListGridBoundColumns(model, result.getChildren(), zoomRendered, grid.getDisableZoomConditionName());
 		
@@ -539,7 +581,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			
 			boolean first = (value.length() == 0);
 			value.append(first ? "<h2>" : "<p>");
-			value.append("#{row['{").append(column.getBinding()).append("}']}");
+			String name = column.getBinding();
+			if (name == null) {
+				name = column.getName();
+			}
+			value.append("#{row['{").append(name).append("}']}");
 			value.append(first ? "</h2>" : "</p>");
 		}
 		

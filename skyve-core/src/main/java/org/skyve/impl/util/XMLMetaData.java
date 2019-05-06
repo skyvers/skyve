@@ -32,7 +32,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.dom4j.Attribute;
+import org.dom4j.CDATA;
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
@@ -53,7 +55,7 @@ import org.xml.sax.SAXException;
  * Marshal and unmarshal XML.
  * 
  * Note:-
- * It should be possible to control the namespace prefixes genreated in the XML with the JAXB RI implementation like this...
+ * It should be possible to control the namespace prefixes generated in the XML with the JAXB RI implementation like this...
  *			marshaller.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
  *				@Override
  *				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
@@ -65,6 +67,9 @@ import org.xml.sax.SAXException;
  *			});
  * but because it is class loaded by the module class loader in wildfly (via CXF) this class extension 
  * can't be seen and generates a linkage error.
+ * 
+ * The same holds for CharacterEscapeHandler.
+ * 
  * Therefore we have to resort to post processing the output with DOM4J.
  */
 public class XMLMetaData {
@@ -75,7 +80,10 @@ public class XMLMetaData {
 	public static final String DOCUMENT_NAMESPACE = "http://www.skyve.org/xml/document";
 	public static final String VIEW_NAMESPACE = "http://www.skyve.org/xml/view";
 	public static final String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
-
+	public static final String CDATA_START_TAG = "<![CDATA[";
+	public static final String CDATA_END_TAG = "]]>";
+	public static final int CDATA_MIN_LENGTH = CDATA_START_TAG.length() + CDATA_END_TAG.length();
+	
 	private static final JAXBContext ROUTER_CONTEXT;
 	private static final Schema ROUTER_SCHEMA;
 
@@ -459,9 +467,13 @@ public class XMLMetaData {
 			marshaller.setSchema(SAIL_SCHEMA);
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(automation, sos);
-			return sos.toString();
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal SAIL", e);
 		}
 	}
@@ -600,7 +612,7 @@ public class XMLMetaData {
 					}
 				}
 			}
-
+			
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
 			while (namespaces.hasNext()) {
 				Namespace additionalNamespace = (Namespace) namespaces.next();
@@ -616,6 +628,21 @@ public class XMLMetaData {
 				}
 				else if (additionalNamespaceUri.equals(VIEW_NAMESPACE)) {
 					namespaces.remove();
+				}
+			}
+
+			// Replace escaped characters within CDATA tags
+			String text = Util.processStringValue(node.getText());
+			if (text != null) {
+				if (text.startsWith(CDATA_START_TAG) && text.endsWith(CDATA_END_TAG)) {
+					text = text.substring(CDATA_START_TAG.length(), text.length() - CDATA_END_TAG.length());
+					text = text.replace("&amp;", "&")
+								.replace("&quot;", "\"")
+								.replace("&lt;", "<")
+								.replace("&gt;", ">");
+					CDATA cdata = DocumentHelper.createCDATA(text);
+					node.clearContent();
+					node.add(cdata);
 				}
 			}
 		}

@@ -1,23 +1,25 @@
 package org.skyve.impl.web;
 
+import static java.lang.Boolean.TRUE;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import javax.faces.FacesException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.websocket.server.ServerContainer;
+import javax.websocket.server.ServerEndpointConfig;
 
+import org.omnifaces.cdi.push.Socket;
+import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
-import org.skyve.domain.PersistentBean;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -25,18 +27,11 @@ import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.VariableExpander;
+import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.Role;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override
@@ -92,30 +87,29 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.BIZLET_TRACE = getBoolean("trace", "bizlet", trace);
 		UtilImpl.DIRTY_TRACE = getBoolean("trace", "dirty", trace);
 
+		// Content settings
 		Map<String, Object> content = getObject(null, "content", properties, true);
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 		// clean up the content directory path
-		UtilImpl.CONTENT_DIRECTORY = cleanupContentDirectory(UtilImpl.CONTENT_DIRECTORY);
-		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
-		if (!contentDirectory.exists()) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
-		}
-		if (!contentDirectory.isDirectory()) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
-		}
-		// Check the content directory is writable
-		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
-		try {
-			testFile.createNewFile();
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
-		} finally {
-			testFile.delete();
-		}
+		UtilImpl.CONTENT_DIRECTORY = cleanupDirectory(UtilImpl.CONTENT_DIRECTORY);
+		testWritableDirectory("content.directory", UtilImpl.CONTENT_DIRECTORY);
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
+
+		// Thumb nail settings
+		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
+		if (thumbnail != null) {
+			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = getInt("thumbnail", "concurrentThreads", thumbnail);
+			UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt("thumbnail", "subsamplingMinimumTargetSize", thumbnail);
+			UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean("thumbnail", "fileStorage", thumbnail);
+			UtilImpl.THUMBNAIL_DIRECTORY = getString("thumbnail", "directory", thumbnail, false);
+			if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
+				// clean up the thumb nail directory path
+				UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
+				testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
+			}
+		}
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
 		// There are container specific ways but we don't want that.
@@ -253,6 +247,7 @@ public class SkyveContextListener implements ServletContextListener {
 						"environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
 			}
 		}
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString("environment", "supportEmailAddress", environment, false);
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
@@ -266,6 +261,10 @@ public class SkyveContextListener implements ServletContextListener {
 		if (bootstrap != null) {
 			UtilImpl.BOOTSTRAP_CUSTOMER = getString("bootstrap", "customer", bootstrap, true);
 			UtilImpl.BOOTSTRAP_USER = getString("bootstrap", "user", bootstrap, true);
+			UtilImpl.BOOTSTRAP_EMAIL = getString("bootstrap", "email", bootstrap, false);
+			if (UtilImpl.BOOTSTRAP_EMAIL == null) {
+				UtilImpl.BOOTSTRAP_EMAIL = "pleaseupdate@test.com";
+			}
 			UtilImpl.BOOTSTRAP_PASSWORD = getString("bootstrap", "password", bootstrap, true);
 		}
 		
@@ -276,7 +275,8 @@ public class SkyveContextListener implements ServletContextListener {
 		try {
 			p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
 			p.begin();
-			if (bootstrap != null) { // we have a bootstrap stanza
+			// If this is not prod and we have a bootstrap stanza
+			if ((UtilImpl.ENVIRONMENT_IDENTIFIER != null) && (bootstrap != null)) {
 				SuperUser u = new SuperUser();
 				u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
 				u.setContactName(UtilImpl.BOOTSTRAP_USER);
@@ -284,7 +284,7 @@ public class SkyveContextListener implements ServletContextListener {
 				u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
 				p.setUser(u);
 
-				bootstrap(p);
+				EXT.bootstrap(p);
 			}
 		}
 		catch (Exception e) {
@@ -300,60 +300,19 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		JobScheduler.init();
-		WebUtil.initConversationsCache();
-	}
-
-	private static void bootstrap(Persistence p) throws Exception {
-		User u = p.getUser();
-		Customer c = u.getCustomer();
-		Module adminMod = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
-		Document contactDoc = adminMod.getDocument(c, SQLMetaDataUtil.CONTACT_DOCUMENT_NAME);
-		Document userDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_DOCUMENT_NAME);
-		Document userRoleDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_ROLE_DOCUMENT_NAME);
-		DocumentQuery q = p.newDocumentQuery(userDoc);
-		q.getFilter().addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-		PersistentBean user = q.beanResult();
-		if (user == null) {
-			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s/%s", 
-												UtilImpl.BOOTSTRAP_CUSTOMER, 
-												UtilImpl.BOOTSTRAP_USER,
-												UtilImpl.BOOTSTRAP_PASSWORD));
-
-			// Create user
-			user = userDoc.newInstance(u);
-			u.setId(user.getBizId());
-			user.setBizUserId(u.getId());
-			BindUtil.set(user, SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
-
-			// Create contact
-			Bean contact = contactDoc.newInstance(u);
-			BindUtil.set(contact, SQLMetaDataUtil.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.convertAndSet(contact, SQLMetaDataUtil.CONTACT_TYPE_PROPERTY_NAME, "Person");
-			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER + "@skyve.org");
-
-			BindUtil.set(user, SQLMetaDataUtil.CONTACT_PROPERTY_NAME, contact);
-
-			// Add roles
-			@SuppressWarnings("unchecked")
-			List<Bean> roles = (List<Bean>) BindUtil.get(user, SQLMetaDataUtil.ROLES_PROPERTY_NAME);
-			for (Module m : c.getModules()) {
-				String moduleName = m.getName();
-				for (Role r : m.getRoles()) {
-					Bean role = userRoleDoc.newInstance(u);
-					BindUtil.set(role, ChildBean.PARENT_NAME, user);
-					BindUtil.set(role, SQLMetaDataUtil.ROLE_NAME_PROPERTY_NAME, String.format("%s.%s", moduleName, r.getName()));
-					roles.add(role);
-				}
-			}
-			
-			// Save the bootstrap user
-			p.save(user);
+		ConversationUtil.initConversationsCache();
+		
+		// Start a websocket end point
+		// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
+		try {
+			ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
+			ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
+			container.addEndpoint(config);
+			// to stop the <o:socket/> from moaning that the endpoint is not configured
+			ctx.setAttribute(Socket.class.getName(), TRUE);
 		}
-		else {
-			UtilImpl.LOGGER.info(String.format("BOOTSTRAP USER %s/%s ALREADY EXISTS", 
-												UtilImpl.BOOTSTRAP_CUSTOMER, 
-												UtilImpl.BOOTSTRAP_USER));
+		catch (Exception e) {
+			throw new FacesException(e);
 		}
 	}
 	
@@ -390,7 +349,7 @@ public class SkyveContextListener implements ServletContextListener {
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
-		WebUtil.destroyConversationsCache();
+		ConversationUtil.destroyConversationsCache();
 		
 		@SuppressWarnings("resource")
 		AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
@@ -413,7 +372,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param path The supplied content path
 	 * @return The updated path if any slashes need to be added
 	 */
-	static String cleanupContentDirectory(final String path) {
+	static String cleanupDirectory(final String path) {
 		if (path != null && path.length() > 0) {
 			String updatedPath = path.replace("\\", "/");
 
@@ -427,6 +386,35 @@ public class SkyveContextListener implements ServletContextListener {
 		return path;
 	}
 
+	/**
+	 * Checks a directory path property value exists, is a directory and is writable.
+	 * @param propertyName	The property name to report in exceptions.
+	 * @param directoryPath	The property value to test.
+	 */
+	private static void testWritableDirectory(String propertyName, String directoryPath) {
+		File directory = new File(directoryPath);
+		
+		if (! directory.exists()) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " does not exist.");
+		}
+		
+		if (! directory.isDirectory()) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " is not a directory.");
+		}
+		
+		// Check the directory is writable
+		File testFile = new File(directory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
+		try {
+			testFile.createNewFile();
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			throw new IllegalStateException(propertyName + " " + directoryPath + " is not writeable.");
+		}
+		finally {
+			testFile.delete();
+		}
+	}
+	
 	/**
 	 * Checks that the module directory:
 	 * <ul>

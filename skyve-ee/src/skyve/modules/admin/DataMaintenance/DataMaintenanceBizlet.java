@@ -15,6 +15,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.ModulesUtil.DomainValueSortByDescription;
+import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.DataMaintenanceModuleDocument;
@@ -24,7 +25,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
-	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete. Check Job log for details.";
+	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
 
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
@@ -104,7 +105,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			if (pre != null) {
 				switch (pre) {
 					case noProcessing:
-						instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and you've let the Skyve create all DDL. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
+						instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and Skyve has created all database objects. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
 						break;
 					case createTablesFromBackup:
 						instructionHint="Use this option when you've created a empty schema (manually or scripted).";
@@ -116,7 +117,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 						instructionHint="Use this option when the backup is from the same version of the application and your data size is not large (i.e. just delete the data and then run the restore.)";
 						break;
 					case dropTablesUsingBackupDropsqlRecreateTablesFromBackupCreatesql:
-						instructionHint="Use this option when your schema matches the application version of the backup (maybe your previous attempt to restore failed). You cant drop the schema without stopping the server and if you do that, you can't log in any more without restoring. Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
+						instructionHint="Use this option when your schema matches the application version of the backup (maybe your previous attempt to restore failed). You can't drop the schema without stopping the server and if you do that, you can't log in any more without restoring. Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
 						break;
 					case dropTablesUsingBackupDropsqlRecreateTablesFromMetadata:
 						instructionHint="Use this option when you've tried a restore before and your database is now in the shape of the backup application version.";

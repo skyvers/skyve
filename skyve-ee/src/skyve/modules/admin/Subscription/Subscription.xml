@@ -24,11 +24,11 @@
 	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{communication.description} for {receiverIdentifier}" />
 	<attributes>
-		<association name="communication" type="aggregation">
+		<association name="communication" type="aggregation" required="true">
 			<displayName>Communication</displayName>
 			<documentName>Communication</documentName>
 		</association>
-		<text name="receiverIdentifier">
+		<text name="receiverIdentifier" required="true">
 			<displayName>Receiver</displayName>
 			<description>This could be an email or sms number, or any other identifier for a delivery method</description>			
 			<length>254</length>

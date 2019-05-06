@@ -4,7 +4,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -47,6 +49,7 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setExpression(String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}

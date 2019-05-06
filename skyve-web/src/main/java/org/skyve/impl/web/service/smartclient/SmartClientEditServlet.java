@@ -39,10 +39,13 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -101,14 +104,16 @@ public class SmartClientEditServlet extends HttpServlet {
 					AbstractWebContext webContext = null;
 			        String key = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 			        if (key != null) {
-			        	webContext = WebUtil.getCachedConversation(key, request, response);
+			        	webContext = ConversationUtil.getCachedConversation(key, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();
 			        }
 			    	else {
+			            // Create and inject any dependencies
 			            webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
-			        	UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
+
+			    		UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();
 			            persistence.evictAllCached();
 			            webContext.setConversation(persistence);
@@ -374,7 +379,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
 	    	pw.append("<li>");
-	        pw.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+	        pw.append(SmartClientGenerateUtils.processString(m.getText()));
 	        pw.append("</li>");
     	}
     	pw.append("</ul>");
@@ -394,12 +399,12 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
 	    		sb.append('"').append(BindUtil.sanitiseBinding(binding)).append("\":\"");
-	    		String message = m.getErrorMessage();
+	    		String message = m.getText();
 	    		if (message == null) {
 	    			sb.append("An error has occurred");
 	    		}
 	    		else {
-		    		sb.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+		    		sb.append(SmartClientGenerateUtils.processString(m.getText()));
 	    		}
 	    		sb.append("\",");
 	    	}
@@ -432,6 +437,8 @@ public class SmartClientEditServlet extends HttpServlet {
     	
     	if (formBinding == null) { // top level
 	    	if (bizId == null) { // new instance
+				// No security check is required as we are at the top of the conversation
+				// If the user doesn't have create privilege, it will be stopped in SaveAction.
 	    		processBean = processDocument.newInstance(user);
 
 	    		applyNewParameters(customer,
@@ -535,7 +542,20 @@ public class SmartClientEditServlet extends HttpServlet {
 			}
 
     		if (bizId == null) { // new instance
-				processBean = processDocument.newInstance(user);
+    			Module contextModule = customer.getModule(contextBean.getBizModule());
+    			Document contextDocument = contextModule.getDocument(customer, contextBean.getBizDocument());
+    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, formBinding);
+        		Attribute targetRelation = (target == null) ? null : target.getAttribute();
+            	Persistent persistent = processDocument.getPersistent();
+
+            	// check for create privilege if the collection is persistent and the collection document is persistent
+            	if ((targetRelation != null) && targetRelation.isPersistent() && // collection is persistent
+    	    			(persistent != null) && (persistent.getName() != null) &&  // collection document is persistent
+    	    			(! user.canCreateDocument(processDocument))) {
+    				throw new SecurityException("create this data", user.getName());
+    			}
+
+    			processBean = processDocument.newInstance(user);
 	    		
 	    		applyNewParameters(customer,
 	    							user,
@@ -612,6 +632,9 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
     		}
     		else {
+    			// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
+    			// Its up to the app coder to disable the UI if appropriate.
+
     			if (referenceValue instanceof List<?>) {
     				processBean = BindUtil.getElementInCollection(contextBean, formBinding, bizId);
     			}
@@ -662,7 +685,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			manipulator.visit();
 
 			webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
-			message.append(manipulator.toJSON(webContext));
+			message.append(manipulator.toJSON(webContext, null));
 			message.append("]}}");
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
 			pw.append(message);
@@ -670,7 +693,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.putConversationInCache(webContext);
+			ConversationUtil.cacheConversation(webContext);
 		}
     }
     
@@ -820,13 +843,16 @@ public class SmartClientEditServlet extends HttpServlet {
 																		createIdCounter,
 																		true);
 			manipulator.visit();
-			manipulator.applyJSON((String) parameters.get("bean"), persistence);
+			manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 		}
 		else {
 			mutableCustomActionName = null;
 		}
 		
 		Bean processedBean = processBean;
+		
+		// if we need to redirect once the XHR response is received by the browser, this will be not null
+		String redirectUrl = null;
 		
 		if (implicitAction == null) { // not an implicit action
 			if (mutableCustomActionName != null) { // a custom action
@@ -835,20 +861,45 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 	
 				// execute an action
+				ServerSideAction<Bean> serverSideAction = null;
+				DownloadAction<Bean> downloadAction = null;
 				AbstractRepository repository = AbstractRepository.get();
-				ServerSideAction<Bean> customAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName, true);
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
-																					mutableCustomActionName,
-																					processedBean, 
-																					webContext);
-				if (! vetoed) {
-					ServerSideActionResult<Bean> result = customAction.execute(processedBean, webContext);
-					internalCustomer.interceptAfterServerSideAction(processDocument,
-																		mutableCustomActionName,
-																		result, 
-																		webContext);
-					processedBean = result.getBean();
+				try {
+					serverSideAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName, true);
+				}
+				catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e) {
+					try {
+						downloadAction = repository.getDownloadAction(customer, processDocument, mutableCustomActionName, true);
+					}
+					catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e1) {
+						throw new MetaDataException("Could not find " + mutableCustomActionName + " in document " + 
+														processDocument.getName() + " as a server-side action or a download action");
+					}
+				}
+				if (downloadAction != null) { // download action
+					downloadAction.prepare(processedBean, webContext);
+					redirectUrl = WebUtil.getDownloadActionUrl(mutableCustomActionName,
+																processDocument.getOwningModuleName(),
+																processDocument.getName(),
+																webContext.getWebId(),
+																formBinding,
+																gridBinding,
+																processBean.getBizId());
+				}
+				else if (serverSideAction != null) { // server-side action
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
+																						mutableCustomActionName,
+																						processedBean, 
+																						webContext);
+					if (! vetoed) {
+						ServerSideActionResult<Bean> result = serverSideAction.execute(processedBean, webContext);
+						internalCustomer.interceptAfterServerSideAction(processDocument,
+																			mutableCustomActionName,
+																			result, 
+																			webContext);
+						processedBean = result.getBean();
+					}
 				}
 			}
 			else if (source != null) { // rerender event
@@ -882,13 +933,10 @@ public class SmartClientEditServlet extends HttpServlet {
 
 			// We are zooming out, so run the required validation and security checks
 			if (ImplicitActionName.ZoomOut.equals(implicitAction)) {
-				if (processedBean.isNotPersisted() && (! user.canCreateDocument(processDocument))) {
-					throw new SecurityException("create this data", user.getName());
-				}
-				// Cannot test for updating the data as the zoom out button is the only way out of the UI
-//				else if (processedBean.isPersisted() && (! user.canUpdateDocument(processDocument))) {
-//					throw new SecurityException("update this data", user.getName());
-//				}
+				// We cannot do security tests at this point because
+				// ZoomOut is the only way out of the UI.
+				// Create privilege is checked at instantiation time - on the zoom in operation
+
 				ValidationUtil.validateBeanAgainstDocument(processDocument, processedBean);
 				if (processBizlet != null) {
 					ValidationUtil.validateBeanAgainstBizlet(processBizlet, processedBean);
@@ -943,7 +991,7 @@ public class SmartClientEditServlet extends HttpServlet {
 												beanToRender.isCreated() ? 
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
-		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, pw);
+		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, redirectUrl, pw);
 	}
 
 	private static void pumpOutResponse(AbstractWebContext webContext,
@@ -954,6 +1002,7 @@ public class SmartClientEditServlet extends HttpServlet {
 											Bean formBean,
 											int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
+											String redirectUrl,
 											PrintWriter pw) 
 	throws Exception  {
 		StringBuilder result = new StringBuilder(256);
@@ -970,7 +1019,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		manipulator.visit();
 		try {
 			result.append("{\"response\":{\"status\":0,\"data\":");
-			result.append(manipulator.toJSON(webContext));
+			result.append(manipulator.toJSON(webContext, redirectUrl));
 			result.append("}}");
 
 			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
@@ -979,7 +1028,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		finally {
 			// lastly put the conversation in the cache, after the response is sent
 			// and all lazy loading of domain objects has been realised
-			WebUtil.putConversationInCache(webContext);
+			ConversationUtil.cacheConversation(webContext);
 		}
 	}
 	
@@ -1045,7 +1094,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		persistence.delete(processDocument, persistentBeanToDelete);
 
-		WebUtil.putConversationInCache(webContext);
+		ConversationUtil.cacheConversation(webContext);
 
 		pw.append("{\"response\":{\"status\":0}}");
 	}

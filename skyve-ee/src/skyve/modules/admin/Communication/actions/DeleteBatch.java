@@ -2,11 +2,9 @@ package modules.admin.Communication.actions;
 
 import java.io.File;
 
-import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Communication;
@@ -21,8 +19,7 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 		
 		bean.setRefreshBatches(Boolean.TRUE);
 		
-		String customerName = CORE.getUser().getCustomerName();
-		File backupDir = new File(Util.getContentDirectory() + "batch_" + customerName + File.separator + bean.getSelectedBatchTimestampFolderName());
+		File backupDir = new File(bean.getBasePath() + File.separator + bean.getSelectedBatchTimestampFolderName());
 		if (backupDir.exists() && backupDir.isDirectory()) {
 			FileUtil.delete(backupDir);
 		}

@@ -42,8 +42,10 @@
 		<text name="phone">
 			<displayName>Phone</displayName>
 			<length>14</length>
-			<format mask="(##) #### ####" />
 		</text>
+		<memo name="description">
+			<displayName>Description</displayName>
+		</memo>		
 		<geometry name="boundary">
 			<displayName>Boundary</displayName>
 			<description>The boundary around the office.</description>

@@ -54,4 +54,9 @@ public class MySQL56InnoDBSpatialDialect extends org.hibernate.spatial.dialect.m
 	public String getModifyColumnString() {
 		return "modify column";
 	}
+	
+	@Override
+	public RDBMS getRDBMS() {
+		return RDBMS.mysql;
+	}
 }

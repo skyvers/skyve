@@ -10,6 +10,8 @@ import modules.admin.domain.ControlPanel;
 public class ControlPanelExtension extends ControlPanel {
 	private static final long serialVersionUID = -6204655500999983605L;
 
+	private String unescapedResults;
+	
 	public void trapException(Exception e) {
 		StringWriter sw = new StringWriter(512);
 		PrintWriter pw = new PrintWriter(sw);
@@ -23,6 +25,7 @@ public class ControlPanelExtension extends ControlPanel {
 	 */
 	@Override
 	public void setResults(String results) {
+		unescapedResults = results;
 		if (results == null) {
 			super.setResults(null);
 		}
@@ -31,6 +34,10 @@ public class ControlPanelExtension extends ControlPanel {
 		}
 	}
 	
+	public String getUnescapedResults() {
+		return unescapedResults;
+	}
+
 	@Override
 	public Boolean getBizletTrace() {
 		return Boolean.valueOf(UtilImpl.BIZLET_TRACE);

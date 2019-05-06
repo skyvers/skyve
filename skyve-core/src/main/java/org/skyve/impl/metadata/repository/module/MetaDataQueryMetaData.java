@@ -10,19 +10,22 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "query")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",
-			propOrder = {"documentName", "polymorphic", "from", "filter", "columns"})
+			propOrder = {"documentName", "polymorphic", "aggregate", "from", "filter", "columns"})
 public class MetaDataQueryMetaData extends QueryMetaData {
 	private static final long serialVersionUID = -7717015766195112054L;
 
 	private String documentName;
 	private Boolean polymorphic;
+	private Boolean aggregate;
 	private String from;
 	private String filter;
 	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
@@ -45,11 +48,21 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 		this.polymorphic = polymorphic;
 	}
 
+	public Boolean getAggregate() {
+		return aggregate;
+	}
+
+	@XmlAttribute
+	public void setAggregate(Boolean aggregate) {
+		this.aggregate = aggregate;
+	}
+
 	public String getFrom() {
 		return from;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFrom(String from) {
 		this.from =  UtilImpl.processStringValue(from);
 	}
@@ -59,6 +72,7 @@ public class MetaDataQueryMetaData extends QueryMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setFilter(String filter) {
 		this.filter =  UtilImpl.processStringValue(filter);
 	}

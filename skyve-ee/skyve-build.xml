@@ -142,44 +142,36 @@
 		</move>
 	</target>
 	
-	<property name="staging.dir" value="." />
+	<property name="sail.dir" value="./tools/sail" />
 	
-	<target name="libsZip">
-		<delete dir="." includes="libs.zip" failonerror="false" />
-		<zip destfile="${staging.dir}/libs.zip"
-				basedir=".."
-				includes="skyve-ee/javaee/skyve.ear/lib/**,skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/**,skyve-ee/lib/javaee-api-7.0.jar,skyve-ee/lib/skyve-src.jar,skyve-ee/tools/lib/com-jaspersoft-ireport.jar,skyve-ee/tools/lib/UmlGraph.jar,skyve-ee/tools/lib/skyve-tools.jar,LICENSE.txt,DEPENDENCIES.txt"
-				excludes="**/.DS_Store"
-				duplicate="fail" />
-	</target>
-	<target name="demoAssemble">
-		<delete dir="${staging.dir}/demo/skyve/javaee/skyve.ear" includes="**" failonerror="false" />
-		<copy todir="${staging.dir}/demo/skyve/javaee/skyve.ear" overwrite="true">
-			<fileset dir="javaee/skyve.ear" includes="**" />
-		</copy>
-		<delete dir="${staging.dir}/demo/skyve/lib" includes="**" failonerror="false" />
-		<copy todir="${staging.dir}/demo/skyve/lib" overwrite="true">
-			<fileset dir="lib" includes="javaee*.jar,skyve*.jar" />
-		</copy>
-		<delete dir="${staging.dir}/demo/skyve/src/skyve" includes="**" failonerror="false" />
-		<copy todir="${staging.dir}/demo/skyve/src/skyve" overwrite="true">
-			<fileset dir="src/skyve" includes="**" />
-		</copy>
-		<delete dir="${staging.dir}/demo/skyve/tools" includes="**" failonerror="false" />
-		<copy todir="${staging.dir}/demo/skyve/tools" overwrite="true">
-			<fileset dir="tools" includes="**" />
-		</copy>
-		<copy todir="${staging.dir}/demo/skyve" overwrite="true">
-			<fileset dir="." includes="build.xml" />
-			<fileset dir=".." includes="LICENSE.txt,DEPENDENCIES.txt" />
-		</copy>
-		<copy file="DEMO-README.txt" tofile="${staging.dir}/demo/README.txt" overwrite="true" />
-	</target>
-	<target name="demoZip">
-		<delete dir="." includes="demo.zip" failonerror="false" />
-		<zip destfile="${staging.dir}/demo.zip" duplicate="fail">
-			<fileset dir="demo" includes="**" excludes="**/.DS_Store,**/run.sh,**/standalone.sh" />
-			<zipfileset dir="demo" includes="**/run.sh,**/standalone.sh" filemode="755" />
+	<target name="sailAssemble">
+		<delete file="${sail.dir}/*.jar" />
+		<copy tofile="${sail.dir}/commons-exec-1.3.jar" file="lib/commons-exec-1.3.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/gson-2.8.2.jar" file="lib/gson-2.8.2.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/guava-23.6-jre.jar" file="lib/guava-23.6-jre.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/hamcrest-core-1.3.jar" file="lib/hamcrest-core-1.3.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/junit-4.12.jar" file="lib/junit-4.12.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/okhttp-3.9.1.jar" file="lib/okhttp-3.9.1.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/okio-1.13.0.jar" file="lib/okio-1.13.0.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/selenium-api-3.11.0.jar" file="lib/selenium-api-3.11.0.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/selenium-chrome-driver-3.11.0.jar" file="lib/selenium-chrome-driver-3.11.0.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/selenium-remote-driver-3.11.0.jar" file="lib/selenium-remote-driver-3.11.0.jar" overwrite="true"/>
+		<copy tofile="${sail.dir}/selenium-support-3.11.0.jar" file="lib/selenium-support-3.11.0.jar" overwrite="true"/>
+		
+		<jar jarfile="${sail.dir}/skyve-core.jar" basedir="../skyve-core/target/classes" />
+		<jar destfile="${sail.dir}/test.jar" basedir="bin" includes="util/**" />
+		<jar destfile="${sail.dir}/sail.jar" basedir="bin" includes="Sail.class" />
+		
+		<delete dir="." includes="sail.zip" failonerror="false" />
+		<zip destfile="./sail.zip" duplicate="fail">
+			<fileset dir="${sail.dir}" includes="**" excludes="sail-assemble*.txt,sail.xml,**/.DS_Store,**/sail.sh,**/chromedriver" />
+			<zipfileset dir="${sail.dir}" includes="**/sail.sh,**/chromedriver" filemode="755" />
 		</zip>
+		
+		<property name="compile.dir" value="./content/compile" />
+
+		<copy tofile="${compile.dir}/junit-4.12.jar" file="${sail.dir}/junit-4.12.jar" overwrite="true"/>
+		<copy tofile="${compile.dir}/skyve-core.jar" file="${sail.dir}/skyve-core.jar" overwrite="true"/>
+		<copy tofile="${compile.dir}/test.jar" file="${sail.dir}/test.jar" overwrite="true"/>
 	</target>
 </project>

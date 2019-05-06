@@ -11,11 +11,6 @@
 			<displayName>Description</displayName>
 			<length>250</length>
 		</text>
-		<association name="tag" type="aggregation">
-			<displayName>Tag</displayName>
-			<domain>variant</domain>
-			<documentName>Tag</documentName>
-		</association>
 		<text name="moduleName">
 			<displayName>Module</displayName>
 			<description>Bindings used in the communication address, subject and body will be based on the selected module document.</description>
@@ -28,6 +23,19 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
+		<association name="tag" type="aggregation" persistent="false" trackChanges="false">
+			<documentation><![CDATA[
+			<p>Tag is transient:
+			<ul><li>as good practice so that the user is forced to reconsider which
+			tag is used for the bulk communication each time, and</li>
+			<li>using a tag in the communication should not block the tag being removed
+			by normal user actions through the list functions</li></ul>
+			</p>
+			]]></documentation>
+			<displayName>Tag</displayName>
+			<domain>variant</domain>
+			<documentName>Tag</documentName>
+		</association>
 		<text name="toBinding">
 			<displayName>Send to</displayName>
 			<description>Provide a binding which contains the email address to send to</description>
@@ -60,7 +68,7 @@
 		</text>
 		<boolean name="monitorBcc">
 			<displayName>BCC Me</displayName>
-			<description>Monitor outgoing emails by including me in the Bcc</description>
+			<description>Monitor outgoing emails by including yourself in the Bcc</description>
 		</boolean>
 		<text name="subject">
 			<displayName>Subject (expression)</displayName>
@@ -120,12 +128,18 @@
 				<value code="email" />
 			</values>
 		</enum>
-		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false">
+		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false" audited="false">
 			<displayName>Selected Batch Timestamp Folder Name</displayName>
 		</id>
-		<boolean name="refreshBatches" persistent="false" trackChanges="false">
+		<boolean name="refreshBatches" persistent="false" trackChanges="false" audited="false">
 			<displayName>Refresh Batches</displayName>
 			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="unTagSuccessful" persistent="false" trackChanges="false" audited="false">
+			<displayName>Untag successful documents</displayName>
+		</boolean>
+		<boolean name="notification" persistent="false" trackChanges="false" audited="false">
+			<displayName>Notify when job is complete</displayName>
 		</boolean>
 
 
@@ -171,7 +185,7 @@
 			</description>
 			<length>500</length>
 		</text>
-		<content name="mailImage" persistent="false">
+		<content name="mailImage" persistent="false" audited="false" trackChanges="false">
 			<displayName>Image</displayName>
 		</content>
 		<association name="template" type="aggregation">
@@ -184,14 +198,29 @@
 			<domain>variant</domain>
 			<documentName>CommunicationTemplate</documentName>
 		</association>
+		
+		<text name="basePath" persistent="false" audited="false" trackChanges="false">
+			<displayName>File Path to batches for this communication</displayName>
+			<length>500</length>
+		</text>
+		<text name="batch" persistent="false" audited="false" trackChanges="false">
+			<displayName>Batch</displayName>
+			<description>The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)</description>
+			<length>14</length>
+		</text>
 
 		<inverseMany name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>
 			<referenceName>communication</referenceName>
 		</inverseMany>
+		
 	</attributes>
 	<conditions>
+		<condition name="showBatches">
+			<description>Whether to show the list of batches</description>
+			<expression><![CDATA[description!=null]]></expression>
+		</condition>
 		<condition name="saveAction">
 			<description>Save for Bulk Send</description>
 			<expression>
@@ -229,6 +258,13 @@
 			<expression>
 				<![CDATA[
 					Boolean.TRUE.equals(refreshBatches)
+				]]>
+			</expression>
+		</condition>
+		<condition name="emailConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
 				]]>
 			</expression>
 		</condition>

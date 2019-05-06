@@ -1,6 +1,5 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Users
@@ -34,13 +34,15 @@ public class UserList extends AbstractTransientBean {
 	public static final String userInvitationGroupsPropertyName = "userInvitationGroups";
 	/** @hidden */
 	public static final String userInvitiationEmailListPropertyName = "userInvitiationEmailList";
+	/** @hidden */
+	public static final String bulkCreateWithEmailPropertyName = "bulkCreateWithEmail";
 
 	/**
 	 * User Invitation Groups
 	 * <br/>
 	 * The collection of groups that invited users are assigned.
 	 **/
-	private List<Group> userInvitationGroups = new ArrayList<>();
+	private List<Group> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
 	/**
 	 * Invitation email addresses
 	 * <br/>
@@ -51,6 +53,10 @@ public class UserList extends AbstractTransientBean {
 			Provide a list separated by either comma or semicolon.
 	 **/
 	private String userInvitiationEmailList;
+	/**
+	 * Bulk create with email
+	 **/
+	private Boolean bulkCreateWithEmail;
 
 	@Override
 	@XmlTransient
@@ -132,5 +138,44 @@ public class UserList extends AbstractTransientBean {
 	public void setUserInvitiationEmailList(String userInvitiationEmailList) {
 		preset(userInvitiationEmailListPropertyName, userInvitiationEmailList);
 		this.userInvitiationEmailList = userInvitiationEmailList;
+	}
+
+	/**
+	 * {@link #bulkCreateWithEmail} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getBulkCreateWithEmail() {
+		return bulkCreateWithEmail;
+	}
+
+	/**
+	 * {@link #bulkCreateWithEmail} mutator.
+	 * @param bulkCreateWithEmail	The new value.
+	 **/
+	@XmlElement
+	public void setBulkCreateWithEmail(Boolean bulkCreateWithEmail) {
+		preset(bulkCreateWithEmailPropertyName, bulkCreateWithEmail);
+		this.bulkCreateWithEmail = bulkCreateWithEmail;
+	}
+
+	/**
+	 * emailConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isEmailConfigured() {
+		return ((
+					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
+						.validSMTPHost()));
+	}
+
+	/**
+	 * {@link #isEmailConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotEmailConfigured() {
+		return (! isEmailConfigured());
 	}
 }

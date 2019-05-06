@@ -17,7 +17,6 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
-import org.skyve.util.Util;
 
 import modules.admin.DownloadFolder.DownloadFolderBizlet;
 import modules.admin.domain.Communication;
@@ -86,10 +85,8 @@ public class BatchesModel extends ListModel<Communication> {
 
 	@Override
 	public Page fetch() throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
-
-		return DownloadFolderBizlet.fetchFolders(backupDirPrefix, getStartRow(), getEndRow());
+		Communication communication = getBean();
+		return DownloadFolderBizlet.fetchFolders(communication.getBasePath(), getStartRow(), getEndRow());
 	}
 
 	@Override

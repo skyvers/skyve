@@ -101,4 +101,9 @@ public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect imp
 	public UniqueDelegate getUniqueDelegate() {
 		return uniqueDelegate;
 	}
+	
+	@Override
+	public RDBMS getRDBMS() {
+		return RDBMS.sqlserver;
+	}
 }

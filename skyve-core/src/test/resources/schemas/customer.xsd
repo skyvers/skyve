@@ -10,7 +10,7 @@
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element name="uiResources" type="tns:uiResources" form="qualified" minOccurs="0"/>
-          <xs:element name="htmlResources" type="tns:htmlResources" form="qualified" minOccurs="0"/>
+          <xs:element name="htmlResources" type="tns:htmlResourcesMetaData" form="qualified" minOccurs="0"/>
           <xs:element name="loginResources" type="tns:LoginResources" form="qualified" minOccurs="0"/>
           <xs:element name="defaultDateConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="defaultTimeConverter" type="ns1:converterName" form="qualified"/>
@@ -36,7 +36,7 @@
     <xs:attribute name="logo" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="htmlResources">
+  <xs:complexType name="htmlResourcesMetaData">
     <xs:sequence/>
     <xs:attribute name="css" type="xs:string"/>
   </xs:complexType>
@@ -44,7 +44,6 @@
   <xs:complexType name="LoginResources">
     <xs:sequence/>
     <xs:attribute name="loggedOutPage" type="xs:string"/>
-    <xs:attribute name="loginErrorPage" type="xs:string"/>
     <xs:attribute name="loginPage" type="xs:string"/>
     <xs:attribute name="smartClientJavascript" type="xs:string"/>
   </xs:complexType>

@@ -22,6 +22,7 @@ import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.CommunicationTemplate;
@@ -34,6 +35,10 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	 */
 	private static final long serialVersionUID = -7404508611264793559L;
 
+	public static final String SYSTEM_COMMUNICATION_JOB_NOTIFICATION = "SYSTEM Communication Job Notification";
+	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT = "Bulk Communication Job for '{description}' - Complete";
+	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY = "The bulk communication job '{description}' for Tag '{tag.name}' is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;
+	
 	@Override
 	public Communication newInstance(Communication communication) throws Exception {
 
@@ -79,7 +84,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getDescription()));
+					result.add(new DomainValue(document.getName(), document.getSingularAlias()));
 				}
 			}
 		}

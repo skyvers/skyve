@@ -38,6 +38,29 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
+    protected void login(String customer, String username, String password) throws Exception {        
+        driver.get(baseUrl);
+
+        if (customer != null) {
+            driver.findElement(By.name("customer")).clear();
+            driver.findElement(By.name("customer")).sendKeys(customer);
+        }
+        
+        driver.findElement(By.name("user")).clear();
+        driver.findElement(By.name("user")).sendKeys(username);
+
+        driver.findElement(By.name("password")).clear();
+        driver.findElement(By.name("password")).sendKeys(password);
+     
+        driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();        
+    }
+    
+    protected void logout() {
+    	driver.get(baseUrl + "loggedOut");
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+    }
+    
 	protected void checkbox(String id, Boolean value) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -106,6 +129,21 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
+	protected void radio(String id, int index) {
+		WebElement element = byId(id);
+		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+			// Look for prime faces disabled style
+			if (! element.getAttribute("class").contains("ui-state-disabled")) {
+				element = byXpath("//label[@for='" + id + ":" + index + "']");
+				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+					click(element);
+					
+					waitForAjaxResponse();
+				}
+			}
+		}
+	}
+	
 	protected void selectOne(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -209,14 +247,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 //				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
 				click(element);
 				
-				// Wait for pick list drop down
-				By xpath = By.xpath(String.format("//div[@id='%s_panel']", id));
+				// Wait for pick list drop down - can be a span or div depending on theme
+				By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 				WebDriverWait wait = new WebDriverWait(driver, 30);
 				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
 													ExpectedConditions.visibilityOfElementLocated(xpath)));
 				
 				// Select the row
-				element = byXpath(String.format("//div[@id='%s_panel']/ul/li[%d]", id, Integer.valueOf(row + 1)));
+				// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+				element = byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row + 1)));
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 					// Scroll the drop down panel so the item is visible
 					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
@@ -232,14 +271,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			_input(id, search);
 
-			// Wait for pick list drop down
-			By xpath = By.xpath(String.format("//div[@id='%s_panel']", id));
+			// Wait for pick list drop down - can be a span or div depending on theme
+			By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 			WebDriverWait wait = new WebDriverWait(driver, 30);
 			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
 												ExpectedConditions.visibilityOfElementLocated(xpath)));
 
 			// Select the first row
-			element = byXpath(String.format("//div[@id='%s_panel']/ul/li", id));
+			// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+			element = byXpath(String.format("//*[@id='%s_panel']//ul/li", id));
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				click(element);
 				waitForAjaxResponse();
@@ -270,6 +310,17 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
+	protected void dataGridSelect(String dataGridId, int row) {
+		// check list grid is present
+		WebElement element = byId(dataGridId);
+		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+			// Find the row
+			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
+			click(element);
+			waitForAjaxResponse();
+		}
+	}
+
 	protected void listGridButton(String listGridId, String buttonId, boolean ajax) {
 		// check list grid is present
 		WebElement element = byId(listGridId);

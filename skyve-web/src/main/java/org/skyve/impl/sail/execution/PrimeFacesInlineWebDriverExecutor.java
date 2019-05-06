@@ -12,6 +12,7 @@ import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
@@ -64,6 +65,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
@@ -102,6 +105,34 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 	@Override
 	public void executePopContext(PopContext pop) {
 		pop();
+	}
+	
+	@Override
+	public void executeLogin(Login login) {
+		String customer = login.getCustomer();
+		String user = login.getUser();
+		
+		if (customer == null) {
+			comment("Login as " + user);
+		}
+		else {
+			comment("Login as " + customer + "/" + user);
+		}
+		indent().append("login(");
+		if (customer == null) {
+			append("null, ");
+		}
+		else {
+			append("\"").append(customer).append("\", ");
+		}
+		append("\"").append(user).append("\", ");
+		append("\"").append(login.getPassword()).append("\");").newline();
+	}
+	
+	@Override
+	public void executeLogout(Logout logout) {
+		comment("Logout");
+		indent().append("logout();").newline();
 	}
 	
 	@Override
@@ -228,6 +259,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 								(component instanceof Password) ||
 								(component instanceof InputMask);
 			boolean selectOne = (component instanceof SelectOneMenu);
+			boolean radio = (component instanceof SelectOneRadio);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
 			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
 			
@@ -265,6 +297,9 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			}
 			else if (selectOne) {
 				indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+			}
+			else if (radio) {
+				indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
 		}
 	}
@@ -406,20 +441,30 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
-		dataGridButton(nu, nu.getBinding(), null);
+		dataGridGesture(nu, nu.getBinding(), null);
 	}
 	
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
-		dataGridButton(zoom, zoom.getBinding(), zoom.getRow());
+		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
 	}
 	
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
-		dataGridButton(remove, remove.getBinding(), remove.getRow());
+		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 	}
 
-	private void dataGridButton(Step step, String binding, Integer row) {
+	@Override
+	public void executeDataGridSelect(DataGridSelect select) {
+		dataGridGesture(select, select.getBinding(), select.getRow());
+	}
+
+	@Override
+	public void executeDataGridEdit(DataGridEdit edit) {
+		// cannot edit a grid row in PF
+	}
+
+	private void dataGridGesture(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		
@@ -438,6 +483,9 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				if (step instanceof DataGridZoom) {
 					comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
+				else if (step instanceof DataGridSelect) {
+					comment(String.format("Select on row %d on list grid [%s] (%s)", row, binding, dataGridClientId));
+				}
 				else {
 					ajax = true;
 					comment(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
@@ -446,6 +494,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			else {
 				comment(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
 			}
+
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
 				for (UIComponent buttonComponent : buttonComponents) {
@@ -453,42 +502,40 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
 												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
-						indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
-						append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
+						if (step instanceof DataGridSelect) {
+							indent().append("dataGridSelect(\"").append(dataGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+						}
+						else {
+							indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
+							append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
+						}
 					}
 				}
 			}
 		}
 
 		// Determine the Document of the edit view to push
-		Customer c = CORE.getUser().getCustomer();
-		Module m = c.getModule(context.getModuleName());
-		Document d = m.getDocument(c, context.getDocumentName());
-		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
-		d = m.getDocument(c, newDocumentName);
-		String newModuleName = d.getOwningModuleName();
-		
-		// Push it
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(newModuleName);
-		push.setDocumentName(newDocumentName);
-		push.execute(this);
-	}
-
-	@Override
-	public void executeDataGridEdit(DataGridEdit edit) {
-		// cannot edit a grid row in PF
-	}
-
-	@Override
-	public void executeDataGridSelect(DataGridSelect select) {
-		// TODO Auto-generated method stub
+		// NB Don't push a new context for DataGridSelect - let them use DataGridZoom if they want that
+		if ((step instanceof DataGridNew) || (step instanceof DataGridZoom)) {
+			Customer c = CORE.getUser().getCustomer();
+			Module m = c.getModule(context.getModuleName());
+			Document d = m.getDocument(c, context.getDocumentName());
+			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+			String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
+			d = m.getDocument(c, newDocumentName);
+			String newModuleName = d.getOwningModuleName();
+			
+			// Push it
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(newModuleName);
+			push.setDocumentName(newDocumentName);
+			push.execute(this);
+		}
 	}
 
 	@Override
 	public void executeListGridNew(ListGridNew nu) {
-		listGridButton(nu, null);
+		listGridGesture(nu, null);
 		
 		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
 		push.setCreateView(nu.getCreateView());
@@ -497,7 +544,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 	@Override
 	public void executeListGridZoom(ListGridZoom zoom) {
-		listGridButton(zoom, zoom.getRow());
+		listGridGesture(zoom, zoom.getRow());
 		
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this);
@@ -505,17 +552,10 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
-		listGridButton(select, select.getRow());
-		
-		// TODO only if there is no select event on the skyve edit view for embedded list grid
-		PrimeFacesAutomationContext context = peek();
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(context.getModuleName());
-		push.setDocumentName(context.getDocumentName());
-		push.execute(this);
+		listGridGesture(select, select.getRow());
 	}
 
-	private void listGridButton(Step step, Integer row) {
+	private void listGridGesture(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));

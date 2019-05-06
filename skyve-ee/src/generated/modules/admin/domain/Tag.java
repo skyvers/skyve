@@ -19,7 +19,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - CombinationsOperator
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
- * @navhas n actionTag 0..1 Tag
+ * @navhas n operandTag 0..1 Tag
  * @navhas n copyToUser 0..1 User
  * @stereotype "persistent"
  */
@@ -46,9 +46,7 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String combinationExplanationPropertyName = "combinationExplanation";
 	/** @hidden */
-	public static final String currentTagCountPropertyName = "currentTagCount";
-	/** @hidden */
-	public static final String actionTagCountPropertyName = "actionTagCount";
+	public static final String totalTaggedPropertyName = "totalTagged";
 	/** @hidden */
 	public static final String copyToUserPropertyName = "copyToUser";
 	/** @hidden */
@@ -62,11 +60,11 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String fileHasHeadersPropertyName = "fileHasHeaders";
 	/** @hidden */
-	public static final String numberLoadedPropertyName = "numberLoaded";
+	public static final String uploadedPropertyName = "uploaded";
 	/** @hidden */
-	public static final String numberMatchedPropertyName = "numberMatched";
+	public static final String uploadMatchedPropertyName = "uploadMatched";
 	/** @hidden */
-	public static final String numberTaggedPropertyName = "numberTagged";
+	public static final String uploadTaggedPropertyName = "uploadTagged";
 	/** @hidden */
 	public static final String filterOperatorPropertyName = "filterOperator";
 	/** @hidden */
@@ -82,7 +80,9 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String filterColumnPropertyName = "filterColumn";
 	/** @hidden */
-	public static final String actionTagPropertyName = "actionTag";
+	public static final String operandTagPropertyName = "operandTag";
+	/** @hidden */
+	public static final String operandTagCountPropertyName = "operandTagCount";
 	/** @hidden */
 	public static final String documentConditionPropertyName = "documentCondition";
 	/** @hidden */
@@ -340,13 +340,9 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	private String combinationExplanation;
 	/**
-	 * Current Tag Count
+	 * Total Tagged
 	 **/
-	private Integer currentTagCount;
-	/**
-	 * Other Tag Count
-	 **/
-	private Integer actionTagCount;
+	private Long totalTagged;
 	/**
 	 * Copy to user
 	 **/
@@ -378,17 +374,17 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	private Boolean fileHasHeaders;
 	/**
-	 * Number of loaded values
+	 * Uploaded
 	 **/
-	private Integer numberLoaded;
+	private Long uploaded;
 	/**
-	 * Number of matching records
+	 * Match
 	 **/
-	private Integer numberMatched;
+	private Long uploadMatched;
 	/**
-	 * Number of tagged records
+	 * Tagged
 	 **/
-	private Integer numberTagged;
+	private Long uploadTagged;
 	/**
 	 * Filter Operator
 	 **/
@@ -424,9 +420,13 @@ public class Tag extends AbstractPersistentBean {
 	/**
 	 * Other Tag
 	 * <br/>
-	 * The other tag to use for the action to be performed on this tag.
+	 * The other tag to use for the combination.
 	 **/
-	private Tag actionTag = null;
+	private Tag operandTag = null;
+	/**
+	 * Tagged
+	 **/
+	private Long operandTagCount;
 	/**
 	 * Condition
 	 * <br/>
@@ -473,7 +473,7 @@ public class Tag extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{name}",
+														"Tag {name}",
 														this);
 		}
 		catch (Exception e) {
@@ -558,37 +558,20 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #currentTagCount} accessor.
+	 * {@link #totalTagged} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getCurrentTagCount() {
-		return currentTagCount;
+	public Long getTotalTagged() {
+		return totalTagged;
 	}
 
 	/**
-	 * {@link #currentTagCount} mutator.
-	 * @param currentTagCount	The new value.
+	 * {@link #totalTagged} mutator.
+	 * @param totalTagged	The new value.
 	 **/
 	@XmlElement
-	public void setCurrentTagCount(Integer currentTagCount) {
-		this.currentTagCount = currentTagCount;
-	}
-
-	/**
-	 * {@link #actionTagCount} accessor.
-	 * @return	The value.
-	 **/
-	public Integer getActionTagCount() {
-		return actionTagCount;
-	}
-
-	/**
-	 * {@link #actionTagCount} mutator.
-	 * @param actionTagCount	The new value.
-	 **/
-	@XmlElement
-	public void setActionTagCount(Integer actionTagCount) {
-		this.actionTagCount = actionTagCount;
+	public void setTotalTagged(Long totalTagged) {
+		this.totalTagged = totalTagged;
 	}
 
 	/**
@@ -698,54 +681,54 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #numberLoaded} accessor.
+	 * {@link #uploaded} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getNumberLoaded() {
-		return numberLoaded;
+	public Long getUploaded() {
+		return uploaded;
 	}
 
 	/**
-	 * {@link #numberLoaded} mutator.
-	 * @param numberLoaded	The new value.
+	 * {@link #uploaded} mutator.
+	 * @param uploaded	The new value.
 	 **/
 	@XmlElement
-	public void setNumberLoaded(Integer numberLoaded) {
-		this.numberLoaded = numberLoaded;
+	public void setUploaded(Long uploaded) {
+		this.uploaded = uploaded;
 	}
 
 	/**
-	 * {@link #numberMatched} accessor.
+	 * {@link #uploadMatched} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getNumberMatched() {
-		return numberMatched;
+	public Long getUploadMatched() {
+		return uploadMatched;
 	}
 
 	/**
-	 * {@link #numberMatched} mutator.
-	 * @param numberMatched	The new value.
+	 * {@link #uploadMatched} mutator.
+	 * @param uploadMatched	The new value.
 	 **/
 	@XmlElement
-	public void setNumberMatched(Integer numberMatched) {
-		this.numberMatched = numberMatched;
+	public void setUploadMatched(Long uploadMatched) {
+		this.uploadMatched = uploadMatched;
 	}
 
 	/**
-	 * {@link #numberTagged} accessor.
+	 * {@link #uploadTagged} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getNumberTagged() {
-		return numberTagged;
+	public Long getUploadTagged() {
+		return uploadTagged;
 	}
 
 	/**
-	 * {@link #numberTagged} mutator.
-	 * @param numberTagged	The new value.
+	 * {@link #uploadTagged} mutator.
+	 * @param uploadTagged	The new value.
 	 **/
 	@XmlElement
-	public void setNumberTagged(Integer numberTagged) {
-		this.numberTagged = numberTagged;
+	public void setUploadTagged(Long uploadTagged) {
+		this.uploadTagged = uploadTagged;
 	}
 
 	/**
@@ -875,20 +858,37 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #actionTag} accessor.
+	 * {@link #operandTag} accessor.
 	 * @return	The value.
 	 **/
-	public Tag getActionTag() {
-		return actionTag;
+	public Tag getOperandTag() {
+		return operandTag;
 	}
 
 	/**
-	 * {@link #actionTag} mutator.
-	 * @param actionTag	The new value.
+	 * {@link #operandTag} mutator.
+	 * @param operandTag	The new value.
 	 **/
 	@XmlElement
-	public void setActionTag(Tag actionTag) {
-		this.actionTag = actionTag;
+	public void setOperandTag(Tag operandTag) {
+		this.operandTag = operandTag;
+	}
+
+	/**
+	 * {@link #operandTagCount} accessor.
+	 * @return	The value.
+	 **/
+	public Long getOperandTagCount() {
+		return operandTagCount;
+	}
+
+	/**
+	 * {@link #operandTagCount} mutator.
+	 * @param operandTagCount	The new value.
+	 **/
+	@XmlElement
+	public void setOperandTagCount(Long operandTagCount) {
+		this.operandTagCount = operandTagCount;
 	}
 
 	/**
@@ -964,6 +964,25 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Whether to allow access to the PerformCombination action button
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isAllowCombination() {
+		return (combinationsOperator!=null && operandTag!=null);
+	}
+
+	/**
+	 * {@link #isAllowCombination} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotAllowCombination() {
+		return (! isAllowCombination());
+	}
+
+	/**
 	 * Attribute Set
 	 *
 	 * @return The condition
@@ -983,40 +1002,21 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Explanation exists
+	 * Whether to show the explanation
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
-	public boolean isExplanation() {
-		return (getCombinationExplanation()!=null);
+	public boolean isShowExplanation() {
+		return (getCombinationExplanation()!=null && getCombinationExplanation().trim().length()>0);
 	}
 
 	/**
-	 * {@link #isExplanation} negation.
+	 * {@link #isShowExplanation} negation.
 	 *
 	 * @return The negated condition
 	 */
-	public boolean isNotExplanation() {
-		return (! isExplanation());
-	}
-
-	/**
-	 * File Loaded
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isFileLoaded() {
-		return (getNumberLoaded().intValue()>0);
-	}
-
-	/**
-	 * {@link #isFileLoaded} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotFileLoaded() {
-		return (! isFileLoaded());
+	public boolean isNotShowExplanation() {
+		return (! isShowExplanation());
 	}
 }

@@ -73,9 +73,17 @@ public abstract class AbstractFacesBuilder {
 		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
 	
-	protected void setDisabled(UIComponent component, String disabledConditionName) {
+	protected void setDisabled(UIComponent component, String disabledConditionName, String formDisabledConditionName) {
 		if (disabledConditionName != null) {
-			component.setValueExpression("disabled", createValueExpressionFromCondition(disabledConditionName, null));
+			if (formDisabledConditionName == null) {
+				component.setValueExpression("disabled", createValueExpressionFromCondition(disabledConditionName, null));
+			}
+			else {
+				component.setValueExpression("disabled", createOredValueExpressionFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+			}
+		}
+		else if (formDisabledConditionName != null) {
+			component.setValueExpression("disabled", createValueExpressionFromCondition(formDisabledConditionName, null));
 		}
 	}
 
@@ -86,10 +94,10 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
-	protected void setInvisible(UIComponent component, String listVar, String invisibleConditionName, String extraELToAnd) {
+	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleConditionName, String extraELToAnd) {
 		if (invisibleConditionName != null) {
 			final String visible = BindUtil.negateCondition(invisibleConditionName);
-			component.setValueExpression("rendered",  createValueExpressionFromFragment(listVar, true,
+			component.setValueExpression("rendered",  createValueExpressionFromFragment(dataWidgetVar, true,
 					visible, false, extraELToAnd, Boolean.class));
 		}
 	}
@@ -168,7 +176,7 @@ public abstract class AbstractFacesBuilder {
 	}
 
 	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
-																	boolean listVar,
+																	boolean dataWidgetVar,
 																	String fragment, 
 																	boolean map,
 																	String extraELConditionToAnd, 
@@ -176,7 +184,7 @@ public abstract class AbstractFacesBuilder {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
 		if (expressionPrefix != null) {
-			sb.append(listVar ? BindUtil.sanitiseBinding(expressionPrefix) : expressionPrefix);
+			sb.append(dataWidgetVar ? BindUtil.sanitiseBinding(expressionPrefix) : expressionPrefix);
 			sb.append(map ? "['" : ".");
 		}
 		sb.append(fragment);

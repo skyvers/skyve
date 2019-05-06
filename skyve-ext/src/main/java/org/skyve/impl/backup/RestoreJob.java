@@ -18,6 +18,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.backup.RestoreOptions.ContentOption;
 import org.skyve.impl.backup.RestoreOptions.IndexingOption;
 import org.skyve.impl.backup.RestoreOptions.PreProcess;
@@ -30,6 +31,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.FileUtil;
+import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -68,6 +70,8 @@ public class RestoreJob extends CancellableJob {
 			Util.LOGGER.warning(trace);
 			return;
 		}
+		
+		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
 		
 		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
 		File extractDir = new File(backup.getParentFile(), extractDirName);
@@ -159,6 +163,8 @@ public class RestoreJob extends CancellableJob {
 		log.add(trace);
 		Util.LOGGER.info(trace);
 		setPercentComplete(100);
+		
+		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 	}
 	
 	private void restore(String extractDirName,

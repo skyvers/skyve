@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20181211</version>
+		<version>20190405-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 
@@ -91,6 +91,11 @@
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

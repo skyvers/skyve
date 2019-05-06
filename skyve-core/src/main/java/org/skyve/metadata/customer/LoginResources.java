@@ -16,12 +16,6 @@ public interface LoginResources extends MetaData {
 	 * 
 	 * @return
 	 */
-	public String getLoginErrorPageURL();
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public String getLoggedOutPageURL();
 	
 	/**

@@ -12,6 +12,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 /**
  * 
@@ -51,16 +52,16 @@ public class BeanValidator {
 	/**
 	 * Validate a document attribute against its metadata.
 	 * 
-	 * @param customer	The current customer for this thread
+	 * @param user	The current user for this thread
 	 * @param attribute The attribute to validate.
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	public static void validateBeanPropertyAgainstAttribute(Customer customer, 
+	public static void validateBeanPropertyAgainstAttribute(User user, 
 																Attribute attribute, 
 																Bean bean, 
 																ValidationException e) {
-		ValidationUtil.validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
+		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class BeanValidator {
 	 * @param e The exception to populate
 	 */
 	public static void validateBeanPropertyAgainstAttribute(Attribute attribute, Bean bean, ValidationException e) {
-		validateBeanPropertyAgainstAttribute(CORE.getUser().getCustomer(), attribute, bean, e);
+		validateBeanPropertyAgainstAttribute(CORE.getUser(), attribute, bean, e);
 	}
 	
 	/**
@@ -82,11 +83,12 @@ public class BeanValidator {
 	 * @param e The exception to populate
 	 */
 	public static void validateBeanPropertyAgainstAttribute(String attributeName, Bean bean, ValidationException e) {
-		Customer c = CORE.getUser().getCustomer();
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		Attribute a = d.getAttribute(attributeName);
-		validateBeanPropertyAgainstAttribute(c, a, bean, e);
+		validateBeanPropertyAgainstAttribute(u, a, bean, e);
 	}
 	
 	
