@@ -2880,7 +2880,7 @@ mark {
 		display: -ms-flex;
 		display: flex;
 		border-bottom: solid 5px #7f888f;
-		padding: 1em 0 1em 0;
+		padding: 1em 0 2.05em 0;
 		position: relative;
 	}
 
@@ -2895,7 +2895,8 @@ mark {
 		#header .logo {
 			border-bottom: 0;
 			color: inherit;
-			font-family: "Roboto Slab", serif;
+			/* font-family: "Roboto Slab", serif; */
+			font-family: "Open Sans","Helvetica Neue",sans-serif;
 			font-size: 2em;
 		}
 
