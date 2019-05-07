@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -146,6 +148,7 @@ public class DataBuilder {
 	private Map<String, Integer> cardinalities = null;
 	private int depth = 0;
 	private Map<String, Integer> depths = null;
+	private Set<String> visitedBizIds = null;
 
 	public DataBuilder() {
 		user = CORE.getUser();
@@ -353,6 +356,7 @@ public class DataBuilder {
 	public <T extends Bean> T build(String moduleName, String documentName) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
+		initialiseCycleTracking();
 		return build(m, d, 0);
 	}
 	
@@ -363,6 +367,7 @@ public class DataBuilder {
 	 * @return
 	 */
 	public <T extends Bean> T build(Module module, Document document) {
+		initialiseCycleTracking();
 		return build(module, document, 0);
 	}
 	
@@ -373,7 +378,12 @@ public class DataBuilder {
 	 */
 	public <T extends Bean> T build(Document document) {
 		Module m = customer.getModule(document.getOwningModuleName());
+		initialiseCycleTracking();
 		return build(m, document, 0);
+	}
+
+	private void initialiseCycleTracking() {
+		visitedBizIds = new TreeSet<>();
 	}
 	
 	/**
@@ -391,6 +401,12 @@ public class DataBuilder {
 			result = dataFactory((DocumentImpl) document);
 			if (result == null) {
 				result = randomBean(module, document);
+
+				if (visitedBizIds.contains(result.getBizId())) {
+					return result;
+				} else {
+					visitedBizIds.add(result.getBizId());
+				}
 
 				for (Attribute attribute : document.getAllAttributes()) {
 					if (filter(attribute)) {
