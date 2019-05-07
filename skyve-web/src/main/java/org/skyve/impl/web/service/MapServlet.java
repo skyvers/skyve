@@ -51,6 +51,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * 			webContext
  * 			modelName
  */
+// TODO This should support continue conversation
 public class MapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
