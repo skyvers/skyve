@@ -39,4 +39,9 @@ public class ValidationException extends DomainException implements MessageExcep
 		
 		return result.toString();
 	}
+
+	@Override
+	public String getMessage() {
+		return toString();
+	}
 }
