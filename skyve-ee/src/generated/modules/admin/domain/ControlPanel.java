@@ -12,6 +12,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
@@ -21,7 +22,10 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - SailTestStrategy
  * @depend - - - SailExecutor
  * @navhas n emailToContact 0..1 Contact
+ * @navhas n newProperty 0..1 Generic
  * @navhas n sailUser 0..1 User
+ * @navhas n originalStartupProperties 0..n Generic
+ * @navhas n startupProperties 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -100,6 +104,12 @@ public class ControlPanel extends AbstractTransientBean {
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
 	public static final String tabIndexPropertyName = "tabIndex";
+	/** @hidden */
+	public static final String startupPropertiesPropertyName = "startupProperties";
+	/** @hidden */
+	public static final String originalStartupPropertiesPropertyName = "originalStartupProperties";
+	/** @hidden */
+	public static final String newPropertyPropertyName = "newProperty";
 
 	/**
 	 * User Agent Type
@@ -484,6 +494,22 @@ public class ControlPanel extends AbstractTransientBean {
 			 	This is set to the results tab when there is results to display.
 	 **/
 	private Integer tabIndex;
+	/**
+	 * Startup
+	 * <br/>
+	 * Startup Configuration
+	 **/
+	private List<Generic> startupProperties = new ChangeTrackingArrayList<>("startupProperties", this);
+	/**
+	 * Original Startup values
+	 * <br/>
+	 * Startup Configuration
+	 **/
+	private List<Generic> originalStartupProperties = new ChangeTrackingArrayList<>("originalStartupProperties", this);
+	/**
+	 * New Property
+	 **/
+	private Generic newProperty = null;
 
 	@Override
 	@XmlTransient
@@ -1081,6 +1107,78 @@ public class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #startupProperties} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getStartupProperties() {
+		return startupProperties;
+	}
+
+	/**
+	 * {@link #startupProperties} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getStartupPropertiesElementById(String bizId) {
+		return getElementById(startupProperties, bizId);
+	}
+
+	/**
+	 * {@link #startupProperties} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setStartupPropertiesElementById(String bizId, Generic element) {
+		 setElementById(startupProperties, element);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getOriginalStartupProperties() {
+		return originalStartupProperties;
+	}
+
+	/**
+	 * {@link #originalStartupProperties} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getOriginalStartupPropertiesElementById(String bizId) {
+		return getElementById(originalStartupProperties, bizId);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setOriginalStartupPropertiesElementById(String bizId, Generic element) {
+		 setElementById(originalStartupProperties, element);
+	}
+
+	/**
+	 * {@link #newProperty} accessor.
+	 * @return	The value.
+	 **/
+	public Generic getNewProperty() {
+		return newProperty;
+	}
+
+	/**
+	 * {@link #newProperty} mutator.
+	 * @param newProperty	The new value.
+	 **/
+	@XmlElement
+	public void setNewProperty(Generic newProperty) {
+		preset(newPropertyPropertyName, newProperty);
+		this.newProperty = newProperty;
+	}
+
+	/**
 	 * If this instance is for 1 fixed customer only.
 	 *
 	 * @return The condition
@@ -1097,5 +1195,24 @@ public class ControlPanel extends AbstractTransientBean {
 	 */
 	public boolean isNotFixedCustomer() {
 		return (! isFixedCustomer());
+	}
+
+	/**
+	 * productionInstance
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isProductionInstance() {
+		return (org.skyve.impl.util.UtilImpl.ENVIRONMENT_IDENTIFIER==null);
+	}
+
+	/**
+	 * {@link #isProductionInstance} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotProductionInstance() {
+		return (! isProductionInstance());
 	}
 }

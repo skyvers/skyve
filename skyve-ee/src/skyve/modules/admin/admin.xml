@@ -192,6 +192,7 @@
 					<action name="ExecuteSAIL" />
 					<action name="DownloadSAIL" />
 					<action name="DownloadClientSAIL" />
+					<action name="ApplyStartupConfiguration" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
@@ -566,6 +567,7 @@
 				<column binding="bizKey" sortOrder="ascending" />
 				<column binding="startTime" sortOrder="ascending" />
 				<column binding="endTime" />
+				<column binding="disabled"/>
 			</columns>
 		</query>
 		<query name="qExistingHits" documentName="UserMonthlyHits">

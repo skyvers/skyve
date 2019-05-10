@@ -169,6 +169,24 @@
 			 </documentation>
 			<displayName>TabIndex</displayName>
 		</integer>
+		
+		<!-- Setup Settings -->
+		<collection type="aggregation" name="startupProperties" persistent="false" audited="false">
+			<displayName>Startup</displayName>
+			<description>Startup Configuration</description>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection type="aggregation" name="originalStartupProperties" persistent="false" audited="false">
+			<displayName>Original Startup values</displayName>
+			<description>Startup Configuration</description>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<association type="aggregation" name="newProperty" persistent="false" audited="false">
+			<displayName>New Property</displayName>
+			<documentName>Generic</documentName>
+		</association>
 	</attributes>
 	<conditions>
 		<condition name="fixedCustomer" usage="view">
@@ -181,5 +199,12 @@
 				org.skyve.impl.util.UtilImpl.CUSTOMER != null
 			</expression>
 		</condition>
+		<condition name="productionInstance">
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.ENVIRONMENT_IDENTIFIER==null
+				]]>
+			</expression>
+		</condition>		
 	</conditions>
 </document>
