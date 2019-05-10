@@ -12,6 +12,31 @@
 		        <column/>
 		        <column/>
 		        <row>
+					<item>
+						<spacer/>
+					</item>			        	
+		        	<item colspan="2">
+		        		<blurb>
+		        			<![CDATA[
+			<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
+				<div class="ui-messages-info ui-corner-all">
+					<span class="ui-messages-warn-icon"></span>
+					<ul>
+						<li role="alert" aria-atomic="true">
+							<span class="ui-messages-warn-detail">
+								The Skyve Script document creator is a developer level tool to assist
+								rapid development, and can modify project files.<br> 
+								&emsp;Ensure you have your project under source control to protect against unexpected change.
+							</span>
+						</li>
+					</ul>
+				</div>
+			</div>				
+		        			]]>
+		        		</blurb>
+		        	</item>
+		        </row>
+		        <row>
 		            <item colspan="2">
 		            	<textArea binding="script" minPixelHeight="500">
 		            		<onBlurHandlers>
@@ -30,11 +55,22 @@
 		        		<default binding="outputLocation" />
 		        	</item>
 		        </row>
-		        <row>
+				<row>
 					<item>
-						<combo binding="defaultModule" />
+						<spacer/>
 					</item>
-		        </row>
+					<item>
+						<blurb><![CDATA[
+						<p>Once your files are created:</p>
+						<ul>
+							<li>Add the new module to your <code>customer.xml</code> file</li>
+							<li>Use the Generate Domain maven target to build the module as part of your project</li>
+							<li>After deployment, add appropriate privileges to your user to be able to use the new module</li>
+							<li>Sign out and back in for the new privilege access to take effect.</li>
+						</ul>						
+						]]></blurb>
+					</item>
+				</row>
 		    </form>
     	</tab>
     	<tab title="Markdown Preview">
