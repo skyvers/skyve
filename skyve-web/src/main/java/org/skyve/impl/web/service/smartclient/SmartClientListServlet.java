@@ -115,7 +115,6 @@ public class SmartClientListServlet extends HttpServlet {
 					// use the view's conversation if it was sent down from the client
 					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 					AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId, request, response);
-					Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
@@ -131,12 +130,15 @@ public class SmartClientListServlet extends HttpServlet {
 
 			        persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request,
+			    														(userPrincipal == null) ? null : userPrincipal.getName(),
+	    																true);
 					if (user == null) {
 						throw new SessionEndedException();
 					}
 			    	persistence.setUser(user);
 	
+					Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			    	Customer customer = user.getCustomer();
 			        Module module = null;
 			        Document drivingDocument = null;
