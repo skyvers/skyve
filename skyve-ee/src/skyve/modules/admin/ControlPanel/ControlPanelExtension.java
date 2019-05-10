@@ -193,7 +193,7 @@ public class ControlPanelExtension extends ControlPanel {
 		// }
 
 		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY != null) {
-			addProperty("api.googleMapsV3Key", UtilImpl.GOOGLE_MAPS_V3_API_KEY, "Google Maps API Key");
+			addProperty("api.googleMapsV3Key", UtilImpl.GOOGLE_MAPS_V3_API_KEY, "Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
 		}
 		if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) {
 			addProperty("api.googleRecaptchaSiteKey", UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, "Google Recaptcha Site Key");
