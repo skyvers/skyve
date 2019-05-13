@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -259,6 +261,7 @@ public class ControlPanelExtension extends ControlPanel {
 			String content = new String(Files.readAllBytes(path), charset);
 			Object oldValue = null;
 			Object replacement = null;
+			Map<String, Object> changed = new TreeMap<>();
 
 			for (Generic g : getStartupProperties()) {
 
@@ -285,6 +288,7 @@ public class ControlPanelExtension extends ControlPanel {
 				} else if ((oldValue == null && replacement != null)
 						|| (oldValue != null && !oldValue.equals(replacement))) {
 
+					changed.put(g.getText5001(), g.getText5002());
 					if (parts.length == 1) {
 						propertyName = parts[0];
 					} else {
@@ -294,40 +298,18 @@ public class ControlPanelExtension extends ControlPanel {
 
 					switch (g.getText5001()) {
 					case "smtp.server":
-						found = true;
-						break;
-					case "smtp.port":
-						quoted = false;
-						found = true;
-						break;
 					case "smtp.uid":
-						found = true;
-						break;
 					case "smtp.pwd":
-						found = true;
-						break;
 					case "smtp.sender":
-						found = true;
-						break;
-					case "smtp.testBogusSend":
-						quoted = false;
-						found = true;
-						break;
 					case "smtp.testRecipient":
-						found = true;
-						break;
 					case "environment.identifier":
-						found = true;
-						break;
 					case "environment.customer":
-						found = true;
-						break;
 					case "environment.moduleDirectory":
-						found = true;
-						break;
 					case "environment.supportEmailAddress":
 						found = true;
 						break;
+					case "smtp.port":
+					case "smtp.testBogusSend":
 					case "environment.showSetup":
 						quoted = false;
 						found = true;
@@ -375,7 +357,53 @@ public class ControlPanelExtension extends ControlPanel {
 			}
 
 			Files.write(nPath, content.getBytes(charset));
+			
+			// now update the application state
+			for(String k: changed.keySet()) {
 
+				switch (k) {
+				case "smtp.server":
+					UtilImpl.SMTP= (String) changed.get(k);
+					break;
+				case "smtp.uid":
+					UtilImpl.SMTP_UID = (String) changed.get(k);
+					break;
+				case "smtp.pwd":
+					UtilImpl.SMTP_PWD = (String) changed.get(k);
+					break;
+				case "smtp.sender":
+					UtilImpl.SMTP_SENDER = (String) changed.get(k);
+					break;
+				case "smtp.testRecipient":
+					UtilImpl.SMTP_TEST_RECIPIENT = (String) changed.get(k);
+					break;
+				case "environment.identifier":
+					UtilImpl.ENVIRONMENT_IDENTIFIER = (String) changed.get(k);
+					break;
+				case "environment.customer":
+					UtilImpl.CUSTOMER = (String) changed.get(k);
+					break;
+				case "environment.moduleDirectory":
+					UtilImpl.MODULE_DIRECTORY = (String) changed.get(k);
+					break;
+				case "environment.supportEmailAddress":
+					UtilImpl.SUPPORT_EMAIL_ADDRESS = (String) changed.get(k);
+					break;
+				case "smtp.port":
+					UtilImpl.SMTP_PORT = (String) changed.get(k);
+					break;
+				case "smtp.testBogusSend":
+					UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean((String) changed.get(k));
+					break;
+				case "environment.showSetup":
+					UtilImpl.SHOW_SETUP = Boolean.parseBoolean((String) changed.get(k));
+					break;
+					
+				default:
+					break;
+				}				
+			}
+			
 			loadStartupConfiguration();
 
 			EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Startup configuration changes have been applied"));
@@ -470,14 +498,10 @@ public class ControlPanelExtension extends ControlPanel {
 	 * Replace a specified group within the source given the regex
 	 * Reg exp handling for "json" startup configuration settings
 	 * 
-	 * @param regex
-	 *            - the regular expression
-	 * @param source
-	 *            - the original string to change
-	 * @param groupToReplace
-	 *            - the number/index of the group to change
-	 * @param replacement
-	 *            - the replacement value to apply for the replaced group
+	 * @param regex - the regular expression
+	 * @param source - the original string to change
+	 * @param groupToReplace - the number/index of the group to change
+	 * @param replacement - the replacement value to apply for the replaced group
 	 * @return
 	 */
 	public static String replaceGroup(String regex, String source, int groupToReplace, String replacement) {

@@ -332,6 +332,6 @@
 		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
 		<action className="ExecuteSAIL" displayName="Generate Test" inActionPanel="false" toolTip="Execute SAIL and output results" />
 		<download className="DownloadSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
-		<action className="ApplyStartupConfiguration" displayName="Apply" inActionPanel="false" toolTip="OK to apply configuration? There is no undo."  iconStyleClass="fa fa-exclamation"/>
+		<action className="ApplyStartupConfiguration" displayName="Apply Changes" inActionPanel="false" toolTip="OK to apply configuration? There is no undo."  iconStyleClass="fa fa-exclamation"/>
 	</actions>
 </view>
