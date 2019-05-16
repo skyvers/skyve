@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.skyve.impl.util.UtilImpl;
 
 public class SkyveContextListenerTest {
 
@@ -52,8 +53,8 @@ public class SkyveContextListenerTest {
 		final String test1 = null, test2 = "";
 
 		// perform the method under test
-		String result1 = SkyveContextListener.cleanupModuleDirectory(test1);
-		String result2 = SkyveContextListener.cleanupModuleDirectory(test2);
+		String result1 = UtilImpl.cleanupModuleDirectory(test1);
+		String result2 = UtilImpl.cleanupModuleDirectory(test2);
 
 		// verify the results
 		assertThat(result1, is(test1));
@@ -70,10 +71,10 @@ public class SkyveContextListenerTest {
 				test4 = "\\src\\main\\java";
 
 		// perform the method under test
-		String result1 = SkyveContextListener.cleanupModuleDirectory(test1);
-		String result2 = SkyveContextListener.cleanupModuleDirectory(test2);
-		String result3 = SkyveContextListener.cleanupModuleDirectory(test3);
-		String result4 = SkyveContextListener.cleanupModuleDirectory(test4);
+		String result1 = UtilImpl.cleanupModuleDirectory(test1);
+		String result2 = UtilImpl.cleanupModuleDirectory(test2);
+		String result3 = UtilImpl.cleanupModuleDirectory(test3);
+		String result4 = UtilImpl.cleanupModuleDirectory(test4);
 
 		// verify the results
 		assertThat(result1, is(test1 + "modules/"));
@@ -92,10 +93,10 @@ public class SkyveContextListenerTest {
 				test4 = "\\src\\main\\java\\modules\\";
 
 		// perform the method under test
-		String result1 = SkyveContextListener.cleanupModuleDirectory(test1);
-		String result2 = SkyveContextListener.cleanupModuleDirectory(test2);
-		String result3 = SkyveContextListener.cleanupModuleDirectory(test3);
-		String result4 = SkyveContextListener.cleanupModuleDirectory(test4);
+		String result1 = UtilImpl.cleanupModuleDirectory(test1);
+		String result2 = UtilImpl.cleanupModuleDirectory(test2);
+		String result3 = UtilImpl.cleanupModuleDirectory(test3);
+		String result4 = UtilImpl.cleanupModuleDirectory(test4);
 
 		// verify the results
 		assertThat(result1, is(test1 + "/"));

@@ -132,6 +132,12 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	public static final String geometry2PropertyName = "geometry2";
 	/** @hidden */
 	public static final String geometry3PropertyName = "geometry3";
+	/** @hidden */
+	public static final String text5001PropertyName = "text5001";
+	/** @hidden */
+	public static final String text5002PropertyName = "text5002";
+	/** @hidden */
+	public static final String text5003PropertyName = "text5003";
 
 	/**
 	 * memo1
@@ -289,6 +295,18 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * geometry3
 	 **/
 	private Geometry geometry3;
+	/**
+	 * text 500 1
+	 **/
+	private String text5001;
+	/**
+	 * text 500 2
+	 **/
+	private String text5002;
+	/**
+	 * text 500 3
+	 **/
+	private String text5003;
 	private String bizParentId;
 
 
@@ -1065,6 +1083,60 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	public void setGeometry3(Geometry geometry3) {
 		preset(geometry3PropertyName, geometry3);
 		this.geometry3 = geometry3;
+	}
+
+	/**
+	 * {@link #text5001} accessor.
+	 * @return	The value.
+	 **/
+	public String getText5001() {
+		return text5001;
+	}
+
+	/**
+	 * {@link #text5001} mutator.
+	 * @param text5001	The new value.
+	 **/
+	@XmlElement
+	public void setText5001(String text5001) {
+		preset(text5001PropertyName, text5001);
+		this.text5001 = text5001;
+	}
+
+	/**
+	 * {@link #text5002} accessor.
+	 * @return	The value.
+	 **/
+	public String getText5002() {
+		return text5002;
+	}
+
+	/**
+	 * {@link #text5002} mutator.
+	 * @param text5002	The new value.
+	 **/
+	@XmlElement
+	public void setText5002(String text5002) {
+		preset(text5002PropertyName, text5002);
+		this.text5002 = text5002;
+	}
+
+	/**
+	 * {@link #text5003} accessor.
+	 * @return	The value.
+	 **/
+	public String getText5003() {
+		return text5003;
+	}
+
+	/**
+	 * {@link #text5003} mutator.
+	 * @param text5003	The new value.
+	 **/
+	@XmlElement
+	public void setText5003(String text5003) {
+		preset(text5003PropertyName, text5003);
+		this.text5003 = text5003;
 	}
 
 	@Override

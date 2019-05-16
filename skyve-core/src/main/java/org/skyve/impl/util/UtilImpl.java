@@ -170,6 +170,9 @@ public class UtilImpl {
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
 
+	// Show setup screen on sign-in for DevOps users
+	public static boolean SHOW_SETUP = false;
+	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
 	public static String BOOTSTRAP_USER = null;
@@ -449,4 +452,38 @@ public class UtilImpl {
 
 		return result;
 	}
+	
+	/**
+	 * Checks that the module directory:
+	 * <ul>
+	 * <li>ends with a trailing slash
+	 * <li>ends with modules
+	 * </ul>
+	 * 
+	 * @param path The supplied content path
+	 * @return The updated path if any slashes or <code>/modules</code> need to be added
+	 */
+	public static String cleanupModuleDirectory(final String path) {
+		if (path != null && path.length() > 0) {
+			String updatedPath = path;
+
+			// strip the trailing slash if any
+			if (path.endsWith("/") || path.endsWith("\\")) {
+				updatedPath = path.substring(0, path.length() - 1);
+			}
+
+			if (!updatedPath.endsWith("modules")) {
+				updatedPath = updatedPath + "/modules/";
+			}
+
+			if (!updatedPath.endsWith("/") && !updatedPath.endsWith("\\")) {
+				updatedPath = updatedPath + "/";
+			}
+
+			return updatedPath;
+		}
+
+		return path;
+	}
+	
 }
