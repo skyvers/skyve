@@ -133,8 +133,6 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("resource")
 	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
-			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");
@@ -147,6 +145,7 @@ class HibernateQueryDelegate {
 				else if (assertMultiple && (returnAliases.length <= 1)) {
 					throw new DomainException("There should be more than 1 projected value in the query");
 				}
+				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 				return new HibernateAutoClosingIterable<>(results, false, false);
 			}
 
@@ -156,6 +155,7 @@ class HibernateQueryDelegate {
 				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
 
+			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			return new HibernateAutoClosingIterable<>(drivingModuleName, 
 														drivingDocumentName, 
 														results, 
