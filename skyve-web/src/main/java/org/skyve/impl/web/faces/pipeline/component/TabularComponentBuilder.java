@@ -3262,6 +3262,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (confirmationText != null) {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
 			confirm.setMessage(confirmationText);
+			confirm.setEscape(false);
 			component.addClientBehavior("click", confirm);
 		}
 	}
