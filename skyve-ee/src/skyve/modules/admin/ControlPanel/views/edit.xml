@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Control Panel" name="edit" xmlns="http://www.skyve.org/xml/view"
-	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="Control Panel" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
 		<tab title="Design">
 			<form border="true" borderTitle="Generate">
@@ -306,19 +306,48 @@
 			<listGrid query="qUserTokens" continueConversation="false" />
 		</tab>
 		<tab title="Startup Configuration">
-			<form>
-				<column/>
-				<row>
-					<item>	
-						<button actionName="ApplyStartupConfiguration" pixelWidth="150"/>
-					</item>
-				</row>
-			</form>
-			<dataGrid binding="startupProperties" showRemove="false" inline="true" showZoom="false">
-				<boundColumn binding="text5001" title="Key" editable="false"/>
-				<boundColumn binding="text5002" title="Value"/>						
-				<boundColumn binding="text5003" title="Description" editable="false"/>
-			</dataGrid>		
+			<vbox>
+				<form>
+					<column />
+					<row>
+						<item>
+							<button actionName="ApplyStartupConfiguration" pixelWidth="150" />
+						</item>
+					</row>
+				</form>
+				<dataGrid binding="startupProperties" showRemove="false" inline="true" showZoom="false">
+					<boundColumn binding="text5001" title="Key" editable="false" />
+					<boundColumn binding="text5002" title="Value" />
+					<boundColumn binding="text5003" title="Description" editable="false" />
+				</dataGrid>
+				<form border="true" borderTitle="Add API Key" visible="allowAddAPIKey">
+					<column />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item label="API Key Name">
+							<textField binding="newProperty.text5001" />
+						</item>
+						<item label="Key Value">
+							<textField binding="newProperty.text5002" />
+						</item>
+						<item>
+							<button actionName="AddAPIKey" />
+						</item>
+					</row>
+				</form>
+				<form border="true" borderTitle="Add API Key" invisible="allowAddAPIKey">
+					<column />
+					<column />
+					<row>
+						<item>
+							<blurb><![CDATA[<em>Adding API keys not supported for complex configuration - modify the project configuration directly.</em>]]></blurb>
+						</item>
+					</row>
+				</form>
+			</vbox>
 		</tab>
 	</tabPane>
 	<actions>
@@ -332,6 +361,9 @@
 		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
 		<action className="ExecuteSAIL" displayName="Generate Test" inActionPanel="false" toolTip="Execute SAIL and output results" />
 		<download className="DownloadSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
-		<action className="ApplyStartupConfiguration" displayName="Apply Changes" inActionPanel="false" toolTip="OK to apply configuration? There is no undo."  iconStyleClass="fa fa-exclamation"/>
+		<action className="ApplyStartupConfiguration" displayName="Apply Changes" inActionPanel="false" toolTip="OK to apply configuration? There is no undo."
+			iconStyleClass="fa fa-exclamation" />
+		<action className="AddAPIKey" displayName="Add API Key" inActionPanel="false" enabled="allowAddAPIKey" 
+			iconStyleClass="fa fa-plus"/>
 	</actions>
 </view>
