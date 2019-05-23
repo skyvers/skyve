@@ -65,6 +65,10 @@ public class RefreshDocumentTuplesJob extends Job {
 				DocumentQuery q = pers.newDocumentQuery(doc.getModuleName(), doc.getDocumentName());
 				for (PersistentBean bean : q.<PersistentBean>beanResults()) {
 					try {
+						if (EvictOption.bean.equals(evict) || EvictOption.all.equals(evict)) {
+                            bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bean.getBizId(), false);
+                        }
+						
 						if (RefreshOption.upsert.equals(refresh)) {
 							pers.upsertBeanTuple(bean);
 						}
@@ -72,6 +76,7 @@ public class RefreshDocumentTuplesJob extends Job {
 							bean = pers.save(bean);
 						}
 						pers.commit(false);
+						
 						if (EvictOption.bean.equals(evict)) {
 							pers.evictCached(bean);
 						}

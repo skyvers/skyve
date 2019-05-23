@@ -78,18 +78,23 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("unchecked")
 	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
+			String[] returnAliases = query.getReturnAliases();
+			if ((returnAliases == null) || (returnAliases.length == 0)) {
+				throw new DomainException("There should be at least 1 projected value in the query");
+			}
+
 			if (asIs) {
-				if (assertSingle && (query.getReturnAliases().length != 1)) {
+				if (assertSingle && (returnAliases.length != 1)) {
 					throw new DomainException("There should be only 1 projected value in the query");
 				}
-				else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
+				else if (assertMultiple && (returnAliases.length <= 1)) {
 					throw new DomainException("There should be more than 1 projected value in the query");
 				}
 				return query.list();
 			}
 
 			// Replace bogus _ property names with the dot
-			String[] aliases = query.getReturnAliases().clone();
+			String[] aliases = returnAliases.clone();
 			for (int i = 0, length = aliases.length; i < length; i++) {
 				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
@@ -128,23 +133,29 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("resource")
 	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
-			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+			String[] returnAliases = query.getReturnAliases();
+			if ((returnAliases == null) || (returnAliases.length == 0)) {
+				throw new DomainException("There should be at least 1 projected value in the query");
+			}
+
 			if (asIs) {
-				if (assertSingle && (query.getReturnAliases().length != 1)) {
+				if (assertSingle && (returnAliases.length != 1)) {
 					throw new DomainException("There should be only 1 projected value in the query");
 				}
-				else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
+				else if (assertMultiple && (returnAliases.length <= 1)) {
 					throw new DomainException("There should be more than 1 projected value in the query");
 				}
+				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 				return new HibernateAutoClosingIterable<>(results, false, false);
 			}
 
 			// Replace bogus _ property names with the dot
-			String[] aliases = query.getReturnAliases().clone();
+			String[] aliases = returnAliases.clone();
 			for (int i = 0, length = aliases.length; i < length; i++) {
 				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
 
+			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			return new HibernateAutoClosingIterable<>(drivingModuleName, 
 														drivingDocumentName, 
 														results, 
