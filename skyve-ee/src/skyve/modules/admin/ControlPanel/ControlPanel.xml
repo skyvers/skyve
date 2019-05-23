@@ -187,6 +187,13 @@
 			<displayName>New Property</displayName>
 			<documentName>Generic</documentName>
 		</association>
+		<boolean name="addKeyNotSupported" persistent="false" audited="false">
+			<displayName>Add Key Not Supported</displayName>
+			<description><![CDATA[
+			Flag to control whether adding an API key will be supported.
+			API stanzas with substanzas is not yet implemented.
+			]]></description>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="fixedCustomer" usage="view">
@@ -205,6 +212,13 @@
 					org.skyve.impl.util.UtilImpl.ENVIRONMENT_IDENTIFIER==null
 				]]>
 			</expression>
-		</condition>		
+		</condition>	
+		<condition name="allowAddAPIKey">
+			<expression>
+				<![CDATA[
+				Boolean.TRUE.equals(addKeyNotSupported)
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>

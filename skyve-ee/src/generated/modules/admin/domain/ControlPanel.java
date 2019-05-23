@@ -110,6 +110,8 @@ public class ControlPanel extends AbstractTransientBean {
 	public static final String originalStartupPropertiesPropertyName = "originalStartupProperties";
 	/** @hidden */
 	public static final String newPropertyPropertyName = "newProperty";
+	/** @hidden */
+	public static final String addKeyNotSupportedPropertyName = "addKeyNotSupported";
 
 	/**
 	 * User Agent Type
@@ -510,6 +512,13 @@ public class ControlPanel extends AbstractTransientBean {
 	 * New Property
 	 **/
 	private Generic newProperty = null;
+	/**
+	 * Add Key Not Supported
+	 * <br/>
+	 * Flag to control whether adding an API key will be supported.
+			API stanzas with substanzas is not yet implemented.
+	 **/
+	private Boolean addKeyNotSupported;
 
 	@Override
 	@XmlTransient
@@ -1176,6 +1185,43 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setNewProperty(Generic newProperty) {
 		preset(newPropertyPropertyName, newProperty);
 		this.newProperty = newProperty;
+	}
+
+	/**
+	 * {@link #addKeyNotSupported} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getAddKeyNotSupported() {
+		return addKeyNotSupported;
+	}
+
+	/**
+	 * {@link #addKeyNotSupported} mutator.
+	 * @param addKeyNotSupported	The new value.
+	 **/
+	@XmlElement
+	public void setAddKeyNotSupported(Boolean addKeyNotSupported) {
+		preset(addKeyNotSupportedPropertyName, addKeyNotSupported);
+		this.addKeyNotSupported = addKeyNotSupported;
+	}
+
+	/**
+	 * allowAddAPIKey
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isAllowAddAPIKey() {
+		return (Boolean.TRUE.equals(addKeyNotSupported));
+	}
+
+	/**
+	 * {@link #isAllowAddAPIKey} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotAllowAddAPIKey() {
+		return (! isAllowAddAPIKey());
 	}
 
 	/**

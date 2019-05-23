@@ -236,7 +236,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.MODULE_DIRECTORY = getString("environment", "moduleDirectory", environment, false);
 		if (UtilImpl.MODULE_DIRECTORY != null) {
 			// clean up the module directory path
-			UtilImpl.MODULE_DIRECTORY = cleanupModuleDirectory(UtilImpl.MODULE_DIRECTORY);
+			UtilImpl.MODULE_DIRECTORY = UtilImpl.cleanupModuleDirectory(UtilImpl.MODULE_DIRECTORY);
 
 			File moduleDirectory = new File(UtilImpl.MODULE_DIRECTORY);
 			if (!moduleDirectory.exists()) {
@@ -416,36 +416,4 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 	
-	/**
-	 * Checks that the module directory:
-	 * <ul>
-	 * <li>ends with a trailing slash
-	 * <li>ends with modules
-	 * </ul>
-	 * 
-	 * @param path The supplied content path
-	 * @return The updated path if any slashes or <code>/modules</code> need to be added
-	 */
-	static String cleanupModuleDirectory(final String path) {
-		if (path != null && path.length() > 0) {
-			String updatedPath = path;
-
-			// strip the trailing slash if any
-			if (path.endsWith("/") || path.endsWith("\\")) {
-				updatedPath = path.substring(0, path.length() - 1);
-			}
-
-			if (!updatedPath.endsWith("modules")) {
-				updatedPath = updatedPath + "/modules/";
-			}
-
-			if (!updatedPath.endsWith("/") && !updatedPath.endsWith("\\")) {
-				updatedPath = updatedPath + "/";
-			}
-
-			return updatedPath;
-		}
-
-		return path;
-	}
 }
