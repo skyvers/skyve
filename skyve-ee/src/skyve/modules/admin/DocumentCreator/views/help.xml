@@ -81,7 +81,9 @@
 - *addressLine1* text 100<br>
 - addressLine2 text 100<br>
 - addressLine3 text 100<br>
-- *suburb* text 50<br>
+- suburb text 50<br>
+- city text 200<br>
+- postalCode text 10<br>
 - state text 50<br>
 - *country* Country<br>
 - boundary geometry<br>

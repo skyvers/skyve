@@ -193,6 +193,7 @@
 					<action name="DownloadSAIL" />
 					<action name="DownloadClientSAIL" />
 					<action name="ApplyStartupConfiguration" />
+					<action name="AddAPIKey"/>
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />

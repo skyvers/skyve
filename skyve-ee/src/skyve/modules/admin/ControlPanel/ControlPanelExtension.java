@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -192,15 +195,45 @@ public class ControlPanelExtension extends ControlPanel {
 		// }
 		// }
 
-		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY != null) {
-			addProperty("api.googleMapsV3Key", UtilImpl.GOOGLE_MAPS_V3_API_KEY, "Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
-		}
-		if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) {
+//		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY != null) {
+			addProperty("api.googleMapsV3Key", UtilImpl.GOOGLE_MAPS_V3_API_KEY,
+					"Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
+//		}
+//		if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) {
 			addProperty("api.googleRecaptchaSiteKey", UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, "Google Recaptcha Site Key");
-		}
-		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL != null) {
+//		}
+//		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL != null) {
 			addProperty("api.ckEditorConfigFileUrl", UtilImpl.CKEDITOR_CONFIG_FILE_URL, "CKEditor Config File URL");
+//		}
+			
+		Map<String, Object> api = (Map<String, Object>) UtilImpl.CONFIGURATION.get("api");
+		if (api != null) {
+			for(String k: api.keySet()) {
+				//ignore keys already loaded above
+				if(!k.equals("googleMapsV3Key") && !k.equals("googleRecaptchaSiteKey") && !k.equals("ckEditorConfigFileUrl") ) {
+					
+					//load this new key value - may be a string, or a hashmap
+					Object value = api.get(k);
+					if(value instanceof String) {
+						addProperty("api." + k, (String) value,"");
+					} else {
+						// multiple depth level stanzas not yet supported
+						setAddKeyNotSupported(Boolean.FALSE);
+						
+						Map<String, String> keyValue = (Map<String, String>) api.get(k);
+						for(String innerK: keyValue.keySet()) {
+							Object innerV = keyValue.get(innerK);
+							if(innerV instanceof String) {
+								addProperty("api." + k + "." + innerK, (String) innerV,"");
+							} else {
+								throw new ValidationException(new Message("Configuration includes unsupported types - edit the json settings file directly"));
+							}
+						}
+					}
+				}
+			}
 		}
+		
 
 		addProperty("environment.identifier", UtilImpl.ENVIRONMENT_IDENTIFIER, "Environment Identifier - \"test\", \"sit\", \"uat\", \"dev\" etc: null = prod");
 		addProperty("environment.customer", UtilImpl.CUSTOMER, "Customer - default customer for sign in page");
@@ -253,88 +286,70 @@ public class ControlPanelExtension extends ControlPanel {
 
 		try {
 			Path path = Paths.get(UtilImpl.PROPERTIES_FILE_PATH);
-			Path nPath = Paths.get(UtilImpl.PROPERTIES_FILE_PATH);
+			Path nPath = Paths.get(UtilImpl.PROPERTIES_FILE_PATH + "2");
 
 			Charset charset = StandardCharsets.UTF_8;
 			String content = new String(Files.readAllBytes(path), charset);
 			Object oldValue = null;
 			Object replacement = null;
+			Map<String, Object> changed = new TreeMap<>();
 
 			for (Generic g : getStartupProperties()) {
 
 				String[] parts = g.getText5001().split("\\.");
 				int index = getStartupProperties().indexOf(g);
-				boolean oldFound = false;
+				boolean replace = false;
 				for (Generic gOld : getOriginalStartupProperties()) {
 					if (gOld.getText5001().equals(g.getText5001())) {
 						oldValue = gOld.getText5002();
-						oldFound = true;
+						replace = true;
 						break;
 					}
 				}
 				replacement = g.getText5002();
 				String stanza = null;
 				String propertyName = null;
-				StringBuilder findExp = new StringBuilder();
 				boolean found = false;
 				boolean quoted = true;
 
-				if (!oldFound) {
-					// insert new property
+				if (parts.length == 1) {
+					propertyName = parts[0];
+				} else {
+					stanza = parts[0];
+					propertyName = parts[1];
+				}
 
+				if (!replace) {
+					// insert new property
+					
+					quoted = true;
+					found = true;
 				} else if ((oldValue == null && replacement != null)
 						|| (oldValue != null && !oldValue.equals(replacement))) {
 
-					if (parts.length == 1) {
-						propertyName = parts[0];
-					} else {
-						stanza = parts[0];
-						propertyName = parts[1];
-					}
+					changed.put(g.getText5001(), g.getText5002());
 
 					switch (g.getText5001()) {
 					case "smtp.server":
-						found = true;
-						break;
-					case "smtp.port":
-						quoted = false;
-						found = true;
-						break;
 					case "smtp.uid":
-						found = true;
-						break;
 					case "smtp.pwd":
-						found = true;
-						break;
 					case "smtp.sender":
-						found = true;
-						break;
-					case "smtp.testBogusSend":
-						quoted = false;
-						found = true;
-						break;
 					case "smtp.testRecipient":
-						found = true;
-						break;
 					case "environment.identifier":
-						found = true;
-						break;
 					case "environment.customer":
-						found = true;
-						break;
 					case "environment.moduleDirectory":
-						found = true;
-						break;
 					case "environment.supportEmailAddress":
 						found = true;
 						break;
+					case "smtp.port":
+					case "smtp.testBogusSend":
 					case "environment.showSetup":
 						quoted = false;
 						found = true;
 						break;
 
 					default:
-						found = oldFound;
+						found = replace;
 						quoted = true;
 						break;
 					}
@@ -342,39 +357,130 @@ public class ControlPanelExtension extends ControlPanel {
 
 				if (found) {
 
-					String oldValueString = null;
+					StringBuilder findExp = new StringBuilder();
 					String replacementString = null;
-					if (quoted) {
-						oldValueString = (oldValue == null ? "null" : "\"" + oldValue + "\"");
-						replacementString = (replacement == null ? "null" : "\"" + replacement + "\"");
+					String oldValueString = null;
+					if (replace) {
+
+						if (quoted) {
+							oldValueString = (oldValue == null || oldValue.toString().length()==0 ? "null" : "\"" + oldValue + "\"");
+							replacementString = (replacement == null || replacement.toString().length()==0 ? "null" : "\"" + replacement + "\"");
+						} else {
+							oldValueString = (oldValue == null ? "null" : oldValue.toString());
+							replacementString = (replacement == null ? "null" : replacement.toString());
+						}
+
+						// handle complex properties
+						findExp.append(stanza).append("\\s*:"); // the stanza in the json
+						if(parts.length>2) {
+							findExp.append("(.|\\n)*?\\n\\s*").append(propertyName);
+							findExp.append(":\\s*(.|\\n)*?\\n\\s*").append(parts[2]).append(":\\s*");
+							
+						} else {
+							findExp.append("(.|\n)*?(\n\\s*"); // new lines or spaces
+							findExp.append(propertyName).append(":\\s*)"); // the property declaration
+						}
+						findExp.append("(").append(oldValueString).append(")"); // the value to replace
+
+//						Util.LOGGER.info(findExp.toString());
+						
+						if (findExp.length() > 0) {
+							try {
+								content = replaceGroup(findExp.toString(), content, 3, replacementString);
+							} catch (StackOverflowError e) {
+								// TODO: handle exception
+								EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.error, g.getText5001() + " - The previous value could not be matched"));
+								throw new ValidationException(
+										new Message(Binder.createIndexedBinding(ControlPanel.startupPropertiesPropertyName, index), "The previous value could not be matched."));
+							}
+						}
+
 					} else {
-						oldValueString = (oldValue == null ? "null" : oldValue.toString());
-						replacementString = (replacement == null ? "null" : replacement.toString());
-					}
+						
+						//handle insertion of new API property
+						
+						//TODO - handle complex sub stanzas - this is not yet implemented
+						
+						StringBuilder sb = new StringBuilder();
+						sb.append("\n\t\t").append(propertyName).append(": ");
+						sb.append((g.getText5002() == null ? "null" : "\"" + g.getText5002() + "\""));
+						sb.append("\n\t");
+						
+						//special case - api: {} breaks the usual pattern replace
+						// stuff a spacer between the braces
+						findExp.append("api:(\\s*)(\\{)(\\})");
+						replacementString = " }";
+						content = replaceGroup(findExp.toString(), content, 3, replacementString);
 
-					findExp.append(stanza).append("\\s*:"); // the stanza in the json
-					findExp.append("(.|\n)*?(\n\\s*"); // new lines or spaces
-					findExp.append(propertyName).append(":\\s*)"); // the property declaration
-					findExp.append("(").append(oldValueString).append(")"); // the value to replace
-
-					// Util.LOGGER.info("OLDVALUE: " + oldValueString);
-					// Util.LOGGER.info("REPLACEMENT: " + replacementString);
-					// Util.LOGGER.info(findExp.toString());
-
-					if (findExp.length() > 0) {
-						try {
+						// as the only api key
+						// if there are other keys, this replace will do nothing
+						findExp = new StringBuilder();
+						findExp.append("api:(\\s*)(\\{)(\\n|\\s)*?(\\})");
+						replacementString = sb.toString();
+						String replaced = replaceGroup(findExp.toString(), content, 3, replacementString);
+						
+						//if not yet inserted
+						if(replaced.equals(content)) {
+							// after existing api keys
+							findExp = new StringBuilder();
+							findExp.append("api:(\\s*)(\\{)(.|\\n\\s)*?(\\})");
+							replacementString = "," + sb.toString();
 							content = replaceGroup(findExp.toString(), content, 3, replacementString);
-						} catch (StackOverflowError e) {
-							// TODO: handle exception
-							EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.error, g.getText5001() + " - The previous value could not be matched"));
-							throw new ValidationException(
-									new Message(Binder.createIndexedBinding(ControlPanel.startupPropertiesPropertyName, index), "The previous value could not be matched."));
+						} else {
+							content = replaced;
 						}
 					}
+
 				}
 			}
 
 			Files.write(nPath, content.getBytes(charset));
+
+			// now update the application state
+			for (String k : changed.keySet()) {
+
+				switch (k) {
+				case "smtp.server":
+					UtilImpl.SMTP = (String) changed.get(k);
+					break;
+				case "smtp.uid":
+					UtilImpl.SMTP_UID = (String) changed.get(k);
+					break;
+				case "smtp.pwd":
+					UtilImpl.SMTP_PWD = (String) changed.get(k);
+					break;
+				case "smtp.sender":
+					UtilImpl.SMTP_SENDER = (String) changed.get(k);
+					break;
+				case "smtp.testRecipient":
+					UtilImpl.SMTP_TEST_RECIPIENT = (String) changed.get(k);
+					break;
+				case "environment.identifier":
+					UtilImpl.ENVIRONMENT_IDENTIFIER = (String) changed.get(k);
+					break;
+				case "environment.customer":
+					UtilImpl.CUSTOMER = (String) changed.get(k);
+					break;
+				case "environment.moduleDirectory":
+					UtilImpl.MODULE_DIRECTORY = (String) changed.get(k);
+					break;
+				case "environment.supportEmailAddress":
+					UtilImpl.SUPPORT_EMAIL_ADDRESS = (String) changed.get(k);
+					break;
+				case "smtp.port":
+					UtilImpl.SMTP_PORT = (String) changed.get(k);
+					break;
+				case "smtp.testBogusSend":
+					UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean((String) changed.get(k));
+					break;
+				case "environment.showSetup":
+					UtilImpl.SHOW_SETUP = Boolean.parseBoolean((String) changed.get(k));
+					break;
+
+				default:
+					break;
+				}
+			}
 
 			loadStartupConfiguration();
 
