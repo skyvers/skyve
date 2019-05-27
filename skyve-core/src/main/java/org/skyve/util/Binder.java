@@ -388,4 +388,13 @@ public class Binder {
 	public static String toJavaStaticIdentifier(String string) {
 		return BindUtil.toJavaStaticIdentifier(string);
 	}
+	
+	/**
+	 * Return a java bean property name from a reflected method name.
+	 * @param methodName	The method name
+	 * @return	"get"/"set"/"is" prefix stripped and the remaining string decapitalised as appropriate.
+	 */
+	public static String toJavaPropertyName(String methodName) {
+		return BindUtil.toJavaPropertyName(methodName);
+	}
 }
