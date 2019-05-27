@@ -3,7 +3,7 @@ package modules.test;
 import org.junit.Test;
 import org.skyve.util.Util;
 
-import modules.AuditJSONGenerator;
+import modules.admin.AuditJSONGenerator;
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;

@@ -31,7 +31,7 @@ import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import modules.ModulesUtil;
+import modules.admin.ModulesUtil;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Communication;

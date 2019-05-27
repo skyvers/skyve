@@ -1,4 +1,4 @@
-package modules;
+package modules.admin;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

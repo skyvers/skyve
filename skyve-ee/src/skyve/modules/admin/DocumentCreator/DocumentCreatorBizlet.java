@@ -10,7 +10,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
-import modules.ModulesUtil.DomainValueSortByDescription;
+import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.DataMaintenanceModuleDocument;
 import modules.admin.domain.DocumentCreator;
 

@@ -1,4 +1,4 @@
-package modules;
+package modules.admin;
 
 import java.util.Map;
 import java.util.TreeMap;
