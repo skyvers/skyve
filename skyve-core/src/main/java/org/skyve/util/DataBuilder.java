@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -36,6 +37,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
@@ -402,11 +404,11 @@ public class DataBuilder {
 			if (result == null) {
 				result = randomBean(module, document);
 
-				if (visitedBizIds.contains(result.getBizId())) {
+				String resultBizId = result.getBizId();
+				if (visitedBizIds.contains(resultBizId)) {
 					return result;
-				} else {
-					visitedBizIds.add(result.getBizId());
 				}
+				visitedBizIds.add(resultBizId);
 
 				for (Attribute attribute : document.getAllAttributes()) {
 					if (filter(attribute)) {
@@ -455,6 +457,8 @@ public class DataBuilder {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
 							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
+							boolean childCollection = CollectionType.child.equals(collection.getType()) &&
+														document.getName().equals(collectionDocument.getParentDocumentName());
 							@SuppressWarnings("unchecked")
 							List<Bean> list = (List<Bean>) BindUtil.get(result, name);
 							
@@ -473,7 +477,13 @@ public class DataBuilder {
 							}
 		
 							for (int i = 0; i < cardinality; i++) {
-								list.add(build(collectionModule, collectionDocument, currentDepth + 1));
+								Bean element = build(collectionModule, collectionDocument, currentDepth + 1);
+								list.add(element);
+								if (childCollection) {
+									@SuppressWarnings("unchecked")
+									ChildBean<Bean> child = (ChildBean<Bean>) element;
+									child.setParent(result);
+								}
 							}
 						}
 					}
@@ -835,7 +845,8 @@ public class DataBuilder {
 				return StringUtils.substringBetween(result, "^", "$");
 			}
 			return result;
-		} catch (Exception e) {
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
@@ -906,7 +917,8 @@ public class DataBuilder {
 								}
 							}
 						}
-					} catch (Exception e) {
+					}
+					catch (@SuppressWarnings("unused") Exception e) {
 						// couldn't find the extension file on the classpath
 					}	
 				}
