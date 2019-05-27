@@ -126,7 +126,7 @@
 	// Environment settings
 	environment: {
 		// test, sit, uat, dev etc: null = prod
-		identifier: null,
+		identifier: "local",
 		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 		devMode: true,
 		// Customer Default
