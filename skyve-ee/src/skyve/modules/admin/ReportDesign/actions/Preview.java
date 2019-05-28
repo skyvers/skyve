@@ -61,7 +61,6 @@ public class Preview extends DownloadAction<ReportDesign> {
 			final ListModel<Bean> listModel = getDocumentQueryListModel(module, documentOrQueryOrModelName);
 			ReportUtil.runReport(reportRenderer.getReport(),
 					user,
-					document,
 					parameters,
 					// TODO: We could populate the list with random data.
 					listModel,
@@ -74,7 +73,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 					document,
 					parameters,
 					// TODO: We could populate the new instance with random data.
-					(Bean) document.newInstance(user),
+					document.newInstance(user),
 					ReportFormat.pdf,
 					baos);
 		}
