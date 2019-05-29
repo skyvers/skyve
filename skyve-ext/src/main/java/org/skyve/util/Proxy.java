@@ -187,14 +187,17 @@ public class Proxy {
 	 * @param proxy	The potential proxy object.
 	 * @return	true if it is a proxy, otherwise false
 	 */
+	@SuppressWarnings("null")
 	public static boolean isProxy(Object proxy) {
-		boolean result = true;
+		boolean result = (proxy != null);
 
-		try {
-			proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME);
-		}
-		catch (@SuppressWarnings("unused") NoSuchFieldException e) {
-			result = false;
+		if (result) {
+			try {
+				proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME);
+			}
+			catch (@SuppressWarnings("unused") NoSuchFieldException e) {
+				result = false;
+			}
 		}
 		
 		return result;
