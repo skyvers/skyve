@@ -1,4 +1,4 @@
-package modules;
+package modules.admin;
 
 import java.util.List;
 import java.util.logging.Level;

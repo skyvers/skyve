@@ -14,6 +14,6 @@
 		<module name="whosinIntegrate" />
 	</modules>
 	<interceptors>
-		<interceptor className="modules.RDBMSAuditInterceptor" />
+		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>
 </customer>

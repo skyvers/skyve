@@ -1,4 +1,4 @@
-package modules;
+package modules.admin;
 
 import java.util.ArrayList;
 import java.util.Calendar;

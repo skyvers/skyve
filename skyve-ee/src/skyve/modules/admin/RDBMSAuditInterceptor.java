@@ -1,4 +1,4 @@
-package modules;
+package modules.admin;
 
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;

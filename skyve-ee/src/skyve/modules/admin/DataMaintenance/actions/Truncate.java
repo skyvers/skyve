@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-import modules.ModulesUtil;
+import modules.admin.ModulesUtil;
 import modules.admin.domain.DataMaintenance;
 
 public class Truncate implements ServerSideAction<DataMaintenance> {

@@ -15,8 +15,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
-import modules.ModulesUtil;
-import modules.ModulesUtil.DomainValueSortByCode;
+import modules.admin.ModulesUtil;
+import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;

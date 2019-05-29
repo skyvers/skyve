@@ -211,8 +211,7 @@ public class ControlPanelExtension extends ControlPanel {
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_TEST_RECIPIENT_KEY, UtilImpl.SMTP_TEST_RECIPIENT, "Test Recipient (all emails only sent to this email address)");
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_TEST_BOGUS_SEND_KEY, Boolean.toString(UtilImpl.SMTP_TEST_BOGUS_SEND),
 				"Test Bogus Send - Set true so emails are never sent, they are logged)");
-
-		// TODO - handle extended properties
+		// TODO - handle extended SMTP properties
 
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_MAPS_V3_KEY, UtilImpl.GOOGLE_MAPS_V3_API_KEY,
 				"Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
@@ -415,7 +414,7 @@ public class ControlPanelExtension extends ControlPanel {
 						// handle insertion of new API property
 
 						// TODO - handle complex sub stanzas - this is not yet implemented
-						// handle by inserting new keys at the beginning of the API stanza
+						// handle by inserting new keys at the beginning of the stanza rather than at the end
 
 						StringBuilder sb = new StringBuilder();
 						sb.append("\n\t\t").append(propertyName).append(": ");

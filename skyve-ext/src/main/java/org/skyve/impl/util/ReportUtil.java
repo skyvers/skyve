@@ -95,7 +95,7 @@ public final class ReportUtil {
 
 		final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 
-		return runReport(jasperReport, user, document, parameters, listModel, format, out);
+		return runReport(jasperReport, user, parameters, listModel, format, out);
 	}
 
 	public static JasperPrint runReport(JasperReport jasperReport,
@@ -137,7 +137,6 @@ public final class ReportUtil {
 
 	public static JasperPrint runReport(JasperReport jasperReport,
 										User user,
-										Document document,
 										Map<String, Object> parameters,
 										ListModel<Bean> listModel,
 										ReportFormat format,

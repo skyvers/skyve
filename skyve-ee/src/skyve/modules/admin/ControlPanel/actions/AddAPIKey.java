@@ -30,7 +30,7 @@ public class AddAPIKey implements ServerSideAction<ControlPanelExtension> {
 			throw v;
 		}
 		
-		//find index of last api key
+		//find index of last first key
 		int index = 0;
 		for(Generic g: bean.getStartupProperties()) {
 			if(g.getText5001().length()>3 && g.getText5001().startsWith(ControlPanelExtension.API_STANZA_KEY)) {

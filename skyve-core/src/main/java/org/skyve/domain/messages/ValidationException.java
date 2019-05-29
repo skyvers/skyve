@@ -31,17 +31,13 @@ public class ValidationException extends DomainException implements MessageExcep
 	}
 
 	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder(super.toString());
+	public String getMessage() {
+		String superMessage = super.getMessage();
+		StringBuilder result = new StringBuilder((superMessage == null) ? "" : superMessage);
 		for (Message message : messages) {
 			result.append('\n').append(message.toString());
 		}
 		
 		return result.toString();
-	}
-
-	@Override
-	public String getMessage() {
-		return toString();
 	}
 }
