@@ -13,7 +13,6 @@ import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Generic;
 
 public class AddAPIKey implements ServerSideAction<ControlPanelExtension> {
-	public static final String API_STANZA_PREFIX = "api.";
 	private static final long serialVersionUID = -4439819451806091821L;
 
 	@Override
@@ -31,16 +30,16 @@ public class AddAPIKey implements ServerSideAction<ControlPanelExtension> {
 			throw v;
 		}
 		
-		//find index of last api key
+		//find index of last first key
 		int index = 0;
 		for(Generic g: bean.getStartupProperties()) {
-			if(g.getText5001().length()>3 && g.getText5001().startsWith(API_STANZA_PREFIX)) {
+			if(g.getText5001().length()>3 && g.getText5001().startsWith(ControlPanelExtension.API_STANZA_KEY)) {
 				index = bean.getStartupProperties().indexOf(g);
 			}
 		}
 		
 		Generic generic = Util.cloneBySerialization(bean.getNewProperty());
-		generic.setText5001(API_STANZA_PREFIX + bean.getNewProperty().getText5001());
+		generic.setText5001(ControlPanelExtension.API_STANZA_KEY + bean.getNewProperty().getText5001());
 		bean.getStartupProperties().add(index+1, generic);
 		
 		//and clear for another API
