@@ -19,30 +19,34 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	@Inject
 	private transient Persistence persistence;
 
+	private int numProcessedElements;
+	private int numSuccessfulElements;
+	private int numFailedElements;
+
 	@Override
 	public void execute() throws Exception {
 		getLog().add(String.format("Commencing job %s.", getDisplayName()));
 
 		final Collection<T> elementsToProcess = getElements();
 		getLog().add(String.format("Found %d element(s) to process.", elementsToProcess.size()));
-		int numProcessedElements = 0;
-		int numSuccessfulElements = 0;
-		int numFailedElements = 0;
+		numProcessedElements = 0;
+		numSuccessfulElements = 0;
+		numFailedElements = 0;
 		for (T element : elementsToProcess) {
 			if (!isCancelled()) {
 				try {
 					operation(element);
 					commitIfRequired(numProcessedElements);
-					numSuccessfulElements++;
+					incrementNumSuccessfulElements();
 				} catch (final Exception e) {
-					numFailedElements++;
+					incrementNumFailedElements();
 					if (!continueOnFailure()) {
 						throw e;
 					}
 					getLog().add(String.format("Exception processing element %d: %s", numProcessedElements, e.getMessage()));
 					LOGGER.error("Exception processing element {}.", numProcessedElements, e);
 				} finally {
-					numProcessedElements++;
+					incrementNumProcessedElements();
 				}
 			} else {
 				getLog().add(String.format("Job was cancelled after processing %d elements.", numProcessedElements));
@@ -108,5 +112,29 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	 */
 	protected void setPersistence(Persistence persistence) {
 		this.persistence = persistence;
+	}
+
+	public int getNumProcessedElements() {
+		return numProcessedElements;
+	}
+
+	protected void incrementNumProcessedElements() {
+		numProcessedElements++;
+	}
+
+	public int getNumSuccessfulElements() {
+		return numSuccessfulElements;
+	}
+
+	protected void incrementNumSuccessfulElements() {
+		numSuccessfulElements++;
+	}
+
+	public int getNumFailedElements() {
+		return numFailedElements;
+	}
+
+	protected void incrementNumFailedElements() {
+		numFailedElements++;
 	}
 }
