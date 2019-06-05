@@ -443,6 +443,10 @@ public class Desktop extends Harness {
 				if ((icon16 == null) && (iconStyleClass != null)) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 				}
+				// Leave some space between the icon and its label
+				if ((icon16 != null) || (iconStyleClass != null)) {
+					result.append("&nbsp;");
+				}
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
