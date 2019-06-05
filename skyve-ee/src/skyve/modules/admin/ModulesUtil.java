@@ -599,11 +599,9 @@ public class ModulesUtil {
 	 * @param numberLength
 	 *        - the minimum length of the number when specified as a string
 	 * @return - the next sequence number
-	 * @throws Exception
-	 *         general Exception for persistence failure
 	 */
 	public static String getNextDocumentNumber(String prefix, String moduleName, String documentName, String fieldName,
-			int numberLength) throws Exception {
+			int numberLength) {
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -687,7 +685,7 @@ public class ModulesUtil {
 	 * Wrapper for getNextDocumentNumber, specifically for numeric only
 	 * sequences
 	 */
-	public static Integer getNextDocumentNumber(String moduleName, String documentName, String fieldName) throws Exception {
+	public static Integer getNextDocumentNumber(String moduleName, String documentName, String fieldName) {
 
 		return new Integer(Integer.parseInt(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
 	}
@@ -696,7 +694,7 @@ public class ModulesUtil {
      * Wrapper for getNextDocumentNumber, specifically for long only
      * sequences
      */
-    public static Long getNextLongDocumentNumber(String moduleName, String documentName, String fieldName) throws Exception {
+    public static Long getNextLongDocumentNumber(String moduleName, String documentName, String fieldName) {
 
         return new Long(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
     }
@@ -712,10 +710,8 @@ public class ModulesUtil {
 	 * @param lastNumber
 	 *        - the number to increment
 	 * @return - the next number
-	 * @throws Exception
-	 *         general Exception
 	 */
-	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) throws Exception {
+	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {
 
 		String newNumber = "";
 		String nonNumeric = lastNumber;
@@ -980,10 +976,8 @@ public class ModulesUtil {
 	 * @param b
 	 *        - the top-level bean to export
 	 * @return - the reference to the Bizportable
-	 * @throws Exception
-	 *         general Exception
 	 */
-	public static BizPortWorkbook standardBeanBizExport(String modName, String docName, Bean b) throws Exception {
+	public static BizPortWorkbook standardBeanBizExport(String modName, String docName, Bean b) {
 
 		String documentName = docName;
 		String moduleName = modName;
@@ -1056,7 +1050,7 @@ public class ModulesUtil {
 	}
 
 	/** short-hand way of finding a bean using a legacy key */
-	public static Bean lookupBean(String moduleName, String documentName, String propertyName, Object objValue) throws Exception {
+	public static Bean lookupBean(String moduleName, String documentName, String propertyName, Object objValue) {
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery qBean = persistence.newDocumentQuery(moduleName, documentName);
 		qBean.getFilter().addEquals(propertyName, objValue);
