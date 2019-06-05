@@ -70,7 +70,11 @@
 			<h:outputText value="#{desktop.localeScript}" escape="false" />
 			<script type="text/javascript" src="desktop/skyve-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			<script type="text/javascript">
-				#{desktop.script}
+				#{desktop.menuScript}
+				#{desktop.dataSourceScript}
+				#{desktop.apiScript}
+				#{desktop.uiScript}
+				#{desktop.bannerScript}
 			</script>
 		</h:body>
 	</f:view>
