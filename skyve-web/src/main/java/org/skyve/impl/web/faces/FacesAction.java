@@ -126,11 +126,13 @@ public abstract class FacesAction<T> {
 							// We will set s1:s2:s3 to s1:s2:<index>:s3 so it matches the row in the grid
 							String clientId = component.getClientId();
 							int lastColonIndex = clientId.lastIndexOf(':');
-							clientId = String.format("%s:%s%s", 
-														clientId.substring(0, lastColonIndex),
-														binding.substring(lastOpeningSquareBraceIndex + 1, lastClosingSquareBraceIndex),
-														clientId.substring(lastColonIndex));
-							context.addMessage(clientId, msg);
+							if (lastColonIndex > 0) { // it really is a row in a grid
+								clientId = String.format("%s:%s%s", 
+															clientId.substring(0, lastColonIndex),
+															binding.substring(lastOpeningSquareBraceIndex + 1, lastClosingSquareBraceIndex),
+															clientId.substring(lastColonIndex));
+								context.addMessage(clientId, msg);
+							}
 						}
 					}
 				}
