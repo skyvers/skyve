@@ -1054,7 +1054,9 @@
   <xs:complexType name="defaultWidget">
     <xs:complexContent>
       <xs:extension base="tns:abstractBound">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
