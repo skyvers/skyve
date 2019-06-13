@@ -130,11 +130,8 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 }
 
 .bizhubFontIcon {
-	font-size: 16px;
-	vertical-align: middle;
-	padding-right: 8px;
-	text-align: center;
-	width: 16px;
+	font-size: 14px;
+	width: 16px !important;
 }
 
 /*

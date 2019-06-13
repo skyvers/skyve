@@ -1691,7 +1691,7 @@ isc.SimpleType.create({
 	editorType: "BizLookupDescriptionItem"
 });
 
-// CKEditor is loaded by Ajile when required
+// CKEditor is loaded on the fly when required
 var CKEDITOR = null;
 
 isc.ClassFactory.defineClass("BizHTMLItem", isc.CanvasItem);
@@ -1739,7 +1739,7 @@ isc.BizHTMLItem.addMethods({
 					this._show();
 				}
 				else {
-					isc.BizUtil.loadJS('ckeditor456/ckeditor.js', function() {
+					isc.BizUtil.loadJS('ckeditor/ckeditor.js', function() {
 						me._editButton._show();
 					});
 				}
@@ -1755,7 +1755,7 @@ isc.BizHTMLItem.addMethods({
 					CKEDITOR.config.filebrowserImageBrowseUrl = "pages/htmlEdit/browseImages.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
 					CKEDITOR.config.filebrowserBrowseUrl = "pages/htmlEdit/browseDocuments.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
 					CKEDITOR.config.resize_enabled = false;
-					CKEDITOR.config.skin = 'moono';
+					CKEDITOR.config.skin = 'moono-lisa';
 					CKEDITOR.config.autoUpdateElement = false;
 					CKEDITOR.config.baseFloatZIndex = 9000000;
 					CKEDITOR.config.toolbar = [
@@ -1771,6 +1771,14 @@ isc.BizHTMLItem.addMethods({
 						['Format', 'Font', 'FontSize'], 
 						['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks']
 					];
+/* for now this is commented out (1 for each marker character)
+					CKEDITOR.config.mentions = [{
+						feed: 'http://fucked.com/?q={encodedQuery}?c=admin.Poo',
+						marker: '{',
+						minChars: 0,
+						template: '<li data-id="{id}">{fullName}</li>',
+					}];
+*/
 					// align with the "markup" styles supported in jasper reports
 					// and display more compatibly with varying style sheets
 					CKEDITOR.config.coreStyles_bold = {element: 'b', overrides: 'strong'};

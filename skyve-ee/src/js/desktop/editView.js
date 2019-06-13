@@ -702,7 +702,7 @@ isc.EditView.addMethods({
 			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + isc.BizUtil.version + '"/>';
 		}
 		else if (this._fontIcon) {
-			icon = '<i style="padding-left:5px;font-size:32px;width:32px" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
+			icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
 		}
 		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
