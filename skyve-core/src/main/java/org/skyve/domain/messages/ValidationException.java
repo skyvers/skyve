@@ -25,6 +25,13 @@ public class ValidationException extends DomainException implements MessageExcep
 		messages.add(message);
 	}
 
+	/**
+	 * @param messages A list of messages to add to the ValidationException.
+	 */
+	public ValidationException(List<Message> messages) {
+		this.messages.addAll(messages);
+	}
+
 	@Override
 	public List<Message> getMessages() {
 		return messages;
