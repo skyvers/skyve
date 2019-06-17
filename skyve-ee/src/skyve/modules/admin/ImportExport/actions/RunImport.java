@@ -21,12 +21,10 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
-import modules.admin.domain.Contact;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.RollbackErrors;
@@ -133,9 +131,9 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					}
 
 					PersistentBean b = loader.beanResult();
-					Util.LOGGER.info("------LOAD RESULT ------");
-					Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
-					Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
+					//Util.LOGGER.info("------LOAD RESULT ------");
+					//Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
+					//Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
 
 					if (loader.isDebugMode()) {
 						if (b == null) {
@@ -151,9 +149,9 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							throw ve;
 						}
 						//Testing
-						Util.LOGGER.info("------ATTEMPTING TO SAVE------");
-						Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
-						Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
+						//Util.LOGGER.info("------ATTEMPTING TO SAVE------");
+						//Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
+						//Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
 						
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
