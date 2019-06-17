@@ -16,6 +16,8 @@ import net.coobird.thumbnailator.Thumbnails.Builder;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.customer.Customer;
@@ -24,7 +26,6 @@ import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
-import org.skyve.web.WebContext;
 
 public class DynamicImageServlet extends HttpServlet {
 	/**
@@ -82,9 +83,21 @@ public class DynamicImageServlet extends HttpServlet {
 		        
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
-				Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-				AbstractPersistence.get().setUser(user);
+	        	if (webContext == null) {
+	        		throw new ConversationEndedException();
+	        	}
+	        	
+	    		AbstractPersistence persistence = webContext.getConversation();
+	    		persistence.setForThread();
+	        	
+	        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+				User user = WebUtil.processUserPrincipalForRequest(request,
+																	request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null,
+																	true);
+				if (user == null) {
+					throw new SessionEndedException();
+				}
+				persistence.setUser(user);
 	
 				int dotIndex = moduleDotDocumentName.lastIndexOf('.');
 				String moduleName = moduleDotDocumentName.substring(0, dotIndex);

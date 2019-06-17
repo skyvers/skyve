@@ -439,13 +439,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												ordered,
 												grid.getWidgetId());
 
-		final String emptyMessage;
-		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
-			emptyMessage = EMPTY_DATA_TABLE_CAN_ADD_MESSAGE;
-		} else {
-			emptyMessage = EMPTY_DATA_TABLE_MESSAGE;
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		if ((! Boolean.FALSE.equals(grid.getEditable())) && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
+			emptyMessage.setValue(EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
 		}
-		dataTable.setEmptyMessage(emptyMessage);
+		else {
+			emptyMessage.setValue(EMPTY_DATA_TABLE_MESSAGE);
+		}
+        dataTable.getFacets().put("emptyMessage", emptyMessage);
 
 		return dataTable;
 	}
@@ -3262,6 +3263,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (confirmationText != null) {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
 			confirm.setMessage(confirmationText);
+			confirm.setEscape(false);
 			component.addClientBehavior("click", confirm);
 		}
 	}

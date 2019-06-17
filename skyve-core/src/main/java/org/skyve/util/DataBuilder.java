@@ -13,12 +13,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -34,6 +37,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
@@ -146,6 +150,7 @@ public class DataBuilder {
 	private Map<String, Integer> cardinalities = null;
 	private int depth = 0;
 	private Map<String, Integer> depths = null;
+	private Set<String> visitedBizIds = null;
 
 	public DataBuilder() {
 		user = CORE.getUser();
@@ -353,6 +358,7 @@ public class DataBuilder {
 	public <T extends Bean> T build(String moduleName, String documentName) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
+		initialiseCycleTracking();
 		return build(m, d, 0);
 	}
 	
@@ -363,6 +369,7 @@ public class DataBuilder {
 	 * @return
 	 */
 	public <T extends Bean> T build(Module module, Document document) {
+		initialiseCycleTracking();
 		return build(module, document, 0);
 	}
 	
@@ -373,7 +380,12 @@ public class DataBuilder {
 	 */
 	public <T extends Bean> T build(Document document) {
 		Module m = customer.getModule(document.getOwningModuleName());
+		initialiseCycleTracking();
 		return build(m, document, 0);
+	}
+
+	private void initialiseCycleTracking() {
+		visitedBizIds = new TreeSet<>();
 	}
 	
 	/**
@@ -391,6 +403,12 @@ public class DataBuilder {
 			result = dataFactory((DocumentImpl) document);
 			if (result == null) {
 				result = randomBean(module, document);
+
+				String resultBizId = result.getBizId();
+				if (visitedBizIds.contains(resultBizId)) {
+					return result;
+				}
+				visitedBizIds.add(resultBizId);
 
 				for (Attribute attribute : document.getAllAttributes()) {
 					if (filter(attribute)) {
@@ -439,6 +457,8 @@ public class DataBuilder {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
 							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
+							boolean childCollection = CollectionType.child.equals(collection.getType()) &&
+														document.getName().equals(collectionDocument.getParentDocumentName());
 							@SuppressWarnings("unchecked")
 							List<Bean> list = (List<Bean>) BindUtil.get(result, name);
 							
@@ -457,7 +477,13 @@ public class DataBuilder {
 							}
 		
 							for (int i = 0; i < cardinality; i++) {
-								list.add(build(collectionModule, collectionDocument, currentDepth + 1));
+								Bean element = build(collectionModule, collectionDocument, currentDepth + 1);
+								list.add(element);
+								if (childCollection) {
+									@SuppressWarnings("unchecked")
+									ChildBean<Bean> child = (ChildBean<Bean>) element;
+									child.setParent(result);
+								}
 							}
 						}
 					}
@@ -819,7 +845,8 @@ public class DataBuilder {
 				return StringUtils.substringBetween(result, "^", "$");
 			}
 			return result;
-		} catch (Exception e) {
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
 		return null;
@@ -869,7 +896,7 @@ public class DataBuilder {
 							Util.LOGGER.fine("Found class " + c.getName());
 							if (c.isAnnotationPresent(DataMap.class)) {
 								DataMap annotation = c.getAnnotation(DataMap.class);
-								Util.LOGGER.info(
+								Util.LOGGER.fine(
 										String.format("attributeName: %s fileName: %s", annotation.attributeName(),
 												annotation.fileName()));
 								if (attribute.getName().equals(annotation.attributeName())) {
@@ -880,7 +907,7 @@ public class DataBuilder {
 								SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 								DataMap[] values = annotation.value();
 								for (DataMap map : values) {
-									Util.LOGGER.info(
+									Util.LOGGER.fine(
 											String.format("attributeName: %s fileName: %s", map.attributeName(), map.fileName()));
 									if (attribute.getName().equals(map.attributeName())) {
 										fileName = map.fileName();
@@ -890,7 +917,8 @@ public class DataBuilder {
 								}
 							}
 						}
-					} catch (Exception e) {
+					}
+					catch (@SuppressWarnings("unused") Exception e) {
 						// couldn't find the extension file on the classpath
 					}	
 				}
@@ -900,7 +928,7 @@ public class DataBuilder {
 						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
 				String value = randomValueFromFile(customerName, module, document, attribute.getName(), fileName);
 				if (value != null) {
-					Util.LOGGER.info(String.format("Random %s: %s", attribute.getName(), value));
+					Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
 					return value;
 				}
 			}
@@ -1043,7 +1071,7 @@ public class DataBuilder {
 						DATA_CACHE.put(key, values);
 						Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
 						if (values != null && values.size() > 0) {
-							Util.LOGGER.info(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
+							Util.LOGGER.fine(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
 									Integer.valueOf(values.size())));
 						}
 					}

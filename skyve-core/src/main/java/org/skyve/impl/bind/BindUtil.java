@@ -1518,6 +1518,22 @@ public final class BindUtil {
 	}
 	
 	/**
+	 * Return a java bean property name from a reflected method name.
+	 * @param methodName	The method name
+	 * @return	"get"/"set"/"is" prefix stripped and the remaining string decapitalised as appropriate.
+	 */
+	public static String toJavaPropertyName(String methodName) {
+		String propertyName = methodName;
+		if (methodName.startsWith("get") || methodName.startsWith("set")) {
+			propertyName = Introspector.decapitalize(methodName.substring(3));
+		}
+		else if (methodName.startsWith("is")) {
+			propertyName = Introspector.decapitalize(methodName.substring(2));
+		}
+		return propertyName;
+	}
+	
+	/**
 	 * Fashion a static identifier from the given string.
 	 * @param string
 	 * @return A valid java static identifier.  Upper Case with underscores.

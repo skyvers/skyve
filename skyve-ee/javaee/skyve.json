@@ -107,17 +107,18 @@
 		uid: null, 
 		// Mail server password
 		pwd: null, 
-		// Extra Java Mail properties {"k.e.y": "value"}
+		// Extra Java Mail properties { "k.e.y" : "value"}
 		properties: null,
 		// Sender header value
 		sender: "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
 		testBogusSend: false, 
 		// Test Recipient (all emails only sent to this email address)
-		testRecipient: "mike.sands@bizhub.com.au"
+		testRecipient: "test@yourdomain.com"
 	},
 	// API Settings
 	api: {
+		//to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
 		googleMapsV3Key: null,
 		googleRecaptchaSiteKey: null,
 		ckEditorConfigFileUrl: null
@@ -125,7 +126,7 @@
 	// Environment settings
 	environment: {
 		// test, sit, uat, dev etc: null = prod
-		identifier: null,
+		identifier: "local",
 		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 		devMode: true,
 		// Customer Default
@@ -134,17 +135,21 @@
 		jobScheduler: true,
 		// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
 		passwordHashingAlgorithm: "bcrypt",
-		// Absolute path on the filesystem to the source directory where modules live for creating new documents
-		// via skyve script, e.g. c:/workspace/project/src/main/java
+		// Absolute path on the filesystem to the source directory where modules live 
+		// for generating report templates and new documents via skyve script. 
+		// This must be a valid /modules directory e.g. C:/Workspace/myapp/src/main/java/modules
+		// (note that if you are running on Windows do NOT use backslashes)		
 		moduleDirectory: null,
 		// Email address for system support
-		supportEmailAddress: "info@skyve.org"
+		supportEmailAddress: "support@yourdomain.com",
+		// Show Setup screen on sign in for DevOps users
+		showSetup: true
 	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
 	bootstrap: {
 		customer: "demo",
 		user: "admin",
-		email: "admin@skyve.org",
+		email: "admin@yourdomain.com",
 		password: "admin"
 	}
 }

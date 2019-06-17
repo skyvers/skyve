@@ -6,7 +6,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.util.Util;
 
-import modules.ModulesUtil;
+import modules.admin.ModulesUtil;
 import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;

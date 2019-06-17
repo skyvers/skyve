@@ -5,7 +5,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.web.WebContext;
 
-import modules.ModulesUtil;
+import modules.admin.ModulesUtil;
 import modules.admin.domain.DataMaintenance;
 
 public class DataMaintenanceExportAction extends BizExportAction {

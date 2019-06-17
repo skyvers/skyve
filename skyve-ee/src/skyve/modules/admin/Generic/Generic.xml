@@ -131,5 +131,17 @@
 		<geometry name="geometry3">
 			<displayName>geometry3</displayName>
 		</geometry>
+		<text name="text5001">
+			<displayName>text 500 1</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5002">
+			<displayName>text 500 2</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5003">
+			<displayName>text 500 3</displayName>
+			<length>500</length>
+		</text>
 	</attributes>
 </document>

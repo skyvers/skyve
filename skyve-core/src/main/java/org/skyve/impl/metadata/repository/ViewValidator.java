@@ -233,7 +233,8 @@ class ViewValidator extends ViewVisitor {
 
 			// ignore implicit conditions when checking the condition exists
 			if ((! Bean.PERSISTED_KEY.equals(testConditionName)) && 
-					(! Bean.CREATED_KEY.equals(testConditionName))) {
+					(! Bean.CREATED_KEY.equals(testConditionName)) &&
+					(! Bean.CHANGED_KEY.equals(testConditionName))) {
 				validateCondition(module, document, testConditionName, widgetIdentifier);
 			}
 		}
@@ -595,7 +596,9 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							dataWidgetIdentifier);
+							dataWidgetIdentifier,
+							AttributeType.collection,
+							AttributeType.inverseMany);
 		validateConditionName(widget.getInvisibleConditionName(), dataWidgetIdentifier);
 	}
 

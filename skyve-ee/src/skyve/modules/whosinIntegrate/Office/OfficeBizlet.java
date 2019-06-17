@@ -1,6 +1,6 @@
 package modules.whosinIntegrate.Office;
 
-import modules.ModulesUtil;
+import modules.admin.ModulesUtil;
 import modules.whosinIntegrate.domain.Office;
 
 import org.skyve.metadata.model.document.Bizlet;

@@ -42,6 +42,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
@@ -265,7 +266,8 @@ public class ViewGenerator {
 						details.add(detail);
 					}
 				}
-				else if (attribute instanceof Inverse) {
+				else if ((attribute instanceof Inverse) && 
+							InverseCardinality.many.equals(((Inverse) attribute).getCardinality())) {
 					Inverse inverse = (Inverse) attribute;
 					Document detailDocument = module.getDocument(customer, inverse.getDocumentName());
 	
@@ -283,7 +285,7 @@ public class ViewGenerator {
 														propertyNames);
 					details.add(detail);
 				}
-				else { // field or association
+				else { // field or association or inverseOne
 					FormItem item = new FormItem();
 					DefaultWidget widget = new DefaultWidget();
 					widget.setBinding(attributeName);

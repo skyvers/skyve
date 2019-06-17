@@ -582,7 +582,11 @@ public class EXT {
 	 * @param reportName
 	 * @param parameters
 	 */
-	public static MailAttachment getMailAttachmentFromReport(String reportModuleName, String reportDocumentName, String reportName, Map<String, Object> parameters) throws Exception {
+	public static MailAttachment getMailAttachmentFromReport(String reportModuleName,
+																String reportDocumentName,
+																String reportName,
+																Map<String, Object> parameters)
+	throws Exception {
 		MailAttachment result = new MailAttachment();
 
 		Persistence persistence = CORE.getPersistence();
@@ -641,9 +645,8 @@ public class EXT {
 	 * Provide a hash of a clear text password.
 	 * @param clearText
 	 * @return	The encoded password.
-	 * @throws Exception
 	 */
-	public static String hashPassword(String clearText) throws Exception {
+	public static String hashPassword(String clearText) {
 		String result = null;
 
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
@@ -672,9 +675,8 @@ public class EXT {
 	 * @param	clearText
 	 * @param	The encoded password.
 	 * @return	true if it matches, or false if it doesn't
-	 * @throws Exception
 	 */
-	public static boolean checkPassword(String clearText, String hashedPassword) throws Exception {
+	public static boolean checkPassword(String clearText, String hashedPassword) {
 		DelegatingPasswordEncoder dpe = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		dpe.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
 		return dpe.matches(clearText, hashedPassword);

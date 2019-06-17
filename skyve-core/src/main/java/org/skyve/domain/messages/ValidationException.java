@@ -25,14 +25,22 @@ public class ValidationException extends DomainException implements MessageExcep
 		messages.add(message);
 	}
 
+	/**
+	 * @param messages A list of messages to add to the ValidationException.
+	 */
+	public ValidationException(List<Message> messages) {
+		this.messages.addAll(messages);
+	}
+
 	@Override
 	public List<Message> getMessages() {
 		return messages;
 	}
 
 	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder(super.toString());
+	public String getMessage() {
+		String superMessage = super.getMessage();
+		StringBuilder result = new StringBuilder((superMessage == null) ? "" : superMessage);
 		for (Message message : messages) {
 			result.append('\n').append(message.toString());
 		}

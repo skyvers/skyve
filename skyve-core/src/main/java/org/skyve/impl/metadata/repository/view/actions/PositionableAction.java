@@ -12,7 +12,7 @@ public abstract class PositionableAction extends ActionMetaData {
 
 	private Boolean inActionPanel;
 
-	public Boolean isInActionPanel() {
+	public Boolean getInActionPanel() {
 		return inActionPanel;
 	}
 	

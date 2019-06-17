@@ -46,16 +46,36 @@ import org.skyve.web.WebAction;
 public class Desktop extends Harness {
 	private static final long serialVersionUID = 913239189728613263L;
 
-	private String script;
-	public String getScript() {
-		return script;
-	}
-	
 	private String localeScript;
 	public String getLocaleScript() {
 		return localeScript;
 	}
 	
+	private String menuScript;
+	public String getMenuScript() {
+		return menuScript;
+	}
+	
+	private String dataSourceScript;
+	public String getDataSourceScript() {
+		return dataSourceScript;
+	}
+	
+	private String apiScript;
+	public String getApiScript() {
+		return apiScript;
+	}
+	
+	private String uiScript;
+	public String getUiScript() {
+		return uiScript;
+	}
+	
+	private String bannerScript;
+	public String getBannerScript() {
+		return bannerScript;
+	}
+
 	@SuppressWarnings("static-method")
 	public String getSmartClientDir() {
 		return UtilImpl.SMART_CLIENT_DIR;
@@ -64,10 +84,10 @@ public class Desktop extends Harness {
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
-        	script = new FacesAction<String>() {
+        	new FacesAction<Void>() {
 				@Override
 				@SuppressWarnings("synthetic-access")
-				public String callback() throws Exception {
+				public Void callback() throws Exception {
 					AbstractPersistence persistence = AbstractPersistence.get();
 			    	UserImpl user = (UserImpl) persistence.getUser();
 			    	Customer customer = user.getCustomer();
@@ -79,58 +99,67 @@ public class Desktop extends Harness {
 			    	String bizDocument = getBizDocumentParameter();
 			    	String bizId = getBizIdParameter();
 			    	
-					StringBuilder result = new StringBuilder(8192);
-
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
 					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 
-					constructMenu(bizModule, uxui.getName(), result);
-					listDataSources(customer, user, result);
+					StringBuilder sb = new StringBuilder(8192);
+
+					constructMenu(bizModule, uxui.getName(), sb);
+					menuScript = sb.toString();
+					sb.setLength(0); 
+					listDataSources(customer, user, sb);
+					dataSourceScript = sb.toString();
+					sb.setLength(0);
 	
-					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
-					result.append("isc.BizUtil.version='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
+					sb.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
+					sb.append("isc.BizUtil.version='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
 					if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
-						result.append("isc.BizUtil.googleMapsV3ApiKey=null;");
+						sb.append("isc.BizUtil.googleMapsV3ApiKey=null;");
 					}
 					else {
-						result.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
+						sb.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
 					}
-					result.append("isc.BizUtil.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
-					
+					sb.append("isc.BizUtil.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
+					apiScript = sb.toString();
+					sb.setLength(0);
+
 					WebAction a = Desktop.this.getWebActionParameter();
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
-						result.append("details.showMember(isc.ListView.contents);");
+						sb.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
 						if (bizDocument != null) {
-							result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
 						}
 						else {
 							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
-							result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 						}
 					} 
 					else {
-						result.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
-						result.append(bizDocument).append("',function(view){");
-						result.append("details.addMember(view);isc.BizUtil._currentView=view;");
+						sb.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
+						sb.append(bizDocument).append("',function(view){");
+						sb.append("details.addMember(view);isc.BizUtil._currentView=view;");
 						if (bizId == null) {
-						    result.append("view.newInstance();});");
+						    sb.append("view.newInstance();});");
 						}
 						else {
-						    result.append("view.editInstance('").append(bizId).append("');});");
+						    sb.append("view.editInstance('").append(bizId).append("');});");
 						}
 					}
+					uiScript = sb.toString();
+					sb.setLength(0);
 					
 					if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-						result.append("$('body').append('<div class=\"skyveEnvBanner skyveTopEnvBanner\">");
-						result.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
-						result.append("$('body').append('<div class=\"skyveEnvBanner skyveBottomEnvBanner\">");
-						result.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
+						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveTopEnvBanner\">");
+						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
+						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveBottomEnvBanner\">");
+						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
 					}
+					bannerScript = sb.toString();
 					
-					return result.toString();
+					return null;
 				}
 			}.execute();
         }
@@ -442,6 +471,10 @@ public class Desktop extends Harness {
 				result.append("',desc:'");
 				if ((icon16 == null) && (iconStyleClass != null)) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+				}
+				// Leave some space between the icon and its label
+				if ((icon16 != null) || (iconStyleClass != null)) {
+					result.append("&nbsp;");
 				}
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
 				if (config != null) {
