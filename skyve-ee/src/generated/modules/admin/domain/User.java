@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Group.GroupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -342,7 +343,7 @@ public class User extends AbstractPersistentBean {
 	 * <br/>
 	 * The collection of security groups that this user belongs to.
 	 **/
-	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
+	private List<GroupExtension> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
 	 * Roles
 	 * <br/>
@@ -403,7 +404,7 @@ public class User extends AbstractPersistentBean {
 	/**
 	 * New Group
 	 **/
-	private Group newGroup = null;
+	private GroupExtension newGroup = null;
 
 	@Override
 	@XmlTransient
@@ -683,7 +684,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Group> getGroups() {
+	public List<GroupExtension> getGroups() {
 		return groups;
 	}
 
@@ -692,7 +693,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Group getGroupsElementById(String bizId) {
+	public GroupExtension getGroupsElementById(String bizId) {
 		return getElementById(groups, bizId);
 	}
 
@@ -701,7 +702,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGroupsElementById(String bizId, Group element) {
+	public void setGroupsElementById(String bizId, GroupExtension element) {
 		 setElementById(groups, element);
 	}
 
@@ -887,7 +888,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #newGroup} accessor.
 	 * @return	The value.
 	 **/
-	public Group getNewGroup() {
+	public GroupExtension getNewGroup() {
 		return newGroup;
 	}
 
@@ -896,7 +897,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param newGroup	The new value.
 	 **/
 	@XmlElement
-	public void setNewGroup(Group newGroup) {
+	public void setNewGroup(GroupExtension newGroup) {
 		this.newGroup = newGroup;
 	}
 

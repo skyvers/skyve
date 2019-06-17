@@ -11,15 +11,15 @@
 	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{name}"/>
 	<attributes>
-		<text name="name" required="true">
+		<text name="name" required="true" usage="domain">
 			<displayName>Group Name</displayName>
 			<length>30</length>
 		</text>
-		<text name="description" >
+		<text name="description" usage="domain">
 			<displayName>Description</displayName>
 			<length>255</length>
 		</text>
-		<collection name="roles" type="child">
+		<collection name="roles" type="child" usage="domain">
 			<displayName>Roles</displayName>
 			<domain>dynamic</domain>
 			<documentName>GroupRole</documentName>
@@ -33,6 +33,15 @@
 					<ref>roleName</ref>
 				</fieldReferences>
 			</unique>
+		</collection>
+		<collection name="candidateRoles" type="child" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>
+				Holds the possible roles that can be assigned to this group.
+			</documentation>
+			<displayName>Candidate Roles</displayName>
+			<domain>dynamic</domain>
+			<documentName>GroupRole</documentName>
+			<minCardinality>0</minCardinality>
 		</collection>
 	</attributes>
 	<uniqueConstraints>

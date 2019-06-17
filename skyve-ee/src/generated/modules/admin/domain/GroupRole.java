@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.admin.domain.Group;
+import modules.admin.Group.GroupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -18,7 +18,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class GroupRole extends AbstractPersistentBean implements ChildBean<Group> {
+public class GroupRole extends AbstractPersistentBean implements ChildBean<GroupExtension> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -37,7 +37,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	 * Role Name
 	 **/
 	private String roleName;
-	private Group parent;
+	private GroupExtension parent;
 
 	private Integer bizOrdinal;
 
@@ -104,13 +104,13 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	}
 
 	@Override
-	public Group getParent() {
+	public GroupExtension getParent() {
 		return parent;
 	}
 
 	@Override
 	@XmlElement
-	public void setParent(Group parent) {
+	public void setParent(GroupExtension parent) {
 		preset(ChildBean.PARENT_NAME, parent);
 		this.parent =  parent;
 	}
