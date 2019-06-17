@@ -100,7 +100,8 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 				defaultInputWidget = new Combo();
 				defaultInputWidget.setBinding(getName());
 			}
-			else if (AttributeType.association.equals(attributeType)) {
+			else if (AttributeType.association.equals(attributeType) || 
+						AttributeType.inverseOne.equals(attributeType)) {
 				LookupDescription lookup = new LookupDescription();
 				lookup.setBinding(getName());
 				lookup.setDescriptionBinding(Bean.BIZ_KEY);
