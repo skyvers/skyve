@@ -29,6 +29,7 @@ public class GroupExtension extends Group {
 					GroupRole role = GroupRole.newInstance();
 					role.setRoleName(value.getCode());
 					role.setParent(this);
+					role.originalValues().clear();
 					candidates.add(role);
 				}
 			}
