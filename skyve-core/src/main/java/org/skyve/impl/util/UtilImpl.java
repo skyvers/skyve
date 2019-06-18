@@ -153,6 +153,12 @@ public class UtilImpl {
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
+	// Map Keys
+	public static enum MapType {
+		gmap, leaflet;
+	}
+	public static MapType MAP_TYPE = MapType.gmap;
+	
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;

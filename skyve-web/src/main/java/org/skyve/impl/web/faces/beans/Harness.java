@@ -94,7 +94,12 @@ public abstract class Harness extends Localisable {
 	public final String getBaseHref() {
 		return Util.getSkyveContextUrl() + '/';
 	}
-	
+
+	@SuppressWarnings("static-method")
+	public final String getMapType() {
+		return UtilImpl.MAP_TYPE.toString();
+	}
+
 	public final void initialise(Customer customer, UserImpl user, Locale requestLocale) {
 		super.initialise(user, requestLocale);
 		

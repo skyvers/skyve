@@ -4,6 +4,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{desktop.dir}">
     <f:view encoding="#{desktop.encoding}">
 		<f:metadata>
@@ -69,6 +70,12 @@
 			<script type="text/javascript" src="#{desktop.smartClientDir}/skins/Enterprise/load_skin.js"></script>
 			<h:outputText value="#{desktop.localeScript}" escape="false" />
 			<script type="text/javascript" src="desktop/skyve-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			<c:if test="#{desktop.mapType eq 'gmap'}">
+				<script type="text/javascript" src="desktop/skyve-gmap-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			</c:if>
+			<c:if test="#{desktop.mapType eq 'leaflet'}">
+				<script type="text/javascript" src="desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			</c:if>
 			<script type="text/javascript">
 				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.apiScript}
