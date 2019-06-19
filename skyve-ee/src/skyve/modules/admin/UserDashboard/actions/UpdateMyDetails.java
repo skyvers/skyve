@@ -1,8 +1,8 @@
 package modules.admin.UserDashboard.actions;
 
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.UserDashboard;
-import modules.admin.domain.User;
 
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -22,7 +22,7 @@ public class UpdateMyDetails implements ServerSideAction<UserDashboard> {
 		Persistence pers= CORE.getPersistence();
 		
 		//force person type just in case
-		User me = bean.getCurrentUser();
+		UserExtension me = bean.getCurrentUser();
 		me.getContact().setContactType(ContactType.person);
 		me = pers.save(me);
 		bean.setCurrentUser(me);
