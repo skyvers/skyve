@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.Group.GroupExtension;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -418,7 +419,7 @@ public class User extends AbstractPersistentBean {
 		return User.DOCUMENT_NAME;
 	}
 
-	public static User newInstance() {
+	public static UserExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}

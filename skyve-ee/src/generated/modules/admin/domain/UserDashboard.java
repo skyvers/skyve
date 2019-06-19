@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.Group.GroupExtension;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -51,7 +52,7 @@ public class UserDashboard extends AbstractTransientBean {
 	/**
 	 * Current User
 	 **/
-	private User currentUser = null;
+	private UserExtension currentUser = null;
 	/**
 	 * Group Membership
 	 **/
@@ -116,7 +117,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * {@link #currentUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getCurrentUser() {
+	public UserExtension getCurrentUser() {
 		return currentUser;
 	}
 
@@ -125,7 +126,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param currentUser	The new value.
 	 **/
 	@XmlElement
-	public void setCurrentUser(User currentUser) {
+	public void setCurrentUser(UserExtension currentUser) {
 		preset(currentUserPropertyName, currentUser);
 		this.currentUser = currentUser;
 	}

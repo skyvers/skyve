@@ -485,7 +485,7 @@
 		<filter name="adminTaggedUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.User" table="ADM_SecurityUser" entity-name="adminUser">
+	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
