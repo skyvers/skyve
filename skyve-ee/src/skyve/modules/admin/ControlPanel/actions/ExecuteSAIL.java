@@ -16,6 +16,7 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailExecutor;
+import modules.admin.domain.UserProxy;
 
 public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	private static final long serialVersionUID = -4884065778373508731L;
@@ -31,7 +32,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		bean.setResults(null);
 		bean.setTabIndex(null);
 		
-		modules.admin.domain.User user = bean.getSailUser();
+		UserProxy user = bean.getSailUser();
 		String baseUrl = bean.getSailBaseUrl();
 		SailExecutor executorClass = bean.getSailExecutor();
 		String componentBuilderClass = bean.getSailComponentBuilder();

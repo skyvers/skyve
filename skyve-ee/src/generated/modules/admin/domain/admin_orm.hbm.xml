@@ -212,7 +212,7 @@
 		</property>
 		<property name="auditTimestampStart" type="Timestamp" />
 		<property name="auditTimestampEnd" type="Timestamp" />
-		<many-to-one name="auditUser" entity-name="adminUser" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser" />
+		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -377,7 +377,7 @@
 		<property name="cronExpression" length="128" />
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
-		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
 		<property name="disabled" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>

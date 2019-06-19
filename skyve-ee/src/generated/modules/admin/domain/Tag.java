@@ -20,7 +20,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
  * @navhas n operandTag 0..1 Tag
- * @navhas n copyToUser 0..1 User
+ * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
  */
 @XmlType
@@ -346,7 +346,7 @@ public class Tag extends AbstractPersistentBean {
 	/**
 	 * Copy to user
 	 **/
-	private User copyToUser = null;
+	private UserProxy copyToUser = null;
 	/**
 	 * Tag Name
 	 **/
@@ -578,7 +578,7 @@ public class Tag extends AbstractPersistentBean {
 	 * {@link #copyToUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getCopyToUser() {
+	public UserProxy getCopyToUser() {
 		return copyToUser;
 	}
 
@@ -587,7 +587,7 @@ public class Tag extends AbstractPersistentBean {
 	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
-	public void setCopyToUser(User copyToUser) {
+	public void setCopyToUser(UserProxy copyToUser) {
 		this.copyToUser = copyToUser;
 	}
 

@@ -51,7 +51,7 @@
 		<document ref="UserList" />
 		<document ref="UserLoginRecord" />
 		<document ref="UserMonthlyHits" />
-		<document ref="UserProxy" />
+		<document ref="UserProxy" defaultQueryName="qUserProxies" />
 		<document ref="UserRole" />
 		<document ref="UserToken" defaultQueryName="qUserTokens" />
 	</documents>
@@ -482,6 +482,15 @@
 				<column binding="passwordExpired" hidden="true"/>
 			</columns>
 		</query>
+		<query name="qUserProxies" documentName="UserProxy">
+			<description>All Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder="ascending" />
+				<column binding="contact.email1" sortOrder="ascending" />
+				<column binding="contact.mobile" sortOrder="ascending" />
+				<column binding="userName" sortOrder="ascending" />
+			</columns>
+		</query>
 		<query name="qUserTokens" documentName="UserToken">
 			<description>All User Tokens</description>
 			<columns>
@@ -491,7 +500,7 @@
 				<column binding="lastUsed" />
 			</columns>
 		</query>
-		<query name="qActiveUsers" documentName="User">
+		<query name="qActiveUserProxies" documentName="UserProxy">
 			<description>All Active Users</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending" />
@@ -501,6 +510,7 @@
 				<column binding="inactive">
 					<filterOperator>nullOrEqual</filterOperator>
 					<filterExpression>false</filterExpression>
+					<projected>false</projected>
 				</column>
 			</columns>
 		</query>
