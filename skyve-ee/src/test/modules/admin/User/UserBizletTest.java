@@ -16,7 +16,7 @@ public class UserBizletTest extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	public void testPreSaveSetsPasswordExpired() throws Exception {
 		// setup the test data
-		User user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setPasswordExpired(Boolean.FALSE);
 		user.setGeneratedPassword("test");
 
