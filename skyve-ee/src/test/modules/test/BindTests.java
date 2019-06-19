@@ -7,6 +7,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
+import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import modules.test.domain.AllAttributesPersistent;
@@ -97,7 +98,7 @@ public class BindTests extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testCopyPropertiesWithChildCollection() throws Exception {
-		User from = User.newInstance();
+		UserExtension from = User.newInstance();
 		UserRole role = UserRole.newInstance();
 		from.getRoles().add(role);
 		role.setParent(from);

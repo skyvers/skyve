@@ -9,6 +9,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
 import modules.admin.Group.GroupExtension;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import modules.admin.domain.UserDashboard;
 import modules.admin.domain.UserLoginRecord;
@@ -23,7 +24,7 @@ public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 		DocumentQuery qUsers = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		qUsers.getFilter().addEquals(Binder.createCompoundBinding(User.contactPropertyName, Bean.DOCUMENT_ID), pers.getUser().getContactId());
 		
-		User user = qUsers.beanResult();
+		UserExtension user = qUsers.beanResult();
 		if (user != null) {
 			bean.setCurrentUser(user);
 			
