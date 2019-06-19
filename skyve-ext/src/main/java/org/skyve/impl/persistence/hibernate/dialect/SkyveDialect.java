@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public interface SkyveDialect {
 	public static enum RDBMS {
-		h2, mysql, sqlserver
+		h2, mysql, sqlserver, postgresql
 	}
 	
 	public int getGeometrySqlType();
