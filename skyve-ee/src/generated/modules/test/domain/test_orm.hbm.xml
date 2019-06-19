@@ -20,11 +20,11 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedAssociation" />
+		<many-to-one name="aggAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggAssociation" />
 		<property name="booleanFlag" />
-		<bag name="aggregatedCollection" table="TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<key column="owner_id" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_owner_id" />
-			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_element_id" column="element_id" />
+		<bag name="aggCollection" table="TEST_AllAttributesInverseOneToOnePersistent_aggCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_element_id" column="element_id" />
 		</bag>
 		<property name="colour" />
 		<property name="date" type="DateOnly" />
@@ -40,7 +40,7 @@
 		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
-		<one-to-one name="inverseAggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggregatedAssociation" />
+		<one-to-one name="invAggAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggAssociation" />
 		<property name="longInteger" />
 		<property name="markup" type="text" />
 		<property name="memo" type="text" />
@@ -268,7 +268,7 @@
 			<property name="bizUserId" length="36" not-null="true" />
 			<property name="booleanFlag" />
 			<property name="colour" />
-			<property name="date" type="DateOnly" />
+			<property name="dateOnly" type="DateOnly" />
 			<property name="dateTime" type="DateTime" />
 			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
 			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
@@ -285,8 +285,8 @@
 			<property name="markup" type="text" />
 			<property name="memo" type="text" />
 			<property name="text" length="255" />
-			<property name="time" type="TimeOnly" />
-			<property name="timestamp" type="Timestamp" />
+			<property name="timeOnly" type="TimeOnly" />
+			<property name="timestampAttribute" type="Timestamp" />
 			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedAssociation" />
 			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionSingleStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedAssociation" />
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionSingleStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
@@ -321,7 +321,7 @@
 			<property name="bizUserId" length="36" not-null="true" />
 			<property name="booleanFlag" />
 			<property name="colour" />
-			<property name="date" type="DateOnly" />
+			<property name="dateOnly" type="DateOnly" />
 			<property name="dateTime" type="DateTime" />
 			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
 			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
@@ -338,8 +338,8 @@
 			<property name="markup" type="text" />
 			<property name="memo" type="text" />
 			<property name="text" length="255" />
-			<property name="time" type="TimeOnly" />
-			<property name="timestamp" type="Timestamp" />
+			<property name="timeOnly" type="TimeOnly" />
+			<property name="timestampAttribute" type="Timestamp" />
 			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedAssociation" />
 			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionJoinedStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedAssociation" />
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionJoinedStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
