@@ -51,6 +51,7 @@
 		<document ref="UserList" />
 		<document ref="UserLoginRecord" />
 		<document ref="UserMonthlyHits" />
+		<document ref="UserProxy" />
 		<document ref="UserRole" />
 		<document ref="UserToken" defaultQueryName="qUserTokens" />
 	</documents>
@@ -79,6 +80,7 @@
 				<document name="Contact" permission="CRUDU" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="User" permission="_RU_U" />
+				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 		</role>
 		<role name="AuditManager">
@@ -133,6 +135,7 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserProxy" permission="_R__C" />
 			</privileges>
 		</role>
 		<role name="ContactManager">
@@ -308,6 +311,7 @@
 					<action name="CreateUsers"/>
 					<action name="InviteUsers"/>
 				</document>
+				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 		</role>
