@@ -58,7 +58,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 
 	@Override
 	public String getModifyColumnString() {
-		return "modify column";
+		return "alter column";
 	}
 
 	@Override
