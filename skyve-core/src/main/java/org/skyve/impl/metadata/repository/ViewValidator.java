@@ -596,7 +596,9 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							dataWidgetIdentifier);
+							dataWidgetIdentifier,
+							AttributeType.collection,
+							AttributeType.inverseMany);
 		validateConditionName(widget.getInvisibleConditionName(), dataWidgetIdentifier);
 	}
 

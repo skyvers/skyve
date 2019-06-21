@@ -462,8 +462,8 @@
 		<association name="runAs" type="aggregation" required="true">
 			<displayName>Run As</displayName>
 			<description>The user to run the job</description>
-			<documentName>User</documentName>
-			<queryName>qActiveUsers</queryName>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
 		</association>
 
 		<boolean name="jobScheduledImmediately" persistent="false">

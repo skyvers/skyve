@@ -19,6 +19,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.util.Binder;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
@@ -40,11 +41,13 @@ public class ControlPanelExtension extends ControlPanel {
 	private static final String SMTP_UID_KEY = "uid";
 	private static final String SMTP_PORT_KEY = "port";
 	private static final String SMTP_SERVER_KEY = "server";
+	private static final String MAP_TYPE_KEY = "type";
 	private static final String QUOTE = "\"";
 	private static final String NULL_STRING = "null";
 	public static final String DISPLAY_DELIM = ".";
 	public static final String ENVIRONMENT_STANZA_KEY = "environment";
 	public static final String SMTP_STANZA_KEY = "smtp";
+	public static final String MAP_STANZA_KEY = "map";
 	public static final String API_STANZA_KEY = "api";
 	public static final String CK_EDITOR_CONFIG_FILE_URL = "ckEditorConfigFileUrl";
 	public static final String GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
@@ -213,6 +216,8 @@ public class ControlPanelExtension extends ControlPanel {
 				"Test Bogus Send - Set true so emails are never sent, they are logged)");
 		// TODO - handle extended SMTP properties
 
+		addProperty(MAP_STANZA_KEY + DISPLAY_DELIM + MAP_TYPE_KEY, UtilImpl.MAP_TYPE.toString(), "Map API to use - gmap or leaflet");
+
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_MAPS_V3_KEY, UtilImpl.GOOGLE_MAPS_V3_API_KEY,
 				"Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_RECAPTCHA_SITE_KEY, UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, "Google Recaptcha Site Key");
@@ -349,6 +354,7 @@ public class ControlPanelExtension extends ControlPanel {
 					case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_PWD_KEY:
 					case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_SENDER_KEY:
 					case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_TEST_RECIPIENT_KEY:
+					case MAP_STANZA_KEY + DISPLAY_DELIM + MAP_TYPE_KEY:
 					case ENVIRONMENT_STANZA_KEY + DISPLAY_DELIM + ENVIRONMENT_IDENTIFIER_KEY:
 					case ENVIRONMENT_STANZA_KEY + DISPLAY_DELIM + ENVIRONMENT_CUSTOMER_KEY:
 					case ENVIRONMENT_STANZA_KEY + DISPLAY_DELIM + ENVIRONMENT_MODULE_DIRECTORY_KEY:
@@ -478,6 +484,10 @@ public class ControlPanelExtension extends ControlPanel {
 					break;
 				case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_TEST_BOGUS_SEND_KEY:
 					UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean((String) changed.get(k));
+					break;
+				case MAP_STANZA_KEY + DISPLAY_DELIM + MAP_TYPE_KEY:
+					String value = (String) changed.get(k);
+					UtilImpl.MAP_TYPE = (value == null) ? null : MapType.valueOf(value);
 					break;
 				case ENVIRONMENT_STANZA_KEY + DISPLAY_DELIM + ENVIRONMENT_IDENTIFIER_KEY:
 					UtilImpl.ENVIRONMENT_IDENTIFIER = (String) changed.get(k);

@@ -116,6 +116,11 @@
 		// Test Recipient (all emails only sent to this email address)
 		testRecipient: "test@yourdomain.com"
 	},
+	// Map Settings
+	map: {
+		// gmap or leaflet
+		type: "gmap"
+	},
 	// API Settings
 	api: {
 		//to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key

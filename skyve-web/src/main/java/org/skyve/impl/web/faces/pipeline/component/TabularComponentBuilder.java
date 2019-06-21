@@ -174,7 +174,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
-			stickyTabScript.append(String.format("$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);});",
+			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
+													id,
+													moduleName, documentName, id,
+													moduleName, documentName, id,
 													id,
 													moduleName, documentName, id,
 													moduleName, documentName, id));
@@ -439,13 +442,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												ordered,
 												grid.getWidgetId());
 
-		final String emptyMessage;
-		if (!Boolean.FALSE.equals(grid.getEditable()) && !Boolean.FALSE.equals(grid.getShowAdd())) {
-			emptyMessage = EMPTY_DATA_TABLE_CAN_ADD_MESSAGE;
-		} else {
-			emptyMessage = EMPTY_DATA_TABLE_MESSAGE;
+		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		if ((! Boolean.FALSE.equals(grid.getEditable())) && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
+			emptyMessage.setValue(EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
 		}
-		dataTable.setEmptyMessage(emptyMessage);
+		else {
+			emptyMessage.setValue(EMPTY_DATA_TABLE_MESSAGE);
+		}
+        dataTable.getFacets().put("emptyMessage", emptyMessage);
 
 		return dataTable;
 	}

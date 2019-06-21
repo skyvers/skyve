@@ -38,8 +38,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * All persistent attributes.
  * 
  * @depend - - - Enum3
- * @navhas n aggregatedCollection 0..n AllAttributesInverseOneToOnePersistent
- * @navhas n aggregatedAssociation 0..1 AllAttributesInverseOneToOnePersistent
+ * @navhas n aggCollection 0..n AllAttributesInverseOneToOnePersistent
+ * @navhas n aggAssociation 0..1 AllAttributesInverseOneToOnePersistent
  * @stereotype "persistent"
  */
 @XmlType
@@ -57,11 +57,11 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	public static final String DOCUMENT_NAME = "AllAttributesInverseOneToOnePersistent";
 
 	/** @hidden */
-	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
+	public static final String aggAssociationPropertyName = "aggAssociation";
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
 	/** @hidden */
-	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+	public static final String aggCollectionPropertyName = "aggCollection";
 	/** @hidden */
 	public static final String colourPropertyName = "colour";
 	/** @hidden */
@@ -83,7 +83,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	/** @hidden */
 	public static final String normalIntegerPropertyName = "normalInteger";
 	/** @hidden */
-	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
+	public static final String invAggAssociationPropertyName = "invAggAssociation";
 	/** @hidden */
 	public static final String longIntegerPropertyName = "longInteger";
 	/** @hidden */
@@ -178,7 +178,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	/**
 	 * Aggregated Association
 	 **/
-	private AllAttributesInverseOneToOnePersistent aggregatedAssociation = null;
+	private AllAttributesInverseOneToOnePersistent aggAssociation = null;
 	/**
 	 * Boolean Flag
 	 **/
@@ -186,7 +186,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	/**
 	 * Aggregated Collection
 	 **/
-	private List<AllAttributesInverseOneToOnePersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
+	private List<AllAttributesInverseOneToOnePersistent> aggCollection = new ChangeTrackingArrayList<>("aggCollection", this);
 	/**
 	 * Colour
 	 **/
@@ -230,7 +230,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	/**
 	 * Inverse
 	 **/
-	private AllAttributesInverseOneToOnePersistent inverseAggregatedAssociation;
+	private AllAttributesInverseOneToOnePersistent invAggAssociation;
 	/**
 	 * Long Integer
 	 **/
@@ -300,21 +300,21 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
-	 * {@link #aggregatedAssociation} accessor.
+	 * {@link #aggAssociation} accessor.
 	 * @return	The value.
 	 **/
-	public AllAttributesInverseOneToOnePersistent getAggregatedAssociation() {
-		return aggregatedAssociation;
+	public AllAttributesInverseOneToOnePersistent getAggAssociation() {
+		return aggAssociation;
 	}
 
 	/**
-	 * {@link #aggregatedAssociation} mutator.
-	 * @param aggregatedAssociation	The new value.
+	 * {@link #aggAssociation} mutator.
+	 * @param aggAssociation	The new value.
 	 **/
 	@XmlElement
-	public void setAggregatedAssociation(AllAttributesInverseOneToOnePersistent aggregatedAssociation) {
-		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-		this.aggregatedAssociation = aggregatedAssociation;
+	public void setAggAssociation(AllAttributesInverseOneToOnePersistent aggAssociation) {
+		preset(aggAssociationPropertyName, aggAssociation);
+		this.aggAssociation = aggAssociation;
 	}
 
 	/**
@@ -336,30 +336,30 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
-	 * {@link #aggregatedCollection} accessor.
+	 * {@link #aggCollection} accessor.
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<AllAttributesInverseOneToOnePersistent> getAggregatedCollection() {
-		return aggregatedCollection;
+	public List<AllAttributesInverseOneToOnePersistent> getAggCollection() {
+		return aggCollection;
 	}
 
 	/**
-	 * {@link #aggregatedCollection} accessor.
+	 * {@link #aggCollection} accessor.
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public AllAttributesInverseOneToOnePersistent getAggregatedCollectionElementById(String bizId) {
-		return getElementById(aggregatedCollection, bizId);
+	public AllAttributesInverseOneToOnePersistent getAggCollectionElementById(String bizId) {
+		return getElementById(aggCollection, bizId);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} mutator.
+	 * {@link #aggCollection} mutator.
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(String bizId, AllAttributesInverseOneToOnePersistent element) {
-		 setElementById(aggregatedCollection, element);
+	public void setAggCollectionElementById(String bizId, AllAttributesInverseOneToOnePersistent element) {
+		 setElementById(aggCollection, element);
 	}
 
 	/**
@@ -551,20 +551,20 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
-	 * {@link #inverseAggregatedAssociation} accessor.
+	 * {@link #invAggAssociation} accessor.
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public AllAttributesInverseOneToOnePersistent getInverseAggregatedAssociation() {
-		return inverseAggregatedAssociation;
+	public AllAttributesInverseOneToOnePersistent getInvAggAssociation() {
+		return invAggAssociation;
 	}
 
 	/**
-	 * {@link #inverseAggregatedAssociation} mutator.
-	 * @param inverseAggregatedAssociation	The new value.
+	 * {@link #invAggAssociation} mutator.
+	 * @param invAggAssociation	The new value.
 	 **/
-	public void setInverseAggregatedAssociation(AllAttributesInverseOneToOnePersistent inverseAggregatedAssociation) {
-		this.inverseAggregatedAssociation = inverseAggregatedAssociation;
+	public void setInvAggAssociation(AllAttributesInverseOneToOnePersistent invAggAssociation) {
+		this.invAggAssociation = invAggAssociation;
 	}
 
 	/**

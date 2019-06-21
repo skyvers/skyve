@@ -23,7 +23,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - SailExecutor
  * @navhas n emailToContact 0..1 Contact
  * @navhas n newProperty 0..1 Generic
- * @navhas n sailUser 0..1 User
+ * @navhas n sailUser 0..1 UserProxy
  * @navhas n originalStartupProperties 0..n Generic
  * @navhas n startupProperties 0..n Generic
  * @stereotype "transient"
@@ -438,7 +438,7 @@ public class ControlPanel extends AbstractTransientBean {
 	/**
 	 * User
 	 **/
-	private User sailUser = null;
+	private UserProxy sailUser = null;
 	/**
 	 * Module Name
 	 **/
@@ -867,7 +867,7 @@ public class ControlPanel extends AbstractTransientBean {
 	 * {@link #sailUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getSailUser() {
+	public UserProxy getSailUser() {
 		return sailUser;
 	}
 
@@ -876,7 +876,7 @@ public class ControlPanel extends AbstractTransientBean {
 	 * @param sailUser	The new value.
 	 **/
 	@XmlElement
-	public void setSailUser(User sailUser) {
+	public void setSailUser(UserProxy sailUser) {
 		preset(sailUserPropertyName, sailUser);
 		this.sailUser = sailUser;
 	}

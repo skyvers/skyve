@@ -7,26 +7,22 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 import modules.admin.User.UserBizlet;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Group;
-import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
 
-public class Next implements ServerSideAction<User> {
-	/**
-	 * For Serialization.
-	 */
+public class Next implements ServerSideAction<UserExtension> {
 	private static final long serialVersionUID = -4667349358677521637L;
 
 	@Override
-	public ServerSideActionResult<User> execute(User adminUser, WebContext webContext) throws Exception {
-
+	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
+	throws Exception {
 		next(adminUser);
-		
 		return new ServerSideActionResult<>(adminUser);
 	}
 	
-	public static void next(User adminUser) throws Exception{
+	public static void next(UserExtension adminUser) throws Exception{
 		ValidationException e = new ValidationException();
 		
 		if(WizardState.confirmContact.equals(adminUser.getWizardState())){

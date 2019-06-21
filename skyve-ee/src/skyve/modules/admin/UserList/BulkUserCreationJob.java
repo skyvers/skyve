@@ -20,6 +20,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Group;
@@ -63,7 +64,7 @@ public class BulkUserCreationJob extends Job {
 								CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 						log.add("New user '" + newUser.getUserName() + "' created and emailed ok");
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						log.add("New user '" + newUser.getUserName() + "' created ok but emailed FAILED");
 					}
 				} else {
@@ -131,8 +132,7 @@ public class BulkUserCreationJob extends Job {
 			c.setEmail1(emailAddress);
 			try {
 				ValidationUtil.validateBeanAgainstDocument(docContact, c);
-			} catch (ValidationException ve) {
-
+			} catch (@SuppressWarnings("unused") ValidationException ve) {
 				// rethrow with a more meaningful message
 				StringBuilder errorMessage = new StringBuilder(64);
 				errorMessage.append("'").append(emailAddress).append("' is not a valid Email Address");
@@ -179,10 +179,10 @@ public class BulkUserCreationJob extends Job {
 			newUser.setContact(contact);
 
 			// assign groups as selected
-			List<Group> groups = bean.getUserInvitationGroups();
-			for (Group group : groups) {
+			List<GroupExtension> groups = bean.getUserInvitationGroups();
+			for (GroupExtension group : groups) {
 				// this job is in its own thread, own persistence, own transaction
-				// and UserList bean is from another persistence that haven’t been fully populagted
+				// and UserList bean is from another persistence that havenï¿½t been fully populagted
 				// so we need to re-retrieve each group
 				String id = group.getBizId();
 				CORE.getPersistence().evictCached(group);
@@ -194,11 +194,9 @@ public class BulkUserCreationJob extends Job {
 
 			newUser = CORE.getPersistence().save(newUser);
 			return newUser;
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			log.add("The user '" + c.getEmail1()+ "' could not be created");
 			return null;
 		}
-
-		
 	}
 }

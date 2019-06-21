@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.admin.domain.User;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -28,7 +28,7 @@ import org.skyve.impl.domain.AbstractTransientBean;
  */
 @XmlType
 @XmlRootElement
-public class UserCandidateContact extends AbstractTransientBean implements ChildBean<User> {
+public class UserCandidateContact extends AbstractTransientBean implements ChildBean<UserExtension> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -53,7 +53,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	 * Score
 	 **/
 	private Integer matchScore;
-	private User parent;
+	private UserExtension parent;
 
 	private Integer bizOrdinal;
 
@@ -138,13 +138,13 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	}
 
 	@Override
-	public User getParent() {
+	public UserExtension getParent() {
 		return parent;
 	}
 
 	@Override
 	@XmlElement
-	public void setParent(User parent) {
+	public void setParent(UserExtension parent) {
 		preset(ChildBean.PARENT_NAME, parent);
 		this.parent =  parent;
 	}

@@ -127,6 +127,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
 
+	/**
+	 * Array of POSTGRESQL database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> POSTGRESQL_RESERVED_WORDS;
+
 	static {
 		String javaReserved[] = {
 				"abstract", "assert", "boolean", "break", "byte", "case",
@@ -138,8 +143,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"null", "package", "private", "protected", "public",
 				"return", "short", "static", "strictfp", "super",
 				"switch", "synchronized", "this", "throw", "throws",
-				"transient", "true", "try", "void", "volatile",
-				"while"
+				"transient", "true", "try", "void", "volatile", "while"
 		};
 		JAVA_RESERVED_WORDS = new HashSet<>(Arrays.asList(javaReserved));
 
@@ -198,9 +202,52 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"unpivot", "disk", "openquery", "update", "distinct", "openrowset", "updatetext", "distributed", "openxml", "use",
 				"double", "option", "user", "drop", "or", "values", "dump", "order", "varying", "else", "outer", "view", "end",
 				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
-				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc",
+				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc"
 		};
 		SQL_SERVER_RESERVED_WORDS = new HashSet<>(Arrays.asList(sqlServerReserved));
+
+		String postgreSQLReserved[] = {
+				"abs", "absolute", "action", "add", "all", "allocate", "alter", "analyse", "analyze", "and", "any", "are", "array",
+				"array_agg", "array_max_cardinality", "as", "asc", "asensitive", "assertion", "asymmetric", "at", "atomic", "authorization",
+				"avg", "begin", "begin_frame", "begin_partition", "between", "bigint", "binary", "bit", "bit_length", "blob", "boolean",
+				"both", "by", "call", "called", "cardinality", "cascade", "cascaded", "case", "cast", "catalog", "ceil", "ceiling", "char",
+				"char_length", "character", "character_length", "check", "clob", "close", "coalesce", "collate", "collation", "collect",
+				"column", "commit", "concurrently", "condition", "connect", "connection", "constraint", "constraints", "contains", "continue",
+				"convert", "corr", "corresponding", "count", "covar_pop", "covar_samp", "create", "cross", "cube", "cume_dist", "current",
+				"current_catalog", "current_date", "current_default_transform_group", "current_path", "current_role", "current_row",
+				"current_schema", "current_time", "current_timestamp", "current_transform_group_for_type", "current_user", "cursor",
+				"cycle", "datalink", "date", "day", "deallocate", "dec", "decimal", "declare", "default", "deferrable", "deferred", "delete",
+				"dense_rank", "deref", "desc", "describe", "descriptor", "deterministic", "diagnostics", "disconnect", "distinct", "dlnewcopy",
+				"dlpreviouscopy", "dlurlcomplete", "dlurlcompleteonly", "dlurlcompletewrite", "dlurlpath", "dlurlpathonly", "dlurlpathwrite",
+				"dlurlscheme", "dlurlserver", "dlvalue", "do", "domain", "double", "drop", "dynamic", "each", "element", "else", "end",
+				"end_frame", "end_partition", "end_exec", "equals", "escape", "every", "except", "exception", "exec", "execute", "exists", "exp",
+				"external", "extract", "false", "fetch", "filter", "first", "first_value", "float", "floor", "for", "foreign", "found", "frame_row",
+				"free", "freeze", "from", "full", "function", "fusion", "get", "global", "go", "goto", "grant", "group", "grouping", "groups",
+				"having", "hold", "hour", "identity", "ilike", "immediate", "import", "in", "indicator", "initially", "inner", "inout",
+				"input", "insensitive", "insert", "int", "integer", "intersect", "intersection", "interval", "into", "is", "isnull",
+				"isolation", "join", "key", "lag", "language", "large", "last", "last_value", "lateral", "lead", "leading", "left", "level",
+				"like", "like_regex", "limit", "ln", "local", "localtime", "localtimestamp", "lower", "match", "max", "max_cardinality", "member",
+				"merge", "method", "min", "minute", "mod", "modifies", "module", "month", "multiset", "names", "national", "natural", "nchar",
+				"nclob", "new", "next", "no", "none", "normalize", "not", "notnull", "nth_value", "ntile", "null", "nullif", "numeric",
+				"occurrences_regex", "octet_length", "of", "offset", "old", "on", "only", "open", "option", "or", "order", "out", "outer",
+				"output", "over", "overlaps", "overlay", "pad", "parameter", "partial", "partition", "percent", "percent_rank", "percentile_cont",
+				"percentile_disc", "period", "placing", "portion", "position", "position_regex", "power", "precedes", "precision", "prepare",
+				"preserve", "primary", "prior", "privileges", "procedure", "public", "range", "rank", "read", "reads", "real", "recursive",
+				"ref", "references", "referencing", "regr_avgx", "regr_avgy", "regr_count", "regr_intercept", "regr_r2", "regr_slope",
+				"regr_sxx", "regr_sxy", "regr_syy", "relative", "release", "restrict", "result", "return", "returning", "returns", "revoke",
+				"right", "rollback", "rollup", "row", "row_number", "rows", "savepoint", "schema", "scope", "scroll", "search", "second",
+				"section", "select", "sensitive", "session", "session_user", "set", "similar", "size", "smallint", "some", "space", "specific",
+				"specifictype", "sql", "sqlcode", "sqlerror", "sqlexception", "sqlstate", "sqlwarning", "sqrt", "start", "static", "stddev_pop",
+				"stddev_samp", "submultiset", "substring", "substring_regex", "succeeds", "sum", "symmetric", "system", "system_time", "system_user",
+				"table", "tablesample", "temporary", "then", "time", "timestamp", "timezone_hour", "timezone_minute", "to", "trailing", "transaction",
+				"translate", "translate_regex", "translation", "treat", "trigger", "trim", "trim_array", "true", "truncate", "uescape", "union",
+				"unique", "unknown", "unnest", "update", "upper", "usage", "user", "using", "value", "value_of", "values", "var_pop", "var_samp",
+				"varbinary", "varchar", "variadic", "varying", "verbose", "versioning", "view", "when", "whenever", "where", "width_bucket", "window",
+				"with", "within", "without", "work", "write", "xml", "xmlagg", "xmlattributes", "xmlbinary", "xmlcast", "xmlcomment", "xmlconcat",
+				"xmldocument", "xmlelement", "xmlexists", "xmlforest", "xmliterate", "xmlnamespaces", "xmlparse", "xmlpi", "xmlquery", "xmlserialize",
+				"xmltable", "xmltext", "xmlvalidate", "year", "zone"
+		};
+		POSTGRESQL_RESERVED_WORDS = new HashSet<>(Arrays.asList(postgreSQLReserved));
 	}
 
 	OverridableDomainGenerator() {
@@ -3219,6 +3266,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						break;
 					case MYSQL_5:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case POSTGRESQL:
+						if (POSTGRESQL_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
 						}

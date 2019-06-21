@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Group.GroupExtension;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -50,7 +52,7 @@ public class UserDashboard extends AbstractTransientBean {
 	/**
 	 * Current User
 	 **/
-	private User currentUser = null;
+	private UserExtension currentUser = null;
 	/**
 	 * Group Membership
 	 **/
@@ -62,7 +64,7 @@ public class UserDashboard extends AbstractTransientBean {
 	/**
 	 * Groups
 	 **/
-	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
+	private List<GroupExtension> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
 	 * Roles
 	 **/
@@ -115,7 +117,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * {@link #currentUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getCurrentUser() {
+	public UserExtension getCurrentUser() {
 		return currentUser;
 	}
 
@@ -124,7 +126,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param currentUser	The new value.
 	 **/
 	@XmlElement
-	public void setCurrentUser(User currentUser) {
+	public void setCurrentUser(UserExtension currentUser) {
 		preset(currentUserPropertyName, currentUser);
 		this.currentUser = currentUser;
 	}
@@ -172,7 +174,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Group> getGroups() {
+	public List<GroupExtension> getGroups() {
 		return groups;
 	}
 
@@ -181,7 +183,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Group getGroupsElementById(String bizId) {
+	public GroupExtension getGroupsElementById(String bizId) {
 		return getElementById(groups, bizId);
 	}
 
@@ -190,7 +192,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGroupsElementById(String bizId, Group element) {
+	public void setGroupsElementById(String bizId, GroupExtension element) {
 		 setElementById(groups, element);
 	}
 

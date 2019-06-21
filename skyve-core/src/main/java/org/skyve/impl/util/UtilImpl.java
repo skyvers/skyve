@@ -153,6 +153,12 @@ public class UtilImpl {
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
+	// Map Keys
+	public static enum MapType {
+		gmap, leaflet;
+	}
+	public static MapType MAP_TYPE = MapType.gmap;
+	
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
@@ -180,8 +186,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20190405-SNAPSHOT";
-	public static final String SKYVE_VERSION = "20190405-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20190607-SNAPSHOT";
+	public static final String SKYVE_VERSION = "20190607-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	// for skyve script

@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.admin.domain.User;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -18,7 +18,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class UserRole extends AbstractPersistentBean implements ChildBean<User> {
+public class UserRole extends AbstractPersistentBean implements ChildBean<UserExtension> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -37,7 +37,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 	 * Role Name
 	 **/
 	private String roleName;
-	private User parent;
+	private UserExtension parent;
 
 	private Integer bizOrdinal;
 
@@ -104,13 +104,13 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 	}
 
 	@Override
-	public User getParent() {
+	public UserExtension getParent() {
 		return parent;
 	}
 
 	@Override
 	@XmlElement
-	public void setParent(User parent) {
+	public void setParent(UserExtension parent) {
 		preset(ChildBean.PARENT_NAME, parent);
 		this.parent =  parent;
 	}

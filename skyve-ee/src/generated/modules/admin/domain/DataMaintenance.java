@@ -29,7 +29,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - Operation
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
- * @navhas n auditUser 0..1 User
+ * @navhas n auditUser 0..1 UserProxy
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
  */
@@ -606,7 +606,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * User
 	 **/
-	private User auditUser = null;
+	private UserProxy auditUser = null;
 	/**
 	 * Found
 	 **/
@@ -1126,7 +1126,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #auditUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getAuditUser() {
+	public UserProxy getAuditUser() {
 		return auditUser;
 	}
 
@@ -1135,7 +1135,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * @param auditUser	The new value.
 	 **/
 	@XmlElement
-	public void setAuditUser(User auditUser) {
+	public void setAuditUser(UserProxy auditUser) {
 		preset(auditUserPropertyName, auditUser);
 		this.auditUser = auditUser;
 	}

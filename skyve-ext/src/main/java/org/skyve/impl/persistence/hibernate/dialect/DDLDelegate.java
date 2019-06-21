@@ -24,6 +24,7 @@ import org.hibernate.tool.schema.extract.spi.TableInformation;
 import org.hibernate.tool.schema.internal.Helper;
 import org.hibernate.tool.schema.internal.exec.JdbcContext;
 import org.skyve.EXT;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 
 import geodb.GeoDB;
@@ -119,8 +120,11 @@ public class DDLDelegate {
 				StringBuilder alter = new StringBuilder(root.toString())
 						.append(' ')
 						.append(column.getQuotedName(dialect))
-						.append(' ')
-						.append(column.getSqlType(dialect, metadata));
+						.append(' ');
+				if (RDBMS.postgresql.equals(skyveDialect.getRDBMS())) {
+					alter.append("type ");
+				}
+				alter.append(column.getSqlType(dialect, metadata));
 
 				String defaultValue = column.getDefaultValue();
 				if (defaultValue != null) {

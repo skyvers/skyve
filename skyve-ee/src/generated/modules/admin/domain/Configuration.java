@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
+import modules.admin.Group.GroupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -160,7 +161,7 @@ public class Configuration extends AbstractPersistentBean {
 			<br/>
 			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
 	 **/
-	private Group userSelfRegistrationGroup = null;
+	private GroupExtension userSelfRegistrationGroup = null;
 	/**
 	 * Allow User Self Registration
 	 * <br/>
@@ -287,7 +288,7 @@ public class Configuration extends AbstractPersistentBean {
 	 * {@link #userSelfRegistrationGroup} accessor.
 	 * @return	The value.
 	 **/
-	public Group getUserSelfRegistrationGroup() {
+	public GroupExtension getUserSelfRegistrationGroup() {
 		return userSelfRegistrationGroup;
 	}
 
@@ -296,7 +297,7 @@ public class Configuration extends AbstractPersistentBean {
 	 * @param userSelfRegistrationGroup	The new value.
 	 **/
 	@XmlElement
-	public void setUserSelfRegistrationGroup(Group userSelfRegistrationGroup) {
+	public void setUserSelfRegistrationGroup(GroupExtension userSelfRegistrationGroup) {
 		preset(userSelfRegistrationGroupPropertyName, userSelfRegistrationGroup);
 		this.userSelfRegistrationGroup = userSelfRegistrationGroup;
 	}

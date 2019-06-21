@@ -32,17 +32,14 @@ import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
 
-public class UserBizlet extends Bizlet<User> {
-	/**
-	 * For Serialization
-	 */
+public class UserBizlet extends Bizlet<UserExtension> {
 	private static final long serialVersionUID = 5947293714061984815L;
 
 	/**
 	 * Populate the data group association if required.
 	 */
 	@Override
-	public User newInstance(User bean) throws Exception {
+	public UserExtension newInstance(UserExtension bean) throws Exception {
 		
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
@@ -82,14 +79,14 @@ public class UserBizlet extends Bizlet<User> {
 			}
 			sb.append(Binder.formatMessage(customer, "{userName} - {contact.bizKey}", user));
 
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			sb.append("Unknown");
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public void preRerender(String source, User bean, WebContext webContext) throws Exception {
+	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
 		
 		if(User.groupSelectionPropertyName.equals(source)) {
 			if(GroupSelection.newGroup.equals(bean.getGroupSelection())) {
@@ -103,7 +100,11 @@ public class UserBizlet extends Bizlet<User> {
 	}
 
 	@Override
-	public User preExecute(ImplicitActionName actionName, User bean, Bean parentBean, WebContext webContext) throws Exception {
+	public UserExtension preExecute(ImplicitActionName actionName,
+										UserExtension bean,
+										Bean parentBean,
+										WebContext webContext)
+	throws Exception {
 		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			
 			//if a new group was created, assign the user to the group membership
@@ -119,7 +120,7 @@ public class UserBizlet extends Bizlet<User> {
 	 * password.
 	 */
 	@Override
-	public void validate(User user, ValidationException e) throws Exception {
+	public void validate(UserExtension user, ValidationException e) throws Exception {
 
 		validateUserContact(user, e);
 
@@ -205,7 +206,7 @@ public class UserBizlet extends Bizlet<User> {
 	}
 
 	@Override
-	public void preSave(User bean) throws Exception {
+	public void preSave(UserExtension bean) throws Exception {
 		
 		if (bean.getGeneratedPassword() != null) {
 			bean.setPasswordExpired(Boolean.TRUE);
@@ -221,7 +222,15 @@ public class UserBizlet extends Bizlet<User> {
 		}
 	}
 
-	public static void validateUserContact(User bean, ValidationException e) {
+	/**
+	 * Reset the assigned roles model.
+	 */
+	@Override
+	public void postSave(UserExtension bean) throws Exception {
+		bean.clearAssignedRoles();
+	}
+	
+	public static void validateUserContact(UserExtension bean, ValidationException e) {
 		if (bean.getContact() == null) {
 			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
 		} else if (bean.getContact().getName() == null) {
@@ -231,7 +240,7 @@ public class UserBizlet extends Bizlet<User> {
 		}
 	}
 
-	public static void validateUserNameAndPassword(User user, ValidationException e) throws Exception {
+	public static void validateUserNameAndPassword(UserExtension user, ValidationException e) throws Exception {
 
 		// validate username is not null, not too short and unique
 		if (user.getUserName() == null) {
