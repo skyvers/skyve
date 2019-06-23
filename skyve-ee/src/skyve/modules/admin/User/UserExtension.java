@@ -1,14 +1,15 @@
 package modules.admin.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.Role;
 
 import modules.admin.domain.User;
@@ -17,25 +18,30 @@ import modules.admin.domain.UserRole;
 public class UserExtension extends User {
 	private static final long serialVersionUID = 3422968996147520436L;
 
-	private List<Bean> assignedRoles = null;
+	private boolean determinedRoles = false;
 
-	public List<Bean> getAssignedRoles() {
-		if (assignedRoles == null) {
-			assignedRoles = new ArrayList<>(10);
+	@Override
+	public List<UserRole> getAssignedRoles() {
+		List<UserRole> assignedRoles = super.getAssignedRoles();
+		if (! determinedRoles) {
+			determinedRoles = true;
+			assignedRoles.clear();
 			if (isPersisted()) {
-				Repository r = CORE.getRepository();
-				org.skyve.metadata.user.User metaDataUser = r.retrieveUser((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
-				if (metaDataUser != null) {
-					Customer c = metaDataUser.getCustomer();
-					for (String moduleName : metaDataUser.getAccessibleModuleNames()) {
-						Module m = c.getModule(moduleName);
-						for (Role role : m.getRoles()) {
-							String roleName = role.getName();
-							if (metaDataUser.isInRole(moduleName, roleName)) {
-								UserRole assignedRole = UserRole.newInstance();
-								assignedRole.setRoleName(moduleName + "." + roleName);
-								assignedRoles.add(assignedRole);
-							}
+				// Populate the user using the persistence connection since it might have just been inserted and not committed yet
+				UserImpl metaDataUser = AbstractRepository.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
+				metaDataUser.clearAllPermissionsAndMenus();
+				SQLMetaDataUtil.populateUser(metaDataUser, ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection());
+
+				// Add the assigned roles
+				Customer c = metaDataUser.getCustomer();
+				for (Module m : c.getModules()) {
+					String moduleName = m.getName();
+					for (Role role : m.getRoles()) {
+						String roleName = role.getName();
+						if (metaDataUser.isInRole(moduleName, roleName)) {
+							UserRole assignedRole = UserRole.newInstance();
+							assignedRole.setRoleName(moduleName + "." + roleName);
+							assignedRoles.add(assignedRole);
 						}
 					}
 				}
@@ -46,6 +52,6 @@ public class UserExtension extends User {
 	}
 		
 	void clearAssignedRoles() {
-		assignedRoles = null;
+		determinedRoles = false;
 	}
 }

@@ -471,7 +471,7 @@ public class EXT {
 	 * @param out
 	 * @throws JRException
 	 */
-	public static void runReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out) throws JRException {
+	public static void runReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out) throws Exception {
 		ReportUtil.runReport(jasperPrint, format, out);
 	}
 
@@ -482,7 +482,7 @@ public class EXT {
 	 * @param out
 	 * @throws JRException
 	 */
-	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out) throws JRException {
+	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out) throws Exception {
 		ReportUtil.runReport(jasperPrintList, format, out);
 	}
 

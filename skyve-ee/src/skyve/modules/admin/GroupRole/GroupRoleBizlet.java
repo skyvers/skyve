@@ -9,6 +9,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserBizlet;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.GroupRole;
 
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
@@ -29,7 +30,13 @@ public class GroupRoleBizlet extends Bizlet<GroupRole> {
 		if (conversationBean instanceof GroupExtension) {
 			return ((GroupExtension) conversationBean).getCandidateRolesElementById(bizId);
 		}
-		
-		return super.resolve(bizId, conversationBean, webContext);
+		else if (conversationBean instanceof UserExtension) {
+			UserExtension user = (UserExtension) conversationBean;
+			GroupExtension group = user.getNewGroup();
+			if (group != null) {
+				return group.getCandidateRolesElementById(bizId);
+			}
+		}
+		return null;
 	}
 }

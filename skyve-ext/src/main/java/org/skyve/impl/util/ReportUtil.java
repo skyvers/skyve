@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.*;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.jasperreports.SkyveDataSource;
@@ -21,6 +20,12 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 
+import net.sf.jasperreports.engine.JRAbstractExporter;
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JExcelApiExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
@@ -104,7 +109,8 @@ public final class ReportUtil {
 	                                    Map<String, Object> parameters,
 	                                    Bean bean,
 	                                    ReportFormat format,
-	                                    OutputStream out) throws JRException {
+	                                    OutputStream out)
+	throws Exception {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
 
 		JasperPrint result = null;
@@ -158,11 +164,10 @@ public final class ReportUtil {
 		return result;
 	}
 
-	@SuppressWarnings("resource")
-	private static JasperPrint fillSqlReport(JasperReport jasperReport, Map<String, Object> parameters, ReportFormat format, OutputStream out) throws JRException {
+	private static JasperPrint fillSqlReport(JasperReport jasperReport, Map<String, Object> parameters, ReportFormat format, OutputStream out)
+	throws Exception {
 		JasperPrint result;
-		Connection connection = EXT.getDataStoreConnection();
-		try {
+		try (Connection connection = EXT.getDataStoreConnection()) {
             UtilImpl.LOGGER.info("FILL REPORT");
             result = JasperFillManager.fillReport(jasperReport,
                     parameters,
@@ -170,9 +175,6 @@ public final class ReportUtil {
             UtilImpl.LOGGER.info("PUMP REPORT");
             runReport(result, format, out);
             UtilImpl.LOGGER.info("PUMPED REPORT");
-        }
-        finally {
-            SQLUtil.disconnect(connection);
         }
 		return result;
 	}
@@ -193,9 +195,7 @@ public final class ReportUtil {
 
 			UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
 			if ("sql".equalsIgnoreCase(queryLanguage)) {
-				@SuppressWarnings("resource")
-				Connection connection = EXT.getDataStoreConnection();
-				try {
+				try (Connection connection = EXT.getDataStoreConnection()) {
 					UtilImpl.LOGGER.info("FILL REPORT");
 					result.add(JasperFillManager.fillReport(jasperReport,
 							reportParameter.getParameters(),
@@ -203,9 +203,6 @@ public final class ReportUtil {
 					UtilImpl.LOGGER.info("PUMP REPORT");
 					runReport(result, format, out);
 					UtilImpl.LOGGER.info("PUMPED REPORT");
-				}
-				finally {
-					SQLUtil.disconnect(connection);
 				}
 			}
 			else if ("document".equalsIgnoreCase(queryLanguage)) {
@@ -270,7 +267,7 @@ public final class ReportUtil {
 	public static void runReport(JasperPrint jasperPrint, 
 									ReportFormat format,
 									OutputStream out)
-	throws JRException {
+	throws Exception {
 		final JRAbstractExporter exporter = getExporter(format);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
@@ -281,7 +278,7 @@ public final class ReportUtil {
 	public static void runReport(List<JasperPrint> jasperPrintList,
 								 ReportFormat format,
 								 OutputStream out)
-			throws JRException {
+			throws Exception {
 		final JRAbstractExporter exporter = getExporter(format);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrintList);

@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
@@ -14,6 +15,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,15 @@ public class SQLMetaDataUtil {
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	
 	public static void populateUser(User user) {
+		try (Connection connection = EXT.getDataStoreConnection()) {
+			populateUser(user, connection);
+		}
+		catch (SQLException e) {
+			throw new MetaDataException("Could not obtain a data store connection", e);
+		}
+	}
+	
+	public static void populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
@@ -107,7 +119,7 @@ public class SQLMetaDataUtil {
 			sql.append("and u.bizCustomer = '").append(customer.getName()).append("'");
 
 			boolean firstRow = true;
-			for (DynaBean userRoleRow : SQLUtil.retrieveListForSQL(null, null, sql.toString(), null, false, false)) {
+			for (DynaBean userRoleRow : SQLUtil.retrieveListForSQL(connection, null, null, sql.toString(), null)) {
 				if (firstRow) {
 					internalUser.setId((String) userRoleRow.get("bizid"));
 					internalUser.setPasswordHash((String) userRoleRow.get("password"));
@@ -149,15 +161,6 @@ public class SQLMetaDataUtil {
 		catch (DomainException e) {
 			throw new MetaDataException(e);
 		}
-		finally {
-			try {
-				SQLUtil.commit(true);
-			}
-			catch (DomainException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 	public static List<Bean> retrieveAllJobSchedulesForAllCustomers() {
@@ -168,7 +171,8 @@ public class SQLMetaDataUtil {
 		
 		AbstractRepository repository = AbstractRepository.get();
 
-		try {
+		
+		try (Connection connection = EXT.getDataStoreConnection()) {
 			Module admin = repository.getModule(null, "admin");
 			String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
 			String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
@@ -177,7 +181,7 @@ public class SQLMetaDataUtil {
 			sql.append("select s.*, u.userName from ").append(ADM_JobSchedule).append(" s inner join ");
 			sql.append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
 			
-			for (DynaBean jobScheduleRow : SQLUtil.retrieveListForSQL(null, null, sql.toString(), null, false, false)) {
+			for (DynaBean jobScheduleRow : SQLUtil.retrieveListForSQL(connection, null, null, sql.toString(), null)) {
 				StringBuilder userPrincipalBuilder = new StringBuilder(128);
 				userPrincipalBuilder.append(jobScheduleRow.get("bizcustomer"));
 				userPrincipalBuilder.append('/').append(jobScheduleRow.get("username"));
@@ -203,15 +207,6 @@ public class SQLMetaDataUtil {
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
-		}
-		finally {
-			try {
-				SQLUtil.commit(true);
-			}
-			catch (DomainException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 		
 		return result;

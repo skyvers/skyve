@@ -26,6 +26,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - WizardState
  * @depend - - - GroupSelection
  * @navhas n dataGroup 0..1 DataGroup
+ * @navhas n assignedRoles 0..n UserRole
  * @navhas n contact 1 Contact
  * @navcomposed 1 roles 0..n UserRole
  * @navhas n groups 0..n Group
@@ -95,6 +96,8 @@ public class User extends AbstractPersistentBean {
 	public static final String groupsExistPropertyName = "groupsExist";
 	/** @hidden */
 	public static final String newGroupPropertyName = "newGroup";
+	/** @hidden */
+	public static final String assignedRolesPropertyName = "assignedRoles";
 
 	/**
 	 * Wizard State
@@ -406,6 +409,12 @@ public class User extends AbstractPersistentBean {
 	 * New Group
 	 **/
 	private GroupExtension newGroup = null;
+	/**
+	 * Roles
+	 * <br/>
+	 * The assigned roles through the groups, customer roles and module roles assigned.
+	 **/
+	private List<UserRole> assignedRoles = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -900,6 +909,33 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	@XmlElement
 	public void setNewGroup(GroupExtension newGroup) {
 		this.newGroup = newGroup;
+	}
+
+	/**
+	 * {@link #assignedRoles} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<UserRole> getAssignedRoles() {
+		return assignedRoles;
+	}
+
+	/**
+	 * {@link #assignedRoles} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public UserRole getAssignedRolesElementById(String bizId) {
+		return getElementById(assignedRoles, bizId);
+	}
+
+	/**
+	 * {@link #assignedRoles} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setAssignedRolesElementById(String bizId, UserRole element) {
+		 setElementById(assignedRoles, element);
 	}
 
 	/**

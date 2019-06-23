@@ -51,7 +51,9 @@
 					</dataGrid>
 				</vbox>
 				<vbox border="true" borderTitle="Assigned Roles" percentageHeight="50">
-					<listRepeater model="AssignedRolesModel" />
+					<dataRepeater binding="assignedRoles">
+						<boundColumn binding="roleName" editable="false" />
+					</dataRepeater>
 				</vbox>
 			</hbox>
 		</tab>
