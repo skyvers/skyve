@@ -48,7 +48,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer + '/' + userName, bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
 		}
 		else if (RDBMS.postgresql.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, coalesce(inactive, false) from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
+			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, coalesce(inactive, true) from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 		}
