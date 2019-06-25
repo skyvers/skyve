@@ -322,6 +322,12 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
 			<version>${hibernate-spatial.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 			<dependency>
 			    <groupId>org.hibernate</groupId>
