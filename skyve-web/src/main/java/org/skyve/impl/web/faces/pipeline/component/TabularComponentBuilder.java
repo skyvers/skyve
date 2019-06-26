@@ -676,7 +676,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setValue(null);
 		button.setTitle("Toggle filters");
 		button.setIcon("fa fa-filter");
-		button.setOnclick(String.format("SKYVE.toggleFilters('%s'); return false;", dataTableId));
+		button.setOnclick(String.format("SKYVE.PF.toggleFilters('%s'); return false;", dataTableId));
 		return button;
 	}
 
@@ -1588,11 +1588,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setModal(true);
 		overlay.setStyle("width:50%;height:300px");
 		// clear the iframe src on hide so there is no flash next open
-		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s')", id));
+		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
 
 		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
 		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 		toAddTo.add(overlay);
@@ -1611,10 +1611,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		clearButton.setValue(null);
 		clearButton.setType("button");
 		if (image) {
-			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s')", sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
 		}
 		else {
-			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s')", sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.PF.clearContentLink('%s')", sanitisedBinding));
 		}
 		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
@@ -2591,11 +2591,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setModal(true);
 		overlay.setStyle("width:50%;height:300px");
 		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
+		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
 
 		// show the overlay, reset the fileUpload.xhtml iframe
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("')).concat('\\')')}");
 		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 

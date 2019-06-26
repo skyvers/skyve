@@ -1739,7 +1739,7 @@ isc.BizHTMLItem.addMethods({
 					this._show();
 				}
 				else {
-					isc.BizUtil.loadJS('ckeditor/ckeditor.js', function() {
+					SKYVE.Util.loadJS('ckeditor/ckeditor.js', function() {
 						me._editButton._show();
 					});
 				}
@@ -1874,14 +1874,14 @@ isc.BizMapPicker.addMethods({
 		else {
 			isc.BizMapPicker.id = this.ID;
 
-			isc.BizUtil.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
-				isc.BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
+			SKYVE.Util.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
+				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
 					if (isc.BizUtil.googleMapsV3ApiKey) {
-						isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
+						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
 											isc.BizUtil.googleMapsV3ApiKey);
 					}
 					else {
-						isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
+						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
 					}
 				});
 			});

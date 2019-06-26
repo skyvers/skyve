@@ -126,10 +126,10 @@ public class ContentUpload extends Localisable {
 			js.append("top.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
 			js.append("','").append(contentId).append("');top.isc.WindowStack.popoff(false)");
 			// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
-			js.append("}else if(top.SKYVE){top.SKYVE.afterContentUpload('").append(sanitisedContentBinding);
+			js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterContentUpload('").append(sanitisedContentBinding);
 			js.append("','").append(contentId).append("','");
 			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
-			js.append(SmartClientGenerateUtils.processString(content.getFileName(), false, false)).append("')}");
+			js.append(SmartClientGenerateUtils.processString(content.getFileName(), false, false)).append("')}}");
 			PrimeFaces.current().executeScript(js.toString());
 		}
 		catch (Exception e) {

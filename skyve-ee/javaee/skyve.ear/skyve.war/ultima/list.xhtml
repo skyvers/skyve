@@ -25,7 +25,7 @@
 			<ui:define name="head">
 			</ui:define>
 			<ui:define name="body">
-				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.onPushMessage(message) }" />
+				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
 				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
 				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 				<h:form prependId="false">

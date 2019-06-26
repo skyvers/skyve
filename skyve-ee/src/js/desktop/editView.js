@@ -1901,7 +1901,7 @@ isc.BizComparison.addMethods({
 			fields: []
 		});
 
-		isc.BizUtil.loadJS('desktop/diff_match_patch.js?v=' + isc.BizUtil.version, function() {
+		SKYVE.Util.loadJS('desktop/diff_match_patch.js?v=' + isc.BizUtil.version, function() {
 			me._comparisonForm.diff_match_patch = new diff_match_patch();
 			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});

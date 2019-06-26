@@ -68,7 +68,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			if ((inputElement != null) && element.isDisplayed() && element.isEnabled()) {
 				// don't need to check if checkbox is disabled coz we can still try to click it
 				// check the value and only click if we need a different value
-				String js = String.format("return window.SKYVE.getCheckboxValue('%s')", id);
+				String js = String.format("return window.SKYVE.PF.getCheckboxValue('%s')", id);
 				Boolean checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 				if (value == null) {
 					for (int i = 0, l = 2; i < l; i++) { // try at most twice

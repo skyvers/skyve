@@ -552,7 +552,7 @@ public class DataBuilder {
 						BindUtil.set(result, name, randomEnum(clazz, null));
 						break;
 					case geometry:
-						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(RANDOM.nextInt(180), RANDOM.nextInt(180))));
+						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(RANDOM.nextInt(180) - RANDOM.nextInt(180), RANDOM.nextInt(90) - RANDOM.nextInt(90))));
 						break;
 					case id:
 						BindUtil.set(result, name, UUID.randomUUID().toString());
