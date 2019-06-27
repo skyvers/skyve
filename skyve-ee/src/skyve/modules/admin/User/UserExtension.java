@@ -27,10 +27,8 @@ public class UserExtension extends User {
 			determinedRoles = true;
 			assignedRoles.clear();
 			if (isPersisted()) {
-				// Populate the user using the persistence connection since it might have just been inserted and not committed yet
-				UserImpl metaDataUser = AbstractRepository.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
-				metaDataUser.clearAllPermissionsAndMenus();
-				SQLMetaDataUtil.populateUser(metaDataUser, ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection());
+				
+				org.skyve.metadata.user.User metaDataUser = toMetaDataUser();
 
 				// Add the assigned roles
 				Customer c = metaDataUser.getCustomer();
@@ -54,4 +52,23 @@ public class UserExtension extends User {
 	void clearAssignedRoles() {
 		determinedRoles = false;
 	}
+	 
+	/**
+	 * Return the metadata user that is this user
+	 * 
+	 * @return the metadata user that is this user
+	 */
+	public org.skyve.metadata.user.User toMetaDataUser() {
+		
+		UserImpl metaDataUser  = null;
+		if(isPersisted()) {
+			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
+			metaDataUser = AbstractRepository.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
+			metaDataUser.clearAllPermissionsAndMenus();
+			SQLMetaDataUtil.populateUser(metaDataUser, ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection());
+		}
+		
+		return metaDataUser;
+	}
+
 }
