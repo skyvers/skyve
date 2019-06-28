@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import javax.el.ValueExpression;
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
@@ -55,7 +56,7 @@ public abstract class FacesAction<T> {
 			if (t instanceof MessageException) {
 				TreeSet<String> globalMessageSet = new TreeSet<>();
 				for (Message em : ((MessageException) t).getMessages()) {
-					processErrors(fc, em, globalMessageSet);
+					processFacesMessages(fc, FacesMessage.SEVERITY_ERROR, em, globalMessageSet);
 				}
 
 				// Render only field level error messages
@@ -94,14 +95,17 @@ public abstract class FacesAction<T> {
 	 * Adding messages manually for each type of message display mechanism affords the most flexibility.
 	 * 
 	 * @param context
-	 * @param em
+	 * @param severity
+	 * @param message	
+	 * @param globalMessageSet	Used to add only unique/distinct messages across calls
 	 */
-	private static void processErrors(FacesContext context,
-										Message em,
-										TreeSet<String> globalMessageSet) {
-		String message = em.getText();
-		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
-		for (String binding : em.getBindings()) {
+	public static void processFacesMessages(FacesContext context,
+												Severity severity,
+												Message message,
+												TreeSet<String> globalMessageSet) {
+		String text = message.getText();
+		FacesMessage msg = new FacesMessage(severity, text, text);
+		for (String binding : message.getBindings()) {
 			List<UIComponent> components = findComponentsByBinding(context.getViewRoot(), binding);
 			for (UIComponent component : components) {
 				if (component.isRendered()) {
@@ -140,7 +144,7 @@ public abstract class FacesAction<T> {
 		}
 
 		// only add distinct error messages globally
-		if (globalMessageSet.add(message)) {
+		if (globalMessageSet.add(text)) {
 			context.addMessage(null, msg);
 		}
 	}
