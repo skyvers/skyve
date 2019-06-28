@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.el.ValueExpression;
@@ -102,7 +103,7 @@ public abstract class FacesAction<T> {
 	public static void processFacesMessages(FacesContext context,
 												Severity severity,
 												Message message,
-												TreeSet<String> globalMessageSet) {
+												Set<String> globalMessageSet) {
 		String text = message.getText();
 		FacesMessage msg = new FacesMessage(severity, text, text);
 		for (String binding : message.getBindings()) {
