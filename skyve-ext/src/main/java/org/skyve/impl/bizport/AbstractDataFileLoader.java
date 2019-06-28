@@ -672,7 +672,7 @@ public abstract class AbstractDataFileLoader {
 							}
 							if (displayValue != null && displayValue.trim().length() > 0) {
 								try {
-									loadValue = field.getConverter().fromDisplayValue(displayValue);
+									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
 								} catch (Exception e) {
 									Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
 								}
@@ -729,7 +729,7 @@ public abstract class AbstractDataFileLoader {
 							case text:
 								operand = getStringFieldValue(fieldIndex, true);
 								if (operand != null) {
-									loadValue = operand;
+									loadValue = (((String) operand).trim().length()>0? (String) operand: null);
 									if (debugMode) {
 										Util.LOGGER.info("String field value " + loadValue);
 									}
