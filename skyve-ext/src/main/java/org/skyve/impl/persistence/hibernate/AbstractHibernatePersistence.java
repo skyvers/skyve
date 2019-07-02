@@ -1140,6 +1140,7 @@ t.printStackTrace();
 				// be unique constraint violation.
 				boolean abortCheck = false;
 				List<Object> constraintFieldValues = new ArrayList<>();
+				int i = 1;
 				for (String fieldName : constraint.getFieldNames()) {
 					Object constraintFieldValue = null;
 					try {
@@ -1162,7 +1163,7 @@ t.printStackTrace();
 						queryString.append(" and bean.");
 					}
 					queryString.append(fieldName);
-					queryString.append(" = ?");
+					queryString.append(" = ?").append(i++);
 				}
 	
 				if (abortCheck) {
@@ -1177,7 +1178,7 @@ t.printStackTrace();
 					Util.LOGGER.info(log.toString());
 				}
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
-				int index = 0;
+				int index = 1;
 				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
 					query.setParameter(index, constraintFieldValues.get(index));
 					if (UtilImpl.QUERY_TRACE) {
