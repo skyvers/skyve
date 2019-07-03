@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -18,9 +20,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;

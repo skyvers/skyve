@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -12,8 +13,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class DocumentFilterImpl implements DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";

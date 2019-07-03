@@ -2,12 +2,11 @@ package org.skyve.metadata.view.model.list;
 
 import java.util.Date;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.types.Decimal;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class SQLFilter implements Filter {
 	private SQL detailSQL;

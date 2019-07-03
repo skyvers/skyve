@@ -8,13 +8,12 @@ import org.geolatte.geom.codec.WkbEncoder;
 import org.geolatte.geom.jts.JTS;
 import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
+import org.hibernate.spatial.dialect.mysql.MySQL56SpatialDialect;
 import org.hibernate.spatial.dialect.mysql.MySQLGeometryTypeDescriptor;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
+import org.locationtech.jts.geom.Geometry;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-@SuppressWarnings("deprecation")
-public class MySQL56InnoDBSpatialDialect extends org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect implements SkyveDialect {
+public class MySQL56InnoDBSpatialDialect extends MySQL56SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = -6017668196369823514L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(MySQLGeometryTypeDescriptor.INSTANCE);

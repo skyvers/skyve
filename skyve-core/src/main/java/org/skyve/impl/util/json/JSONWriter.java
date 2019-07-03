@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -30,9 +32,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTWriter;
 
 // TODO Clean up exception handling in JSON stuff
 public class JSONWriter {

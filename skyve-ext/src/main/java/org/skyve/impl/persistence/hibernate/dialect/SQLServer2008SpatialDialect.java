@@ -13,8 +13,7 @@ import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.sqlserver.SqlServer2008GeometryTypeDescriptor;
 import org.hibernate.spatial.dialect.sqlserver.SqlServer2008SpatialDialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect implements SkyveDialect {
 	private static final long serialVersionUID = 5463421110159264122L;

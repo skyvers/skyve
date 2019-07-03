@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
@@ -38,8 +40,6 @@ import org.skyve.util.test.DataMap;
 import org.skyve.util.test.SkyveFactory;
 
 import com.mifmif.common.regex.Generex;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 public class TestUtil {
 

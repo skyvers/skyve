@@ -48,7 +48,6 @@ import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
-import org.hibernate.jpa.event.spi.JpaIntegrator;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
@@ -249,7 +248,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			@Override
 			public Iterable<Integrator> getIntegrators() {
 				List<Integrator> result = new ArrayList<>();
-				result.add(new JpaIntegrator());
 				result.add(new Integrator() {
 					@Override
 					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
@@ -1180,9 +1178,10 @@ t.printStackTrace();
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 				int index = 1;
 				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
-					query.setParameter(index, constraintFieldValues.get(index));
+					Object value = constraintFieldValues.get(index - 1);
+					query.setParameter(index, value);
 					if (UtilImpl.QUERY_TRACE) {
-						Util.LOGGER.info("    SET PARAM " + index + " = " + constraintFieldValues.get(index));
+						Util.LOGGER.info("    SET PARAM " + index + " = " + value);
 					}
 					index++;
 				}

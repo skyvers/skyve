@@ -10,14 +10,13 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 class HibernateQueryDelegate {
 	private Session session;

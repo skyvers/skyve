@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.locationtech.jts.geom.Envelope;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -28,8 +29,6 @@ import org.skyve.metadata.view.model.map.DefaultQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Map Servlet - supplies map data to google map widget.

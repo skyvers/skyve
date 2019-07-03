@@ -2,9 +2,8 @@ package org.skyve.metadata.view.model.list;
 
 import java.util.Date;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.types.Decimal;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public interface Filter {
 	public void addAnd(Filter filter);

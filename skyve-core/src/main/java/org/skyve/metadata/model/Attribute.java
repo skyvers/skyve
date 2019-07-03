@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -16,8 +17,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * 

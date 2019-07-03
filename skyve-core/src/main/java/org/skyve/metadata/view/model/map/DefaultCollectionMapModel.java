@@ -3,10 +3,9 @@ package org.skyve.metadata.view.model.map;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Envelope;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class DefaultCollectionMapModel<T extends Bean> extends DefaultMapModel<T> {
 	/**

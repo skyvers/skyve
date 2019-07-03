@@ -4,8 +4,7 @@ import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class PostgreSQL95SpatialDialect extends PostgisPG95Dialect implements SkyveDialect {
 	private static final long serialVersionUID = 7467866460194029713L;

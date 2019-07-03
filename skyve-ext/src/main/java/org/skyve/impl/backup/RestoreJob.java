@@ -12,6 +12,8 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -35,9 +37,6 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTReader;
 
 public class RestoreJob extends CancellableJob {
 	private static final long serialVersionUID = -4076693395300706664L;

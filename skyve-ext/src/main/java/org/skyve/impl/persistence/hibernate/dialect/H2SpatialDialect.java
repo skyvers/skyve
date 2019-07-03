@@ -10,8 +10,7 @@ import org.hibernate.spatial.dialect.h2geodb.GeoDBDialect;
 import org.hibernate.spatial.dialect.h2geodb.GeoDBGeometryTypeDescriptor;
 import org.hibernate.spatial.dialect.h2geodb.GeoDbWkb;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	private static final long serialVersionUID = 2491505869930720627L;
