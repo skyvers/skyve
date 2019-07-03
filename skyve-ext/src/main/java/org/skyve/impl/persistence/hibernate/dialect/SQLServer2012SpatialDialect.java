@@ -3,12 +3,12 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import org.hibernate.dialect.unique.UniqueDelegate;
 import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
-import org.hibernate.spatial.dialect.sqlserver.SqlServer2008SpatialDialect;
+import org.hibernate.spatial.dialect.sqlserver.SqlServer2012SpatialDialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
-public class SQLServer2008SpatialDialect extends SqlServer2008SpatialDialect implements SkyveDialect {
-	private static final long serialVersionUID = 5463421110159264122L;
+public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect implements SkyveDialect {
+	private static final long serialVersionUID = -5092882478484022389L;
 
 	private SQLServerSpatialDialectDelegate delegate = new SQLServerSpatialDialectDelegate(this);
 	
