@@ -2,7 +2,6 @@ package org.skyve.impl.persistence.hibernate.dialect;
 
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.sql.Types;
 
 import org.geolatte.geom.ByteOrder;
 import org.geolatte.geom.codec.Wkb;
@@ -53,34 +52,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 
 	@Override
 	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
-		boolean result = DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
-		
-		// Do additional check for text as varchar false positive.
-		if (result) {
-/*
-			System.out.println("" + column.getSqlType() + " : " + 
-								column.getSqlTypeCode() + " : " + 
-								column.getLength() + " : " + 
-								column.getPrecision() + " : " +
-								column.getScale() + " : " + 
-								column.getTypeIndex() + " = " +
-								columnInfo.getColumnSize() + " : " +
-								columnInfo.getDecimalDigits() + " : " + 
-								columnInfo.getTypeCode() + " : " + 
-								columnInfo.getTypeName() + " : " + 
-								columnInfo.getColumnIdentifier());
-*/
-			if ((column.getLength() == 255) && 
-					(column.getPrecision() == 19) && 
-					(column.getScale() == 2) &&
-					(column.getTypeIndex() == 0) &&
-					(columnInfo.getColumnSize() == Integer.MAX_VALUE) &&
-					(columnInfo.getDecimalDigits() == 0) &&
-					(columnInfo.getTypeCode() == Types.VARCHAR)) {
-				result = false;
-			}
-		}
-		return result;
+		return DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 
 	@Override

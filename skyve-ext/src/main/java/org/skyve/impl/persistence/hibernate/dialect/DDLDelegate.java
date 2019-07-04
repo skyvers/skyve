@@ -153,23 +153,51 @@ public class DDLDelegate {
 	}
 	
 	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+/*
+		System.out.println("" + column.getSqlType() + " : " + 
+							column.getSqlTypeCode() + " : " + 
+							column.getLength() + " : " + 
+							column.getPrecision() + " : " +
+							column.getScale() + " : " + 
+							column.getTypeIndex() + " = " +
+							columnInfo.getColumnSize() + " : " +
+							columnInfo.getDecimalDigits() + " : " + 
+							columnInfo.getTypeCode() + " : " + 
+							columnInfo.getTypeName() + " : " + 
+							columnInfo.getColumnIdentifier());
+*/
 		int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
 
-		return (columnInfo != null) && // the column exists
-				// char column and lengths are different
-				(
-					(((typeCode == Types.VARCHAR) || 
-							(typeCode == Types.CHAR) || 
-							(typeCode == Types.LONGVARCHAR) ||
-							(typeCode == Types.LONGNVARCHAR)) && 
-							(column.getLength() != columnInfo.getColumnSize()))
-					||
-					// decimal column and scales are different
-					(((typeCode == Types.FLOAT) || 
-							(typeCode == Types.REAL) || 
-							(typeCode == Types.DOUBLE) ||
-							(typeCode == Types.NUMERIC)) &&
-						((column.getScale() != columnInfo.getDecimalDigits()) ||
-							(column.getPrecision() != columnInfo.getColumnSize()))));
+		boolean result = (columnInfo != null) && // the column exists
+							// char column and lengths are different
+							(
+								(((typeCode == Types.VARCHAR) || 
+										(typeCode == Types.CHAR) || 
+										(typeCode == Types.LONGVARCHAR) ||
+										(typeCode == Types.LONGNVARCHAR)) && 
+										(column.getLength() != columnInfo.getColumnSize()))
+								||
+								// decimal column and scales are different
+								(((typeCode == Types.FLOAT) || 
+										(typeCode == Types.REAL) || 
+										(typeCode == Types.DOUBLE) ||
+										(typeCode == Types.NUMERIC)) &&
+									((column.getScale() != columnInfo.getDecimalDigits()) ||
+										(column.getPrecision() != columnInfo.getColumnSize()))));
+		// cater for longvarchar / text / clob / varchar(max) false positives
+		if (result) {
+			if ((column.getLength() == 255) && 
+					(column.getPrecision() == 19) && 
+					(column.getScale() == 2) &&
+					(column.getTypeIndex() == 0) &&
+					(typeCode == Types.VARCHAR) &&
+					(columnInfo != null) &&
+					(columnInfo.getColumnSize() == Integer.MAX_VALUE) &&
+					(columnInfo.getDecimalDigits() == 0)) {
+				result = false;
+			}
+		}
+		
+		return result;
 	}
 }
