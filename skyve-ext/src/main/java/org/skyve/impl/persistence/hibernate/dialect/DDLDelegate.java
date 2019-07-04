@@ -171,11 +171,7 @@ public class DDLDelegate {
 		boolean result = (columnInfo != null) && // the column exists
 							// char column and lengths are different
 							(
-								(((typeCode == Types.VARCHAR) || 
-										(typeCode == Types.CHAR) || 
-										(typeCode == Types.LONGVARCHAR) ||
-										(typeCode == Types.LONGNVARCHAR)) && 
-										(column.getLength() != columnInfo.getColumnSize()))
+								(isChar(typeCode) && (column.getLength() != columnInfo.getColumnSize()))
 								||
 								// decimal column and scales are different
 								(((typeCode == Types.FLOAT) || 
@@ -199,5 +195,16 @@ public class DDLDelegate {
 		}
 		
 		return result;
+	}
+	
+	static boolean isChar(int typeCode) {
+		return (typeCode == Types.CHAR) ||
+				(typeCode == Types.VARCHAR) || 
+				(typeCode == Types.LONGVARCHAR) ||
+				(typeCode == Types.CLOB) ||
+				(typeCode == Types.NCHAR) ||
+				(typeCode == Types.NVARCHAR) || 
+				(typeCode == Types.LONGNVARCHAR) ||
+				(typeCode == Types.NCLOB);
 	}
 }

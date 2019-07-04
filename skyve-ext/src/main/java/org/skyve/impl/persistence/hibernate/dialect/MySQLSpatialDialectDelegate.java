@@ -2,6 +2,7 @@ package org.skyve.impl.persistence.hibernate.dialect;
 
 import java.io.Serializable;
 import java.sql.Types;
+import java.util.Iterator;
 
 import org.geolatte.geom.ByteBuffer;
 import org.geolatte.geom.ByteOrder;
@@ -27,16 +28,27 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	private StandardIndexExporter indexExporter;
 
 	public MySQLSpatialDialectDelegate(Dialect dialect) {
-		// We override index exporter for MySQL so that we can specify the max length of indexes
+		// We override index exporter for MySQL so that we can specify the max length of indexes.
 		// We use 1024 as we assume that innodb_large_prefix setting is ON - default in MySQL > 5.7.
 		indexExporter = new StandardIndexExporter(dialect) {
 			@Override
 			public String[] getSqlCreateStrings(Index index, Metadata metadata) {
 				String[] result = super.getSqlCreateStrings(index, metadata);
-				for (int i = 0, l = result.length; i < l; i++) {
-					String create = result[i];
-					create = create.substring(0, create.length() - 1) + "(1024))";
-					result[i] = create;
+
+				Iterator<Column> i = index.getColumnIterator();
+				Column column = i.next();
+				if (! i.hasNext()) { // 1 column - we can do something
+					int l = column.getLength();
+					if (l >= 255) {
+						int typeCode = column.getSqlTypeCode(metadata);
+						if (DDLDelegate.isChar(typeCode)) {
+							String create = result[0];
+							create = new StringBuilder(create.length() + 6)
+											.append(create.substring(0, create.length() - 1)).append('(').append(l).append("))")
+											.toString();
+							result[0] = create;
+						}
+					}
 				}
 				return result;
 			}
