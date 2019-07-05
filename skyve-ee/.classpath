@@ -9,7 +9,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.1.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
@@ -76,7 +76,7 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/elasticsearch-1.4.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/fontbox-1.8.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/generex-1.0.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geodb-0.7.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geodb-0.9.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geolatte-geom-1.4.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/groovy-all-2.3.2.jar"/>
