@@ -15,8 +15,8 @@ import modules.admin.domain.User;
 public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
-	public static User crudInstance() throws Exception {
-		User user = new DataBuilder().build(User.MODULE_NAME, User.DOCUMENT_NAME);
+	public static UserExtension crudInstance() throws Exception {
+		UserExtension user = new DataBuilder().build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setConfirmPassword(null);
 		user.setGeneratedPassword(null);
 		user.setNewPassword(null);
