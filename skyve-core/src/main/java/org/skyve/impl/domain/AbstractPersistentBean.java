@@ -159,6 +159,16 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 		this.bizUserId = bizUserId;
 	}
 
+	/**
+	 * A useful string for being able to describe the record in a human readable way (via the bizKey) whilst also
+	 * being able to uniquely identify that record (via the bizId).
+	 *
+	 * @return A string containing the bizKey and the bizId of the record.
+	 */
+	public String getBizKeyBizIdString() {
+		return String.format("%s (%s)", bizKey, bizId);
+	}
+
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@PreRemove
 	private void preRemove() throws Exception {
