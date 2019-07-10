@@ -282,59 +282,60 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			}
 		});
 		
-		StandardServiceRegistry standardRegistry = ssrb.build();
-		MetadataSources sources = new MetadataSources(standardRegistry);
-
-		sources.addAnnotatedClass(AbstractPersistentBean.class);
-
-		AbstractRepository repository = AbstractRepository.get();
-		if (UtilImpl.USING_JPA) {
-			// cfg.configure("bizhub", null);
-			// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
-		}
-		else {
-			StringBuilder sb = new StringBuilder(64);
-
-			for (String moduleName : repository.getAllVanillaModuleNames()) {
-				// repository.REPOSITORY_DIRECTORY
-				sb.setLength(0);
-				sb.append(repository.MODULES_NAME).append('/');
-				sb.append(moduleName).append('/');
-				sb.append(repository.DOMAIN_NAME).append('/');
-				sb.append(moduleName).append("_orm.hbm.xml");
-				String mappingPath = sb.toString();
-
-				File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
-				if (mappingFile.exists()) {
-					sources.addResource(mappingPath);
+		try (StandardServiceRegistry standardRegistry = ssrb.build()) {
+			MetadataSources sources = new MetadataSources(standardRegistry);
+	
+			sources.addAnnotatedClass(AbstractPersistentBean.class);
+	
+			AbstractRepository repository = AbstractRepository.get();
+			if (UtilImpl.USING_JPA) {
+				// cfg.configure("bizhub", null);
+				// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
+			}
+			else {
+				StringBuilder sb = new StringBuilder(64);
+	
+				for (String moduleName : repository.getAllVanillaModuleNames()) {
+					// repository.REPOSITORY_DIRECTORY
+					sb.setLength(0);
+					sb.append(repository.MODULES_NAME).append('/');
+					sb.append(moduleName).append('/');
+					sb.append(repository.DOMAIN_NAME).append('/');
+					sb.append(moduleName).append("_orm.hbm.xml");
+					String mappingPath = sb.toString();
+	
+					File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
+					if (mappingFile.exists()) {
+						sources.addResource(mappingPath);
+					}
+				}
+	
+				// Check for customer overridden ORMs
+				for (String customerName : repository.getAllCustomerNames()) {
+					sb.setLength(0);
+					sb.append(repository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
+					sb.append(repository.MODULES_NAME).append("/orm.hbm.xml");
+					String ormResourcePath = sb.toString();
+					
+					File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
+					if (ormFile.exists()) {
+						sources.addResource(ormResourcePath);
+					}
 				}
 			}
-
-			// Check for customer overridden ORMs
-			for (String customerName : repository.getAllCustomerNames()) {
-				sb.setLength(0);
-				sb.append(repository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
-				sb.append(repository.MODULES_NAME).append("/orm.hbm.xml");
-				String ormResourcePath = sb.toString();
-				
-				File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
-				if (ormFile.exists()) {
-					sources.addResource(ormResourcePath);
+	
+			metadata = sources.getMetadataBuilder().build();
+			SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
+			
+			sf = sessionFactoryBuilder.build();
+	
+			if (UtilImpl.DDL_SYNC) {
+				try {
+					DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 				}
-			}
-		}
-
-		metadata = sources.getMetadataBuilder().build();
-		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
-		
-		sf = sessionFactoryBuilder.build();
-
-		if (UtilImpl.DDL_SYNC) {
-			try {
-				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
-			}
-			catch (Exception e) {
-				throw new MetaDataException("Could not apply skyve extra schema updates", e);
+				catch (Exception e) {
+					throw new MetaDataException("Could not apply skyve extra schema updates", e);
+				}
 			}
 		}
 	}
