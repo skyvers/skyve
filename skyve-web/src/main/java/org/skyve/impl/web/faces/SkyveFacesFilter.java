@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import javax.faces.application.ViewExpiredException;
 import javax.servlet.Filter;
@@ -112,7 +113,9 @@ public class SkyveFacesFilter implements Filter {
         	e.printStackTrace();
         	Throwable c = e.getCause();
         	
-        	Util.LOGGER.throwing("SkyveFacesFilter", "doFilter", e);
+        	Util.LOGGER.log(Level.SEVERE, "SkyveFacesFilter.doFilter", e);
+        	e.printStackTrace();
+        	
         	// redirect to appropriate page
             HttpServletResponse response = (HttpServletResponse) resp;
 
