@@ -35,7 +35,6 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 
 	private OptimisticLock bizLock;
 	
-	@SuppressWarnings("unused")
 	private String bizKey;
 
 	private String bizCustomer;
