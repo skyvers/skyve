@@ -230,7 +230,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		if (map != null) {
 			String value = getString("map", "type", map, true);
-			UtilImpl.MAP_TYPE = (value == null) ?  null : MapType.valueOf(value);
+			UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
 		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);

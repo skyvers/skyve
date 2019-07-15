@@ -142,7 +142,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-tika-0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/wsdl4j-1.6.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xercesImpl-2.8.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlschema-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-5.1.2.jar"/>

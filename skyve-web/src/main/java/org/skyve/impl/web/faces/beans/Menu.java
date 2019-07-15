@@ -1,6 +1,9 @@
 package org.skyve.impl.web.faces.beans;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -43,10 +46,14 @@ public class Menu extends Harness {
 
 	// The modules menu on the LHS
 	private MenuModel menu;
+	// The map of module name to sub menu nodes in the model
+	private Map<String, DefaultSubMenu> moduleSubMenus = new TreeMap<>();
+	
 	public MenuModel getMenu() {
 		if (menu == null) {
 			preRender();
 		}
+		setExpandedModule();
 		return menu;
 	}
 
@@ -76,6 +83,18 @@ public class Menu extends Harness {
 		}.execute();
 	}
 	
+	private void setExpandedModule() {
+		if (menu != null) {
+			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+			String moduleName = params.get("m");
+			if (moduleName != null) {
+				for (Entry<String, DefaultSubMenu> e : moduleSubMenus.entrySet()) {
+					e.getValue().setExpanded(moduleName.equals(e.getKey()));
+				}
+			}
+		}
+	}
+	
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
@@ -84,10 +103,12 @@ public class Menu extends Harness {
 			private Stack<Submenu> subs = new Stack<>();
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
 											Module menuModule,
 											boolean open) {
 				DefaultSubMenu moduleSub = new DefaultSubMenu(menuModule.getTitle());
+				moduleSubMenus.put(menuModule.getName(), moduleSub);
 				result.addElement(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
@@ -95,7 +116,8 @@ public class Menu extends Harness {
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				Submenu sub = new DefaultSubMenu(group.getName());
+				DefaultSubMenu sub = new DefaultSubMenu(group.getName());
+				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
 			}

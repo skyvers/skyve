@@ -346,6 +346,18 @@ public class PersistenceTests extends AbstractSkyveTest {
 	}
 
 	@Test
+	public void testComposedAssociationNulledDoesCascadeDelete() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test.setAggregatedAssociation(null);
+		test.getAggregatedCollection().clear();
+		test = p.save(test);
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		test.setComposedAssociation(null);
+		p.save(test);
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+	}
+
+	@Test
 	public void testComposedCascadeDeleteExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test.setAggregatedAssociation(null);
