@@ -4,6 +4,11 @@ SKYVE = {};
 SKYVE.Util = function() {
 	// public methods
 	return {
+		customer: null,
+		version: null,
+		googleMapsV3ApiKey: null,
+		ckEditorConfigFileUrl: null,
+		
 		loadJS: function(scriptPath, callback) {
 		    var scriptNode = document.createElement('SCRIPT');
 		    scriptNode.type = 'text/javascript';

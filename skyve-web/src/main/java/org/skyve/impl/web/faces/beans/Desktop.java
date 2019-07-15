@@ -61,11 +61,6 @@ public class Desktop extends Harness {
 		return dataSourceScript;
 	}
 	
-	private String apiScript;
-	public String getApiScript() {
-		return apiScript;
-	}
-	
 	private String uiScript;
 	public String getUiScript() {
 		return uiScript;
@@ -113,18 +108,6 @@ public class Desktop extends Harness {
 					dataSourceScript = sb.toString();
 					sb.setLength(0);
 	
-					sb.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
-					sb.append("isc.BizUtil.version='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
-					if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
-						sb.append("isc.BizUtil.googleMapsV3ApiKey=null;");
-					}
-					else {
-						sb.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
-					}
-					sb.append("isc.BizUtil.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
-					apiScript = sb.toString();
-					sb.setLength(0);
-
 					WebAction a = Desktop.this.getWebActionParameter();
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						sb.append("details.showMember(isc.ListView.contents);");

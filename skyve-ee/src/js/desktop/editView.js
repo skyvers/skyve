@@ -699,7 +699,7 @@ isc.EditView.addMethods({
 		var header = isc.BizUtil.headerTemplate;
 		var icon = '';
 		if (this._icon) {
-			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + isc.BizUtil.version + '"/>';
+			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + SKYVE.Util.v + '"/>';
 		}
 		else if (this._fontIcon) {
 			icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
@@ -1901,7 +1901,7 @@ isc.BizComparison.addMethods({
 			fields: []
 		});
 
-		SKYVE.Util.loadJS('desktop/diff_match_patch.js?v=' + isc.BizUtil.version, function() {
+		SKYVE.Util.loadJS('desktop/diff_match_patch.js?v=' + SKYVE.Util.v, function() {
 			me._comparisonForm.diff_match_patch = new diff_match_patch();
 			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});

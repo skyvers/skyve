@@ -114,6 +114,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
@@ -760,6 +761,36 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
+	
+	@Override
+	public UIComponent map(UIComponent component, 
+							MapModel<? extends Bean> model) {
+		if (component != null) {
+			return component;
+		}
+		
+		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		result.setLayout("block");
+		List<UIComponent> children = result.getChildren();
+		
+		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		mapDiv.setLayout("block");
+		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
+		setId(mapDiv, null);
+		
+		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		output.setValue("Loading Map...");
+		mapDiv.getChildren().add(output);
+		
+		children.add(mapDiv);
+		
+		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		script.setValue("<script type=\"text/javascript\">SKYVE.PF.gmap('" + mapDiv.getId() + "');</script>");
+		children.add(script);
+		
+		return result;
+	}
+	
 	/*
 		<p:dataTable id="list"
 						var="row"

@@ -40,6 +40,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 public class NoOpComponentBuilder extends ComponentBuilder {
@@ -206,6 +207,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	@Override
+	public UIComponent map(UIComponent component, MapModel<? extends Bean> model) {
+		return component;
+	}
+	
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,

@@ -32,11 +32,11 @@ isc.BizMap.addMethods({
 		}
 		else {
 			isc.BizMap.id = this.ID;
-			SKYVE.Util.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
-				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
-					if (isc.BizUtil.googleMapsV3ApiKey) {
+			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
+					if (SKYVE.Util.googleMapsV3ApiKey) {
 						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMap.initialise&key=' +
-											isc.BizUtil.googleMapsV3ApiKey);
+											SKYVE.Util.googleMapsV3ApiKey);
 					}
 					else {
 						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMap.initialise');

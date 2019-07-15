@@ -163,6 +163,27 @@ SKYVE.PF = function() {
 					msgs: growls 
 				});
 			}
+		},
+		
+		gmap: function(elementId) {
+			if (window.google && window.google.maps && window.SKYVE.BizMap) {
+				Skyve.BizMap.initialise(elementId);
+			}
+			else {
+				SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
+					SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
+						var url = 'https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing';
+						if (SKYVE.Util.googleMapsV3ApiKey) {
+							url += '&key=' + SKYVE.Util.googleMapsV3ApiKey;
+						}
+						SKYVE.Util.loadJS(url, function() {
+							SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
+								SKYVE.BizMap.initialise(elementId);
+							});
+						});
+					});
+				});
+			}
 		}
 	};
 }();

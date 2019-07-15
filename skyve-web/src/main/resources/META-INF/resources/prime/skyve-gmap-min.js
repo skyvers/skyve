@@ -1,1 +1,1 @@
-SKYVE.BizMap=function(){return{}}();
+SKYVE.BizMap=function(){maps={};return{initialise:function(a){var b={zoom:4,center:new google.maps.LatLng(-26,133.5),mapTypeId:google.maps.MapTypeId.ROADMAP};if(this._map){b.zoom=this._map.getZoom();b.center=this._map.getCenter();b.mapTypeId=this._map.getMapTypeId()}this._infoWindow=new google.maps.InfoWindow({content:""});this._map=new google.maps.Map(document.getElementById(a),b)}}}();

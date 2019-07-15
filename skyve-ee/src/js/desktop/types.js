@@ -1783,7 +1783,7 @@ isc.BizHTMLItem.addMethods({
 					// and display more compatibly with varying style sheets
 					CKEDITOR.config.coreStyles_bold = {element: 'b', overrides: 'strong'};
 					CKEDITOR.config.coreStyles_italic = {element: 'i', overrides: 'em'};
-					me._editor = CKEDITOR.replace('_CKEditor', {customConfig: isc.BizUtil.ckEditorConfigFileUrl});
+					me._editor = CKEDITOR.replace('_CKEditor', {customConfig: SKYVE.Util.ckEditorConfigFileUrl});
 					me._editor.setData(me.getValue());
 					return this;
 				};
@@ -1874,11 +1874,11 @@ isc.BizMapPicker.addMethods({
 		else {
 			isc.BizMapPicker.id = this.ID;
 
-			SKYVE.Util.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
-				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
-					if (isc.BizUtil.googleMapsV3ApiKey) {
+			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
+					if (SKYVE.Util.googleMapsV3ApiKey) {
 						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
-											isc.BizUtil.googleMapsV3ApiKey);
+											SKYVE.Util.googleMapsV3ApiKey);
 					}
 					else {
 						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
