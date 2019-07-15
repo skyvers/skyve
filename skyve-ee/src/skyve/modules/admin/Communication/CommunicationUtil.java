@@ -237,6 +237,7 @@ public class CommunicationUtil {
 					switch (format) {
 					case email:
 						EXT.writeMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
+						result = filePath;
 						break;
 					default:
 						break;
