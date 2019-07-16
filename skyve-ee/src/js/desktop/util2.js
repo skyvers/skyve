@@ -188,9 +188,6 @@ isc.DataSource.addSearchOperator('notNull', ['geometry']);
 // utility class
 isc.defineClass("BizUtil");
 isc.BizUtil.addClassProperties({
-	// this is the page's URL prefix
-	URL_PREFIX: window.location + "",
-
 	// Map of modules loaded -> views -> used & unused views
 	_modules: {},
 	
@@ -204,7 +201,6 @@ isc.BizUtil.addClassProperties({
 		fields: [{name: 'value', type: 'text'}]
 	})
 });
-isc.BizUtil.URL_PREFIX = isc.BizUtil.URL_PREFIX.substring(0, isc.BizUtil.URL_PREFIX.lastIndexOf("/") + 1);
 isc.BizUtil.addClassMethods({
 	_currentView: null, // the view currently displayed
 
@@ -360,7 +356,7 @@ isc.BizUtil.addClassMethods({
 			getHoverHTML: function() {return "Select or search for a map location";},
 			click: function() {
 				var instance = editView.gather(false);
-				var url = isc.BizUtil.URL_PREFIX;
+				var url = SKYVE.Util.CONTEXT_URL;
 				url += 'pages/map/geolocate.jsp?';
 				if (latitudeBinding) {
 					var latitudeValue = instance[latitudeBinding];
@@ -444,7 +440,7 @@ isc.BizUtil.addClassMethods({
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
-				actionURL: isc.BizUtil.URL_PREFIX + "smartgen" + "?_mod=" + moduleName  + "&_doc=" + documentName,
+				actionURL: SKYVE.Util.CONTEXT_URL + "smartgen" + "?_mod=" + moduleName  + "&_doc=" + documentName,
 				callback: function(rpcResponse, data, rpcRequest) {
 					// create the document entry structure
 					isc.BizUtil._modules[moduleName][documentName] = {};

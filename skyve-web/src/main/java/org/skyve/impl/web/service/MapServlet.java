@@ -24,14 +24,14 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.map.DefaultCollectionMapModel;
-import org.skyve.metadata.view.model.map.DefaultQueryMapModel;
+import org.skyve.metadata.view.model.map.ReferenceMapModel;
+import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 /**
- * Map Servlet - supplies map data to google map widget.
+ * Map Servlet - supplies map data to a map display.
  * 
  * there are 3 usage modes:-
  * 
@@ -39,11 +39,11 @@ import org.skyve.util.Util;
  * 		parameters
  * 			query
  * 			geometryBinding
- * 2) This mode reaches into the current bean's collection via collectionBinding 
+ * 2) This mode reaches into the current bean's reference via refrenceBinding 
  * 		and gets each geometry object using collectionGeometryBinding
  * 		parameters
  * 			webContext
- * 			collectionBinding
+ * 			refefrenceBinding
  * 			geometryBinding
  * 3) This mode uses the given model to generate its own geometry list
  * 		parameters
@@ -128,7 +128,7 @@ public class MapServlet extends HttpServlet {
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
 		}
-		DefaultQueryMapModel<Bean> model = new DefaultQueryMapModel<>(query);
+		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
 		// TODO get the envelope from the map
 		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
@@ -143,7 +143,7 @@ public class MapServlet extends HttpServlet {
 		
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
 		String geometryBinding = request.getParameter(GEOMETRY_BINDING_NAME);
-		DefaultCollectionMapModel<Bean> model = new DefaultCollectionMapModel<>(collectionBinding);
+		ReferenceMapModel<Bean> model = new ReferenceMapModel<>(collectionBinding);
 		model.setGeometryBinding(geometryBinding);
 		model.setBean(bean);
 		// TODO get the envelope from the map

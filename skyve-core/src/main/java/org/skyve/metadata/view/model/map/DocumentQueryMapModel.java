@@ -8,7 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 
-public class DefaultQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
+public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	/**
 	 * For Serialization
 	 */
@@ -17,7 +17,7 @@ public class DefaultQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
 
-	public DefaultQueryMapModel(MetaDataQueryDefinition query) {
+	public DocumentQueryMapModel(MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 

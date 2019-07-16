@@ -2,12 +2,16 @@
 SKYVE = {};
 
 SKYVE.Util = function() {
+	var context = window.location + '';
+	context = context.substring(0, context.lastIndexOf("/") + 1)
+	
 	// public methods
 	return {
 		customer: null,
-		version: null,
+		v: null,
 		googleMapsV3ApiKey: null,
 		ckEditorConfigFileUrl: null,
+		CONTEXT_URL: context,
 		
 		loadJS: function(scriptPath, callback) {
 		    var scriptNode = document.createElement('SCRIPT');

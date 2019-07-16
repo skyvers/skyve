@@ -189,7 +189,7 @@ isc.BizMap.addMethods({
 		}
 		
 		var wkt = new Wkt.Wkt();
-		var url = isc.BizUtil.URL_PREFIX + 'map?';
+		var url = SKYVE.Util.CONTEXT_URL + 'map?';
 /*
 		// set the map bounds
 		var bounds = wkt.write(this._map.getBounds());

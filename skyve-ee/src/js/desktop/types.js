@@ -1218,7 +1218,7 @@ isc.BizContentLinkItem.addMethods({
 	setValue: function(newValue) {
 		if ((this.canvas != null) && (! this.userSetValue)) {
 			if (newValue) {
-				var url = isc.BizUtil.URL_PREFIX + 
+				var url = SKYVE.Util.CONTEXT_URL + 
 				"content?_n=" + newValue +
 				"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 				"&_b=" + this.name.replaceAll('_', '.');
@@ -1302,7 +1302,7 @@ isc.BizContentImageItem.addMethods({
 	setValue: function(newValue) {
 		if ((this.canvas != null) && (! this.userSetValue)) {
 			if (newValue) {
-				var url = isc.BizUtil.URL_PREFIX + 
+				var url = SKYVE.Util.CONTEXT_URL + 
 							"content?_n=" + newValue +
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +

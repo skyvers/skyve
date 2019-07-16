@@ -584,7 +584,7 @@ isc.BizListGrid.addMethods({
 					useSimpleHttp: true,
 					httpMethod: 'POST',
 					params: params,
-					actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
+					actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 					callback: function(rpcResponse, data, rpcRequest) {
 						snapMenu.setData(data);
 					}
@@ -615,7 +615,7 @@ isc.BizListGrid.addMethods({
 												sortState: me.grid.getSortState(),
 												groupState: me.grid.getGroupState(),
 												summaryType: me.summaryType}},
-							actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
+							actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 							callback: function(rpcResponse, data, rpcRequest) {
 								me.snapId = data.bizId;
 								snapMenuButton.setTitle(value);
@@ -683,7 +683,7 @@ isc.BizListGrid.addMethods({
 									sortState: me.grid.getSortState(),
 									groupState: me.grid.getGroupState(),
 									summaryType: me.summaryType}},
-				actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap'
+				actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap'
 			});
 		};
 
@@ -698,7 +698,7 @@ isc.BizListGrid.addMethods({
 									useSimpleHttp: true,
 									httpMethod: 'POST',
 									params: {a: 'D', i: snapId},
-									actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
+									actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 									callback: function(rpcResponse, data, rpcRequest) {
 										snapMenuButton.setSnap(null, 'No Snapshot', null);
 									}
@@ -736,7 +736,7 @@ isc.BizListGrid.addMethods({
 					useSimpleHttp: true,
 					httpMethod: 'POST',
 					params: params,
-					actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
+					actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 					callback: function(rpcResponse, data, rpcRequest) {
 						tagsMenu.setData(data);
 					}
@@ -756,7 +756,7 @@ isc.BizListGrid.addMethods({
 							useSimpleHttp: true,
 							httpMethod: 'POST',
 							params: {a: 'N', n: value, ID: tagsMenuButton.ID},
-							actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
+							actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 							callback: function(rpcResponse, data, rpcRequest) {
 								me.tagId = data.bizId;
 								tagsMenuButton.setTitle(value);
@@ -846,7 +846,7 @@ isc.BizListGrid.addMethods({
 				useSimpleHttp: true,
 				httpMethod: 'POST',
 				params: params,
-				actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
+				actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 				callback: function(rpcResponse, data, rpcRequest) {
 					if (action == 'D') {
 						tagsMenuButton.setTag(null, 'No Tag');
@@ -2161,7 +2161,7 @@ isc.BizDataGrid.addMethods({
 //			useSimpleHttp: true,
 //			httpMethod: 'POST',
 //			params: {_mod: moduleName, _doc: documentName},
-//			actionURL: isc.BizUtil.URL_PREFIX + "smartedit",
+//			actionURL: SKYVE.Util.CONTEXT_URL + "smartedit",
 //			callback: function(rpcResponse, data, rpcRequest) {
 //				this.grid.startEditingNew(data);
 //			}
