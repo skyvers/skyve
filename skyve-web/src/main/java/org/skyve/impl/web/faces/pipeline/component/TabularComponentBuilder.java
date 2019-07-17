@@ -114,7 +114,6 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
@@ -764,11 +763,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent map(UIComponent component, 
-							MapModel<? extends Bean> model) {
+							String moduleName,
+							String queryName,
+							String geometryBinding) {
 		if (component != null) {
 			return component;
 		}
-		
+		return map(moduleName, queryName, geometryBinding, null);
+	}
+
+	@Override
+	public UIComponent map(UIComponent component, String modelName) {
+		if (component != null) {
+			return component;
+		}
+		return map((String) null, null, null, modelName);
+	}
+	
+	private UIComponent map(String moduleName, String queryName, String geometryBinding, String modelName) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		result.setLayout("block");
 		List<UIComponent> children = result.getChildren();
@@ -785,7 +797,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		children.add(mapDiv);
 		
 		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		script.setValue("<script type=\"text/javascript\">SKYVE.PF.gmap('" + mapDiv.getId() + "');</script>");
+
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
+		if (modelName != null) {
+			value.append("', null, null, null, '").append(modelName).append("'");
+		}
+		else {
+			value.append("', '").append(moduleName);
+			value.append("', '").append(queryName);
+			value.append("', '").append(geometryBinding).append("', null");
+		}
+		value.append(")}");
+		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		children.add(script);
 		
 		return result;

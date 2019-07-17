@@ -238,17 +238,12 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<name>document</name>
+			<name>geometryBinding</name>
 			<required>false</required>
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
 			<name>model</name>
-			<required>false</required>
-			<type>java.lang.String</type>
-		</attribute>
-		<attribute>
-			<name>geometryBinding</name>
 			<required>false</required>
 			<type>java.lang.String</type>
 		</attribute>

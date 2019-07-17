@@ -42,7 +42,6 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 /**
@@ -402,14 +401,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, MapModel<? extends Bean> model) {
+	public UIComponent map(UIComponent component, String moduleName, String queryName, String geometryBinding) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.map(result, model);
+			result = builder.map(result, moduleName, queryName, geometryBinding);
 		}
 		return result;
 	}
-	
+
+	@Override
+	public UIComponent map(UIComponent component, String modelName) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.map(result, modelName);
+		}
+		return result;
+	}
+
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,

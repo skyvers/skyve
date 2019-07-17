@@ -54,7 +54,6 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
@@ -217,7 +216,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												boolean showGrid);
 
 	public abstract UIComponent map(UIComponent component, 
-										MapModel<? extends Bean> model);
+										String moduleName,
+										String queryName,
+										String geometryBinding);
+
+	public abstract UIComponent map(UIComponent component, String modelName);
 	
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	

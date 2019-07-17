@@ -7,9 +7,6 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
-import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
@@ -17,13 +14,6 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
-import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Util;
 
 @FacesComponent(Map.COMPONENT_TYPE)
@@ -37,7 +27,6 @@ public class Map extends HtmlPanelGroup {
 			java.util.Map<String, Object> attributes = getAttributes();
 			final String moduleName = (String) attributes.get("module");
 			final String queryName = (String) attributes.get("query");
-			final String documentName = (String) attributes.get("document");
 			final String modelName = (String) attributes.get("model");
 			final String geometryBinding = (String) attributes.get("geometryBinding");
 			final String managedBeanName = (String) attributes.get("managedBean");
@@ -60,12 +49,13 @@ public class Map extends HtmlPanelGroup {
 					FacesContext fc = FacesContext.getCurrentInstance();
 					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 
-					Map.this.getChildren().add(generate(moduleName,
-															documentName,
+					componentBuilder.setManagedBeanName(managedBeanName);
+			    	componentBuilder.setUserAgentType(userAgentType);
+
+			    	Map.this.getChildren().add(generate(moduleName,
 															queryName,
+															geometryBinding,
 															modelName,
-															managedBeanName,
-															userAgentType,
 															componentBuilder));
 				    
 					return null;
@@ -79,38 +69,14 @@ public class Map extends HtmlPanelGroup {
 	}		
 
 	public static UIComponent generate(String moduleName,
-										String documentName,
 										String queryName,
+										String geometryBinding,
 										String modelName,
-										String managedBeanName,
-										UserAgentType userAgentType,
 										ComponentBuilder componentBuilder) {
-		MapModel<? extends Bean> model = null;
-		String name = null;
 
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(moduleName);
-		if (queryName != null) {
-			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
-			if (query == null) {
-				query = module.getDocumentDefaultQuery(customer, queryName);
-			}
-			DocumentQueryMapModel<Bean> queryModel = new DocumentQueryMapModel<>(query);
-			model = queryModel;
-			name = queryName;
+    	if (modelName != null) {
+			return componentBuilder.map(null, modelName);
 		}
-		else {
-			Document document = module.getDocument(customer, documentName);
-			model = CORE.getRepository().getMapModel(customer, document, modelName, true);
-			name = modelName;
-		}
-
-		componentBuilder.setManagedBeanName(managedBeanName);
-    	componentBuilder.setUserAgentType(userAgentType);
-
-		MapDisplay map = new MapDisplay();
-
-    	return componentBuilder.map(null, null);
+		return componentBuilder.map(null, moduleName, queryName, geometryBinding);
 	}
 }
