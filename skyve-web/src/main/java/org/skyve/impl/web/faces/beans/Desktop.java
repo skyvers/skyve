@@ -109,18 +109,7 @@ public class Desktop extends Harness {
 					sb.setLength(0);
 	
 					WebAction a = Desktop.this.getWebActionParameter();
-					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
-						sb.append("details.showMember(isc.ListView.contents);");
-						// TODO should cater for map, tree, calendar etc
-						if (bizDocument != null) {
-							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
-						}
-						else {
-							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
-							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
-						}
-					} 
-					else {
+					if (WebAction.e.equals(a)) { // edit
 						sb.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
 						sb.append(bizDocument).append("',function(view){");
 						sb.append("details.addMember(view);isc.BizUtil._currentView=view;");
@@ -129,6 +118,30 @@ public class Desktop extends Harness {
 						}
 						else {
 						    sb.append("view.editInstance('").append(bizId).append("');});");
+						}
+					}
+					else {
+						sb.append("details.showMember(isc.ListView.contents);");
+						sb.append("isc.ListView.set");
+						if (WebAction.l.equals(a)) {
+							sb.append("Grid");
+						}
+						else if (WebAction.t.equals(a)) {
+							sb.append("Tree");
+						}
+						else if (WebAction.m.equals(a)) {
+							sb.append("Map");
+						}
+						else if (WebAction.c.equals(a)) {
+							sb.append("Calendar");
+						}
+						
+						if (bizDocument != null) {
+							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+						}
+						else {
+							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
+							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 						}
 					}
 					uiScript = sb.toString();
