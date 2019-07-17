@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20190607-SNAPSHOT</version>
+	<version>20190701-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20190607-SNAPSHOT</skyve.version>
+		<skyve.version>20190701-SNAPSHOT</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
 		<cglib.version>3.1</cglib.version>
@@ -29,19 +29,19 @@
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
 		<ehcache.version>2.10.3</ehcache.version>
 		<elasticsearch.version>1.4.2</elasticsearch.version>
-		<geodb.version>0.7</geodb.version>
+		<geodb.version>0.9</geodb.version>
 		<h2.version>1.3.173</h2.version>
 		<gson.version>2.2.4</gson.version>
-		<hibernate.version>5.2.12.Final</hibernate.version>
-		<hibernate-entitymanager.version>5.2.12.Final</hibernate-entitymanager.version>
-		<hibernate-spatial.version>5.2.12.Final</hibernate-spatial.version>
+		<hibernate.version>5.4.3.Final</hibernate.version>
+		<hibernate-entitymanager.version>5.4.3.Final</hibernate-entitymanager.version>
+		<hibernate-spatial.version>5.4.3.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
 		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>6.3.1</jasperreports.version>
 		<java.version>1.8</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
-		<jts.version>1.13</jts.version>
+		<jts.version>1.16.1</jts.version>
 		<lucene.version>4.10.2</lucene.version>
 		<omnifaces.version>2.7</omnifaces.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
@@ -71,6 +71,8 @@
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 		<spring.version>5.0.4.RELEASE</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<distributionManagement>
@@ -435,8 +437,8 @@
 				<version>${xmlschema-core.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.vividsolutions</groupId>
-				<artifactId>jts</artifactId>
+				<groupId>org.locationtech.jts</groupId>
+				<artifactId>jts-core</artifactId>
 				<version>${jts.version}</version>
 			</dependency>
 			<dependency>
@@ -494,8 +496,14 @@
 			<!-- Runtime dependencies -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j-api.version}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.5.6</version>
+				<version>${slf4j-api.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -543,7 +551,7 @@
 			<dependency>
 				<groupId>net.sourceforge.hatbox</groupId>
 				<artifactId>hatbox</artifactId>
-				<version>1.0.b7</version>
+				<version>1.0.b10</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>

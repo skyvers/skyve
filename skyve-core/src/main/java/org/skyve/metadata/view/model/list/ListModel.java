@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -22,8 +23,6 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -5786617076399299709L;

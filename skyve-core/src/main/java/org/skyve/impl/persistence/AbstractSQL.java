@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -16,8 +17,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.persistence.AbstractSQL;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	private String query = null;

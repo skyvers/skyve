@@ -88,7 +88,8 @@ public class FacesView<T extends Bean> extends Harness {
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 
-	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel - q becomes the model name
+	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel
+	// parameter q becomes the model name; this is not a parameter
 	private String modelName;
 
 	public String getModelName() {
@@ -571,7 +572,32 @@ public class FacesView<T extends Bean> extends Harness {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 		return getBeans(completeModule, completeDocument, completeQuery, completeModel, parameters);
 	}
+ 	
+ 	/**
+ 	 * Creates the map display script.
+ 	 */
+	public String getMapScript(String elementId,
+								String moduleName,
+								String queryName,
+								String geometryBinding,
+								String mapModelName) {
+		StringBuilder result = new StringBuilder(512);
 
+		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
+		if (modelName != null) {
+			result.append("',_c:'").append(getWebContext().getWebId());
+			result.append("',modelName:'").append(mapModelName);
+		}
+		else {
+			result.append("',moduleName:'").append(moduleName);
+			result.append("',queryName:'").append(queryName);
+			result.append("',geometryBinding:'").append(geometryBinding);
+		}
+		result.append("'})</script>");
+		
+		return result.toString();
+	}
+ 	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
  	// NB This is only set when the bean is dehydrated
 	private String dehydratedWebId;

@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Group.GroupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
@@ -42,7 +43,7 @@ public class UserList extends AbstractTransientBean {
 	 * <br/>
 	 * The collection of groups that invited users are assigned.
 	 **/
-	private List<Group> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
+	private List<GroupExtension> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
 	/**
 	 * Invitation email addresses
 	 * <br/>
@@ -100,7 +101,7 @@ public class UserList extends AbstractTransientBean {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Group> getUserInvitationGroups() {
+	public List<GroupExtension> getUserInvitationGroups() {
 		return userInvitationGroups;
 	}
 
@@ -109,7 +110,7 @@ public class UserList extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Group getUserInvitationGroupsElementById(String bizId) {
+	public GroupExtension getUserInvitationGroupsElementById(String bizId) {
 		return getElementById(userInvitationGroups, bizId);
 	}
 
@@ -118,7 +119,7 @@ public class UserList extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setUserInvitationGroupsElementById(String bizId, Group element) {
+	public void setUserInvitationGroupsElementById(String bizId, GroupExtension element) {
 		 setElementById(userInvitationGroups, element);
 	}
 

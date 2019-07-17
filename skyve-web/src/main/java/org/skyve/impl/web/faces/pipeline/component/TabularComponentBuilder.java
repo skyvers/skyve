@@ -174,7 +174,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
-			stickyTabScript.append(String.format("$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s ? sessionStorage.tab_%s_%s_%s : 0);});",
+			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
+													id,
+													moduleName, documentName, id,
+													moduleName, documentName, id,
 													id,
 													moduleName, documentName, id,
 													moduleName, documentName, id));
@@ -673,7 +676,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setValue(null);
 		button.setTitle("Toggle filters");
 		button.setIcon("fa fa-filter");
-		button.setOnclick(String.format("SKYVE.toggleFilters('%s'); return false;", dataTableId));
+		button.setOnclick(String.format("SKYVE.PF.toggleFilters('%s'); return false;", dataTableId));
 		return button;
 	}
 
@@ -757,6 +760,61 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
+	
+	@Override
+	public UIComponent map(UIComponent component, 
+							String moduleName,
+							String queryName,
+							String geometryBinding) {
+		if (component != null) {
+			return component;
+		}
+		return map(moduleName, queryName, geometryBinding, null);
+	}
+
+	@Override
+	public UIComponent map(UIComponent component, String modelName) {
+		if (component != null) {
+			return component;
+		}
+		return map((String) null, null, null, modelName);
+	}
+	
+	private UIComponent map(String moduleName, String queryName, String geometryBinding, String modelName) {
+		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		result.setLayout("block");
+		List<UIComponent> children = result.getChildren();
+		
+		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		mapDiv.setLayout("block");
+		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
+		setId(mapDiv, null);
+		
+		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		output.setValue("Loading Map...");
+		mapDiv.getChildren().add(output);
+		
+		children.add(mapDiv);
+		
+		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
+		if (modelName != null) {
+			value.append("', null, null, null, '").append(modelName).append("'");
+		}
+		else {
+			value.append("', '").append(moduleName);
+			value.append("', '").append(queryName);
+			value.append("', '").append(geometryBinding).append("', null");
+		}
+		value.append(")}");
+		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+		children.add(script);
+		
+		return result;
+	}
+	
 	/*
 		<p:dataTable id="list"
 						var="row"
@@ -1585,11 +1643,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setModal(true);
 		overlay.setStyle("width:50%;height:300px");
 		// clear the iframe src on hide so there is no flash next open
-		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s')", id));
+		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
 
 		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
 		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 		toAddTo.add(overlay);
@@ -1608,10 +1666,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		clearButton.setValue(null);
 		clearButton.setType("button");
 		if (image) {
-			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s')", sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
 		}
 		else {
-			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s')", sanitisedBinding));
+			clearButton.setOnclick(String.format("SKYVE.PF.clearContentLink('%s')", sanitisedBinding));
 		}
 		setDisabled(clearButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
@@ -2588,11 +2646,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setModal(true);
 		overlay.setStyle("width:50%;height:300px");
 		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
+		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
 
 		// show the overlay, reset the fileUpload.xhtml iframe
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("')).concat('\\')')}");
 		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 

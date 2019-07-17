@@ -26,7 +26,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
-import modules.admin.domain.Contact;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.RollbackErrors;
@@ -132,10 +131,10 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						break;
 					}
 
+					Util.LOGGER.info("------TRANSFORMING ------");
+
 					PersistentBean b = loader.beanResult();
 					Util.LOGGER.info("------LOAD RESULT ------");
-					Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
-					Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
 
 					if (loader.isDebugMode()) {
 						if (b == null) {
@@ -152,8 +151,6 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 						//Testing
 						Util.LOGGER.info("------ATTEMPTING TO SAVE------");
-						Util.LOGGER.info("NAME " + Binder.get(b, Contact.namePropertyName));
-						Util.LOGGER.info("ContactType " + Binder.get(b, Contact.contactTypePropertyName));
 						
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
@@ -198,7 +195,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 			StringBuilder sb = new StringBuilder();
 			if (loadedRows > 0) {
 				sb.append("Successfully loaded ").append(loadedRows).append(" rows. ");
-				sb.append(created).append(' ').append(document.getSingularAlias()).append(" created.");
+				sb.append(created).append(' ').append(document.getPluralAlias()).append(" created.");
 			} else {
 				sb.append("Import unsuccessful. Try again.");
 			}

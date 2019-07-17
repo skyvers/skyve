@@ -113,6 +113,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				// create a new import export column config row for each column in the spreadsheet
 				ImportExportColumn newCol = ImportExportColumn.newInstance();
 				newCol.setParent((ImportExportExtension) bean);
+				newCol.setBizOrdinal(new Integer(i)); //preserve load order
 				bean.getImportExportColumns().add(newCol);
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
 					newCol.setColumnName(columnName);

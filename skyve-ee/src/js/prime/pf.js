@@ -1,4 +1,4 @@
-SKYVE = function() {
+SKYVE.PF = function() {
 	// public
 	return {
 		getById: function(id) {
@@ -6,11 +6,11 @@ SKYVE = function() {
 		},
 		
 		contentOverlayOnShow: function(id, url) {
-			SKYVE.getById(id + '_iframe').attr('src', url);
+			SKYVE.PF.getById(id + '_iframe').attr('src', url);
 		},
 		
 		contentOverlayOnHide: function(id) {
-			SKYVE.getById(id + '_iframe').attr('src','')
+			SKYVE.PF.getById(id + '_iframe').attr('src','')
 		},
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
@@ -32,61 +32,61 @@ SKYVE = function() {
 		},
 		
 		getTextElement: function(id) {
-			return SKYVE.getById(id);
+			return SKYVE.PF.getById(id);
 		},
 
 		getTextValue: function(id) {
-			return SKYVE.getTextElement(id).val();
+			return SKYVE.PF.getTextElement(id).val();
 		},
 		
 		setTextValue: function(id, value) {
-			SKYVE.getTextElement(id).val(value);
+			SKYVE.PF.getTextElement(id).val(value);
 		},
 
 		getPasswordElement: function(id) {
-			return SKYVE.getById(id + 'password');
+			return SKYVE.PF.getById(id + 'password');
 		},
 		
 		getPasswordValue: function(id) {
-			return SKYVE.getPasswordElement(id).val();
+			return SKYVE.PF.getPasswordElement(id).val();
 		},
 		
 		setPasswordValue: function(id, value) {
-			SKYVE.getPasswordElement(id).val(value);
+			SKYVE.PF.getPasswordElement(id).val(value);
 		},
 
 		// for selecting values and getting the selected value, use the PF SelectOneMenu API through widgetVar
 		getComboElement: function(id) {
-			return SKYVE.getById(id);
+			return SKYVE.PF.getById(id);
 		},
 
 		// to perform a lookup, use the AutoComplete API through widgetVar
 		getLookupElement: function(id) {
-			return SKYVE.getById(id);
+			return SKYVE.PF.getById(id);
 		},
 		
 		getLookupValue: function(id) {
-			return SKYVE.getById(id + '_hinput').val();
+			return SKYVE.PF.getById(id + '_hinput').val();
 		},
 		
 		setLookupValue: function(id, value) {
-			SKYVE.getById(id + '_hinput').val(value);
+			SKYVE.PF.getById(id + '_hinput').val(value);
 		},
 		
 		getLookupDescription: function(id) {
-			return SKYVE.getById(id + '_input').val();
+			return SKYVE.PF.getById(id + '_input').val();
 		},
 		
 		setLookupDescription: function(id, value) {
-			SKYVE.getById(id + '_input').val(value);
+			SKYVE.PF.getById(id + '_input').val(value);
 		},
 		
 		getCheckboxElement: function(id) {
-			return SKYVE.getById(id);
+			return SKYVE.PF.getById(id);
 		},
 		
 		getCheckboxValue: function(id) {
-			var value = SKYVE.getById(id + '_input').val();
+			var value = SKYVE.PF.getById(id + '_input').val();
 			if (value == '0') {
 				return null;
 			}
@@ -97,14 +97,14 @@ SKYVE = function() {
 				return false;
 			}
 			else {
-				return SKYVE.getById(id + '_input').is(":checked");
+				return SKYVE.PF.getById(id + '_input').is(":checked");
 			}
 		},
 		
 		setCheckboxValue: function(id, trueOrFalse) {
-			SKYVE.getById(id + '_input').prop('checked', trueOrFalse);
+			SKYVE.PF.getById(id + '_input').prop('checked', trueOrFalse);
 
-			var outerDiv = SKYVE.getById(id);
+			var outerDiv = SKYVE.PF.getById(id);
 			var innerDiv = outerDiv.find('.ui-chkbox-box');
 			var innerSpan = innerDiv.find('.ui-chkbox-icon')
 			if (trueOrFalse) {
@@ -163,6 +163,26 @@ SKYVE = function() {
 					msgs: growls 
 				});
 			}
+		},
+		
+		gmap: function(elementId) {
+			if (window.google && window.google.maps && window.SKYVE.BizMap) {
+				return Skyve.BizMap.create(elementId);
+			}
+
+			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
+					var url = 'https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing';
+					if (SKYVE.Util.googleMapsV3ApiKey) {
+						url += '&key=' + SKYVE.Util.googleMapsV3ApiKey;
+					}
+					SKYVE.Util.loadJS(url, function() {
+						SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
+							return SKYVE.BizMap.create(elementId);
+						});
+					});
+				});
+			});
 		}
 	};
 }();

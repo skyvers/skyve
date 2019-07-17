@@ -93,7 +93,7 @@
 		<!-- SAIL Attributes -->
 		<association name="sailUser" type="aggregation">
 			<displayName>User</displayName>
-			<documentName>User</documentName>
+			<documentName>UserProxy</documentName>
 		</association>
 		<text name="sailModuleName">
 			<displayName>Module Name</displayName>

@@ -32,6 +32,9 @@
 			<h:outputScript name="js/layout.js" library="ecuador-layout" />
 	
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				#{bean.apiScript}
+			</script>
 			<ui:insert name="head" />
 		</h:head>
 	

@@ -139,7 +139,7 @@
 		</timestamp>
 		<association type="aggregation" name="auditUser">
 			<displayName>User</displayName>
-			<documentName>User</documentName>
+			<documentName>UserProxy</documentName>
 		</association>
 		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
 			<displayName>Found</displayName>

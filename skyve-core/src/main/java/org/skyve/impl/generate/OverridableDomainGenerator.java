@@ -127,6 +127,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
 
+	/**
+	 * Array of POSTGRESQL database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> POSTGRESQL_RESERVED_WORDS;
+
 	static {
 		String javaReserved[] = {
 				"abstract", "assert", "boolean", "break", "byte", "case",
@@ -138,8 +143,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"null", "package", "private", "protected", "public",
 				"return", "short", "static", "strictfp", "super",
 				"switch", "synchronized", "this", "throw", "throws",
-				"transient", "true", "try", "void", "volatile",
-				"while"
+				"transient", "true", "try", "void", "volatile", "while"
 		};
 		JAVA_RESERVED_WORDS = new HashSet<>(Arrays.asList(javaReserved));
 
@@ -198,9 +202,46 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"unpivot", "disk", "openquery", "update", "distinct", "openrowset", "updatetext", "distributed", "openxml", "use",
 				"double", "option", "user", "drop", "or", "values", "dump", "order", "varying", "else", "outer", "view", "end",
 				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
-				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc",
+				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc"
 		};
 		SQL_SERVER_RESERVED_WORDS = new HashSet<>(Arrays.asList(sqlServerReserved));
+
+		String postgreSQLReserved[] = {
+				"all", "analyse", "analyze", "and", "any", "array",
+				"as", "asc", "authorization",
+				"between", "binary", 
+				"both", "case", "cast",
+				"check",
+				"column", "constraint",
+				"create", "cross",
+				"current_date", "current_role",
+				"current_time", "current_timestamp",
+				"default", "deferrable",
+				"desc", "distinct",
+				"do", "else", "end",
+				"except",
+				"false", "for", "foreign",
+				"freeze", "from", "full", "grant", "group",
+				"having", "ilike", "in", "initially", "inner",
+				"intersect", "into", "is", "isnull",
+				"join", "leading", "left",
+				"like", "limit", "localtime", "localtimestamp",
+				"natural",
+				"new", "not", "notnull", "null",
+				"off", "offset", "old", "on", "only", "or", "order", "outer",
+				"overlaps",
+				"placing",
+				"primary",
+				"references",
+				"right",
+				"select", "session_user", "similar", "some",
+				"symmetric",
+				"table", "then", "to", "trailing",
+				"true", "union",
+				"unique", "user", "using",
+				"verbose", "when", "where"
+		};
+		POSTGRESQL_RESERVED_WORDS = new HashSet<>(Arrays.asList(postgreSQLReserved));
 	}
 
 	OverridableDomainGenerator() {
@@ -3219,6 +3260,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						break;
 					case MYSQL_5:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case POSTGRESQL:
+						if (POSTGRESQL_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
 						}

@@ -26,6 +26,9 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				#{bean.apiScript}
+			</script>
 			<ui:insert name="head" />
 		</h:head>
 		<h:body>

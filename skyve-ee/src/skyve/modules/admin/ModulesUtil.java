@@ -38,6 +38,7 @@ import org.skyve.util.Time;
 
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
+import modules.admin.domain.UserProxy;
 
 /**
  * Utility methods applicable across application modules.
@@ -546,18 +547,37 @@ public class ModulesUtil {
 	 * @return The current {@link modules.admin.domain.User}
 	 */
 	public static modules.admin.domain.User currentAdminUser() {
-		modules.admin.domain.User user = null;
+		modules.admin.domain.User result = null;
 		try {
-			Persistence persistence = CORE.getPersistence();
-			Customer customer = persistence.getUser().getCustomer();
-			Module module = customer.getModule(modules.admin.domain.User.MODULE_NAME);
-			Document userDoc = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
-			user = persistence.retrieve(userDoc, persistence.getUser().getId(), false);
-		} catch (Exception e) {
+			Persistence p = CORE.getPersistence();
+			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
+									modules.admin.domain.User.DOCUMENT_NAME,
+									p.getUser().getId(),
+									false);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
 		}
 
-		return user;
+		return result;
+	}
+
+	/**
+	 * Returns the current session/conversation user as an Admin module UserProxy
+	 * 
+	 * @return The current {@link modules.admin.domain.UserProxy}
+	 */
+	public static UserProxy currentAdminUserProxy() {
+		UserProxy result = null;
+		try {
+			Persistence p = CORE.getPersistence();
+			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId(), false);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			// do nothing
+		}
+
+		return result;
 	}
 
 	public static Contact getCurrentUserContact() {
@@ -880,7 +900,7 @@ public class ModulesUtil {
 							if (Binder.get(bean, a) != null) {
 								binding.append(a);
 							}
-						} catch (Exception e) {
+						} catch (@SuppressWarnings("unused") Exception e) {
 							// do nothing
 						}
 					}

@@ -107,7 +107,7 @@ isc.ListView.addClassProperties({
 	_setHeading: function(title, icon, fontIcon, modoc) {
 		var iconMarkup = '';
 		if (icon) {
-			iconMarkup = '<img style="width:32px;height:32px" src="resources?_doc=' + modoc + '&_n=' + icon + '&v=' + isc.BizUtil.version + '"/>';
+			iconMarkup = '<img style="width:32px;height:32px" src="resources?_doc=' + modoc + '&_n=' + icon + '&v=' + SKYVE.Util.v + '"/>';
 		}
 		else if (fontIcon) {
 			iconMarkup = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';

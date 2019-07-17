@@ -11,6 +11,9 @@
 		<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 		<h:outputStylesheet name="css/admin.css" library="skyve" />
 		<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+		<script type="text/javascript">
+			#{bean.apiScript}
+		</script>
 		<style>
 			.content-header {
 				display: none;

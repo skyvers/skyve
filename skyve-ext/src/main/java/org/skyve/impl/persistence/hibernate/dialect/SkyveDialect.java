@@ -3,12 +3,11 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public interface SkyveDialect {
 	public static enum RDBMS {
-		h2, mysql, sqlserver
+		h2, mysql, sqlserver, postgresql
 	}
 	
 	public int getGeometrySqlType();

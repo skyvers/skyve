@@ -48,7 +48,6 @@ import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
-import org.hibernate.jpa.event.spi.JpaIntegrator;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
@@ -94,6 +93,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
@@ -171,6 +171,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		configure();
 	}
 
+	@SuppressWarnings("resource")
 	private static void configure() {
 		LoadedConfig config = LoadedConfig.baseline();
 		Map<String, String> cfg = config.getConfigurationValues();
@@ -249,7 +250,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			@Override
 			public Iterable<Integrator> getIntegrators() {
 				List<Integrator> result = new ArrayList<>();
-				result.add(new JpaIntegrator());
 				result.add(new Integrator() {
 					@Override
 					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
@@ -283,6 +283,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			}
 		});
 		
+		// NB try-with-resources fails on standardRegistry here as the standard registry is used
+		// as long as the session factory is open.
 		StandardServiceRegistry standardRegistry = ssrb.build();
 		MetadataSources sources = new MetadataSources(standardRegistry);
 
@@ -1140,6 +1142,7 @@ t.printStackTrace();
 				// be unique constraint violation.
 				boolean abortCheck = false;
 				List<Object> constraintFieldValues = new ArrayList<>();
+				int i = 1;
 				for (String fieldName : constraint.getFieldNames()) {
 					Object constraintFieldValue = null;
 					try {
@@ -1162,7 +1165,7 @@ t.printStackTrace();
 						queryString.append(" and bean.");
 					}
 					queryString.append(fieldName);
-					queryString.append(" = ?");
+					queryString.append(" = ?").append(i++);
 				}
 	
 				if (abortCheck) {
@@ -1177,11 +1180,12 @@ t.printStackTrace();
 					Util.LOGGER.info(log.toString());
 				}
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
-				int index = 0;
+				int index = 1;
 				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
-					query.setParameter(index, constraintFieldValues.get(index));
+					Object value = constraintFieldValues.get(index - 1);
+					query.setParameter(index, value);
 					if (UtilImpl.QUERY_TRACE) {
-						Util.LOGGER.info("    SET PARAM " + index + " = " + constraintFieldValues.get(index));
+						Util.LOGGER.info("    SET PARAM " + index + " = " + value);
 					}
 					index++;
 				}
@@ -1239,12 +1243,13 @@ t.printStackTrace();
 				boolean vetoed = internalCustomer.interceptBeforeDelete(document, newBean);
 				if (! vetoed) {
 					Set<String> documentsVisited = new TreeSet<>();
-					// Check composed collections here in case we are deleting a composed collection element directly using p.delete().
+					// Check composed collections/associations here in case we are 
+					// deleting a composed collection element or an association directly using p.delete().
 					checkReferentialIntegrityOnDelete(document,
 														bean,
 														documentsVisited,
 														beansToDelete,
-														true);
+														false);
 
 					// need to merge before validation to ensure that the FK constraints
 					// can check for members of collections etc - need the persistent version for this
@@ -1272,7 +1277,7 @@ t.printStackTrace();
 													PersistentBean beanToDelete, 
 													Set<String> documentsVisited,
 													Map<String, Set<Bean>> beansToBeCascaded,
-													boolean checkComposedCollection) {
+													boolean preRemove) {
 		Customer customer = user.getCustomer();
 		List<ExportedReference> refs = ((CustomerImpl) customer).getExportedReferences(document);
 		if (refs != null) {
@@ -1284,10 +1289,13 @@ t.printStackTrace();
 				if (! CollectionType.child.equals(type)) {
 					// Check composed collections if we are deleting a composed collection element
 					// directly using p.delete(), otherwise,
-					// if preRemove() is being fired, we should NOT check composed collections
-					// as they are going to be deleted by hibernate as a collection.remove() was performed.
-					if (((! checkComposedCollection) && (! CollectionType.composition.equals(type))) || 
-							(checkComposedCollection && CollectionType.composition.equals(type))) {
+					// if preRemove() is being fired, we should NOT check composed collections or associations
+					// as they are going to be deleted by hibernate 
+					// as a collection.remove() was performed or an association was nulled.
+					if ((! preRemove) ||
+							(preRemove && 
+								(! CollectionType.composition.equals(type)) && 
+								(! AssociationType.composition.equals(type)))) {
 						String moduleName = ref.getModuleName();
 						String documentName = ref.getDocumentName();
 						String entityName = getDocumentEntityName(moduleName, documentName);
@@ -1315,7 +1323,7 @@ t.printStackTrace();
 			int dotIndex = baseDocumentName.indexOf('.');
 			Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
 			Document baseDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-			checkReferentialIntegrityOnDelete(baseDocument, beanToDelete, documentsVisited, beansToBeCascaded, checkComposedCollection);
+			checkReferentialIntegrityOnDelete(baseDocument, beanToDelete, documentsVisited, beansToBeCascaded, preRemove);
 		}
 
 		// Process derived documents if present
@@ -1324,7 +1332,7 @@ t.printStackTrace();
 				int dotIndex = derivedDocumentName.indexOf('.');
 				Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
 				Document derivedDocument = derivedModule.getDocument(customer, derivedDocumentName.substring(dotIndex + 1));
-				checkReferentialIntegrityOnDelete(derivedDocument, beanToDelete, documentsVisited, beansToBeCascaded, checkComposedCollection);
+				checkReferentialIntegrityOnDelete(derivedDocument, beanToDelete, documentsVisited, beansToBeCascaded, preRemove);
 			}
 		}
 	}
@@ -1732,12 +1740,14 @@ t.printStackTrace();
 			}
 
 			Set<String> documentsVisited = new TreeSet<>();
-			// We should NOT check composed collections here as they are going to be deleted by hibernate as a collection.remove() was performed.
+			// We should NOT check composed collections/associations here 
+			// as they are going to be deleted by hibernate 
+			// as a collection.remove() was performed or an association was nulled.
 			checkReferentialIntegrityOnDelete(document,
 												beanToDelete,
 												documentsVisited,
 												beansToDelete,
-												false);
+												true);
 			((PersistentBean) beanToDelete).setBizLock(new OptimisticLock(user.getName(), new Date()));
 		}
 		catch (ValidationException e) {

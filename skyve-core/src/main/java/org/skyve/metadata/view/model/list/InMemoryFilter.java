@@ -7,11 +7,10 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.PredicateUtils;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.util.Binder;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class InMemoryFilter implements Filter {
 	private List<Predicate> predicates = new ArrayList<>();

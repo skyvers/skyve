@@ -177,6 +177,14 @@
 			<displayName>New Group</displayName>
 			<documentName>Group</documentName>
 		</association>
+		<collection name="assignedRoles" type="aggregation" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>Roles</displayName>
+			<description>
+				The assigned roles through the groups, customer roles and module roles assigned.
+			</description>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->

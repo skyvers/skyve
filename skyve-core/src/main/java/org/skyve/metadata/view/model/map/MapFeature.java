@@ -1,6 +1,6 @@
 package org.skyve.metadata.view.model.map;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class MapFeature {
 	private Geometry geometry;

@@ -212,7 +212,7 @@
 		</property>
 		<property name="auditTimestampStart" type="Timestamp" />
 		<property name="auditTimestampEnd" type="Timestamp" />
-		<many-to-one name="auditUser" entity-name="adminUser" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser" />
+		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -238,7 +238,7 @@
 		<filter name="adminDocumentNumberUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Group" table="ADM_SecurityGroup" entity-name="adminGroup">
+	<class name="modules.admin.Group.GroupExtension" table="ADM_SecurityGroup" entity-name="adminGroup">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -377,7 +377,7 @@
 		<property name="cronExpression" length="128" />
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
-		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
 		<property name="disabled" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -485,7 +485,7 @@
 		<filter name="adminTaggedUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.User" table="ADM_SecurityUser" entity-name="adminUser">
+	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -553,6 +553,25 @@
 		<filter name="adminUserMonthlyHitsCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserMonthlyHitsDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminUserMonthlyHitsUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.UserProxy" table="ADM_SecurityUser" entity-name="adminUserProxy">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="createdDateTime" type="DateTime" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact" />
+		<property name="inactive" />
+		<filter name="adminUserProxyNoneFilter" condition="1=0"/>
+		<filter name="adminUserProxyCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserProxyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserProxyUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.admin.domain.UserRole" table="ADM_SecurityUserRole" entity-name="adminUserRole">
@@ -799,6 +818,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserMonthlyHitsUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyNoneFilter" />
+	<filter-def name="adminUserProxyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserRoleNoneFilter" />

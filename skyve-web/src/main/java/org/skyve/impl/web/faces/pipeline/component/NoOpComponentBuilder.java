@@ -207,6 +207,16 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent map(UIComponent component, String moduleName, String queryName, String geometryBinding) {
+		return component;
+	}
+
+	@Override
+	public UIComponent map(UIComponent component, String modelName) {
+		return component;
+	}
+
+	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String modelDocumentName,

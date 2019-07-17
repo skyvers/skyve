@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:o="http://omnifaces.org/ui"
+		dir="#{skyveMap.dir}">
+	<f:view encoding="UTF-8">
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<f:metadata>
+			<f:viewParam name="a" value="#{skyveMap.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyveMap.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyveMap.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyveMap.queryNameParameter}" />
+			<f:viewParam name="b" value="#{skyveMap.bindingParameter}" />
+			<f:event type="preRenderView" listener="#{skyveMap.preRender}"/>
+		</f:metadata>
+		<ui:composition template="./template.xhtml">
+			<ui:param name="bean" value="#{skyveMap}" />
+			<ui:define name="head">
+			</ui:define>
+			<ui:define name="body">
+				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
+				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
+				<h:form prependId="false">
+					<p:focus />
+					<p:remoteCommand name="pushRerender" actionListener="#{skyveMap.rerender('push', false)}" process="@this" update="@form" />
+				</h:form>
+				<s:map id="map"
+						module="#{skyveMap.bizModuleParameter}"
+						document="#{skyveMap.bizDocumentParameter}"
+						query="#{skyveMap.queryNameParameter}"
+						model="#{skyveMap.modelName}"
+						geometryBinding="#{skyveMap.bindingParameter}"
+						managedBean="skyveMap"
+						update="@none" />
+				<!-- Map is height of window - 250px for header and footer -->
+				<script>
+					$('#map').parent().height($(window).height() - 250);
+					$(window).resize(function(e) {$('#map').parent().height($(window).height() - 250)});
+				</script>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

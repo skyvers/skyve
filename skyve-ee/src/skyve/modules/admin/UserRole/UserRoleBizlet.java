@@ -14,7 +14,7 @@ public class UserRoleBizlet extends Bizlet<UserRole> {
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName) 
 	throws Exception {
-		if (fieldName.equals(UserRole.roleNamePropertyName)) {
+		if (UserRole.roleNamePropertyName.equals(fieldName)) {
 			return UserBizlet.getCustomerRoleValues(CORE.getUser());
 		}
 

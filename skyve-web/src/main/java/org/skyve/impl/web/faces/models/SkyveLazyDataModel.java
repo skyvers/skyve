@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.locationtech.jts.geom.Geometry;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
@@ -38,8 +39,6 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private static final long serialVersionUID = -2161288261538038204L;

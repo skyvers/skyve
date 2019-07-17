@@ -1,5 +1,6 @@
 package org.skyve.persistence;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -8,8 +9,6 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * 

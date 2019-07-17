@@ -312,13 +312,16 @@ public class SmartClientGenerateUtils {
 						if (validator != null) {
 							@SuppressWarnings("unchecked")
 							Converter<String> converter = (Converter<String>) text.getConverterForCustomer(customer); 
-							StringBuilder sb = new StringBuilder(128);
-							// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
-							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
-							sb.append("',type:'regexp',errorMessage:'");
-							sb.append(processString(validator.constructMessage(user, title, converter)));
-							sb.append("'}");
-							validation = sb.toString();
+							String regex = validator.getRegularExpression();
+							if (regex != null) {
+								StringBuilder sb = new StringBuilder(128);
+								// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
+								sb.append("{expression:'").append(regex.replace("\\", "\\\\").replace("'", "\\'"));
+								sb.append("',type:'regexp',errorMessage:'");
+								sb.append(processString(validator.constructMessage(user, title, converter)));
+								sb.append("'}");
+								validation = sb.toString();
+							}
 						}
 					}
 					else if (bindingAttribute instanceof Date) {

@@ -1,6 +1,5 @@
 package modules.test.domain;
 
-import com.vividsolutions.jts.geom.Geometry;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
@@ -11,6 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
@@ -60,7 +60,7 @@ public class MappedBase extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String colourPropertyName = "colour";
 	/** @hidden */
-	public static final String datePropertyName = "date";
+	public static final String dateOnlyPropertyName = "dateOnly";
 	/** @hidden */
 	public static final String dateTimePropertyName = "dateTime";
 	/** @hidden */
@@ -86,9 +86,9 @@ public class MappedBase extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String textPropertyName = "text";
 	/** @hidden */
-	public static final String timePropertyName = "time";
+	public static final String timeOnlyPropertyName = "timeOnly";
 	/** @hidden */
-	public static final String timestampPropertyName = "timestamp";
+	public static final String timestampAttributePropertyName = "timestampAttribute";
 	/** @hidden */
 	public static final String baseDerivedIntegerPropertyName = "baseDerivedInteger";
 	/** @hidden */
@@ -183,7 +183,7 @@ public class MappedBase extends AbstractPersistentBean {
 	/**
 	 * Date
 	 **/
-	private DateOnly date;
+	private DateOnly dateOnly;
 	/**
 	 * Date Time
 	 **/
@@ -235,11 +235,11 @@ public class MappedBase extends AbstractPersistentBean {
 	/**
 	 * Time
 	 **/
-	private TimeOnly time;
+	private TimeOnly timeOnly;
 	/**
 	 * Timestamp
 	 **/
-	private Timestamp timestamp;
+	private Timestamp timestampAttribute;
 	/**
 	 * Base Derived Integer
 	 **/
@@ -329,23 +329,23 @@ public class MappedBase extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #date} accessor.
+	 * {@link #dateOnly} accessor.
 	 * @return	The value.
 	 **/
-	public DateOnly getDate() {
-		return date;
+	public DateOnly getDateOnly() {
+		return dateOnly;
 	}
 
 	/**
-	 * {@link #date} mutator.
-	 * @param date	The new value.
+	 * {@link #dateOnly} mutator.
+	 * @param dateOnly	The new value.
 	 **/
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
 	@XmlElement
-	public void setDate(DateOnly date) {
-		preset(datePropertyName, date);
-		this.date = date;
+	public void setDateOnly(DateOnly dateOnly) {
+		preset(dateOnlyPropertyName, dateOnly);
+		this.dateOnly = dateOnly;
 	}
 
 	/**
@@ -571,43 +571,43 @@ public class MappedBase extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #time} accessor.
+	 * {@link #timeOnly} accessor.
 	 * @return	The value.
 	 **/
-	public TimeOnly getTime() {
-		return time;
+	public TimeOnly getTimeOnly() {
+		return timeOnly;
 	}
 
 	/**
-	 * {@link #time} mutator.
-	 * @param time	The new value.
+	 * {@link #timeOnly} mutator.
+	 * @param timeOnly	The new value.
 	 **/
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
 	@XmlElement
-	public void setTime(TimeOnly time) {
-		preset(timePropertyName, time);
-		this.time = time;
+	public void setTimeOnly(TimeOnly timeOnly) {
+		preset(timeOnlyPropertyName, timeOnly);
+		this.timeOnly = timeOnly;
 	}
 
 	/**
-	 * {@link #timestamp} accessor.
+	 * {@link #timestampAttribute} accessor.
 	 * @return	The value.
 	 **/
-	public Timestamp getTimestamp() {
-		return timestamp;
+	public Timestamp getTimestampAttribute() {
+		return timestampAttribute;
 	}
 
 	/**
-	 * {@link #timestamp} mutator.
-	 * @param timestamp	The new value.
+	 * {@link #timestampAttribute} mutator.
+	 * @param timestampAttribute	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
 	@XmlElement
-	public void setTimestamp(Timestamp timestamp) {
-		preset(timestampPropertyName, timestamp);
-		this.timestamp = timestamp;
+	public void setTimestampAttribute(Timestamp timestampAttribute) {
+		preset(timestampAttributePropertyName, timestampAttribute);
+		this.timestampAttribute = timestampAttribute;
 	}
 
 	/**

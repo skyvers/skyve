@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Group.GroupExtension;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -24,6 +26,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - WizardState
  * @depend - - - GroupSelection
  * @navhas n dataGroup 0..1 DataGroup
+ * @navhas n assignedRoles 0..n UserRole
  * @navhas n contact 1 Contact
  * @navcomposed 1 roles 0..n UserRole
  * @navhas n groups 0..n Group
@@ -93,6 +96,8 @@ public class User extends AbstractPersistentBean {
 	public static final String groupsExistPropertyName = "groupsExist";
 	/** @hidden */
 	public static final String newGroupPropertyName = "newGroup";
+	/** @hidden */
+	public static final String assignedRolesPropertyName = "assignedRoles";
 
 	/**
 	 * Wizard State
@@ -342,7 +347,7 @@ public class User extends AbstractPersistentBean {
 	 * <br/>
 	 * The collection of security groups that this user belongs to.
 	 **/
-	private List<Group> groups = new ChangeTrackingArrayList<>("groups", this);
+	private List<GroupExtension> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
 	 * Roles
 	 * <br/>
@@ -403,7 +408,13 @@ public class User extends AbstractPersistentBean {
 	/**
 	 * New Group
 	 **/
-	private Group newGroup = null;
+	private GroupExtension newGroup = null;
+	/**
+	 * Roles
+	 * <br/>
+	 * The assigned roles through the groups, customer roles and module roles assigned.
+	 **/
+	private List<UserRole> assignedRoles = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -417,7 +428,7 @@ public class User extends AbstractPersistentBean {
 		return User.DOCUMENT_NAME;
 	}
 
-	public static User newInstance() {
+	public static UserExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -683,7 +694,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Group> getGroups() {
+	public List<GroupExtension> getGroups() {
 		return groups;
 	}
 
@@ -692,7 +703,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Group getGroupsElementById(String bizId) {
+	public GroupExtension getGroupsElementById(String bizId) {
 		return getElementById(groups, bizId);
 	}
 
@@ -701,7 +712,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGroupsElementById(String bizId, Group element) {
+	public void setGroupsElementById(String bizId, GroupExtension element) {
 		 setElementById(groups, element);
 	}
 
@@ -887,7 +898,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #newGroup} accessor.
 	 * @return	The value.
 	 **/
-	public Group getNewGroup() {
+	public GroupExtension getNewGroup() {
 		return newGroup;
 	}
 
@@ -896,8 +907,35 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param newGroup	The new value.
 	 **/
 	@XmlElement
-	public void setNewGroup(Group newGroup) {
+	public void setNewGroup(GroupExtension newGroup) {
 		this.newGroup = newGroup;
+	}
+
+	/**
+	 * {@link #assignedRoles} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<UserRole> getAssignedRoles() {
+		return assignedRoles;
+	}
+
+	/**
+	 * {@link #assignedRoles} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public UserRole getAssignedRolesElementById(String bizId) {
+		return getElementById(assignedRoles, bizId);
+	}
+
+	/**
+	 * {@link #assignedRoles} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setAssignedRolesElementById(String bizId, UserRole element) {
+		 setElementById(assignedRoles, element);
 	}
 
 	/**

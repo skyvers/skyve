@@ -14,7 +14,7 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
-import modules.admin.domain.Group;
+import modules.admin.domain.ImportExport;
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 
@@ -51,34 +51,34 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 	@Test
 	public void testNull() throws Exception {
-		Module admin = c.getModule(Group.MODULE_NAME);
-		Document groupDoc =admin.getDocument(c, Group.DOCUMENT_NAME);
-		Group test = Util.constructRandomInstance(u, admin, groupDoc, 2);
+		Module admin = c.getModule(ImportExport.MODULE_NAME);
+		Document ieDoc = admin.getDocument(c, ImportExport.DOCUMENT_NAME);
+		ImportExport test = Util.constructRandomInstance(u, admin, ieDoc, 2);
 		
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
-		// roles[0]
-		String expectedBinding = Binder.createIndexedBinding(Group.rolesPropertyName, 0);
+		// importExportColumns[0]
+		String expectedBinding = Binder.createIndexedBinding(ImportExport.importExportColumnsPropertyName, 0);
 		expectedBindings.add(expectedBinding);
-		// roles[0].parent
+		// importExportColumns[0].parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// roles[0].parent.roles
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, Group.rolesPropertyName);
+		// importExportColumns[0].parent.importExportColumns
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ImportExport.importExportColumnsPropertyName);
 		expectedBindings.add(expectedBinding);
-		// roles[0].parent.roles.parent
+		// importExportColumns[0].parent.importExportColumns.parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// roles[1]
-		expectedBinding = Binder.createIndexedBinding(Group.rolesPropertyName, 1);
+		// importExportColumns[1]
+		expectedBinding = Binder.createIndexedBinding(ImportExport.importExportColumnsPropertyName, 1);
 		expectedBindings.add(expectedBinding);
-		// roles[1].parent
+		// importExportColumns[1].parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
-		// roles[1].parent.roles
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, Group.rolesPropertyName);
+		// importExportColumns[1].parent.importExportColumns
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, ImportExport.importExportColumnsPropertyName);
 		expectedBindings.add(expectedBinding);
-		// roles[1].parent.roles.paremnt
+		// importExportColumns[1].parent.importExportColumns.parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
 		expectedBindings.add(expectedBinding);
 		
@@ -97,7 +97,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 				return true;
 			}
 
-		}.visit(groupDoc, test, c);
+		}.visit(ieDoc, test, c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
@@ -187,9 +187,9 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
 		// inverse
-		String expectedBinding = AllAttributesPersistent.inverseAggregatedAssociationPropertyName;
+		String expectedBinding = AllAttributesInverseOneToOnePersistent.invAggAssociationPropertyName;
 		expectedBindings.add(expectedBinding);
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesInverseOneToOnePersistent.aggCollectionPropertyName);
 		// inverse.aggregatedCollection[0]
 		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
 		// inverse.aggregatedCollection[1]
@@ -209,7 +209,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 				return true;
 			}
 
-		}.visit(aai121pd, test.getAggregatedAssociation(), c);
+		}.visit(aai121pd, test.getAggAssociation(), c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}

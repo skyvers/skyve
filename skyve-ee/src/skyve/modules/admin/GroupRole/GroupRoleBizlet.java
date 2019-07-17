@@ -7,8 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
-import modules.admin.Group.GroupBizlet;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserBizlet;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.GroupRole;
 
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
@@ -26,22 +27,16 @@ public class GroupRoleBizlet extends Bizlet<GroupRole> {
 
 	@Override
 	public GroupRole resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-	
-		// Check if the role being resolved is part of the temporary collection for selection
-		// in the case of the listMembership selection, the bizId value being resolved
-		// will be the roleName
-		@SuppressWarnings("unchecked")
-		List<DomainValue> roles = (List<DomainValue>) CORE.getStash().get(GroupBizlet.AVAILABLE_ROLES);
-		for(DomainValue v: roles) {
-			if(v.getCode().equals(bizId)) {
-				GroupRole r = GroupRole.newInstance();
-				r.setRoleName(v.getCode());
-				return r;
+		if (conversationBean instanceof GroupExtension) {
+			return ((GroupExtension) conversationBean).getCandidateRolesElementById(bizId);
+		}
+		else if (conversationBean instanceof UserExtension) {
+			UserExtension user = (UserExtension) conversationBean;
+			GroupExtension group = user.getNewGroup();
+			if (group != null) {
+				return group.getCandidateRolesElementById(bizId);
 			}
 		}
-		
-		return super.resolve(bizId, conversationBean, webContext);
+		return null;
 	}
-	
-	
 }

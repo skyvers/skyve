@@ -20,16 +20,15 @@ import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
-import modules.admin.domain.User;
+import modules.admin.domain.UserProxy;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	private static final long serialVersionUID = -6033906392152210002L;
 
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
-		Persistence p = CORE.getPersistence();
 		// Set the user name and email to the logged in user
-		User user = p.retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, CORE.getUser().getId(), false);
+		UserProxy user = ModulesUtil.currentAdminUserProxy();
 		bean.setSailUser(user);
 		Contact contact = user.getContact();
 		bean.setEmailFrom(contact.getEmail1());

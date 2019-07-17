@@ -11,7 +11,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Snapshot
  * 
- * @navhas n copyToUser 0..1 User
+ * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
  */
 @XmlType
@@ -60,7 +60,7 @@ public class Snapshot extends AbstractPersistentBean {
 	/**
 	 * Copy to user
 	 **/
-	private User copyToUser = null;
+	private UserProxy copyToUser = null;
 	/**
 	 * Snapshot Name for Copy
 	 **/
@@ -185,7 +185,7 @@ public class Snapshot extends AbstractPersistentBean {
 	 * {@link #copyToUser} accessor.
 	 * @return	The value.
 	 **/
-	public User getCopyToUser() {
+	public UserProxy getCopyToUser() {
 		return copyToUser;
 	}
 
@@ -194,7 +194,7 @@ public class Snapshot extends AbstractPersistentBean {
 	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
-	public void setCopyToUser(User copyToUser) {
+	public void setCopyToUser(UserProxy copyToUser) {
 		this.copyToUser = copyToUser;
 	}
 

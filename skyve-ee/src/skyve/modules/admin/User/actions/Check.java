@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.User;
 import modules.admin.domain.UserCandidateContact;
 
 import org.skyve.CORE;
@@ -23,14 +23,11 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class Check implements ServerSideAction<User> {
-	/**
-	 * For Serialization.
-	 */
+public class Check implements ServerSideAction<UserExtension> {
 	private static final long serialVersionUID = -4667349358677521637L;
 
 	@Override
-	public ServerSideActionResult<User> execute(User adminUser, WebContext webContext) throws Exception {
+	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
 		
 		adminUser.setContact(null);
 		

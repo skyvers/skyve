@@ -32,8 +32,8 @@
 		</longInteger>
 		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
 			<displayName>Copy to user</displayName>
-			<documentName>User</documentName>
-			<queryName>qActiveUsers</queryName>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
 		</association>
 		<text name="copyToUserTagName" persistent="false" trackChanges="false">
 			<displayName>Tag Name</displayName>

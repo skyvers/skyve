@@ -33,6 +33,7 @@
 		<action className="Check" displayName="Search" inActionPanel="false" iconStyleClass="fa fa-search"/>
 		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
 		<action className="Next" displayName="Next" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
-		<save visible="confirmGroupMemberships" displayName="Finish"/>
+		<save visible="confirmGroupMemberships"/>
+		<zoomOut visible="confirmGroupMemberships"/>
 	</actions>
 </view>

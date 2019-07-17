@@ -78,11 +78,14 @@ public class CommunicationUtil {
 	 * @param runMode
 	 * @param responseMode
 	 * @param beans
+	 * 
+	 * returns the filePath of the written email file (if this option is chosen and write is successful)
+	 * 
 	 * @throws Exception
 	 */
 	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 
-		String result = null;
+		String resultingFilePath = null;
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -237,6 +240,7 @@ public class CommunicationUtil {
 					switch (format) {
 					case email:
 						EXT.writeMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
+						resultingFilePath = filePath;
 						break;
 					default:
 						break;
@@ -269,7 +273,7 @@ public class CommunicationUtil {
 			break;
 		}
 		
-		return result;
+		return resultingFilePath;
 	}
 	
 	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {

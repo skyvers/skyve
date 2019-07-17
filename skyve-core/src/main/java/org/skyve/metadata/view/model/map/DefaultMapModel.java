@@ -2,17 +2,13 @@ package org.skyve.metadata.view.model.map;
 
 import java.util.List;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-
 public abstract class DefaultMapModel<T extends Bean> extends MapModel<T> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -2978244270525374267L;
 
 	private String geometryBinding;

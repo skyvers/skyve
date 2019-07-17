@@ -3,13 +3,12 @@ package org.skyve.metadata.view.model.map;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Envelope;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 
-import com.vividsolutions.jts.geom.Envelope;
-
-public class DefaultQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
+public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	/**
 	 * For Serialization
 	 */
@@ -18,7 +17,7 @@ public class DefaultQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
 
-	public DefaultQueryMapModel(MetaDataQueryDefinition query) {
+	public DocumentQueryMapModel(MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 

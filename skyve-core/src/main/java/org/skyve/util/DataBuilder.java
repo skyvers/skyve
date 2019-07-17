@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -50,8 +52,6 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import com.mifmif.common.regex.Generex;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * <p>
@@ -552,7 +552,7 @@ public class DataBuilder {
 						BindUtil.set(result, name, randomEnum(clazz, null));
 						break;
 					case geometry:
-						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
+						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(RANDOM.nextInt(180) - RANDOM.nextInt(180), RANDOM.nextInt(90) - RANDOM.nextInt(90))));
 						break;
 					case id:
 						BindUtil.set(result, name, UUID.randomUUID().toString());

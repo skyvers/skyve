@@ -28,6 +28,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.job.JobScheduler;
@@ -226,6 +227,12 @@ public class SkyveContextListener implements ServletContextListener {
 			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
 		}
 
+		Map<String, Object> map = getObject(null, "map", properties, true);
+		if (map != null) {
+			String value = getString("map", "type", map, true);
+			UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
+		}
+		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);

@@ -24,6 +24,7 @@ import org.hibernate.tool.schema.extract.spi.TableInformation;
 import org.hibernate.tool.schema.internal.Helper;
 import org.hibernate.tool.schema.internal.exec.JdbcContext;
 import org.skyve.EXT;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 
 import geodb.GeoDB;
@@ -119,8 +120,11 @@ public class DDLDelegate {
 				StringBuilder alter = new StringBuilder(root.toString())
 						.append(' ')
 						.append(column.getQuotedName(dialect))
-						.append(' ')
-						.append(column.getSqlType(dialect, metadata));
+						.append(' ');
+				if (RDBMS.postgresql.equals(skyveDialect.getRDBMS())) {
+					alter.append("type ");
+				}
+				alter.append(column.getSqlType(dialect, metadata));
 
 				String defaultValue = column.getDefaultValue();
 				if (defaultValue != null) {
@@ -149,23 +153,58 @@ public class DDLDelegate {
 	}
 	
 	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+/*
+		System.out.println("" + column.getSqlType() + " : " + 
+							column.getSqlTypeCode() + " : " + 
+							column.getLength() + " : " + 
+							column.getPrecision() + " : " +
+							column.getScale() + " : " + 
+							column.getTypeIndex() + " = " +
+							columnInfo.getColumnSize() + " : " +
+							columnInfo.getDecimalDigits() + " : " + 
+							columnInfo.getTypeCode() + " : " + 
+							columnInfo.getTypeName() + " : " + 
+							columnInfo.getColumnIdentifier());
+*/
 		int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
 
-		return (columnInfo != null) && // the column exists
-				// char column and lengths are different
-				(
-					(((typeCode == Types.VARCHAR) || 
-							(typeCode == Types.CHAR) || 
-							(typeCode == Types.LONGVARCHAR) ||
-							(typeCode == Types.LONGNVARCHAR)) && 
-							(column.getLength() != columnInfo.getColumnSize()))
-					||
-					// decimal column and scales are different
-					(((typeCode == Types.FLOAT) || 
-							(typeCode == Types.REAL) || 
-							(typeCode == Types.DOUBLE) ||
-							(typeCode == Types.NUMERIC)) &&
-						((column.getScale() != columnInfo.getDecimalDigits()) ||
-							(column.getPrecision() != columnInfo.getColumnSize()))));
+		boolean result = (columnInfo != null) && // the column exists
+							// char column and lengths are different
+							(
+								(isChar(typeCode) && (column.getLength() != columnInfo.getColumnSize()))
+								||
+								// decimal column and scales are different
+								(((typeCode == Types.FLOAT) || 
+										(typeCode == Types.REAL) || 
+										(typeCode == Types.DOUBLE) ||
+										(typeCode == Types.NUMERIC)) &&
+									((column.getScale() != columnInfo.getDecimalDigits()) ||
+										(column.getPrecision() != columnInfo.getColumnSize()))));
+		// cater for longvarchar / text / clob / varchar(max) false positives
+		if (result) {
+			if ((column.getLength() == 255) && 
+					(column.getPrecision() == 19) && 
+					(column.getScale() == 2) &&
+					(column.getTypeIndex() == 0) &&
+					(typeCode == Types.VARCHAR) &&
+					(columnInfo != null) &&
+					(columnInfo.getColumnSize() == Integer.MAX_VALUE) &&
+					(columnInfo.getDecimalDigits() == 0)) {
+				result = false;
+			}
+		}
+		
+		return result;
+	}
+	
+	static boolean isChar(int typeCode) {
+		return (typeCode == Types.CHAR) ||
+				(typeCode == Types.VARCHAR) || 
+				(typeCode == Types.LONGVARCHAR) ||
+				(typeCode == Types.CLOB) ||
+				(typeCode == Types.NCHAR) ||
+				(typeCode == Types.NVARCHAR) || 
+				(typeCode == Types.LONGNVARCHAR) ||
+				(typeCode == Types.NCLOB);
 	}
 }

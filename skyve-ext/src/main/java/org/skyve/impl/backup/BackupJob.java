@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.hibernate.engine.spi.SessionImplementor;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -38,9 +40,6 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTWriter;
 
 /**
  * Tables and the content repository files are backed up by this.

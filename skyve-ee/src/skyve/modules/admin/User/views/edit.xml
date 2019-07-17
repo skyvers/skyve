@@ -44,12 +44,18 @@
 			<vbox />
 		</tab>
 		<tab title="Roles">
-			<vbox border="true" percentageHeight="50">
-				<dataGrid title="User Roles" binding="roles">
-					<boundColumn binding="roleName" title="Role Name" />
-				</dataGrid>
-			</vbox>
-			<vbox />
+			<hbox>
+				<vbox border="true" borderTitle="User Roles" percentageHeight="50">
+					<dataGrid binding="roles">
+						<boundColumn binding="roleName" />
+					</dataGrid>
+				</vbox>
+				<vbox border="true" borderTitle="Assigned Roles" percentageHeight="50">
+					<dataRepeater binding="assignedRoles">
+						<boundColumn binding="roleName" editable="false" />
+					</dataRepeater>
+				</vbox>
+			</hbox>
 		</tab>
 		<tab title="Password">
 			<form border="true" percentageWidth="70" responsiveWidth="12">

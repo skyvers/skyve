@@ -90,11 +90,21 @@ public abstract class Harness extends Localisable {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
 	}
 	
+	private String apiScript;
+	public final String getApiScript() {
+		return apiScript;
+	}
+	
 	@SuppressWarnings("static-method")
 	public final String getBaseHref() {
 		return Util.getSkyveContextUrl() + '/';
 	}
-	
+
+	@SuppressWarnings("static-method")
+	public final String getMapType() {
+		return UtilImpl.MAP_TYPE.toString();
+	}
+
 	public final void initialise(Customer customer, UserImpl user, Locale requestLocale) {
 		super.initialise(user, requestLocale);
 		
@@ -158,6 +168,18 @@ public abstract class Harness extends Localisable {
 			sb.append("css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
 			cssRelativeFileNameUrl = sb.toString();
 		}
+		
+		sb.setLength(0);
+		sb.append("var u=SKYVE.Util;u.customer='").append(customer.getName()).append("';");
+		sb.append("u.v='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
+		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
+			sb.append("u.googleMapsV3ApiKey=null;");
+		}
+		else {
+			sb.append("u.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
+		}
+		sb.append("u.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
+		apiScript = sb.toString();
 	}
 	
 	@SuppressWarnings("static-method")

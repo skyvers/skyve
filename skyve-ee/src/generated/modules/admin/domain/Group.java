@@ -1,10 +1,12 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Group.GroupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -14,6 +16,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * Group
  * 
  * @navcomposed 1 roles 1..n GroupRole
+ * @navcomposed 1 candidateRoles 0..n GroupRole
  * @stereotype "persistent"
  */
 @XmlType
@@ -36,6 +39,8 @@ public class Group extends AbstractPersistentBean {
 	public static final String descriptionPropertyName = "description";
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
+	/** @hidden */
+	public static final String candidateRolesPropertyName = "candidateRoles";
 
 	/**
 	 * Group Name
@@ -49,6 +54,12 @@ public class Group extends AbstractPersistentBean {
 	 * Roles
 	 **/
 	private List<GroupRole> roles = new ChangeTrackingArrayList<>("roles", this);
+	/**
+	 * Candidate Roles
+	 * <br/>
+	 * Holds the possible roles that can be assigned to this group.
+	 **/
+	private List<GroupRole> candidateRoles = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -62,7 +73,7 @@ public class Group extends AbstractPersistentBean {
 		return Group.DOCUMENT_NAME;
 	}
 
-	public static Group newInstance() {
+	public static GroupExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -154,5 +165,32 @@ public class Group extends AbstractPersistentBean {
 	 **/
 	public void setRolesElementById(String bizId, GroupRole element) {
 		 setElementById(roles, element);
+	}
+
+	/**
+	 * {@link #candidateRoles} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<GroupRole> getCandidateRoles() {
+		return candidateRoles;
+	}
+
+	/**
+	 * {@link #candidateRoles} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public GroupRole getCandidateRolesElementById(String bizId) {
+		return getElementById(candidateRoles, bizId);
+	}
+
+	/**
+	 * {@link #candidateRoles} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setCandidateRolesElementById(String bizId, GroupRole element) {
+		 setElementById(candidateRoles, element);
 	}
 }

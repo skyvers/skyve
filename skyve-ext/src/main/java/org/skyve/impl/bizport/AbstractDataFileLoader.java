@@ -18,11 +18,6 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH24_MI;
-import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
-import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
-import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
-import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.metadata.customer.Customer;
@@ -676,48 +671,25 @@ public abstract class AbstractDataFileLoader {
 								Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString());
 							}
 							if (displayValue != null && displayValue.trim().length() > 0) {
-								if (this instanceof POISheetLoader) {
-									// handle rubbish values from Excel, ignore converter and use default constructor
-									switch (field.getAttribute().getAttributeType()) {
-									case date:
-										break;
-									case dateTime:
-										// process of elimination based on whatever excel thinks it should send in
-										DD_MM_YYYY_HH24_MI_SS c1 = new DD_MM_YYYY_HH24_MI_SS();
-										loadValue = c1.fromDisplayValue(displayValue);
-										if (loadValue == null) {
-											DD_MM_YYYY_HH_MI_SS c2 = new DD_MM_YYYY_HH_MI_SS();
-											loadValue = c2.fromDisplayValue(displayValue);
-										}
-										if (loadValue == null) {
-											DD_MM_YYYY_HH24_MI c2 = new DD_MM_YYYY_HH24_MI();
-											loadValue = c2.fromDisplayValue(displayValue);
-										}
-										if (loadValue == null) {
-											DD_MM_YYYY_HH_MI_SS c2 = new DD_MM_YYYY_HH_MI_SS();
-											loadValue = c2.fromDisplayValue(displayValue);
-										}
-										if (loadValue == null) {
-											DD_MMM_YYYY_HH24_MI_SS c2 = new DD_MMM_YYYY_HH24_MI_SS();
-											loadValue = c2.fromDisplayValue(displayValue);
-										}
-										if (loadValue == null) {
-											DD_MMM_YYYY_HH24_MI c2 = new DD_MMM_YYYY_HH24_MI();
-											loadValue = c2.fromDisplayValue(displayValue);
-										}
-
-										loadValue = new DateTime(getDateFieldValue(fieldIndex));
-										break;
-									default:
-										loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
-										break;
-									}
-								} else {
+								try {
 									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
+								} catch (Exception e) {
+									Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
+								}
+								
+								if(loadValue==null) {
+									try {	
+										Date  d = 	getDateFieldValue(fieldIndex);
+										loadValue = new DateTime(d);
+									} catch (Exception e) {
+										Util.LOGGER.info("Loading String value " + displayValue + " using default conversion FAILED");
+									}
 								}
 								if (debugMode) {
 									Util.LOGGER.info("Converted value =  " + loadValue);
 								}
+							} else {
+								Util.LOGGER.info("Null display value found");
 							}
 						} catch (Exception e) {
 							what.append(" The value ");
@@ -757,7 +729,7 @@ public abstract class AbstractDataFileLoader {
 							case text:
 								operand = getStringFieldValue(fieldIndex, true);
 								if (operand != null) {
-									loadValue = operand;
+									loadValue = (((String) operand).trim().length()>0? (String) operand: null);
 									if (debugMode) {
 										Util.LOGGER.info("String field value " + loadValue);
 									}

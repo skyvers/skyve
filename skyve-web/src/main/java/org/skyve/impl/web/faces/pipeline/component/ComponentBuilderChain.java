@@ -401,6 +401,24 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent map(UIComponent component, String moduleName, String queryName, String geometryBinding) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.map(result, moduleName, queryName, geometryBinding);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent map(UIComponent component, String modelName) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.map(result, modelName);
+		}
+		return result;
+	}
+
+	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,
 									String modelDocumentName,

@@ -15,7 +15,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * Job Schedule Entry
  * 
- * @navhas n runAs 1 User
+ * @navhas n runAs 1 UserProxy
  * @stereotype "persistent"
  */
 @XmlType
@@ -906,7 +906,7 @@ public class JobSchedule extends AbstractPersistentBean {
 	 * <br/>
 	 * The user to run the job
 	 **/
-	private User runAs = null;
+	private UserProxy runAs = null;
 	/**
 	 * Job Scheduled Immediately
 	 * <br/>
@@ -3538,7 +3538,7 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * {@link #runAs} accessor.
 	 * @return	The value.
 	 **/
-	public User getRunAs() {
+	public UserProxy getRunAs() {
 		return runAs;
 	}
 
@@ -3547,7 +3547,7 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * @param runAs	The new value.
 	 **/
 	@XmlElement
-	public void setRunAs(User runAs) {
+	public void setRunAs(UserProxy runAs) {
 		preset(runAsPropertyName, runAs);
 		this.runAs = runAs;
 	}

@@ -215,6 +215,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												boolean showColumnHeaders,
 												boolean showGrid);
 
+	public abstract UIComponent map(UIComponent component, 
+										String moduleName,
+										String queryName,
+										String geometryBinding);
+
+	public abstract UIComponent map(UIComponent component, String modelName);
+	
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	
 	public abstract UIComponent checkBox(UIComponent component, 

@@ -19,7 +19,7 @@
 		<colour name="colour" required="true">
 			<displayName>Colour</displayName>
 		</colour>
-		<date name="date" required="true">
+		<date name="dateOnly" required="true">
 			<displayName>Date</displayName>
 		</date>
 		<dateTime name="dateTime" required="true">
@@ -64,10 +64,10 @@
 			<displayName>Text</displayName>
 			<length>255</length>
 		</text>
-		<time name="time" required="true">
+		<time name="timeOnly" required="true">
 			<displayName>Time</displayName>
 		</time>
-		<timestamp name="timestamp" required="true">
+		<timestamp name="timestampAttribute" required="true">
 			<displayName>Timestamp</displayName>
 		</timestamp>
 		<integer name="baseDerivedInteger" persistent="false" trackChanges="false">

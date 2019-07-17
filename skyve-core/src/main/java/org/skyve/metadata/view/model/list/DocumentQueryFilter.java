@@ -2,13 +2,12 @@ package org.skyve.metadata.view.model.list;
 
 import java.util.Date;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.types.Decimal;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class DocumentQueryFilter implements Filter {
 	private DocumentFilter detailFilter;

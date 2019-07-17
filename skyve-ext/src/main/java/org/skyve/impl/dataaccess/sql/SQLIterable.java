@@ -8,6 +8,7 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
@@ -22,8 +23,6 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 class SQLIterable<T> implements AutoClosingIterable<T> {
 	private Document document;

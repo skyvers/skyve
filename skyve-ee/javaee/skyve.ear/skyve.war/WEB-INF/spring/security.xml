@@ -27,6 +27,9 @@
 	<!-- Do not secure the H2 database servlet -->
 	<http auto-config="true" use-expressions="true" security="none" pattern="/h2/**" />
 
+	<!-- Do not secure the Rest servlet - this is done by Skyve filters -->
+	<http auto-config="true" use-expressions="true" security="none" pattern="/rest/**" />
+
 	<!-- Secure everything else -->
 	<http auto-config="true" use-expressions="true">
 		<form-login default-target-url="/" login-page="/login" />
@@ -103,12 +106,6 @@
 		<!-- Do not Secure trackmate servlet - it handles authentication itself -->
 		<intercept-url pattern="/tracks" access="permitAll" />
 
-		<!-- Allow GET, PUT, POST and DELETE for rest -->
-		<intercept-url pattern="/rest**" access="authenticated" method="GET" />
-		<intercept-url pattern="/rest**" access="authenticated" method="PUT" />
-		<intercept-url pattern="/rest**" access="authenticated" method="POST" />
-		<intercept-url pattern="/rest**" access="authenticated" method="DELETE" />
-		
 		<!-- Permit all GET requests by default -->
 		<intercept-url pattern="/**" access="permitAll" method="GET" />
 		<!--  Secure all POST requests by default -->

@@ -20,6 +20,7 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ControlPanel.SailUserAgentType;
+import modules.admin.domain.UserProxy;
 
 public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExtension> {
 	private static final long serialVersionUID = 7370653121212184868L;
@@ -30,7 +31,7 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 		bean.setResults(null);
 		bean.setTabIndex(null);
 
-		modules.admin.domain.User user = bean.getSailUser();
+		UserProxy user = bean.getSailUser();
 		String moduleName = bean.getSailModuleName();
 		String uxui = bean.getSailUxUi();
 		SailUserAgentType sailUserAgentType = bean.getSailUserAgentType();

@@ -7,6 +7,8 @@ import modules.whosinIntegrate.domain.Office;
 import modules.whosinIntegrate.domain.Staff;
 import modules.whosinIntegrate.domain.Staff.Status;
 
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.metadata.view.model.map.MapFeature;
 import org.skyve.metadata.view.model.map.MapItem;
@@ -14,9 +16,6 @@ import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 
 public class OfficeMap extends MapModel<Office> {
 	private static final long serialVersionUID = 7880044512360465355L;

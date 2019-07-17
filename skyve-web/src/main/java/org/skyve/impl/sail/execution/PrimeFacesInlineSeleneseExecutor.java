@@ -275,7 +275,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			if (checkbox) {
 				// dont need to check if checkbox is disabled coz we can still try to click it
 				// check the value and only click if we need the other different value
-				command("storeEval", String.format("window.SKYVE.getCheckboxValue('%s')", clientId), "checked");
+				command("storeEval", String.format("window.SKYVE.PF.getCheckboxValue('%s')", clientId), "checked");
 				command("if", String.format("${checked} != %s", dataEnter.getValue()));
 				command("click", String.format("%s_input", clientId));
 				command("endIf");

@@ -13,14 +13,14 @@
 	<pluralAlias>All Inverse 121 Persistent</pluralAlias>
 	<bizKey expression="{text}" />
 	<attributes>
-		<association name="aggregatedAssociation" type="aggregation">
+		<association name="aggAssociation" type="aggregation">
 			<displayName>Aggregated Association</displayName>
 			<documentName>AllAttributesInverseOneToOnePersistent</documentName>
 		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 		</boolean>
-		<collection name="aggregatedCollection" type="aggregation">
+		<collection name="aggCollection" type="aggregation">
 			<displayName>Aggregated Collection</displayName>
 			<documentName>AllAttributesInverseOneToOnePersistent</documentName>
 			<minCardinality>0</minCardinality>
@@ -60,10 +60,10 @@
 		<integer name="normalInteger">
 			<displayName>Integer</displayName>
 		</integer>
-		<inverseOne name="inverseAggregatedAssociation">
+		<inverseOne name="invAggAssociation">
 			<displayName>Inverse</displayName>
 			<documentName>AllAttributesInverseOneToOnePersistent</documentName>
-			<referenceName>aggregatedAssociation</referenceName>
+			<referenceName>aggAssociation</referenceName>
 		</inverseOne>
 		<longInteger name="longInteger">
 			<displayName>Long Integer</displayName>
