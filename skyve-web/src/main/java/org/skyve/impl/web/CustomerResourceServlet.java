@@ -327,6 +327,8 @@ public class CustomerResourceServlet extends HttpServlet {
 					response.setHeader("Cache-Control", "cache");
 			        response.setHeader("Pragma", "cache");
 			        response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
+					// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
+					response.setHeader("Accept-Ranges", "bytes");
 				}
 
 				out.write(bytes, 0, bytes.length);
