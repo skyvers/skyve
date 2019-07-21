@@ -72,6 +72,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -763,26 +764,43 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent map(UIComponent component, 
+							MapDisplay map,
 							String moduleName,
 							String queryName,
 							String geometryBinding) {
 		if (component != null) {
 			return component;
 		}
-		return map(moduleName, queryName, geometryBinding, null);
+		return map(map, moduleName, queryName, geometryBinding, null);
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String modelName) {
+	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
 		if (component != null) {
 			return component;
 		}
-		return map((String) null, null, null, modelName);
+		return map(map, null, null, null, modelName);
 	}
 	
-	private UIComponent map(String moduleName, String queryName, String geometryBinding, String modelName) {
+	private UIComponent map(MapDisplay map, 
+								String moduleName,
+								String queryName,
+								String geometryBinding,
+								String modelName) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		result.setLayout("block");
+		Integer pixelHeight = map.getPixelHeight();
+		if (pixelHeight == null) {
+			pixelHeight = Integer.valueOf(300);
+		}
+		setSize(result,
+					null,
+					map.getPixelWidth(),
+					map.getResponsiveWidth(),
+					map.getPercentageWidth(),
+					pixelHeight,
+					map.getPercentageHeight(),
+					null);
 		List<UIComponent> children = result.getChildren();
 		
 		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);

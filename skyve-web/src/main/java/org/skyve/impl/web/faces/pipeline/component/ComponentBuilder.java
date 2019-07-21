@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
@@ -216,11 +217,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												boolean showGrid);
 
 	public abstract UIComponent map(UIComponent component, 
+										MapDisplay map,
 										String moduleName,
 										String queryName,
 										String geometryBinding);
 
-	public abstract UIComponent map(UIComponent component, String modelName);
+	public abstract UIComponent map(UIComponent component, MapDisplay map, String modelName);
 	
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	

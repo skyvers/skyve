@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
@@ -207,12 +208,16 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String moduleName, String queryName, String geometryBinding) {
+	public UIComponent map(UIComponent component,
+							MapDisplay map,
+							String moduleName,
+							String queryName,
+							String geometryBinding) {
 		return component;
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String modelName) {
+	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
 		return component;
 	}
 

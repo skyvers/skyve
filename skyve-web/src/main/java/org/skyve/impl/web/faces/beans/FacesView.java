@@ -584,7 +584,7 @@ public class FacesView<T extends Bean> extends Harness {
 		StringBuilder result = new StringBuilder(512);
 
 		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
-		if (modelName != null) {
+		if (mapModelName != null) {
 			result.append("',_c:'").append(getWebContext().getWebId());
 			result.append("',modelName:'").append(mapModelName);
 		}

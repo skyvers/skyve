@@ -165,9 +165,9 @@ SKYVE.PF = function() {
 			}
 		},
 		
-		gmap: function(elementId) {
+		gmap: function(options) {
 			if (window.google && window.google.maps && window.SKYVE.BizMap) {
-				return Skyve.BizMap.create(elementId);
+				return Skyve.BizMap.create(options);
 			}
 
 			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
@@ -178,7 +178,7 @@ SKYVE.PF = function() {
 					}
 					SKYVE.Util.loadJS(url, function() {
 						SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
-							return SKYVE.BizMap.create(elementId);
+							return SKYVE.BizMap.create(options);
 						});
 					});
 				});

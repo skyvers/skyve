@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
@@ -401,19 +402,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String moduleName, String queryName, String geometryBinding) {
+	public UIComponent map(UIComponent component,
+							MapDisplay map,
+							String moduleName,
+							String queryName,
+							String geometryBinding) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.map(result, moduleName, queryName, geometryBinding);
+			result = builder.map(result, map, moduleName, queryName, geometryBinding);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String modelName) {
+	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.map(result, modelName);
+			result = builder.map(result, map, modelName);
 		}
 		return result;
 	}

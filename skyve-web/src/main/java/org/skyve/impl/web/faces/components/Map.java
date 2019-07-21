@@ -7,6 +7,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
@@ -75,8 +76,8 @@ public class Map extends HtmlPanelGroup {
 										ComponentBuilder componentBuilder) {
 
     	if (modelName != null) {
-			return componentBuilder.map(null, modelName);
+			return componentBuilder.map(null, new MapDisplay(), modelName);
 		}
-		return componentBuilder.map(null, moduleName, queryName, geometryBinding);
+		return componentBuilder.map(null, new MapDisplay(), moduleName, queryName, geometryBinding);
 	}
 }

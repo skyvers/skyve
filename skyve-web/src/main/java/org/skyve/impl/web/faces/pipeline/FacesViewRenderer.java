@@ -688,7 +688,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderMap(MapDisplay map) {
-	    UIComponent l = cb.map(null, map.getModelName());
+	    UIComponent l = cb.map(null, map, map.getModelName());
 	    addComponent(null, 
 	    				false, 
 	    				map.getInvisibleConditionName(), 
