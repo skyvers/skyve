@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -78,7 +77,6 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = ContentLink.class), 
 						@XmlElementRef(type = Button.class),
 						@XmlElementRef(type = DialogButton.class),
-						@XmlElementRef(type = GeoLocator.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = HTML.class),
 						@XmlElementRef(type = Label.class),
