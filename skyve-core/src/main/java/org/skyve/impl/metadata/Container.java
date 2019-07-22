@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -44,7 +43,6 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = Form.class),
 						@XmlElementRef(type = TabPane.class),
 						@XmlElementRef(type = Button.class),
-						@XmlElementRef(type = GeoLocator.class),
 						@XmlElementRef(type = MapDisplay.class),
 						@XmlElementRef(type = DynamicImage.class),
 						@XmlElementRef(type = DialogButton.class),

@@ -31,7 +31,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -684,20 +683,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 										String confirmationText,
 										char type,
 										Button button);
-
-	@Override
-	public final void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(locator.getDescriptionBinding(), locator.showsLabelByDefault());
-		if (currentFormItem != null) {
-			renderFormGeoLocator(locator);
-		}
-		else {
-			renderGeoLocator(locator);
-		}
-	}
-
-	public abstract void renderFormGeoLocator(GeoLocator locator);
-	public abstract void renderGeoLocator(GeoLocator locator);
 
 	@Override
 	public final void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {

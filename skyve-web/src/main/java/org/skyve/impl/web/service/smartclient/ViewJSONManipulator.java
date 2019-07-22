@@ -60,7 +60,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -1060,14 +1059,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		addCondition(action.getDisabledConditionName());
 	}
 	
-	@Override
-	public void visitGeoLocator(GeoLocator locator,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		addCondition(locator.getInvisibleConditionName());
-		addCondition(locator.getDisabledConditionName());
-	}
-
 	@Override
 	public void visitGeometry(Geometry geometry,
 								boolean parentVisible,

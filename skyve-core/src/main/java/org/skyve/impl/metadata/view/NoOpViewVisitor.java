@@ -28,7 +28,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -156,11 +155,6 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

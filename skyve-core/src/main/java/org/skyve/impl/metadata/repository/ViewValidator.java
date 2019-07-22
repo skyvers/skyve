@@ -52,7 +52,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -674,77 +673,6 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// TODO Implement FormItem validation
-	}
-
-	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		String locatorIdentifier = "A GeoLocator";
-		validateBinding(null,
-							locator.getAddressBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getCityBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getCountryBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getDescriptionBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateConditionName(locator.getDisabledConditionName(), locatorIdentifier);
-		validateConditionName(locator.getInvisibleConditionName(), locatorIdentifier);
-		validateBinding(null,
-							locator.getLatitudeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.decimal10);
-		validateBinding(null,
-							locator.getLongitudeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.decimal10);
-		validateBinding(null,
-							locator.getPostcodeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getStateBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
 	}
 
 	@Override

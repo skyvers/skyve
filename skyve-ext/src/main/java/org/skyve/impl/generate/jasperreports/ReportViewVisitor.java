@@ -40,7 +40,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -1017,12 +1016,6 @@ public class ReportViewVisitor extends ViewVisitor {
 		// reset columns and starting left position
 		col = 0;
 		left = 0;
-	}
-
-	@Override
-	public void visitGeoLocator(GeoLocator arg0, boolean arg1, boolean arg2) {
-		// Not supported
-
 	}
 
 	@Override

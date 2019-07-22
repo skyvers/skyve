@@ -51,7 +51,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -589,84 +588,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 		}
-	}
-
-	@Override
-	public void renderFormGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = buildGeoLocator(locator);
-		code.append("type:'canvas',showTitle:false,canvas:isc.HLayout.create({height:22,members:[");
-		code.append(geoLocatorCode).append(")]}),");
-	}
-
-	@Override
-	public void renderGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = buildGeoLocator(locator);
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append('=').append(geoLocatorCode).append(");\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-	}
-	
-	private static StringBuilder buildGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = new StringBuilder(256);
-		geoLocatorCode.append("isc.BizUtil.createGeoLocator(view,");
-		String binding = locator.getLatitudeBinding();
-		if (binding == null) {
-			geoLocatorCode.append("null");
-		}
-		else {
-			geoLocatorCode.append('\'').append(binding).append('\'');
-		}
-		binding = locator.getLongitudeBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getDescriptionBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getAddressBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getCityBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getStateBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getPostcodeBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getCountryBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		
-		return geoLocatorCode;
 	}
 
 	@Override

@@ -58,7 +58,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -664,24 +663,6 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
-	    				null, 
-	    				null);
-	}
-
-	@Override
-	public void renderFormGeoLocator(GeoLocator locator) {
-		renderGeoLocator(locator);
-	}
-
-	@Override
-	public void renderGeoLocator(GeoLocator locator) {
-	    UIComponent l = cb.label(null, "geoLocator"); // TODO geolocator
-	    addComponent(null, 
-	    				false, 
-	    				locator.getInvisibleConditionName(), 
-	    				null,
-	    				l, 
-	    				null, 
 	    				null, 
 	    				null);
 	}

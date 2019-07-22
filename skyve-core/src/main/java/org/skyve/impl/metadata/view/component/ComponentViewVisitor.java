@@ -41,7 +41,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -237,20 +236,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
 		button.setActionName(translate(button.getActionName()));
-	}
-
-	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		locator.setAddressBinding(prefixBinding(locator.getAddressBinding()));
-		locator.setCityBinding(prefixBinding(locator.getCityBinding()));
-		locator.setCountryBinding(prefixBinding(locator.getCountryBinding()));
-		locator.setDescriptionBinding(prefixBinding(locator.getDescriptionBinding()));
-		locator.setLatitudeBinding(prefixBinding(locator.getLatitudeBinding()));
-		locator.setLongitudeBinding(prefixBinding(locator.getLongitudeBinding()));
-		locator.setPostcodeBinding(prefixBinding(locator.getPostcodeBinding()));
-		locator.setStateBinding(prefixBinding(locator.getStateBinding()));
-		disable(locator);
-		invisible(locator);
 	}
 
 	@Override

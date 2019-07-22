@@ -35,7 +35,6 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -152,9 +151,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitButton(Button button,
 										boolean parentVisible,
 										boolean parentEnabled);
-	public abstract void visitGeoLocator(GeoLocator locator,
-											boolean parentVisible,
-											boolean parentEnabled);
 	public abstract void visitGeometry(Geometry geometry,
 										boolean parentVisible,
 										boolean parentEnabled);
@@ -473,10 +469,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 		else if (widget instanceof Button) {
 			Button button = (Button) widget;
 			visitButton(button, parentVisible, parentEnabled);
-		}
-		else if (widget instanceof GeoLocator) {
-			GeoLocator locator = (GeoLocator) widget;
-			visitGeoLocator(locator, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof Geometry) {
 			Geometry geometry = (Geometry) widget;
