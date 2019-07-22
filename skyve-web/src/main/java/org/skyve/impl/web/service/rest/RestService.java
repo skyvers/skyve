@@ -369,6 +369,8 @@ public class RestService {
 				response.setCharacterEncoding(Util.UTF8);
 				response.setHeader("Content-Disposition", 
 									String.format("attachment; filename=\"%s\"", content.getFileName()));
+				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
+				response.setHeader("Accept-Ranges", "bytes");
 				UtilImpl.LOGGER.info(request.getRequestURI() + " served as binary");
 			}				
 		}
