@@ -178,6 +178,7 @@ isc.BizMap.addMethods({
 	},
 	
 	_refresh: function(fit, auto) {
+console.log('_refresh');
 /* TODO reinstate
 		if (auto) {
 			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
@@ -190,9 +191,11 @@ isc.BizMap.addMethods({
 		if (! this._refreshRequired) { // map UI has refresh checked off
 			return;
 		}
+/* - windowStack.opener = the underlying edit view, not the map, so comment out for now.
 		if (this._zoomed) { // operator is zoomed-in so no point refreshing this now
 			return;
 		}
+*/
 		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}
@@ -240,6 +243,7 @@ isc.BizMap.addMethods({
 			actionURL: url,
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
+console.log(data);
 				SKYVE.Util.scatterGMap(me, data, fit, auto);
 			}
 		});
