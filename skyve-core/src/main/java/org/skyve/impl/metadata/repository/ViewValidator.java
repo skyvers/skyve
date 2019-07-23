@@ -66,6 +66,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -678,6 +679,21 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
+		validateBinding(null,
+							geometry.getBinding(),
+							true,
+							false,
+							false,
+							true,
+							geometryIdentifier,
+							AttributeType.geometry);
+		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
+		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+	}
+
+	@Override
+	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		String geometryIdentifier = "GeometryMap " + geometry.getBinding();
 		validateBinding(null,
 							geometry.getBinding(),
 							true,

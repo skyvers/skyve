@@ -54,6 +54,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -1023,6 +1024,11 @@ public class ReportViewVisitor extends ViewVisitor {
 		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	@Override
+	public void visitGeometryMap(GeometryMap arg0, boolean arg1, boolean arg2) {
+		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+	}
+	
 	@Override
 	public void visitHBox(HBox arg0, boolean arg1, boolean arg2) {
 		Boolean horiz = Boolean.TRUE;

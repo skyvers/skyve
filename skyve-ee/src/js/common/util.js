@@ -40,6 +40,8 @@ SKYVE.Util = function() {
 		    }
 		},
 		
+		
+		
 		scatterGMap: function(display, // the display object that holds the map and other state variables
 								data, // the response from the map servlet to scatter
 								fit, // fit bounds

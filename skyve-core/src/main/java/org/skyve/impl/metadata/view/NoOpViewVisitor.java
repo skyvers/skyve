@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -163,6 +164,11 @@ public class NoOpViewVisitor extends ViewVisitor {
 		// no-op
 	}
 
+	@Override
+	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+	
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		// no-op

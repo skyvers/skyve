@@ -1850,174 +1850,6 @@ isc.SimpleType.create({
 	editorType: "BizHTMLItem"
 });
 
-isc.ClassFactory.defineClass("BizMapPicker", "HTMLFlow");
-isc.BizMapPicker.addClassMethods({
-	v: 0,
-	initialise: function() {
-		eval(isc.BizMapPicker.id + '.build()');
-	}
-});
-isc.BizMapPicker.addMethods({
-	init: function(config) {
-		this.width = '100%';
-		this.height = '100%';
-		this.styleName = 'googleMapDivParent';
-		this.ID = 'bizMapPicker' + isc.BizMapPicker.v++;
-		this.contents = '<div id="' + this.ID + '_map" style="margin:0;padding:0;height:100%">Loading Map...</div>';
-		this.Super("init", arguments);
-		this._overlays = [];
-		this.field = config.field;
-		
-		if (window.google && window.google.maps) {
-			this.build();
-		}
-		else {
-			isc.BizMapPicker.id = this.ID;
-
-			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
-				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
-					if (SKYVE.Util.googleMapsV3ApiKey) {
-						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
-											SKYVE.Util.googleMapsV3ApiKey);
-					}
-					else {
-						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
-					}
-				});
-			});
-		}
-	},
-
-    mapIt: function() {
-    	var value = this.field.getValue();
-		if (value) {} else {
-			return;
-		}
-
-		var wkt = new Wkt.Wkt();
-        try { // Catch any malformed WKT strings
-        	wkt.read(value);
-        }
-        catch (e) {
-            if (e.name === 'WKTError') {
-                alert('The WKT string is invalid.');
-                return;
-            }
-        }
-
-        var obj = wkt.toObject(this._map.defaults);
-        
-        if (wkt.type === 'polygon' || wkt.type === 'linestring') {
-        }
-		else {
-            if (obj.setEditable) {obj.setEditable(false);}
-        }
-
-        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
-        	for (i in obj) {
-                if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
-                    obj[i].setMap(this._map);
-                    this._overlays.push(obj[i]);
-                }
-            }
-        }
-        else {
-            obj.setMap(this._map); // Add it to the map
-            this._overlays.push(obj);
-        }
-
-        // Pan the map to the feature
-        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
-            // For objects that have defined bounds or a way to get them
-            this._map.fitBounds(obj.getBounds());
-        }
-        else {
-            if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
-	            // For Polygons and Polylines - fit the bounds to the vertices
-				var bounds = new google.maps.LatLngBounds();
-				var path = obj.getPath();
-				for (var i = 0, l = path.getLength(); i < l; i++) {
-					bounds.extend(path.getAt(i));
-				}
-				this._map.fitBounds(bounds);
-            }
-            else { // But points (Markers) are different
-            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-            		this._map.panTo(obj.getPosition());
-                }
-                if (this._map.getZoom() < 15) {
-                    this._map.setZoom(15);
-                }
-            }
-        }
-    },
-
-    clearIt: function () {
-        for (var i = 0, l = this._overlays.length; i < l; i++) {
-            this._overlays[i].setMap(null);
-        }
-        this._overlays.length = 0;
-    },
-
-	build: function() {
-		if (this.isDrawn()) {
-			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
-			};
-			var drawingDefaults = {
-                    editable: true,
-                    strokeColor: '#990000',
-                    fillColor: '#EEFFCC',
-                    fillOpacity: 0.6
-            };
-			this._map = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
-
-            this._map.drawingManager = new google.maps.drawing.DrawingManager({
-                drawingControlOptions: {
-                    position: google.maps.ControlPosition.TOP_CENTER,
-                    defaults: drawingDefaults,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.POLYLINE,
-                        google.maps.drawing.OverlayType.POLYGON,
-                        google.maps.drawing.OverlayType.RECTANGLE
-                    ]
-                },
-                markerOptions: drawingDefaults,
-                polygonOptions: drawingDefaults,
-                polylineOptions: drawingDefaults,
-                rectangleOptions: drawingDefaults
-            });
-            this._map.drawingManager.setMap(this._map);
-
-            var me = this;
-            
-            google.maps.event.addListener(this._map.drawingManager, 'overlaycomplete', function (event) {
-                me.clearIt();
-
-                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-                this.setDrawingMode(null);
-
-                me._overlays.push(event.overlay);
-                var wkt = new Wkt.Wkt();
-                wkt.fromObject(event.overlay);
-                var wktValue = wkt.write();
-                me.field.setValue(wktValue);
-            });
-
-			this.clearIt();
-			// delay the mapIt call because even though the maps API is synchronous, sometimes the
-			// maps JS calls seem to beat the initialisation of the map.
-			this.delayCall('mapIt', null, 100);
-		}
-		else {
-			this.delayCall('build', null, 100);
-		}
-	}
-});
-
 isc.ClassFactory.defineClass("GeometryItem", "TextItem");
 isc.GeometryItem.addClassProperties({
 	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals', 'isNull', 'notNull']
@@ -2061,6 +1893,10 @@ isc.GeometryItem.addMethods({
 		}
 		
 		this.Super("init", arguments);
+	},
+	// called from BizMapPicker
+	setValueFromPicker: function(newValue) {
+		this.setValue(newValue);
 	}
 });
 isc.SimpleType.create({
@@ -2068,4 +1904,51 @@ isc.SimpleType.create({
     inheritsFrom: "text",
 	editorType: "GeometryItem",
 	validOperators: isc.GeometryItem.validOperators
+});
+
+isc.ClassFactory.defineClass("GeometryMapItem", isc.CanvasItem);
+//instance properties and methods
+isc.GeometryMapItem.addProperties({
+	width: '*',
+	rowSpan: "*", 
+	endRow: false, 
+	startRow: false,
+	canFocus: false,
+	// this is going to be an editable data item
+	shouldSaveValue: true
+});
+
+//Properties are :-
+//
+//width
+//height
+//name
+//title
+//icons
+isc.GeometryMapItem.addMethods({
+	createCanvas: function() {
+		return isc.HLayout.create({defaultLayoutAlign: 'center'});
+	},
+	
+	showValue: function(displayValue, dataValue) {
+		if (! this.valueSetFromPicker) {
+			this._map = isc.BizMapPicker.create({field: this, 
+													width: (this.width ? this.width : '100%'),
+													height: (this.height ? this.height : '100%')});
+			this.canvas.setMembers([this._map]);
+		}
+	},
+	
+	setValueFromPicker: function(newValue) {
+		this.valueSetFromPicker = true;
+		this.setValue(newValue);
+		delete this.valueSetFromPicker;
+	}
+});
+
+//register the editor
+isc.SimpleType.create({
+	inheritsFrom: "canvas",
+	name: "geometryMapItem",
+	editorType: "GeometryMapItem"
 });

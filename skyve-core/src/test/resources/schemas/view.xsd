@@ -69,9 +69,9 @@
 
   <xs:element name="formRow" type="tns:formRow"/>
 
-  <xs:element name="geoLocator" type="tns:geoLocator"/>
-
   <xs:element name="geometry" type="tns:geometry"/>
+
+  <xs:element name="geometryMap" type="tns:geometryMap"/>
 
   <xs:element name="hbox" type="tns:HBox"/>
 
@@ -414,6 +414,7 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -656,7 +657,6 @@
         <xs:element ref="tns:form"/>
         <xs:element ref="tns:tabPane"/>
         <xs:element ref="tns:button"/>
-        <xs:element ref="tns:geoLocator"/>
         <xs:element ref="tns:map"/>
         <xs:element ref="tns:dynamicImage"/>
         <xs:element ref="tns:dialogButton"/>
@@ -1016,8 +1016,8 @@
         <xs:element ref="tns:contentLink"/>
         <xs:element ref="tns:button"/>
         <xs:element ref="tns:dialogButton"/>
-        <xs:element ref="tns:geoLocator"/>
         <xs:element ref="tns:geometry"/>
+        <xs:element ref="tns:geometryMap"/>
         <xs:element ref="tns:html"/>
         <xs:element ref="tns:label"/>
         <xs:element ref="tns:blurb"/>
@@ -1095,22 +1095,38 @@
     <xs:attribute name="enabled" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="geoLocator">
-    <xs:sequence>
-      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="latitudeBinding" type="xs:string"/>
-    <xs:attribute name="longitudeBinding" type="xs:string"/>
-    <xs:attribute name="descriptionBinding" type="xs:string"/>
-    <xs:attribute name="addressBinding" type="xs:string"/>
-    <xs:attribute name="cityBinding" type="xs:string"/>
-    <xs:attribute name="stateBinding" type="xs:string"/>
-    <xs:attribute name="postcodeBinding" type="xs:string"/>
-    <xs:attribute name="countryBinding" type="xs:string"/>
-    <xs:attribute name="disabled" type="xs:string"/>
-    <xs:attribute name="enabled" type="xs:string"/>
-    <xs:attribute name="invisible" type="xs:string"/>
-    <xs:attribute name="visible" type="xs:string"/>
+  <xs:complexType name="geometryMap">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onChangedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="label">
@@ -1740,6 +1756,17 @@
       <xs:enumeration value="left"/>
       <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="geometryInputType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="point"/>
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="polygon"/>
+      <xs:enumeration value="pointAndLine"/>
+      <xs:enumeration value="pointAndPolygon"/>
+      <xs:enumeration value="lineAndPolygon"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -72,6 +72,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -688,6 +689,12 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void renderGeometryMap(GeometryMap geometry) {
 		// TODO Auto-generated method stub
 		
 	}

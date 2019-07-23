@@ -16,12 +16,14 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 /**
- * Editor for a geometry field
+ * Popup Map Editor for a geometry field
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = 7902784327466913291L;
+	
+	private GeometryInputType type;
 	
 	private Integer pixelWidth;
 	
@@ -34,6 +36,15 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 		return true;
 	}
 	
+	public GeometryInputType getType() {
+		return type;
+	}
+
+	@XmlAttribute(required = false)
+	public void setType(GeometryInputType type) {
+		this.type = type;
+	}
+
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

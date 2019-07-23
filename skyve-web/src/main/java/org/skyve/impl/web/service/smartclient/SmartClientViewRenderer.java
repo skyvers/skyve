@@ -65,6 +65,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -611,6 +612,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// TODO add in the filter operators allowed
 	}
 
+	@Override
+	public void renderGeometryMap(GeometryMap geometry) {
+		preProcessFormItem(geometry, "geometryMap");
+		size(geometry, null, code);
+		disabled(geometry.getDisabledConditionName(), code);
+		invisible(geometry.getInvisibleConditionName(), code);
+	}
+	
 	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
 		dataWidgetColumnInputWidget = geometry;

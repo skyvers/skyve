@@ -58,6 +58,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -240,6 +241,13 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		bound(geometry);
+		disable(geometry);
+		invisible(geometry);
+	}
+
+	@Override
+	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		bound(geometry);
 		disable(geometry);
 		invisible(geometry);

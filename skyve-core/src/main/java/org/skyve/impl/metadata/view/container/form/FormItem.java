@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -78,6 +79,7 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = Button.class),
 						@XmlElementRef(type = DialogButton.class),
 						@XmlElementRef(type = Geometry.class),
+						@XmlElementRef(type = GeometryMap.class),
 						@XmlElementRef(type = HTML.class),
 						@XmlElementRef(type = Label.class),
 						@XmlElementRef(type = Blurb.class),
