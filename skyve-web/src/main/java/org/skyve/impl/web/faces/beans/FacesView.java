@@ -589,8 +589,10 @@ public class FacesView<T extends Bean> extends Harness {
 			result.append("',modelName:'").append(mapModelName);
 		}
 		else {
-			result.append("',moduleName:'").append(moduleName);
-			result.append("',queryName:'").append(queryName);
+			if ((moduleName != null) && (queryName != null)) {
+				result.append("',moduleName:'").append(moduleName);
+				result.append("',queryName:'").append(queryName);
+			}
 			result.append("',geometryBinding:'").append(geometryBinding);
 		}
 		result.append("'})</script>");
