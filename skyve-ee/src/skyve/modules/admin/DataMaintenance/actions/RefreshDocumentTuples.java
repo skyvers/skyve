@@ -3,6 +3,7 @@ package modules.admin.DataMaintenance.actions;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -35,7 +36,7 @@ public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> 
 		EXT.runOneShotJob(job, bean, user);
 	
 		bean.setAuditResponse("Job commenced.");
-		
+		webContext.growl(MessageSeverity.info, "Refresh Job has been started");
 
 		return new ServerSideActionResult<>(bean);
 	}

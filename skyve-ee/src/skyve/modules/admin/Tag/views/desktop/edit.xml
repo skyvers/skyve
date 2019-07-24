@@ -259,6 +259,11 @@
 				</row>
 				<row>
 					<item>
+						<combo binding="evictOption"/>
+					</item>
+				</row>
+				<row>
+					<item>
 						<checkBox binding="unTagSuccessful" triState="false" />
 					</item>
 				</row>

@@ -4,11 +4,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.PushMessage;
 import org.skyve.persistence.Persistence;
 
 import modules.admin.Communication.CommunicationUtil;
@@ -111,5 +114,6 @@ public class RefreshDocumentTuplesJob extends Job {
 
 		setPercentComplete(100);
 		log.add("Finished Document Data Refresh Job at " + new Date());
+		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Tag action Job completed."));
 	}
 }
