@@ -35,6 +35,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -224,6 +226,19 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 
 	public abstract UIComponent map(UIComponent component, MapDisplay map, String modelName);
 	
+	public abstract UIComponent geometry(UIComponent component, 
+											String dataWidgetVar, 
+											Geometry geometry, 
+											String formDisabledConditionName,
+											String title, 
+											boolean required);
+
+	public abstract UIComponent geometryMap(UIComponent component, 
+												GeometryMap geometry, 
+												String formDisabledConditionName,
+												String title, 
+												boolean required);
+
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	
 	public abstract UIComponent checkBox(UIComponent component, 

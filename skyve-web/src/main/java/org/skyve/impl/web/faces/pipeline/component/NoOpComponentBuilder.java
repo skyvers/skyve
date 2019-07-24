@@ -22,6 +22,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -221,6 +223,25 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	@Override
+	public UIComponent geometry(UIComponent component,
+									String dataWidgetVar,
+									Geometry geometry,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
+		return component;
+	}
+
+	@Override
+	public UIComponent geometryMap(UIComponent component,
+									GeometryMap geometry,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
+		return component;
+	}
+	
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,

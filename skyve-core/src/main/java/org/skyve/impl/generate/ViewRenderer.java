@@ -708,7 +708,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(true, geometry.showsLabelByDefault());
+		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
 		renderGeometryMap(geometry);
 	}
 	

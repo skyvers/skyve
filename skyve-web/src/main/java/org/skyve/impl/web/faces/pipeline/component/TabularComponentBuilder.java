@@ -80,6 +80,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -761,7 +763,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	
 	@Override
 	public UIComponent map(UIComponent component, 
 							MapDisplay map,
@@ -831,6 +832,51 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		children.add(script);
 		
 		return result;
+	}
+	
+	@Override
+	public UIComponent geometry(UIComponent component,
+									String dataWidgetVar,
+									Geometry geometry,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+    	return textField(dataWidgetVar,
+							geometry.getBinding(),
+							title,
+							required,
+							false,
+							geometry.getDisabledConditionName(),
+							formDisabledConditionName,
+							null,
+							null,
+							geometry.getPixelWidth(),
+							true);
+	}
+
+	@Override
+	public UIComponent geometryMap(UIComponent component,
+									GeometryMap geometry,
+									String formDisabledConditionName,
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+    	return textField(null,
+							geometry.getBinding(),
+							title,
+							required,
+							false,
+							geometry.getDisabledConditionName(),
+							formDisabledConditionName,
+							null,
+							null,
+							geometry.getPixelWidth(),
+							true);
 	}
 	
 	/*

@@ -683,20 +683,48 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
-		// TODO Auto-generated method stub
-		
+		renderFormGeometry(geometry);
 	}
 
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
-		// TODO Auto-generated method stub
-		
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
+		UIComponent c = cb.geometry(null,
+										dataWidgetVar,
+										geometry,
+										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+										title,
+										required);
+        addComponent(title, 
+        				false, 
+        				geometry.getInvisibleConditionName(), 
+        				getCurrentWidgetHelp(),
+        				c,
+        				geometry.getPixelWidth(), 
+        				null, 
+        				null);
 	}
 	
 	@Override
 	public void renderGeometryMap(GeometryMap geometry) {
-		// TODO Auto-generated method stub
-		
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
+		UIComponent c = cb.geometryMap(null,
+										geometry,
+										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+										title,
+										required);
+        addComponent(title, 
+        				false, 
+        				geometry.getInvisibleConditionName(), 
+        				getCurrentWidgetHelp(),
+        				c,
+        				geometry.getPixelWidth(), 
+        				null, 
+        				null);
 	}
 
 	@Override
