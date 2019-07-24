@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.domain.DataMaintenance.EvictOption;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -19,6 +20,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - CombinationsOperator
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
+ * @depend - - - EvictOption
  * @navhas n operandTag 0..1 Tag
  * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
@@ -89,6 +91,8 @@ public class Tag extends AbstractPersistentBean {
 	public static final String documentActionPropertyName = "documentAction";
 	/** @hidden */
 	public static final String documentActionResultsPropertyName = "documentActionResults";
+	/** @hidden */
+	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
 	 * Operator
@@ -443,6 +447,14 @@ public class Tag extends AbstractPersistentBean {
 	 * Request
 	 **/
 	private String documentActionResults;
+	/**
+	 * Cache Evict
+	 * <br/>
+	 * <p>Whether to evict each bean after processing.</p>
+				<p>Evicting beans will free memory for large data jobs, however there may be impacts
+				if the action (processing) selected affects items that other beans may reference.</p>
+	 **/
+	private EvictOption evictOption = EvictOption.bean;
 
 	@Override
 	@XmlTransient
@@ -942,6 +954,23 @@ public class Tag extends AbstractPersistentBean {
 	@XmlElement
 	public void setDocumentActionResults(String documentActionResults) {
 		this.documentActionResults = documentActionResults;
+	}
+
+	/**
+	 * {@link #evictOption} accessor.
+	 * @return	The value.
+	 **/
+	public EvictOption getEvictOption() {
+		return evictOption;
+	}
+
+	/**
+	 * {@link #evictOption} mutator.
+	 * @param evictOption	The new value.
+	 **/
+	@XmlElement
+	public void setEvictOption(EvictOption evictOption) {
+		this.evictOption = evictOption;
 	}
 
 	/**
