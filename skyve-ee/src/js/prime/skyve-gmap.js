@@ -18,10 +18,10 @@ SKYVE.BizMap = function() {
 
 			var display = displays[options.elementId];
 			if (display) {
-				if (display.gmap) {
-					mapOptions.zoom = display.gmap.getZoom();
-					mapOptions.center = display.gmap.getCenter();
-					mapOptions.mapTypeId = display.gmap.getMapTypeId();
+				if (display.webmap) {
+					mapOptions.zoom = display.webmap.getZoom();
+					mapOptions.center = display.webmap.getCenter();
+					mapOptions.mapTypeId = display.webmap.getMapTypeId();
 				}
 			}
 			else {
@@ -38,9 +38,9 @@ SKYVE.BizMap = function() {
 				control.id = this.ID + '_form';
 				control.style.width = '300px';
 	*/
-			display.gmap = new google.maps.Map(document.getElementById(options.elementId), mapOptions);
+			display.webmap = new google.maps.Map(document.getElementById(options.elementId), mapOptions);
 	/* TODO reinstate
-				this._map.controls[google.maps.ControlPosition.TOP].push(control);
+				this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
 	*/
 
 			var url = SKYVE.Util.CONTEXT_URL + 'map?';
@@ -65,7 +65,7 @@ SKYVE.BizMap = function() {
 	    	contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
 			contents += '?m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
 	    	if (overlay.getPosition) {
-				display.infoWindow.open(this.gmap, overlay);
+				display.infoWindow.open(this.webmap, overlay);
 	    		display.infoWindow.setContent(contents);
 	    	}
 	    	else if (overlay.getPath) {
@@ -78,7 +78,7 @@ SKYVE.BizMap = function() {
 				var sw = bounds.getSouthWest();
 				
 				display.infoWindow.setPosition(event.latLng);
-	    		display.infoWindow.open(display.gmap);
+	    		display.infoWindow.open(display.webmap);
 	    		display.infoWindow.setContent(contents);
 	    	}
 	    }

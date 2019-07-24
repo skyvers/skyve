@@ -204,6 +204,27 @@ isc.EditView.addMethods({
 		}
 	},
 	
+	// resume controls that get paused when they do not have focus like MapDisplay
+	// this is called from windowStack
+	resume: function() {
+console.log('resume');
+		// now that the values are set, we can reset all list grids - which have parameters
+		for (var gridBinding in this._grids) {
+			var grids = this._grids[gridBinding];
+			for (var gridID in grids) {
+				var grid = grids[gridID];
+				if (this._refreshedGrids[gridID]) {} else {
+					if (grid.isVisible()) { // only refresh component if it is visible
+						if (grid.webmap) { // this is a map
+console.log('resume map');
+							grid.resume();
+						}
+					}
+				}
+			}
+		}
+	},
+	
 	newInstance: function(newParams, // a map of parameter names to values used to seed the new instance - can be null or undefined
 							formBinding, // the binding of the datagrid or lookup - can be null
 							parentContext, // the parent web context - can be null
@@ -935,8 +956,7 @@ isc.EditView.addMethods({
 				var grid = grids[gridID];
 				if (this._refreshedGrids[gridID]) {} else {
 					if (grid.isVisible()) { // only refresh component if it is visible
-						if (grid._map) { // this is a map
-							grid.resume();
+						if (grid.webmap) { // this is a map
 							if (forcePostRefresh || 
 									// refresh only if the grids wants to be
 									(grid.postRefreshConditionName === undefined) ||

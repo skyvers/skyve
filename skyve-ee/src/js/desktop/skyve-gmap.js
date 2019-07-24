@@ -63,7 +63,7 @@ isc.BizMap.addMethods({
 	},
 
 	setDataSource: function(dataSourceID) {
-		if (window.google && window.google.maps && this.gmap) {
+		if (window.google && window.google.maps && this.webmap) {
 			if (this._view) {
 				this._modelName = dataSourceID;
 
@@ -104,10 +104,10 @@ isc.BizMap.addMethods({
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 
-			if (this.gmap) {
-				mapOptions.zoom = this.gmap.getZoom();
-				mapOptions.center = this.gmap.getCenter();
-				mapOptions.mapTypeId = this.gmap.getMapTypeId();
+			if (this.webmap) {
+				mapOptions.zoom = this.webmap.getZoom();
+				mapOptions.center = this.webmap.getCenter();
+				mapOptions.mapTypeId = this.webmap.getMapTypeId();
 			}
 
 			this.infoWindow = new google.maps.InfoWindow({content: ''});
@@ -117,9 +117,9 @@ isc.BizMap.addMethods({
 			control.id = this.ID + '_form';
 			control.style.width = '300px';
 */
-			this.gmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
+			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 /* TODO reinstate
-			this.gmap.controls[google.maps.ControlPosition.TOP].push(control);
+			this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
 */
 			this._refresh(true, false);
 			this.delayCall('_addForm', null, 1000);
@@ -178,7 +178,6 @@ isc.BizMap.addMethods({
 	},
 	
 	_refresh: function(fit, auto) {
-console.log('_refresh');
 /* TODO reinstate
 		if (auto) {
 			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
@@ -191,11 +190,9 @@ console.log('_refresh');
 		if (! this._refreshRequired) { // map UI has refresh checked off
 			return;
 		}
-/* - windowStack.opener = the underlying edit view, not the map, so comment out for now.
 		if (this._zoomed) { // operator is zoomed-in so no point refreshing this now
 			return;
 		}
-*/
 		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}
@@ -210,11 +207,11 @@ console.log('_refresh');
 		var url = SKYVE.Util.CONTEXT_URL + 'map?';
 /*
 		// set the map bounds
-		var bounds = wkt.write(this.gmap.getBounds());
+		var bounds = wkt.write(this.webmap.getBounds());
 		alert(bounds)
 		var nw = new google.maps.LatLng(
-        	    this.gmap.getBounds().getNorthEast().lat(),
-        	    this.gmap.getBounds().getSouthWest().lng()
+        	    this.webmap.getBounds().getNorthEast().lat(),
+        	    this.webmap.getBounds().getSouthWest().lng()
         	);
 */
 		if (this._view) {
@@ -243,7 +240,6 @@ console.log('_refresh');
 			actionURL: url,
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
-console.log(data);
 				SKYVE.Util.scatterGMap(me, data, fit, auto);
 			}
 		});
@@ -257,7 +253,7 @@ console.log(data);
     		contents += p.lat() + ',' + p.lng() + "," + p.lat() + ',' + p.lng() + ",'"; 
 			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
     		
-			this.infoWindow.open(this.gmap, overlay);
+			this.infoWindow.open(this.webmap, overlay);
     		this.infoWindow.setContent(contents);
     	}
     	else if (overlay.getPath) {
@@ -272,25 +268,25 @@ console.log(data);
 			contents += ne.lat() + ',' + sw.lng() + "," + sw.lat() + ',' + ne.lng() + ",'";
 			contents += this.mod + "','" + this.doc + "','" + this.bizId + "')\"/>";
 
-			display.infoWindow.setPosition(event.latLng);
-    		display.infoWindow.open(display.gmap);
-    		display.infoWindow.setContent(contents);
+			this.infoWindow.setPosition(event.latLng);
+    		this.infoWindow.open(this.webmap);
+    		this.infoWindow.setContent(contents);
     	}
 	},
 	
 	zoom: function(topLeftLat, topLeftLng, bottomRightLat, bottomRightLng, bizModule, bizDocument, bizId) {
 		this._zoomed = true; // indicates that we don't want refreshes as we are zoomed on an overlay
 		
-		var scale = Math.pow(2, this.gmap.getZoom());
+		var scale = Math.pow(2, this.webmap.getZoom());
     	var nw = new google.maps.LatLng(
-    	    this.gmap.getBounds().getNorthEast().lat(),
-    	    this.gmap.getBounds().getSouthWest().lng()
+    	    this.webmap.getBounds().getNorthEast().lat(),
+    	    this.webmap.getBounds().getSouthWest().lng()
     	);
-    	var worldCoordinateNW = this.gmap.getProjection().fromLatLngToPoint(nw);
+    	var worldCoordinateNW = this.webmap.getProjection().fromLatLngToPoint(nw);
     	var topLeftPosition = new google.maps.LatLng(topLeftLat, topLeftLng);
-    	var topLeftWorldCoordinate = this.gmap.getProjection().fromLatLngToPoint(topLeftPosition);
+    	var topLeftWorldCoordinate = this.webmap.getProjection().fromLatLngToPoint(topLeftPosition);
     	var bottomRightPosition = new google.maps.LatLng(bottomRightLat, bottomRightLng);
-    	var bottomRightWorldCoordinate = this.gmap.getProjection().fromLatLngToPoint(bottomRightPosition);
+    	var bottomRightWorldCoordinate = this.webmap.getProjection().fromLatLngToPoint(bottomRightPosition);
 
 		var pageRect = this.getPageRect();
 		var x = Math.floor((topLeftWorldCoordinate.x - worldCoordinateNW.x) * scale) + pageRect[0];
@@ -354,7 +350,7 @@ isc.BizMapPicker.addMethods({
             }
         }
 
-        var obj = wkt.toObject(this._map.defaults);
+        var obj = wkt.toObject(this.webmap.defaults);
         
         if (wkt.type === 'polygon' || wkt.type === 'linestring') {
         }
@@ -365,20 +361,20 @@ isc.BizMapPicker.addMethods({
         if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
         	for (i in obj) {
                 if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
-                    obj[i].setMap(this._map);
+                    obj[i].setMap(this.webmap);
                     this._overlays.push(obj[i]);
                 }
             }
         }
         else {
-            obj.setMap(this._map); // Add it to the map
+            obj.setMap(this.webmap); // Add it to the map
             this._overlays.push(obj);
         }
 
         // Pan the map to the feature
         if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
             // For objects that have defined bounds or a way to get them
-            this._map.fitBounds(obj.getBounds());
+            this.webmap.fitBounds(obj.getBounds());
         }
         else {
             if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
@@ -388,14 +384,14 @@ isc.BizMapPicker.addMethods({
 				for (var i = 0, l = path.getLength(); i < l; i++) {
 					bounds.extend(path.getAt(i));
 				}
-				this._map.fitBounds(bounds);
+				this.webmap.fitBounds(bounds);
             }
             else { // But points (Markers) are different
             	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-            		this._map.panTo(obj.getPosition());
+            		this.webmap.panTo(obj.getPosition());
                 }
-                if (this._map.getZoom() < 15) {
-                    this._map.setZoom(15);
+                if (this.webmap.getZoom() < 15) {
+                    this.webmap.setZoom(15);
                 }
             }
         }
@@ -413,7 +409,10 @@ isc.BizMapPicker.addMethods({
 			var mapOptions = {
 				zoom: 4,
 				center: new google.maps.LatLng(-26,133.5),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeControlOptions: {
+            		style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+            	}
 			};
 			var drawingDefaults = {
                     editable: true,
@@ -421,11 +420,11 @@ isc.BizMapPicker.addMethods({
                     fillColor: '#EEFFCC',
                     fillOpacity: 0.6
             };
-			this._map = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
+			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 
-            this._map.drawingManager = new google.maps.drawing.DrawingManager({
-                drawingControlOptions: {
-                    position: google.maps.ControlPosition.TOP_CENTER,
+            this.webmap.drawingManager = new google.maps.drawing.DrawingManager({
+            	drawingControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_BOTTOM,
                     defaults: drawingDefaults,
                     drawingModes: [
                         google.maps.drawing.OverlayType.MARKER,
@@ -439,11 +438,11 @@ isc.BizMapPicker.addMethods({
                 polylineOptions: drawingDefaults,
                 rectangleOptions: drawingDefaults
             });
-            this._map.drawingManager.setMap(this._map);
+            this.webmap.drawingManager.setMap(this.webmap);
 
             var me = this;
             
-            google.maps.event.addListener(this._map.drawingManager, 'overlaycomplete', function (event) {
+            google.maps.event.addListener(this.webmap.drawingManager, 'overlaycomplete', function (event) {
                 me.clearIt();
 
                 // Set the drawing mode to "pan" (the hand) so users can immediately edit

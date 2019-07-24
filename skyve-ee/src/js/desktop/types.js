@@ -1932,10 +1932,13 @@ isc.GeometryMapItem.addMethods({
 	
 	showValue: function(displayValue, dataValue) {
 		if (! this.valueSetFromPicker) {
-			this._map = isc.BizMapPicker.create({field: this, 
-													width: (this.width ? this.width : '100%'),
-													height: (this.height ? this.height : '100%')});
-			this.canvas.setMembers([this._map]);
+			this.canvas.setMembers([
+					isc.BizMapPicker.create({
+							field: this, 
+							width: (this.width ? this.width : '100%'),
+							height: (this.height ? this.height : '100%')
+					})
+			]);
 		}
 	},
 	

@@ -144,7 +144,7 @@ SKYVE.Util = function() {
 				        
 				        var overlay = wkt.toObject(props);
 				        object.overlays.push(overlay);
-	                	overlay.setMap(display.gmap);
+	                	overlay.setMap(display.webmap);
 
 	                	if (feature.zoomable) { // can show the info window for zooming
 		                	overlay.bizId = item.bizId;
@@ -164,20 +164,20 @@ SKYVE.Util = function() {
 //			        	for (i in obj) {
 //			                if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
 //			                	obj[i].bizId = datum.bizId;
-//			                	obj[i].setMap(display.gmap);
+//			                	obj[i].setMap(display.webmap);
 //								display._objects[obj[i].bizId] = obj[i];
 //			                }
 //			            }
 //			        }
 //			        else {
-//			            obj.setMap(display.gmap); // Add it to the map
+//			            obj.setMap(display.webmap); // Add it to the map
 //			            this._objects.push(obj);
 //			        }
 //
 //					overlay = new google.maps.Marker({
 //						bizId: datum.bizId,
 //						position: latlng,
-//			            map: display.gmap
+//			            map: display.webmap
 //			        });
 					display._objects[item.bizId] = object;
 				}
@@ -214,7 +214,7 @@ SKYVE.Util = function() {
 				       bounds.extend(extendPoint2);
 				    }
 
-					display.gmap.fitBounds(bounds);
+					display.webmap.fitBounds(bounds);
 				}
 			}
 		}
