@@ -4,14 +4,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
-import modules.admin.domain.Tag;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.job.Job;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -20,9 +17,16 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.PushMessage;
+
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Communication.CommunicationUtil.ResponseMode;
+import modules.admin.domain.DataMaintenance.EvictOption;
+import modules.admin.domain.Tag;
 
 public class PerformDocumentActionForTagJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -53,6 +57,8 @@ public class PerformDocumentActionForTagJob extends Job {
 			Repository rep = CORE.getRepository();
 
 			ServerSideAction<Bean> act = null;
+			EvictOption evict = tag.getEvictOption();
+			
 
 			// retrieve action for non-default actions only
 			if (!TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
@@ -100,27 +106,23 @@ public class PerformDocumentActionForTagJob extends Job {
 							// remove from tag and delete
 							EXT.untag(tag.getBizId(), pb);
 							pers.delete(pb);
-							pers.commit(false);
-							pers.evictCached(pb);
-							pers.begin();
 						} else if (TagDefaultAction.tagValidate.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							BeanValidator.validateBeanAgainstDocument(document, pb);
-							pers.evictCached(pb);
 						} else if (TagDefaultAction.tagUpsert.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							pers.upsertBeanTuple(pb);
-							pers.commit(false);
-							pers.evictCached(pb);
-							pers.begin();
 						} else {
 							pers.save(pb);
-							pers.commit(false);
-							/*
-							 * Action interactions may effect related records
-							 * evicting any cached records will cause later actions to fail if they refer to the same beans
-							 */
-//							pers.evictCached(pb);
-							pers.begin();
 						}
+						
+						pers.commit(false);
+						if (EvictOption.bean.equals(evict)) {
+							pers.evictCached(pb);
+						}
+						else if (EvictOption.all.equals(evict)) {
+							pers.evictAllCached();
+						}
+						pers.begin();
+
 						sb.append(" - Successful");
 
 					} else {
@@ -146,5 +148,6 @@ public class PerformDocumentActionForTagJob extends Job {
 
 		setPercentComplete(100);
 		log.add("Finished Document Action for Tagged Items Job at " + new Date());
+		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Tag action Job completed."));
 	}
 }

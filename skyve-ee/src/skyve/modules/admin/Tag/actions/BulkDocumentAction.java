@@ -5,6 +5,7 @@ import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -58,6 +59,8 @@ public class BulkDocumentAction implements ServerSideAction<Tag> {
 		sb.append("\n\nTag action Job started successfully. Check Job for results.");
 		
 		tag.setDocumentActionResults(sb.toString());
+		
+		webContext.growl(MessageSeverity.info, "Tag action Job has been started");		
 		
 		return new ServerSideActionResult<>(tag);
 	}
