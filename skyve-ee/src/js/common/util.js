@@ -40,8 +40,6 @@ SKYVE.Util = function() {
 		    }
 		},
 		
-		
-		
 		scatterGMap: function(display, // the display object that holds the map and other state variables
 								data, // the response from the map servlet to scatter
 								fit, // fit bounds
@@ -171,7 +169,7 @@ SKYVE.Util = function() {
 //			        }
 //			        else {
 //			            obj.setMap(display.webmap); // Add it to the map
-//			            this._objects.push(obj);
+//			            display._objects.push(obj);
 //			        }
 //
 //					overlay = new google.maps.Marker({
@@ -217,6 +215,83 @@ SKYVE.Util = function() {
 					display.webmap.fitBounds(bounds);
 				}
 			}
-		}
+		},
+		
+	    scatterGMapValue: function(display, // the display object that holds the map and other state variables
+	    							value) { // the WKT string value to display
+			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (! wkt) {
+				wkt = new Wkt.Wkt()
+			}
+
+			if (! value) {
+				return;
+			}
+
+	        try { // Catch any malformed WKT strings
+	        	wkt.read(value);
+	        }
+	        catch (e) {
+	            if (e.name === 'WKTError') {
+	                alert('The WKT string is invalid.');
+	                return;
+	            }
+	        }
+
+	        var obj = wkt.toObject(display.webmap.defaults);
+	        
+	        if (wkt.type === 'polygon' || wkt.type === 'linestring') {
+	        }
+			else {
+	            if (obj.setEditable) {
+	            	obj.setEditable(false);
+            	}
+	        }
+
+	        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
+	        	for (i in obj) {
+	                if (obj.hasOwnProperty(i) && (! Wkt.isArray(obj[i]))) {
+	                    obj[i].setMap(display.webmap);
+	                    display._overlays.push(obj[i]);
+	                }
+	            }
+	        }
+	        else {
+	            obj.setMap(display.webmap); // Add it to the map
+	            display._overlays.push(obj);
+	        }
+
+	        // Pan the map to the feature
+	        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
+	            // For objects that have defined bounds or a way to get them
+	            display.webmap.fitBounds(obj.getBounds());
+	        }
+	        else {
+	            if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
+		            // For Polygons and Polylines - fit the bounds to the vertices
+					var bounds = new google.maps.LatLngBounds();
+					var path = obj.getPath();
+					for (var i = 0, l = path.getLength(); i < l; i++) {
+						bounds.extend(path.getAt(i));
+					}
+					display.webmap.fitBounds(bounds);
+	            }
+	            else { // But points (Markers) are different
+	            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
+	            		display.webmap.panTo(obj.getPosition());
+	                }
+	                if (display.webmap.getZoom() < 15) {
+	                    display.webmap.setZoom(15);
+	                }
+	            }
+	        }
+	    },
+
+	    clearGMap: function (display) { // the display object that holds the map and other state variables
+	        for (var i = 0, l = display._overlays.length; i < l; i++) {
+	            display._overlays[i].setMap(null);
+	        }
+	        display._overlays.length = 0;
+	    }
 	}
 }();

@@ -335,73 +335,11 @@ isc.BizMapPicker.addMethods({
 
     mapIt: function() {
     	var value = this.field.getValue();
-		if (value) {} else {
-			return;
-		}
-
-		var wkt = new Wkt.Wkt();
-        try { // Catch any malformed WKT strings
-        	wkt.read(value);
-        }
-        catch (e) {
-            if (e.name === 'WKTError') {
-                alert('The WKT string is invalid.');
-                return;
-            }
-        }
-
-        var obj = wkt.toObject(this.webmap.defaults);
-        
-        if (wkt.type === 'polygon' || wkt.type === 'linestring') {
-        }
-		else {
-            if (obj.setEditable) {obj.setEditable(false);}
-        }
-
-        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
-        	for (i in obj) {
-                if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
-                    obj[i].setMap(this.webmap);
-                    this._overlays.push(obj[i]);
-                }
-            }
-        }
-        else {
-            obj.setMap(this.webmap); // Add it to the map
-            this._overlays.push(obj);
-        }
-
-        // Pan the map to the feature
-        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
-            // For objects that have defined bounds or a way to get them
-            this.webmap.fitBounds(obj.getBounds());
-        }
-        else {
-            if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
-	            // For Polygons and Polylines - fit the bounds to the vertices
-				var bounds = new google.maps.LatLngBounds();
-				var path = obj.getPath();
-				for (var i = 0, l = path.getLength(); i < l; i++) {
-					bounds.extend(path.getAt(i));
-				}
-				this.webmap.fitBounds(bounds);
-            }
-            else { // But points (Markers) are different
-            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-            		this.webmap.panTo(obj.getPosition());
-                }
-                if (this.webmap.getZoom() < 15) {
-                    this.webmap.setZoom(15);
-                }
-            }
-        }
+    	SKYVE.Util.scatterGMapValue(this, value);
     },
 
     clearIt: function () {
-        for (var i = 0, l = this._overlays.length; i < l; i++) {
-            this._overlays[i].setMap(null);
-        }
-        this._overlays.length = 0;
+    	SKYVE.Util.clearGMap(this);
     },
 
 	build: function() {
@@ -465,4 +403,3 @@ isc.BizMapPicker.addMethods({
 		}
 	}
 });
-
