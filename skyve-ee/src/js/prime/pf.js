@@ -1,4 +1,7 @@
 SKYVE.PF = function() {
+	// block multiple load attempts of google maps JS libs.
+	var loadingGMap = false;
+
 	// public
 	return {
 		getById: function(id) {
@@ -166,23 +169,36 @@ SKYVE.PF = function() {
 		},
 		
 		gmap: function(options) {
-			if (window.google && window.google.maps && window.SKYVE.BizMap) {
-				return Skyve.BizMap.create(options);
+			if (loadingGMap) {
+				setTimeout(function() {SKYVE.PF.gmap(options)}, 100);
 			}
+			else if (window.google && window.google.maps && window.SKYVE.BizMapPicker) {
+				if (options.queryName || options.modelName) {
+					return SKYVE.BizMap.create(options);
+				}
+				return SKYVE.BizMapPicker.create(options);
+			}
+			else {
+				loadingGMap = true;
 
-			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
-				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
-					var url = 'https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing';
-					if (SKYVE.Util.googleMapsV3ApiKey) {
-						url += '&key=' + SKYVE.Util.googleMapsV3ApiKey;
-					}
-					SKYVE.Util.loadJS(url, function() {
-						SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
-							return SKYVE.BizMap.create(options);
+				SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
+					SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
+						var url = 'https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing';
+						if (SKYVE.Util.googleMapsV3ApiKey) {
+							url += '&key=' + SKYVE.Util.googleMapsV3ApiKey;
+						}
+						SKYVE.Util.loadJS(url, function() {
+							SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
+								loadingGMap = false;
+								if (options.queryName || options.modelName) {
+									return SKYVE.BizMap.create(options);
+								}
+								return SKYVE.BizMapPicker.create(options);
+							});
 						});
 					});
 				});
-			});
+			}
 		}
 	};
 }();

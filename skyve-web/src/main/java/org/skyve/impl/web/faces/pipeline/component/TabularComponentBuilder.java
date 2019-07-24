@@ -65,6 +65,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
@@ -788,37 +789,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String queryName,
 								String geometryBinding,
 								String modelName) {
-		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
-		result.setLayout("block");
-		Integer pixelHeight = map.getPixelHeight();
-		if (pixelHeight == null) {
-			pixelHeight = Integer.valueOf(300);
-		}
-		setSize(result,
-					null,
-					map.getPixelWidth(),
-					map.getResponsiveWidth(),
-					map.getPercentageWidth(),
-					pixelHeight,
-					map.getPercentageHeight(),
-					null);
-		List<UIComponent> children = result.getChildren();
-		
-		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
-		mapDiv.setLayout("block");
-		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
-		setId(mapDiv, null);
-		
-		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		output.setValue("Loading Map...");
-		mapDiv.getChildren().add(output);
-		
-		children.add(mapDiv);
-		
+		HtmlPanelGroup result = mapDiv(map);
+
 		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 
 		StringBuilder value = new StringBuilder(128);
-		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(result.getChildren().get(0).getClientId());
 		if (modelName != null) {
 			value.append("', null, null, null, '").append(modelName).append("'");
 		}
@@ -829,9 +805,41 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		value.append(")}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
-		children.add(script);
+		result.getChildren().add(script);
 		
 		return result;
+	}
+	
+	private HtmlPanelGroup mapDiv(RelativeSize widget) {
+		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		result.setLayout("block");
+		setId(result, null);
+		
+		Integer pixelHeight = widget.getPixelHeight();
+		if (pixelHeight == null) {
+			pixelHeight = Integer.valueOf(300);
+		}
+		setSize(result,
+					null,
+					widget.getPixelWidth(),
+					widget.getResponsiveWidth(),
+					widget.getPercentageWidth(),
+					pixelHeight,
+					widget.getPercentageHeight(),
+					null);
+
+		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		mapDiv.setLayout("block");
+		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
+		setId(mapDiv, null);
+		
+		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		output.setValue("Loading Map...");
+		mapDiv.getChildren().add(output);
+		
+		result.getChildren().add(mapDiv);
+		
+		return result;		
 	}
 	
 	@Override
@@ -866,17 +874,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (component != null) {
 			return component;
 		}
-    	return textField(null,
-							geometry.getBinding(),
-							title,
-							required,
-							false,
-							geometry.getDisabledConditionName(),
-							formDisabledConditionName,
-							null,
-							null,
-							geometry.getPixelWidth(),
-							true);
+		
+		String binding = geometry.getBinding();
+		
+		HtmlPanelGroup result = mapDiv(geometry);
+		UIComponent mapDiv = result.getChildren().get(0);
+		
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
+		setId(hidden, mapDiv.getId() + "_hidden");
+		result.getChildren().add(hidden);
+				
+		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
+		value.append("', null, null, '").append(geometry.getBinding()).append("', null)}");
+		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+		result.getChildren().add(script);
+		
+		return result;
 	}
 	
 	/*
