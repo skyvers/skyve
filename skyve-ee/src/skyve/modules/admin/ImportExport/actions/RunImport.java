@@ -21,7 +21,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
