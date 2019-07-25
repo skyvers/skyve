@@ -287,11 +287,40 @@ SKYVE.Util = function() {
 	        }
 	    },
 
-	    clearGMap: function (display) { // the display object that holds the map and other state variables
+	    clearGMap: function(display) { // the display object that holds the map and other state variables
 	        for (var i = 0, l = display._overlays.length; i < l; i++) {
 	            display._overlays[i].setMap(null);
 	        }
 	        display._overlays.length = 0;
+	    },
+	    
+	    gmapDrawingModes: function(drawingTools) { // the drawing tools specified on the geometryMap widget
+			var result = null;
+			if (drawingTools == 'point') {
+				result = [google.maps.drawing.OverlayType.MARKER];
+			}
+			else if (drawingTools == 'line') {
+				result = [google.maps.drawing.OverlayType.POLYLINE];
+			}
+			else if (drawingTools == 'polygon') {
+				result = [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+			}
+			else if (drawingTools == 'pointAndLine') {
+				result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYLINE];
+			}
+			else if (drawingTools == 'pointAndPolygon') {
+				result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+			}
+			else if (drawingTools == 'lineAndPolygon') {
+				result = [google.maps.drawing.OverlayType.POLYLINE, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+			}
+			else {
+				result = [google.maps.drawing.OverlayType.MARKER, 
+							google.maps.drawing.OverlayType.POLYLINE,
+							google.maps.drawing.OverlayType.POLYGON,
+							google.maps.drawing.OverlayType.RECTANGLE];
+			}
+			return result;
 	    }
 	}
 }();

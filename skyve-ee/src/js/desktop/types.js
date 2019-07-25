@@ -1885,7 +1885,8 @@ isc.GeometryItem.addMethods({
 	        src: 'icons/map.png',
 	        prompt: 'Click to set or see the geometry on a map',
 	        click: function(form, item, icon) {
-	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
+	        	var options = config.drawingTools ? {field: item, drawingTools: config.drawingTools} : {field: item};
+	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create(options)]);
 	        }
 	    }];
 		if (config.icons) {
@@ -1932,12 +1933,15 @@ isc.GeometryMapItem.addMethods({
 	
 	showValue: function(displayValue, dataValue) {
 		if (! this.valueSetFromPicker) {
+			var options = {
+					field: this, 
+					width: (this.width ? this.width : '100%'),
+					height: (this.height ? this.height : '100%')};
+			if (this.drawingTools) {
+				options.drawingTools = this.drawingTools;
+			}
 			this.canvas.setMembers([
-					isc.BizMapPicker.create({
-							field: this, 
-							width: (this.width ? this.width : '100%'),
-							height: (this.height ? this.height : '100%')
-					})
+				isc.BizMapPicker.create(options)
 			]);
 		}
 	},

@@ -580,7 +580,8 @@ public class FacesView<T extends Bean> extends Harness {
 								String moduleName,
 								String queryName,
 								String geometryBinding,
-								String mapModelName) {
+								String mapModelName,
+								String geometryInputTypeString) {
 		StringBuilder result = new StringBuilder(512);
 
 		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
@@ -594,6 +595,9 @@ public class FacesView<T extends Bean> extends Harness {
 				result.append("',queryName:'").append(queryName);
 			}
 			result.append("',geometryBinding:'").append(geometryBinding);
+			if (geometryInputTypeString != null) {
+				result.append("',drawingTools:'").append(geometryInputTypeString);
+			}
 		}
 		result.append("'})</script>");
 		

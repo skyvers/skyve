@@ -82,6 +82,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -803,7 +804,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("', '").append(queryName);
 			value.append("', '").append(geometryBinding).append("', null");
 		}
-		value.append(")}");
+		value.append(", null)}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
@@ -888,7 +889,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		StringBuilder value = new StringBuilder(128);
 		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
-		value.append("', null, null, '").append(geometry.getBinding()).append("', null)}");
+		value.append("', null, null, '").append(geometry.getBinding()).append("', null, ");
+		GeometryInputType type = geometry.getType();
+		if (type == null) {
+			value.append("null");
+		}
+		else {
+			value.append("'").append(type).append("'");
+		}
+		value.append(")}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
