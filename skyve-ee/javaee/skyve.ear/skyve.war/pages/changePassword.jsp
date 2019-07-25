@@ -73,37 +73,7 @@
 		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
 		<link rel="stylesheet" href="semantic24/semantic.min.css">
 		
-		<style type="text/css">
-			body {
-				background-color: #eee;
-			}
-			body > .grid {
-				height: 100%;
-				/* background: url('/img/bg-image-login.jpg') no-repeat; */
-			    background-size: cover;
-			    background-position: center;
-			    margin-top: 0px !important;
-			}
-			.image {
-				margin-top: -100px;
-			}
-			.column {
-				max-width: 450px;
-			}
-			.ui.white.header {
-				color: white !important;
-			}
-			.footer {
-			    color: white;
-			    font-size: 80%;
-			    margin-top: -20px;
-			    margin-right: 10px;
-			    text-align: right;
-		    }
-		    .footer a {
-		    	color: #cdcdcd;
-		    }
-		</style>
+		<%@include file="fragments/styles.html" %>
 
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
