@@ -126,12 +126,7 @@ SKYVE.BizMapPicker = function() {
             	drawingControlOptions: {
                     position: google.maps.ControlPosition.LEFT_BOTTOM,
                     defaults: drawingDefaults,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.POLYLINE,
-                        google.maps.drawing.OverlayType.POLYGON,
-                        google.maps.drawing.OverlayType.RECTANGLE
-                    ]
+                    drawingModes: SKYVE.Util.gmapDrawingModes(options.drawingTools)
                 },
                 markerOptions: drawingDefaults,
                 polygonOptions: drawingDefaults,

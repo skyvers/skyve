@@ -65,6 +65,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
@@ -609,15 +610,37 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 		
+		GeometryInputType type = geometry.getType();
+		if (type != null) {
+			code.append("drawingTools:'").append(type).append("',");
+		}
+		
 		// TODO add in the filter operators allowed
 	}
 
 	@Override
 	public void renderGeometryMap(GeometryMap geometry) {
 		preProcessFormItem(geometry, "geometryMap");
+
+		// If no height, make the map at least 150px high so that all the map controls fit
+		boolean noHeight = (geometry.getPixelHeight() == null) && (geometry.getPercentageHeight() == null) && (geometry.getMinPixelHeight() == null);
+		if (noHeight) {
+			geometry.setPercentageHeight(Integer.valueOf(100));
+			geometry.setMinPixelHeight(Integer.valueOf(150));
+		}
 		size(geometry, null, code);
+		if (noHeight) {
+			geometry.setPercentageHeight(null);
+			geometry.setMinPixelHeight(null);
+		}
+		
 		disabled(geometry.getDisabledConditionName(), code);
 		invisible(geometry.getInvisibleConditionName(), code);
+
+		GeometryInputType type = geometry.getType();
+		if (type != null) {
+			code.append("drawingTools:'").append(type).append("',");
+		}
 	}
 	
 	@Override

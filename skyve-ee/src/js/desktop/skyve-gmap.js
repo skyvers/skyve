@@ -323,6 +323,7 @@ isc.BizMapPicker.addMethods({
 		this.Super("init", arguments);
 		this._overlays = [];
 		this.field = config.field;
+		this.drawingTools = config.drawingTools;
 		
 		if (window.google && window.google.maps) {
 			this.build();
@@ -360,16 +361,11 @@ isc.BizMapPicker.addMethods({
             };
 			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 
-            this.webmap.drawingManager = new google.maps.drawing.DrawingManager({
+			this.webmap.drawingManager = new google.maps.drawing.DrawingManager({
             	drawingControlOptions: {
                     position: google.maps.ControlPosition.LEFT_BOTTOM,
                     defaults: drawingDefaults,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.POLYLINE,
-                        google.maps.drawing.OverlayType.POLYGON,
-                        google.maps.drawing.OverlayType.RECTANGLE
-                    ]
+                    drawingModes: SKYVE.Util.gmapDrawingModes(this.drawingTools)
                 },
                 markerOptions: drawingDefaults,
                 polygonOptions: drawingDefaults,
