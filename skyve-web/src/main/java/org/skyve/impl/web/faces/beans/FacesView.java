@@ -581,7 +581,8 @@ public class FacesView<T extends Bean> extends Harness {
 								String queryName,
 								String geometryBinding,
 								String mapModelName,
-								String geometryInputTypeString) {
+								String geometryInputTypeString,
+								boolean disabled) {
 		StringBuilder result = new StringBuilder(512);
 
 		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
@@ -599,7 +600,7 @@ public class FacesView<T extends Bean> extends Harness {
 				result.append("',drawingTools:'").append(geometryInputTypeString);
 			}
 		}
-		result.append("'})</script>");
+		result.append("',disabled:").append(disabled).append("})</script>");
 		
 		return result.toString();
 	}

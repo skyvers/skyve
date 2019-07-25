@@ -114,40 +114,42 @@ SKYVE.BizMapPicker = function() {
 				displays[options.elementId] = display;
 			}
 			
-			var drawingDefaults = {
-                editable: true,
-                strokeColor: '#990000',
-                fillColor: '#EEFFCC',
-                fillOpacity: 0.6
-            };
 			display.webmap = new google.maps.Map(document.getElementById(options.elementId), mapOptions);
 
-			display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
-            	drawingControlOptions: {
-                    position: google.maps.ControlPosition.LEFT_BOTTOM,
-                    defaults: drawingDefaults,
-                    drawingModes: SKYVE.Util.gmapDrawingModes(options.drawingTools)
-                },
-                markerOptions: drawingDefaults,
-                polygonOptions: drawingDefaults,
-                polylineOptions: drawingDefaults,
-                rectangleOptions: drawingDefaults
-            });
-            display.webmap.drawingManager.setMap(display.webmap);
-            
-            google.maps.event.addListener(display.webmap.drawingManager, 'overlaycomplete', function (event) {
-            	SKYVE.Util.clearGMap(display);
-
-                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-                this.setDrawingMode(null);
-
-                display._overlays.push(event.overlay);
-                var wkt = new Wkt.Wkt();
-                wkt.fromObject(event.overlay);
-                var wktValue = wkt.write();
-                $('#' + options.elementId + '_hidden').val(wktValue);
-            });
-
+			if (! options.disabled) {
+				var drawingDefaults = {
+	                editable: true,
+	                strokeColor: '#990000',
+	                fillColor: '#EEFFCC',
+	                fillOpacity: 0.6
+	            };
+				display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
+	            	drawingControlOptions: {
+	                    position: google.maps.ControlPosition.LEFT_BOTTOM,
+	                    defaults: drawingDefaults,
+	                    drawingModes: SKYVE.Util.gmapDrawingModes(options.drawingTools)
+	                },
+	                markerOptions: drawingDefaults,
+	                polygonOptions: drawingDefaults,
+	                polylineOptions: drawingDefaults,
+	                rectangleOptions: drawingDefaults
+	            });
+	            display.webmap.drawingManager.setMap(display.webmap);
+	            
+	            google.maps.event.addListener(display.webmap.drawingManager, 'overlaycomplete', function (event) {
+	            	SKYVE.Util.clearGMap(display);
+	
+	                // Set the drawing mode to "pan" (the hand) so users can immediately edit
+	                this.setDrawingMode(null);
+	
+	                display._overlays.push(event.overlay);
+	                var wkt = new Wkt.Wkt();
+	                wkt.fromObject(event.overlay);
+	                var wktValue = wkt.write();
+	                $('#' + options.elementId + '_hidden').val(wktValue);
+	            });
+			}
+			
         	SKYVE.Util.clearGMap(display);
 
         	// delay the mapIt call because even though the maps API is synchronous, sometimes the

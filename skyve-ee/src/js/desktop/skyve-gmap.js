@@ -353,41 +353,44 @@ isc.BizMapPicker.addMethods({
             		style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             	}
 			};
-			var drawingDefaults = {
-                    editable: true,
-                    strokeColor: '#990000',
-                    fillColor: '#EEFFCC',
-                    fillOpacity: 0.6
-            };
 			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 
-			this.webmap.drawingManager = new google.maps.drawing.DrawingManager({
-            	drawingControlOptions: {
-                    position: google.maps.ControlPosition.LEFT_BOTTOM,
-                    defaults: drawingDefaults,
-                    drawingModes: SKYVE.Util.gmapDrawingModes(this.drawingTools)
-                },
-                markerOptions: drawingDefaults,
-                polygonOptions: drawingDefaults,
-                polylineOptions: drawingDefaults,
-                rectangleOptions: drawingDefaults
-            });
-            this.webmap.drawingManager.setMap(this.webmap);
+			if (! this.field.isDisabled()) {
+				var drawingDefaults = {
+	                    editable: true,
+	                    strokeColor: '#990000',
+	                    fillColor: '#EEFFCC',
+	                    fillOpacity: 0.6
+	            };
 
-            var me = this;
-            
-            google.maps.event.addListener(this.webmap.drawingManager, 'overlaycomplete', function (event) {
-                me.clearIt();
+				this.webmap.drawingManager = new google.maps.drawing.DrawingManager({
+	            	drawingControlOptions: {
+	                    position: google.maps.ControlPosition.LEFT_BOTTOM,
+	                    defaults: drawingDefaults,
+	                    drawingModes: SKYVE.Util.gmapDrawingModes(this.drawingTools)
+	                },
+	                markerOptions: drawingDefaults,
+	                polygonOptions: drawingDefaults,
+	                polylineOptions: drawingDefaults,
+	                rectangleOptions: drawingDefaults
+	            });
+	            this.webmap.drawingManager.setMap(this.webmap);
 
-                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-                this.setDrawingMode(null);
+	            var me = this;
+	            
+	            google.maps.event.addListener(this.webmap.drawingManager, 'overlaycomplete', function (event) {
+	                me.clearIt();
 
-                me._overlays.push(event.overlay);
-                var wkt = new Wkt.Wkt();
-                wkt.fromObject(event.overlay);
-                var wktValue = wkt.write();
-                me.field.setValueFromPicker(wktValue);
-            });
+	                // Set the drawing mode to "pan" (the hand) so users can immediately edit
+                	this.setDrawingMode(null);
+
+	                me._overlays.push(event.overlay);
+	                var wkt = new Wkt.Wkt();
+	                wkt.fromObject(event.overlay);
+	                var wktValue = wkt.write();
+	                me.field.setValueFromPicker(wktValue);
+	            });
+			}
 
 			this.clearIt();
 			// delay the mapIt call because even though the maps API is synchronous, sometimes the

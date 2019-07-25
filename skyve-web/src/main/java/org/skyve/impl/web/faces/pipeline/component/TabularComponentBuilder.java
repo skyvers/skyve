@@ -804,7 +804,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("', '").append(queryName);
 			value.append("', '").append(geometryBinding).append("', null");
 		}
-		value.append(", null)}");
+		value.append(", null, false)}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
@@ -892,10 +892,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		value.append("', null, null, '").append(geometry.getBinding()).append("', null, ");
 		GeometryInputType type = geometry.getType();
 		if (type == null) {
-			value.append("null");
+			value.append("null, ");
 		}
 		else {
-			value.append("'").append(type).append("'");
+			value.append("'").append(type).append("', ");
+		}
+		String disabledConditionName = geometry.getDisabledConditionName();
+		if (formDisabledConditionName == null) {
+			if (disabledConditionName != null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName}));
+			}
+			else {
+				value.append("false");
+			}
+		}
+		else {
+			if (disabledConditionName == null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {formDisabledConditionName}));
+			}
+			else {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+			}
 		}
 		value.append(")}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
