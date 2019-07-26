@@ -80,7 +80,6 @@
                     <execution>
                         <!-- Generate javadoc package HTMLs: mvn exec:java@generate-javadoc-package-htmls -->
                         <id>generate-javadoc-package-htmls</id>
-						<phase>generate-sources</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
