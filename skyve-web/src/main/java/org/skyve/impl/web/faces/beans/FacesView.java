@@ -582,10 +582,14 @@ public class FacesView<T extends Bean> extends Harness {
 								String geometryBinding,
 								String mapModelName,
 								String geometryInputTypeString,
-								boolean disabled) {
+								boolean disabled,
+								boolean includeScriptTag) {
 		StringBuilder result = new StringBuilder(512);
 
-		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
+		if (includeScriptTag) {
+			result.append("<script type=\"text/javascript\">");
+		}
+		result.append("SKYVE.PF.gmap({elementId:'").append(elementId);
 		if (mapModelName != null) {
 			result.append("',_c:'").append(getWebContext().getWebId());
 			result.append("',modelName:'").append(mapModelName);
@@ -600,7 +604,10 @@ public class FacesView<T extends Bean> extends Harness {
 				result.append("',drawingTools:'").append(geometryInputTypeString);
 			}
 		}
-		result.append("',disabled:").append(disabled).append("})</script>");
+		result.append("',disabled:").append(disabled).append("})");
+		if (includeScriptTag) {
+			result.append("</script>");
+		}
 		
 		return result.toString();
 	}

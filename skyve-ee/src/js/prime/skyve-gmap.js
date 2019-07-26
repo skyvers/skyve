@@ -146,7 +146,7 @@ SKYVE.BizMapPicker = function() {
 	                var wkt = new Wkt.Wkt();
 	                wkt.fromObject(event.overlay);
 	                var wktValue = wkt.write();
-	                $('#' + options.elementId + '_hidden').val(wktValue);
+	                SKYVE.PF.setTextValue(options.elementId + '_value', wktValue);
 	            });
 			}
 			
@@ -155,7 +155,7 @@ SKYVE.BizMapPicker = function() {
         	// delay the mapIt call because even though the maps API is synchronous, sometimes the
 			// maps JS calls seem to beat the initialisation of the map.
 			//setTimeout(function() {isc.BizMap.loadGMap(callback)}, 100);
-        	SKYVE.Util.scatterGMapValue(display, $('#' + options.elementId + '_hidden').val());
+        	SKYVE.Util.scatterGMapValue(display, SKYVE.PF.getTextValue(options.elementId + '_value'));
 		}
 	}
 }();

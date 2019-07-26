@@ -804,7 +804,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("', '").append(queryName);
 			value.append("', '").append(geometryBinding).append("', null");
 		}
-		value.append(", null, false)}");
+		value.append(", null, false, true)}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
@@ -853,19 +853,102 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (component != null) {
 			return component;
 		}
-    	return textField(dataWidgetVar,
-							geometry.getBinding(),
-							title,
-							required,
-							false,
+
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		String id = result.getId();
+		setId(result, null); // new id for the panel but we'll use the old id for the text value and the map
+		result.setColumns(3);
+		result.setColumnClasses(",shrink,");
+		Integer pixelWidth = geometry.getPixelWidth();
+		if (pixelWidth != null) {
+			result.setWidth(pixelWidth + "px");
+		}
+		else {
+			result.setStyleClass("inputComponent");
+		}
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		String binding = geometry.getBinding();
+		InputText textField = textField(dataWidgetVar,
+											geometry.getBinding(),
+											title,
+											required,
+											false,
+											geometry.getDisabledConditionName(),
+											formDisabledConditionName,
+											null,
+											null,
+											null,
+											true);
+		textField.setId(id + "_value");
+		toAddTo.add(textField);
+		editableGeometry(toAddTo,
+							id,
+							binding,
+							geometry.getType(),
 							geometry.getDisabledConditionName(),
-							formDisabledConditionName,
-							null,
-							null,
-							geometry.getPixelWidth(),
-							true);
+							formDisabledConditionName);
+		return result;
 	}
 
+	/**
+	 * Add the buttons and overlays etc
+	 * 			<h:panelGrid> (from caller)
+	 * 				...
+	 *				<p:commandButton id="s03" icon="fa fa-globe" title="Map" type="button" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:300px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
+	 *					<h:panelGroup layout="block" style="height:280px">
+	 *						<h:panelGroup id="poo" layout="block" style="margin:0;padding:0;height:100%;width:100%">
+	 *							Loading Map
+	 *						</h:panelGroup>
+	 *					</h:panelGroup>
+	 *			    </p:overlayPanel>
+	 *			</h:panelGrid>
+	 */
+	private void editableGeometry(List<UIComponent> toAddTo,
+									String id,
+									String binding,
+									GeometryInputType type,
+									String disabledConditionName,
+									String formDisabledConditionName) {
+		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(mapButton, null);
+		String mapButtonId = mapButton.getId();
+		mapButton.setIcon("fa fa-globe");
+		mapButton.setTitle("Map");
+		mapButton.setValue(null);
+		mapButton.setType("button");
+		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
+		// for admin theme
+		setSize(mapButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
+		toAddTo.add(mapButton);
+
+		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+		setId(overlay, null);
+		overlay.setFor(mapButtonId);
+		overlay.setHideEffect("fade");
+		overlay.setDynamic(false);
+		overlay.setShowCloseIcon(true);
+		overlay.setModal(true);
+		overlay.setStyle("width:50%;height:300px");
+		
+		MapDisplay display = new MapDisplay();
+		display.setPixelHeight(Integer.valueOf(280));
+		HtmlPanelGroup mapDivs = mapDiv(display);
+		UIComponent mapDiv = mapDivs.getChildren().get(0);
+		mapDiv.setId(id);
+		overlay.getChildren().add(mapDivs);
+		
+		overlay.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
+																			binding,
+																			type,
+																			disabledConditionName,
+																			formDisabledConditionName,
+																			false));
+		toAddTo.add(overlay);
+	}
+	
 	@Override
 	public UIComponent geometryMap(UIComponent component,
 									GeometryMap geometry,
@@ -882,22 +965,36 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		UIComponent mapDiv = result.getChildren().get(0);
 		
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
-		setId(hidden, mapDiv.getId() + "_hidden");
+		setId(hidden, mapDiv.getId() + "_value");
 		result.getChildren().add(hidden);
-				
+		
 		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-
+		script.setValueExpression("value", generateMapScriptExpression(mapDiv.getClientId(),
+																		geometry.getBinding(),
+																		geometry.getType(),
+																		geometry.getDisabledConditionName(),
+																		formDisabledConditionName,
+																		true));
+		result.getChildren().add(script);
+		
+		return result;
+	}
+	
+	private ValueExpression generateMapScriptExpression(String mapDivClientId,
+															String geometryBinding, 
+															GeometryInputType type,
+															String disabledConditionName,
+															String formDisabledConditionName,
+															boolean includeScriptTag) {
 		StringBuilder value = new StringBuilder(128);
-		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
-		value.append("', null, null, '").append(geometry.getBinding()).append("', null, ");
-		GeometryInputType type = geometry.getType();
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
+		value.append("', null, null, '").append(geometryBinding).append("', null, ");
 		if (type == null) {
 			value.append("null, ");
 		}
 		else {
 			value.append("'").append(type).append("', ");
 		}
-		String disabledConditionName = geometry.getDisabledConditionName();
 		if (formDisabledConditionName == null) {
 			if (disabledConditionName != null) {
 				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName}));
@@ -914,11 +1011,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
 			}
 		}
-		value.append(")}");
-		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
-		result.getChildren().add(script);
-		
-		return result;
+		value.append(", ").append(includeScriptTag).append(")}");
+		return ef.createValueExpression(elc, value.toString(), String.class);
 	}
 	
 	/*
