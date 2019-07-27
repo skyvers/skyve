@@ -39,7 +39,7 @@ SKYVE.BizMap = function() {
 				control.id = this.ID + '_form';
 				control.style.width = '300px';
 	*/
-			display.webmap = new google.maps.Map(document.getElementById(options.elementId), mapOptions);
+			display.webmap = new google.maps.Map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
 	/* TODO reinstate
 				this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
 	*/
@@ -114,7 +114,8 @@ SKYVE.BizMapPicker = function() {
 				displays[options.elementId] = display;
 			}
 			
-			display.webmap = new google.maps.Map(document.getElementById(options.elementId), mapOptions);
+			var elementId = SKYVE.PF.getByIdEndsWith(options.elementId).attr('id');
+			display.webmap = new google.maps.Map(document.getElementById(elementId), mapOptions);
 
 			if (! options.disabled) {
 				var drawingDefaults = {
@@ -146,7 +147,7 @@ SKYVE.BizMapPicker = function() {
 	                var wkt = new Wkt.Wkt();
 	                wkt.fromObject(event.overlay);
 	                var wktValue = wkt.write();
-	                SKYVE.PF.setTextValue(options.elementId + '_value', wktValue);
+	                SKYVE.PF.setTextValue(elementId + '_value', wktValue);
 	            });
 			}
 			
@@ -155,7 +156,7 @@ SKYVE.BizMapPicker = function() {
         	// delay the mapIt call because even though the maps API is synchronous, sometimes the
 			// maps JS calls seem to beat the initialisation of the map.
 			//setTimeout(function() {isc.BizMap.loadGMap(callback)}, 100);
-        	SKYVE.Util.scatterGMapValue(display, SKYVE.PF.getTextValue(options.elementId + '_value'));
+        	SKYVE.Util.scatterGMapValue(display, SKYVE.PF.getTextValue(elementId + '_value'));
 		}
 	}
 }();

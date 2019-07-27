@@ -8,6 +8,16 @@ SKYVE.PF = function() {
 			return $(PrimeFaces.escapeClientId(id));
 		},
 		
+		getByIdEndsWith: function(id) {
+			var result = SKYVE.PF.getById(id);
+			if (result.length) { // 1 node found
+				return result;
+			}
+			else {
+				return $('[id$="' + PrimeFaces.escapeClientId(id) + '"]');
+			}
+		},
+		
 		contentOverlayOnShow: function(id, url) {
 			SKYVE.PF.getById(id + '_iframe').attr('src', url);
 		},
