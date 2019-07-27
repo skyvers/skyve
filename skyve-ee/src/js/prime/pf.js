@@ -9,13 +9,7 @@ SKYVE.PF = function() {
 		},
 		
 		getByIdEndsWith: function(id) {
-			var result = SKYVE.PF.getById(id);
-			if (result.length) { // 1 node found
-				return result;
-			}
-			else {
-				return $('[id$="' + PrimeFaces.escapeClientId(id) + '"]');
-			}
+			return $('[id$="' + id + '"]');
 		},
 		
 		contentOverlayOnShow: function(id, url) {
