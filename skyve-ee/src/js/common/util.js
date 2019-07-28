@@ -263,7 +263,7 @@ SKYVE.Util = function() {
 
 	        // Pan the map to the feature
 	        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
-	            // For objects that have defined bounds or a way to get them
+	        	// For objects that have defined bounds or a way to get them
 	            display.webmap.fitBounds(obj.getBounds());
 	        }
 	        else {
@@ -277,11 +277,11 @@ SKYVE.Util = function() {
 					display.webmap.fitBounds(bounds);
 	            }
 	            else { // But points (Markers) are different
-	            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-	            		display.webmap.panTo(obj.getPosition());
-	                }
 	                if (display.webmap.getZoom() < 15) {
 	                    display.webmap.setZoom(15);
+	                }
+	            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
+	            		display.webmap.setCenter(obj.getPosition());
 	                }
 	            }
 	        }
