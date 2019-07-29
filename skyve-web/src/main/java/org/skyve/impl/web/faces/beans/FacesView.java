@@ -581,6 +581,7 @@ public class FacesView<T extends Bean> extends Harness {
 								String queryName,
 								String geometryBinding,
 								String mapModelName,
+								String loading,
 								String geometryInputTypeString,
 								boolean disabled,
 								boolean includeScriptTag) {
@@ -604,6 +605,7 @@ public class FacesView<T extends Bean> extends Harness {
 				result.append("',drawingTools:'").append(geometryInputTypeString);
 			}
 		}
+		result.append("',loading:'").append(loading);
 		result.append("',disabled:").append(disabled).append("})");
 		if (includeScriptTag) {
 			result.append("</script>");

@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LayoutUtil;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ShrinkWrap;
@@ -595,7 +596,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderMap(MapDisplay map) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
+		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view,loading:'");
+		LoadingType loading = map.getLoading();
+		code.append((loading == null) ? LoadingType.eager : loading).append("'});");
 		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}

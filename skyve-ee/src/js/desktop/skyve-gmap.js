@@ -99,8 +99,8 @@ isc.BizMap.addMethods({
 	build: function() {
 		if (this.isDrawn()) {
 			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
+				zoom: 1,
+				center: new google.maps.LatLng(0, 0),
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 
@@ -121,6 +121,18 @@ isc.BizMap.addMethods({
 /* TODO reinstate
 			this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
 */
+			if (this.loading == 'lazy') {
+				var me = this;
+	            google.maps.event.addListener(this.webmap, 'zoom_changed', function() {
+console.log(this.getBounds());
+me._refresh(false, false);
+	            });
+	            google.maps.event.addListener(this.webmap, 'dragend', function() {
+console.log(this.getBounds());
+me._refresh(false, false);
+	            });
+			}
+			
 			this._refresh(true, false);
 			this.delayCall('_addForm', null, 1000);
 		}

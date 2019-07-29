@@ -65,6 +65,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -804,7 +805,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("', '").append(queryName);
 			value.append("', '").append(geometryBinding).append("', null");
 		}
-		value.append(", null, false, true)}");
+		LoadingType loading = map.getLoading();
+		value.append(", '").append((loading == null) ? LoadingType.eager : loading).append("', null, false, true)}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
@@ -988,7 +990,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															boolean includeScriptTag) {
 		StringBuilder value = new StringBuilder(128);
 		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
-		value.append("', null, null, '").append(geometryBinding).append("', null, ");
+		value.append("', null, null, '").append(geometryBinding).append("', null, 'eager', ");
 		if (type == null) {
 			value.append("null, ");
 		}

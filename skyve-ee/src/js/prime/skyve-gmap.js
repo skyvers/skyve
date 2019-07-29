@@ -1,9 +1,9 @@
 SKYVE.BizMap = function() {
 	var displays = {};
 
-	var refresh = function(display, fit) {
+	var refresh = function(display, fit, auto) {
 		$.get(display.url, function(data) {
-			SKYVE.Util.scatterGMap(display, data, true, false);
+			SKYVE.Util.scatterGMap(display, data, fit, auto);
 		});
 	};
 	
@@ -11,8 +11,8 @@ SKYVE.BizMap = function() {
 	return {
 		create: function(options) {
 			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
+				zoom: 1,
+				center: new google.maps.LatLng(0, 0),
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 
@@ -43,7 +43,16 @@ SKYVE.BizMap = function() {
 	/* TODO reinstate
 				this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
 	*/
-
+			if (options.loading === 'lazy') {
+				google.maps.event.addListener(display.webmap, 'zoom_changed', function() {
+console.log(this.getBounds());
+refresh(display, false, true);
+	            });
+	    	    google.maps.event.addListener(display.webmap, 'dragend', function() {
+console.log(this.getBounds());
+refresh(display, false, true);
+	            });
+			}
 			var url = SKYVE.Util.CONTEXT_URL + 'map?';
 			if (options.modelName) {
 				url += '_c=' + options._c + '&_m=' + options.modelName;
@@ -52,7 +61,7 @@ SKYVE.BizMap = function() {
 				url += '_mod=' + options.moduleName + '&_q=' + options.queryName + '&_geo=' + options.geometryBinding;
 			}
 			display.url = url;
-			refresh(display, true);
+			refresh(display, true, false);
 //				this.delayCall('_addForm', null, 1000);
 			return display;
 		},

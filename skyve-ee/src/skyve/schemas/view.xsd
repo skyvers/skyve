@@ -1345,6 +1345,7 @@
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="modelName" type="xs:string" use="required"/>
+    <xs:attribute name="loading" type="tns:loadingType"/>
     <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
     <xs:attribute name="showRefreshControls" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
@@ -1815,6 +1816,13 @@
       <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="loadingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="eager"/>
+      <xs:enumeration value="lazy"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
