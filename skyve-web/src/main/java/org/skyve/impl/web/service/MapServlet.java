@@ -24,9 +24,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.metadata.view.model.map.MapResult;
+import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -162,7 +163,14 @@ public class MapServlet extends HttpServlet {
 		Repository repository = CORE.getRepository();
 		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME), true);
 		model.setBean(bean);
+		
+		MapResult result = model.getResult(new Envelope(-180, 180, -90, 90));
+
 		// TODO get the envelope from the map
-		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		String json = JSON.marshall(customer, result, null);
+		
+		// Add _doc property to json response for resources such as images for map pins.
+		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
+		return json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
 	}
 }

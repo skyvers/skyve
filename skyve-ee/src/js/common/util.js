@@ -133,7 +133,9 @@ SKYVE.Util = function() {
 				        	props.fillOpacity = feature.fillOpacity;
 				        }
 				        if (feature.iconDynamicImageName) {
-				        	props.icon = {url: 'image?_n=' + feature.iconDynamicImageName};
+				        	props.icon = {url: SKYVE.Util.CONTEXT_URL + 
+				        							'resources?_n=' + feature.iconDynamicImageName + 
+				        							'&_doc=' + data._doc};
 				        	if (feature.iconAnchorX && feature.iconAnchorY) {
 				        		props.icon.anchor = new google.maps.Point(feature.iconAnchorX, feature.iconAnchorY);
 				        		props.icon.origin = new google.maps.Point(0,0);
