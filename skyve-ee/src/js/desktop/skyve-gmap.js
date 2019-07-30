@@ -217,15 +217,6 @@ isc.BizMap.addMethods({
 		
 		var wkt = new Wkt.Wkt();
 		var url = SKYVE.Util.CONTEXT_URL + 'map?';
-/*
-		// set the map bounds
-		var bounds = wkt.write(this.webmap.getBounds());
-		alert(bounds)
-		var nw = new google.maps.LatLng(
-        	    this.webmap.getBounds().getNorthEast().lat(),
-        	    this.webmap.getBounds().getSouthWest().lng()
-        	);
-*/
 		if (this._view) {
 			if (this._modelName) {
 				var instance = this._view.gather(false);
@@ -371,8 +362,8 @@ isc.BizMapPicker.addMethods({
 	build: function() {
 		if (this.isDrawn()) {
 			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
+				zoom: SKYVE.Util.mapZoom,
+				center: SKYVE.Util.gmapCentre(),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				mapTypeControlOptions: {
             		style: google.maps.MapTypeControlStyle.DROPDOWN_MENU

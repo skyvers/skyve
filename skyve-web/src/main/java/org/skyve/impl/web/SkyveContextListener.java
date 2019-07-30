@@ -231,6 +231,11 @@ public class SkyveContextListener implements ServletContextListener {
 		if (map != null) {
 			String value = getString("map", "type", map, true);
 			UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
+			UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
+			Number zoom = getNumber("map", "zoom", map, false);
+			if (zoom != null) {
+				UtilImpl.MAP_ZOOM = zoom.intValue();
+			}
 		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
@@ -341,8 +346,11 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 	
 	private static int getInt(String prefix, String key, Map<String, Object> properties) {
-		Number result = (Number) get(prefix, key, properties, true);
-		return result.intValue();
+		return getNumber(prefix, key, properties, true).intValue();
+	}
+
+	private static Number getNumber(String prefix, String key, Map<String, Object> properties, boolean required) {
+		return (Number) get(prefix, key, properties, required);
 	}
 
 	private static String getString(String prefix, String key, Map<String, Object> properties, boolean required) {

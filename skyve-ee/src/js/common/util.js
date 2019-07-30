@@ -13,6 +13,8 @@ SKYVE.Util = function() {
 		v: null,
 		googleMapsV3ApiKey: null,
 		ckEditorConfigFileUrl: null,
+		mapCentre: null,
+		mapZoom: 1,
 		CONTEXT_URL: context,
 		
 		loadJS: function(scriptPath, callback) {
@@ -216,6 +218,31 @@ SKYVE.Util = function() {
 				    }
 				}
 			}
+		},
+
+		gmapCentre: function() {
+			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (! wkt) {
+				wkt = new Wkt.Wkt()
+			}
+
+			var result = null;
+			if (SKYVE.Util.mapCentre) {
+				try { // Catch any malformed WKT strings
+		        	wkt.read(SKYVE.Util.mapCentre);
+		        	var coord = wkt.components[0];
+		        	result = new google.maps.LatLng(coord.y, coord.x);
+				}
+		        catch (e) {
+		        	console.log(SKYVE.Util.mapCentre + " is malformed WKT Point format");
+		        	SKYVE.Util.mapCentre = null;
+		        	result = new google.maps.LatLng(0, 0);
+		        }
+			}
+			else {
+	        	result = new google.maps.LatLng(0, 0);
+			}
+			return result;
 		},
 		
 	    scatterGMapValue: function(display, // the display object that holds the map and other state variables

@@ -124,8 +124,8 @@ SKYVE.BizMapPicker = function() {
 	return {
 		create: function(options) {
 			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
+				zoom: SKYVE.Util.mapZoom,
+				center: SKYVE.Util.gmapCentre(),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				mapTypeControlOptions: {
 	            	style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
