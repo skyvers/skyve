@@ -49,10 +49,6 @@ SKYVE.Util = function() {
 				wkt = new Wkt.Wkt()
 			}
 			
-			// ensure that only 1 refresh at a time occurs
-			// NB switch this off first thing in case there is an error in the code below
-			display._refreshing = false;
-
 			var items = data.items;
 			
 			if (auto) {
@@ -211,7 +207,7 @@ SKYVE.Util = function() {
 		                if (display.webmap.getZoom() < 15) {
 		                    display.webmap.setZoom(15);
 		                }
-		            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
+		            	if (overlay.getPosition !== undefined && typeof overlay.getPosition === 'function') {
 		            		display.webmap.setCenter(bounds.getNorthEast());
 		                }
 				    }

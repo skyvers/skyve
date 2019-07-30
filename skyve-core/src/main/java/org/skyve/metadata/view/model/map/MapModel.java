@@ -1,6 +1,6 @@
 package org.skyve.metadata.view.model.map;
 
-import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
 
@@ -15,5 +15,5 @@ public abstract class MapModel<T extends Bean> implements MetaData {
 		this.bean = bean;
 	}
 	
-	public abstract MapResult getResult(Envelope mapExtents) throws Exception;
+	public abstract MapResult getResult(Geometry mapBounds) throws Exception;
 }

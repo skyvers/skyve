@@ -1,9 +1,29 @@
 SKYVE.BizMap = function() {
 	var displays = {};
+    var wkt = new Wkt.Wkt();
 
-	var refresh = function(display, fit, auto) {
-		$.get(display.url, function(data) {
-			SKYVE.Util.scatterGMap(display, data, fit, auto);
+	var refresh = function(display, fit, auto, bounds) {
+		if (display._refreshing) { // already triggered a refresh - waiting on XHR response
+			return;
+		}
+
+		// ensure that only 1 refresh at a time occurs
+		display._refreshing = true;
+
+		var extents = '';
+		if (bounds) {
+            wkt.fromObject(bounds.getNorthEast());
+            extents = '&_ne=' + wkt.write();
+            wkt.fromObject(bounds.getSouthWest());
+            extents += '&_sw=' + wkt.write();
+		}
+		$.get(display.url + extents, function(data) {
+			try {
+				SKYVE.Util.scatterGMap(display, data, fit, auto);
+			}
+			finally {
+				display._refreshing = false;
+			}
 		});
 	};
 	
@@ -27,6 +47,7 @@ SKYVE.BizMap = function() {
 			else {
 				display = {_objects: {},
 							_overlays: [], 
+							_refreshing: false,
 							click: function(overlay, event) {
 								SKYVE.BizMap.click(this, overlay, event);
 							}};
@@ -45,12 +66,12 @@ SKYVE.BizMap = function() {
 	*/
 			if (options.loading === 'lazy') {
 				google.maps.event.addListener(display.webmap, 'zoom_changed', function() {
-console.log(this.getBounds());
-refresh(display, false, true);
+					if (! display._refreshing) {  // dont refresh if fitting bounds in a refresh already
+						refresh(display, false, false, this.getBounds());
+					}
 	            });
 	    	    google.maps.event.addListener(display.webmap, 'dragend', function() {
-console.log(this.getBounds());
-refresh(display, false, true);
+	    	    	refresh(display, false, false, this.getBounds());
 	            });
 			}
 			var url = SKYVE.Util.CONTEXT_URL + 'map?';
@@ -97,7 +118,8 @@ refresh(display, false, true);
 
 SKYVE.BizMapPicker = function() {
 	var displays = {};
-	
+    var wkt = new Wkt.Wkt();
+
 	// public
 	return {
 		create: function(options) {
@@ -153,7 +175,6 @@ SKYVE.BizMapPicker = function() {
 	                this.setDrawingMode(null);
 	
 	                display._overlays.push(event.overlay);
-	                var wkt = new Wkt.Wkt();
 	                wkt.fromObject(event.overlay);
 	                var wktValue = wkt.write();
 	                SKYVE.PF.setTextValue(elementId + '_value', wktValue);

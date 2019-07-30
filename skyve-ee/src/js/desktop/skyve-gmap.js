@@ -124,12 +124,12 @@ isc.BizMap.addMethods({
 			if (this.loading == 'lazy') {
 				var me = this;
 	            google.maps.event.addListener(this.webmap, 'zoom_changed', function() {
-console.log(this.getBounds());
-me._refresh(false, false);
+	            	if (! me._refreshing) { // dont refresh if fitting bounds in a refresh already
+	            		me._refresh(false, false, this.getBounds());
+	            	}
 	            });
 	            google.maps.event.addListener(this.webmap, 'dragend', function() {
-console.log(this.getBounds());
-me._refresh(false, false);
+	            	me._refresh(false, false, this.getBounds());
 	            });
 			}
 			
@@ -182,14 +182,14 @@ me._refresh(false, false);
 	},
 
 	rerender: function() {
-		this._refresh(false, false);
+		this._refresh(false, false, this.webmap ? this.webmap.getBounds() : null);
 	},
 	
 	resume: function() {
 		this._zoomed = false;
 	},
 	
-	_refresh: function(fit, auto) {
+	_refresh: function(fit, auto, bounds) {
 /* TODO reinstate
 		if (auto) {
 			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
@@ -245,14 +245,27 @@ me._refresh(false, false);
 		// ensure that only 1 refresh at a time occurs
 		this._refreshing = true;
 
+		var extents = '';
+		if (bounds) {
+            wkt.fromObject(bounds.getNorthEast());
+            extents = '&_ne=' + wkt.write();
+            wkt.fromObject(bounds.getSouthWest());
+            extents += '&_sw=' + wkt.write();
+		}
+		
 		var me = this;
 		isc.RPCManager.sendRequest({
 			showPrompt: true,
 			evalResult: true,
-			actionURL: url,
+			actionURL: url + extents,
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
-				SKYVE.Util.scatterGMap(me, data, fit, auto);
+				try {
+					SKYVE.Util.scatterGMap(me, data, fit, auto);
+				}
+				finally {
+					me._refreshing = false;
+				}
 			}
 		});
 	},
