@@ -19,7 +19,7 @@ SKYVE.BizMap = function() {
 		}
 		$.get(display.url + extents, function(data) {
 			try {
-				SKYVE.Util.scatterGMap(display, data, fit, auto);
+				SKYVE.GMap.scatter(display, data, fit, auto);
 			}
 			finally {
 				display._refreshing = false;
@@ -125,7 +125,7 @@ SKYVE.BizMapPicker = function() {
 		create: function(options) {
 			var mapOptions = {
 				zoom: SKYVE.Util.mapZoom,
-				center: SKYVE.Util.gmapCentre(),
+				center: SKYVE.GMap.centre(),
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
 				mapTypeControlOptions: {
 	            	style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
@@ -141,7 +141,13 @@ SKYVE.BizMapPicker = function() {
 				}
 			}
 			else {
-				display = {_objects: {}, _overlays: []};
+				display = {
+					_objects: {},
+					_overlays: [],
+					setFieldValue: function(wktValue) {
+			            SKYVE.PF.setTextValue(elementId + '_value', wktValue);
+					}
+				};
 				displays[options.elementId] = display;
 			}
 			
@@ -149,44 +155,16 @@ SKYVE.BizMapPicker = function() {
 			display.webmap = new google.maps.Map(document.getElementById(elementId), mapOptions);
 
 			if (! options.disabled) {
-				var drawingDefaults = {
-	                editable: true,
-	                strokeColor: '#990000',
-	                fillColor: '#EEFFCC',
-	                fillOpacity: 0.6
-	            };
-				display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
-	            	drawingControlOptions: {
-	                    position: google.maps.ControlPosition.LEFT_BOTTOM,
-	                    defaults: drawingDefaults,
-	                    drawingModes: SKYVE.Util.gmapDrawingModes(options.drawingTools)
-	                },
-	                markerOptions: drawingDefaults,
-	                polygonOptions: drawingDefaults,
-	                polylineOptions: drawingDefaults,
-	                rectangleOptions: drawingDefaults
-	            });
-	            display.webmap.drawingManager.setMap(display.webmap);
-	            
-	            google.maps.event.addListener(display.webmap.drawingManager, 'overlaycomplete', function (event) {
-	            	SKYVE.Util.clearGMap(display);
-	
-	                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-	                this.setDrawingMode(null);
-	
-	                display._overlays.push(event.overlay);
-	                wkt.fromObject(event.overlay);
-	                var wktValue = wkt.write();
-	                SKYVE.PF.setTextValue(elementId + '_value', wktValue);
-	            });
+				SKYVE.GMap.drawingTools(display);
+				SKYVE.GMap.geoLocator(display);
 			}
 			
-        	SKYVE.Util.clearGMap(display);
+        	SKYVE.GMap.clear(display);
 
         	// delay the mapIt call because even though the maps API is synchronous, sometimes the
 			// maps JS calls seem to beat the initialisation of the map.
 			//setTimeout(function() {isc.BizMap.loadGMap(callback)}, 100);
-        	SKYVE.Util.scatterGMapValue(display, SKYVE.PF.getTextValue(elementId + '_value'));
+        	SKYVE.GMap.scatterValue(display, SKYVE.PF.getTextValue(elementId + '_value'));
 		}
 	}
 }();

@@ -5,8 +5,6 @@ SKYVE.Util = function() {
 	var context = window.location + '';
 	context = context.substring(0, context.lastIndexOf("/") + 1)
 	
-	var wkt = null;
-
 	// public methods
 	return {
 		customer: null,
@@ -41,11 +39,63 @@ SKYVE.Util = function() {
 		        headNode[0].appendChild(scriptNode);
 		    }
 		},
-		
-		scatterGMap: function(display, // the display object that holds the map and other state variables
-								data, // the response from the map servlet to scatter
-								fit, // fit bounds
-								auto) { // auto-update, only remove or update if changed
+
+	    geoLocate: function(callback) { // a function that takes the wktString of the geolocation
+	    	if (navigator.geolocation) {
+		    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});
+	            navigator.geolocation.getCurrentPosition(
+	                function(position) {
+				    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Done', severity: 'info'}]});});
+	                	callback('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
+	                },
+	                function(error) {
+				    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: error.message, severity: 'warn'}]});});
+	                },
+	                {enableHighAccuracy: true
+	            });
+	    	}
+        }
+	}
+}();
+
+SKYVE.GMap = function() {
+	var wkt = null;
+
+	var drawingModes = function(drawingTools) { // the drawing tools specified on the geometryMap widget
+		var result = null;
+		if (drawingTools == 'point') {
+			result = [google.maps.drawing.OverlayType.MARKER];
+		}
+		else if (drawingTools == 'line') {
+			result = [google.maps.drawing.OverlayType.POLYLINE];
+		}
+		else if (drawingTools == 'polygon') {
+			result = [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+		}
+		else if (drawingTools == 'pointAndLine') {
+			result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYLINE];
+		}
+		else if (drawingTools == 'pointAndPolygon') {
+			result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+		}
+		else if (drawingTools == 'lineAndPolygon') {
+			result = [google.maps.drawing.OverlayType.POLYLINE, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
+		}
+		else {
+			result = [google.maps.drawing.OverlayType.MARKER, 
+						google.maps.drawing.OverlayType.POLYLINE,
+						google.maps.drawing.OverlayType.POLYGON,
+						google.maps.drawing.OverlayType.RECTANGLE];
+		}
+		return result;
+    };
+
+	// public methods
+	return {
+		scatter: function(display, // the display object that holds the map and other state variables
+							data, // the response from the map servlet to scatter
+							fit, // fit bounds
+							auto) { // auto-update, only remove or update if changed
 			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
 			if (! wkt) {
 				wkt = new Wkt.Wkt()
@@ -220,7 +270,7 @@ SKYVE.Util = function() {
 			}
 		},
 
-		gmapCentre: function() {
+		centre: function() {
 			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
 			if (! wkt) {
 				wkt = new Wkt.Wkt()
@@ -245,8 +295,8 @@ SKYVE.Util = function() {
 			return result;
 		},
 		
-	    scatterGMapValue: function(display, // the display object that holds the map and other state variables
-	    							value) { // the WKT string value to display
+	    scatterValue: function(display, // the display object that holds the map and other state variables
+	    						value) { // the WKT string value to display
 			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
 			if (! wkt) {
 				wkt = new Wkt.Wkt()
@@ -315,40 +365,89 @@ SKYVE.Util = function() {
 	        }
 	    },
 
-	    clearGMap: function(display) { // the display object that holds the map and other state variables
+	    clear: function(display) { // the display object that holds the map and other state variables
 	        for (var i = 0, l = display._overlays.length; i < l; i++) {
 	            display._overlays[i].setMap(null);
 	        }
 	        display._overlays.length = 0;
 	    },
 	    
-	    gmapDrawingModes: function(drawingTools) { // the drawing tools specified on the geometryMap widget
-			var result = null;
-			if (drawingTools == 'point') {
-				result = [google.maps.drawing.OverlayType.MARKER];
+	    drawingTools: function(display) {
+			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
+			if (! wkt) {
+				wkt = new Wkt.Wkt()
 			}
-			else if (drawingTools == 'line') {
-				result = [google.maps.drawing.OverlayType.POLYLINE];
-			}
-			else if (drawingTools == 'polygon') {
-				result = [google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-			}
-			else if (drawingTools == 'pointAndLine') {
-				result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYLINE];
-			}
-			else if (drawingTools == 'pointAndPolygon') {
-				result = [google.maps.drawing.OverlayType.MARKER, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-			}
-			else if (drawingTools == 'lineAndPolygon') {
-				result = [google.maps.drawing.OverlayType.POLYLINE, google.maps.drawing.OverlayType.POLYGON, google.maps.drawing.OverlayType.RECTANGLE];
-			}
-			else {
-				result = [google.maps.drawing.OverlayType.MARKER, 
-							google.maps.drawing.OverlayType.POLYLINE,
-							google.maps.drawing.OverlayType.POLYGON,
-							google.maps.drawing.OverlayType.RECTANGLE];
-			}
-			return result;
+
+			var drawingDefaults = {
+                    editable: true,
+                    strokeColor: '#990000',
+                    fillColor: '#EEFFCC',
+                    fillOpacity: 0.6
+            };
+
+			display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
+            	drawingControlOptions: {
+                    position: google.maps.ControlPosition.LEFT_BOTTOM,
+                    defaults: drawingDefaults,
+                    drawingModes: drawingModes(display.drawingTools)
+                },
+                markerOptions: drawingDefaults,
+                polygonOptions: drawingDefaults,
+                polylineOptions: drawingDefaults,
+                rectangleOptions: drawingDefaults
+            });
+            display.webmap.drawingManager.setMap(display.webmap);
+
+            google.maps.event.addListener(display.webmap.drawingManager, 'overlaycomplete', function(event) {
+            	SKYVE.GMap.clear(display);
+
+                // Set the drawing mode to "pan" (the hand) so users can immediately edit
+            	this.setDrawingMode(null);
+
+                display._overlays.push(event.overlay);
+                wkt.fromObject(event.overlay);
+                var wktValue = wkt.write();
+                display.setFieldValue(wktValue);
+            });
+	    },
+	    
+	    geoLocator: function(display) {
+            if (navigator.geolocation) {
+				var control = document.createElement('DIV');
+				control.style.backgroundColor = '#fff';
+				control.style.border = '2px solid #fff';
+				control.style.borderRadius = '3px';
+				control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+				control.style.cursor = 'pointer';
+				control.style.margin = '10px';
+				control.style.padding = '5px';
+				control.style.textAlign = 'center';
+				control.title = 'Click to set you current position from your GPS';
+				control.innerHTML = '<i class="fa fa-map-marker fa-2x"></i>';
+				control.index = 1;
+				control.addEventListener('click', function() {
+					navigator.geolocation.getCurrentPosition(
+						function(position) {
+					    	SKYVE.GMap.clear(display);
+					        // Set the drawing mode to "pan" (the hand) so users can immediately edit
+					    	display.webmap.setDrawingMode(null);
+					    	var position = {lat: position.coords.latitude, lng: position.coords.longitude};
+					    	var marker = new google.maps.Marker({
+					        	position: position,
+					            map: display.webmap
+					        });
+					    	display.setFieldValue('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
+					        me.webmap.setZoom(15);
+							display.webmap.setCenter(position);
+						},
+						function(error) {
+							alert(error.message);
+						},
+						{enableHighAccuracy : true
+					});
+				});
+				display.webmap.controls[google.maps.ControlPosition.LEFT].push(control);
+            }
 	    }
 	}
 }();
