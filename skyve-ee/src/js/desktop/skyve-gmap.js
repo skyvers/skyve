@@ -213,7 +213,7 @@ isc.BizMap.addMethods({
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
-					SKYVE.GMap.scatter(me, data, fit, false);
+					SKYVE.GMap.scatter(me, data, fit, true);
 				}
 				finally {
 					me._refreshing = false;
@@ -243,7 +243,7 @@ isc.BizMap.addMethods({
 			var sw = bounds.getSouthWest();
 			
 			contents += ne.lat() + ',' + sw.lng() + "," + sw.lat() + ',' + ne.lng() + ",'";
-			contents += this.mod + "','" + this.doc + "','" + this.bizId + "')\"/>";
+			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
 
 			this.infoWindow.setPosition(event.latLng);
     		this.infoWindow.open(this.webmap);

@@ -22,7 +22,7 @@ SKYVE.BizMap = function() {
 		}
 		$.get(display.url + extents, function(data) {
 			try {
-				SKYVE.GMap.scatter(display, data, fit, false);
+				SKYVE.GMap.scatter(display, data, fit, true);
 			}
 			finally {
 				display._refreshing = false;

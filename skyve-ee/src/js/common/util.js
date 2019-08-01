@@ -110,7 +110,14 @@ SKYVE.GMap = function() {
 			if (delta) {
 				// remove overlays not present in the data
 				for (var bizId in display._objects) {
-					if (! items.containsProperty('bizId', bizId)) { // this is SC API
+					var found = false;
+					for (var i = 0, l = items.length; i < l; i++) {
+						if (items[i].bizId === bizId) {
+							found = true;
+							break;
+						}
+					}
+					if (! found) {
 						var deletedObject = display._objects[bizId];
 						for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
 							deletedObject.overlays[i].setMap(null);
@@ -160,7 +167,7 @@ SKYVE.GMap = function() {
 						object = null;
 					}
 				}
-				if (object) {} else {
+				if (! object) { // object could have been nulled just above 
 					object = {overlays: []};
 					for (var j = 0, m = item.features.length; j < m; j++) {
 						var feature = item.features[j];
