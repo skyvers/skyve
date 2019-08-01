@@ -95,15 +95,19 @@ SKYVE.GMap = function() {
 		scatter: function(display, // the display object that holds the map and other state variables
 							data, // the response from the map servlet to scatter
 							fit, // fit bounds
-							auto) { // auto-update, only remove or update if changed
+							delta) { // only remove or update if changed
 			// instantiate WKT if it hasn't been already (at this point Wkt script is loaded)
 			if (! wkt) {
 				wkt = new Wkt.Wkt()
 			}
 			
 			var items = data.items;
+			// if there is no data, there is probably an error, so just bug out
+			if (! items) {
+				return;
+			}
 			
-			if (auto) {
+			if (delta) {
 				// remove overlays not present in the data
 				for (var bizId in display._objects) {
 					if (! items.containsProperty('bizId', bizId)) { // this is SC API
@@ -448,6 +452,44 @@ SKYVE.GMap = function() {
 				});
 				display.webmap.controls[google.maps.ControlPosition.LEFT].push(control);
             }
+	    },
+
+	    refreshControls: function(display) {
+			var control = document.createElement('DIV');
+			control.style.backgroundColor = '#fff';
+			control.style.border = '2px solid #fff';
+			control.style.borderRadius = '3px';
+			control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+			control.style.cursor = 'pointer';
+			control.style.margin = '10px';
+			control.style.padding = '5px';
+			control.style.textAlign = 'center';
+			control.title = 'Click to set you current position from your GPS';
+			control.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
+									'<input type="checkbox" checked><label>Refresh</label>';
+			control.index = 1;
+			control.children[0].addEventListener('change', function() {
+				display.refreshTime = this.value;
+				if (display._refreshRequired) {
+					if (display._intervalId) {
+						clearInterval(display._intervalId);
+					}
+					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+				}
+			});
+			control.children[1].addEventListener('click', function() {
+				display._refreshRequired = this.checked;
+				if (display._intervalId) {
+					clearInterval(display._intervalId);
+					display._intervalId = null;
+				}
+				if (display._refreshRequired) {
+					display.rerender();
+					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+				}
+			});
+
+			display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(control);
 	    }
 	}
 }();

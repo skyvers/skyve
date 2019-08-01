@@ -31,10 +31,11 @@ isc.BizMap.addClassMethods({
 	}
 });
 isc.BizMap.addMethods({
+	// params loading, refreshTime, showRefresh
 	init: function(config) {
-		this._refreshTime = 10;
 		this._refreshRequired = true; // set via the map UI
 		this._refreshing = false; // stop multiple refreshes
+		this._zoomed = false; // indicates that we don't want refreshes as we are zoomed on an overlay
 		this.width = '100%';
 		this.height = '100%';
 		this.styleName = 'googleMapDivParent',
@@ -42,6 +43,7 @@ isc.BizMap.addMethods({
 		this.redrawOnResize = false;
 		this.Super("init", arguments);
 		this._objects = {};
+		this._intervalId = null; // the interval to stop on refresh checkbox click
 	},
 
 	getInnerHTML: function() {
@@ -89,7 +91,7 @@ isc.BizMap.addMethods({
 
 				this._modelName = null;
 			}
-			this._refresh(true, false);
+			this._refresh(true);
 		}
 		else {
 			this.delayCall('setDataSource', arguments, 100);
@@ -112,94 +114,50 @@ isc.BizMap.addMethods({
 
 			this.infoWindow = new google.maps.InfoWindow({content: ''});
 
-/* TODO reinstate
-			var control = document.createElement('DIV');
-			control.id = this.ID + '_form';
-			control.style.width = '300px';
-*/
 			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
-/* TODO reinstate
-			this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
-*/
+			
+			if (this.showRefresh) {
+				SKYVE.GMap.refreshControls(this);
+			}
+
 			if (this.loading == 'lazy') {
 				var me = this;
 	            google.maps.event.addListener(this.webmap, 'zoom_changed', function() {
 	            	if (! me._refreshing) { // dont refresh if fitting bounds in a refresh already
-	            		me._refresh(false, false, this.getBounds());
+	            		me._refresh(false, bounded);
 	            	}
 	            });
 	            google.maps.event.addListener(this.webmap, 'dragend', function() {
-	            	me._refresh(false, false, this.getBounds());
+	            	me._refresh(false, bounded);
 	            });
 			}
 			
-			this._refresh(true, false);
-			this.delayCall('_addForm', null, 1000);
+			// ensure this refresh below kick off a new delayCall
+			this._refresh(false, (this.loading == 'lazy'));
+
+			if (this._intervalId) {
+				clearInterval(this._intervalId);
+				this._intervalId = null;
+			}
+			if ((this.refreshTime > 0) && this._refreshRequired) {
+				this._intervalId = setInterval(this.rerender.bind(this), this.refreshTime * 1000);
+			}
 		}
 		else {
 			this.delayCall('build', null, 100);
 		}
 	},
-	
-	_addForm: function() {
-/* TODO reinstate
-		var me = this;
-		isc.DynamicForm.create({
-			autoDraw: true,
-			htmlElement: this.ID + '_form',
-			position: 'relative',
-			width: 260,
-			numCols: 4,
-			colWidths: [130, 50, 10, 70],
-			backgroundColor: "white",
-			border: "1px solid #c0c0c0",
-			showShadow: true,
-			shadowSoftness: 10,
-			shadowOffset: 0,
-		    fields: [
-		        {name: 'refreshTime',
-		        	title: "Refresh Time (secs)",
-		        	required: true,
-		        	editorType: "spinner",
-		        	defaultValue: 10,
-		        	min: 5,
-		        	max: 600,
-		        	step: 1,
-		        	width: 50,
-		        	changed: function(form, item, value) {
-		        		me._refreshTime = parseInt(value);
-		        	}},
-		        {name: 'refresh',
-		        	title: "Refresh",
-		        	type: "checkbox",
-		        	defaultValue: true,
-		        	changed: function(form, item, value) {
-		        		me._refreshRequired = value;
-		        	}}
-		    ]
-		});
-*/
-	},
 
 	rerender: function() {
-		this._refresh(false, false, this.webmap ? this.webmap.getBounds() : null);
+		this._refresh(false, (this.loading == 'lazy'));
 	},
 	
 	resume: function() {
 		this._zoomed = false;
 	},
 	
-	_refresh: function(fit, auto, bounds) {
-/* TODO reinstate
-		if (auto) {
-			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
-		}
-		else if (this._called) {} else {
-			this._called = true;
-			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
-		}
-*/
-		if (! this._refreshRequired) { // map UI has refresh checked off
+	_refresh: function(fit, bounded) {
+		if (! this._refreshRequired) { // refresh was switched off in the UI
 			return;
 		}
 		if (this._zoomed) { // operator is zoomed-in so no point refreshing this now
@@ -211,7 +169,7 @@ isc.BizMap.addMethods({
 		if (! this.isDrawn()) { // widget isn't even drawn yet
 			return;
 		}
-		if (! this.isVisible()) { // widget is invisible (from condition on the UI)
+		if (! this.isVisible()) { // widget is invisible (from condition on the UI or UI is not displayed at the moment)
 			return;
 		}
 		
@@ -237,11 +195,14 @@ isc.BizMap.addMethods({
 		this._refreshing = true;
 
 		var extents = '';
-		if (bounds) {
-            wkt.fromObject(bounds.getNorthEast());
-            extents = '&_ne=' + wkt.write();
-            wkt.fromObject(bounds.getSouthWest());
-            extents += '&_sw=' + wkt.write();
+		if (bounded) {
+			if (this.webmap) {
+				var bounds = this.webmap.getBounds();
+	            wkt.fromObject(bounds.getNorthEast());
+	            extents = '&_ne=' + wkt.write();
+	            wkt.fromObject(bounds.getSouthWest());
+	            extents += '&_sw=' + wkt.write();
+			}
 		}
 		
 		var me = this;
@@ -252,7 +213,7 @@ isc.BizMap.addMethods({
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
-					SKYVE.GMap.scatter(me, data, fit, auto);
+					SKYVE.GMap.scatter(me, data, fit, false);
 				}
 				finally {
 					me._refreshing = false;

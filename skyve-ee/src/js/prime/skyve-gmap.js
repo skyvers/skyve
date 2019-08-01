@@ -2,7 +2,7 @@ SKYVE.BizMap = function() {
 	var displays = {};
     var wkt = new Wkt.Wkt();
 
-	var refresh = function(display, fit, auto, bounds) {
+	var refresh = function(display, fit, bounds) {
 		if (display._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}
@@ -19,7 +19,7 @@ SKYVE.BizMap = function() {
 		}
 		$.get(display.url + extents, function(data) {
 			try {
-				SKYVE.GMap.scatter(display, data, fit, auto);
+				SKYVE.GMap.scatter(display, data, fit, false);
 			}
 			finally {
 				display._refreshing = false;
@@ -67,11 +67,11 @@ SKYVE.BizMap = function() {
 			if (options.loading === 'lazy') {
 				google.maps.event.addListener(display.webmap, 'zoom_changed', function() {
 					if (! display._refreshing) {  // dont refresh if fitting bounds in a refresh already
-						refresh(display, false, false, this.getBounds());
+						refresh(display, false, this.getBounds());
 					}
 	            });
 	    	    google.maps.event.addListener(display.webmap, 'dragend', function() {
-	    	    	refresh(display, false, false, this.getBounds());
+	    	    	refresh(display, false, this.getBounds());
 	            });
 			}
 			var url = SKYVE.Util.CONTEXT_URL + 'map?';
@@ -82,8 +82,8 @@ SKYVE.BizMap = function() {
 				url += '_mod=' + options.moduleName + '&_q=' + options.queryName + '&_geo=' + options.geometryBinding;
 			}
 			display.url = url;
-			refresh(display, true, false);
-//				this.delayCall('_addForm', null, 1000);
+			refresh(display, true);
+
 			return display;
 		},
 		

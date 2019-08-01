@@ -3183,26 +3183,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Creates a "variable" name for a document. E.g. Audit will return audit. Lowercases
-	 * the first letter of the document name. Also checks if the variable name is
-	 * a Java reserved word, and prefixes it with an underscore if it is.
-	 * 
-	 * @param documentName The name of the document to generate a variable name for
-	 * @return The variable name from the document.
-	 */
-	@SuppressWarnings("unused")
-	private static String getVariableNameForDocument(final String documentName) {
-		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
-
-		// check this is not a Java reserved word
-		if (JAVA_RESERVED_WORDS.contains(variableName)) {
-			return "_" + variableName;
-		}
-
-		return variableName;
-	}
-
-	/**
 	 * Checks if a file in the TEST_PATH already exists for the test about
 	 * to be created in the GENERATED_TEST_PATH.
 	 * 

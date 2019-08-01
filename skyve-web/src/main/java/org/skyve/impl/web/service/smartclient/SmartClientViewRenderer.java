@@ -598,7 +598,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view,loading:'");
 		LoadingType loading = map.getLoading();
-		code.append((loading == null) ? LoadingType.eager : loading).append("'});");
+		code.append((loading == null) ? LoadingType.eager : loading).append("',refreshTime:");
+		Integer refreshTime = map.getRefreshTimeInSeconds();
+		code.append((refreshTime == null) ? 0 : refreshTime.intValue()).append(",showRefresh:");
+		Boolean showRefreshControls = map.getShowRefreshControls();
+		code.append((Boolean.TRUE.equals(showRefreshControls))).append("});");
 		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
