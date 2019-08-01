@@ -165,10 +165,20 @@ public class NoOpViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
 	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 	
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		// no-op

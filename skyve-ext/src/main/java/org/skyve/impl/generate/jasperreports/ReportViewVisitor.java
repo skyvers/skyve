@@ -1025,8 +1025,18 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// No action required
+	}
+	
+	@Override
 	public void visitGeometryMap(GeometryMap arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+	}
+
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// No action required
 	}
 	
 	@Override

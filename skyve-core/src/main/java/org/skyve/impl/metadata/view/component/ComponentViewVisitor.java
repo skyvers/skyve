@@ -247,12 +247,22 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+
+	@Override
 	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		bound(geometry);
 		disable(geometry);
 		invisible(geometry);
 	}
 
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+	
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		invisible(map);

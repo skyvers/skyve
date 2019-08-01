@@ -608,6 +608,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
+	public void renderBoundColumnGeometry(Geometry geometry) {
+		dataWidgetColumnInputWidget = geometry;
+	}
+	
+	@Override
+	public void renderedBoundColumnGeometry(Geometry geometry) {
+		// do nothing
+	}
+	
+	@Override
 	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
 		size(geometry, null, code);
@@ -626,7 +636,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderGeometryMap(GeometryMap geometry) {
+	public void renderedFormGeometry(Geometry geometry) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderFormGeometryMap(GeometryMap geometry) {
 		preProcessFormItem(geometry, "geometryMap");
 
 		// If no height, make the map at least 150px high so that all the map controls fit
@@ -651,8 +666,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderBoundColumnGeometry(Geometry geometry) {
-		dataWidgetColumnInputWidget = geometry;
+	public void renderedFormGeometryMap(GeometryMap geometry) {
+		// do nothing
 	}
 	
 	@Override

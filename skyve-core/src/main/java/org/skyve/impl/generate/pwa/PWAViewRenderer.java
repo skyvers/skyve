@@ -476,28 +476,49 @@ public class PWAViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
-		RenderedComponent l = cr.label(null, "geometry"); // TODO geometry
+//		String title = getCurrentWidgetLabel();
+//		boolean required = isCurrentWidgetRequired();
+		RenderedComponent c = cr.label(null, "geometry"); // TODO geometry
+		eventSource = c;
 	    addComponent(null, 
 	    				false, 
 	    				geometry.getInvisibleConditionName(), 
 	    				null,
-	    				l, 
+	    				c, 
 	    				geometry.getPixelWidth(), 
 	    				null, 
 	    				null);
 	}
 
 	@Override
-	public void renderGeometryMap(GeometryMap geometry) {
-		RenderedComponent l = cr.label(null, "geometryMap"); // TODO geometryMap
+	public void renderedBoundColumnGeometry(Geometry geometry) {
+		renderedFormGeometry(geometry);
+	}
+
+	@Override
+	public void renderedFormGeometry(Geometry geometry) {
+		eventSource = null;
+	}
+	
+	@Override
+	public void renderFormGeometryMap(GeometryMap geometry) {
+//		String title = getCurrentWidgetLabel();
+//		boolean required = isCurrentWidgetRequired();
+		RenderedComponent c = cr.label(null, "geometryMap"); // TODO geometryMap
+		eventSource = c;
 	    addComponent(null, 
 	    				false, 
 	    				geometry.getInvisibleConditionName(), 
 	    				null,
-	    				l, 
+	    				c, 
 	    				geometry.getPixelWidth(), 
 	    				null, 
 	    				null);
+	}
+
+	@Override
+	public void renderedFormGeometryMap(GeometryMap geometry) {
+		eventSource = null;
 	}
 	
 	@Override

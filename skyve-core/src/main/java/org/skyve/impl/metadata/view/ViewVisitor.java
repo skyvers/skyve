@@ -155,9 +155,15 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitGeometry(Geometry geometry,
 										boolean parentVisible,
 										boolean parentEnabled);
+	public abstract void visitedGeometry(Geometry geometry,
+											boolean parentVisible,
+											boolean parentEnabled);
 	public abstract void visitGeometryMap(GeometryMap geometry,
 											boolean parentVisible,
 											boolean parentEnabled);
+	public abstract void visitedGeometryMap(GeometryMap geometry,
+												boolean parentVisible,
+												boolean parentEnabled);
 	public abstract void visitMap(MapDisplay map,
 									boolean parentVisible,
 									boolean parentEnabled);
@@ -477,10 +483,13 @@ public abstract class ViewVisitor extends ActionVisitor {
 		else if (widget instanceof Geometry) {
 			Geometry geometry = (Geometry) widget;
 			visitGeometry(geometry, parentVisible, parentEnabled);
+			visitFocusable(geometry, parentVisible, parentEnabled);
+			visitChangeable(geometry, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof GeometryMap) {
 			GeometryMap geometry = (GeometryMap) widget;
 			visitGeometryMap(geometry, parentVisible, parentEnabled);
+			visitChangeable(geometry, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof MapDisplay) {
 			MapDisplay map = (MapDisplay) widget;

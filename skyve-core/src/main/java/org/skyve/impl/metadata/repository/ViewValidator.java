@@ -692,6 +692,11 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to validate
+	}
+	
+	@Override
 	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "GeometryMap " + geometry.getBinding();
 		validateBinding(null,
@@ -706,6 +711,11 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
 	}
 
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to validate
+	}
+	
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();

@@ -1079,6 +1079,13 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// do nothing
+	}
+	
+	@Override
 	public void visitGeometryMap(GeometryMap geometry,
 									boolean parentVisible,
 									boolean parentEnabled) {
@@ -1092,6 +1099,13 @@ class ViewJSONManipulator extends ViewVisitor {
 		addCondition(geometry.getDisabledConditionName());
 	}
 
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// do nothing
+	}
+	
 	@Override
 	public void visitMap(MapDisplay map,
 							boolean parentVisible,

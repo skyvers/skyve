@@ -691,12 +691,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponent c = cb.geometry(null,
-										dataWidgetVar,
-										geometry,
-										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-										title,
-										required);
+		UIComponentBase c = (UIComponentBase) cb.geometry(null,
+															dataWidgetVar,
+															geometry,
+															(currentForm == null) ? 
+																	null : 
+																	currentForm.getDisabledConditionName(),
+															title,
+															required);
+		eventSource = c;
         addComponent(title, 
         				false, 
         				geometry.getInvisibleConditionName(), 
@@ -708,16 +711,29 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderGeometryMap(GeometryMap geometry) {
+	public void renderedBoundColumnGeometry(Geometry geometry) {
+		renderedFormGeometry(geometry);
+	}
+
+	@Override
+	public void renderedFormGeometry(Geometry geometry) {
+		eventSource = null;
+	}
+	
+	@Override
+	public void renderFormGeometryMap(GeometryMap geometry) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponent c = cb.geometryMap(null,
-										geometry,
-										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-										title,
-										required);
-        addComponent(title, 
+		UIComponentBase c = (UIComponentBase) cb.geometryMap(null,
+																geometry,
+																(currentForm == null) ? 
+																		null : 
+																		currentForm.getDisabledConditionName(),
+																title,
+																required);
+		eventSource = c;
+		addComponent(title, 
         				false, 
         				geometry.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -727,6 +743,11 @@ public class FacesViewRenderer extends ViewRenderer {
         				null);
 	}
 
+	@Override
+	public void renderedFormGeometryMap(GeometryMap geometry) {
+		eventSource = null;
+	}
+	
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		renderDialogButton(label, button);

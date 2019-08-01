@@ -1898,6 +1898,9 @@ isc.GeometryItem.addMethods({
 	// called from BizMapPicker
 	setValueFromPicker: function(newValue) {
 		this.setValue(newValue);
+		if (this.changed) {
+			this.changed(this.form, this, newValue);
+		}
 	}
 });
 isc.SimpleType.create({
@@ -1932,7 +1935,7 @@ isc.GeometryMapItem.addMethods({
 	},
 	
 	showValue: function(displayValue, dataValue) {
-		if (! this.valueSetFromPicker) {
+		if (! this._valueSetFromPicker) {
 			var options = {
 					field: this, 
 					width: (this.width ? this.width : '100%'),
@@ -1947,9 +1950,12 @@ isc.GeometryMapItem.addMethods({
 	},
 	
 	setValueFromPicker: function(newValue) {
-		this.valueSetFromPicker = true;
+		this._valueSetFromPicker = true;
 		this.setValue(newValue);
-		delete this.valueSetFromPicker;
+		delete this._valueSetFromPicker;
+		if (this.changed) {
+			this.changed(this.form, this, newValue);
+		}
 	}
 });
 

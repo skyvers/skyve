@@ -705,14 +705,32 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderBoundColumnGeometry(Geometry geometry);
 	public abstract void renderFormGeometry(Geometry geometry);
+	public abstract void renderedBoundColumnGeometry(Geometry geometry);
+	public abstract void renderedFormGeometry(Geometry geometry);
 
 	@Override
-	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
-		renderGeometryMap(geometry);
+	public final void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		if (currentBoundColumn != null) {
+			renderedBoundColumnGeometry(geometry);
+		}
+		else {
+			renderedFormGeometry(geometry);
+		}
 	}
 	
-	public abstract void renderGeometryMap(GeometryMap geometry);
+	@Override
+	public final void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
+		renderFormGeometryMap(geometry);
+	}
+	
+	public abstract void renderFormGeometryMap(GeometryMap geometry);
+	public abstract void renderedFormGeometryMap(GeometryMap geometry);
+	
+	@Override
+	public final void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		renderedFormGeometryMap(geometry);
+	}
 	
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
