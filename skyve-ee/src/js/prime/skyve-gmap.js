@@ -64,10 +64,41 @@ SKYVE.BizMap = function() {
 					},
 					rerender: function() {
 						refresh(this, false);
-					}
+					},
+					moduleName: options.moduleName,
+					queryName: options.queryName,
+					geometryBinding: options.geometryBinding,
+					documentName: options.documentName,
+					modelName: options.modelName
 				};
 				displays[options.elementId] = display;
 			}
+
+			// if there is an entry in session storage, use it
+			var inSessionStorage = false;
+			if (display.documentName) {
+				var key = display.moduleName + '_' + display.documentName + '_' + display.modelName;
+				var value = sessionStorage.getItem(key);
+				if (value) {
+					inSessionStorage = true;
+					var settings = JSON.parse(value);
+					mapOptions.center = settings.centre;
+					mapOptions.zoom = settings.zoom;
+					sessionStorage.removeItem(key);
+				}
+			}
+			else {
+				var key = display.moduleName + '_' + display.queryName + '_' + display.geometryBinding;
+				var value = sessionStorage.getItem(key);
+				if (value) {
+					inSessionStorage = true;
+					var settings = JSON.parse(value);
+					mapOptions.center = settings.centre;
+					mapOptions.zoom = settings.zoom;
+					sessionStorage.removeItem(key);
+				}
+			}
+
 			display.infoWindow = new google.maps.InfoWindow({content: ''});
 
 			display.webmap = new google.maps.Map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
@@ -94,7 +125,7 @@ SKYVE.BizMap = function() {
 				url += '_mod=' + options.moduleName + '&_q=' + options.queryName + '&_geo=' + options.geometryBinding;
 			}
 			display.url = url;
-			refresh(display, true);
+			refresh(display, (! inSessionStorage)); // fit to bounds if not in sessionStorage
 
 			if ((display.refreshTime > 0) && display._refreshRequired) {
 				display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
@@ -108,7 +139,18 @@ SKYVE.BizMap = function() {
 		},
 		
 		click: function(display, overlay, event) {
-	    	var contents = overlay.infoMarkup;
+			if (display.documentName) {
+				sessionStorage.setItem(display.moduleName + '_' + display.documentName + '_' + display.modelName,
+										'{"centre":' + JSON.stringify(display.webmap.getCenter().toJSON()) + 
+											',"zoom":' + display.webmap.getZoom() + '}');
+			}
+			else {
+				sessionStorage.setItem(display.moduleName + '_' + display.queryName + '_' + display.geometryBinding,
+										'{"centre":' + JSON.stringify(display.webmap.getCenter().toJSON()) + 
+											',"zoom":' + display.webmap.getZoom() + '}');
+			}
+			
+			var contents = overlay.infoMarkup;
 	    	contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
 			contents += '?m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
 	    	if (overlay.getPosition) {

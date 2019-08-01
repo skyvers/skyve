@@ -597,6 +597,9 @@ public class FacesView<T extends Bean> extends Harness {
 			result.append("',refreshTime:").append((refreshTimeInSeconds == null) ? 0 : refreshTimeInSeconds.intValue());
 			result.append(",showRefresh:").append(Boolean.TRUE.equals(showRefresh));
 			result.append(",_c:'").append(getWebContext().getWebId());
+			Bean bean = getCurrentBean().getBean();
+			result.append("',moduleName:'").append(bean.getBizModule());
+			result.append("',documentName:'").append(bean.getBizDocument());
 			result.append("',modelName:'").append(mapModelName);
 		}
 		else {
