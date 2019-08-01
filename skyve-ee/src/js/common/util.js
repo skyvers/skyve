@@ -466,7 +466,7 @@ SKYVE.GMap = function() {
 			control.style.textAlign = 'center';
 			control.title = 'Click to set you current position from your GPS';
 			control.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
-									'<input type="checkbox" checked><label>Refresh</label>';
+									'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
 			control.index = 1;
 			control.children[0].addEventListener('change', function() {
 				display.refreshTime = this.value;

@@ -582,6 +582,8 @@ public class FacesView<T extends Bean> extends Harness {
 								String geometryBinding,
 								String mapModelName,
 								String loading,
+								Integer refreshTimeInSeconds,
+								Boolean showRefresh,
 								String geometryInputTypeString,
 								boolean disabled,
 								boolean includeScriptTag) {
@@ -592,7 +594,9 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 		result.append("SKYVE.PF.gmap({elementId:'").append(elementId);
 		if (mapModelName != null) {
-			result.append("',_c:'").append(getWebContext().getWebId());
+			result.append("',refreshTime:").append((refreshTimeInSeconds == null) ? 0 : refreshTimeInSeconds.intValue());
+			result.append(",showRefresh:").append(Boolean.TRUE.equals(showRefresh));
+			result.append(",_c:'").append(getWebContext().getWebId());
 			result.append("',modelName:'").append(mapModelName);
 		}
 		else {

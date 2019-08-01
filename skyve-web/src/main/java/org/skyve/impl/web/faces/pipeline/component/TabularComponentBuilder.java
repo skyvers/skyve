@@ -806,7 +806,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append("', '").append(geometryBinding).append("', null");
 		}
 		LoadingType loading = map.getLoading();
-		value.append(", '").append((loading == null) ? LoadingType.eager : loading).append("', null, false, true)}");
+		value.append(", '").append((loading == null) ? LoadingType.eager : loading);
+		value.append("', ").append(map.getRefreshTimeInSeconds());
+		value.append(", ").append(map.getShowRefreshControls());
+		value.append(", null, false, true)}");
 		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
 		result.getChildren().add(script);
 		
@@ -990,7 +993,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 															boolean includeScriptTag) {
 		StringBuilder value = new StringBuilder(128);
 		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
-		value.append("', null, null, '").append(geometryBinding).append("', null, 'eager', ");
+		value.append("', null, null, '").append(geometryBinding).append("', null, 'eager', null, null,");
 		if (type == null) {
 			value.append("null, ");
 		}

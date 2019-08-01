@@ -2,7 +2,10 @@ SKYVE.BizMap = function() {
 	var displays = {};
     var wkt = new Wkt.Wkt();
 
-	var refresh = function(display, fit, bounds) {
+	var refresh = function(display, fit) {
+		if (! display._refreshRequired) { // refresh was switched off in the UI
+			return;
+		}
 		if (display._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}
@@ -11,7 +14,7 @@ SKYVE.BizMap = function() {
 		display._refreshing = true;
 
 		var extents = '';
-		if (bounds) {
+		if (display.loading == 'lazy') {
             wkt.fromObject(bounds.getNorthEast());
             extents = '&_ne=' + wkt.write();
             wkt.fromObject(bounds.getSouthWest());
@@ -43,35 +46,44 @@ SKYVE.BizMap = function() {
 					mapOptions.center = display.webmap.getCenter();
 					mapOptions.mapTypeId = display.webmap.getMapTypeId();
 				}
+				if (display._intervalId) {
+					clearInterval(display._intervalId);
+					display._intervalId = null;
+				}
 			}
 			else {
-				display = {_objects: {},
-							_overlays: [], 
-							_refreshing: false,
-							click: function(overlay, event) {
-								SKYVE.BizMap.click(this, overlay, event);
-							}};
+				display = {
+					_objects: {},
+					_overlays: [], 
+					refreshTime: options.refreshTime,
+					_refreshRequired: true, // set via the map UI
+					_refreshing: false, // stop multiple refreshes
+					_intervalId: null, // the interval to stop on refresh checkbox click
+					click: function(overlay, event) {
+						SKYVE.BizMap.click(this, overlay, event);
+					},
+					rerender: function() {
+						refresh(this, false);
+					}
+				};
 				displays[options.elementId] = display;
 			}
 			display.infoWindow = new google.maps.InfoWindow({content: ''});
 
-	/* TODO reinstate
-				var control = document.createElement('DIV');
-				control.id = this.ID + '_form';
-				control.style.width = '300px';
-	*/
 			display.webmap = new google.maps.Map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
-	/* TODO reinstate
-				this.webmap.controls[google.maps.ControlPosition.TOP].push(control);
-	*/
+
+			if (options.showRefresh) {
+				SKYVE.GMap.refreshControls(display);
+			}
+
 			if (options.loading === 'lazy') {
 				google.maps.event.addListener(display.webmap, 'zoom_changed', function() {
 					if (! display._refreshing) {  // dont refresh if fitting bounds in a refresh already
-						refresh(display, false, this.getBounds());
+						refresh(display, false);
 					}
 	            });
 	    	    google.maps.event.addListener(display.webmap, 'dragend', function() {
-	    	    	refresh(display, false, this.getBounds());
+	    	    	refresh(display, false);
 	            });
 			}
 			var url = SKYVE.Util.CONTEXT_URL + 'map?';
@@ -84,6 +96,10 @@ SKYVE.BizMap = function() {
 			display.url = url;
 			refresh(display, true);
 
+			if ((display.refreshTime > 0) && display._refreshRequired) {
+				display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+			}
+			
 			return display;
 		},
 		

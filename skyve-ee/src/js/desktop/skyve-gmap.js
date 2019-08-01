@@ -124,16 +124,15 @@ isc.BizMap.addMethods({
 				var me = this;
 	            google.maps.event.addListener(this.webmap, 'zoom_changed', function() {
 	            	if (! me._refreshing) { // dont refresh if fitting bounds in a refresh already
-	            		me._refresh(false, bounded);
+	            		me._refresh(false);
 	            	}
 	            });
 	            google.maps.event.addListener(this.webmap, 'dragend', function() {
-	            	me._refresh(false, bounded);
+	            	me._refresh(false);
 	            });
 			}
 			
-			// ensure this refresh below kick off a new delayCall
-			this._refresh(false, (this.loading == 'lazy'));
+			this._refresh(true);
 
 			if (this._intervalId) {
 				clearInterval(this._intervalId);
@@ -149,14 +148,14 @@ isc.BizMap.addMethods({
 	},
 
 	rerender: function() {
-		this._refresh(false, (this.loading == 'lazy'));
+		this._refresh(false);
 	},
 	
 	resume: function() {
 		this._zoomed = false;
 	},
 	
-	_refresh: function(fit, bounded) {
+	_refresh: function(fit) {
 		if (! this._refreshRequired) { // refresh was switched off in the UI
 			return;
 		}
@@ -194,8 +193,9 @@ isc.BizMap.addMethods({
 		// ensure that only 1 refresh at a time occurs
 		this._refreshing = true;
 
+		// add the bounds if we are in lazy loading mode
 		var extents = '';
-		if (bounded) {
+		if (this.loading == 'lazy') {
 			if (this.webmap) {
 				var bounds = this.webmap.getBounds();
 	            wkt.fromObject(bounds.getNorthEast());
