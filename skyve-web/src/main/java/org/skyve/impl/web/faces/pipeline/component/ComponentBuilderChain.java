@@ -426,13 +426,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent geometry(UIComponent component,
-									String dataWidgetVar,
-									Geometry geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent geometry(EventSourceComponent component,
+											String dataWidgetVar,
+											Geometry geometry,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, required);
 		}
@@ -440,12 +440,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent geometryMap(UIComponent component,
-									GeometryMap geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent geometryMap(EventSourceComponent component,
+												GeometryMap geometry,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, required);
 		}
@@ -501,8 +501,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent listMembership(UIComponent component, ListMembership membership) {
-		UIComponent result = component;
+	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listMembership(result, membership);
 		}
@@ -510,13 +510,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent checkBox(UIComponent component,
-									String dataWidgetVar,
-									CheckBox checkBox,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent checkBox(EventSourceComponent component,
+											String dataWidgetVar,
+											CheckBox checkBox,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.checkBox(result,
 										dataWidgetVar,
@@ -529,13 +529,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent colourPicker(UIComponent component,
-										String dataWidgetVar,
-										ColourPicker colour,
-										String formDisabledConditionName,
-										String title,
-										boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent colourPicker(EventSourceComponent component,
+												String dataWidgetVar,
+												ColourPicker colour,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.colourPicker(result,
 											dataWidgetVar,
@@ -548,13 +548,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent combo(UIComponent component,
-								String dataWidgetVar,
-								Combo combo,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent combo(EventSourceComponent component,
+										String dataWidgetVar,
+										Combo combo,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, required);
 		}
@@ -604,15 +604,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent lookupDescription(UIComponent component,
-											String dataWidgetVar,
-											LookupDescription lookup,
-											String formDisabledConditionName,
-											String title,
-											boolean required,
-											String displayBinding,
-											QueryDefinition query) {
-		UIComponent result = component;
+	public EventSourceComponent lookupDescription(EventSourceComponent component,
+													String dataWidgetVar,
+													LookupDescription lookup,
+													String formDisabledConditionName,
+													String title,
+													boolean required,
+													String displayBinding,
+													QueryDefinition query) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.lookupDescription(result,
 												dataWidgetVar,
@@ -627,13 +627,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent password(UIComponent component,
-									String dataWidgetVar,
-									Password password,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent password(EventSourceComponent component,
+											String dataWidgetVar,
+											Password password,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, required);
 		}
@@ -641,13 +641,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent radio(UIComponent component,
-								String dataWidgetVar,
-								Radio radio,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent radio(EventSourceComponent component,
+										String dataWidgetVar,
+										Radio radio,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, required);
 		}
@@ -655,13 +655,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent richText(UIComponent component,
-									String dataWidgetVar,
-									RichText text,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent richText(EventSourceComponent component,
+											String dataWidgetVar,
+											RichText text,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, required);
 		}
@@ -669,13 +669,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component,
-								String dataWidgetVar,
-								Spinner spinner,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
-		UIComponent result = component;
+	public EventSourceComponent spinner(EventSourceComponent component,
+											String dataWidgetVar,
+											Spinner spinner,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required);
 		}
@@ -683,14 +683,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent textArea(UIComponent component,
-									String dataWidgetVar,
-									TextArea text,
-									String formDisabledConditionName,
-									String title,
-									boolean required,
-									Integer length) {
-		UIComponent result = component;
+	public EventSourceComponent textArea(EventSourceComponent component,
+											String dataWidgetVar,
+											TextArea text,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											Integer length) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, required, length);
 		}
@@ -698,17 +698,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent text(UIComponent component,
-								String dataWidgetVar,
-								TextField text,
-								String formDisabledConditionName,
-								String title,
-								boolean required,
-								Integer length,
-								Converter<?> converter,
-								Format<?> format,
-								javax.faces.convert.Converter facesConverter) {
-		UIComponent result = component;
+	public EventSourceComponent text(EventSourceComponent component,
+										String dataWidgetVar,
+										TextField text,
+										String formDisabledConditionName,
+										String title,
+										boolean required,
+										Integer length,
+										Converter<?> converter,
+										Format<?> format,
+										javax.faces.convert.Converter facesConverter) {
+		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.text(result,
 									dataWidgetVar,

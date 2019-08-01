@@ -849,12 +849,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent geometry(UIComponent component,
-									String dataWidgetVar,
-									Geometry geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent geometry(EventSourceComponent component,
+											String dataWidgetVar,
+											Geometry geometry,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
@@ -894,7 +894,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							geometry.getType(),
 							geometry.getDisabledConditionName(),
 							formDisabledConditionName);
-		return result;
+		return new EventSourceComponent(result, textField);
 	}
 
 	/**
@@ -955,11 +955,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent geometryMap(UIComponent component,
-									GeometryMap geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent geometryMap(EventSourceComponent component,
+												GeometryMap geometry,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
 		if (component != null) {
 			return component;
 		}
@@ -982,7 +982,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																		true));
 		result.getChildren().add(script);
 		
-		return result;
+		return new EventSourceComponent(result, hidden);
 	}
 	
 	private ValueExpression generateMapScriptExpression(String mapDivClientId,
@@ -1615,7 +1615,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent listMembership(UIComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
 		if (component != null) {
 			return component;
 		}
@@ -1649,33 +1649,56 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		text.setValue((heading == null) ? "Members" : heading);
 		setId(text, null);
 		facets.put("targetCaption", text);
-		return result;
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent checkBox(UIComponent component,
-									String dataWidgetVar,
-									CheckBox checkBox,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent checkBox(EventSourceComponent component,
+											String dataWidgetVar,
+											CheckBox checkBox,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return checkbox(dataWidgetVar,
-							checkBox.getBinding(), 
-							title,
-							required,
-							checkBox.getDisabledConditionName(),
-							formDisabledConditionName,
-							! Boolean.FALSE.equals(checkBox.getTriState()));
+		UIInput result = checkbox(dataWidgetVar,
+									checkBox.getBinding(), 
+									title,
+									required,
+									checkBox.getDisabledConditionName(),
+									formDisabledConditionName,
+									! Boolean.FALSE.equals(checkBox.getTriState()));
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent colourPicker(UIComponent component,
+	public EventSourceComponent colourPicker(EventSourceComponent component,
+												String dataWidgetVar,
+												ColourPicker colour,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		if (component != null) {
+			return component;
+		}
+
+		ColorPicker result = colourPicker(dataWidgetVar, 
+											colour.getBinding(), 
+											title, 
+											required, 
+											colour.getDisabledConditionName(),
+											formDisabledConditionName,
+											colour.getPixelWidth(),
+											true);
+		return new EventSourceComponent(result, result);
+	}
+	
+	@Override
+	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
-										ColourPicker colour,
+										Combo combo,
 										String formDisabledConditionName,
 										String title,
 										boolean required) {
@@ -1683,39 +1706,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return colourPicker(dataWidgetVar, 
-								colour.getBinding(), 
-								title, 
-								required, 
-								colour.getDisabledConditionName(),
-								formDisabledConditionName,
-								colour.getPixelWidth(),
-								true);
-	}
-	
-	@Override
-	public UIComponent combo(UIComponent component,
-								String dataWidgetVar,
-								Combo combo,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
-		if (component != null) {
-			return component;
-		}
-
 		String binding = combo.getBinding();
-		HtmlSelectOneMenu s = selectOneMenu(dataWidgetVar,
-												binding,
-								                title,
-								                required,
-								                combo.getDisabledConditionName(),
-								                formDisabledConditionName,
-								                null);
+		HtmlSelectOneMenu result = selectOneMenu(dataWidgetVar,
+													binding,
+									                title,
+									                required,
+									                combo.getDisabledConditionName(),
+									                formDisabledConditionName,
+									                null);
 		UISelectItems i = selectItems(null, null, dataWidgetVar, binding, true);
-		s.getChildren().add(i);
+		result.getChildren().add(i);
 		
-		return s;
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
@@ -1902,65 +1904,67 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent lookupDescription(UIComponent component,
+	public EventSourceComponent lookupDescription(EventSourceComponent component,
+													String dataWidgetVar, 
+													LookupDescription lookup, 
+													String formDisabledConditionName,
+													String title, 
+													boolean required,
+													String displayBinding,
+													QueryDefinition query) {
+		if (component != null) {
+			return component;
+		}
+
+		AutoComplete result = autoComplete(dataWidgetVar,
+											lookup.getBinding(),
+											title,
+											required,
+											lookup.getDisabledConditionName(),
+											formDisabledConditionName,
+											displayBinding,
+											query,
+											lookup.getParameters(),
+											lookup.getPixelWidth(),
+											false);
+		return new EventSourceComponent(result, result);
+	}
+
+	@Override
+	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar, 
-											LookupDescription lookup, 
+											org.skyve.impl.metadata.view.widget.bound.input.Password password,
 											String formDisabledConditionName,
 											String title, 
-											boolean required,
-											String displayBinding,
-											QueryDefinition query) {
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return autoComplete(dataWidgetVar,
-							lookup.getBinding(),
-							title,
-							required,
-							lookup.getDisabledConditionName(),
-							formDisabledConditionName,
-							displayBinding,
-							query,
-							lookup.getParameters(),
-							lookup.getPixelWidth(),
-							false);
+		Password result = password(dataWidgetVar,
+									password.getBinding(), 
+					                title,
+					                required,
+					                password.getDisabledConditionName(),
+					                formDisabledConditionName,
+					                password.getPixelWidth(),
+					                true);
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent password(UIComponent component,
-									String dataWidgetVar, 
-									org.skyve.impl.metadata.view.widget.bound.input.Password password,
-									String formDisabledConditionName,
-									String title, 
-									boolean required) {
-		if (component != null) {
-			return component;
-		}
-
-		return password(dataWidgetVar,
-							password.getBinding(), 
-			                title,
-			                required,
-			                password.getDisabledConditionName(),
-			                formDisabledConditionName,
-			                password.getPixelWidth(),
-			                true);
-	}
-
-	@Override
-	public UIComponent radio(UIComponent component,
-								String dataWidgetVar,
-								Radio radio,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
+	public EventSourceComponent radio(EventSourceComponent component,
+										String dataWidgetVar,
+										Radio radio,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
 		if (component != null) {
 			return component;
 		}
 
 		String binding = radio.getBinding();
-        UIComponent result = selectOneRadio(dataWidgetVar,
+        SelectOneRadio result = selectOneRadio(dataWidgetVar,
 												binding,
 				                                title,
 				                                required,
@@ -1969,84 +1973,87 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.getAttributes().put("binding", radio.getBinding());
         UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
 		result.getChildren().add(i);
-		return result;
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent richText(UIComponent component, 
-									String dataWidgetVar, 
-									RichText text, 
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent richText(EventSourceComponent component, 
+											String dataWidgetVar, 
+											RichText text, 
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return editor(dataWidgetVar,
-						text.getBinding(),
-						title,
-						required,
-						text.getDisabledConditionName(),
-						formDisabledConditionName);
+		Editor result = editor(dataWidgetVar,
+								text.getBinding(),
+								title,
+								required,
+								text.getDisabledConditionName(),
+								formDisabledConditionName);
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component,
-								String dataWidgetVar, 
-								org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
-								String formDisabledConditionName,
-								String title, 
-								boolean required) {
+	public EventSourceComponent spinner(EventSourceComponent component,
+											String dataWidgetVar, 
+											org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
+											String formDisabledConditionName,
+											String title, 
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return spinner(dataWidgetVar, 
-						spinner.getBinding(), 
-						title, 
-						required, 
-						spinner.getDisabledConditionName(),
-						formDisabledConditionName,
-						spinner.getPixelWidth());
+		Spinner result = spinner(dataWidgetVar, 
+									spinner.getBinding(), 
+									title, 
+									required, 
+									spinner.getDisabledConditionName(),
+									formDisabledConditionName,
+									spinner.getPixelWidth());
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent textArea(UIComponent component,
-									String dataWidgetVar, 
-									TextArea text, 
-									String formDisabledConditionName,
-									String title, 
-									boolean required,
-									Integer length) {
+	public EventSourceComponent textArea(EventSourceComponent component,
+											String dataWidgetVar, 
+											TextArea text, 
+											String formDisabledConditionName,
+											String title, 
+											boolean required,
+											Integer length) {
 		if (component != null) {
 			return component;
 		}
 
-		return textArea(dataWidgetVar,
-							text.getBinding(),
-							title,
-							required,
-							Boolean.FALSE.equals(text.getEditable()),
-							text.getDisabledConditionName(),
-							formDisabledConditionName,
-							length,
-							text.getPixelWidth(),
-							text.getPixelHeight(),
-							true);
+		InputTextarea result = textArea(dataWidgetVar,
+											text.getBinding(),
+											title,
+											required,
+											Boolean.FALSE.equals(text.getEditable()),
+											text.getDisabledConditionName(),
+											formDisabledConditionName,
+											length,
+											text.getPixelWidth(),
+											text.getPixelHeight(),
+											true);
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent text(UIComponent component,
-								String dataWidgetVar, 
-								TextField text, 
-								String formDisabledConditionName,
-								String title, 
-								boolean required,
-								Integer length,
-								org.skyve.domain.types.converters.Converter<?> converter,
-								Format<?> format,
-								Converter facesConverter) {
+	public EventSourceComponent text(EventSourceComponent component,
+										String dataWidgetVar, 
+										TextField text, 
+										String formDisabledConditionName,
+										String title, 
+										boolean required,
+										Integer length,
+										org.skyve.domain.types.converters.Converter<?> converter,
+										Format<?> format,
+										Converter facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -2065,7 +2072,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        }
 		}
 		
-        UIComponent result = null;
+        UIComponentBase result = null;
         if (useCalendar) {
             result = calendar(dataWidgetVar,
 	            				text.getBinding(),
@@ -2114,7 +2121,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								true);
         }
         
-        return result;
+        return new EventSourceComponent(result, result);
 	}
 
 	@Override

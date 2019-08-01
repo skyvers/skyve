@@ -123,6 +123,7 @@ import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
@@ -156,6 +157,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	private UIComponent facesView; // the result of construction
 	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
+	// A reference to the current widget that is the source of events
+	private UIComponentBase eventSource = null;
+	
 	public FacesViewRenderer(User user,
 								Module module,
 								Document document,
@@ -691,20 +695,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.geometry(null,
-															dataWidgetVar,
-															geometry,
-															(currentForm == null) ? 
-																	null : 
-																	currentForm.getDisabledConditionName(),
-															title,
-															required);
-		eventSource = c;
+		EventSourceComponent c = cb.geometry(null,
+												dataWidgetVar,
+												geometry,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required);
+		eventSource = c.getEventSource();
         addComponent(title, 
         				false, 
         				geometry.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c,
+        				c.getComponent(),
         				geometry.getPixelWidth(), 
         				null, 
         				null);
@@ -725,19 +727,17 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.geometryMap(null,
-																geometry,
-																(currentForm == null) ? 
-																		null : 
-																		currentForm.getDisabledConditionName(),
-																title,
-																required);
-		eventSource = c;
+		EventSourceComponent c = cb.geometryMap(null,
+													geometry,
+													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+													title,
+													required);
+		eventSource = c.getEventSource();
 		addComponent(title, 
         				false, 
         				geometry.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c,
+        				c.getComponent(),
         				geometry.getPixelWidth(), 
         				null, 
         				null);
@@ -1238,9 +1238,6 @@ public class FacesViewRenderer extends ViewRenderer {
 		current = cb.addedDataGridContainerColumn(null, current);
 	}
 
-	// A reference to the current widget that is the source of events
-	private UIComponentBase eventSource = null;
-	
 	@Override
 	public void renderBoundColumnCheckBox(CheckBox checkBox) {
 		renderFormCheckBox(checkBox);
@@ -1251,18 +1248,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.checkBox(null,
-															dataWidgetVar,
-															checkBox,
-															(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-															title,
-															required);
-		eventSource = c;
+		EventSourceComponent c = cb.checkBox(null,
+												dataWidgetVar,
+												checkBox,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required);
+		eventSource = c.getEventSource();
 		addComponent(title,
 						required,
 						checkBox.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
-						c, 
+						c.getComponent(), 
 						checkBox.getPixelWidth(), 
 						null,
 						null);
@@ -1301,18 +1298,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.colourPicker(null,
-																dataWidgetVar,
-																colour,
-																(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-																title,
-																required);
-		eventSource = c;
+		EventSourceComponent c = cb.colourPicker(null,
+													dataWidgetVar,
+													colour,
+													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+													title,
+													required);
+		eventSource = c.getEventSource();
 		addComponent(title, 
 						required, 
 						colour.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
-						c, 
+						c.getComponent(), 
 						colour.getPixelWidth(), 
 						null, 
 						null);
@@ -1338,18 +1335,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase s = (UIComponentBase) cb.combo(null,
-														dataWidgetVar,
-														combo,
-														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-														title,
-														required);
-		eventSource = s;
+		EventSourceComponent c = cb.combo(null,
+											dataWidgetVar,
+											combo,
+											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+											title,
+											required);
+		eventSource = c.getEventSource();
 		addComponent(title, 
 						required, 
 						combo.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
-						s, 
+						c.getComponent(), 
 						combo.getPixelWidth(), 
 						null, 
 						null);
@@ -1450,10 +1447,10 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		UIComponentBase c = (UIComponentBase) cb.listMembership(null, membership);
-		eventSource = c;
+		EventSourceComponent c = cb.listMembership(null, membership);
+		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
-		addToContainer(c, pixelWidth, null, null, membership.getInvisibleConditionName());
+		addToContainer(c.getComponent(), pixelWidth, null, null, membership.getInvisibleConditionName());
 	}
 
 	@Override
@@ -1487,20 +1484,20 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.lookupDescription(null,
-																	dataWidgetVar, 
-																	lookup, 
-																	(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-																	title, 
-																	required,
-																	descriptionBinding,
-																	query);
-        eventSource = c;
+		EventSourceComponent c = cb.lookupDescription(null,
+														dataWidgetVar, 
+														lookup, 
+														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+														title, 
+														required,
+														descriptionBinding,
+														query);
+        eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
         				lookup.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c, 
+        				c.getComponent(), 
         				lookup.getPixelWidth(), 
         				null, 
         				null);
@@ -1552,18 +1549,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-        UIComponentBase c = (UIComponentBase) cb.password(null,
-        													dataWidgetVar,
-        													password,
-        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-        													title,
-        													required);
-        eventSource = c;
+        EventSourceComponent c = cb.password(null,
+												dataWidgetVar,
+												password,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required);
+        eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
         				password.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c, 
+        				c.getComponent(), 
         				password.getPixelWidth(), 
         				null, 
         				null);
@@ -1589,18 +1586,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-        UIComponentBase c = (UIComponentBase) cb.radio(null,
-        												dataWidgetVar,
-        												radio,
-        												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-        												title,
-        												required);
-		eventSource = c;
+		EventSourceComponent c = cb.radio(null,
+											dataWidgetVar,
+											radio,
+											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+											title,
+											required);
+		eventSource = c.getEventSource();
 		addComponent(title, 
 						required, 
 						radio.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
-						c, 
+						c.getComponent(), 
 						radio.getPixelWidth(), 
 						null, 
 						null);
@@ -1626,18 +1623,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-        UIComponentBase c = (UIComponentBase) cb.richText(null,
-        													dataWidgetVar,
-        													text,
-        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-        													title,
-        													required);
-        eventSource = c;
+		EventSourceComponent c = cb.richText(null,
+												dataWidgetVar,
+												text,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required);
+        eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c, 
+        				c.getComponent(), 
         				text.getPixelWidth(), 
         				null, 
         				null);
@@ -1694,18 +1691,18 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.spinner(null,
-        													dataWidgetVar,
-        													spinner,
-        													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-        													title,
-        													required);
-        eventSource = c;
+		EventSourceComponent c = cb.spinner(null,
+												dataWidgetVar,
+												spinner,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required);
+        eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
         				spinner.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c, 
+        				c.getComponent(), 
         				spinner.getPixelWidth(), 
         				null, 
         				null);
@@ -1738,19 +1735,19 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponentBase c = (UIComponentBase) cb.textArea(null,
-															dataWidgetVar,
-															text,
-															(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-															title,
-															required,
-															length);
-        eventSource = c;
+		EventSourceComponent c = cb.textArea(null,
+												dataWidgetVar,
+												text,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required,
+												length);
+        eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
-        				c, 
+        				c.getComponent(), 
         				text.getPixelWidth(), 
         				null, 
         				null);
@@ -1810,22 +1807,22 @@ public class FacesViewRenderer extends ViewRenderer {
         String title = getCurrentWidgetLabel();
         boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-        UIComponentBase c = (UIComponentBase) cb.text(null,
-        												dataWidgetVar, 
-        												text, 
-        												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-        												title, 
-        												required,
-        												length,
-        												converter,
-        												format,
-        												convertConverter(converter, type));
-        eventSource = c;
+		EventSourceComponent c = cb.text(null,
+											dataWidgetVar, 
+											text, 
+											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+											title, 
+											required,
+											length,
+											converter,
+											format,
+											convertConverter(converter, type));
+        eventSource = c.getEventSource();
 		addComponent(title, 
 						required, 
 						text.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
-						c, 
+						c.getComponent(), 
 						text.getPixelWidth(), 
 						null, 
 						null);

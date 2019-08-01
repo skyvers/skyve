@@ -224,21 +224,21 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent geometry(UIComponent component,
-									String dataWidgetVar,
-									Geometry geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent geometry(EventSourceComponent component,
+											String dataWidgetVar,
+											Geometry geometry,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent geometryMap(UIComponent component,
-									GeometryMap geometry,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent geometryMap(EventSourceComponent component,
+												GeometryMap geometry,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
 		return component;
 	}
 	
@@ -268,37 +268,37 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent listMembership(UIComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
 		return component;
 	}
 
 	@Override
-	public UIComponent checkBox(UIComponent component,
-									String dataWidgetVar,
-									CheckBox checkBox,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent checkBox(EventSourceComponent component,
+											String dataWidgetVar,
+											CheckBox checkBox,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return component;
 	}
 
 	@Override
-	public UIComponent colourPicker(UIComponent component,
+	public EventSourceComponent colourPicker(EventSourceComponent component,
+												String dataWidgetVar,
+												ColourPicker colour,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
-										ColourPicker colour,
+										Combo combo,
 										String formDisabledConditionName,
 										String title,
 										boolean required) {
-		return component;
-	}
-
-	@Override
-	public UIComponent combo(UIComponent component,
-								String dataWidgetVar,
-								Combo combo,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
 		return component;
 	}
 
@@ -333,78 +333,78 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent lookupDescription(UIComponent component,
+	public EventSourceComponent lookupDescription(EventSourceComponent component,
+													String dataWidgetVar,
+													LookupDescription lookup,
+													String formDisabledConditionName,
+													String title,
+													boolean required,
+													String displayBinding,
+													QueryDefinition query) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar,
-											LookupDescription lookup,
+											Password password,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent radio(EventSourceComponent component,
+										String dataWidgetVar,
+										Radio radio,
+										String formDisabledConditionName,
+										String title, boolean required) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent richText(EventSourceComponent component,
+											String dataWidgetVar,
+											RichText text,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent spinner(EventSourceComponent component,
+											String dataWidgetVar,
+											Spinner spinner,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent textArea(EventSourceComponent component,
+											String dataWidgetVar,
+											TextArea text,
 											String formDisabledConditionName,
 											String title,
 											boolean required,
-											String displayBinding,
-											QueryDefinition query) {
+											Integer length) {
 		return component;
 	}
 
 	@Override
-	public UIComponent password(UIComponent component,
-									String dataWidgetVar,
-									Password password,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		return component;
-	}
-
-	@Override
-	public UIComponent radio(UIComponent component,
-								String dataWidgetVar,
-								Radio radio,
-								String formDisabledConditionName,
-								String title, boolean required) {
-		return component;
-	}
-
-	@Override
-	public UIComponent richText(UIComponent component,
-									String dataWidgetVar,
-									RichText text,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		return component;
-	}
-
-	@Override
-	public UIComponent spinner(UIComponent component,
-									String dataWidgetVar,
-									Spinner spinner,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
-		return component;
-	}
-
-	@Override
-	public UIComponent textArea(UIComponent component,
-									String dataWidgetVar,
-									TextArea text,
-									String formDisabledConditionName,
-									String title,
-									boolean required,
-									Integer length) {
-		return component;
-	}
-
-	@Override
-	public UIComponent text(UIComponent component,
-								String dataWidgetVar,
-								TextField text,
-								String formDisabledConditionName,
-								String title,
-								boolean required,
-								Integer length,
-								Converter<?> converter,
-								Format<?> format,
-								javax.faces.convert.Converter facesConverter) {
+	public EventSourceComponent text(EventSourceComponent component,
+										String dataWidgetVar,
+										TextField text,
+										String formDisabledConditionName,
+										String title,
+										boolean required,
+										Integer length,
+										Converter<?> converter,
+										Format<?> format,
+										javax.faces.convert.Converter facesConverter) {
 		return component;
 	}
 
