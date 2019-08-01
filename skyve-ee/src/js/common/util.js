@@ -206,7 +206,7 @@ SKYVE.GMap = function() {
 	                	overlay.setMap(display.webmap);
 
 	                	if (feature.zoomable) { // can show the info window for zooming
-		                	overlay.bizId = item.bizId;
+	                		overlay.bizId = item.bizId;
 		                	overlay.geometry = feature.geometry;
 				            overlay.fromTimestamp = item.fromTimestamp;
 				            overlay.toTimestamp = item.toTimestamp;

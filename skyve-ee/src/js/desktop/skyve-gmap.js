@@ -249,6 +249,18 @@ isc.BizMap.addMethods({
     		this.infoWindow.open(this.webmap);
     		this.infoWindow.setContent(contents);
     	}
+    	else if (overlay.getBounds) {
+			var bounds = overlay.getBounds();
+			var ne = bounds.getNorthEast();
+			var sw = bounds.getSouthWest();
+			
+			contents += ne.lat() + ',' + sw.lng() + "," + sw.lat() + ',' + ne.lng() + ",'";
+			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
+
+			this.infoWindow.setPosition(event.latLng);
+    		this.infoWindow.open(this.webmap);
+    		this.infoWindow.setContent(contents);
+    	}
 	},
 	
 	zoom: function(topLeftLat, topLeftLng, bottomRightLat, bottomRightLng, bizModule, bizDocument, bizId) {
