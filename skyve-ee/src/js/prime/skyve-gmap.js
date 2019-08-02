@@ -203,7 +203,9 @@ SKYVE.BizMapPicker = function() {
 					_objects: {},
 					_overlays: [],
 					setFieldValue: function(wktValue) {
-			            SKYVE.PF.setTextValue(elementId + '_value', wktValue);
+			            var element = SKYVE.PF.getTextElement(elementId + '_value');
+			            element.val(wktValue);
+			            element.change(); // trigger on change event here for any skyve event handling to occur
 					}
 				};
 				displays[options.elementId] = display;

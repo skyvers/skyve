@@ -14,6 +14,7 @@ import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlInputHidden;
+import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
@@ -887,6 +888,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											null,
 											true);
 		textField.setId(id + "_value");
+		// We set this as a "change" event is fired every char press
+		// and we dont want to send malformed WKT to the server
+		textField.setReadonly(true);
 		toAddTo.add(textField);
 		editableGeometry(toAddTo,
 							id,
@@ -969,8 +973,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		HtmlPanelGroup result = mapDiv(geometry);
 		UIComponent mapDiv = result.getChildren().get(0);
 		
-		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
+		// We use an input text here as there is no change event allowed on HtmlInputHidden
+		HtmlInputText hidden = (HtmlInputText) input(HtmlInputText.COMPONENT_TYPE, null, binding, null, false, null, null);
 		setId(hidden, mapDiv.getId() + "_value");
+		hidden.setStyle("display:none");
 		result.getChildren().add(hidden);
 		
 		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
