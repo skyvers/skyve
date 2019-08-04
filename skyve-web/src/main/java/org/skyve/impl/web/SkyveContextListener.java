@@ -1,9 +1,8 @@
 package org.skyve.impl.web;
 
-import static java.lang.Boolean.TRUE;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -51,10 +50,10 @@ public class SkyveContextListener implements ServletContextListener {
 		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
 			UtilImpl.PROPERTIES_FILE_PATH = ctx.getInitParameter("PROPERTIES_FILE_PATH");
 		}
+		String archiveName = null;
 		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
 			UtilImpl.LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
-			String archiveName = null;
 			if (archive.getParentFile().getName().endsWith("ear")) {
 				archive = archive.getParentFile();
 				archiveName = archive.getName();
@@ -76,6 +75,33 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		UtilImpl.CONFIGURATION = properties;
 		
+		// Content directory
+		Map<String, Object> content = getObject(null, "content", properties, true);
+		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
+		// clean up the content directory path
+		UtilImpl.CONTENT_DIRECTORY = cleanupDirectory(UtilImpl.CONTENT_DIRECTORY);
+		testWritableDirectory("content.directory", UtilImpl.CONTENT_DIRECTORY);
+
+		// Find any overrides
+		Map<String, Object> overrides = null;
+		File overridesFile = new File(UtilImpl.CONTENT_DIRECTORY, archiveName + ".json");
+		if (overridesFile.exists()) {
+			try (FileInputStream fis = new FileInputStream(overridesFile)) {
+				final VariableExpander variableExpander = new VariableExpander();
+				overrides = variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Cannot open or read " + overridesFile.getAbsolutePath(), e);
+			}
+		}
+		else {
+			overrides = Collections.emptyMap();
+		}
+
+		// Apply overrides to configuration
+		merge(overrides, properties);
+		
+		// Trace settings
 		Map<String, Object> trace = getObject(null, "trace", properties, true);
 		UtilImpl.XML_TRACE = getBoolean("trace", "xml", trace);
 		UtilImpl.HTTP_TRACE = getBoolean("trace", "http", trace);
@@ -89,11 +115,6 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.DIRTY_TRACE = getBoolean("trace", "dirty", trace);
 
 		// Content settings
-		Map<String, Object> content = getObject(null, "content", properties, true);
-		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
-		// clean up the content directory path
-		UtilImpl.CONTENT_DIRECTORY = cleanupDirectory(UtilImpl.CONTENT_DIRECTORY);
-		testWritableDirectory("content.directory", UtilImpl.CONTENT_DIRECTORY);
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
@@ -105,11 +126,11 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt("thumbnail", "subsamplingMinimumTargetSize", thumbnail);
 			UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean("thumbnail", "fileStorage", thumbnail);
 			UtilImpl.THUMBNAIL_DIRECTORY = getString("thumbnail", "directory", thumbnail, false);
-			if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
-				// clean up the thumb nail directory path
-				UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
-				testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
-			}
+		if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
+			// clean up the thumb nail directory path
+			UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
+			testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
+		}
 		}
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
@@ -143,7 +164,7 @@ public class SkyveContextListener implements ServletContextListener {
 				UtilImpl.DATA_STORES.put(dataStoreName, new DataStore(jndi, dialect));
 			}
 		}
-
+		
 		Map<String, Object> hibernate = getObject(null, "hibernate", properties, true);
 		UtilImpl.DATA_STORE = UtilImpl.DATA_STORES.get(getString("hibernate", "dataStore", hibernate, true));
 		if (UtilImpl.DATA_STORE == null) {
@@ -230,7 +251,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		if (map != null) {
 			String value = getString("map", "type", map, true);
-			UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
+		UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
 			UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
 			Number zoom = getNumber("map", "zoom", map, false);
 			if (zoom != null) {
@@ -251,12 +272,11 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.MODULE_DIRECTORY = UtilImpl.cleanupModuleDirectory(UtilImpl.MODULE_DIRECTORY);
 
 			File moduleDirectory = new File(UtilImpl.MODULE_DIRECTORY);
-			if (!moduleDirectory.exists()) {
+			if (! moduleDirectory.exists()) {
 				throw new IllegalStateException("environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " does not exist.");
 			}
-			if (!moduleDirectory.isDirectory()) {
-				throw new IllegalStateException(
-						"environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
+			if (! moduleDirectory.isDirectory()) {
+				throw new IllegalStateException("environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
 			}
 		}
 		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString("environment", "supportEmailAddress", environment, false);
@@ -280,8 +300,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			UtilImpl.BOOTSTRAP_PASSWORD = getString("bootstrap", "password", bootstrap, true);
 		}
-		
-		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 
 		// ensure that the schema is created before trying to init the job scheduler
 		AbstractPersistence p = null;
@@ -322,10 +340,39 @@ public class SkyveContextListener implements ServletContextListener {
 			ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
 			container.addEndpoint(config);
 			// to stop the <o:socket/> from moaning that the endpoint is not configured
-			ctx.setAttribute(Socket.class.getName(), TRUE);
+			ctx.setAttribute(Socket.class.getName(), Boolean.TRUE);
 		}
 		catch (Exception e) {
 			throw new FacesException(e);
+		}
+	}
+	
+	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
+		for (String key : overrides.keySet()) {
+			Object override = overrides.get(key);
+			Object original = properties.get(key);
+			if ((original == null) || (override == null)) {
+				properties.put(key, override);
+			}
+			else if ((override instanceof String) && (original instanceof String)) {
+				properties.put(key, override);
+			}
+			else if ((override instanceof Boolean) && (original instanceof Boolean)) {
+				properties.put(key, override);
+			}
+			else if ((override instanceof Number) && (original instanceof Number)) {
+				properties.put(key, override);
+			}
+			else if ((override instanceof Map) && (original instanceof Map)) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> overrideMap = (Map<String, Object>) override;
+				@SuppressWarnings("unchecked")
+				Map<String, Object> originalMap = (Map<String, Object>) original;
+				merge(overrideMap, originalMap);
+			}
+			else {
+				throw new IllegalStateException("Cannot apply override " + override + " to " + key);
+			}
 		}
 	}
 	

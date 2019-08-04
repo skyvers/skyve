@@ -47,7 +47,7 @@ public class UtilImpl {
 	 */
 	public static Map<String, Object> CONFIGURATION = null;
 
-	public static boolean XML_TRACE = true;
+	public static boolean XML_TRACE = false;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
 	public static boolean COMMAND_TRACE = false;
