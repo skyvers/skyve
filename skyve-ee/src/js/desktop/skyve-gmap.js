@@ -322,6 +322,10 @@ isc.BizMapPicker.addMethods({
 			isc.BizMap.loadGMap(isc.BizMapPicker.initialise);
 		}
 	},
+	
+	setDisabled: function(disabled) {
+		SKYVE.GMap.setDisabled(this, disabled);
+	},
 
     mapIt: function() {
     	var value = this.field.getValue();
@@ -344,12 +348,11 @@ isc.BizMapPicker.addMethods({
 			};
 			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 
-			if (! this.field.isDisabled()) {
-				SKYVE.GMap.drawingTools(this);
-				SKYVE.GMap.geoLocator(this);
-			}
+			SKYVE.GMap.drawingTools(this);
+			SKYVE.GMap.geoLocator(this);
+			SKYVE.GMap.setDisabled(this, this.field.isDisabled());
 
-	    	SKYVE.GMap.clear(this);
+			SKYVE.GMap.clear(this);
 			// delay the mapIt call because even though the maps API is synchronous, sometimes the
 			// maps JS calls seem to beat the initialisation of the map.
 			this.delayCall('mapIt', null, 100);

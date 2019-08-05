@@ -457,8 +457,22 @@ SKYVE.GMap = function() {
 						{enableHighAccuracy : true
 					});
 				});
+				display.webmap.geolocator = control;
 				display.webmap.controls[google.maps.ControlPosition.LEFT].push(control);
             }
+	    },
+	    
+	    setDisabled: function(display, disabled) {
+	    	if (display.webmap) {
+		    	if (display.webmap.drawingManager) {
+		    		display.webmap.drawingManager.setOptions({
+		    			drawingControl: (! disabled)
+		    		});
+		    	}
+		    	if (display.webmap.geolocator) {
+		    		display.webmap.geolocator.style.display = disabled ? 'none' : 'block';
+		    	}
+	    	}
 	    },
 
 	    refreshControls: function(display) {

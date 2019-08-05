@@ -1949,6 +1949,10 @@ isc.GeometryMapItem.addMethods({
 		}
 	},
 	
+	setDisabled: function(disabled) {
+		this.canvas.getMember(0).setDisabled(disabled);
+	},
+	
 	setValueFromPicker: function(newValue) {
 		this._valueSetFromPicker = true;
 		this.setValue(newValue);
