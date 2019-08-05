@@ -888,9 +888,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											null,
 											true);
 		textField.setId(id + "_value");
-		// We set this as a "change" event is fired every char press
-		// and we dont want to send malformed WKT to the server
-		textField.setReadonly(true);
 		toAddTo.add(textField);
 		editableGeometry(toAddTo,
 							id,

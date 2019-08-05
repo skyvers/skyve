@@ -176,10 +176,8 @@ SKYVE.GMap = function() {
 				        	wkt.read(feature.geometry);
 				        }
 				        catch (e) {
-				            if (e.name === 'WKTError') {
-				                alert(feature.geometry + ' is invalid WKT.');
-				                continue;
-				            }
+			                alert(feature.geometry + ' is invalid WKT.');
+			                continue;
 				        }
 				        var props = {editable: feature.editable};
 				        if (feature.strokeColour) {
@@ -218,26 +216,6 @@ SKYVE.GMap = function() {
 					        });
 				        }
 					}
-			        
-//			        if (Wkt.isArray(overlay)) { // Distinguish multigeometries (Arrays) from objects
-//			        	for (i in obj) {
-//			                if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
-//			                	obj[i].bizId = datum.bizId;
-//			                	obj[i].setMap(display.webmap);
-//								display._objects[obj[i].bizId] = obj[i];
-//			                }
-//			            }
-//			        }
-//			        else {
-//			            obj.setMap(display.webmap); // Add it to the map
-//			            display._objects.push(obj);
-//			        }
-//
-//					overlay = new google.maps.Marker({
-//						bizId: datum.bizId,
-//						position: latlng,
-//			            map: display.webmap
-//			        });
 					display._objects[item.bizId] = object;
 				}
 			}

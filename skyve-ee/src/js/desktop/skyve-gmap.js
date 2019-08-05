@@ -112,8 +112,8 @@ isc.BizMap.addMethods({
 				mapOptions.mapTypeId = this.webmap.getMapTypeId();
 			}
 
+			this._objects = {}; // if we are building a new map, there will be no overlays, so clear our state
 			this.infoWindow = new google.maps.InfoWindow({content: ''});
-
 			this.webmap = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 			
 			if (this.showRefresh) {

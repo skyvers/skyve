@@ -53,8 +53,7 @@ SKYVE.BizMap = function() {
 			}
 			else {
 				display = {
-					_objects: {},
-					_overlays: [], 
+					_objects: null,
 					refreshTime: options.refreshTime,
 					_refreshRequired: true, // set via the map UI
 					_refreshing: false, // stop multiple refreshes
@@ -99,8 +98,8 @@ SKYVE.BizMap = function() {
 				}
 			}
 
+			display._objects = {}; // if we are building a new map, there will be no overlays, so clear our state
 			display.infoWindow = new google.maps.InfoWindow({content: ''});
-
 			display.webmap = new google.maps.Map(SKYVE.PF.getByIdEndsWith(options.elementId)[0], mapOptions);
 
 			if (options.showRefresh) {
@@ -200,7 +199,6 @@ SKYVE.BizMapPicker = function() {
 			}
 			else {
 				display = {
-					_objects: {},
 					_overlays: [],
 					setFieldValue: function(wktValue) {
 			            var element = SKYVE.PF.getTextElement(elementId + '_value');
@@ -220,11 +218,11 @@ SKYVE.BizMapPicker = function() {
 			}
 			
         	SKYVE.GMap.clear(display);
-
-        	// delay the mapIt call because even though the maps API is synchronous, sometimes the
-			// maps JS calls seem to beat the initialisation of the map.
-			//setTimeout(function() {isc.BizMap.loadGMap(callback)}, 100);
-        	SKYVE.GMap.scatterValue(display, SKYVE.PF.getTextValue(elementId + '_value'));
+        	var textElement = SKYVE.PF.getTextElement(elementId + '_value')
+			// Make text read-only to stop "change" events fired every char press
+			// as we don't want to send malformed WKT to the server
+        	textElement.attr('readonly', true);
+        	SKYVE.GMap.scatterValue(display, textElement.val());
 		}
 	}
 }();
