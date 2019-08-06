@@ -413,7 +413,7 @@ SKYVE.GMap = function() {
 	    
 	    geoLocator: function(display) {
             if (navigator.geolocation) {
-				var control = document.createElement('DIV');
+        		var control = document.createElement('DIV');
 				control.style.backgroundColor = '#fff';
 				control.style.border = '2px solid #fff';
 				control.style.borderRadius = '3px';
@@ -438,7 +438,7 @@ SKYVE.GMap = function() {
 					        });
 			                display._overlays.push(marker);
 					    	display.setFieldValue('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
-					        me.webmap.setZoom(15);
+					        display.webmap.setZoom(15);
 							display.webmap.setCenter(position);
 						},
 						function(error) {
@@ -908,7 +908,7 @@ SKYVE.Leaflet = function() {
 	    
 	    geoLocator: function(display) {
             if (navigator.geolocation) {
-    			L.GeoControl = L.Control.extend({
+            	L.GeoControl = L.Control.extend({
     				options: {
     					position: 'bottomleft'
     				},
@@ -935,7 +935,7 @@ SKYVE.Leaflet = function() {
 						    		marker.addTo(display.webmap);
 					                display._overlays.push(marker);
 							    	display.setFieldValue('POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')');
-							        me.webmap.setZoom(15);
+							        display.webmap.setZoom(15);
 									display.webmap.panTo(latlng);
 								},
 								function(error) {
