@@ -14,8 +14,12 @@ isc.BizMap.addClassMethods({
 				SKYVE.Util.loadJS('leaflet/leaflet.js?v=' + SKYVE.Util.v, function() {
 					SKYVE.Util.loadJS('leaflet/Path.Drag.js?v=' + SKYVE.Util.v, function() {
 						SKYVE.Util.loadJS('leaflet/Leaflet.Editable.js?v=' + SKYVE.Util.v, function() {
-							isc.BizMap.loadingLeaflet = false;
-							callback();
+							SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
+								SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
+									isc.BizMap.loadingLeaflet = false;
+									callback();
+								});
+							});
 						});
 					});
 				});
@@ -101,7 +105,10 @@ isc.BizMap.addMethods({
 			var mapOptions = {
 				zoom: 1,
 				center: [0, 0],
-                layers: [
+				fullscreenControl: {
+					pseudoFullscreen: false
+				},
+			    layers: [
 					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 						maxZoom: 19
 					})
@@ -349,6 +356,9 @@ isc.BizMapPicker.addMethods({
 					zoom: SKYVE.Util.mapZoom,
 					center: SKYVE.Leaflet.centre(),
 					editable: true,
+					fullscreenControl: {
+						pseudoFullscreen: false
+					},
 	                layers: [
 						L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 							maxZoom: 19

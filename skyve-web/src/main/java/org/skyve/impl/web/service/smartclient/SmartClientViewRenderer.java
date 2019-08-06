@@ -648,7 +648,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		boolean noHeight = (geometry.getPixelHeight() == null) && (geometry.getPercentageHeight() == null) && (geometry.getMinPixelHeight() == null);
 		if (noHeight) {
 			geometry.setPercentageHeight(Integer.valueOf(100));
-			geometry.setMinPixelHeight(Integer.valueOf(150));
+			geometry.setMinPixelHeight(Integer.valueOf(170));
 		}
 		size(geometry, null, code);
 		if (noHeight) {

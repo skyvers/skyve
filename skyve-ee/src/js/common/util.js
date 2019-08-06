@@ -964,6 +964,43 @@ SKYVE.Leaflet = function() {
 	    },
 
 	    refreshControls: function(display) {
+/*
+			var control = document.createElement('DIV');
+			control.style.backgroundColor = '#fff';
+			control.style.border = '2px solid #fff';
+			control.style.borderRadius = '3px';
+			control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+			control.style.cursor = 'pointer';
+			control.style.margin = '10px';
+			control.style.padding = '5px';
+			control.style.textAlign = 'center';
+			control.title = 'Click to set the refresh rate of the map';
+			control.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
+									'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
+			control.index = 1;
+			control.children[0].addEventListener('change', function() {
+				display.refreshTime = this.value;
+				if (display._refreshRequired) {
+					if (display._intervalId) {
+						clearInterval(display._intervalId);
+					}
+					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+				}
+			});
+			control.children[1].addEventListener('click', function() {
+				display._refreshRequired = this.checked;
+				if (display._intervalId) {
+					clearInterval(display._intervalId);
+					display._intervalId = null;
+				}
+				if (display._refreshRequired) {
+					display.rerender();
+					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+				}
+			});
+
+			display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(control);
+*/
 	    }
 	}
 }();
