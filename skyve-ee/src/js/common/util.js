@@ -785,6 +785,174 @@ SKYVE.Leaflet = function() {
 							data, // the response from the map servlet to scatter
 							fit, // fit bounds
 							delta) { // only remove or update if changed
+			var items = data.items;
+			// if there is no data, there is probably an error, so just bug out
+			if (! items) {
+				return;
+			}
+			
+			if (delta) {
+				// remove overlays not present in the data
+				for (var bizId in display._objects) {
+					var found = false;
+					for (var i = 0, l = items.length; i < l; i++) {
+						if (items[i].bizId === bizId) {
+							found = true;
+							break;
+						}
+					}
+					if (! found) {
+						var deletedObject = display._objects[bizId];
+						for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
+							display.webmap.removeLayer(deletedObject.overlays[i]);
+							deletedObject.overlays[i] = null;
+						}
+						delete deletedObject['overlays'];
+						delete display._objects[bizId];
+					}
+				}
+			}
+			else {
+				// remove all overlays
+				for (var bizId in display._objects) {
+					var deletedObject = display._objects[bizId];
+					for (var i = 0, l = deletedObject.overlays.length; i < l; i++) {
+						display.webmap.removeLayer(deletedObject.overlays[i]);
+						deletedObject.overlays[i] = null;
+					}
+					delete deletedObject['overlays'];
+					delete display._objects[bizId];
+				}
+			}
+
+			// add/update overlays from the data
+			for (var i = 0, l = items.length; i < l; i++) {
+				var item = items[i];
+
+				var object = display._objects[item.bizId];
+				if (object) {
+					// if the wkts have changed delete the overlay and recreate it
+					var same = (object.overlays.length == item.features.length);
+					if (same) {
+						for (var j = 0, m = object.overlays.length; j < m; j++) {
+							if (object.overlays[j].geometry !== item.features[j].geometry) {
+								same = false;
+								break;
+							}
+						}
+					}
+					if (! same) {
+						for (var j = 0, m = object.overlays.length; j < m; j++) {
+							display.webmap.removeLayer(object.overlays[j]);
+							object.overlays[j] = null;
+						}
+						delete object['overlays'];
+						delete display._objects[bizId];
+						object = null;
+					}
+				}
+				if (! object) { // object could have been nulled just above 
+					object = {overlays: []};
+					for (var j = 0, m = item.features.length; j < m; j++) {
+						var itemFeature = item.features[j];
+						
+						var geometry = parse(itemFeature.geometry);
+						geometry.properties = {editable: itemFeature.editable};
+						if (itemFeature.strokeColour) {
+							geometry.properties.color = itemFeature.strokeColour;
+						}
+						if (itemFeature.fillColour) {
+							geometry.properties.fillColor = itemFeature.fillColour;
+						}
+						if (itemFeature.fillOpacity) {
+							geometry.properties.fillOpacity = itemFeature.fillOpacity;
+						}
+						if (itemFeature.iconDynamicImageName) {
+							var icon = {
+							    iconUrl: 'resources?_n=' + itemFeature.iconDynamicImageName + '&_doc=' + data._doc,
+							};
+							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
+								icon.iconAnchor = [itemFeature.iconAnchorX, itemFeature.iconAnchorY];
+							}
+							geometry.properties.icon = icon;
+						}
+
+						var overlay = L.geoJson(geometry, {
+			        		pointToLayer: function(point, latlng) {
+			        			var properties = point.properties;
+			        	    	delete point.properties;
+
+			        	    	if (properties.icon) {
+			        	    		properties.icon = L.icon(properties.icon);
+			        	    	}
+			        		    return L.marker(latlng, properties);
+			        		},
+			        		style: function(feature) {
+			        	    	var properties = feature.geometry.properties;
+			        	    	delete feature.geometry.properties;
+			        	    	
+			        	    	return properties;
+			        	    },
+			        	    onEachFeature: function(feature, layer) {
+								if (itemFeature.zoomable) { // can show the info window for zooming
+									layer.zoomData = {bizId: item.bizId,
+														geometry: itemFeature.geometry,
+														fromTimestamp: item.fromTimestamp,
+														toTimestamp: item.toTimestamp,
+														mod: item.moduleName,
+														doc: item.documentName,
+														infoMarkup: item.infoMarkup};
+									layer.bindPopup(function(layer) {
+										return layer.zoomData.infoMarkup;
+									});
+								}
+			        	    }
+			        	});
+				        object.overlays.push(overlay);
+	                	display.webmap.addLayer(overlay);
+					}
+					display._objects[item.bizId] = object;
+				}
+			}
+/*
+			if (fit) {
+				var bounds = new google.maps.LatLngBounds();
+				var someOverlays = false;
+				for (var id in display._objects) {
+					someOverlays = true;
+					var object = display._objects[id];
+					var overlays = object.overlays;
+					for (var i = 0, l = overlays.length; i < l; i++) {
+						var overlay = overlays[i];
+			            if (overlay.getPath) {
+				            // For Polygons and Polylines - fit the bounds to the vertices
+							var path = overlay.getPath();
+							for (var j = 0, m = path.getLength(); j < m; j++) {
+								bounds.extend(path.getAt(j));
+							}
+			            }
+			            else if (overlay.getPosition) {
+			            	bounds.extend(overlay.getPosition());
+			            }
+					}
+				}
+
+				if (someOverlays) {
+					// Don't zoom in too far on only one marker
+				    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+		                if (display.webmap.getZoom() < 15) {
+		                    display.webmap.setZoom(15);
+		                }
+		            	if (overlay.getPosition !== undefined && typeof overlay.getPosition === 'function') {
+		            		display.webmap.setCenter(bounds.getNorthEast());
+		                }
+				    }
+				    else {
+				    	display.webmap.fitBounds(bounds);
+				    }
+				}
+			}
+*/
 		},
 		
 		centre: function() {
@@ -964,43 +1132,41 @@ SKYVE.Leaflet = function() {
 	    },
 
 	    refreshControls: function(display) {
-/*
-			var control = document.createElement('DIV');
-			control.style.backgroundColor = '#fff';
-			control.style.border = '2px solid #fff';
-			control.style.borderRadius = '3px';
-			control.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-			control.style.cursor = 'pointer';
-			control.style.margin = '10px';
-			control.style.padding = '5px';
-			control.style.textAlign = 'center';
-			control.title = 'Click to set the refresh rate of the map';
-			control.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
-									'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
-			control.index = 1;
-			control.children[0].addEventListener('change', function() {
-				display.refreshTime = this.value;
-				if (display._refreshRequired) {
-					if (display._intervalId) {
-						clearInterval(display._intervalId);
-					}
-					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
-				}
-			});
-			control.children[1].addEventListener('click', function() {
-				display._refreshRequired = this.checked;
-				if (display._intervalId) {
-					clearInterval(display._intervalId);
-					display._intervalId = null;
-				}
-				if (display._refreshRequired) {
-					display.rerender();
-					display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
-				}
-			});
+        	L.GeoControl = L.Control.extend({
+				options: {
+					position: 'bottomleft'
+				},
+				onAdd: function (map) {
+					var container = L.DomUtil.create('div', 'leaflet-control');
 
-			display.webmap.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(control);
-*/
+					container.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
+											'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
+					
+					container.children[0].addEventListener('change', function() {
+						display.refreshTime = this.value;
+						if (display._refreshRequired) {
+							if (display._intervalId) {
+								clearInterval(display._intervalId);
+							}
+							display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+						}
+					});
+					container.children[1].addEventListener('click', function() {
+						display._refreshRequired = this.checked;
+						if (display._intervalId) {
+							clearInterval(display._intervalId);
+							display._intervalId = null;
+						}
+						if (display._refreshRequired) {
+							display.rerender();
+							display._intervalId = setInterval(display.rerender.bind(display), display.refreshTime * 1000);
+						}
+					});
+
+					return container;
+				}
+			});
+			display.webmap.addControl(new L.GeoControl());
 	    }
 	}
 }();

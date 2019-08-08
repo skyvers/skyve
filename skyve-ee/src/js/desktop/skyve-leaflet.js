@@ -125,23 +125,21 @@ isc.BizMap.addMethods({
 			var element = document.getElementById(this.ID + '_map');
 			element.innerHTML = '';
 			this.webmap = L.map(element, mapOptions);
-/*			
+
 			if (this.showRefresh) {
 				SKYVE.Leaflet.refreshControls(this);
 			}
-*/
+
 			if (this.loading == 'lazy') {
-/*
 				var me = this;
-	            google.maps.event.addListener(this.webmap, 'zoom_changed', function() {
-	            	if (! me._refreshing) { // dont refresh if fitting bounds in a refresh already
+				this.webmap.on('zoomend', function(event) {
+	            	if (! me._refreshing) { // don't refresh if fitting bounds in a refresh already
 	            		me._refresh(false);
 	            	}
-	            });
-	            google.maps.event.addListener(this.webmap, 'dragend', function() {
+				});
+				this.webmap.on('moveend', function(event) {
 	            	me._refresh(false);
 	            });
-*/
 			}
 			
 			this._refresh(true);
@@ -209,10 +207,10 @@ isc.BizMap.addMethods({
 		if (this.loading == 'lazy') {
 			if (this.webmap) {
 				var bounds = this.webmap.getBounds();
-	            wkt.fromObject(bounds.getNorthEast());
-	            extents = '&_ne=' + wkt.write();
-	            wkt.fromObject(bounds.getSouthWest());
-	            extents += '&_sw=' + wkt.write();
+				var point = bounds.getNorthEast();
+				extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
+				point = bounds.getSouthWest();
+	            extents += '&_sw=POINT(' + point.lng + ' ' + point.lat + ')';
 			}
 		}
 		
@@ -224,7 +222,7 @@ isc.BizMap.addMethods({
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
-//					SKYVE.GMap.scatter(me, data, fit, true);
+					SKYVE.Leaflet.scatter(me, data, fit, true);
 				}
 				finally {
 					me._refreshing = false;
