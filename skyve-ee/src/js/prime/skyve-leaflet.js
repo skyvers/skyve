@@ -2,6 +2,7 @@ SKYVE.BizMap = function() {
 	var displays = {};
 
 	var refresh = function(display, fit) {
+		// NB can't check if the refresh is switched off here as we need it to fire always for lazy loading
 		if (display._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}

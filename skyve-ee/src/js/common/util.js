@@ -835,7 +835,7 @@ SKYVE.Leaflet = function() {
 					var same = (object.overlays.length == item.features.length);
 					if (same) {
 						for (var j = 0, m = object.overlays.length; j < m; j++) {
-							if (object.overlays[j].geometry !== item.features[j].geometry) {
+							if (object.overlays[j].getLayers()[0].zoomData.geometry !== item.features[j].geometry) {
 								same = false;
 								break;
 							}

@@ -156,9 +156,7 @@ isc.BizMap.addMethods({
 	},
 	
 	_refresh: function(fit) {
-		if (! this._refreshRequired) { // refresh was switched off in the UI
-			return;
-		}
+		// NB can't check if the refresh is switched off here as we need it to fire always for lazy loading
 		if (this._zoomed) { // operator is zoomed-in so no point refreshing this now
 			return;
 		}
