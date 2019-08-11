@@ -251,7 +251,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		if (map != null) {
 			String value = getString("map", "type", map, true);
-		UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
+			UtilImpl.MAP_TYPE = (value == null) ?  MapType.gmap : MapType.valueOf(value);
 			UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
 			Number zoom = getNumber("map", "zoom", map, false);
 			if (zoom != null) {

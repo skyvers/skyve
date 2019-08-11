@@ -592,7 +592,9 @@ public class FacesView<T extends Bean> extends Harness {
 		if (includeScriptTag) {
 			result.append("<script type=\"text/javascript\">");
 		}
-		result.append("SKYVE.PF.gmap({elementId:'").append(elementId);
+		result.append("SKYVE.PF.");
+		result.append(UtilImpl.MAP_TYPE);
+		result.append("({elementId:'").append(elementId);
 		if (mapModelName != null) {
 			result.append("',refreshTime:").append((refreshTimeInSeconds == null) ? 0 : refreshTimeInSeconds.intValue());
 			result.append(",showRefresh:").append(Boolean.TRUE.equals(showRefresh));

@@ -903,7 +903,7 @@ SKYVE.Leaflet = function() {
 														doc: item.documentName,
 														infoMarkup: item.infoMarkup};
 									layer.bindPopup(function(layer) {
-										return layer.zoomData.infoMarkup;
+							        	return display.click(layer);
 									});
 								}
 			        	    }
@@ -914,9 +914,9 @@ SKYVE.Leaflet = function() {
 					display._objects[item.bizId] = object;
 				}
 			}
-/*
+
 			if (fit) {
-				var bounds = new google.maps.LatLngBounds();
+				var bounds = L.latLngBounds();
 				var someOverlays = false;
 				for (var id in display._objects) {
 					someOverlays = true;
@@ -924,35 +924,15 @@ SKYVE.Leaflet = function() {
 					var overlays = object.overlays;
 					for (var i = 0, l = overlays.length; i < l; i++) {
 						var overlay = overlays[i];
-			            if (overlay.getPath) {
-				            // For Polygons and Polylines - fit the bounds to the vertices
-							var path = overlay.getPath();
-							for (var j = 0, m = path.getLength(); j < m; j++) {
-								bounds.extend(path.getAt(j));
-							}
-			            }
-			            else if (overlay.getPosition) {
-			            	bounds.extend(overlay.getPosition());
-			            }
+						bounds.extend(overlay.getBounds());
 					}
 				}
 
 				if (someOverlays) {
 					// Don't zoom in too far on only one marker
-				    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
-		                if (display.webmap.getZoom() < 15) {
-		                    display.webmap.setZoom(15);
-		                }
-		            	if (overlay.getPosition !== undefined && typeof overlay.getPosition === 'function') {
-		            		display.webmap.setCenter(bounds.getNorthEast());
-		                }
-				    }
-				    else {
-				    	display.webmap.fitBounds(bounds);
-				    }
+			    	display.webmap.fitBounds(bounds, {maxZoom: 15});
 				}
 			}
-*/
 		},
 		
 		centre: function() {
@@ -993,7 +973,7 @@ SKYVE.Leaflet = function() {
             display._overlays.push(obj);
 
 	        // Pan the map to the feature
-            display.webmap.fitBounds(obj.getBounds());
+            display.webmap.fitBounds(obj.getBounds(), {maxZoom: 15});
 	    },
 
 	    clear: function(display) { // the display object that holds the map and other state variables

@@ -3,9 +3,6 @@ SKYVE.BizMap = function() {
     var wkt = new Wkt.Wkt();
 
 	var refresh = function(display, fit) {
-		if (! display._refreshRequired) { // refresh was switched off in the UI
-			return;
-		}
 		if (display._refreshing) { // already triggered a refresh - waiting on XHR response
 			return;
 		}
@@ -14,7 +11,8 @@ SKYVE.BizMap = function() {
 		display._refreshing = true;
 
 		var extents = '';
-		if (display.loading == 'lazy') {
+		if (display.loading === 'lazy') {
+			var bounds = display.webmap.getBounds();
             wkt.fromObject(bounds.getNorthEast());
             extents = '&_ne=' + wkt.write();
             wkt.fromObject(bounds.getSouthWest());
@@ -55,6 +53,7 @@ SKYVE.BizMap = function() {
 				display = {
 					_objects: null,
 					refreshTime: options.refreshTime,
+					loading: options.loading, // lazy or eager
 					_refreshRequired: true, // set via the map UI
 					_refreshing: false, // stop multiple refreshes
 					_intervalId: null, // the interval to stop on refresh checkbox click
@@ -153,18 +152,10 @@ SKYVE.BizMap = function() {
 	    	contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
 			contents += '?m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
 	    	if (overlay.getPosition) {
-				display.infoWindow.open(this.webmap, overlay);
+				display.infoWindow.open(display.webmap, overlay);
 	    		display.infoWindow.setContent(contents);
 	    	}
 	    	else if (overlay.getPath) {
-				var bounds = new google.maps.LatLngBounds();
-				var path = overlay.getPath();
-				for (var k = 0, n = path.getLength(); k < n; k++) {
-					bounds.extend(path.getAt(k));
-				}
-				var ne = bounds.getNorthEast();
-				var sw = bounds.getSouthWest();
-				
 				display.infoWindow.setPosition(event.latLng);
 	    		display.infoWindow.open(display.webmap);
 	    		display.infoWindow.setContent(contents);

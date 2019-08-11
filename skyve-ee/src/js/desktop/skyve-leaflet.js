@@ -121,7 +121,6 @@ isc.BizMap.addMethods({
 			}
 
 			this._objects = {}; // if we are building a new map, there will be no overlays, so clear our state
-//			this.infoWindow = new google.maps.InfoWindow({content: ''});
 			var element = document.getElementById(this.ID + '_map');
 			element.innerHTML = '';
 			this.webmap = L.map(element, mapOptions);
@@ -206,7 +205,7 @@ isc.BizMap.addMethods({
 		var extents = '';
 		if (this.loading == 'lazy') {
 			if (this.webmap) {
-				var bounds = this.webmap.getBounds();
+				var bounds = this.webmap.wrapLatLngBounds(this.webmap.getBounds());
 				var point = bounds.getNorthEast();
 				extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
 				point = bounds.getSouthWest();
@@ -231,78 +230,52 @@ isc.BizMap.addMethods({
 		});
 	},
 	
-	click: function(overlay, event) {
-/*
-		var contents = overlay.infoMarkup;
-    	contents += '<br/><br/><input type="button" value="Zoom" onclick="' + this.ID + '.zoom(';
-    	if (overlay.getPosition) {
-    		var p = overlay.getPosition();
-    		contents += p.lat() + ',' + p.lng() + "," + p.lat() + ',' + p.lng() + ",'"; 
-			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
-    		
-			this.infoWindow.open(this.webmap, overlay);
-    		this.infoWindow.setContent(contents);
-    	}
-    	else if (overlay.getPath) {
-			var bounds = new google.maps.LatLngBounds();
-			var path = overlay.getPath();
-			for (var k = 0, n = path.getLength(); k < n; k++) {
-				bounds.extend(path.getAt(k));
-			}
-			var ne = bounds.getNorthEast();
-			var sw = bounds.getSouthWest();
+	click: function(layer) {
+		var result = '';
+		if (layer.zoomData) {
+			this._selectedLayer = layer;
 			
-			contents += ne.lat() + ',' + sw.lng() + "," + sw.lat() + ',' + ne.lng() + ",'";
-			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
-
-			this.infoWindow.setPosition(event.latLng);
-    		this.infoWindow.open(this.webmap);
-    		this.infoWindow.setContent(contents);
-    	}
-    	else if (overlay.getBounds) {
-			var bounds = overlay.getBounds();
-			var ne = bounds.getNorthEast();
-			var sw = bounds.getSouthWest();
-			
-			contents += ne.lat() + ',' + sw.lng() + "," + sw.lat() + ',' + ne.lng() + ",'";
-			contents += overlay.mod + "','" + overlay.doc + "','" + overlay.bizId + "')\"/>";
-
-			this.infoWindow.setPosition(event.latLng);
-    		this.infoWindow.open(this.webmap);
-    		this.infoWindow.setContent(contents);
-    	}
-*/
+			var result = layer.zoomData.infoMarkup;
+	    	result += '<br/><br/><input type="button" value="Zoom" onclick="' + this.ID + '.zoom()\"/>';
+		}
+		return result;
 	},
 	
-	zoom: function(topLeftLat, topLeftLng, bottomRightLat, bottomRightLng, bizModule, bizDocument, bizId) {
+	zoom: function() {
 		this._zoomed = true; // indicates that we don't want refreshes as we are zoomed on an overlay
-		
-		var scale = Math.pow(2, this.webmap.getZoom());
-    	var nw = new google.maps.LatLng(
-    	    this.webmap.getBounds().getNorthEast().lat(),
-    	    this.webmap.getBounds().getSouthWest().lng()
-    	);
-    	var worldCoordinateNW = this.webmap.getProjection().fromLatLngToPoint(nw);
-    	var topLeftPosition = new google.maps.LatLng(topLeftLat, topLeftLng);
-    	var topLeftWorldCoordinate = this.webmap.getProjection().fromLatLngToPoint(topLeftPosition);
-    	var bottomRightPosition = new google.maps.LatLng(bottomRightLat, bottomRightLng);
-    	var bottomRightWorldCoordinate = this.webmap.getProjection().fromLatLngToPoint(bottomRightPosition);
 
 		var pageRect = this.getPageRect();
-		var x = Math.floor((topLeftWorldCoordinate.x - worldCoordinateNW.x) * scale) + pageRect[0];
-		var y = Math.floor((topLeftWorldCoordinate.y - worldCoordinateNW.y) * scale) + pageRect[1]; 
-		var width = Math.floor((bottomRightWorldCoordinate.x - worldCoordinateNW.x) * scale) + pageRect[0] - x;
-		var height = Math.floor((bottomRightWorldCoordinate.y - worldCoordinateNW.y) * scale) + pageRect[1] - y;
+		var topLeft = null;
+		var bottomRight = null;
+		if (this._selectedLayer.getBounds) { // polylines and polygons
+			var bounds = this._selectedLayer.getBounds();
+			var nw = bounds.getNorthWest();
+			var se = bounds.getSouthEast();
+			topLeft = this.webmap.latLngToContainerPoint(nw);
+			bottomRight = this.webmap.latLngToContainerPoint(se);
+		}
+		else { // markers
+			var coordinates = this._selectedLayer.feature.geometry.coordinates;
+			var point = this.webmap.latLngToContainerPoint(L.latLng(coordinates[1], coordinates[0]));
+			topLeft = L.point(point.x - 10, point.y - 10);
+			bottomRight = L.point(point.x + 10, point.y + 10);
+		}
 		
 		var me = this;
-		isc.BizUtil.getEditView(bizModule, 
-									bizDocument,
+		isc.BizUtil.getEditView(this._selectedLayer.zoomData.mod, 
+									this._selectedLayer.zoomData.doc,
 									function(view) { // the view
-										isc.WindowStack.popup([x, y, width, height], "Edit", true, [view]);
-										view.editInstance(bizId, null, null);
-										me.infoWindow.close();
+										// constrain to max dimensions of the map container
+										isc.WindowStack.popup([
+											pageRect[0] + Math.max(topLeft.x, 0), 
+											pageRect[1] + Math.max(topLeft.y, 0),
+											Math.min(bottomRight.x - topLeft.x, bottomRight.x, pageRect[2]),
+											Math.min(bottomRight.y - topLeft.y, bottomRight.y, pageRect[3])
+										], "Edit", true, [view]);
+										view.editInstance(me._selectedLayer.zoomData.bizId, null, null);
+										me._selectedLayer.closePopup();
+										me._selectedLayer = null;
 									});
-
 	}
 });
 
