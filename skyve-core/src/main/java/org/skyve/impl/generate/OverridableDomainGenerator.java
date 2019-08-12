@@ -195,7 +195,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		};
 		MYSQL_8_RESERVED_WORDS = new TreeSet<>(MYSQL_5_RESERVED_WORDS);
 		MYSQL_8_RESERVED_WORDS.addAll(Arrays.asList(mysql8ExtraReserved));
-
 		String sqlServerReserved[] = {
 				"add", "external", "procedure", "all", "fetch", "public", "alter", "file", "raiserror", "and", "fillfactor", "read",
 				"any", "for", "readtext", "as", "foreign", "reconfigure", "asc", "freetext", "references", "authorization",
@@ -3232,13 +3231,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					// return, attribute is transient
 					UtilImpl.LOGGER.fine(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
 							document.getName()));
-					return;
+					continue;
 				}
 
 				// skip checking association or collections as their persistent field name will be modified
 				if (AttributeType.collection.equals(type) || AttributeType.association.equals(type)
 						|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
-					return;
+					continue;
 				}
 
 				// check not using a reserved word
