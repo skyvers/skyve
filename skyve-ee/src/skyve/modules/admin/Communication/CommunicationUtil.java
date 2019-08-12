@@ -365,7 +365,7 @@ public class CommunicationUtil {
 		c.setSubject(subject);
 		c.setBody(body);
 		c.setFormatType(formatType);
-		c.setSystem(Boolean.TRUE);
+		c.setSystemUse(Boolean.TRUE);
 
 		send(c, RunMode.ACTION, responseMode, null, beans);
 	}
@@ -384,7 +384,7 @@ public class CommunicationUtil {
 			result = Communication.newInstance();
 			result.setDescription(description);
 			result.setFormatType(FormatType.email);
-			result.setSystem(Boolean.TRUE);
+			result.setSystemUse(Boolean.TRUE);
 			result.setSendFrom(ConfigurationExtension.defaultSMTPSender());
 			result.setSendTo(sendToExpression);
 			result.setCcTo(ccExpression);
