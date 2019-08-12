@@ -3251,12 +3251,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						break;
 					case MYSQL_5:
+					case MYSQL_5_4_BYTE_CHARSET:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
 						}
 						break;
 					case MYSQL_8:
+					case MYSQL_8_4_BYTE_CHARSET:
 						if (MYSQL_8_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
