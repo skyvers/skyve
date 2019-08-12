@@ -192,11 +192,14 @@ SKYVE.BizMapPicker = function() {
 			}
 			
 			var elementId = SKYVE.PF.getByIdEndsWith(options.elementId).attr('id');
-			display.webmap = L.map(document.getElementById(elementId), mapOptions);
+			var mapElement = document.getElementById(elementId);
+			if (mapElement.childNodes.length <= 1) { // the map has been instantiated here
+				display.webmap = L.map(mapElement, mapOptions);
 
-			if (! options.disabled) {
-				SKYVE.Leaflet.drawingTools(display);
-				SKYVE.Leaflet.geoLocator(display);
+				if (! options.disabled) {
+					SKYVE.Leaflet.drawingTools(display);
+					SKYVE.Leaflet.geoLocator(display);
+				}
 			}
 			
         	SKYVE.Leaflet.clear(display);
