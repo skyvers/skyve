@@ -5,6 +5,9 @@ public enum DialectOptions {
 	H2("H2", true, false, 0, 1024), 
 	H2_NO_INDEXES("H2 without indexes", false, false, 0, 1024), 
 	MYSQL_5("MySQL 5", true, false, 64, 1024), 
+	MYSQL_5_4_BYTE_CHARSET("MySQL 5 (4 Byte charset)", true, false, 64, 768), 
+	MYSQL_8("MySQL 8", true, false, 64, 1024),
+	MYSQL_8_4_BYTE_CHARSET("MySQL 8", true, false, 64, 768),
 	MSSQL_2014("SQL Server up to 2014", true, true, 0, 900), // SQL Server 2014 and below limits indexes to 900
 	MSSQL_2016("SQL Server 2016+", true, true, 0, 1024),
 	POSTGRESQL("PostgreSQL", true, true, 63, 1024);

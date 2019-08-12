@@ -94,7 +94,7 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
 	/** @hidden */
-	public static final String systemPropertyName = "system";
+	public static final String systemUsePropertyName = "systemUse";
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
 	/** @hidden */
@@ -421,7 +421,7 @@ public class Communication extends AbstractPersistentBean {
 	 * <br/>
 	 * System communications can not be deleted unless the system flag is cleared first.
 	 **/
-	private Boolean system;
+	private Boolean systemUse;
 	/**
 	 * UnsubscribeUrl
 	 **/
@@ -989,21 +989,21 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #system} accessor.
+	 * {@link #systemUse} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getSystem() {
-		return system;
+	public Boolean getSystemUse() {
+		return systemUse;
 	}
 
 	/**
-	 * {@link #system} mutator.
-	 * @param system	The new value.
+	 * {@link #systemUse} mutator.
+	 * @param systemUse	The new value.
 	 **/
 	@XmlElement
-	public void setSystem(Boolean system) {
-		preset(systemPropertyName, system);
-		this.system = system;
+	public void setSystemUse(Boolean systemUse) {
+		preset(systemUsePropertyName, systemUse);
+		this.systemUse = systemUse;
 	}
 
 	/**
@@ -1306,7 +1306,7 @@ public class Communication extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isLocked() {
-		return (isPersisted() && Boolean.TRUE.equals(getSystem()));
+		return (isPersisted() && Boolean.TRUE.equals(getSystemUse()));
 	}
 
 	/**

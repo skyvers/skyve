@@ -142,8 +142,7 @@
 			<displayName>Notify when job is complete</displayName>
 		</boolean>
 
-
-		<boolean name="system">
+		<boolean name="systemUse">
 			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
 		</boolean>
@@ -236,7 +235,7 @@
 		<condition name="locked">
 			<description>Locked</description>
 			<expression>
-				<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
+				<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystemUse())]]>
 			</expression>
 		</condition>
 		<condition name="includesCalendar">
