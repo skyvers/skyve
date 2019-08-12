@@ -13,10 +13,12 @@ SKYVE.BizMap = function() {
 		var extents = '';
 		if (display.loading === 'lazy') {
 			var bounds = display.webmap.wrapLatLngBounds(display.webmap.getBounds());
-			var point = bounds.getNorthEast();
-			extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
-			point = bounds.getSouthWest();
-            extents += '&_sw=POINT(' + point.lng + ' ' + point.lat + ')';
+			if (bounds) {
+				var point = bounds.getNorthEast();
+				extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
+				point = bounds.getSouthWest();
+	            extents += '&_sw=POINT(' + point.lng + ' ' + point.lat + ')';
+			}
 		}
 		$.get(display.url + extents, function(data) {
 			try {

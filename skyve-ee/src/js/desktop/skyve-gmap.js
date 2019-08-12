@@ -196,10 +196,12 @@ isc.BizMap.addMethods({
 		if (this.loading == 'lazy') {
 			if (this.webmap) {
 				var bounds = this.webmap.getBounds();
-	            wkt.fromObject(bounds.getNorthEast());
-	            extents = '&_ne=' + wkt.write();
-	            wkt.fromObject(bounds.getSouthWest());
-	            extents += '&_sw=' + wkt.write();
+				if (bounds) {
+					wkt.fromObject(bounds.getNorthEast());
+		            extents = '&_ne=' + wkt.write();
+		            wkt.fromObject(bounds.getSouthWest());
+		            extents += '&_sw=' + wkt.write();
+				}
 			}
 		}
 		

@@ -200,10 +200,12 @@ isc.BizMap.addMethods({
 		if (this.loading == 'lazy') {
 			if (this.webmap) {
 				var bounds = this.webmap.wrapLatLngBounds(this.webmap.getBounds());
-				var point = bounds.getNorthEast();
-				extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
-				point = bounds.getSouthWest();
-	            extents += '&_sw=POINT(' + point.lng + ' ' + point.lat + ')';
+				if (bounds) {
+					var point = bounds.getNorthEast();
+					extents = '&_ne=POINT(' + point.lng + ' ' + point.lat + ')';
+					point = bounds.getSouthWest();
+		            extents += '&_sw=POINT(' + point.lng + ' ' + point.lat + ')';
+				}
 			}
 		}
 		

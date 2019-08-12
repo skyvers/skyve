@@ -378,23 +378,11 @@ SKYVE.GMap = function() {
 				wkt = new Wkt.Wkt()
 			}
 
-			var drawingDefaults = {
-                    editable: true,
-                    strokeColor: '#990000',
-                    fillColor: '#EEFFCC',
-                    fillOpacity: 0.6
-            };
-
 			display.webmap.drawingManager = new google.maps.drawing.DrawingManager({
             	drawingControlOptions: {
                     position: google.maps.ControlPosition.LEFT_BOTTOM,
-                    defaults: drawingDefaults,
                     drawingModes: drawingModes(display.drawingTools)
                 },
-                markerOptions: drawingDefaults,
-                polygonOptions: drawingDefaults,
-                polylineOptions: drawingDefaults,
-                rectangleOptions: drawingDefaults
             });
             display.webmap.drawingManager.setMap(display.webmap);
 
@@ -423,7 +411,7 @@ SKYVE.GMap = function() {
 				control.style.padding = '5px';
 				control.style.textAlign = 'center';
 				control.title = 'Click to set your current position from your GPS';
-				control.innerHTML = '<i class="fa fa-map-marker fa-2x"></i>';
+				control.innerHTML = '<i class="fa fa-dot-circle-o"></i>';
 				control.index = 1;
 				control.addEventListener('click', function() {
 					navigator.geolocation.getCurrentPosition(

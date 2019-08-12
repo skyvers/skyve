@@ -14,10 +14,12 @@ SKYVE.BizMap = function() {
 		var extents = '';
 		if (display.loading === 'lazy') {
 			var bounds = display.webmap.getBounds();
-            wkt.fromObject(bounds.getNorthEast());
-            extents = '&_ne=' + wkt.write();
-            wkt.fromObject(bounds.getSouthWest());
-            extents += '&_sw=' + wkt.write();
+			if (bounds) {
+	            wkt.fromObject(bounds.getNorthEast());
+	            extents = '&_ne=' + wkt.write();
+	            wkt.fromObject(bounds.getSouthWest());
+	            extents += '&_sw=' + wkt.write();
+			}
 		}
 		$.get(display.url + extents, function(data) {
 			try {
