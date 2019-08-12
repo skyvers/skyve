@@ -15,7 +15,7 @@
 						<textField binding="description" disabled="locked" />
 					</item>
 					<item>
-						<checkBox binding="system" triState="false" />
+						<checkBox binding="systemUse" triState="false" />
 					</item>
 				</row>
 				<row>
