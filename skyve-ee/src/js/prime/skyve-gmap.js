@@ -35,7 +35,7 @@ SKYVE.BizMap = function() {
 			var mapOptions = {
 				zoom: 1,
 				center: new google.maps.LatLng(0, 0),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
+				mapTypeId: eval(SKYVE.Util.mapLayers)
 			};
 
 			var display = displays[options.elementId];
@@ -175,7 +175,7 @@ SKYVE.BizMapPicker = function() {
 			var mapOptions = {
 				zoom: SKYVE.Util.mapZoom,
 				center: SKYVE.GMap.centre(),
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeId: eval(SKYVE.Util.mapLayers),
 				mapTypeControlOptions: {
 	            	style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
 	            }

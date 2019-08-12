@@ -157,13 +157,14 @@ public class UtilImpl {
 	public static enum MapType {
 		gmap, leaflet;
 	}
-	public static MapType MAP_TYPE = MapType.gmap;
+	public static MapType MAP_TYPE = MapType.leaflet;
+	// the layers to display on the map backdrop
+	public static String MAP_LAYERS = null;
 	// opening a new empty map will centre here
 	public static String MAP_CENTRE = null;
 	// opening a new empty map will apply this zoom level
 	public static int MAP_ZOOM = 1;
 
-	
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;

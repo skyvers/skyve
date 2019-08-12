@@ -178,6 +178,7 @@ public abstract class Harness extends Localisable {
 		else {
 			sb.append("u.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
 		}
+		sb.append("u.mapLayers=\"").append(UtilImpl.MAP_LAYERS).append("\";");
 		if (UtilImpl.MAP_CENTRE != null) {
 			sb.append("u.mapCentre='").append(UtilImpl.MAP_CENTRE).append("';");
 		}

@@ -108,11 +108,7 @@ isc.BizMap.addMethods({
 				fullscreenControl: {
 					pseudoFullscreen: false
 				},
-			    layers: [
-					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-						maxZoom: 19
-					})
-                ]
+			    layers: eval(SKYVE.Util.mapLayers)
 			};
 
 			if (this.webmap) {
@@ -328,11 +324,7 @@ isc.BizMapPicker.addMethods({
 					fullscreenControl: {
 						pseudoFullscreen: false
 					},
-	                layers: [
-						L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-							maxZoom: 19
-						})
-	                ]
+	                layers: eval(SKYVE.Util.mapLayers)
 				};
 				var element = document.getElementById(this.ID + '_map');
 				element.innerHTML = '';

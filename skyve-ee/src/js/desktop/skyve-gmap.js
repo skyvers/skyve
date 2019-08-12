@@ -103,7 +103,7 @@ isc.BizMap.addMethods({
 			var mapOptions = {
 				zoom: 1,
 				center: new google.maps.LatLng(0, 0),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
+				mapTypeId: eval(SKYVE.Util.mapLayers)
 			};
 
 			if (this.webmap) {
@@ -339,7 +339,7 @@ isc.BizMapPicker.addMethods({
 			var mapOptions = {
 				zoom: SKYVE.Util.mapZoom,
 				center: SKYVE.GMap.centre(),
-				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				mapTypeId: eval(SKYVE.Util.mapLayers),
 				mapTypeControlOptions: {
             		style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
             	}
