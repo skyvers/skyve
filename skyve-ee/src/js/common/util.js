@@ -200,9 +200,9 @@ SKYVE.GMap = function() {
 				        if (feature.fillOpacity) {
 				        	props.fillOpacity = feature.fillOpacity;
 				        }
-				        if (feature.iconDynamicImageName) {
+				        if (feature.iconRelativeFilePath) {
 				        	props.icon = {url: SKYVE.Util.CONTEXT_URL + 
-				        							'resources?_n=' + feature.iconDynamicImageName + 
+				        							'resources?_n=' + feature.iconRelativeFilePath + 
 				        							'&_doc=' + data._doc};
 				        	if (feature.iconAnchorX && feature.iconAnchorY) {
 				        		props.icon.anchor = new google.maps.Point(feature.iconAnchorX, feature.iconAnchorY);
@@ -855,9 +855,9 @@ SKYVE.Leaflet = function() {
 						if (itemFeature.fillOpacity) {
 							geometry.properties.fillOpacity = itemFeature.fillOpacity;
 						}
-						if (itemFeature.iconDynamicImageName) {
+						if (itemFeature.iconRelativeFilePath) {
 							var icon = {
-							    iconUrl: 'resources?_n=' + itemFeature.iconDynamicImageName + '&_doc=' + data._doc,
+							    iconUrl: 'resources?_n=' + itemFeature.iconRelativeFilePath + '&_doc=' + data._doc,
 							};
 							if (itemFeature.iconAnchorX && itemFeature.iconAnchorY) {
 								icon.iconAnchor = [itemFeature.iconAnchorX, itemFeature.iconAnchorY];

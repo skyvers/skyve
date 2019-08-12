@@ -9,7 +9,7 @@ public class MapFeature {
 	private String strokeColour;
 	private String fillColour;
 	private String fillOpacity;
-	private String iconDynamicImageName;
+	private String iconRelativeFilePath;
 	private Integer iconAnchorX;
 	private Integer iconAnchorY;
 
@@ -22,7 +22,7 @@ public class MapFeature {
 						String strokeColour,
 						String fillColour,
 						String fillOpacity,
-						String iconDynamicImageName,
+						String iconRelativeFilePath,
 						Integer iconAnchorX,
 						Integer iconAnchorY) {
 		this.geometry = geometry;
@@ -31,7 +31,7 @@ public class MapFeature {
 		this.strokeColour = strokeColour;
 		this.fillColour = fillColour;
 		this.fillOpacity = fillOpacity;
-		this.iconDynamicImageName = iconDynamicImageName;
+		this.iconRelativeFilePath = iconRelativeFilePath;
 		this.iconAnchorX = iconAnchorX;
 		this.iconAnchorY = iconAnchorY;
 	}
@@ -84,12 +84,12 @@ public class MapFeature {
 		this.fillOpacity = fillOpacity;
 	}
 
-	public String getIconDynamicImageName() {
-		return iconDynamicImageName;
+	public String getIconRelativeFilePath() {
+		return iconRelativeFilePath;
 	}
 
-	public void setIconDynamicImageName(String iconDynamicImageName) {
-		this.iconDynamicImageName = iconDynamicImageName;
+	public void setIconRelativeFilePath(String iconRelativeFilePath) {
+		this.iconRelativeFilePath = iconRelativeFilePath;
 	}
 
 	public Integer getIconAnchorX() {
