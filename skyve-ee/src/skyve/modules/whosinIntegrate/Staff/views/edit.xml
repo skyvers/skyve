@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Staff" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox shrinkWrap="height">
-		<hbox border="true" borderTitle="Details">
+	<vbox>
+		<hbox border="true" borderTitle="Details" shrinkWrap="height">
 			<form percentageWidth="50">
 				<column percentageWidth="20" />
 				<column />
@@ -53,14 +53,10 @@
 
 			</form>
 		</hbox>
-		<form border="true" borderTitle="Status" percentageWidth="50">
-			<column percentageWidth="20" />
+		<hbox border="true" borderTitle="Status" >
+			<form  percentageWidth="50">
+				<column percentageWidth="20" />
 			<column />
-			<row>
-				<item>
-					<geometry binding="location" disabled="notCanChange" />
-				</item>
-			</row>
 			<row>
 				<item>
 					<combo binding="status" disabled="notCanChange" />
@@ -72,6 +68,16 @@
 				</item>
 			</row>
 		</form>
+			<form  percentageWidth="50">
+				<column percentageWidth="20" />
+			<column />
+			<row>
+				<item>
+					<geometry binding="location" disabled="notCanChange" type="point"/>
+				</item>
+			</row>
+		</form>
+		</hbox>
 	</vbox>
 	<actions>
 		<ok invisible="notCanChange" />

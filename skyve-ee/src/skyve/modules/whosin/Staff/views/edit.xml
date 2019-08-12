@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" 
-xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox shrinkWrap="height">
-		<hbox border="true" borderTitle="Details">
+	<vbox>
+		<hbox border="true" borderTitle="Details" shrinkWrap="height">
 			<form percentageWidth="50">
 				<column percentageWidth="20" />
 				<column />
@@ -55,28 +54,40 @@ xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 				<column />
 				<row>
 					<item>
-						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200"  editable="false"/>
+						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
 					</item>
 				</row>
-
 			</form>
 		</hbox>
-		<form border="true" borderTitle="Status" percentageWidth="50">
-			<column percentageWidth="20" />
-			<column />
-			<row>
-				<item>
-					<combo binding="status" >
-						<onChangedHandlers><rerender/></onChangedHandlers>
-					</combo>
-				</item>
-			</row>
-			<row>
-				<item>
-					<default binding="dueBack" />
-				</item>
-			</row>
-		</form>
+		<hbox border="true" borderTitle="Status">
+			<form  percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<combo binding="status">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="dueBack" />
+					</item>
+				</row>
+			</form>
+			<form  percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<geometryMap binding="location" type="point" />
+					</item>
+				</row>
+			</form>
+		</hbox>
 	</vbox>
 	<actions>
 		<defaults />
