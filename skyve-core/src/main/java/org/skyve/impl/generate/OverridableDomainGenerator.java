@@ -17,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +122,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	public static final Set<String> MYSQL_5_RESERVED_WORDS;
 
 	/**
+	 * Array of MySQL 8.x database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> MYSQL_8_RESERVED_WORDS;
+
+	/**
 	 * Array of SqlServer T-SQL reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
 	 */
 	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
@@ -145,7 +149,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"switch", "synchronized", "this", "throw", "throws",
 				"transient", "true", "try", "void", "volatile", "while"
 		};
-		JAVA_RESERVED_WORDS = new HashSet<>(Arrays.asList(javaReserved));
+		JAVA_RESERVED_WORDS = new TreeSet<>(Arrays.asList(javaReserved));
 
 		String h2Reserved[] = {
 				"all", "check", "constraint", "cross", "current_date", "current_time", "current_timestamp",
@@ -154,7 +158,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"offset", "on", "order", "primary", "rownum", "select", "sysdate", "systime", "systimestamp",
 				"today", "true", "union", "unique", "where", "with"
 		};
-		H2_RESERVED_WORDS = new HashSet<>(Arrays.asList(h2Reserved));
+		H2_RESERVED_WORDS = new TreeSet<>(Arrays.asList(h2Reserved));
 
 		String mysql5Reserved[] = {
 				"accessible", "add", "all", "alter", "analyze", "and", "as", "asc", "asensitive", "before", "between", "bigint",
@@ -182,7 +186,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"utc_timestamp", "values", "varbinary", "varchar", "varcharacter", "varying", "virtual", "when", "where", "while",
 				"with", "write", "xor", "year_month", "generated"
 		};
-		MYSQL_5_RESERVED_WORDS = new HashSet<>(Arrays.asList(mysql5Reserved));
+		MYSQL_5_RESERVED_WORDS = new TreeSet<>(Arrays.asList(mysql5Reserved));
+
+		String mysql8ExtraReserved[] = {
+				"array", "cume_dist", "dense_rank", "empty", "except", "first_value", "grouping", "groups",
+				"json_table", "lag", "last_value", "lateral", "lead", "member", "nth_value", "ntile",
+				"of", "over", "percent_rank", "rank", "recursive", "row_number", "system", "window"
+		};
+		MYSQL_8_RESERVED_WORDS = new TreeSet<>(MYSQL_5_RESERVED_WORDS);
+		MYSQL_8_RESERVED_WORDS.addAll(Arrays.asList(mysql8ExtraReserved));
 
 		String sqlServerReserved[] = {
 				"add", "external", "procedure", "all", "fetch", "public", "alter", "file", "raiserror", "and", "fillfactor", "read",
@@ -204,7 +216,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
 				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc"
 		};
-		SQL_SERVER_RESERVED_WORDS = new HashSet<>(Arrays.asList(sqlServerReserved));
+		SQL_SERVER_RESERVED_WORDS = new TreeSet<>(Arrays.asList(sqlServerReserved));
 
 		String postgreSQLReserved[] = {
 				"all", "analyse", "analyze", "and", "any", "array",
@@ -241,7 +253,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"unique", "user", "using",
 				"verbose", "when", "where"
 		};
-		POSTGRESQL_RESERVED_WORDS = new HashSet<>(Arrays.asList(postgreSQLReserved));
+		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
 	}
 
 	OverridableDomainGenerator() {
@@ -3240,6 +3252,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						break;
 					case MYSQL_5:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case MYSQL_8:
+						if (MYSQL_8_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
 						}
