@@ -70,7 +70,9 @@ public class OfficeMap extends MapModel<Office> {
 					
 					MapFeature feature = new MapFeature();
 					feature.setGeometry(member.getLocation());
-					feature.setIconDynamicImageName("icons/document/user16.png");					
+					feature.setIconRelativeFilePath("icons/document/user16.png");
+					feature.setIconAnchorX(Integer.valueOf(8));
+					feature.setIconAnchorY(Integer.valueOf(8));
 					item.getFeatures().add(feature);
 					
 					items.add(item);
