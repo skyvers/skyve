@@ -24,6 +24,8 @@ isc.ClassFactory.defineClass("EditView", "BizContainer");
 isc.EditView.addClassProperties({
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
+		jsonPrefix: '',
+		jsonSuffix: '',
 		dataURL: "smartedit",
 		// ensure that only datasource defined fields goes down with the request
 		sendExtraFields: false
@@ -802,7 +804,7 @@ isc.EditView.addMethods({
 										if (isDate) {
 											// NB - this handles Logical Dates (2000-01-01) and 
 											//      ISO Dates (2001-01-01T00:00:00+00:00)
-											row[name] = Date.parseSchemaDate(value);
+											row[name] = isc.DateUtil.parseSchemaDate(value);
 										}
 										else if (isTime) {
 											row[name] = isc.Time.parseInput(value);

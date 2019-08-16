@@ -179,8 +179,6 @@ isc.DataSource.addSearchOperator({ID:'gOverlaps',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator('isNull', ['geometry']);
-isc.DataSource.addSearchOperator('notNull', ['geometry']);
 
 // TODO Leave as modals for now and see how error tightening on server goes
 //isc.RPCManager.promptStyle = "cursor";
@@ -197,6 +195,8 @@ isc.BizUtil.addClassProperties({
 	// Data source for the "previous values" mechanism on text fields.
 	PREVIOUS_VALUES_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
+		jsonPrefix: '',
+		jsonSuffix: '',
 		dataURL: "smartprev",
 		fields: [{name: 'value', type: 'text'}]
 	})

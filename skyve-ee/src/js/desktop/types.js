@@ -59,12 +59,12 @@ isc.DateTimeItem.addProperties({
 
 isc.ClassFactory.defineClass("BizDateItem", "DateItem");
 isc.BizDateItem.addClassMethods({
-	parseInput: function(value) { // value is not only a string, returns a float
+	parseInput: function(value) { // value is not only a string
 		if (isc.isA.Date(value)) {
 			return value;
 		}
 		
-		if (value) {
+		if (value) { // must be a string
 			value = value.trim();
 			
 			// look for a string month match
@@ -110,27 +110,18 @@ isc.BizDateItem.addClassMethods({
 				}
 			}
 
-			var result = Date.parseSchemaDate(value);
-			if (result) {
-			}
-			else {
+			var result = isc.DateUtil.parseSchemaDate(value);
+			if (! result) {
 				// any non-matches returns null
 				result = Date.parseInput(value, 'DMY', 50, true);
 				// check if we have just a day and month, no year or time etc
-				if (result) {
-				}
-				else {
+				if (! result) {
 					if (/^\d?\d[^A-Za-z0-9]\d?\d$/.test(value)) { // 1 or 2 digits, anything, month word, whitespace or nothing
 						// try adding the current year on the end - any non-matches returns null
 						result = Date.parseInput(value + ' ' + Date.create().getFullYear(), 'DMY', 50, true);
 					}
 				}
 			}
-			// Adjust time to UTC
-//			if (result) {
-//				result.setTime(result.getTime() - result.getTimezoneOffset() * 60000);
-//				result.set
-//			}
 
 			return result;
 		}
@@ -160,7 +151,7 @@ isc.BizDateItem.addProperties({
 	inputFormat: function(value) {
 		return isc.BizDateItem.parseInput(value);
 	},
-	displayFormat: 'toDD_MM_YYYY'
+	dateFormatter: 'toDD_MM_YYYY'
 });
 isc.BizDateItem.addMethods({
 	mapValueToDisplay: function(value) {
@@ -170,7 +161,7 @@ isc.BizDateItem.addMethods({
 		if (! isc.isA.Date(value)) {
 			value = isc.BizDateItem.parseInput(value);
 		}
-		return isc.BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.dateFormatter);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
@@ -184,7 +175,7 @@ isc.BizDateItem.addMethods({
 	},
 	// Override - ensure the value displayed in the element matches the saved value, and is formatted correctly
 	updateValue: function() {
-		// this will map the value to a valid float
+		// this will map the value to a valid date
         this.Super("updateValue", arguments);
         // this will update the displayed string so its formatted correctly
         this.setElementValue(this.mapValueToDisplay(this.getValue()));
@@ -220,7 +211,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_Item", "BizDateItem");
 isc.DD_MMM_YYYY_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY'
+	dateFormatter: 'toDD_MMM_YYYY'
 });
 isc.SimpleType.create({
 	name: "DD_MMM_YYYY",
@@ -247,7 +238,7 @@ isc.BizDateTimeItem.addProperties({
 	inputFormat: function(value) {
 		return isc.BizDateItem.parseInput(value);
 	},
-	displayFormat: 'toDD_MM_YYYY_HH_MI'
+	dateFormatter: 'toDD_MM_YYYY_HH_MI'
 });
 isc.BizDateTimeItem.addMethods({
 	mapValueToDisplay: function(value) {
@@ -257,7 +248,7 @@ isc.BizDateTimeItem.addMethods({
 		if (! isc.isA.Date(value)) {
 			value = isc.BizDateItem.parseInput(value);
 		}
-		return isc.BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.dateFormatter);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
@@ -306,7 +297,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -320,7 +311,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -333,7 +324,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -347,7 +338,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
@@ -361,7 +352,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -376,7 +367,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
@@ -390,7 +381,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -460,7 +451,7 @@ isc.ClassFactory.defineClass("HH_MI_SS_Item", "BizTimeItem");
 isc.HH_MI_SS_Item.addProperties({
 	use24HourTime: false,
 	hint: 'HH:MI:SS am/pm',
-   	displayFormat: 'toTime',
+	dateFormatter: 'toTime',
    	timeFormatter: 'toTime'
 });
 isc.SimpleType.create({
@@ -475,7 +466,7 @@ isc.ClassFactory.defineClass("HH24_MI_Item", "BizTimeItem");
 isc.HH24_MI_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI',
-   	displayFormat: 'toShortPadded24HourTime',
+	dateFormatter: 'toShortPadded24HourTime',
    	timeFormatter: 'toShortPadded24HourTime'
 });
 isc.SimpleType.create({
@@ -490,7 +481,7 @@ isc.ClassFactory.defineClass("HH24_MI_SS_Item", "BizTimeItem");
 isc.HH24_MI_SS_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI:SS',
-   	displayFormat: 'toPadded24HourTime',
+	dateFormatter: 'toPadded24HourTime',
    	timeFormatter: 'toPadded24HourTime'
 });
 isc.SimpleType.create({
@@ -1635,49 +1626,51 @@ isc.BizLookupDescriptionItem.addMethods({
 										}
 										// Validate here so we can put out the zoom message if required
 										var instance = me._view.gather(true);
-										if (instance) {} else {
-											isc.warn('You cannot zoom in until you fix the problems found');
-										}
-
-										if (instance._apply || me._view._vm.valuesHaveChanged()) {
-											delete instance._apply;
-											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function() {
+										if (instance) {
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to current form before zoom in
+												me._view.saveInstance(true, null, function() {
+													me.setRequired(required); // reset form item's required-ness
+													isc.WindowStack.popup(fromRect, "New", false, [view]);
+													view.newInstance(newParams, viewBinding, instance._c, false);
+												});
+											}
+											else {
 												me.setRequired(required); // reset form item's required-ness
 												isc.WindowStack.popup(fromRect, "New", false, [view]);
 												view.newInstance(newParams, viewBinding, instance._c, false);
-											});
+											}
 										}
 										else {
-											me.setRequired(required); // reset form item's required-ness
-											isc.WindowStack.popup(fromRect, "New", false, [view]);
-											view.newInstance(newParams, viewBinding, instance._c, false);
+											isc.warn('You cannot zoom in until you fix the problems found');
 										}
 									}
 									else {
 										// Validate here so we can put out the zoom message if required
 										var instance = me._view.gather(true);
-										if (instance) {} else {
-											isc.warn('You cannot zoom in until you fix the problems found');
-										}
-										
-										if (instance._apply || me._view._vm.valuesHaveChanged()) {
-											delete instance._apply;
-											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function() {
+										if (instance) {
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to current form before zoom in
+												me._view.saveInstance(true, null, function() {
+													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+													view.editInstance(me.getValue(),
+																		viewBinding,
+																		instance._c,
+																		false);
+												});
+											}
+											else {
 												isc.WindowStack.popup(fromRect, "Edit", false, [view]);
 												view.editInstance(me.getValue(),
 																	viewBinding,
 																	instance._c,
 																	false);
-											});
+											}
 										}
 										else {
-											isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-											view.editInstance(me.getValue(),
-																viewBinding,
-																instance._c,
-																false);
+											isc.warn('You cannot zoom in until you fix the problems found');
 										}
 									}
 								});

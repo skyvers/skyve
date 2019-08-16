@@ -194,7 +194,7 @@ public class UtilImpl {
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "2";
 	public static final String SKYVE_VERSION = "20190813";
-	public static final String SMART_CLIENT_DIR = "isomorphic110";
+	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	// for skyve script
 	/**
