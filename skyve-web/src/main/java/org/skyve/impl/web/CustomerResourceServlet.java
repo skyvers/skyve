@@ -70,7 +70,7 @@ public class CustomerResourceServlet extends HttpServlet {
 		public byte[] getBytes()
 		throws IOException, NoSuchAlgorithmException, InterruptedException {
 			load();
-			return image.getBytes();
+			return (image == null) ? null : image.getBytes();
 		}
 		
 		private void load()
@@ -196,14 +196,20 @@ public class CustomerResourceServlet extends HttpServlet {
 					AbstractPersistence.get().setUser(user);
 				}
 				else { // not logged in
-					// Get the customer name if it is in a cookie from the HomeServlet
-					Cookie[] cookies = request.getCookies();
-					if (cookies != null) {
-						for (int i = 0, l = cookies.length; i < l; i++) {
-							Cookie cookie = cookies[i];
-							if (AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(cookie.getName())) {
-								customerName = cookie.getValue();
-								break;
+					// Get the customer name from the JSON properties, if defined
+					if (UtilImpl.CUSTOMER != null) {
+						customerName = UtilImpl.CUSTOMER;
+					}
+					else {
+						// Get the customer name if it is in a cookie from the HomeServlet
+						Cookie[] cookies = request.getCookies();
+						if (cookies != null) {
+							for (int i = 0, l = cookies.length; i < l; i++) {
+								Cookie cookie = cookies[i];
+								if (AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(cookie.getName())) {
+									customerName = cookie.getValue();
+									break;
+								}
 							}
 						}
 					}
