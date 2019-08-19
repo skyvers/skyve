@@ -1316,16 +1316,16 @@ public class SmartClientGenerateUtils {
 	
 	public static Integer determineDefaultColumnWidth(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {
-			return Integer.valueOf(100);
+			return Integer.valueOf(110);
 		}
 		if (AttributeType.dateTime.equals(attributeType)) {
-			return Integer.valueOf(125);
+			return Integer.valueOf(130);
 		}
 		if (AttributeType.time.equals(attributeType)) {
-			return Integer.valueOf(75);
+			return Integer.valueOf(80);
 		}
 		if (AttributeType.timestamp.equals(attributeType)) {
-			return Integer.valueOf(125);
+			return Integer.valueOf(140);
 		}
 		if (AttributeType.bool.equals(attributeType)) {
 			return Integer.valueOf(75);
