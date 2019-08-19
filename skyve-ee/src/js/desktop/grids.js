@@ -1168,6 +1168,7 @@ isc.BizListGrid.addMethods({
 					requestProperties.params._cc = '';
 				}
 
+				// Get the filter criteria, so we can set it back after super call
 				var editorCriteria = me._advancedFilter.toggleButton.selected ?
 										me._advancedFilter.getCriteria() :
 										me.grid.getFilterEditorCriteria(true);

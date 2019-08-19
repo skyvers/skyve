@@ -936,14 +936,14 @@ public class SmartClientListServlet extends HttpServlet {
 		    			case iEndsWithPattern:
 							// nothing to do
 		    				break;
-						case gContains:
-						case gCrosses:
-						case gDisjoint:
-						case gEquals:
-						case gIntersects:
-						case gOverlaps:
-						case gTouches:
-						case gWithin:
+						case geoContains:
+						case geoCrosses:
+						case geoDisjoint:
+						case geoEquals:
+						case geoIntersects:
+						case geoOverlaps:
+						case geoTouches:
+						case geoWithin:
 							// TODO fix this later
 							break;
 						case and:
@@ -1216,42 +1216,42 @@ public class SmartClientListServlet extends HttpServlet {
 	    			break;
 	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
 	    			break;
-	    		case gWithin:
+	    		case geoWithin:
 					if (value instanceof Geometry) {
 						filter.addWithin(binding, (Geometry) value);
 					}
 					break;
-	    		case gContains:
+	    		case geoContains:
 					if (value instanceof Geometry) {
 						filter.addContains(binding, (Geometry) value);
 					}
 					break;
-	    		case gCrosses:
+	    		case geoCrosses:
 					if (value instanceof Geometry) {
 						filter.addCrosses(binding, (Geometry) value);
 					}
 					break;
-	    		case gDisjoint:
+	    		case geoDisjoint:
 					if (value instanceof Geometry) {
 						filter.addDisjoint(binding, (Geometry) value);
 					}
 					break;
-	    		case gEquals:
+	    		case geoEquals:
 					if (value instanceof Geometry) {
 						filter.addEquals(binding, (Geometry) value); 
 					}
 					break;
-	    		case gIntersects:
+	    		case geoIntersects:
 					if (value instanceof Geometry) {
 						filter.addIntersects(binding, (Geometry) value);
 					}
 					break;
-	    		case gOverlaps:
+	    		case geoOverlaps:
 					if (value instanceof Geometry) {
 						filter.addOverlaps(binding, (Geometry) value);
 					}
 					break;
-	    		case gTouches:
+	    		case geoTouches:
 					if (value instanceof Geometry) {
 						filter.addTouches(binding, (Geometry) value);
 					}

@@ -68,14 +68,14 @@ public enum SmartClientFilterOperator {
 	or, // at least one subcriteria (criterion.criteria) is true
 	betweenInclusive, // shortcut for "greaterThan" + "lessThan" + "and". Specify criterion.start and criterion.end
 	iBetweenInclusive, // shortcut for "greaterOrEqual" + "lessOrEqual" + "and". Specify criterion.start and criterion.end
-	gWithin, // the geometry field is within (contained by) the operand geometry
-	gContains, // the operand geometry is within (contained by) the geometry field
-	gOverlaps, // the geometry field overlaps the operand geometry
-	gDisjoint, // the geometry field does not touch or intersect the operand geometry
-	gIntersects, // the geometry field intersects the operand geometry
-	gTouches, // the geometry field touches (but does not intersect) the operand geometry
-	gCrosses, // not sure???
-	gEquals; // the geometry field is equivalent to the operand geometry
+	geoWithin, // the geometry field is within (contained by) the operand geometry
+	geoContains, // the operand geometry is within (contained by) the geometry field
+	geoOverlaps, // the geometry field overlaps the operand geometry
+	geoDisjoint, // the geometry field does not touch or intersect the operand geometry
+	geoIntersects, // the geometry field intersects the operand geometry
+	geoTouches, // the geometry field touches (but does not intersect) the operand geometry
+	geoCrosses, // not sure???
+	geoEquals; // the geometry field is equivalent to the operand geometry
 	
 	public static SmartClientFilterOperator fromFilterOperator(FilterOperator operator) {
 		SmartClientFilterOperator result = null;

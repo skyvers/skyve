@@ -11,69 +11,23 @@ isc.RPCManager.handleError = function (response, request) {
 		isc.warn(response.data);
 		return false;
 	}
-	else {
-		return this.Super("handleError", arguments);
-	}
+
+	return this.Super("handleError", arguments);
 };
 Date.setShortDisplayFormat("toEuropeanShortDate");
 Date.setNormalDisplayFormat("toEuropeanShortDate");
 Date.setInputFormat("DMY");
 
-// Fix DnD for list grids
-isc.ListGrid.addProperties({
-	recordDrop: function (dropRecords, targetRecord, index, sourceWidget) {
-		if (this.getID() == sourceWidget.getID()) {
-			var dupdata = this.data.slice();
-			dupdata.slideList(dropRecords, index);
-			this.setData(dupdata);
-			this.markForRedraw();
+// isc.ResultSet._willFetchData() doesn't cater for SearchOperator.requiresServer = true.
+// So for spatial operators, I will force a fetch.
+isc.ResultSet.addMethods({
+	skyveSetCriteria: isc.ResultSet.getPrototype().setCriteria,
+	setCriteria: function(newCriteria) {
+		var result = this.skyveSetCriteria(newCriteria);
+		if (newCriteria && JSON.stringify(newCriteria).match(/"operator"\s*:\s*"geo/)) {
+			this.invalidateCache();
 		}
-		else {
-			this.transferRecords(dropRecords, targetRecord, this.canReorderRecords ? index: null, sourceWidget);  
-		}  
-		
-		if (this.recordsDropped) {
-			this.recordsDropped(dropRecords, index, this, sourceWidget);
-		}
-		
-		return false;    
-	},
-	
-	getFilterEditorType: function(field) {
-	    // Simple case: support explicit filterEditorType on the field
-	    if (field.filterEditorType != null) return field.filterEditorType;
-
-	    // TODO: reimplement this once RecordEditor correctly returns AdvancedCriteria
-//	    if (isc.SimpleType.inheritsFrom(field.type, "date") && this.getDataSource() && 
-//	        this.getDataSource().supportsAdvancedCriteria()) 
-//	    {
-//	        return "MiniDateRangeItem";
-//	    }
-
-	    // filter editor config is basically picked up from field defaults and explicit
-	    // field.filterEditorProperties.
-	    // If a a field specifies an explicit filterEditorType or a filterEditorProperties block with
-	    // an explicit editor type, respect it.
-	    // Otherwise if a field specifies an explicit editorType, respect that
-	    // Otherwise generate the editor type based on data type in the normal way
-	    // A couple of exceptions:
-	    // - override canEdit with canFilter, so we don't get a staticTextItem in the field
-	    
-	    // - clear out field.length: we don't want to show the long editor type (text area) in our
-	    //   filter editor
-	    var filterEditorConfig = isc.addProperties ({}, field,
-	                                                 {canEdit:field.canFilter !== false,
-	                                                  length:null});
-	    
-	    // the _constructor property can come from XML -> JS conversion, and matches the 
-	    // XML tag name for the field element.
-	    // Don't attempt to use this to determine DynamicForm editor type - it's likely to be
-	    // ListGridField or similar which shouldn't effect the generated form item type.
-	    if (filterEditorConfig._constructor != null) delete filterEditorConfig._constructor;
-	    if (field.filterEditorType != null) filterEditorConfig.editorType = field.filterEditorType;
-	    isc.addProperties(filterEditorConfig, field.filterEditorProperties);
-	    var type = isc.DynamicForm.getEditorType(filterEditorConfig, this);
-	    return type;
+		return result;
 	}
 });
 
@@ -90,11 +44,11 @@ isc.Page.setEvent('resize', function() {
 });
 
 // register new search operator types for spatial queries
-isc.DataSource.addSearchOperator({ID:'gEquals',
+isc.DataSource.addSearchOperator({ID:'geoEquals',
 	title: 'Equals',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -102,11 +56,11 @@ isc.DataSource.addSearchOperator({ID:'gEquals',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gDisjoint',
+isc.DataSource.addSearchOperator({ID:'geoDisjoint',
 	title: 'Disjoint',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -114,11 +68,11 @@ isc.DataSource.addSearchOperator({ID:'gDisjoint',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gIntersects',
+isc.DataSource.addSearchOperator({ID:'geoIntersects',
 	title: 'Intersects',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -126,19 +80,22 @@ isc.DataSource.addSearchOperator({ID:'gIntersects',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gTouches',
+isc.DataSource.addSearchOperator({ID:'geoTouches',
 	title: 'Touches',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
+	condition: function(value, record, fieldName, criterion, operator) {
+		return true;
+	},
 	compareCriteria: function(newCriterion, oldCriterion) {
 		return -1;
 	}});
-isc.DataSource.addSearchOperator({ID:'gCrosses',
+isc.DataSource.addSearchOperator({ID:'geoCrosses',
 	title: 'Crosses',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -146,20 +103,11 @@ isc.DataSource.addSearchOperator({ID:'gCrosses',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gWithin',
+isc.DataSource.addSearchOperator({ID:'geoWithin',
 	title: 'Within',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
-	compareCriteria: function(newCriterion, oldCriterion) {
-		return -1;
-	}
-});
-isc.DataSource.addSearchOperator({ID:'gContains',
-	title: 'Contains',
-	fieldTypes:['geometry'],
-	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -167,11 +115,23 @@ isc.DataSource.addSearchOperator({ID:'gContains',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gOverlaps',
+isc.DataSource.addSearchOperator({ID:'geoContains',
+	title: 'Contains',
+	fieldTypes:['geometry'],
+	valueType: 'fieldType',
+	requiresServer: true,
+	condition: function(value, record, fieldName, criterion, operator) {
+		return true;
+	},
+	compareCriteria: function(newCriterion, oldCriterion) {
+		return -1;
+	}
+});
+isc.DataSource.addSearchOperator({ID:'geoOverlaps',
 	title: 'Overlaps',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -277,11 +237,11 @@ isc.BizUtil.addClassMethods({
 									splitTarget, // a canvas sent to checkIf() and enableIf() within the splitItems
 									splitItems) { // array of MenuItem defns including the click functions
 		return isc.HLayout.create({
-			height: 22,
+			align: 'right',
+			height: 1,
 			membersMargin: 1,
 			members:[
 				isc.IButton.create({
-					height: 22,
 					autoFit: true,
 					title: buttonTitle,
 					icon: buttonIcon,
@@ -291,8 +251,8 @@ isc.BizUtil.addClassMethods({
 					click: buttonClick
 				}),
 				isc.MenuButton.create({
-					title: '',
-					width: 23,
+					title: null,
+					width: 26,
 					alignMenuLeft: false,
 					canHover: true,
 					getHoverHTML: function() {return splitTooltip;},

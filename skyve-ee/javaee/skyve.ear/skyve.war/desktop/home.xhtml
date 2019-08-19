@@ -77,6 +77,8 @@
 				<script type="text/javascript" src="desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			</c:if>
 			<script type="text/javascript">
+				isc.Canvas.resizeControls(4);
+				isc.Canvas.resizeFonts(2);
 				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.apiScript}
 				#{desktop.uiScript}

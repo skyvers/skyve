@@ -1368,7 +1368,6 @@ isc.BizLookupDescriptionItem.addMethods({
 			type: 'comboBox', 
 			showTitle: false,
 			width: '*',
-			height: 22,
 			selectOnFocus: true,
 			fetchMissingValues: false,
 //			addUnknownValues: false, This triggers a fetch on blur
@@ -1458,8 +1457,8 @@ isc.BizLookupDescriptionItem.addMethods({
 		if (config.editable) {
 			this._form = isc.DynamicForm.create({
 				writeFormTag: false, // ensure there are no nested forms
-				numCols: 3,
-				colWidths: ['*', 1, 53],
+				numCols: 2,
+				colWidths: ['*', 65],
 				margin: 0,
 				cellPadding: 0
 			});
@@ -1514,8 +1513,7 @@ isc.BizLookupDescriptionItem.addMethods({
 			
 			this._form.setItems([
 			    combo,
-			    {type: 'spacer', width: 1},
-		        {name: '_splitButton', showTitle: false, type: 'canvas', canvas: this._splitButton}
+		        {name: '_splitButton', showTitle: false, type: 'canvas', canvas: this._splitButton, align: 'right'}
 		    ]);
 		}
 		else {
@@ -1722,7 +1720,6 @@ isc.BizHTMLItem.addMethods({
 		
 		var me = this;
 		this._editButton = isc.IButton.create({
-			height: 22,
 			width: 30,
 			title: 'Edit',
 			canHover: true,
@@ -1791,7 +1788,6 @@ isc.BizHTMLItem.addMethods({
 												align: "right",
 												members: [
 													isc.IButton.create({
-														height: 22, 
 														width: 60, 
 														title: 'Apply',
 														click: function(applyEvent) {
@@ -1800,7 +1796,6 @@ isc.BizHTMLItem.addMethods({
 														}
 													}),
 													isc.IButton.create({
-														height: 22, 
 														width: 60, 
 														title: 'Cancel',
 														click: function(applyEvent) {
@@ -1843,9 +1838,9 @@ isc.SimpleType.create({
 	editorType: "BizHTMLItem"
 });
 
-isc.ClassFactory.defineClass("GeometryItem", "TextItem");
+isc.ClassFactory.defineClass("GeometryItem", isc.CanvasItem);
 isc.GeometryItem.addClassProperties({
-	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals', 'isNull', 'notNull']
+	validOperators: ['geoWithin', 'geoContains', 'geoOverlaps', 'geoDisjoint', 'geoIntersects', 'geoTouches', 'geoCrosses', 'geoEquals', 'isNull', 'notNull']
 });
 isc.GeometryItem.addClassMethods({
 	format: function(value) {
@@ -1865,41 +1860,71 @@ isc.GeometryItem.addClassMethods({
 	}
 });
 isc.GeometryItem.addProperties({
-//    canEdit: false,
-//    disableIconsOnReadOnly: false,
-    width: 100,
-    operator: 'gWithin',
+	showHint: false,
+	width: 100,
+    operator: 'geoWithin',
 	validOperators: isc.GeometryItem.validOperators,
-	selectOnFocus: true
+	// this is going to be an editable data item
+	shouldSaveValue: true
 });
 isc.GeometryItem.addMethods({
-	init: function(config) {
-		this.icons = [{
+	createCanvas: function() {
+		var me = this;
+		var icons = [{
 	        src: 'icons/map.png',
 	        prompt: 'Click to set or see the geometry on a map',
 	        click: function(form, item, icon) {
-	        	var options = config.drawingTools ? {field: item, drawingTools: config.drawingTools} : {field: item};
+	        	var options = me.drawingTools ? {field: me, drawingTools: me.drawingTools} : {field: me};
 	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create(options)]);
 	        }
-	    }];
-		if (config.icons) {
-			this.icons.addList(config.icons);
-		}
-		
-		this.Super("init", arguments);
+		}];
+		// Use a HLayout coz if we returned a DynamicForm here, 
+		// CanvasItem would add the form items to the filter criteria automatically
+		return isc.HLayout.create({
+			height: 1,
+			width: '100%',
+			members: [
+				isc.DynamicForm.create({
+					writeFormTag: false, // ensure there are no nested forms
+					numCols: 1,
+					width: '100%',
+					margin: 0,
+					cellPadding: 0,
+					items: [{name: 'value',
+								type: 'text',
+								showTitle: false,
+								width: '*',
+								hint: this.hint,
+								showHintInField: true,
+								selectOnFocus: true,
+								changed: function(form, item, value) {
+									me.storeValue(value, false);
+								},
+								icons: icons}]
+				})
+			]
+		});
 	},
+	
+	showValue: function(displayValue, dataValue, form, item) {
+		item.canvas.getMember(0).setValue('value', displayValue);
+	},
+
+	setHint: function(hint) {
+		this.canvas.getMember(0).setHint(hint);
+	},
+	
 	// called from BizMapPicker
 	setValueFromPicker: function(newValue) {
-		this.setValue(newValue);
-		if (this.changed) {
-			this.changed(this.form, this, newValue);
-		}
+		// NB calls change events too.
+		this.storeValue(newValue, true);
 	}
 });
 isc.SimpleType.create({
     name: "geometry",
-    inheritsFrom: "text",
+    inheritsFrom: "canvas",
 	editorType: "GeometryItem",
+	defaultOperator: 'gWithin',
 	validOperators: isc.GeometryItem.validOperators
 });
 
@@ -1958,7 +1983,8 @@ isc.GeometryMapItem.addMethods({
 
 //register the editor
 isc.SimpleType.create({
+	name: "geometryMap",
 	inheritsFrom: "canvas",
-	name: "geometryMapItem",
-	editorType: "GeometryMapItem"
+	editorType: "GeometryMapItem",
+	validOperators: isc.GeometryItem.validOperators
 });
