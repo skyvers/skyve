@@ -39,9 +39,9 @@ isc.BizUtil.addClassProperties({
 							ID: "adminStack",
 							width: "100%",
 							visibilityMode: "mutex",
-							animateSections: true,
+							animateSections: false,
 							overflow: "hidden",
-							headerHeight: 20
+							headerHeight: 30
 						})
 					]
 				}),
@@ -137,7 +137,7 @@ isc.BizUtil.addClassProperties({
 					}
 				}
 			});
-			// add the section to the accordian pane
+			// add the section to the accordion pane
 			adminStack.addSection({
 				title: item.title,
 				expanded: item.open,

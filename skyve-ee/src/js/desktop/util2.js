@@ -18,6 +18,58 @@ Date.setShortDisplayFormat("toEuropeanShortDate");
 Date.setNormalDisplayFormat("toEuropeanShortDate");
 Date.setInputFormat("DMY");
 
+isc.ListGrid.addProperties({
+	getFilterEditorType: function(field) {
+	    // Simple case: support explicit filterEditorType on the field
+	    if (field.filterEditorType != null) return field.filterEditorType;
+
+	    // TODO: re-implement this once RecordEditor correctly returns AdvancedCriteria
+	    var ds = this.getDataSource();
+//	    if (isc.SimpleType.inheritsFrom(field.type, "date") &&  ds &&
+//	        ds.supportsAdvancedCriteria())
+//	    {
+//	        return "MiniDateRangeItem";
+//	    }
+
+	    var type = field.type;
+	    var isFileType = (type == this._$binary || type == this._$file ||
+	                        type == this._$imageFile);
+
+	    if (isFileType && field.editorType == null) {
+	        if (field.filenameSuppressed || ds && ds.getFilenameField && ds.getFilenameField(field.name) == null) {
+	            return "StaticTextItem";
+	        } else {
+	            return "TextItem";
+	        }
+	    }
+
+	    // filter editor config is basically picked up from field defaults and explicit
+	    // field.filterEditorProperties.
+	    // If a a field specifies an explicit filterEditorType or a filterEditorProperties block with
+	    // an explicit editor type, respect it.
+	    // Otherwise if a field specifies an explicit editorType, respect that
+	    // Otherwise generate the editor type based on data type in the normal way
+	    // A couple of exceptions:
+	    // - override canEdit with canFilter, so we don't get a staticTextItem in the field
+
+	    // - clear out field.length: we don't want to show the long editor type (text area) in our
+	    //   filter editor
+	    var filterEditorConfig = isc.addProperties ({}, field,
+	                                                 {canEdit:field.canFilter !== false,
+	                                                  length:null});
+
+	    // the _constructor property can come from XML -> JS conversion, and matches the
+	    // XML tag name for the field element.
+	    // Don't attempt to use this to determine DynamicForm editor type - it's likely to be
+	    // ListGridField or similar which shouldn't effect the generated form item type.
+	    if (filterEditorConfig._constructor != null) delete filterEditorConfig._constructor;
+	    if (field.filterEditorType != null) filterEditorConfig.editorType = field.filterEditorType;
+	    isc.addProperties(filterEditorConfig, field.filterEditorProperties);
+	    var type = isc.DynamicForm.getEditorType(filterEditorConfig, this);
+	    return type;
+	}
+});
+
 // isc.ResultSet._willFetchData() doesn't cater for SearchOperator.requiresServer = true.
 // So for spatial operators, I will force a fetch.
 isc.ResultSet.addMethods({
@@ -211,13 +263,12 @@ isc.BizUtil.addClassMethods({
 		return result;
 	},
 	
-	// returns an IButton
+	// returns an ToolStripButton
 	createImageButton: function(icon, // src relative to isomorphic directory - use ../images/ etc
 								hasDisabledIcon, // true to look for disabled icon ie icon_Disabled
 								tooltip, // the tooltip to add to the button
 								click) { // function to call when clicked
-		return isc.IButton.create({
-			width: 24,
+		return isc.ToolStripButton.create({
 			icon: icon,
 			iconAlign: "center",
 			showDisabledIcon: hasDisabledIcon,
