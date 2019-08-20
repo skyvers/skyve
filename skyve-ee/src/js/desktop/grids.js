@@ -198,6 +198,7 @@ isc.BizListGrid.addMethods({
 		
 		me._flagDialog = isc.Window.create({
 			autoCenter: true,
+			autoSize: true,
 			isModal: true,
 			showModalMask: true,
 			canDragReposition: true,
@@ -212,56 +213,14 @@ isc.BizListGrid.addMethods({
 			showHeaderIcon: true,
 			items: [
 				isc.DynamicForm.create({
-					padding: 5,
-//					margin: 5,
-					width:'100%',
+					padding: 0,
+					margin: 5,
 					useAllDataSourceFields: false,
-					fields: [{name:'bizFlagComment', 
-								type:'richText', 
-								height:175,
-								width: '100%',
-								validators: [{type: "lengthRange", min: 0, max: 1024, clientOnly: true}]}]
-				}),
-				isc.HLayout.create({
-					padding: 10,
-					membersMargin: 5,
-					align: 'right',
-					members: [
-						isc.IButton.create({
-							title: "Clear",
-							width: 100,
-							click: function() {
-								var commentField = me._flagForm.getField('bizFlagComment');
-								if (commentField.getValue() != '') {
-									commentField.setValue('');
-									me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-										if (dsResponse.status >= 0) { // success
-											me._flagForm.reset(); // ensure form is not dirty before hiding it
-											me._flagDialog.hide();
-										}
-									});
-								}
-							}
-						}),
-						isc.IButton.create({
-							title: "Flag",
-							width: 100,
-							click: function() {
-								if (me._flagForm.validate(true)) {
-									me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-										if (dsResponse.status >= 0) { // success
-											me._flagForm.reset(); // ensure form is not dirty before hiding it
-											me._flagDialog.hide();
-										}
-									});
-								}
-							}
-						})
-					]
+					numCols: 3,
+					colWidths: ['*', 100, 100],
+					items: []
 				})
-	        ],
-			width: 580,
-			height: 265
+	        ]
 		});
 
 		var getAllCriteria = function() {
@@ -1590,11 +1549,49 @@ isc.BizListGrid.addMethods({
 		me._advancedFilter.setDataSource(me._dataSource);
 
 		me._flagForm.setDataSource(me._dataSource);
-		me._flagForm.setFields([{name:'bizFlagComment', 
-									type:'richText', 
-									height:175,
-									validators: [{type: "lengthRange", min: 0, max: 1024, clientOnly: true}]}]);
-		
+		me._flagForm.setFields([
+			{name:'bizFlagComment', 
+				type:'richText',
+				colSpan: 3,
+				height:175,
+				validators: [{type: 'lengthRange', min: 0, max: 1024, clientOnly: true}]},
+			{type: 'spacer', startRow: true, endRow: false},
+			{type: 'button',
+				title: 'Clear',
+				width: 100,
+				startRow: false,
+				endRow: false,
+				click: function() {
+					var commentField = me._flagForm.getField('bizFlagComment');
+					if (commentField.getValue() != '') {
+						commentField.setValue('');
+						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
+							if (dsResponse.status >= 0) { // success
+								me._flagForm.reset(); // ensure form is not dirty before hiding it
+								me._flagDialog.hide();
+							}
+						});
+					}
+				}
+			},
+			{type: 'button',
+				title: 'Flag',
+				width: 100,
+				startRow: false,
+				endRow: true,
+				click: function() {
+					if (me._flagForm.validate(true)) {
+						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
+							if (dsResponse.status >= 0) { // success
+								me._flagForm.reset(); // ensure form is not dirty before hiding it
+								me._flagDialog.hide();
+							}
+						});
+					}
+				}
+			}
+		]);
+
 		if (me.grid) {
 			me.removeMember(me.grid);
 			me.grid.destroy();
