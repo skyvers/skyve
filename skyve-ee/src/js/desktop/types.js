@@ -1720,7 +1720,7 @@ isc.BizHTMLItem.addMethods({
 		
 		var me = this;
 		this._editButton = isc.IButton.create({
-			width: 30,
+			width: 40,
 			title: 'Edit',
 			canHover: true,
 			getHoverHTML: function() {return 'Edit the HTML';},
