@@ -60,7 +60,7 @@ isc.EditView.addMethods({
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
-		this._heading = isc.HTMLFlow.create({showEdges:true});
+		this._heading = isc.HTMLFlow.create();
 
 		// not contained here as it is implicit
 		this.addMember(this._heading);
