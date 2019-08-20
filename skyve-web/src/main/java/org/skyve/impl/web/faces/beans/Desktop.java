@@ -76,6 +76,11 @@ public class Desktop extends Harness {
 		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
+	private String skin;
+	public String getSkin() {
+		return skin;
+	}
+	
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
@@ -98,7 +103,8 @@ public class Desktop extends Harness {
 					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-
+					skin = uxui.getScSkin();
+					
 					StringBuilder sb = new StringBuilder(8192);
 
 					constructMenu(bizModule, uxui.getName(), sb);

@@ -218,7 +218,7 @@ isc.BizListGrid.addMethods({
 					useAllDataSourceFields: false,
 					numCols: 3,
 					colWidths: ['*', 100, 100],
-					items: []
+					items: [] // this form is built in ListGrid.setDataSource()
 				})
 	        ]
 		});

@@ -803,7 +803,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				}
 			}
 			// We have a binding to a document attribute OR
-			// we have a binding to an implicit property that is settable.
+			// we have a binding to an implicit property that is mutable.
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
