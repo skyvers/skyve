@@ -33,7 +33,8 @@ isc.AdvancedFilter.addMethods({
 		    icon: "../images/icons/filter_add.png",
 		    actionType: "checkbox",
 		    showFocused: false,
-		    showFocusOutline: true,
+		    showDown: false,
+		    showSelectedIcon: false,
     	    selected: false,
     	    canHover: true,
     		getHoverHTML: function() {
