@@ -2599,7 +2599,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					break;
 				case Edit:
 					if (iconStyleClass == null) { 
-						result.setIcon("fa fa-mail-forward");
+						result.setIcon("fa fa-pencil");
 					}
 					break;
 				case Report:

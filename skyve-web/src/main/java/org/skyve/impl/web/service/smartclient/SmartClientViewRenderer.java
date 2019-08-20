@@ -222,7 +222,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("',title:'");
 			String iconStyleClass = tab.getIconStyleClass();
 			if (iconStyleClass != null) {
-				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
 			}
 		}
 		code.append(SmartClientGenerateUtils.processString(title));
@@ -545,7 +545,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											label,
 											action.getClientValidation(),
 											iconUrl,
-											action.getIconStyleClass(),
+											iconStyleClass,
 											toolTip,
 											confirmationText,
 											type,
@@ -2740,17 +2740,14 @@ pickListFields:[{name:'value'}],
 		}
 		result.append("',type:'");
 		result.append(type);
-		if (iconUrl != null) {
-			result.append("',icon:'../").append(iconUrl);
-			result.append("',displayName:'");
-		}
-		else {
-			result.append("',displayName:'");
-			if (iconStyleClass != null) {
-				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
-			}
+		result.append("',displayName:'");
+		if (iconStyleClass != null) {
+			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
 		}
 		result.append(SmartClientGenerateUtils.processString(label)).append("',tabIndex:999,");
+		if ((iconStyleClass == null) && (iconUrl != null)) {
+			result.append("icon:'../").append(iconUrl).append("',");
+		}
 		if (button != null) {
 			size(button, null, result);
 		}

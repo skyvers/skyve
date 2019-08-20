@@ -539,7 +539,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 						relativeIconFileName = "actions/Edit.gif";
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-mail-forward";
+						actionIconStyleClass = "fa fa-pencil";
 					}
 					actionType = 'E';
 					break;
