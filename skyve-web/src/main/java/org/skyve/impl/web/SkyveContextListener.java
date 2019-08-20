@@ -472,7 +472,7 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.createNewFile();
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			throw new IllegalStateException(propertyName + " " + directoryPath + " is not writeable.");
+			throw new IllegalStateException(propertyName + " " + directoryPath + " is not writable.");
 		}
 		finally {
 			testFile.delete();

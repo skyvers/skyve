@@ -728,7 +728,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
 //UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
-			if (bindings.isWritable(binding)) {
+			if (bindings.isMutable(binding)) {
 				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
 			}
 		}
@@ -821,14 +821,14 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addBinding(String binding, boolean writeable) {
-		addBinding(binding, writeable, false);
+	private void addBinding(String binding, boolean mutable) {
+		addBinding(binding, mutable, false);
 	}
 
-	private void addBinding(String binding, boolean writable, boolean noPrefix) {
+	private void addBinding(String binding, boolean mutable, boolean noPrefix) {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
-			bindings.putBinding(binding, writable);
+			bindings.putBinding(binding, mutable);
 		}
 	}
 
