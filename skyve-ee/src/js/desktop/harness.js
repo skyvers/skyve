@@ -285,8 +285,6 @@ var eventData = [
 		isc.RestDataSource.create({
 			ID: 'textSearch', 
 			dataFormat: 'json',
-			jsonPrefix: '',
-			jsonSuffix: '',
 			dataURL: 'smartsearch', 
 			// ensure all queries are performed server-side
 			criteriaPolicy: "dropOnChange",
