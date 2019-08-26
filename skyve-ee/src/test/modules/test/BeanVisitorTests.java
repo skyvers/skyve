@@ -145,7 +145,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		// Load inverses
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(aapd, test.getBizId(), false);
+		test = p.retrieve(aapd, test.getBizId());
 		test.getAggregatedAssociation().setEmbeddedAssociation(null);
 		
 		Set<String> expectedBindings = new TreeSet<>();
@@ -194,7 +194,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		// Load inverses
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(aai121pd, test.getBizId(), false);
+		test = p.retrieve(aai121pd, test.getBizId());
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");

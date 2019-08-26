@@ -238,7 +238,7 @@ public class StandardLoader {
 			id = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 			// find the bean by bizId
 			try {
-				result = persistence.retrieve(document, id, true);
+				result = persistence.retrieveAndLock(document, id);
 			} 
 			catch (@SuppressWarnings("unused") Exception e) { // could not be retrieved, must be new
 				result = document.newInstance(user);

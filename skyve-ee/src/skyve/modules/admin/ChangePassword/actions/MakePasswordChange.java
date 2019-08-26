@@ -59,7 +59,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		}
 
 		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
-		modules.admin.domain.User userBean = persistence.retrieve(userDocument, user.getId(), true);
+		modules.admin.domain.User userBean = persistence.retrieveAndLock(userDocument, user.getId());
 
 		// check old password matches if it is defined
 		if (oldPassword != null) {

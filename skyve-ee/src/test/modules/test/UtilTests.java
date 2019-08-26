@@ -19,7 +19,7 @@ public class UtilTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		// Got the shell of the object back
-		test = p.retrieve(aapd, test.getBizId(), false);
+		test = p.retrieve(aapd, test.getBizId());
 
 		Util.populateFully(test);
 

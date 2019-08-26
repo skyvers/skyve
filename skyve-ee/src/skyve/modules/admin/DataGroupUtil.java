@@ -97,7 +97,7 @@ public class DataGroupUtil {
 			Module module = customer.getModule(DataGroup.MODULE_NAME);
 			Document document = module.getDocument(customer, DataGroup.DOCUMENT_NAME);
 			
-			result = pers.retrieve(document, bean.getBizDataGroupId(), false);
+			result = pers.retrieve(document, bean.getBizDataGroupId());
 		}
 		
 		return result;

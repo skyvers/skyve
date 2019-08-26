@@ -1329,8 +1329,7 @@ public class SmartClientListServlet extends HttpServlet {
 						properties.put(columnBinding,
 										persistence.retrieve(module.getName(),
 																((Association) targetAttribute).getDocumentName(),
-																associationId,
-																false));
+																associationId));
 					}
 				}
 			}

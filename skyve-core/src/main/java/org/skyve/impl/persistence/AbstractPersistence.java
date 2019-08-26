@@ -129,12 +129,22 @@ public abstract class AbstractPersistence implements Persistence {
 	@Override
 	public final <T extends Bean> T retrieve(String moduleName,
 												String documentName,
-												String id,
-												boolean forUpdate) {
+												String id) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 		
-		return retrieve(document, id, forUpdate);
+		return retrieve(document, id);
+	}
+
+	@Override
+	public final <T extends Bean> T retrieveAndLock(String moduleName,
+														String documentName,
+														String id) {
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
+		
+		return retrieveAndLock(document, id);
 	}
 }

@@ -51,7 +51,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 		// verify the results
 		CORE.getPersistence().evictAllCached();
-		T deleted = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), false);
+		T deleted = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 
 		assertThat(deleted, is(nullValue()));
 	}
@@ -83,7 +83,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		CORE.getPersistence().save(bean);
 
 		// perform the method under test
-		T result = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), false);
+		T result = CORE.getPersistence().retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 
 		// verify the results
 		assertThat(result, is(notNullValue()));

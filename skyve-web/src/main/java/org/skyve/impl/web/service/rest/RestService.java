@@ -73,7 +73,7 @@ public class RestService {
 				throw new SecurityException("read this data", u.getName());
 			}
 	
-	    	bean = p.retrieve(d, id, false);
+	    	bean = p.retrieve(d, id);
 	    	if (bean == null) {
 	    		throw new NoResultsException();
 	    	}
@@ -109,7 +109,7 @@ public class RestService {
 				throw new SecurityException("read this data", u.getName());
 			}
 	
-	    	result = p.retrieve(d, id, false);
+	    	result = p.retrieve(d, id);
 	    	if (result == null) {
 	    		throw new NoResultsException();
 	    	}
@@ -224,7 +224,7 @@ public class RestService {
 			User u = p.getUser();
 			
 			PersistentBean bean = (PersistentBean) JSON.unmarshall(u, json);
-			PersistentBean beanToUpdate = p.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), true);
+			PersistentBean beanToUpdate = p.retrieveAndLock(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 			Binder.copy(bean, beanToUpdate);
 			beanToUpdate = p.save(beanToUpdate);
 			result = JSON.marshall(u.getCustomer(), beanToUpdate, null);
@@ -262,7 +262,7 @@ public class RestService {
 			User u = p.getUser();
 			
 			PersistentBean bean = (PersistentBean) JSON.unmarshall(u, json);
-			PersistentBean beanToDelete = p.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), true);
+			PersistentBean beanToDelete = p.retrieveAndLock(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 			p.delete(beanToDelete);
 			result = "{}";
 		}
@@ -414,7 +414,7 @@ public class RestService {
 				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
 			}
 
-			final PersistentBean bean = CORE.getPersistence().retrieve(module, document, id, true);
+			final PersistentBean bean = CORE.getPersistence().retrieveAndLock(module, document, id);
 			if (bean == null) {
 			    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			    return null;

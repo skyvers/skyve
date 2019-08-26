@@ -117,8 +117,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
                    		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
                    	 	value = CORE.getPersistence().retrieve(targetDocument.getOwningModuleName(), 
 	                											targetAssociation.getDocumentName(),
-	                											code,
-	                											false);
+	                											code);
 	            	}
 	            	else {
 	            		if (type == null) {

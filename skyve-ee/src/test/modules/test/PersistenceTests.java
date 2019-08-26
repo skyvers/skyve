@@ -62,7 +62,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 		p = CORE.getPersistence();
 		((AbstractPersistence) p).setUser(u);
 		p.begin();
-		test = p.retrieve(aapd, test.getBizId(), false);
+		test = p.retrieve(aapd, test.getBizId());
 		test = Util.cloneToTransientBySerialization(test);
 		test = p.save(test);
 	}
@@ -92,7 +92,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 		
-		spoke1 = p.retrieve(aapd, spoke1.getBizId(), false);
+		spoke1 = p.retrieve(aapd, spoke1.getBizId());
 		AllAttributesPersistent spoke3 = Util.cloneToTransientBySerialization(spoke1);
 		spoke3 = p.save(spoke3);
 		

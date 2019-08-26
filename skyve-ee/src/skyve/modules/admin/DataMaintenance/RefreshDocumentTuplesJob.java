@@ -69,7 +69,7 @@ public class RefreshDocumentTuplesJob extends Job {
 				for (PersistentBean bean : q.<PersistentBean>beanResults()) {
 					try {
 						if (EvictOption.bean.equals(evict) || EvictOption.all.equals(evict)) {
-                            bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bean.getBizId(), false);
+                            bean = pers.retrieve(doc.getModuleName(), doc.getDocumentName(), bean.getBizId());
                         }
 						
 						if (RefreshOption.upsert.equals(refresh)) {

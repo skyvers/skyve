@@ -126,7 +126,7 @@ public final class ReportUtil {
 				String id = (String) parameters.get(AbstractWebContext.ID_NAME);
 				// if we have a bizId then assume its persistent and load it
 				if (id != null) {
-					reportBean = AbstractPersistence.get().retrieve(document, id, false);
+					reportBean = AbstractPersistence.get().retrieve(document, id);
 				}
 			}
 			UtilImpl.LOGGER.info("FILL REPORT");
@@ -212,7 +212,7 @@ public final class ReportUtil {
 					String id = (String) reportParameter.getParameters().get(AbstractWebContext.ID_NAME);
 					// if we have a bizId then assume its persistent and load it
 					if (id != null) {
-						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id, false);
+						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id);
 					}
 				}
 				UtilImpl.LOGGER.info("FILL REPORT");

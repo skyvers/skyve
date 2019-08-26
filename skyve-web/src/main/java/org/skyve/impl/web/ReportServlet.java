@@ -187,7 +187,7 @@ public class ReportServlet extends HttpServlet {
 					// the conversation.
 					final String id = request.getParameter(AbstractWebContext.ID_NAME);
 					if (id != null && (bean == null || (contextKey != null && !contextKey.endsWith(id)))) {
-						bean = AbstractPersistence.get().retrieve(document, id, false);
+						bean = AbstractPersistence.get().retrieve(document, id);
 					}
 
 					jasperPrint = ReportUtil.runReport(user,

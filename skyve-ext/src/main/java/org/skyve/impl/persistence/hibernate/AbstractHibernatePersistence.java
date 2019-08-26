@@ -1489,8 +1489,17 @@ t.printStackTrace();
 	}
 	
 	@Override
+	public <T extends Bean> T retrieve(Document document, String id) {
+		return retrieve(document, id, false);
+	}
+	
+	@Override
+	public <T extends Bean> T retrieveAndLock(Document document, String id) {
+		return retrieve(document, id, true);
+	}
+	
 	@SuppressWarnings("unchecked")
-	public final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
+	private final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
 		T result = null;
 		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());

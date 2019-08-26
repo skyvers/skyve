@@ -32,8 +32,7 @@ public class SourceVersionChanged implements ServerSideAction<Audit> {
 			else {
 				Audit comparison = CORE.getPersistence().retrieve(Audit.MODULE_NAME, 
 																	Audit.DOCUMENT_NAME, 
-																	lesserVersions.get(0).getCode(),
-																	false);
+																	lesserVersions.get(0).getCode());
 				bean.setComparisonVersion(comparison);
 			}
 		}

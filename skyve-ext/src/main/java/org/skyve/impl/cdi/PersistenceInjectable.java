@@ -153,13 +153,23 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
-		return CORE.getPersistence().retrieve(document, id, forUpdate);
+	public <T extends Bean> T retrieve(Document document, String id) {
+		return CORE.getPersistence().retrieve(document, id);
 	}
 
 	@Override
-	public <T extends Bean> T retrieve(String moduleName, String documentName, String id, boolean forUpdate) {
-		return CORE.getPersistence().retrieve(moduleName, documentName, id, forUpdate);
+	public <T extends Bean> T retrieveAndLock(Document document, String id) {
+		return CORE.getPersistence().retrieveAndLock(document, id);
+	}
+
+	@Override
+	public <T extends Bean> T retrieve(String moduleName, String documentName, String id) {
+		return CORE.getPersistence().retrieve(moduleName, documentName, id);
+	}
+
+	@Override
+	public <T extends Bean> T retrieveAndLock(String moduleName, String documentName, String id) {
+		return CORE.getPersistence().retrieveAndLock(moduleName, documentName, id);
 	}
 
 	@Override
