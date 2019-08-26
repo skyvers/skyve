@@ -1738,7 +1738,7 @@ isc.BizHTMLItem.addMethods({
 				var owningView = me.form._view;
 				var formValues = owningView.gather(false);
 				
-				var holder = isc.Canvas.create({width:'100%', height:'100%'});
+				var holder = isc.Canvas.create({width:'100%', height:'100%', margin: 5});
 				holder.setContents('<div style="width:100%;height:100%" id="_CKEditor"></div>');
 				holder.draw = function() {
 					this.Super('draw');
@@ -1784,7 +1784,7 @@ isc.BizHTMLItem.addMethods({
 										[holder,
 											isc.HLayout.create({
 												membersMargin: 5,
-												margin: 10,
+												margin: 5,
 												align: "right",
 												members: [
 													isc.IButton.create({
@@ -1805,7 +1805,7 @@ isc.BizHTMLItem.addMethods({
 												]
 											})
 										],
-										405);
+										420);
 			}
 		});
 		
