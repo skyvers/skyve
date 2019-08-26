@@ -1771,13 +1771,13 @@ isc.BizListMembership.addMethods({
 				height: 75,
 				members: [
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberAssign.png",
 						iconWidth: 24,
 						iconHeight: 24,
 						iconAlign: "center",
-						showText: false, 
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._memberList.transferSelectedData(me._candidateList);
 							me._view._vm.setValue('_changed', true); // make the view dirty
@@ -1788,13 +1788,13 @@ isc.BizListMembership.addMethods({
 						getHoverHTML: function() {return "Add the selected candidates.";}
 					}),
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberUnassign.png",
 						iconWidth: 24,
 						iconHeight:24,
 						iconAlign: "center", 
-						showText: false,
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._candidateList.transferSelectedData(me._memberList);
 							me._view._vm.setValue('_changed', true); // make the view dirty
