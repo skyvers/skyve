@@ -100,6 +100,7 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -1557,9 +1558,44 @@ t.printStackTrace();
 
 		Customer customer = user.getCustomer();
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		
+		// check that embedded objects are empty and null them if they are
+		Module module = customer.getModule(loadedBean.getBizModule());
+		Document document = module.getDocument(customer, loadedBean.getBizDocument());
+		for (Attribute attribute : document.getAllAttributes()) {
+			if (attribute instanceof Association) {
+				Association association = (Association) attribute;
+				if (AssociationType.embedded.equals(association.getType())) {
+					String embeddedName = association.getName();
+					Bean embeddedBean = (Bean) BindUtil.get(loadedBean, embeddedName);
+					if (embeddedBean != null) {
+						Document embeddedDocument = module.getDocument(customer, association.getDocumentName());
+						boolean empty = true;
+						for (Attribute embeddedAttribute : embeddedDocument.getAllAttributes()) {
+							// ignore inverses since they are stored directly in the data store
+							if (! (embeddedAttribute instanceof Inverse)) {
+								Object value = BindUtil.get(embeddedBean, embeddedAttribute.getName());
+								if (value != null) {
+									if ((value instanceof List<?>) && ((List<?>) value).isEmpty()) {
+										continue;
+									}
+									empty = false;
+									break;
+								}
+							}
+						}
+						if (empty) {
+							BindUtil.set(loadedBean, embeddedName, null);
+							// clear the object's dirtiness read for interceptor and bizlet callbacks
+							loadedBean.originalValues().remove(embeddedName);
+						}
+					}
+				}
+			}
+		}
+		
 		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
 		if (! vetoed) {
-			Document document = customer.getModule(loadedBean.getBizModule()).getDocument(customer, loadedBean.getBizDocument());
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);

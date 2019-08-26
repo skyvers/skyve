@@ -65,11 +65,6 @@
 		<integer name="normalInteger">
 			<displayName>Integer</displayName>
 		</integer>
-		<inverseMany name="inverseAggregatedAssociation">
-			<displayName>Inverse</displayName>
-			<documentName>AllAttributesPersistent</documentName>
-			<referenceName>aggregatedAssociation</referenceName>
-		</inverseMany>
 		<longInteger name="longInteger">
 			<displayName>Long Integer</displayName>
 		</longInteger>

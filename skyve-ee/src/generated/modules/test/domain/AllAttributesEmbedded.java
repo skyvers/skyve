@@ -89,8 +89,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	/** @hidden */
 	public static final String normalIntegerPropertyName = "normalInteger";
 	/** @hidden */
-	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
-	/** @hidden */
 	public static final String longIntegerPropertyName = "longInteger";
 	/** @hidden */
 	public static final String markupPropertyName = "markup";
@@ -237,10 +235,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 * Integer
 	 **/
 	private Integer normalInteger;
-	/**
-	 * Inverse
-	 **/
-	private List<AllAttributesPersistent> inverseAggregatedAssociation = new ArrayList<>();
 	/**
 	 * Long Integer
 	 **/
@@ -580,24 +574,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	public void setNormalInteger(Integer normalInteger) {
 		preset(normalIntegerPropertyName, normalInteger);
 		this.normalInteger = normalInteger;
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<AllAttributesPersistent> getInverseAggregatedAssociation() {
-		return inverseAggregatedAssociation;
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public AllAttributesPersistent getInverseAggregatedAssociationElementById(String bizId) {
-		return getElementById(inverseAggregatedAssociation, bizId);
 	}
 
 	/**

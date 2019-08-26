@@ -87,10 +87,6 @@
 			<property name="geometry" column="embedded_geometry" />
 			<property name="id" length="36" column="embedded_id" />
 			<property name="normalInteger" column="embedded_normalInteger" />
-			<bag name="inverseAggregatedAssociation" inverse="true">
-				<key column="aggregatedAssociation_id" />
-				<one-to-many entity-name="testAllAttributesPersistent" />
-			</bag>
 			<property name="longInteger" column="embedded_longInteger" />
 			<property name="markup" type="text" column="embedded_markup" />
 			<property name="memo" type="text" column="embedded_memo" />

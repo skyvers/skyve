@@ -146,7 +146,6 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		test = p.save(test);
 		p.evictAllCached();
 		test = p.retrieve(aapd, test.getBizId());
-		test.getAggregatedAssociation().setEmbeddedAssociation(null);
 		
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -155,19 +154,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(expectedBinding);
 		// inverseAggregatedAssociation[0].composedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedAssociationPropertyName));
-		// inverseAggregatedAssociation[0].composedAssociation.embeddedAssociation
-		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedAssociationPropertyName, AllAttributesPersistent.embeddedAssociationPropertyName));
 		// inverseAggregatedAssociation[0].embeddedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName));
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
 		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[0]
 		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
-		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[0].embeddedAssociation
-		expectedBindings.add(Binder.createCompoundBinding(Binder.createIndexedBinding(expectedBinding, 0), AllAttributesPersistent.embeddedAssociationPropertyName));
 		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[1]
 		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 1));
-		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[1].embeddedAssociation
-		expectedBindings.add(Binder.createCompoundBinding(Binder.createIndexedBinding(expectedBinding, 1), AllAttributesPersistent.embeddedAssociationPropertyName));
 
 		final Set<String> actualBindings = new TreeSet<>();
 

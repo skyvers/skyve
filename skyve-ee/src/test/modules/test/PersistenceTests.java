@@ -809,4 +809,40 @@ public class PersistenceTests extends AbstractSkyveTest {
 			Assert.assertTrue(test.isPersisted());
 		}
 	}
+
+	
+	@Test
+	public void testEmbeddedAssociationParent() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		p.evictAllCached();
+		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertEquals(test, test.getEmbeddedAssociation().getParent());
+	}
+
+	@Test
+	public void testNullInsertedEmbeddedAssociation() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		p.evictAllCached();
+		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNull(test.getEmbeddedAssociation());
+	}
+
+	@Test
+	public void testNullUpdatedEmbeddedAssociation() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+
+		p.evictAllCached();
+		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNotNull(test.getEmbeddedAssociation());
+
+		test.setEmbeddedAssociation(null);
+		test = p.save(test);
+		
+		p.evictAllCached();
+		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
+		Assert.assertNull(test.getEmbeddedAssociation());
+	}
 }
