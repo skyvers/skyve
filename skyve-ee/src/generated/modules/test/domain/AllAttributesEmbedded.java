@@ -9,8 +9,11 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.test.domain.AllAttributesPersistent;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -33,20 +36,19 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
- * All Persistent
+ * All Value
  * <br/>
- * All persistent attributes.
+ * All persistent attributes in a value object.
  * 
  * @depend - - - Enum3
  * @navhas n aggregatedCollection 0..n AllAttributesPersistent
  * @navcomposed n composedAssociation 0..1 AllAttributesPersistent
  * @navhas n aggregatedAssociation 0..1 AllAttributesPersistent
- * @navcomposed n embeddedAssociation 0..1 AllAttributesEmbedded
- * @stereotype "persistent"
+ * @stereotype "persistent child"
  */
 @XmlType
 @XmlRootElement
-public class AllAttributesPersistent extends AbstractPersistentBean {
+public class AllAttributesEmbedded extends AbstractPersistentBean implements ChildBean<AllAttributesPersistent> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -56,14 +58,12 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "AllAttributesPersistent";
+	public static final String DOCUMENT_NAME = "AllAttributesEmbedded";
 
 	/** @hidden */
 	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
 	/** @hidden */
 	public static final String composedAssociationPropertyName = "composedAssociation";
-	/** @hidden */
-	public static final String embeddedAssociationPropertyName = "embeddedAssociation";
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
 	/** @hidden */
@@ -190,10 +190,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	private AllAttributesPersistent composedAssociation = null;
 	/**
-	 * Embedded Association
-	 **/
-	private AllAttributesEmbedded embeddedAssociation = null;
-	/**
 	 * Boolean Flag
 	 **/
 	private Boolean booleanFlag;
@@ -269,20 +265,24 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Timestamp
 	 **/
 	private Timestamp timestamp;
+	private AllAttributesPersistent parent;
+
+	private Integer bizOrdinal;
+
 
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return AllAttributesPersistent.MODULE_NAME;
+		return AllAttributesEmbedded.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return AllAttributesPersistent.DOCUMENT_NAME;
+		return AllAttributesEmbedded.DOCUMENT_NAME;
 	}
 
-	public static AllAttributesPersistent newInstance() {
+	public static AllAttributesEmbedded newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -309,8 +309,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof AllAttributesPersistent) && 
-					this.getBizId().equals(((AllAttributesPersistent) o).getBizId()));
+		return ((o instanceof AllAttributesEmbedded) && 
+					this.getBizId().equals(((AllAttributesEmbedded) o).getBizId()));
 	}
 
 	/**
@@ -347,24 +347,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
 		preset(composedAssociationPropertyName, composedAssociation);
 		this.composedAssociation = composedAssociation;
-	}
-
-	/**
-	 * {@link #embeddedAssociation} accessor.
-	 * @return	The value.
-	 **/
-	public AllAttributesEmbedded getEmbeddedAssociation() {
-		return embeddedAssociation;
-	}
-
-	/**
-	 * {@link #embeddedAssociation} mutator.
-	 * @param embeddedAssociation	The new value.
-	 **/
-	@XmlElement
-	public void setEmbeddedAssociation(AllAttributesEmbedded embeddedAssociation) {
-		preset(embeddedAssociationPropertyName, embeddedAssociation);
-		this.embeddedAssociation = embeddedAssociation;
 	}
 
 	/**
@@ -728,5 +710,29 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
+	}
+
+	@Override
+	public AllAttributesPersistent getParent() {
+		return parent;
+	}
+
+	@Override
+	@XmlElement
+	public void setParent(AllAttributesPersistent parent) {
+		preset(ChildBean.PARENT_NAME, parent);
+		this.parent =  parent;
+	}
+
+	@Override
+	public Integer getBizOrdinal() {
+		return bizOrdinal;
+	}
+
+	@Override
+	@XmlElement
+	public void setBizOrdinal(Integer bizOrdinal) {
+		preset(Bean.ORDINAL_NAME, bizOrdinal);
+		this.bizOrdinal =  bizOrdinal;
 	}
 }

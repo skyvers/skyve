@@ -39,6 +39,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -181,7 +183,7 @@ public class ViewGenerator {
 		
 		List<Detail> details = new ArrayList<>();
 
-		processAttributes(customer, module, document, form, details);
+		processAttributes(customer, module, document, form, details, null);
 		
 		// make a tabbed view if more than 1 detail widget or there is 1 detail widget and more than 5 form fields
 		int numberOfDetailWidgets = details.size();
@@ -226,16 +228,17 @@ public class ViewGenerator {
 											Module module, 
 											Document document,
 											Form form,
-											List<Detail> details) {
+											List<Detail> details,
+											String bindingPrefix) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
-			processAttributes(customer, module, baseDocument, form, details);
+			processAttributes(customer, module, baseDocument, form, details, bindingPrefix);
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
 			if (! attribute.isDeprecated()) {
-				String attributeName = attribute.getName();
+				String binding = (bindingPrefix == null) ? attribute.getName() : bindingPrefix + attribute.getName();
 	
 				if (attribute instanceof Collection) {
 					Collection collection = (Collection) attribute;
@@ -252,7 +255,7 @@ public class ViewGenerator {
 															customer,
 															module,
 															detailDocument, 
-															attributeName, 
+															binding, 
 															propertyNames);
 						details.add(detail);
 					}
@@ -261,7 +264,7 @@ public class ViewGenerator {
 						Detail detail = new Detail();
 						detail.title = attribute.getDisplayName();
 						ListMembership membership = new ListMembership();
-						membership.setBinding(attribute.getName());
+						membership.setBinding(binding);
 						membership.setCandidatesHeading("Candidates");
 						membership.setMembersHeading("Members");
 						detail.widget = membership;
@@ -283,14 +286,21 @@ public class ViewGenerator {
 														customer,
 														module,
 														detailDocument, 
-														attributeName, 
+														binding, 
 														propertyNames);
 					details.add(detail);
+				}
+				else if ((attribute instanceof Association) && 
+							AssociationType.embedded.equals(((Association) attribute).getType())) {
+					Association embeddedAssociation = (Association) attribute;
+					Document embeddedDocument = module.getDocument(customer, embeddedAssociation.getDocumentName());
+					Module embeddedModule = customer.getModule(embeddedDocument.getOwningModuleName());
+					processAttributes(customer, embeddedModule, embeddedDocument, form, details, binding + '.');
 				}
 				else if (module.isPrototype() && (attribute instanceof Geometry)) {
 					FormItem item = new FormItem();
 					GeometryMap widget = new GeometryMap();
-					widget.setBinding(attributeName);
+					widget.setBinding(binding);
 					item.setWidget(widget);
 					FormRow row = new FormRow();
 					row.getItems().add(item);
@@ -299,7 +309,7 @@ public class ViewGenerator {
 				else { // field or association or inverseOne
 					FormItem item = new FormItem();
 					DefaultWidget widget = new DefaultWidget();
-					widget.setBinding(attributeName);
+					widget.setBinding(binding);
 					item.setWidget(widget);
 					FormRow row = new FormRow();
 					row.getItems().add(item);
@@ -359,6 +369,13 @@ public class ViewGenerator {
 
 				DomainType domainType = attribute.getDomainType();
 				if (DomainType.dynamic.equals(domainType)) {
+					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
+					column.setEditable(Boolean.FALSE);
+				}
+				// Set this field as non-editable coz the default widget (lookup description) 
+				// cannot query the document as its an embedded association
+				else if ((attribute instanceof Association) &&
+							AssociationType.embedded.equals(((Association) attribute).getType())) {
 					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
 					column.setEditable(Boolean.FALSE);
 				}

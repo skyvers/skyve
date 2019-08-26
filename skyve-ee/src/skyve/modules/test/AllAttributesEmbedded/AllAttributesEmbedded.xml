@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<document name="AllAttributesPersistent" 
+<document name="AllAttributesEmbedded" 
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			All persistent attributes.
+			All persistent attributes in a value object.
 		]]>
 	</documentation>
-	<persistent name="TEST_AllAttributesPersistent" />
-	<singularAlias>All Persistent</singularAlias>
-	<pluralAlias>All Persistent</pluralAlias>
+	<persistent strategy="mapped" />
+	<singularAlias>All Value</singularAlias>
+	<pluralAlias>All Value</pluralAlias>
+	<parentDocument>AllAttributesPersistent</parentDocument>
 	<bizKey expression="{text}" />
 	<attributes>
 		<association name="aggregatedAssociation" type="aggregation">
@@ -20,10 +21,6 @@
 		<association name="composedAssociation" type="composition">
 			<displayName>Composed Association</displayName>
 			<documentName>AllAttributesPersistent</documentName>
-		</association>
-		<association name="embeddedAssociation" type="embedded" embeddedColumnsPrefix="embedded">
-			<displayName>Embedded Association</displayName>
-			<documentName>AllAttributesEmbedded</documentName>
 		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>

@@ -5,6 +5,7 @@
 	<homeDocument>AllAttributesPersistent</homeDocument>
 	<documents>
 		<document ref="AllAttributesPersistent" />
+		<document ref="AllAttributesEmbedded" />
 		<document ref="AllAttributesRequiredPersistent" />
 		<document ref="AllAttributesInverseOneToOnePersistent" />
 		<document ref="AnyBase" />

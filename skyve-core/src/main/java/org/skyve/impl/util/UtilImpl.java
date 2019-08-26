@@ -395,7 +395,7 @@ public class UtilImpl {
 				if (reference.isPersistent()) {
 					if (reference instanceof AssociationImpl) {
 						AssociationImpl association = (AssociationImpl) reference;
-						if (association.getType() == AssociationType.composition) {
+						if (association.getType() != AssociationType.aggregation) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
 					} else if (reference instanceof Collection) {
@@ -431,7 +431,7 @@ public class UtilImpl {
 				if (reference.isPersistent()) {
 					if (reference instanceof AssociationImpl) {
 						AssociationImpl association = (AssociationImpl) reference;
-						if (association.getType() == AssociationType.composition) {
+						if (association.getType() != AssociationType.aggregation) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
 					} else if (reference instanceof Collection) {

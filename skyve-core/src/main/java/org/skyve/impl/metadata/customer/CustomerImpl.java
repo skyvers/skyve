@@ -38,6 +38,7 @@ import org.skyve.metadata.customer.UIResources;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
@@ -413,6 +414,11 @@ public class CustomerImpl implements Customer {
 								((DocumentImpl) targetDocument).setOrdered(true);
 							}
 							
+							// Embedded associations don't have an exported reference
+							if (AssociationType.embedded.equals(reference.getType())) {
+								continue;
+							}
+
 							// References are required to be able to check FK constraints in HibernatePersistence
 							// but are also needed to be able to export the tables - Backup
 							// and to generate the overridden domain - OverridableDomainGenerator

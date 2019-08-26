@@ -64,6 +64,40 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation" />
 		<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation" />
+		<component name="embeddedAssociation">
+			<parent name="parent" />
+			<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="embedded_aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation" />
+			<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="embedded_composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation" />
+			<property name="booleanFlag" column="embedded_booleanFlag" />
+			<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+				<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
+				<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
+			</bag>
+			<property name="colour" column="embedded_colour" />
+			<property name="date" type="DateOnly" column="embedded_date" />
+			<property name="dateTime" type="DateTime" column="embedded_dateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" column="embedded_decimal10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" column="embedded_decimal2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" column="embedded_decimal5" />
+			<property name="enum3" length="5" column="embedded_enum3">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.AllAttributesEmbedded$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" column="embedded_geometry" />
+			<property name="id" length="36" column="embedded_id" />
+			<property name="normalInteger" column="embedded_normalInteger" />
+			<bag name="inverseAggregatedAssociation" inverse="true">
+				<key column="aggregatedAssociation_id" />
+				<one-to-many entity-name="testAllAttributesPersistent" />
+			</bag>
+			<property name="longInteger" column="embedded_longInteger" />
+			<property name="markup" type="text" column="embedded_markup" />
+			<property name="memo" type="text" column="embedded_memo" />
+			<property name="text" length="255" column="embedded_text" />
+			<property name="time" type="TimeOnly" column="embedded_time" />
+			<property name="timestamp" type="Timestamp" column="embedded_timestamp" />
+		</component>
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />

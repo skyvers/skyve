@@ -469,6 +469,7 @@
         </xs:sequence>
         <xs:attribute name="required" type="xs:boolean"/>
         <xs:attribute name="type" type="tns:associationType" use="required"/>
+        <xs:attribute name="embeddedColumnsPrefix" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -673,6 +674,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="composition"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="embedded"/>
     </xs:restriction>
   </xs:simpleType>
 
