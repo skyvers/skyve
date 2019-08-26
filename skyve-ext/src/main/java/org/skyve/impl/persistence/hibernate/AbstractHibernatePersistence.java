@@ -1557,11 +1557,32 @@ t.printStackTrace();
 		BeanProvider.injectFields(loadedBean);
 
 		Customer customer = user.getCustomer();
-		CustomerImpl internalCustomer = (CustomerImpl) customer;
-		
-		// check that embedded objects are empty and null them if they are
 		Module module = customer.getModule(loadedBean.getBizModule());
 		Document document = module.getDocument(customer, loadedBean.getBizDocument());
+		
+		// check that embedded objects are empty and null them if they are
+		nullEmbeddedReferencesOnLoad(customer, module, document, loadedBean);
+		
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
+		if (! vetoed) {
+			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			if (bizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
+				bizlet.postLoad(loadedBean);
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
+			}
+			internalCustomer.interceptAfterPostLoad(loadedBean);
+		}
+
+		// clear the object's dirtiness
+		loadedBean.originalValues().clear();
+	}
+
+	private static void nullEmbeddedReferencesOnLoad(Customer customer,
+														Module module,
+														Document document,
+														AbstractPersistentBean loadedBean) {
 		for (Attribute attribute : document.getAllAttributes()) {
 			if (attribute instanceof Association) {
 				Association association = (Association) attribute;
@@ -1593,22 +1614,8 @@ t.printStackTrace();
 				}
 			}
 		}
-		
-		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
-		if (! vetoed) {
-			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
-				bizlet.postLoad(loadedBean);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
-			}
-			internalCustomer.interceptAfterPostLoad(loadedBean);
-		}
-
-		// clear the object's dirtiness
-		loadedBean.originalValues().clear();
 	}
-
+	
 	@Override
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
