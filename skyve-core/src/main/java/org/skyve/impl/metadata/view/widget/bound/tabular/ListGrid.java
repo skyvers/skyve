@@ -87,8 +87,6 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 
 	private Boolean autoPopulate;
 	
-	private String queryName;
-	private String modelName;
 	private String selectedIdBinding;
 	private boolean continueConversation;
 	
@@ -370,7 +368,8 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	@Override
 	@XmlTransient
 	public String getSource() {
-		return (queryName == null) ? modelName : queryName;
+		String queryName = getQueryName();
+		return (queryName == null) ? getModelName() : queryName;
 	}
 
 	@Override
