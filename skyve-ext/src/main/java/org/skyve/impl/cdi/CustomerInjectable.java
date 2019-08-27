@@ -114,9 +114,10 @@ public class CustomerInjectable implements Customer {
 
 	@Override
 	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
+																		String moduleName,
 																		String documentName,
 																		Attribute attribute)
 	throws Exception {
-		return CORE.getCustomer().getConstantDomainValues(bizlet, documentName, attribute);
+		return CORE.getCustomer().getConstantDomainValues(bizlet, moduleName, documentName, attribute);
 	}
 }

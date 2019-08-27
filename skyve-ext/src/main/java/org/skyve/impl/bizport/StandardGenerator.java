@@ -297,7 +297,10 @@ public final class StandardGenerator {
 							private static final long serialVersionUID = 5302965331084582623L;
 						};
 					}
-					column.setRangeValues(getConstantRangeValues(bizlet, currentDocument.getName(), attribute));
+					column.setRangeValues(getConstantRangeValues(bizlet, 
+																	currentDocument.getOwningModuleName(),
+																	currentDocument.getName(),
+																	attribute));
 				}
 
 				sheet.addColumn(name, column);
@@ -366,16 +369,19 @@ public final class StandardGenerator {
 	/**
 	 * Determine constant range values for the spreadsheet from the bizlet domain values.
 	 * @param domainBizlet	The bizlet to get domain values from.
+	 * @param domainModuleName	The module to get the domain values for.
 	 * @param domainDocumentName	The document to get the domain values for.
 	 * @param domainAttribute	The attribute to get domain values for.
 	 * @return	An array of range values.
 	 * @throws Exception
 	 */
 	private String[] getConstantRangeValues(Bizlet<?> domainBizlet,
+												String domainModuleName,
 												String domainDocumentName,
 												Attribute domainAttribute) 
 	throws Exception {
 		List<DomainValue> values = customer.getConstantDomainValues(domainBizlet,
+																		domainModuleName,
 																		domainDocumentName,
 																		domainAttribute);
 		String[] result = new String[values.size()];

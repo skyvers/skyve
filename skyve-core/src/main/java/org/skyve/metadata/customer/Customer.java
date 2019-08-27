@@ -109,12 +109,14 @@ public interface Customer extends NamedMetaData {
 	/**
 	 * 
 	 * @param bizlet
+	 * @param moduleName
 	 * @param documentName
 	 * @param attribute
 	 * @return
 	 * @throws Exception
 	 */
 	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet, 
+																		String moduleName,
 																		String documentName, 
 																		Attribute attribute)
 	throws Exception;

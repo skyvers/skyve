@@ -491,6 +491,7 @@ public class CustomerImpl implements Customer {
 	@Override
 	@SuppressWarnings("unchecked")
 	public synchronized <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet, 
+																					String moduleName,
 																					String documentName, 
 																					Attribute attribute)
 	throws Exception {
@@ -499,7 +500,7 @@ public class CustomerImpl implements Customer {
 		String attributeName = attribute.getName();
 		boolean vetoed = interceptBeforeGetConstantDomainValues(attributeName);
 		if (! vetoed) {
-			String key = documentName + '.' + attributeName;
+			String key = moduleName + '.' + documentName + '.' + attributeName;
 			result = domainValueCache.get(key);
 			if (result == null) {
 				if (bizlet != null) {
