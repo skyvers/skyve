@@ -272,6 +272,7 @@ isc.BizUtil.addClassMethods({
 			icon: icon,
 			iconAlign: "center",
 			showDisabledIcon: hasDisabledIcon,
+			showDownIcon: false,
 			canHover: true,
 			getHoverHTML: function() {return tooltip;},
 			click: click
