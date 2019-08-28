@@ -320,7 +320,8 @@ isc.BizUtil.addClassMethods({
 		});
 	},
 	
-	createUploadButton: function(contentFormItem) { // the item this upload button will live in
+	createUploadButton: function(contentFormItem, // the item this upload button will live in
+									image) { // whether this is a contentImage or a contentLink
 		return isc.BizUtil.createSplitButton(
 			'Upload', 
 			null, 
@@ -328,13 +329,13 @@ isc.BizUtil.addClassMethods({
 			'Upload content', 
 			function() {
 				var instance = contentFormItem.form._view.gather(false);
-				var url = 'contentUpload.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
+				var url = (image ? 'image' : 'content') + 'Upload.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
 							'&_c=' + instance._c;
 				if (contentFormItem.form._view._b) {
 					url += '&_b=' + contentFormItem.form._view._b.replaceAll('_', '.');
 				}
 				isc.WindowStack.popup(null,
-										"Upload Content",
+										image ? 'Upload Image' : 'Upload Content',
 										true,
 										[isc.HTMLPane.create({
 											contentsType: 'page',

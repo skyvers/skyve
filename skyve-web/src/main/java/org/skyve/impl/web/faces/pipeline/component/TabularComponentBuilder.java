@@ -1809,9 +1809,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
-	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *				<p:commandButton id="s05" icon="fa fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
@@ -1858,7 +1858,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
+		value.append(image).append(")).concat('\\')')}");
 		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 		toAddTo.add(overlay);
 

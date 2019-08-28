@@ -452,10 +452,10 @@ public class FacesView<T extends Bean> extends Harness {
 		action(actionName, null, null);
 	}
 
-	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
-	public String getContentUploadUrl(String sanitisedBinding) {
+	// /skyve/{content/image}Upload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
+	public String getContentUploadUrl(String sanitisedBinding, boolean image) {
 		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append("/contentUpload.xhtml?");
+		result.append(Util.getSkyveContextUrl()).append(image ? "/image" : "/content").append("Upload.xhtml?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
 		if (viewBinding != null) {

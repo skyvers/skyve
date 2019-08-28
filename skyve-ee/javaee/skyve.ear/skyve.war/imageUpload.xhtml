@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveContent.dir}">
+    <f:view encoding="#{_skyveContent.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-panelgrid .ui-widget-content {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-panelgrid td {
+					border-width: 0px;
+					border-style: none;
+				}
+			</style>
+		</h:head>
+		<h:body>
+			<h:form enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
+				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
+				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
+				<p:fileUpload fileUploadListener="#{_skyveContent.handleFileUpload}" 
+								accept="image/*"
+								update="messages"
+								multiple="false"
+								fileLimit="1"
+								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}" />
+			    <p:growl id="messages" showDetail="true" escape="false" />
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

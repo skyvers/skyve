@@ -1192,7 +1192,7 @@ isc.BizContentLinkItem.addMethods({
 		if (config.editable) {
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this)]
+				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this, false)]
 			});
 		}
 		else {
@@ -1272,7 +1272,7 @@ isc.BizContentImageItem.addMethods({
 				width: 1, // make minimum width of button
 				height: (config.height ? config.height : '100%'),
 				defaultLayoutAlign: 'center', 
-				members: [isc.BizUtil.createUploadButton(this)]
+				members: [isc.BizUtil.createUploadButton(this, true)]
 			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',

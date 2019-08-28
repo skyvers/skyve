@@ -73,7 +73,7 @@
 		<delete dir="${war-path}/ultima" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/primefaces-water" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/skyve" includes="**" />
-		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp,unsubscribe.xhtml" />
+		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,imageUpload.xhtml,home.jsp,unsubscribe.xhtml" />
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
