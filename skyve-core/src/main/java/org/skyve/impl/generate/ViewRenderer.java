@@ -2046,7 +2046,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 			return HorizontalAlignment.right;
 		}
 		if (AttributeType.bool.equals(attributeType) || 
-				AttributeType.content.equals(attributeType)) {
+				AttributeType.content.equals(attributeType) ||
+				AttributeType.image.equals(attributeType)) {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;

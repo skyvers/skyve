@@ -535,7 +535,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							imageIdentifier,
-							AttributeType.content);
+							AttributeType.content,
+							AttributeType.image);
 		validateConditionName(image.getDisabledConditionName(), imageIdentifier);
 		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
 	}
@@ -554,7 +555,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							linkIdentifier,
-							AttributeType.content);
+							AttributeType.content,
+							AttributeType.image);
 		validateConditionName(link.getDisabledConditionName(), linkIdentifier);
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
 		validateParameterBindings(link.getParameters(), linkIdentifier);

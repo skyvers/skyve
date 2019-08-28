@@ -1654,7 +1654,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else if (type == AttributeType.id) {
 					fw.append("\" length=\"36");
 				}
-				else if (type == AttributeType.content) {
+				else if ((type == AttributeType.content) || (type == AttributeType.image)) {
 					fw.append("\" length=\"36");
 				}
 				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.

@@ -118,6 +118,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 				switch (a.getAttributeType()) {
 				case collection:
 				case content:
+				case image:
 				case inverseMany:
 				case inverseOne:
 					break;

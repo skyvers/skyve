@@ -55,6 +55,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 					// exclude unimplemented types - some of these can be handled later
 					if (!AttributeType.collection.equals(a.getAttributeType())
 							&& !AttributeType.content.equals(a.getAttributeType())
+							&& !AttributeType.image.equals(a.getAttributeType())
 							&& !AttributeType.geometry.equals(a.getAttributeType())
 							&& !AttributeType.inverseMany.equals(a.getAttributeType())
 							&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
@@ -107,7 +108,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 					@SuppressWarnings("unused")
 					Attribute attr = tm.getAttribute();
 
-				} catch (Exception e) {
+				} catch (@SuppressWarnings("unused") Exception e) {
 
 					if (Mode.importData.equals(bean.getParent().getMode())) {
 
@@ -125,7 +126,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 						@SuppressWarnings("unused")
 						String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
 
-					} catch (Exception e2) {
+					} catch (@SuppressWarnings("unused") Exception e2) {
 						StringBuilder sb = new StringBuilder(64);
 						sb.append("The expression '").append(bean.getBindingExpression()).append("' is invalid or can't be processed");
 

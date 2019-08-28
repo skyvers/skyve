@@ -9,9 +9,6 @@ import org.skyve.impl.metadata.model.document.field.Field;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class ConstrainableField extends Field {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 8797830818574132688L;
 
 	@Override

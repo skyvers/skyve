@@ -552,7 +552,8 @@ public class SmartClientGenerateUtils {
 					type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
 					break;
 				case content:
-					type = "bizUpload";
+				case image:
+					// nothing yet
 					break;
 				case geometry:
 					type = "geometry";
@@ -1308,7 +1309,8 @@ public class SmartClientGenerateUtils {
 			return HorizontalAlignment.right;
 		}
 		if (AttributeType.bool.equals(attributeType) || 
-				AttributeType.content.equals(attributeType)) {
+				AttributeType.content.equals(attributeType) || 
+				AttributeType.image.equals(attributeType)) {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;

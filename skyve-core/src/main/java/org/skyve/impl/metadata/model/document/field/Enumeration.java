@@ -25,9 +25,6 @@ import org.skyve.metadata.module.Module;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"xmlTypeName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
 public class Enumeration extends ConstrainableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -8699424041011741395L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, propOrder = {"name", "code", "description"})

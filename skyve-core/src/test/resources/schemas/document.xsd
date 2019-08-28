@@ -41,6 +41,8 @@
 
   <xs:element name="id" type="tns:id"/>
 
+  <xs:element name="image" type="tns:image"/>
+
   <xs:element name="integer" type="tns:integer"/>
 
   <xs:element name="integerValidator" type="tns:integerValidator"/>
@@ -111,6 +113,7 @@
                   <xs:element ref="tns:markup"/>
                   <xs:element ref="tns:colour"/>
                   <xs:element ref="tns:content"/>
+                  <xs:element ref="tns:image"/>
                   <xs:element ref="tns:association"/>
                   <xs:element ref="tns:collection"/>
                   <xs:element ref="tns:inverseOne"/>
@@ -456,6 +459,14 @@
   <xs:complexType name="content">
     <xs:complexContent>
       <xs:extension base="tns:constrainableField">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="image">
+    <xs:complexContent>
+      <xs:extension base="tns:content">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>

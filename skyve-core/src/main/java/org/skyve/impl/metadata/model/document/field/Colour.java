@@ -9,9 +9,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Colour extends ConvertableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 2815253897974678949L;
 
 	public Colour() {

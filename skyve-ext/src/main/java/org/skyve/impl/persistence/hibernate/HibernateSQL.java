@@ -198,6 +198,7 @@ class HibernateSQL extends AbstractSQL {
 			}
 			else if (AttributeType.colour.equals(type) ||
 						AttributeType.content.equals(type) ||
+						AttributeType.image.equals(type) ||
 						AttributeType.text.equals(type)) {
 				if (value instanceof Collection) {
 					result.setParameterList(name, (Collection<?>) value, StringType.INSTANCE);

@@ -609,6 +609,7 @@ public final class POISheet implements BizPortSheet {
 						AttributeType.association.equals(attributeType) ||
 						AttributeType.colour.equals(attributeType) ||
 						AttributeType.content.equals(attributeType) ||
+						AttributeType.image.equals(attributeType) ||
 						AttributeType.memo.equals(attributeType) ||
 						AttributeType.markup.equals(attributeType)) {
 					result = (T) cell.getStringCellValue();
@@ -672,6 +673,7 @@ public final class POISheet implements BizPortSheet {
 								AttributeType.association.equals(attributeType) ||
 								AttributeType.colour.equals(attributeType) ||
 								AttributeType.content.equals(attributeType) ||
+								AttributeType.image.equals(attributeType) ||
 								AttributeType.memo.equals(attributeType) ||
 								AttributeType.markup.equals(attributeType)) {
 						result = (T) NumberToTextConverter.toText(cell.getNumericCellValue());

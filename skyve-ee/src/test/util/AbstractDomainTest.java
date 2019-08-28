@@ -103,9 +103,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			AttributeType type = attribute.getAttributeType();
 
 			// skip updating content, an association or collection, try find a scalar attribute to update
-			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
-					|| AttributeType.association.equals(type)
-					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+			if (AttributeType.content.equals(type) ||
+					AttributeType.image.equals(type) ||
+					AttributeType.collection.equals(type) ||
+					AttributeType.association.equals(type) ||
+					AttributeType.inverseOne.equals(type) ||
+					AttributeType.inverseMany.equals(type)) {
 				continue;
 			}
 
@@ -129,9 +132,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			AttributeType type = attribute.getAttributeType();
 
 			// skip updating content, an association or collection, try find a scalar attribute to update
-			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
-					|| AttributeType.association.equals(type)
-					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+			if (AttributeType.content.equals(type) ||
+					AttributeType.image.equals(type) ||
+					AttributeType.collection.equals(type) ||
+					AttributeType.association.equals(type) ||
+					AttributeType.inverseOne.equals(type) ||
+					AttributeType.inverseMany.equals(type)) {
 				continue;
 			}
 
@@ -155,9 +161,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			AttributeType type = attribute.getAttributeType();
 
 			// skip updating content, an association or collection, try find a scalar attribute to update
-			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
-					|| AttributeType.association.equals(type)
-					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+			if (AttributeType.content.equals(type) ||
+					AttributeType.image.equals(type) ||
+					AttributeType.collection.equals(type) ||
+					AttributeType.association.equals(type) ||
+					AttributeType.inverseOne.equals(type) ||
+					AttributeType.inverseMany.equals(type)) {
 				continue;
 			}
 
@@ -263,9 +272,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			AttributeType type = attribute.getAttributeType();
 
 			// skip updating content, an association or collection, try find a scalar attribute to update
-			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
-					|| AttributeType.association.equals(type)
-					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+			if (AttributeType.content.equals(type) ||
+					AttributeType.image.equals(type) ||
+					AttributeType.collection.equals(type) ||
+					AttributeType.association.equals(type) ||
+					AttributeType.inverseOne.equals(type) ||
+					AttributeType.inverseMany.equals(type)) {
 				continue;
 			}
 

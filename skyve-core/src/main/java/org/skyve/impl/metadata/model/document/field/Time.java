@@ -11,9 +11,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Time extends ConvertableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 5704150703623236506L;
 
 	private DateValidator validator;

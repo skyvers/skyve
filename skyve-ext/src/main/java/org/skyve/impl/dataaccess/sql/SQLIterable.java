@@ -51,6 +51,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 				}
 				else if (AttributeType.colour.equals(type) ||
 							AttributeType.content.equals(type) ||
+							AttributeType.image.equals(type) ||
 							AttributeType.enumeration.equals(type) ||
 							AttributeType.text.equals(type) ||
 							AttributeType.id.equals(type) ||
@@ -253,6 +254,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 					}
 					else if (AttributeType.colour.equals(type) ||
 								AttributeType.content.equals(type) ||
+								AttributeType.image.equals(type) ||
 								AttributeType.enumeration.equals(type) ||
 								AttributeType.markup.equals(type) ||
 								AttributeType.memo.equals(type) ||

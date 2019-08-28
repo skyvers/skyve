@@ -1725,7 +1725,7 @@ t.printStackTrace();
 						}
 					}
 				}
-				if (AttributeType.content.equals(type)) {
+				if (AttributeType.content.equals(type) || AttributeType.image.equals(type)) {
 					if (oldState != null) { // an update
 						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
 							// Remove the attachment content
