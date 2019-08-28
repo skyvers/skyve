@@ -15,28 +15,95 @@
 				.ui-widget {
 				    font-size: 12px !important;
 				}
-				.ui-panelgrid .ui-widget-content {
-					border-width: 0px;
-					border-style: none;
+				.ui-fileupload-buttonbar {
+					text-align: center;
 				}
-				.ui-panelgrid td {
-					border-width: 0px;
-					border-style: none;
+				.square {
+					position: relative;
+					width: 50%;
+					padding-top: 10px;
+				}
+				.square:after {
+					content: "";
+					display: block;
+					padding-bottom: 75%;
+				}
+				.content {
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					padding-left: 50%;
 				}
 			</style>
+			<link rel="stylesheet" href="croppie/croppie.css" />
+			<script src="croppie/exif-min.js"></script>
+			<script src="croppie/croppie-min.js"></script>
+			<script type="text/javascript">
+				var cropper = null;
+				function readFile(input) {
+					if (input.files) {
+						if (input.files[0]) {
+							var file = input.files[0];
+							$('#croppedFileName').val(file.name);
+							$('#cropperContainer').css({display: 'flex'});
+							var reader = new FileReader();
+							reader.onload = function (evt) {
+								cropper.croppie('bind', {
+									url: evt.target.result
+								});
+							}
+							reader.readAsDataURL(file);
+						}
+			        }
+			        else {
+				        alert("You're browser doesn't support the FileReader API");
+				    }
+				}
+				$(document).ready(function() {
+					$('#upload_input').on('change', function () {
+						readFile(this);
+					});
+
+					cropper = $('#cropper').croppie({
+						viewport: {
+							width: 100,
+							height: 100,
+							type: 'square'
+						},
+						enableExif: true,
+						enableResize: true,
+						enableOrientation: true
+					});
+				});
+			</script>
 		</h:head>
-		<h:body>
-			<h:form enctype="multipart/form-data" prependId="false">
+		<h:body style="height:2000px">
+			<h:form id="form" enctype="multipart/form-data" prependId="false">
 				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
 				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
 				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
-				<p:fileUpload fileUploadListener="#{_skyveContent.handleFileUpload}" 
+				<p:fileUpload id="upload"
+								fileUploadListener="#{_skyveContent.handleFileUpload}" 
 								accept="image/*"
 								update="messages"
 								multiple="false"
 								fileLimit="1"
 								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
+				<h:inputHidden id="croppedFileName" value="#{_skyveContent.croppedFileName}" />
+				<h:inputHidden id="croppedDataUrl" value="#{_skyveContent.croppedDataUrl}" />
+				<p:remoteCommand name="uploadCropped" actionListener="#{_skyveContent.uploadCropped()}" process="@form" update="@form" />
+				<div id="cropperContainer" style="display:none">
+					<div class="square">
+						<div id="cropper" class="content" />
+					</div>
+					<div style="width:25%;padding-right:10px" />
+					<div style="display:flex;flex-direction:column;justify-content:center">
+						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-left" title="Rotate Left" onclick="cropper.croppie('rotate',90);return false" />
+						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-right" title="Rotate Right" onclick="cropper.croppie('rotate',-90);return false" />
+						<p:button type="button" icon="fa fa-upload" title="Upload Cropped Image" onclick="cropper.croppie('result', {type: 'base64', size: 'original'}).then(function(base64) {$('#croppedDataUrl').val(base64); uploadCropped()});return false" />
+					</div>
+				</div>
 			</h:form>
 		</h:body>
 	</f:view>

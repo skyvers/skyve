@@ -12,6 +12,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIPanel;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlInputHidden;
 import javax.faces.component.html.HtmlInputText;
@@ -35,6 +36,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
@@ -1842,33 +1844,51 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// for admin theme
 		setSize(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
+		if (image) {
+			uploadButton.setOnclick("PF('" + sanitisedBinding + "Overlay" + "').show();");
+		}
 
-		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
-		setId(overlay, null);
-		overlay.setWidgetVar(sanitisedBinding + "Overlay");
-		overlay.setFor(uploadButtonId);
-		overlay.setHideEffect("fade");
-		overlay.setDynamic(false);
-		overlay.setShowCloseIcon(true);
-		overlay.setModal(true);
-		overlay.setStyle("width:50%;height:300px");
-		// clear the iframe src on hide so there is no flash next open
-		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
-
+		UIPanel panel = null;
+		if (image) {
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			dialog.setWidgetVar(sanitisedBinding + "Overlay");
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			// clear the iframe src on hide so there is no flash next open
+			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+			panel = dialog;
+		}
+		else {
+			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+			setId(overlay, null);
+			overlay.setWidgetVar(sanitisedBinding + "Overlay");
+			overlay.setFor(uploadButtonId);
+			overlay.setHideEffect("fade");
+			overlay.setDynamic(false);
+			overlay.setShowCloseIcon(true);
+			overlay.setModal(true);
+			overlay.setStyle("width:50%;height:300px");
+			// clear the iframe src on hide so there is no flash next open
+			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+			panel = overlay;
+		}
+		
 		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
 		value.append(image).append(")).concat('\\')')}");
-		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-		toAddTo.add(overlay);
+		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		toAddTo.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:280px;border:none\"></iframe>", id));
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:100%%;border:none\"></iframe>", id));
 		setId(iframe, null);
-		overlay.getChildren().add(iframe);
+		panel.getChildren().add(iframe);
 		
 		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(clearButton, null);

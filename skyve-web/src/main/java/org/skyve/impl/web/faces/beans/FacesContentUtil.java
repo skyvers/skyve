@@ -19,7 +19,6 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class FacesContentUtil {
-	
 	/**
 	 * Handle a file upload event and return the content once uploaded.
 	 * @param event the event to handle
@@ -28,11 +27,30 @@ public class FacesContentUtil {
 	 * @return the uploaded content
 	 * @throws Exception
 	 */
-	public static AttachmentContent handleFileUpload(FileUploadEvent event, Bean bean, String binding) throws Exception {
+	public static AttachmentContent handleFileUpload(FileUploadEvent event,
+														Bean bean,
+														String binding)
+	throws Exception {
 		UploadedFile file = event.getFile();
+		return handleFileUpload(file.getFileName(), file.getContents(), bean, binding);
+	}
+	
+	/**
+	 * Handle a file upload event and return the content once uploaded.
+	 * @param fileName the name of the uploaded file
+	 * @param fileContents	the contents of the uploaded file
+	 * @param bean the driving bean
+	 * @param binding the binding to upload
+	 * @return the uploaded content
+	 * @throws Exception
+	 */
+	public static AttachmentContent handleFileUpload(String filePathOrName,
+														byte[] fileContents,
+														Bean bean,
+														String binding)
+	throws Exception {
 		Customer customer = CORE.getCustomer();
-		
-		String fileName = FilenameUtils.getName(file.getFileName());
+		String fileName = FilenameUtils.getName(filePathOrName);
 		String customerName = customer.getName();
 		Bean contentOwner = bean;
 		String contentAttributeName = binding;
@@ -53,7 +71,7 @@ public class FacesContentUtil {
 															contentOwner.getBizId(), 
 															contentAttributeName, 
 															fileName, 
-															file.getContents());
+															fileContents);
 		try (ContentManager cm = EXT.newContentManager()) {
 			// Determine if we should index the content or not
 			boolean index = true; // default
