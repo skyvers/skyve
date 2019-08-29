@@ -107,7 +107,8 @@ public class ContentUpload extends Localisable {
 	}
 	
 	/**
-	 * Process the file upload from the croppie plugin
+	 * Process the file upload from the croppie plugin.
+	 * For use as a remote command with a hidden populated with a data url
 	 */
 	public void uploadCropped()
 	throws Exception {

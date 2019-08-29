@@ -40,11 +40,16 @@
 			<script src="croppie/croppie-min.js"></script>
 			<script type="text/javascript">
 				var cropper = null;
+				var fileName = null;
+				var fileFormat = 'png';
 				function readFile(input) {
 					if (input.files) {
 						if (input.files[0]) {
 							var file = input.files[0];
-							$('#croppedFileName').val(file.name);
+							if (file.type == 'image/jpeg') {
+								fileFormat = 'jpeg';
+							}
+							fileName = file.name + '.cropped.' + fileFormat;
 							$('#cropperContainer').css({display: 'flex'});
 							var reader = new FileReader();
 							reader.onload = function (evt) {
@@ -59,6 +64,26 @@
 				        alert("You're browser doesn't support the FileReader API");
 				    }
 				}
+				
+				function uploadCropped(blob) {
+					var formData = new FormData(document.getElementById('form'));
+					formData.append('javax.faces.partial.ajax', 'true');
+					formData.append('javax.faces.partial.execute', 'upload');
+					formData.append('javax.faces.source', 'upload');
+					formData.append('javax.faces.partial.render', 'messages');
+					formData.append('upload', blob, fileName);
+
+					$.ajax({
+						type: 'POST',
+						url: 'imageUpload.xhtml',
+						data: formData,
+						processData: false,
+						contentType: false
+					}).done(function(data, status, xhr) {
+						PrimeFaces.ajax.Response.handle(data, status, xhr);
+					});
+				}
+				
 				$(document).ready(function() {
 					$('#upload_input').on('change', function () {
 						readFile(this);
@@ -90,9 +115,6 @@
 								fileLimit="1"
 								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
-				<h:inputHidden id="croppedFileName" value="#{_skyveContent.croppedFileName}" />
-				<h:inputHidden id="croppedDataUrl" value="#{_skyveContent.croppedDataUrl}" />
-				<p:remoteCommand name="uploadCropped" actionListener="#{_skyveContent.uploadCropped()}" process="@form" update="@form" />
 				<div id="cropperContainer" style="display:none">
 					<div class="square">
 						<div id="cropper" class="content" />
@@ -101,7 +123,7 @@
 					<div style="display:flex;flex-direction:column;justify-content:center">
 						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-left" title="Rotate Left" onclick="cropper.croppie('rotate',90);return false" />
 						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-right" title="Rotate Right" onclick="cropper.croppie('rotate',-90);return false" />
-						<p:button type="button" icon="fa fa-upload" title="Upload Cropped Image" onclick="cropper.croppie('result', {type: 'base64', size: 'original'}).then(function(base64) {$('#croppedDataUrl').val(base64); uploadCropped()});return false" />
+						<p:button type="button" icon="fa fa-upload" title="Upload Cropped Image" onclick="cropper.croppie('result', {type: 'blob', size: 'original', format: fileFormat}).then(function(blob) {uploadCropped(blob)});return false" />
 					</div>
 				</div>
 			</h:form>

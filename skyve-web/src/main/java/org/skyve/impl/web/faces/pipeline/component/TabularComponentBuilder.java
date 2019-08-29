@@ -1844,20 +1844,22 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// for admin theme
 		setSize(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
+
+		String var = sanitisedBinding + "Overlay";
 		if (image) {
-			uploadButton.setOnclick("PF('" + sanitisedBinding + "Overlay" + "').show();");
+			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
 		}
 
 		UIPanel panel = null;
 		if (image) {
 			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 			setId(dialog, null);
-			dialog.setWidgetVar(sanitisedBinding + "Overlay");
+			dialog.setWidgetVar(var);
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
 			panel = dialog;
 		}
 		else {
