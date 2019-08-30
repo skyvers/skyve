@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20190813</version>
+	<version>20190830-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
