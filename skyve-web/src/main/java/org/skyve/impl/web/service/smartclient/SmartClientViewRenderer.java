@@ -940,7 +940,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
-		appendFilterParameters(grid.getParameters(), code);
+		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -994,7 +994,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
-		appendFilterParameters(grid.getParameters(), code);
+		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -1516,7 +1516,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     	code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
 
 		code.append(",_view:view,");
-		appendFilterParameters(lookup.getParameters(), code);
+		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
@@ -1557,7 +1557,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("type:'blurb',defaultValue:'lookup ");
 		code.append(lookup.getBinding()).append("',");
 		disableLookupComponents(lookup, code);
-		appendFilterParameters(lookup.getParameters(), code);
+		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 	}
 
 	@Override
@@ -2783,20 +2783,38 @@ pickListFields:[{name:'value'}],
 		}
 	}
 
-	private static void appendFilterParameters(List<FilterParameter> parameters, StringBuilder builder) {
-		if ((parameters != null) && (! parameters.isEmpty())) {
+	private static void appendFilterParameters(List<FilterParameter> filterParameters,
+												List<Parameter> parameters,
+												StringBuilder builder) {
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			builder.append("params:[");
-			for (FilterParameter parameter : parameters) {
-				builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
-				builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
-				String binding = parameter.getBinding();
-				if (binding != null) {
-					builder.append('{').append(binding).append("}'},");
-				}
-				else {
-					builder.append(parameter.getValue()).append("'},");
+			if (filterParameters != null) {
+				for (FilterParameter parameter : filterParameters) {
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
+					String binding = parameter.getBinding();
+					if (binding != null) {
+						builder.append('{').append(binding).append("}'},");
+					}
+					else {
+						builder.append(parameter.getValue()).append("'},");
+					}
 				}
 			}
+			if (parameters != null) {
+				for (Parameter parameter : parameters) {
+					builder.append("{name:':").append(BindUtil.sanitiseBinding(parameter.getName()));
+					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:'");
+					String binding = parameter.getBinding();
+					if (binding != null) {
+						builder.append('{').append(binding).append("}'},");
+					}
+					else {
+						builder.append(parameter.getValue()).append("'},");
+					}
+				}
+			}			
 			builder.setLength(builder.length() - 1); // remove comma
 			builder.append("],");
 		}

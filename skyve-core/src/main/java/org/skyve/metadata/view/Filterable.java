@@ -7,10 +7,10 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 /**
  * 
  */
-public interface Filterable {
+public interface Filterable extends Parameterizable {
 	/**
 	 * 
 	 * @return
 	 */
-	public List<FilterParameter> getParameters();
+	public List<FilterParameter> getFilterParameters();
 }

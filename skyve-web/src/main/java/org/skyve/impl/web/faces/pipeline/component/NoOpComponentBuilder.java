@@ -44,6 +44,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class NoOpComponentBuilder extends ComponentBuilder {
 	@Override
@@ -261,6 +262,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String modelName,
 										ListModel<? extends Bean> model,
 										List<FilterParameter> filterParameters,
+										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {

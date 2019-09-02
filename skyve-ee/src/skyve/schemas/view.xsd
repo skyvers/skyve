@@ -503,6 +503,7 @@
             </xs:complexType>
           </xs:element>
           <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="query" type="xs:string"/>
@@ -1658,6 +1659,7 @@
   <xs:complexType name="abstractListWidget" abstract="true">
     <xs:sequence>
       <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>

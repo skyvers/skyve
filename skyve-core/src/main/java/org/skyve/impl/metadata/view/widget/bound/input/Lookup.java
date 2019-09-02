@@ -25,10 +25,12 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
@@ -47,6 +49,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 							"clearedActions",
 							"editedActions",
 							"addedActions",
+							"filterParameters",
 							"parameters",
 							"properties"})
 public class Lookup extends InputWidget implements Filterable, Addable, Editable, FormItemWidget {
@@ -64,7 +67,8 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> addedActions = new ArrayList<>();
 
-	private List<FilterParameter> parameters = new ArrayList<>();
+	private List<FilterParameter> filterParameters = new ArrayList<>();
+	private List<Parameter> parameters = new ArrayList<>();
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -169,10 +173,19 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 					name = "filterParameter",
 					type = FilterParameterImpl.class,
 					required = false)
-	public List<FilterParameter> getParameters() {
+	public List<FilterParameter> getFilterParameters() {
+		return filterParameters;
+	}
+
+	@Override
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,
+					name = "parameter",
+					type = ParameterImpl.class,
+					required = false)
+	public List<Parameter> getParameters() {
 		return parameters;
 	}
-	
+
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onPickedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),

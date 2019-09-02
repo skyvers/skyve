@@ -58,6 +58,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
@@ -233,6 +234,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String modelName,
 												ListModel<? extends Bean> model, 
 												List<FilterParameter> filterParameters,
+												List<Parameter> parameters,
 												String title,
 												boolean showColumnHeaders,
 												boolean showGrid);

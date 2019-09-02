@@ -1041,7 +1041,8 @@ public class FacesViewRenderer extends ViewRenderer {
 											getCurrentListWidgetModelDocumentName(), 
 											getCurrentListWidgetModelName(), 
 											getCurrentListWidgetModel(), 
-											repeater.getParameters(), 
+											repeater.getFilterParameters(),
+											repeater.getParameters(),
 											title,
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 											Boolean.TRUE.equals(repeater.getShowGrid()));

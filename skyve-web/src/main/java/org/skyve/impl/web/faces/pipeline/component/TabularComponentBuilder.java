@@ -1130,24 +1130,47 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		// Add filter parameters to getLazyDataModel call
 		StringBuilder createUrlParams = null;
-		if ((grid.getParameters() != null) && (! grid.getParameters().isEmpty())) {
+		List<FilterParameter> filterParameters = grid.getFilterParameters();
+		List<Parameter> parameters = grid.getParameters();
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			createUrlParams = new StringBuilder(64);
 			modelExpression.append('[');
-			for (FilterParameter param : grid.getParameters()) {
-				String name = param.getName();
-				String binding = param.getBinding();
-				String value = param.getValue();
-				
-				createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
-				modelExpression.append("['").append(name).append("','");
-				modelExpression.append(param.getOperator()).append("','");
-				if (binding != null) {
-					createUrlParams.append('{').append(binding).append("}']}");
-					modelExpression.append('{').append(binding).append("}'],");
+			if (filterParameters != null) {
+				for (FilterParameter param : filterParameters) {
+					String name = param.getName();
+					String binding = param.getBinding();
+					String value = param.getValue();
+					
+					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					modelExpression.append("['").append(name).append("','");
+					modelExpression.append(param.getOperator()).append("','");
+					if (binding != null) {
+						createUrlParams.append('{').append(binding).append("}']}");
+						modelExpression.append('{').append(binding).append("}'],");
+					}
+					else {
+						createUrlParams.append(binding).append("']}");
+						modelExpression.append(value).append("'],");
+					}
 				}
-				else {
-					createUrlParams.append(binding).append("']}");
-					modelExpression.append(value).append("'],");
+			}
+			if (parameters != null) {
+				for (Parameter param : parameters) {
+					String name = param.getName();
+					String binding = param.getBinding();
+					String value = param.getValue();
+					
+					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					modelExpression.append("['").append(name).append("','");
+					if (binding != null) {
+						createUrlParams.append('{').append(binding).append("}']}");
+						modelExpression.append('{').append(binding).append("}'],");
+					}
+					else {
+						createUrlParams.append(binding).append("']}");
+						modelExpression.append(value).append("'],");
+					}
 				}
 			}
 			modelExpression.setLength(modelExpression.length() - 1); // remove last comma
@@ -1536,6 +1559,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String modelName,
 										ListModel<? extends Bean> model,
 										List<FilterParameter> filterParameters,
+										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
@@ -1567,17 +1591,32 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		// Add filter parameters to getLazyDataModel call
-		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			value.append('[');
-			for (FilterParameter param : filterParameters) {
-				value.append("['").append(param.getName()).append("','");
-				value.append(param.getOperator()).append("','");
-				String binding = param.getBinding();
-				if (binding != null) {
-					value.append('{').append(binding).append("}'],");
+			if (filterParameters != null) {
+				for (FilterParameter param : filterParameters) {
+					value.append("['").append(param.getName()).append("','");
+					value.append(param.getOperator()).append("','");
+					String binding = param.getBinding();
+					if (binding != null) {
+						value.append('{').append(binding).append("}'],");
+					}
+					else {
+						value.append(param.getValue()).append("'],");
+					}
 				}
-				else {
-					value.append(param.getValue()).append("'],");
+			}
+			if (parameters != null) {
+				for (Parameter param : parameters) {
+					value.append("['").append(param.getName()).append("','");
+					String binding = param.getBinding();
+					if (binding != null) {
+						value.append('{').append(binding).append("}'],");
+					}
+					else {
+						value.append(param.getValue()).append("'],");
+					}
 				}
 			}
 			value.setLength(value.length() - 1); // remove last comma
@@ -1950,6 +1989,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											formDisabledConditionName,
 											displayBinding,
 											query,
+											lookup.getFilterParameters(),
 											lookup.getParameters(),
 											lookup.getPixelWidth(),
 											false);
@@ -3246,7 +3286,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String formDisabled,
 											String displayBinding, 
 											QueryDefinition query, 
-											List<FilterParameter> parameters,
+											List<FilterParameter> filterParameters,
+											List<Parameter> parameters,
 											Integer pixelWidth,
 											boolean dontDisplay) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
@@ -3279,6 +3320,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		attributes.put("module", query.getOwningModule().getName());
 		attributes.put("query", query.getName());
 		attributes.put("display", displayBinding);
+		attributes.put("filterParameters", filterParameters);
 		attributes.put("parameters", parameters);
 
 		setSize(result, 

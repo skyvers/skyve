@@ -20,6 +20,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
@@ -87,168 +88,194 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		this.selectedTagId = selectedTagId;
 	}
 
-	public final void addFilterParameters(Document drivingDocument, List<FilterParameter> filterParameters) throws Exception {
+	public final void addFilterParameters(Document drivingDocument,
+											List<FilterParameter> filterParameters,
+											List<Parameter> parameters)
+	throws Exception {
 		Filter filter = getFilter();
 		Customer customer = CORE.getUser().getCustomer();
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		
-		for (FilterParameter param : filterParameters) {
-			String parameterName = param.getName();
-			boolean parameter = parameterName.charAt(0) == ':';
-			if (parameter) {
-				parameterName = parameterName.substring(1);
-			}
-			String parameterBinding = param.getBinding();
-			String parameterValue = param.getValue();
-
-			// Determine the parameter value to use
-			Object value = null;
-			if (parameterBinding == null) {
-				if (parameterValue != null) {
-					// check for a surrogate binding
-					if (parameterValue.startsWith("{") && parameterValue.endsWith("}")) {
-						parameterBinding = parameterValue.substring(1, parameterValue.length() - 1);
-					}
-					else {
-						value = parameterValue;
+		if (filterParameters != null) {
+			for (FilterParameter param : filterParameters) {
+				String parameterName = param.getName();
+				String parameterBinding = param.getBinding();
+				String parameterValue = param.getValue();
+	
+				// Determine the parameter value to use
+				Object value = null;
+				if (parameterBinding == null) {
+					if (parameterValue != null) {
+						// check for a surrogate binding
+						if (parameterValue.startsWith("{") && parameterValue.endsWith("}")) {
+							parameterBinding = parameterValue.substring(1, parameterValue.length() - 1);
+						}
+						else {
+							value = parameterValue;
+						}
 					}
 				}
-			}
-			if (parameterBinding != null) {
-				value = BindUtil.get(bean, parameterBinding);
-			}
-			if (value instanceof Bean) {
-				value = ((Bean) value).getBizId();
-			}
-
-			if (parameter) {
-				putParameter(parameterName, value);
-				continue;
-			}
-			
-			// Determine the parameter name to use
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
-																	drivingModule, 
-																	drivingDocument, 
-																	parameterName);
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					if (AttributeType.association.equals(attribute.getAttributeType())) {
+				if (parameterBinding != null) {
+					value = BindUtil.get(bean, parameterBinding);
+				}
+				if (value instanceof Bean) {
+					value = ((Bean) value).getBizId();
+				}
+	
+				// Determine the parameter name to use
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+																		drivingModule, 
+																		drivingDocument, 
+																		parameterName);
+				if (target != null) {
+					Attribute attribute = target.getAttribute();
+					if (attribute != null) {
+						if (AttributeType.association.equals(attribute.getAttributeType())) {
+							parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
+						}
+					}
+	    			else if (ChildBean.PARENT_NAME.equals(parameterName) || parameterName.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
 						parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
+	    			}
+				}
+	
+				// Add the filter to the model
+				switch (param.getOperator()) {
+					case equal:
+						if (value != null) {
+							addEquals(filter, parameterName, value);
+						}
+						break;
+					case greater:
+						if (value != null) {
+							addGreaterThan(filter, parameterName, value);
+						}
+						break;
+					case greaterEqual:
+						if (value != null) {
+							addGreaterThanOrEqualTo(filter, parameterName, value);
+						}
+						break;
+					case isNull:
+						filter.addNull(parameterName);
+						break;
+					case less:
+						if (value != null) {
+							addLessThan(filter, parameterName, value);
+						}
+						break;
+					case lessEqual:
+						if (value != null) {
+							addLessThanOrEqualTo(filter, parameterName, value);
+						}
+						break;
+					case like:
+						if (value != null) {
+							filter.addContains(parameterName, (String) value);
+						}
+						break;
+					case notEqual:
+						if (value != null) {
+							addNotEquals(filter, parameterName, value);
+						}
+						break;
+					case notLike:
+						if (value != null) {
+							filter.addNotContains(parameterName, (String) value);
+						}
+						break;
+					case notNull:
+						filter.addNotNull(parameterName);
+						break;
+					case nullOrEqual:
+						if (value != null) {
+							Filter equalFilter = newFilter();
+							addEquals(equalFilter, parameterName, value);
+							addNullOrSomething(filter, equalFilter, parameterName);
+						}
+						break;
+					case nullOrGreater:
+						if (value != null) {
+							Filter greaterFilter = newFilter();
+							addGreaterThan(greaterFilter, parameterName, value);
+							addNullOrSomething(filter, greaterFilter, parameterName);
+						}
+						break;
+					case nullOrGreaterEqual:
+						if (value != null) {
+							Filter greaterEqualFilter = newFilter();
+							addGreaterThan(greaterEqualFilter, parameterName, value);
+							addNullOrSomething(filter, greaterEqualFilter, parameterName);
+						}
+						break;
+					case nullOrLess:
+						if (value != null) {
+							Filter lessFilter = newFilter();
+							addGreaterThan(lessFilter, parameterName, value);
+							addNullOrSomething(filter, lessFilter, parameterName);
+						}
+						break;
+					case nullOrLessEqual:
+						if (value != null) {
+							Filter lessEqualFilter = newFilter();
+							addGreaterThan(lessEqualFilter, parameterName, value);
+							addNullOrSomething(filter, lessEqualFilter, parameterName);
+						}
+						break;
+					case nullOrLike:
+						if (value != null) {
+							Filter likeFilter = newFilter();
+							likeFilter.addContains(parameterName, (String) value);
+							addNullOrSomething(filter, likeFilter, parameterName);
+						}
+						break;
+					case nullOrNotEqual:
+						if (value != null) {
+							Filter notEqualFilter = newFilter();
+							addNotEquals(notEqualFilter, parameterName, value);
+							addNullOrSomething(filter, notEqualFilter, parameterName);
+						}
+						break;
+					case nullOrNotLike:
+						if (value != null) {
+							Filter notLikeFilter = newFilter();
+							notLikeFilter.addNotContains(parameterName, (String) value);
+							addNullOrSomething(filter, notLikeFilter, parameterName);
+						}
+						break;
+					default:
+						throw new IllegalStateException(param.getOperator() + " is not supported");
+				}
+			}
+		}
+		
+		if (parameters != null) {
+			for (Parameter param : parameters) {
+				String parameterName = param.getName();
+				String parameterBinding = param.getBinding();
+				String parameterValue = param.getValue();
+	
+				// Determine the parameter value to use
+				Object value = null;
+				if (parameterBinding == null) {
+					if (parameterValue != null) {
+						// check for a surrogate binding
+						if (parameterValue.startsWith("{") && parameterValue.endsWith("}")) {
+							parameterBinding = parameterValue.substring(1, parameterValue.length() - 1);
+						}
+						else {
+							value = parameterValue;
+						}
 					}
 				}
-    			else if (ChildBean.PARENT_NAME.equals(parameterName) || parameterName.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
-					parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
-    			}
-			}
-
-			// Add the filter to the model
-			switch (param.getOperator()) {
-				case equal:
-					if (value != null) {
-						addEquals(filter, parameterName, value);
-					}
-					break;
-				case greater:
-					if (value != null) {
-						addGreaterThan(filter, parameterName, value);
-					}
-					break;
-				case greaterEqual:
-					if (value != null) {
-						addGreaterThanOrEqualTo(filter, parameterName, value);
-					}
-					break;
-				case isNull:
-					filter.addNull(parameterName);
-					break;
-				case less:
-					if (value != null) {
-						addLessThan(filter, parameterName, value);
-					}
-					break;
-				case lessEqual:
-					if (value != null) {
-						addLessThanOrEqualTo(filter, parameterName, value);
-					}
-					break;
-				case like:
-					if (value != null) {
-						filter.addContains(parameterName, (String) value);
-					}
-					break;
-				case notEqual:
-					if (value != null) {
-						addNotEquals(filter, parameterName, value);
-					}
-					break;
-				case notLike:
-					if (value != null) {
-						filter.addNotContains(parameterName, (String) value);
-					}
-					break;
-				case notNull:
-					filter.addNotNull(parameterName);
-					break;
-				case nullOrEqual:
-					if (value != null) {
-						Filter equalFilter = newFilter();
-						addEquals(equalFilter, parameterName, value);
-						addNullOrSomething(filter, equalFilter, parameterName);
-					}
-					break;
-				case nullOrGreater:
-					if (value != null) {
-						Filter greaterFilter = newFilter();
-						addGreaterThan(greaterFilter, parameterName, value);
-						addNullOrSomething(filter, greaterFilter, parameterName);
-					}
-					break;
-				case nullOrGreaterEqual:
-					if (value != null) {
-						Filter greaterEqualFilter = newFilter();
-						addGreaterThan(greaterEqualFilter, parameterName, value);
-						addNullOrSomething(filter, greaterEqualFilter, parameterName);
-					}
-					break;
-				case nullOrLess:
-					if (value != null) {
-						Filter lessFilter = newFilter();
-						addGreaterThan(lessFilter, parameterName, value);
-						addNullOrSomething(filter, lessFilter, parameterName);
-					}
-					break;
-				case nullOrLessEqual:
-					if (value != null) {
-						Filter lessEqualFilter = newFilter();
-						addGreaterThan(lessEqualFilter, parameterName, value);
-						addNullOrSomething(filter, lessEqualFilter, parameterName);
-					}
-					break;
-				case nullOrLike:
-					if (value != null) {
-						Filter likeFilter = newFilter();
-						likeFilter.addContains(parameterName, (String) value);
-						addNullOrSomething(filter, likeFilter, parameterName);
-					}
-					break;
-				case nullOrNotEqual:
-					if (value != null) {
-						Filter notEqualFilter = newFilter();
-						addNotEquals(notEqualFilter, parameterName, value);
-						addNullOrSomething(filter, notEqualFilter, parameterName);
-					}
-					break;
-				case nullOrNotLike:
-					if (value != null) {
-						Filter notLikeFilter = newFilter();
-						notLikeFilter.addNotContains(parameterName, (String) value);
-						addNullOrSomething(filter, notLikeFilter, parameterName);
-					}
-					break;
-				default:
-					throw new IllegalStateException(param.getOperator() + " is not supported");
+				if (parameterBinding != null) {
+					value = BindUtil.get(bean, parameterBinding);
+				}
+				if (value instanceof Bean) {
+					value = ((Bean) value).getBizId();
+				}
+	
+				putParameter(parameterName, value);
 			}
 		}
 	}

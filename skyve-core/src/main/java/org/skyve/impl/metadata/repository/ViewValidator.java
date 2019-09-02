@@ -94,9 +94,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -290,6 +290,17 @@ class ViewValidator extends ViewVisitor {
 			if (! BindUtil.messageBindingsAreValid(customer, testModule, testDocument, message)) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 												" has " + description + " containing malformed binding expressions.");
+			}
+		}
+	}
+	
+	private void validateNoColon(List<? extends Parameter> parameters, String widgetIdentifier) {
+		if (parameters != null) {
+			for (Parameter parameter : parameters) {
+				if (parameter.getName().indexOf(':') >= 0) {
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a parameter named " + parameter.getName() + 
+													" which contains a colon (:). Use a parameter to bind a value to a named parameter in a query");
+				}
 			}
 		}
 	}
@@ -807,7 +818,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
 		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
+		validateParameterBindings(grid.getFilterParameters(), listGridIdentifier);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
+		validateNoColon(grid.getFilterParameters(), listGridIdentifier);
+		validateNoColon(grid.getParameters(), listGridIdentifier);
 		validateQueryOrModel(queryName, modelName, listGridIdentifier);
 	}
 
@@ -818,7 +832,10 @@ class ViewValidator extends ViewVisitor {
 		String listRepeaterIdentifier = "ListRepeater " + ((modelName != null) ? modelName : queryName);
 		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
 		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
+		validateParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
+		validateNoColon(repeater.getFilterParameters(), listRepeaterIdentifier);
+		validateNoColon(repeater.getParameters(), listRepeaterIdentifier);
 		validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 	}
 
@@ -836,7 +853,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
+		validateParameterBindings(grid.getFilterParameters(), treeGridIdentifier);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
+		validateNoColon(grid.getFilterParameters(), treeGridIdentifier);
+		validateNoColon(grid.getParameters(), treeGridIdentifier);
 		validateQueryOrModel(queryName, modelName, treeGridIdentifier);
 	}
 
@@ -902,7 +922,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
+		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
+		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColon(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 	}
 
@@ -942,7 +965,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
+		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
+		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColon(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used
