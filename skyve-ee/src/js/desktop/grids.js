@@ -1852,7 +1852,61 @@ isc.BizDataGrid.addMethods({
 				showHeader = false;
 			}
 		}
-		me.grid = isc.ListGrid.create({
+
+		this._createGrid(this._config, this._fields);
+
+		// assign the grid to the form grids...
+		var grids = me._view._grids[me._b];
+		if (grids) {} else {
+			grids = {};
+			me._view._grids[me._b] = grids;
+		}
+		grids[me.getID()] = me;
+		
+		if (me.title) {
+			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
+		}
+		
+		if (config.editable) {
+			if (config.isRepeater) {} else {
+				var toolStripMembers = [];
+				if (me.showAdd) {
+					toolStripMembers.add(me._newButton);
+				}
+				if (me.showZoom) {
+					toolStripMembers.add(me._zoomButton);
+				}
+				if (me.showEdit) {
+					toolStripMembers.add(me._editButton);
+				}
+				if (me.showRemove) {
+					toolStripMembers.add(me.deleteSelectionButton);
+				}
+				if (me.showDeselect) {
+					if (toolStripMembers.length > 0) {
+						toolStripMembers.add("separator");
+					}
+					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																		false,
+																		"<b>Deselect</b> all.",
+																		me.clearSelectionItem.click));
+				}
+
+				if (toolStripMembers.length > 0) {
+					me.addMember(isc.ToolStrip.create({
+						membersMargin: 2,
+						layoutMargin: 2,
+					    width: '100%',
+						members: toolStripMembers
+					}));
+				}
+			}
+		}
+		me.addMember(me.grid);
+	},
+
+	_createGrid: function(config, fields) {
+		var gridConfig = {
 			height: "*",
 			minHeight: me.minHeight,
 			autoFetchData: false,
@@ -2019,58 +2073,15 @@ isc.BizDataGrid.addMethods({
 				]
 			}
 */
-		});
-
-		// assign the grid to the form grids...
-		var grids = me._view._grids[me._b];
-		if (grids) {} else {
-			grids = {};
-			me._view._grids[me._b] = grids;
-		}
-		grids[me.getID()] = me;
+		};
 		
-		if (me.title) {
-			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
+		if (config.gridConfig) {
+			isc.addProperties(gridConfig, config.gridConfig);
 		}
 		
-		if (config.editable) {
-			if (config.isRepeater) {} else {
-				var toolStripMembers = [];
-				if (me.showAdd) {
-					toolStripMembers.add(me._newButton);
-				}
-				if (me.showZoom) {
-					toolStripMembers.add(me._zoomButton);
-				}
-				if (me.showEdit) {
-					toolStripMembers.add(me._editButton);
-				}
-				if (me.showRemove) {
-					toolStripMembers.add(me.deleteSelectionButton);
-				}
-				if (me.showDeselect) {
-					if (toolStripMembers.length > 0) {
-						toolStripMembers.add("separator");
-					}
-					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																		false,
-																		"<b>Deselect</b> all.",
-																		me.clearSelectionItem.click));
-				}
-
-				if (toolStripMembers.length > 0) {
-					me.addMember(isc.ToolStrip.create({
-						membersMargin: 2,
-						layoutMargin: 2,
-					    width: '100%',
-						members: toolStripMembers
-					}));
-				}
-			}
-		}
-		me.addMember(me.grid);
+		me.grid = isc.ListGrid.create(gridConfig);
 	},
-
+	
 	setDisabled: function(disabled) {
 		this._disabled = disabled;
 		if (this.grid) {
