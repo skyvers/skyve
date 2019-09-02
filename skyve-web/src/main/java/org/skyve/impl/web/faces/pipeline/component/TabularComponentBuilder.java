@@ -1783,10 +1783,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		String binding = image.getBinding();
 		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
-		HtmlPanelGroup contentImage = contentGraphicImage(image.getPixelWidth(), 
+		Integer pixelWidth = image.getPixelWidth();
+		Integer pixelHeight = image.getPixelHeight();
+		HtmlPanelGroup contentImage = contentGraphicImage((pixelWidth == null) ? ONE_HUNDRED : pixelWidth, 
 															null,
 															null, 
-															image.getPixelHeight(), 
+															(pixelHeight == null) ? ONE_HUNDRED : pixelHeight, 
 															null, 
 															binding);
 		// Set the id of the inner image element
