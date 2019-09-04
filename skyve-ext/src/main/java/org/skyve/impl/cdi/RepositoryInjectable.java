@@ -19,6 +19,7 @@ import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -84,6 +85,14 @@ public class RepositoryInjectable implements Repository, Serializable {
 														String modelName,
 														boolean runtime) {
 		return CORE.getRepository().getMapModel(customer, document, modelName, runtime);
+	}
+
+	@Override
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer,
+															Document document,
+															String modelName,
+															boolean runtime) {
+		return CORE.getRepository().getChartModel(customer, document, modelName, runtime);
 	}
 
 	@Override

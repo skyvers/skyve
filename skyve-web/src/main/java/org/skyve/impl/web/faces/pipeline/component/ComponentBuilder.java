@@ -24,6 +24,7 @@ import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -259,6 +260,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														String formDisabledConditionName,
 														String title, 
 														boolean required);
+
+	public abstract UIComponent chart(UIComponent component, Chart chart, String modelName);
 
 	public abstract EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership);
 	

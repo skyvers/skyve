@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -181,6 +182,11 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

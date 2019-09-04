@@ -19,6 +19,8 @@
 
   <xs:element name="cancel" type="tns:cancelAction"/>
 
+  <xs:element name="chart" type="tns:chart"/>
+
   <xs:element name="checkBox" type="tns:checkBox"/>
 
   <xs:element name="checkMembership" type="tns:checkMembership"/>
@@ -658,6 +660,7 @@
         <xs:element ref="tns:form"/>
         <xs:element ref="tns:tabPane"/>
         <xs:element ref="tns:button"/>
+        <xs:element ref="tns:chart"/>
         <xs:element ref="tns:map"/>
         <xs:element ref="tns:dynamicImage"/>
         <xs:element ref="tns:dialogButton"/>
@@ -1341,6 +1344,25 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="chart">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type" type="tns:chartType" use="required"/>
+    <xs:attribute name="modelName" type="xs:string" use="required"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
   <xs:complexType name="map">
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
@@ -1818,6 +1840,19 @@
       <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="chartType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="lineArea"/>
+      <xs:enumeration value="bar"/>
+      <xs:enumeration value="horizontalBar"/>
+      <xs:enumeration value="radar"/>
+      <xs:enumeration value="pie"/>
+      <xs:enumeration value="doughnut"/>
+      <xs:enumeration value="polarArea"/>
     </xs:restriction>
   </xs:simpleType>
 

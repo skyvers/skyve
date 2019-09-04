@@ -51,6 +51,7 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -532,6 +533,19 @@ public class PWAViewRenderer extends ViewRenderer {
 	    				map.getPixelWidth(), 
 	    				map.getResponsiveWidth(),
 	    				map.getPercentageWidth());
+	}
+
+	@Override
+	public void renderChart(Chart chart) {
+		RenderedComponent l = cr.label(null, "chart"); // TODO chart
+	    addComponent(null, 
+	    				false, 
+	    				chart.getInvisibleConditionName(), 
+	    				null,
+	    				l, 
+	    				chart.getPixelWidth(), 
+	    				chart.getResponsiveWidth(),
+	    				chart.getPercentageWidth());
 	}
 
 	@Override

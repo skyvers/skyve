@@ -58,6 +58,7 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -1111,6 +1112,13 @@ class ViewJSONManipulator extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		addCondition(map.getInvisibleConditionName());
+	}
+
+	@Override
+	public void visitChart(Chart chart,
+							boolean parentVisible,
+							boolean parentEnabled) {
+		addCondition(chart.getInvisibleConditionName());
 	}
 
 	@Override

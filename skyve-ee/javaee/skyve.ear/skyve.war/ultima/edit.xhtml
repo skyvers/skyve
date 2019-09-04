@@ -23,6 +23,8 @@
 			<ui:param name="leftMenu" value="true" />
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:define name="head">
+				<h:outputScript library="primefaces" name="moment/moment.js" />
+				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
 			</ui:define>
 			<ui:define name="body">
 				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />

@@ -50,6 +50,7 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -354,6 +355,22 @@ class ViewValidator extends ViewVisitor {
 			}
 			catch (Exception e) { // NB could be class cast problems
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid map model of " + modelName, e);
+			}
+		}
+	}
+
+	private void validateChartModelName(String modelName, String widgetIdentifier) {
+		if (modelName != null) {
+			try {
+				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
+				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
+				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
+				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				}
+			}
+			catch (Exception e) { // NB could be class cast problems
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid chart model of " + modelName, e);
 			}
 		}
 	}
@@ -734,6 +751,13 @@ class ViewValidator extends ViewVisitor {
 		String geometryIdentifier = "Map with model " + map.getModelName();
 		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
+	}
+
+	@Override
+	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+		String chartIdentifier = "Chart with model " + chart.getModelName();
+		validateConditionName(chart.getInvisibleConditionName(), chartIdentifier);
+		validateChartModelName(chart.getModelName(), chartIdentifier);
 	}
 
 	@Override

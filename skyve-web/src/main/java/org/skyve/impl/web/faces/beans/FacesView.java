@@ -18,9 +18,11 @@ import javax.faces.model.SelectItem;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -31,6 +33,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
+import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
@@ -652,6 +655,21 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 		
 		return result.toString();
+	}
+	
+	private transient Map<String, ChartModel> chartModels = new TreeMap<>();
+
+	/**
+	 * Creates a PF ChartModel for a Skyve ChartModel.
+	 */
+	public ChartModel getChartModel(String chartModelName, ChartType type) {
+		ChartModel result = chartModels.get(chartModelName);
+		if (result == null) {
+			result = new ChartAction<>(this, chartModelName, type).execute();
+			chartModels.put(chartModelName, result);
+		}
+
+		return result;
 	}
  	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()

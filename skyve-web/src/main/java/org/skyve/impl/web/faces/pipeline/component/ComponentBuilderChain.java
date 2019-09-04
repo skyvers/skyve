@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -449,6 +450,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, required);
+		}
+		return result;
+	}
+	
+	@Override
+	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.chart(result, chart, modelName);
 		}
 		return result;
 	}

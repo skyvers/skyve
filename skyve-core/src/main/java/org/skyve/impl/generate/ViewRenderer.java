@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -692,6 +693,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	public abstract void renderMap(MapDisplay map);
 	
+	@Override
+	public final void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+		renderChart(chart);
+	}
+	
+	public abstract void renderChart(Chart chart);
+	
+
 	@Override
 	public final void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());

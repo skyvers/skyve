@@ -50,6 +50,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -604,6 +605,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Boolean showRefreshControls = map.getShowRefreshControls();
 		code.append((Boolean.TRUE.equals(showRefreshControls))).append("});");
 		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+
+	@Override
+	public void renderChart(Chart chart) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,type:'");
+		code.append(chart.getType()).append("'});");
+		code.append(variable).append(".setDataSource('").append(chart.getModelName()).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 

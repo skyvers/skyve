@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -243,6 +244,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 	
+	@Override
+	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+		return component;
+	}
+
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String moduleName,

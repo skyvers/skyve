@@ -28,6 +28,7 @@ import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
@@ -37,17 +38,22 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.dialog.Dialog;
+import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.linechart.LineChart;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.piechart.PieChart;
+import org.primefaces.component.polarareachart.PolarAreaChart;
+import org.primefaces.component.radarchart.RadarChart;
 import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
@@ -59,6 +65,7 @@ import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.model.DualListModel;
+import org.primefaces.model.charts.ChartModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
@@ -75,6 +82,8 @@ import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
+import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
@@ -1023,6 +1032,45 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		value.append(", ").append(includeScriptTag).append(")}");
 		return ef.createValueExpression(elc, value.toString(), String.class);
+	}
+	
+	@Override
+	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+		if (component != null) {
+			return component;
+		}
+		UIComponent result = null;
+		ChartType type = chart.getType();
+		switch (type) {
+		case bar:
+		case horizontalBar:
+			result = a.createComponent(BarChart.COMPONENT_TYPE);
+			break;
+		case doughnut:
+			result = a.createComponent(DonutChart.COMPONENT_TYPE);
+			break;
+		case line:
+		case lineArea:
+			result = a.createComponent(LineChart.COMPONENT_TYPE);
+			break;
+		case pie:
+			result = a.createComponent(PieChart.COMPONENT_TYPE);
+			break;
+		case polarArea:
+			result = a.createComponent(PolarAreaChart.COMPONENT_TYPE);
+			break;
+		case radar:
+			result = a.createComponent(RadarChart.COMPONENT_TYPE);
+			break;
+		default:
+			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
+		}
+
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getChartModel('").append(modelName);
+		value.append("','").append(type).append("')}");
+		result.setValueExpression("model", ef.createValueExpression(elc, value.toString(), ChartModel.class));
+		return result;
 	}
 	
 	/*

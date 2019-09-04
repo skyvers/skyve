@@ -33,6 +33,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -167,6 +168,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitMap(MapDisplay map,
 									boolean parentVisible,
 									boolean parentEnabled);
+	public abstract void visitChart(Chart chart,
+										boolean parentVisible,
+										boolean parentEnabled);
 	public abstract void visitDialogButton(DialogButton button,
 											boolean parentVisible,
 											boolean parentEnabled);
@@ -494,6 +498,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 		else if (widget instanceof MapDisplay) {
 			MapDisplay map = (MapDisplay) widget;
 			visitMap(map, parentVisible, parentEnabled);
+		}
+		else if (widget instanceof Chart) {
+			Chart chart = (Chart) widget;
+			visitChart(chart, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof DialogButton) {
 			DialogButton button = (DialogButton) widget;

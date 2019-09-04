@@ -57,7 +57,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 	/**
 	 * Number
 	 * <br/>
-	 * The last used number for the document.
+	 * The last used number for the document (the next number used will increment this).
 	 **/
 	private String documentNumber;
 

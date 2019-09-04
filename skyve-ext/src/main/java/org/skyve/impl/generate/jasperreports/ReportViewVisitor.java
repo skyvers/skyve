@@ -38,6 +38,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -1100,6 +1101,12 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitMap(MapDisplay arg0, boolean arg1, boolean arg2) {
 		// Not supported
+
+	}
+
+	@Override
+	public void visitChart(Chart arg0, boolean arg1, boolean arg2) {
+		// Not supported yet
 
 	}
 
