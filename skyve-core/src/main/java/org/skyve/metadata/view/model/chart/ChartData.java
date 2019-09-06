@@ -6,10 +6,10 @@ import java.util.List;
 public class ChartData {
 	private List<Number> values;
 	private List<String> labels;
-	private List<Color> colours;
+	private List<Color> backgrounds;
 	private List<Color> borders;
 	private String label;
-	private Color colour;
+	private Color background;
 	private Color border;
 
 	public List<Number> getValues() {
@@ -24,11 +24,11 @@ public class ChartData {
 	public void setLabels(List<String> labels) {
 		this.labels = labels;
 	}
-	public List<Color> getColours() {
-		return colours;
+	public List<Color> getBackgrounds() {
+		return backgrounds;
 	}
-	public void setColours(List<Color> colours) {
-		this.colours = colours;
+	public void setBackgrounds(List<Color> backgrounds) {
+		this.backgrounds = backgrounds;
 	}
 	public List<Color> getBorders() {
 		return borders;
@@ -42,11 +42,11 @@ public class ChartData {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	public Color getColour() {
-		return colour;
+	public Color getBackground() {
+		return background;
 	}
-	public void setColour(Color colour) {
-		this.colour = colour;
+	public void setBackground(Color background) {
+		this.background = background;
 	}
 	public Color getBorder() {
 		return border;

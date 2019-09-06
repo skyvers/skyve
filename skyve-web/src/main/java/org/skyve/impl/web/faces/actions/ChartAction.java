@@ -68,7 +68,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			BarChartDataSet set = horizontal ? new HorizontalBarChartDataSet() : new BarChartDataSet();
 			set.setData(data.getValues());
 			set.setLabel(data.getLabel());
-			set.setBackgroundColor(web(data.getColour()));
+			set.setBackgroundColor(web(data.getBackground()));
 			set.setBorderColor(web(data.getBorder()));
 			set.setBorderWidth(Integer.valueOf(1));
 			ChartData chartData = new ChartData();
@@ -81,7 +81,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		else if (ChartType.doughnut.equals(type)) {
 			DonutChartDataSet set = new DonutChartDataSet();
 			set.setData(data.getValues());
-			set.setBackgroundColor(web(data.getColours()));
+			set.setBackgroundColor(web(data.getBackgrounds()));
 			set.setBorderColor(web(data.getBorders()));
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
@@ -94,7 +94,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			LineChartDataSet set = new LineChartDataSet();
 			set.setData(data.getValues());
 			set.setLabel(data.getLabel());
-			set.setBackgroundColor(web(data.getColour()));
+			set.setBackgroundColor(web(data.getBackground()));
 			set.setBorderColor(web(data.getBorder()));
 			set.setPointBackgroundColor(set.getBorderColor());
 			set.setPointBorderColor(set.getBorderColor());
@@ -112,7 +112,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		else if (ChartType.pie.equals(type)) {
 			PieChartDataSet set = new PieChartDataSet();
 			set.setData(data.getValues());
-			set.setBackgroundColor(web(data.getColours()));
+			set.setBackgroundColor(web(data.getBackgrounds()));
 			set.setBorderColor(web(data.getBorders()));
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
@@ -124,7 +124,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		else if (ChartType.polarArea.equals(type)) {
 			PolarAreaChartDataSet set = new PolarAreaChartDataSet();
 			set.setData(data.getValues());
-			set.setBackgroundColor(web(data.getColours()));
+			set.setBackgroundColor(web(data.getBackgrounds()));
 			set.setBorderColor(web(data.getBorders()));
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
@@ -137,7 +137,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			RadarChartDataSet set = new RadarChartDataSet();
 			set.setData(data.getValues());
 			set.setLabel(data.getLabel());
-			set.setBackgroundColor(web(data.getColour()));
+			set.setBackgroundColor(web(data.getBackground()));
 			set.setBorderColor(web(data.getBorder()));
 			set.setBorderWidth(Integer.valueOf(1));
 			set.setPointBackgroundColor(set.getBorderColor());
