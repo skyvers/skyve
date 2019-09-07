@@ -19,11 +19,19 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.types.Decimal;
+import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.field.Decimal10;
+import org.skyve.impl.metadata.model.document.field.Decimal5;
 import org.skyve.impl.metadata.model.document.field.LengthField;
+import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
+import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
+import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.model.Attribute;
@@ -147,9 +155,11 @@ public class TestUtil {
 			case decimal10:
 			case decimal2:
 			case decimal5:
+				BindUtil.convertAndSet(bean, name, randomDecimal(attribute));
+				break;
 			case integer:
 			case longInteger:
-				BindUtil.convertAndSet(bean, name, new Integer((int) Math.random() * 10000));
+				BindUtil.convertAndSet(bean, name, randomInteger(attribute));
 				break;
 			case enumeration:
 				// get the current int value of the enum
@@ -180,7 +190,6 @@ public class TestUtil {
 			case association:
 			case collection:
 			case content:
-			case image:
 			case inverseMany:
 			case inverseOne:
 				break;
@@ -280,9 +289,11 @@ public class TestUtil {
 				case decimal10:
 				case decimal2:
 				case decimal5:
+					BindUtil.convertAndSet(result, name, randomDecimal(attribute));
+					break;
 				case integer:
 				case longInteger:
-					BindUtil.convertAndSet(result, name, new Integer(random.nextInt(10000)));
+					BindUtil.convertAndSet(result, name, randomInteger(attribute));
 					break;
 				case enumeration:
 					// pick a random value from the enum
@@ -318,6 +329,43 @@ public class TestUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns a random decimal which conforms to any min and max validators set,
+	 * otherwise between 0 and 10,000.
+	 * 
+	 * @param attribute The attribute to generate the random decimal for
+	 * @return A random decimal
+	 */
+	private static Decimal randomDecimal(Attribute attribute) {
+		Decimal min = new Decimal2(0), max = new Decimal2(10000);
+
+		DecimalValidator validator = null;
+		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Decimal2) {
+			org.skyve.impl.metadata.model.document.field.Decimal2 field = (org.skyve.impl.metadata.model.document.field.Decimal2) attribute;
+			validator = field.getValidator();
+		} else if (attribute instanceof Decimal5) {
+			Decimal5 field = (Decimal5) attribute;
+			validator = field.getValidator();
+		} else if (attribute instanceof Decimal10) {
+			Decimal10 field = (Decimal10) attribute;
+			validator = field.getValidator();
+		}
+
+		if (validator != null) {
+			if (validator.getMin() != null) {
+				min = validator.getMin();
+			}
+			if (validator.getMax() != null) {
+				max = validator.getMax();
+			}
+		}
+
+		random.setSeed(random.generateSeed(20));
+		return new Decimal2(random.nextInt(
+				(max.subtract(min))
+						.add(new Decimal2(1)).intValue())).add(min);
 	}
 
 	private static String randomEmail(int length) {
@@ -394,6 +442,45 @@ public class TestUtil {
 		}
 
 		return out;
+	}
+
+	/**
+	 * Returns a random number which conforms to any min and max validators set,
+	 * otherwise between 0 and 10,000.
+	 * 
+	 * @param attribute The attribute to generate the random integer for
+	 * @return A random integer
+	 */
+	private static Integer randomInteger(Attribute attribute) {
+		int min = 0, max = 10000;
+
+		// if there is a min and max make sure it is within the range
+		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer) {
+			org.skyve.impl.metadata.model.document.field.Integer field = (org.skyve.impl.metadata.model.document.field.Integer) attribute;
+			IntegerValidator validator = field.getValidator();
+			if (validator != null) {
+				if (validator.getMin() != null) {
+					min = validator.getMin().intValue();
+				}
+				if (validator.getMax() != null) {
+					max = validator.getMax().intValue();
+				}
+			}
+		} else if (attribute instanceof org.skyve.impl.metadata.model.document.field.LongInteger) {
+			LongInteger field = (LongInteger) attribute;
+			LongValidator validator = field.getValidator();
+			if (validator != null) {
+				if (validator.getMin() != null) {
+					min = validator.getMin().intValue();
+				}
+				if (validator.getMax() != null) {
+					max = validator.getMax().intValue();
+				}
+			}
+		}
+
+		random.setSeed(random.generateSeed(20));
+		return new Integer(random.nextInt((max - min) + 1) + min);
 	}
 
 	/**
