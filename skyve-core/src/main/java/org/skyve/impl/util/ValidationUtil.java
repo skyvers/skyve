@@ -436,7 +436,10 @@ public class ValidationUtil {
 												constraint.getName();
 								}
 
-								throw new UniqueConstraintViolationException(constraint.getName(), referenceName + '[' + i + ']', message);
+								throw new UniqueConstraintViolationException(document,
+																				constraint.getName(),
+																				referenceName + '[' + i + ']',
+																				message);
 							}
 						}
 					}

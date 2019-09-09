@@ -1209,7 +1209,7 @@ t.printStackTrace();
 												constraint.getName();
 							}
 	
-							throw new UniqueConstraintViolationException(constraint.getName(), message);
+							throw new UniqueConstraintViolationException(document, constraint.getName(), message);
 						}
 					}
 				}
