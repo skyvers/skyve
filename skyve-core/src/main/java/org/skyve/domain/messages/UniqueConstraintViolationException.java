@@ -39,7 +39,8 @@ public class UniqueConstraintViolationException extends DomainException implemen
 												String constraintName,
 												String binding,
 												String message) {
-		super(message);
+		super("Constraint " + constraintName + " in document " + document.getOwningModuleName() + "." + document.getName() +
+				" is violated with message :- " + message);
 		messages.add(new Message(binding, message));
 		this.document = document;
 		this.constraintName = constraintName;
