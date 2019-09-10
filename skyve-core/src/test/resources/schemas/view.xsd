@@ -1443,6 +1443,7 @@
     <xs:complexContent>
       <xs:extension base="tns:chartBuilderOrderMetaData">
         <xs:sequence/>
+        <xs:attribute name="includeOthers" type="xs:boolean" use="required"/>
         <xs:attribute name="top" type="xs:int" use="required"/>
       </xs:extension>
     </xs:complexContent>

@@ -30,6 +30,6 @@ public class NumericMultipleBucket implements Bucket {
 			int value = ((Number) category).intValue();
 			return String.format("%d-%s", Integer.valueOf(value * multiple), Integer.valueOf((value + 1) * multiple));
 		}
-		return "Unknown";
+		return null;
 	}
 }

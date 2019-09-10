@@ -12,6 +12,7 @@ public class ChartBuilderTopMetaData extends ChartBuilderOrderMetaData {
 	private static final long serialVersionUID = 5416228121746943426L;
 
 	private int top;
+	private boolean includeOthers;
 
 	public int getTop() {
 		return top;
@@ -19,5 +20,13 @@ public class ChartBuilderTopMetaData extends ChartBuilderOrderMetaData {
 	@XmlAttribute(required = true)
 	public void setTop(int top) {
 		this.top = top;
+	}
+
+	public boolean isIncludeOthers() {
+		return includeOthers;
+	}
+	@XmlAttribute(required = true)
+	public void setIncludeOthers(boolean includeOthers) {
+		this.includeOthers = includeOthers;
 	}
 }

@@ -2,10 +2,13 @@ package org.skyve.metadata.view.model.chart;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -29,6 +32,7 @@ public class ChartBuilder {
 	private int top = Integer.MIN_VALUE;
 	private SortDirection topSort;
 	private OrderBy topOrderBy;
+	private boolean topOthers = false;
 	private SortDirection orderBySort;
 	private OrderBy orderBy;
 	
@@ -110,13 +114,16 @@ public class ChartBuilder {
 	 * @param top
 	 * @param orderBy
 	 * @param sort
+	 * @param includeOthers
 	 */
 	public ChartBuilder top(@SuppressWarnings("hiding") int top,
 								@SuppressWarnings("hiding") OrderBy orderBy,
-								SortDirection sort) {
+								SortDirection sort,
+								boolean includeOthers) {
 		this.top = top;
 		topOrderBy = orderBy;
 		topSort = sort;
+		topOthers = includeOthers;
 		return this;
 	}
 	
@@ -147,13 +154,20 @@ public class ChartBuilder {
 		result.setBorder(borderColours.getCurrent());
 		Customer c = CORE.getCustomer();
 		result.setLabels(data.stream().map(r -> (categoryBucket == null) ?
-													Binder.getDisplay(c, r, categoryBindingOrAlias) :
-													categoryBucket.label(Binder.get(r, "category"))).collect(Collectors.toList()));
+													label(Binder.getDisplay(c, r, categoryBindingOrAlias)) :
+													label(categoryBucket.label(Binder.get(r, "category")))).collect(Collectors.toList()));
 		result.setValues(data.stream().map(r -> (Number) Binder.get(r, "value")).collect(Collectors.toList()));
 
 		result.setBackgrounds(backgroundColours.list(200));
 		result.setBorders(borderColours.list());
 		return result;
+	}
+	
+	private static String label(String value) {
+		if ((value == null) || value.isEmpty()) {
+			return "Others";
+		}
+		return value;
 	}
 	
 	private List<Bean> query() {
@@ -190,13 +204,84 @@ public class ChartBuilder {
 		if (top > 0) {
 			// cull the list if its bigger than the top requirement
 			if (top < result.size()) {
-				result = new ArrayList<>(result.subList(0, top));
+				if (topOthers) {
+					List<Bean> best = new ArrayList<>(result.subList(0, top));
+					result = result.subList(top, result.size());
+
+					Number rest = null;
+					if ((valueFunction == null) || 
+							AggregateFunction.Count.equals(valueFunction) ||
+							AggregateFunction.Sum.equals(valueFunction)) {
+						// sum the rest
+						rest = Double.valueOf(sum(result));
+					}
+					else if (AggregateFunction.Avg.equals(valueFunction)) {
+						// average the rest
+						rest = Double.valueOf(sum(result) / result.size());
+					}
+					else if (AggregateFunction.Min.equals(valueFunction)) {
+						rest = minMax(result, true);
+					}
+					else if (AggregateFunction.Max.equals(valueFunction)) {
+						rest = minMax(result, false);
+					}
+					
+					Map<String, Object> properties = new TreeMap<>();
+					properties.put((categoryBucket == null) ? categoryBindingOrAlias : "category", null);
+					properties.put("value", rest);
+					best.add(new MapBean(document.getOwningModuleName(), document.getName(), properties));
+					result = best;
+				}
+				else {
+					result = result.subList(0, top);
+				}
 			}
 			// Always order here as the top sort was applied on the data store
 			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBindingOrAlias : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
 			Binder.sortCollectionByOrdering(result, ordering);
 		}
+		return result;
+	}
+	
+	private static double sum(List<Bean> beans) {
+		double result = 0.0;
+		
+		for (Bean bean : beans) {
+			Number number = (Number) Binder.get(bean, "value");
+			if (number != null) {
+				result += number.doubleValue();
+			}
+		}
+		
+		return Math.round((result * 100000d) / 100000d);
+	}
+	
+	private static Number minMax(List<Bean> beans, boolean min) {
+		Number result = null;
+		
+		for (Bean bean : beans) {
+			@SuppressWarnings("unchecked")
+			Comparable<Number> number = (Comparable<Number>) Binder.get(bean, "value");
+			if (number != null) {
+				if (result == null) {
+					result = (Number) number;
+				}
+				else {
+					if (min) {
+						if (number.compareTo(result) < 0) {
+							result = (Number) number;
+						}
+					}
+					else {
+						if (number.compareTo(result) > 0) {
+							result = (Number) number;
+						}
+					}
+				}
+			}
+		}
+		
 		return result;
 	}
 }

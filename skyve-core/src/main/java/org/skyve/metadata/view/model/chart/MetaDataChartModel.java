@@ -23,11 +23,11 @@ public class MetaDataChartModel extends ChartModel<Bean> {
 		}
 		
 		ChartBuilder result = new ChartBuilder().with(builder.getModuleName(), builder.getDocumentName())
-									.category(builder.getCategoryBinding(), bucket)
-									.value(builder.getValueBinding(), builder.getValueFunction());
+													.category(builder.getCategoryBinding(), bucket)
+													.value(builder.getValueBinding(), builder.getValueFunction());
 		ChartBuilderTopMetaData top = builder.getTop();
 		if (top != null) {
-			result.top(top.getTop(), top.getBy(), top.getSort());
+			result.top(top.getTop(), top.getBy(), top.getSort(), top.isIncludeOthers());
 		}
 		ChartBuilderOrderMetaData order = builder.getOrder();
 		if (order != null) {

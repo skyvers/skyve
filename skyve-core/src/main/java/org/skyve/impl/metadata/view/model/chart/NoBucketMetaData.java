@@ -18,6 +18,6 @@ public class NoBucketMetaData implements Bucket {
 
 	@Override
 	public String label(Object category) {
-		return (category == null) ? "Unknown" : category.toString();
+		return (category == null) ? null : category.toString();
 	}
 }

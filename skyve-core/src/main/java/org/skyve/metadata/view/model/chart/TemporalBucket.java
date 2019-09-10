@@ -140,11 +140,12 @@ public class TemporalBucket implements Bucket {
 
 	@Override
 	public String label(Object category) {
-		StringBuilder result = new StringBuilder(16);
 		if (category == null) {
-			result.append("Unknown");
+			return null;
 		}
-		else if (TemporalBucketType.dayMonthYear.equals(type)) {
+		
+		StringBuilder result = new StringBuilder(16);
+		if (TemporalBucketType.dayMonthYear.equals(type)) {
 			String[] tokens = category.toString().split("-");
 			result.append(day(Integer.parseInt(tokens[2]))).append(' ');
 			result.append(month(Integer.parseInt(tokens[1]))).append(' ').append(tokens[0]);

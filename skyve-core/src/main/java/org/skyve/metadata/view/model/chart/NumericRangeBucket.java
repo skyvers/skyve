@@ -56,6 +56,6 @@ public class NumericRangeBucket implements Bucket {
 				return ranges[index - 1] + "-" + ranges[index];
 			}
 		}
-		return "Unknown";
+		return null;
 	}
 }
