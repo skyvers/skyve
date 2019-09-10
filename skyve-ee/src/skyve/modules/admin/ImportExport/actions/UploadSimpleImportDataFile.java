@@ -40,6 +40,10 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 		
 		if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 
+			if(!bean.isPersisted()) {
+				bean =CORE.getPersistence().save(bean);
+			}
+			
 			// create the import upload file
 			File importFile = new File(String.format("%simportExport_%s%s%s",
 					Util.getContentDirectory(),
@@ -71,7 +75,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 			//construct a result message
 			StringBuilder sb = new StringBuilder();
 			if(i>0) {
-				sb.append("Successfully loaded ").append(i).append(" column")
+				sb.append("Successfully loaded definitions for ").append(i).append(" column")
 						.append(i != 1 ? "s" : "")
 						.append(". Configure each column title you wish to import with an appropriate "
 								+ "binding then click the Import Data button.");

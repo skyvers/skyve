@@ -48,8 +48,7 @@ public class DeleteAction extends FacesAction<Void> {
 		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
 		persistence.evictAllCached();
 		PersistentBean persistentBeanToDelete = persistence.retrieve(document, 
-																		beanToDelete.getBizId(), 
-																		false);
+																		beanToDelete.getBizId());
 
 		if (persistentBeanToDelete == null) { // deleted by another user
 			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));

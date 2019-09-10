@@ -44,6 +44,7 @@ public interface Attribute extends NamedMetaData {
 		markup(String.class),
 		colour(String.class), 
 		content(String.class), 
+		image(String.class),
 		association(Bean.class), 
 		collection(List.class),
 		inverseOne(Bean.class),

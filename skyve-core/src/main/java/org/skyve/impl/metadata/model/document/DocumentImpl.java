@@ -383,7 +383,10 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			Bizlet<T> bizlet = AbstractRepository.get().getBizlet(customer, this, runtime);
 			try {
 				if (DomainType.constant.equals(domainType)) {
-					result = customer.getConstantDomainValues(bizlet, getName(), attribute);
+					result = customer.getConstantDomainValues(bizlet,
+																getOwningModuleName(),
+																getName(),
+																attribute);
 				}
 				else {
 					String attributeName = attribute.getName();

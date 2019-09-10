@@ -119,7 +119,14 @@
 	// Map Settings
 	map: {
 		// gmap or leaflet
-		type: "gmap"
+		type: "leaflet",
+		// gmap or leafet layers to show for the map backdrop (use single-quoted strings)
+		layers: "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors'})]",
+		//layers: "google.maps.MapTypeId.ROADMAP",
+		// opening a new empty map will centre here - ie "POINT(lng lat)"
+		// centre: "POINT(0 0)",
+		// opening a new empty map will apply this zoom level - ie 1 - 19
+		// zoom: 1
 	},
 	// API Settings
 	api: {

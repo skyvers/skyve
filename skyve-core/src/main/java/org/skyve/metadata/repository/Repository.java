@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -85,6 +86,8 @@ public interface Repository {
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
 	
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime);
+
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime);
 
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime);
 	

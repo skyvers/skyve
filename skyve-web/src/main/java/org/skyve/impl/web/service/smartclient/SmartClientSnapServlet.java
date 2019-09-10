@@ -212,7 +212,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	private static void update(String snapId, String snapshot) 
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieve(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId, true);
+		PersistentBean snap = p.retrieveAndLock(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId);
 		BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
 		p.save(snap);
 	}
@@ -220,7 +220,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	private static void delete(String snapId) 
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieve(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId, true);
+		PersistentBean snap = p.retrieveAndLock(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId);
 		p.delete(snap);
 	}
 }

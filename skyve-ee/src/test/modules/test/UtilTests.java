@@ -19,7 +19,7 @@ public class UtilTests extends AbstractSkyveTest {
 		p.evictAllCached();
 
 		// Got the shell of the object back
-		test = p.retrieve(aapd, test.getBizId(), false);
+		test = p.retrieve(aapd, test.getBizId());
 
 		Util.populateFully(test);
 
@@ -48,6 +48,7 @@ public class UtilTests extends AbstractSkyveTest {
 		test.originalValues().clear();
 		test.getAggregatedAssociation().originalValues().clear();
 		test.getComposedAssociation().originalValues().clear();
+		test.getEmbeddedAssociation().originalValues().clear();
 
 		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
 

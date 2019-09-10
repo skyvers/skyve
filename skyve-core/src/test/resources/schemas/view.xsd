@@ -19,6 +19,10 @@
 
   <xs:element name="cancel" type="tns:cancelAction"/>
 
+  <xs:element name="chart" type="tns:chart"/>
+
+  <xs:element name="chartBuilderMetaData" type="tns:chartBuilderMetaData"/>
+
   <xs:element name="checkBox" type="tns:checkBox"/>
 
   <xs:element name="checkMembership" type="tns:checkMembership"/>
@@ -69,9 +73,9 @@
 
   <xs:element name="formRow" type="tns:formRow"/>
 
-  <xs:element name="geoLocator" type="tns:geoLocator"/>
-
   <xs:element name="geometry" type="tns:geometry"/>
+
+  <xs:element name="geometryMap" type="tns:geometryMap"/>
 
   <xs:element name="hbox" type="tns:HBox"/>
 
@@ -105,7 +109,15 @@
 
   <xs:element name="new" type="tns:newAction"/>
 
+  <xs:element name="noBucket" type="tns:noBucketMetaData"/>
+
+  <xs:element name="numericMultipleBucket" type="tns:numericMultipleBucketMetaData"/>
+
+  <xs:element name="numericRangeBucket" type="tns:numericRangeBucketMetaData"/>
+
   <xs:element name="ok" type="tns:okAction"/>
+
+  <xs:element name="order" type="tns:chartBuilderOrderMetaData"/>
 
   <xs:element name="password" type="tns:password"/>
 
@@ -116,6 +128,8 @@
   <xs:element name="queryListViewReference" type="tns:queryListViewReference"/>
 
   <xs:element name="radio" type="tns:radio"/>
+
+  <xs:element name="range" type="tns:numericRangeMetaData"/>
 
   <xs:element name="remove" type="tns:removeAction"/>
 
@@ -149,13 +163,21 @@
 
   <xs:element name="tabPane" type="tns:tabPane"/>
 
+  <xs:element name="temporalBucket" type="tns:temporalBucketMetaData"/>
+
   <xs:element name="textArea" type="tns:textArea"/>
 
   <xs:element name="textField" type="tns:textField"/>
 
+  <xs:element name="textLengthBucket" type="tns:textLengthBucketMetaData"/>
+
+  <xs:element name="textStartsWithBucket" type="tns:textStartsWithBucketMetaData"/>
+
   <xs:element name="toggleDisabled" type="tns:toggleDisabledEventAction"/>
 
   <xs:element name="toggleVisibility" type="tns:toggleVisibilityEventAction"/>
+
+  <xs:element name="top" type="tns:chartBuilderTopMetaData"/>
 
   <xs:element name="treeGrid" type="tns:treeGrid"/>
 
@@ -414,6 +436,7 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -502,6 +525,7 @@
             </xs:complexType>
           </xs:element>
           <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="query" type="xs:string"/>
@@ -656,7 +680,7 @@
         <xs:element ref="tns:form"/>
         <xs:element ref="tns:tabPane"/>
         <xs:element ref="tns:button"/>
-        <xs:element ref="tns:geoLocator"/>
+        <xs:element ref="tns:chart"/>
         <xs:element ref="tns:map"/>
         <xs:element ref="tns:dynamicImage"/>
         <xs:element ref="tns:dialogButton"/>
@@ -1016,8 +1040,8 @@
         <xs:element ref="tns:contentLink"/>
         <xs:element ref="tns:button"/>
         <xs:element ref="tns:dialogButton"/>
-        <xs:element ref="tns:geoLocator"/>
         <xs:element ref="tns:geometry"/>
+        <xs:element ref="tns:geometryMap"/>
         <xs:element ref="tns:html"/>
         <xs:element ref="tns:label"/>
         <xs:element ref="tns:blurb"/>
@@ -1095,22 +1119,38 @@
     <xs:attribute name="enabled" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="geoLocator">
-    <xs:sequence>
-      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="latitudeBinding" type="xs:string"/>
-    <xs:attribute name="longitudeBinding" type="xs:string"/>
-    <xs:attribute name="descriptionBinding" type="xs:string"/>
-    <xs:attribute name="addressBinding" type="xs:string"/>
-    <xs:attribute name="cityBinding" type="xs:string"/>
-    <xs:attribute name="stateBinding" type="xs:string"/>
-    <xs:attribute name="postcodeBinding" type="xs:string"/>
-    <xs:attribute name="countryBinding" type="xs:string"/>
-    <xs:attribute name="disabled" type="xs:string"/>
-    <xs:attribute name="enabled" type="xs:string"/>
-    <xs:attribute name="invisible" type="xs:string"/>
-    <xs:attribute name="visible" type="xs:string"/>
+  <xs:complexType name="geometryMap">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onChangedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="label">
@@ -1324,11 +1364,103 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="chart">
+    <xs:sequence>
+      <xs:element name="model" type="tns:chartBuilderMetaData" form="qualified" minOccurs="0"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type" type="tns:chartType" use="required"/>
+    <xs:attribute name="modelName" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderMetaData">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element ref="tns:noBucket"/>
+        <xs:element ref="tns:numericMultipleBucket"/>
+        <xs:element ref="tns:numericRangeBucket"/>
+        <xs:element ref="tns:temporalBucket"/>
+        <xs:element ref="tns:textLengthBucket"/>
+        <xs:element ref="tns:textStartsWithBucket"/>
+      </xs:choice>
+      <xs:element ref="tns:top" minOccurs="0"/>
+      <xs:element ref="tns:order" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="label" type="xs:string" use="required"/>
+    <xs:attribute name="moduleName" type="xs:string" use="required"/>
+    <xs:attribute name="documentName" type="xs:string" use="required"/>
+    <xs:attribute name="categoryBinding" type="xs:string" use="required"/>
+    <xs:attribute name="valueBinding" type="xs:string" use="required"/>
+    <xs:attribute name="valueFunction" type="tns:aggregateFunction"/>
+  </xs:complexType>
+
+  <xs:complexType name="noBucketMetaData">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="numericMultipleBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="multiple" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="numericRangeBucketMetaData">
+    <xs:sequence>
+      <xs:element ref="tns:range" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="numericRangeMetaData">
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+
+  <xs:complexType name="temporalBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="type" type="tns:temporalBucketType" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="textLengthBucketMetaData">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="textStartsWithBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="caseSensitive" type="xs:boolean" use="required"/>
+    <xs:attribute name="length" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderTopMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:chartBuilderOrderMetaData">
+        <xs:sequence/>
+        <xs:attribute name="includeOthers" type="xs:boolean" use="required"/>
+        <xs:attribute name="top" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderOrderMetaData">
+    <xs:sequence/>
+    <xs:attribute name="by" type="tns:orderBy" use="required"/>
+    <xs:attribute name="sort" type="ns1:sortDirection" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="map">
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="modelName" type="xs:string" use="required"/>
+    <xs:attribute name="loading" type="tns:loadingType"/>
     <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
     <xs:attribute name="showRefreshControls" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
@@ -1641,6 +1773,7 @@
   <xs:complexType name="abstractListWidget" abstract="true">
     <xs:sequence>
       <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
@@ -1743,6 +1876,17 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="geometryInputType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="point"/>
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="polygon"/>
+      <xs:enumeration value="pointAndLine"/>
+      <xs:enumeration value="pointAndPolygon"/>
+      <xs:enumeration value="lineAndPolygon"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
       <xs:enumeration value="width"/>
@@ -1788,6 +1932,58 @@
       <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="chartType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="lineArea"/>
+      <xs:enumeration value="bar"/>
+      <xs:enumeration value="horizontalBar"/>
+      <xs:enumeration value="radar"/>
+      <xs:enumeration value="pie"/>
+      <xs:enumeration value="doughnut"/>
+      <xs:enumeration value="polarArea"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="temporalBucketType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dayMonthYear"/>
+      <xs:enumeration value="day"/>
+      <xs:enumeration value="month"/>
+      <xs:enumeration value="year"/>
+      <xs:enumeration value="monthYear"/>
+      <xs:enumeration value="hour"/>
+      <xs:enumeration value="hourDay"/>
+      <xs:enumeration value="hourDayMonth"/>
+      <xs:enumeration value="minuteHour"/>
+      <xs:enumeration value="secondMinuteHour"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="aggregateFunction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Min"/>
+      <xs:enumeration value="Max"/>
+      <xs:enumeration value="Sum"/>
+      <xs:enumeration value="Count"/>
+      <xs:enumeration value="Avg"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="orderBy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="category"/>
+      <xs:enumeration value="value"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="loadingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="eager"/>
+      <xs:enumeration value="lazy"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

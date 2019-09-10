@@ -53,8 +53,7 @@
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</list>
-		<map name="Staff Locations" document="Staff" geometryBinding="location" >
-			<uxui name="desktop" />
+		<map name="Staff Locations" document="Staff" geometryBinding="location" showRefreshControls="true">
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</map>

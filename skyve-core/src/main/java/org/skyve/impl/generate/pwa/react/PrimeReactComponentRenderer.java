@@ -44,6 +44,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class PrimeReactComponentRenderer extends ComponentRenderer {
 	private Map<String, String> imports;
@@ -298,6 +299,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 											String modelName,
 											ListModel<? extends Bean> model,
 											List<FilterParameter> filterParameters,
+											List<Parameter> parameters,
 											String title,
 											boolean showColumnHeaders,
 											boolean showGrid) {

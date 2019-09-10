@@ -24,6 +24,8 @@ isc.ClassFactory.defineClass("EditView", "BizContainer");
 isc.EditView.addClassProperties({
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
+		jsonPrefix: '',
+		jsonSuffix: '',
 		dataURL: "smartedit",
 		// ensure that only datasource defined fields goes down with the request
 		sendExtraFields: false
@@ -58,7 +60,7 @@ isc.EditView.addMethods({
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
-		this._heading = isc.HTMLFlow.create({showEdges:true});
+		this._heading = isc.HTMLFlow.create();
 
 		// not contained here as it is implicit
 		this.addMember(this._heading);
@@ -201,6 +203,21 @@ isc.EditView.addMethods({
 		var instance = this.gather(false); // no validation
 		if (instance) {
 			this._editInstance('ZoomOut', instance.bizId, this._b, instance._c, this._openedFromDataGrid);
+		}
+	},
+	
+	// resume controls that get paused when they do not have focus like MapDisplay
+	// this is called from windowStack
+	resume: function() {
+		// now that the values are set, we can reset all list grids - which have parameters
+		for (var gridBinding in this._grids) {
+			var grids = this._grids[gridBinding];
+			for (var gridID in grids) {
+				var grid = grids[gridID];
+				if (grid.webmap) { // this is a map
+					grid.resume();
+				}
+			}
 		}
 	},
 	
@@ -787,7 +804,7 @@ isc.EditView.addMethods({
 										if (isDate) {
 											// NB - this handles Logical Dates (2000-01-01) and 
 											//      ISO Dates (2001-01-01T00:00:00+00:00)
-											row[name] = Date.parseSchemaDate(value);
+											row[name] = isc.DateUtil.parseSchemaDate(value);
 										}
 										else if (isTime) {
 											row[name] = isc.Time.parseInput(value);
@@ -935,8 +952,7 @@ isc.EditView.addMethods({
 				var grid = grids[gridID];
 				if (this._refreshedGrids[gridID]) {} else {
 					if (grid.isVisible()) { // only refresh component if it is visible
-						if (grid._map) { // this is a map
-							grid.resume();
+						if (grid.webmap) { // this is a map
 							if (forcePostRefresh || 
 									// refresh only if the grids wants to be
 									(grid.postRefreshConditionName === undefined) ||
@@ -1755,13 +1771,13 @@ isc.BizListMembership.addMethods({
 				height: 75,
 				members: [
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberAssign.png",
 						iconWidth: 24,
 						iconHeight: 24,
 						iconAlign: "center",
-						showText: false, 
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._memberList.transferSelectedData(me._candidateList);
 							me._view._vm.setValue('_changed', true); // make the view dirty
@@ -1772,13 +1788,13 @@ isc.BizListMembership.addMethods({
 						getHoverHTML: function() {return "Add the selected candidates.";}
 					}),
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberUnassign.png",
 						iconWidth: 24,
 						iconHeight:24,
 						iconAlign: "center", 
-						showText: false,
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._candidateList.transferSelectedData(me._memberList);
 							me._view._vm.setValue('_changed', true); // make the view dirty

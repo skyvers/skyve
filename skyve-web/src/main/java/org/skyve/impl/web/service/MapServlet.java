@@ -9,7 +9,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -24,9 +30,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.metadata.view.model.map.MapResult;
+import org.skyve.metadata.view.model.map.ReferenceMapModel;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -55,6 +62,8 @@ public class MapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static final String GEOMETRY_BINDING_NAME = "_geo";
+	private static final String NORTH_EAST_NAME = "_ne";
+	private static final String SOUTH_WEST_NAME = "_sw";
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -94,7 +103,7 @@ public class MapServlet extends HttpServlet {
 						pw.print(result);
 					}
 					else {
-						pw.print("{}");
+						pw.print(emptyResponse());
 					}
 				}
 				catch (InvocationTargetException e) {
@@ -104,7 +113,7 @@ public class MapServlet extends HttpServlet {
 			catch (Throwable t) {
 				t.printStackTrace();
 				persistence.rollback();
-				pw.print("{}");
+				pw.print(emptyResponse());
 			}
 			finally {
 				if (persistence != null) {
@@ -130,13 +139,12 @@ public class MapServlet extends HttpServlet {
 		}
 		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
-		// TODO get the envelope from the map
-		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		return JSON.marshall(customer, model.getResult(mapBounds(request)), null);
 	}
 	
 	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
-		Customer customer = CORE.getUser().getCustomer();
+		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
     	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
@@ -146,15 +154,14 @@ public class MapServlet extends HttpServlet {
 		ReferenceMapModel<Bean> model = new ReferenceMapModel<>(collectionBinding);
 		model.setGeometryBinding(geometryBinding);
 		model.setBean(bean);
-		// TODO get the envelope from the map
-		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		return JSON.marshall(customer, model.getResult(mapBounds(request)), null);
 	}
 
 	private static String processModel(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
-		Customer customer = CORE.getUser().getCustomer();
+		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-    	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -162,7 +169,58 @@ public class MapServlet extends HttpServlet {
 		Repository repository = CORE.getRepository();
 		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME), true);
 		model.setBean(bean);
-		// TODO get the envelope from the map
-		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		
+		MapResult result = model.getResult(mapBounds(request));
+
+		String json = JSON.marshall(customer, result, null);
+		
+		// Add _doc property to json response for resources such as images for map pins.
+		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
+		return json.substring(0, json.length() - 1) + ",\"_doc\":\"" + _doc + "\"}";
+	}
+	
+	private static Geometry mapBounds(HttpServletRequest request) throws ParseException {
+		Geometry result = null;
+
+		WKTReader wkt = new WKTReader();
+		GeometryFactory gf = new GeometryFactory();
+		
+		String ne = request.getParameter(NORTH_EAST_NAME);
+		Coordinate topRight = (ne == null) ? new Coordinate(180, 90) : ((Point) wkt.read(ne)).getCoordinate();
+		
+		String sw = request.getParameter(SOUTH_WEST_NAME);
+		Coordinate bottomLeft = (sw == null) ? new Coordinate(-180, -90) : ((Point) wkt.read(sw)).getCoordinate();
+		
+		Coordinate topLeft = new Coordinate(bottomLeft.x, topRight.y);
+		Coordinate bottomRight = new Coordinate(topRight.x, bottomLeft.y);
+
+		// If the bounds crosses the anti-meridian, split the polygon up at 180 Longitude 
+		if (topLeft.x > bottomRight.x) { // crosses the anti-meridian
+			Coordinate minus180Top = new Coordinate(-180, topLeft.y);
+			result = gf.createMultiPolygon(new Polygon[] {
+				gf.createPolygon(new Coordinate[] {
+					topLeft,
+					new Coordinate(180, topLeft.y),
+					new Coordinate(180, bottomRight.y),
+					bottomLeft,
+					topLeft}),
+				gf.createPolygon(new Coordinate[] {
+						minus180Top,
+						topRight,
+						bottomRight,
+						new Coordinate(-180, bottomRight.y),
+						minus180Top
+				})
+			});
+		}
+		else {
+			result = gf.createPolygon(new Coordinate[] {topLeft, topRight, bottomRight, bottomLeft, topLeft});
+		}
+			
+		return result;
+	}
+	
+	private static String emptyResponse() {
+		return JSON.marshall(CORE.getCustomer(), new MapResult(), null);
 	}
 }

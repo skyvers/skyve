@@ -9,8 +9,10 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
@@ -37,6 +39,9 @@ public class ContentUpload extends Localisable {
     @ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
     private String contentBinding;
 
+    private String croppedDataUrl;
+    private String croppedFileName;
+    
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
@@ -74,12 +79,45 @@ public class ContentUpload extends Localisable {
 		this.contentBinding = UtilImpl.processStringValue(contentBinding);
 	}
 
+	public String getCroppedDataUrl() {
+		return croppedDataUrl;
+	}
+
+	public void setCroppedDataUrl(String croppedDataUrl) {
+		this.croppedDataUrl = croppedDataUrl;
+	}
+
+	public String getCroppedFileName() {
+		return croppedFileName;
+	}
+
+	public void setCroppedFileName(String croppedFileName) {
+		this.croppedFileName = croppedFileName;
+	}
+
 	/**
-	 * Process the file upload
+	 * Process the file upload directly from the PF file upload component
 	 * 
 	 * @param event
 	 */
 	public void handleFileUpload(FileUploadEvent event)
+	throws Exception {
+		UploadedFile file = event.getFile();
+		upload(file.getFileName(), file.getContents());
+	}
+	
+	/**
+	 * Process the file upload from the croppie plugin.
+	 * For use as a remote command with a hidden populated with a data url
+	 */
+	public void uploadCropped()
+	throws Exception {
+		String base64 = croppedDataUrl.substring(croppedDataUrl.indexOf(','));
+		Base64 base64Codec = new Base64();
+		upload(croppedFileName, base64Codec.decode(base64));
+	}
+
+	private void upload(String fileName, byte[] fileContents)
 	throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();
 
@@ -112,7 +150,7 @@ public class ContentUpload extends Localisable {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
 			
-			AttachmentContent content = FacesContentUtil.handleFileUpload(event, bean, BindUtil.unsanitiseBinding(contentBinding));
+			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing

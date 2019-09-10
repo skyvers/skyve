@@ -91,6 +91,7 @@
 
 		if ((user != null) && user.isPasswordChangeRequired()) {
 			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/changePassword.jsp"));
+			return;
 		}
 		
 		// Set the UX/UI and user agent type
@@ -129,6 +130,7 @@
 													outcomeUrl));
 		}
 		if (outcomeUrl == null) {
+			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
 		}
 			

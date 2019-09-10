@@ -359,7 +359,8 @@ public class RestoreJob extends CancellableJob {
 									else if (AttributeType.longInteger.equals(attributeType)) {
 										statement.setLong(index++, Long.parseLong(stringValue));
 									}
-									else if (AttributeType.content.equals(attributeType)) {
+									else if (AttributeType.content.equals(attributeType) ||
+												AttributeType.image.equals(attributeType)) {
 										StringBuilder contentPath = new StringBuilder(128);
 										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
 										contentPath.append(AbstractContentManager.FILE_STORE_NAME).append('/');

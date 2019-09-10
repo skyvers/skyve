@@ -111,7 +111,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		}
 		else {
 			AbstractPersistence persistence = AbstractPersistence.get();
-			bean = persistence.retrieve(document, bizId, false);
+			bean = persistence.retrieve(document, bizId);
 			// NB bean can be null if it wasn't found in the retrieve above
 			if (bean != null) {
 	    		if (! user.canReadBean(bean.getBizId(), 

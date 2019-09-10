@@ -34,7 +34,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2m, test.getBizId(), false);
+		test = p.retrieve(ao2m, test.getBizId());
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId(), false);
+		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test.getArc());
 	}
 
@@ -70,7 +70,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId(), false);
+		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test.getArc());
 	}
 
@@ -88,7 +88,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId(), false);
+		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test.getArc());
 	}
 
@@ -113,7 +113,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId(), false);
+		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test.getArc());
 	}
 
@@ -131,7 +131,7 @@ public class ArcTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId(), false);
+		test = p.retrieve(ao2o, test.getBizId());
 		Assert.assertNotNull(test.getArc());
 		Assert.assertEquals(arc2.getBizId(), test.getArc().getBizId());
 	}

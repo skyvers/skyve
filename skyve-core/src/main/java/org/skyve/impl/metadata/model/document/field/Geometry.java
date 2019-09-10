@@ -11,10 +11,6 @@ import org.skyve.impl.metadata.model.document.field.Field;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Geometry extends Field {
-
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6419883664269071344L;
 
 	public Geometry() {

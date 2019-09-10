@@ -995,7 +995,7 @@ public final class BindUtil {
 		}
 	}
 
-	public static boolean isWriteable(Object bean, String propertyName) {
+	public static boolean isMutable(Object bean, String propertyName) {
 		try {
 			return (PROPERTY_UTILS.getWriteMethod(PROPERTY_UTILS.getPropertyDescriptor(bean, propertyName)) != null);
 		}
@@ -1167,7 +1167,7 @@ public final class BindUtil {
 		}
 
 		if ((! List.class.isAssignableFrom(BindUtil.getPropertyType(target, propName))) &&
-			(! BindUtil.isWriteable(target, propName))) {
+			(! BindUtil.isMutable(target, propName))) {
 			return;
 		}
 

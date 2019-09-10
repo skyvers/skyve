@@ -14,9 +14,6 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"persistentBool", "requiredBool", "defaultValue", "index"})
 public abstract class Field extends AbstractAttribute {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -638312757619721424L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)

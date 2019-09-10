@@ -28,7 +28,7 @@
 				<value code="Organisation"/>
 			</values>
 		</enum>
-		<text name="email1" >
+		<text name="email1">
 			<displayName>Email</displayName>
 			<length>500</length>
 			<validator type="email" />
@@ -37,8 +37,8 @@
 			<displayName>Mobile</displayName>
 			<length>20</length>
 		</text>
-		<content name="image">
+		<image name="image">
 			<displayName>Image</displayName>
-		</content>
+		</image>
 	</attributes>
 </document>

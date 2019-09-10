@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 
 public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 5182580858481923068L;
 
 	private MetaDataQueryDefinition query;
@@ -22,14 +20,15 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	}
 
 	@Override
-	public MapResult getResult(Envelope mapExtents) throws Exception {
+	public MapResult getResult(Geometry mapBounds) throws Exception {
 		if (documentQuery == null) {
 			documentQuery = query.constructDocumentQuery(null, null);
 		}
 		
 		List<MapItem> items = new ArrayList<>(256);
+		Envelope mapEnvelope = mapBounds.getEnvelopeInternal();
 		for (Bean bean : documentQuery.projectedIterable()) {
-			addItem(bean, items, mapExtents);
+			addItem(bean, items, mapEnvelope);
 		}
 		
 		return new MapResult(items, null);

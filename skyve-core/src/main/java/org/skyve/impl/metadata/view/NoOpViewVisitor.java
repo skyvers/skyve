@@ -26,9 +26,9 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -43,6 +43,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -160,17 +161,32 @@ public class NoOpViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+	
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

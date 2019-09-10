@@ -58,9 +58,9 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -75,6 +75,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -728,7 +729,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
 //UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
-			if (bindings.isWritable(binding)) {
+			if (bindings.isMutable(binding)) {
 				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
 			}
 		}
@@ -803,7 +804,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				}
 			}
 			// We have a binding to a document attribute OR
-			// we have a binding to an implicit property that is settable.
+			// we have a binding to an implicit property that is mutable.
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
@@ -821,14 +822,14 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addBinding(String binding, boolean writeable) {
-		addBinding(binding, writeable, false);
+	private void addBinding(String binding, boolean mutable) {
+		addBinding(binding, mutable, false);
 	}
 
-	private void addBinding(String binding, boolean writable, boolean noPrefix) {
+	private void addBinding(String binding, boolean mutable, boolean noPrefix) {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
-			bindings.putBinding(binding, writable);
+			bindings.putBinding(binding, mutable);
 		}
 	}
 
@@ -1061,14 +1062,6 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitGeoLocator(GeoLocator locator,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		addCondition(locator.getInvisibleConditionName());
-		addCondition(locator.getDisabledConditionName());
-	}
-
-	@Override
 	public void visitGeometry(Geometry geometry,
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -1087,10 +1080,45 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// do nothing
+	}
+	
+	@Override
+	public void visitGeometryMap(GeometryMap geometry,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		if (parentVisible && visible(geometry)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addBinding(geometry.getBinding(), true);
+			}
+		}
+		addCondition(geometry.getInvisibleConditionName());
+		addCondition(geometry.getDisabledConditionName());
+	}
+
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// do nothing
+	}
+	
+	@Override
 	public void visitMap(MapDisplay map,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		addCondition(map.getInvisibleConditionName());
+	}
+
+	@Override
+	public void visitChart(Chart chart,
+							boolean parentVisible,
+							boolean parentEnabled) {
+		addCondition(chart.getInvisibleConditionName());
 	}
 
 	@Override

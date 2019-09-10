@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -30,6 +29,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -78,8 +78,8 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = ContentLink.class), 
 						@XmlElementRef(type = Button.class),
 						@XmlElementRef(type = DialogButton.class),
-						@XmlElementRef(type = GeoLocator.class),
 						@XmlElementRef(type = Geometry.class),
+						@XmlElementRef(type = GeometryMap.class),
 						@XmlElementRef(type = HTML.class),
 						@XmlElementRef(type = Label.class),
 						@XmlElementRef(type = Blurb.class),

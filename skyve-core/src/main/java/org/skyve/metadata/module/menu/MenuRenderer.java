@@ -256,6 +256,7 @@ public class MenuRenderer {
 													                                item,
 													                                itemQueryName,
 													                                itemDocumentName);
+							itemDocumentName = query.getDocumentName();
 							itemQueryName = query.getName();
 							itemModule = query.getDocumentModule(customer);
 						}

@@ -766,21 +766,38 @@ public class SmartClientListServlet extends HttpServlet {
 		    		case not:
 		    			switch (filterOperator) {
 		    			case substring:
+		    			case contains:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter);
+		    				break;
 		    			case iContains:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter);
+		    				break;
+		    			case notContains:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.contains, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotContains:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter);
 		    				break;
 		    			case startsWith:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notStartsWith, value, start, end, tagId, filter);
+		    				break;
 		    			case iStartsWith:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter);
+		    				break;
+		    			case notStartsWith:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.startsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotStartsWith:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter);
 		    				break;
+		    			case endsWith:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notEndsWith, value, start, end, tagId, filter);
+		    				break;
 		    			case iEndsWith:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter);
+		    				break;
+		    			case notEndsWith:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.endsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotEndsWith:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter);
@@ -819,17 +836,73 @@ public class SmartClientListServlet extends HttpServlet {
 				    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterThan, end, null, null, tagId, filter);
 		    				}
 		    				break;
+		    			case iBetween:
+		    				if (start != null) {
+				    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
+		    				}
+		    				if (end != null) {
+				    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterOrEqual, end, null, null, tagId, filter);
+		    				}
+		    				break;
 		    			case isNull:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter);
 		    				break;
 		    			case notNull:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter);
 		    				break;
+		    			case isBlank:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
+		    				break;
+		    			case notBlank:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
+		    				break;
 		    			case equalsField:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter);
 		    				break;
+		    			case iEqualsField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotEqualField, value, start, end, tagId, filter);
+		    				break;
 		    			case notEqualField:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter);
+		    				break;
+		    			case iNotEqualField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iEqualsField, value, start, end, tagId, filter);
+		    				break;
+		    			case containsField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notContainsField, value, start, end, tagId, filter);
+		    				break;
+		    			case iContainsField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotContainsField, value, start, end, tagId, filter);
+		    				break;
+		    			case notContainsField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.containsField, value, start, end, tagId, filter);
+		    				break;
+		    			case iNotContainsField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iContainsField, value, start, end, tagId, filter);
+		    				break;
+		    			case startsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notStartsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case iStartsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotStartsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case notStartsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.startsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case iNotStartsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iStartsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case endsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notEndsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case iEndsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotEndsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case notEndsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.endsWithField, value, start, end, tagId, filter);
+		    				break;
+		    			case iNotEndsWithField:
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iEndsWithField, value, start, end, tagId, filter);
 		    				break;
 		    			case greaterThanField:
 			    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter);
@@ -853,14 +926,24 @@ public class SmartClientListServlet extends HttpServlet {
 						case iregexp:
 							// nothing to do
 							break;
-						case gContains:
-						case gCrosses:
-						case gDisjoint:
-						case gEquals:
-						case gIntersects:
-						case gOverlaps:
-						case gTouches:
-						case gWithin:
+		    			case containsPattern:
+		    			case iContainsPattern:
+		    			case matchesPattern:
+		    			case iMatchesPattern:
+		    			case startsWithPattern:
+		    			case iStartsWithPattern:
+		    			case endsWithPattern:
+		    			case iEndsWithPattern:
+							// nothing to do
+		    				break;
+						case geoContains:
+						case geoCrosses:
+						case geoDisjoint:
+						case geoEquals:
+						case geoIntersects:
+						case geoOverlaps:
+						case geoTouches:
+						case geoWithin:
 							// TODO fix this later
 							break;
 						case and:
@@ -997,11 +1080,13 @@ public class SmartClientListServlet extends HttpServlet {
 	    		switch (filterOperator) {
 	    		case substring:
 	    		case iContains:
+	    		case contains:
 	    			if (revisedValue != null) {
 	    				filter.addContains(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case iNotContains:
+	    		case notContains:
 	    			if (revisedValue != null) {
 	    				filter.addNotContains(binding, revisedValue.toString());
 	    			}
@@ -1013,16 +1098,19 @@ public class SmartClientListServlet extends HttpServlet {
 	    			}
 	    			break;
 	    		case iNotStartsWith:
+	    		case notStartsWith:
 	    			if (revisedValue != null) {
 	    				filter.addNotStartsWith(binding,  revisedValue.toString());
 	    			}
 	    			break;
 	    		case iEndsWith:
+	    		case endsWith:
 	    			if (revisedValue != null) {
 	    				filter.addEndsWith(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case iNotEndsWith:
+	    		case notEndsWith:
 	    			if (revisedValue != null) {
 	    				filter.addNotEndsWith(binding, revisedValue.toString());
 	    			}
@@ -1070,6 +1158,7 @@ public class SmartClientListServlet extends HttpServlet {
 	    			break;
 	    		case iBetweenInclusive:
 	    		case betweenInclusive:
+	    		case iBetween:
 	    			if ((start != null) && (end != null)) {
 	    				ListModel.addBetween(filter, binding, start, end);
 	    			}
@@ -1081,72 +1170,88 @@ public class SmartClientListServlet extends HttpServlet {
 	    			}
 	    			break;
 	    		case isNull:
+	    		case isBlank:
 	    			filter.addNull(binding);
 	    			break;
 	    		case notNull:
+	    		case notBlank:
 	    			filter.addNotNull(binding);
 	    			break;
 	    		case equalsField:
-// TODO
-	    			break;
+	    		case iEqualsField:
 	    		case notEqualField:
-// TODO
-	    			break;
+	    		case iNotEqualField:
+	    		case containsField:
+	    		case iContainsField:
+	    		case notContainsField:
+	    		case iNotContainsField:
+	    		case startsWithField:
+	    		case iStartsWithField:
+	    		case notStartsWithField:
+	    		case iNotStartsWithField:
+	    		case endsWithField:
+	    		case iEndsWithField:
+	    		case notEndsWithField:
+	    		case iNotEndsWithField:
 				case greaterOrEqualField:
-// TODO
-					break;
 				case greaterThanField:
-// TODO
-					break;
 				case lessOrEqualField:
-// TODO
-					break;
 				case lessThanField:
-// TODO
+					// TODO
 					break;
-	    		case regexp: // Regular expression match
+				case matchesPattern:
+				case iMatchesPattern:
+				case containsPattern:
+				case iContainsPattern:
+				case startsWithPattern:
+				case iStartsWithPattern:
+				case endsWithPattern:
+				case iEndsWithPattern:
+					// TODO
+					break;
+				case regexp: // Regular expression match
 	    		case iregexp: // Regular expression match (case insensitive)
 	    			break;
 	    		case inSet: // value is in a set of values. Specify criterion.value as an Array
 	    			break;
 	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
 	    			break;
-	    		case gWithin:
+	    		case geoWithin:
 					if (value instanceof Geometry) {
 						filter.addWithin(binding, (Geometry) value);
 					}
 					break;
-	    		case gContains:
+	    		case geoContains:
 					if (value instanceof Geometry) {
 						filter.addContains(binding, (Geometry) value);
 					}
 					break;
-	    		case gCrosses:
+	    		case geoCrosses:
 					if (value instanceof Geometry) {
 						filter.addCrosses(binding, (Geometry) value);
 					}
 					break;
-	    		case gDisjoint:
+	    		case geoDisjoint:
 					if (value instanceof Geometry) {
 						filter.addDisjoint(binding, (Geometry) value);
 					}
 					break;
-	    		case gEquals:
+	    		case geoEquals:
 					if (value instanceof Geometry) {
 						filter.addEquals(binding, (Geometry) value); 
 					}
 					break;
-	    		case gIntersects:
+	    		case geoIntersects:
 					if (value instanceof Geometry) {
 						filter.addIntersects(binding, (Geometry) value);
 					}
 					break;
-	    		case gOverlaps:
+	    		case geoOverlaps:
 					if (value instanceof Geometry) {
 						filter.addOverlaps(binding, (Geometry) value);
 					}
 					break;
-	    		case gTouches:
+	    		case geoTouches:
 					if (value instanceof Geometry) {
 						filter.addTouches(binding, (Geometry) value);
 					}
@@ -1162,47 +1267,24 @@ public class SmartClientListServlet extends HttpServlet {
     }
     
 /*
-	@SuppressWarnings("unchecked")
-    private void add(String matrixType, 
-    					String propertyName,
-						Map<String, String> parameters, 
-						Persistence persistence,
+    private void add(Module module, 
+						ListModel<Bean> model,
+						boolean rowIsTagged,
+						SortedMap<String, Object> properties, 
+						AbstractPersistence persistence,
 						PrintWriter pw)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 
-		// Creating a new document
-		if ((propertyName == null) || matrixType.equals(propertyName)) {
-			AWDDomainBean bean = BindUtil.newInstance(matrixType);
-			
-			BeanUtils.populate(bean, parameters);
+		// create a new document
+		// add the parameters given
+		Bean bean = model.add(bizId, properties);
 
-			persistence.persist(bean);
-			message.append("{\"response\":{\"status\":0,\"data\":");
-			message.append(JSONUtil.marshall(bean));
-			message.append("}}");
-		}
-		else { // either connecting new, or connecting existing
-			String fromId = parameters.get(AWDDomainRelationship.FROM_ID_PROPERTY_NAME);
-			String toId = parameters.get(AWDDomainRelationship.TO_ID_PROPERTY_NAME);
-			AWDDomainBean parentBean = persistence.retrieveBean(fromId);
-			if (toId == null) { // connecting new
-			}
-			else { // connecting existing
-				AWDDomainBean childBean = persistence.retrieveBean(toId);
-				List<AWDDomainRelationship<?, ?>> rels = (List<AWDDomainRelationship<?, ?>>) BindUtil.get(parentBean, propertyName);
-
-				AWDDomainRelationship<?, ?> relationship = BindUtil.newInstance(propertyName, parentBean, childBean);
-				rels.add(relationship);
-				message.append("{\"response\":{\"status\":0,\"data\":");
-				message.append(JSONUtil.marshall(relationship));
-				message.append("}}");
-			}
-		}
-		
-		pw.append(message);
+		// return the updated row
+		pw.append(returnUpdatedMessage(customer, model, bean, rowIsTagged));
 	}
 */
+    
     private static void update(Module module, 
 								ListModel<Bean> model,
 								boolean rowIsTagged,
@@ -1247,8 +1329,7 @@ public class SmartClientListServlet extends HttpServlet {
 						properties.put(columnBinding,
 										persistence.retrieve(module.getName(),
 																((Association) targetAttribute).getDocumentName(),
-																associationId,
-																false));
+																associationId));
 					}
 				}
 			}

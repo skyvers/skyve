@@ -227,8 +227,8 @@ public class Binder {
 	 * @param propertyName
 	 * @return
 	 */
-	public static boolean isWriteable(Object bean, String propertyName) {
-		return BindUtil.isWriteable(bean, propertyName);
+	public static boolean isMutable(Object bean, String propertyName) {
+		return BindUtil.isMutable(bean, propertyName);
 	}
 
 	/**

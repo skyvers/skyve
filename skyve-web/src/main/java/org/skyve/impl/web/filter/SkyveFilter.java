@@ -66,7 +66,11 @@ public class SkyveFilter implements Filter {
 						String[] parameterValues = request.getParameterValues(parameterName);
 						if (parameterValues != null) {
 							for (String parameterValue : parameterValues) {
-								if (parameterValue.toLowerCase().contains("password")) {
+								int parameterValueLength = parameterValue.length();
+								if (parameterValueLength > 51200) { // 50K
+									UtilImpl.LOGGER.info(parameterName + "=***LENGTH " + (parameterValueLength / 1024) + "K***");
+								}
+								else if (parameterValue.toLowerCase().contains("password")) {
 									UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
 								}
 								else {

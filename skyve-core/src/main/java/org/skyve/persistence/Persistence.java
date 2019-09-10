@@ -182,20 +182,35 @@ public interface Persistence extends Serializable {
 	 * 
 	 * @param document
 	 * @param id
-	 * @param forUpdate
 	 * @return
 	 */
-	public <T extends Bean> T retrieve(Document document, String id, boolean forUpdate);
+	public <T extends Bean> T retrieve(Document document, String id);
+
+	/**
+	 * Retrieve and place a write lock on the data store.
+	 * @param document
+	 * @param id
+	 * @return
+	 */
+	public <T extends Bean> T retrieveAndLock(Document document, String id);
 
 	/**
 	 * 
 	 * @param moduleName
 	 * @param documentName
 	 * @param id
-	 * @param forUpdate
 	 * @return
 	 */
-	public <T extends Bean> T retrieve(String moduleName, String documentName, String id, boolean forUpdate);
+	public <T extends Bean> T retrieve(String moduleName, String documentName, String id);
+
+	/**
+	 * Retrieve and place a write lock on the data store.
+	 * @param moduleName
+	 * @param documentName
+	 * @param id
+	 * @return
+	 */
+	public <T extends Bean> T retrieveAndLock(String moduleName, String documentName, String id);
 
 
 	/**

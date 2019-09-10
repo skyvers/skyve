@@ -100,6 +100,7 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -1208,7 +1209,7 @@ t.printStackTrace();
 												constraint.getName();
 							}
 	
-							throw new UniqueConstraintViolationException(constraint.getName(), message);
+							throw new UniqueConstraintViolationException(document, constraint.getName(), message);
 						}
 					}
 				}
@@ -1232,49 +1233,68 @@ t.printStackTrace();
 	 */
 	private Map<String, Set<Bean>> beansToDelete = new TreeMap<>();
 
+	/**
+	 * The bean to delete - this is used to detect the same event in preRemove.
+	 * This variable is cleared at the end of the delete operation.
+	 * See the finally block below.
+	 */
+	private PersistentBean beanToDelete;
+	
+	/**
+	 * Delete a document bean from the data store.
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
-		T newBean = bean;
+		beanToDelete = bean;
 		
-		if (isPersisted(newBean)) {
+		if (isPersisted(beanToDelete)) {
 			try {
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
-				boolean vetoed = internalCustomer.interceptBeforeDelete(document, newBean);
+				boolean vetoed = internalCustomer.interceptBeforeDelete(document, beanToDelete);
 				if (! vetoed) {
+					// need to merge before validation to ensure that the FK constraints
+					// can check for members of collections etc - need the persistent version for this
+					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+					beanToDelete = (T) session.merge(entityName, beanToDelete);
+					em.flush();
+	
+					// Call preDelete()
+					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
+					if (bizlet != null) {
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
+						bizlet.preDelete(beanToDelete);
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					}
+					
 					Set<String> documentsVisited = new TreeSet<>();
 					// Check composed collections/associations here in case we are 
 					// deleting a composed collection element or an association directly using p.delete().
 					checkReferentialIntegrityOnDelete(document,
-														bean,
+														beanToDelete,
 														documentsVisited,
 														beansToDelete,
 														false);
 
-					// need to merge before validation to ensure that the FK constraints
-					// can check for members of collections etc - need the persistent version for this
-					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-					newBean = (T) session.merge(entityName, newBean);
-					em.flush();
-	
-					session.delete(entityName, newBean);
+					session.delete(entityName, beanToDelete);
 					em.flush();
 				
-					internalCustomer.interceptAfterDelete(document, newBean);
+					internalCustomer.interceptAfterDelete(document, beanToDelete);
 				}
 			}
 			catch (Throwable t) {
-				treatPersistenceThrowable(t, OperationType.update, newBean);
+				treatPersistenceThrowable(t, OperationType.update, beanToDelete);
 			}
 			finally {
 				beansToDelete.clear();
+				beanToDelete = null;
 			}
 		}
 	}
 
 	// Do not increase visibility of this method as we don't want it to be public.
 	private void checkReferentialIntegrityOnDelete(Document document, 
-													PersistentBean beanToDelete, 
+													PersistentBean bean, 
 													Set<String> documentsVisited,
 													Map<String, Set<Bean>> beansToBeCascaded,
 													boolean preRemove) {
@@ -1304,10 +1324,10 @@ t.printStackTrace();
 						Persistent persistent = document.getPersistent();
 						if (persistent != null) {
 							if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
-								checkMappedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
+								checkMappedReference(bean, beansToBeCascaded, document, ref, entityName, referenceDocument);
 							}
 							else {
-								checkTypedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
+								checkTypedReference(bean, beansToBeCascaded, document, ref, entityName, referenceDocument);
 							}
 						}
 					}
@@ -1323,7 +1343,7 @@ t.printStackTrace();
 			int dotIndex = baseDocumentName.indexOf('.');
 			Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
 			Document baseDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-			checkReferentialIntegrityOnDelete(baseDocument, beanToDelete, documentsVisited, beansToBeCascaded, preRemove);
+			checkReferentialIntegrityOnDelete(baseDocument, bean, documentsVisited, beansToBeCascaded, preRemove);
 		}
 
 		// Process derived documents if present
@@ -1332,12 +1352,12 @@ t.printStackTrace();
 				int dotIndex = derivedDocumentName.indexOf('.');
 				Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
 				Document derivedDocument = derivedModule.getDocument(customer, derivedDocumentName.substring(dotIndex + 1));
-				checkReferentialIntegrityOnDelete(derivedDocument, beanToDelete, documentsVisited, beansToBeCascaded, preRemove);
+				checkReferentialIntegrityOnDelete(derivedDocument, bean, documentsVisited, beansToBeCascaded, preRemove);
 			}
 		}
 	}
 
-	private void checkTypedReference(PersistentBean beanToDelete, 
+	private void checkTypedReference(PersistentBean bean, 
 										Map<String, Set<Bean>> beansToBeCascaded,
 										Document document,
 										ExportedReference ref,
@@ -1348,7 +1368,7 @@ t.printStackTrace();
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
 			for (Document derivation : derivations) {
-				checkTypedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, derivation);
+				checkTypedReference(bean, beansToBeCascaded, document, ref, entityName, derivation);
 			}
 		}
 		else {
@@ -1385,7 +1405,7 @@ t.printStackTrace();
 				Query<?> query = session.createQuery(queryString.toString());
 				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-				query.setParameter("referencedBeanId", beanToDelete.getBizId(), StringType.INSTANCE);
+				query.setParameter("referencedBeanId", bean.getBizId(), StringType.INSTANCE);
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
@@ -1397,7 +1417,7 @@ t.printStackTrace();
 				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
 						throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																			" \"" + beanToDelete.getBizKey() + 
+																			" \"" + bean.getBizKey() + 
 																			"\" as it is referenced by a " + ref.getDocumentAlias());
 					}
 				}
@@ -1408,7 +1428,7 @@ t.printStackTrace();
 		}
 	}
 	
-	private void checkMappedReference(PersistentBean beanToDelete, 
+	private void checkMappedReference(PersistentBean bean, 
 										Map<String, Set<Bean>> beansToBeCascaded,
 										Document document,
 										ExportedReference ref,
@@ -1419,7 +1439,7 @@ t.printStackTrace();
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
 			for (Document derivation : derivations) {
-				checkMappedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, derivation);
+				checkMappedReference(bean, beansToBeCascaded, document, ref, entityName, derivation);
 			}
 		}
 		else {
@@ -1452,7 +1472,7 @@ t.printStackTrace();
 	
 			NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 //			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-			query.setParameter("reference_id", beanToDelete.getBizId(), StringType.INSTANCE);
+			query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
 			if (theseBeansToBeCascaded != null) {
 				int i = 0;
 				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
@@ -1463,7 +1483,7 @@ t.printStackTrace();
 			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 				if (results.next()) {
 					throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																		" \"" + beanToDelete.getBizKey() + 
+																		" \"" + bean.getBizKey() + 
 																		"\" as it is referenced by a " + ref.getDocumentAlias());
 				}
 			}
@@ -1489,8 +1509,17 @@ t.printStackTrace();
 	}
 	
 	@Override
+	public <T extends Bean> T retrieve(Document document, String id) {
+		return retrieve(document, id, false);
+	}
+	
+	@Override
+	public <T extends Bean> T retrieveAndLock(Document document, String id) {
+		return retrieve(document, id, true);
+	}
+	
 	@SuppressWarnings("unchecked")
-	public final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
+	private final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
 		T result = null;
 		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
@@ -1547,10 +1576,15 @@ t.printStackTrace();
 		BeanProvider.injectFields(loadedBean);
 
 		Customer customer = user.getCustomer();
+		Module module = customer.getModule(loadedBean.getBizModule());
+		Document document = module.getDocument(customer, loadedBean.getBizDocument());
+		
+		// check that embedded objects are empty and null them if they are
+		nullEmbeddedReferencesOnLoad(customer, module, document, loadedBean);
+		
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
 		if (! vetoed) {
-			Document document = customer.getModule(loadedBean.getBizModule()).getDocument(customer, loadedBean.getBizDocument());
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
@@ -1564,6 +1598,43 @@ t.printStackTrace();
 		loadedBean.originalValues().clear();
 	}
 
+	private static void nullEmbeddedReferencesOnLoad(Customer customer,
+														Module module,
+														Document document,
+														AbstractPersistentBean loadedBean) {
+		for (Attribute attribute : document.getAllAttributes()) {
+			if (attribute instanceof Association) {
+				Association association = (Association) attribute;
+				if (AssociationType.embedded.equals(association.getType())) {
+					String embeddedName = association.getName();
+					Bean embeddedBean = (Bean) BindUtil.get(loadedBean, embeddedName);
+					if (embeddedBean != null) {
+						Document embeddedDocument = module.getDocument(customer, association.getDocumentName());
+						boolean empty = true;
+						for (Attribute embeddedAttribute : embeddedDocument.getAllAttributes()) {
+							// ignore inverses since they are stored directly in the data store
+							if (! (embeddedAttribute instanceof Inverse)) {
+								Object value = BindUtil.get(embeddedBean, embeddedAttribute.getName());
+								if (value != null) {
+									if ((value instanceof List<?>) && ((List<?>) value).isEmpty()) {
+										continue;
+									}
+									empty = false;
+									break;
+								}
+							}
+						}
+						if (empty) {
+							BindUtil.set(loadedBean, embeddedName, null);
+							// clear the object's dirtiness read for interceptor and bizlet callbacks
+							loadedBean.originalValues().remove(embeddedName);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
@@ -1654,7 +1725,7 @@ t.printStackTrace();
 						}
 					}
 				}
-				if (AttributeType.content.equals(type)) {
+				if (AttributeType.content.equals(type) || AttributeType.image.equals(type)) {
 					if (oldState != null) { // an update
 						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
 							// Remove the attachment content
@@ -1692,11 +1763,17 @@ t.printStackTrace();
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@Override
 	@SuppressWarnings("synthetic-access")
-	public void preRemove(AbstractPersistentBean beanToDelete)
+	public void preRemove(AbstractPersistentBean bean)
 	throws Exception {
+		// Don't continue if we've already called preDelete on this bean 
+		// as it was the argument in a Persistence.delete() call
+		if (bean.equals(beanToDelete)) {
+			return;
+		}
+
 		final Customer customer = user.getCustomer();
-		Module module = customer.getModule(beanToDelete.getBizModule());
-		Document document = module.getDocument(customer, beanToDelete.getBizDocument());
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
 		
 		// Collect beans to be cascaded
 		new CascadeDeleteBeanVisitor() {
@@ -1724,19 +1801,19 @@ t.printStackTrace();
 					add(baseDocument, beanToCascade);
 				}
 			}
-		}.visit(document, beanToDelete, customer);
+		}.visit(document, bean, customer);
 		
 		try {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreDelete(beanToDelete);
+			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
 			if (! vetoed) {
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
-					bizlet.preDelete(beanToDelete);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					bizlet.preDelete(bean);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
 				}
-				internalCustomer.interceptAfterPreDelete(beanToDelete);
+				internalCustomer.interceptAfterPreDelete(bean);
 			}
 
 			Set<String> documentsVisited = new TreeSet<>();
@@ -1744,15 +1821,15 @@ t.printStackTrace();
 			// as they are going to be deleted by hibernate 
 			// as a collection.remove() was performed or an association was nulled.
 			checkReferentialIntegrityOnDelete(document,
-												beanToDelete,
+												bean,
 												documentsVisited,
 												beansToDelete,
 												true);
-			((PersistentBean) beanToDelete).setBizLock(new OptimisticLock(user.getName(), new Date()));
+			((PersistentBean) bean).setBizLock(new OptimisticLock(user.getName(), new Date()));
 		}
 		catch (ValidationException e) {
 			for (Message message : e.getMessages()) {
-				ValidationUtil.processMessageBindings(customer, message, beanToDelete, beanToDelete);
+				ValidationUtil.processMessageBindings(customer, message, bean, bean);
 			}
 			throw e;
 		}

@@ -33,9 +33,9 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -51,6 +51,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -152,15 +153,24 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitButton(Button button,
 										boolean parentVisible,
 										boolean parentEnabled);
-	public abstract void visitGeoLocator(GeoLocator locator,
-											boolean parentVisible,
-											boolean parentEnabled);
 	public abstract void visitGeometry(Geometry geometry,
 										boolean parentVisible,
 										boolean parentEnabled);
+	public abstract void visitedGeometry(Geometry geometry,
+											boolean parentVisible,
+											boolean parentEnabled);
+	public abstract void visitGeometryMap(GeometryMap geometry,
+											boolean parentVisible,
+											boolean parentEnabled);
+	public abstract void visitedGeometryMap(GeometryMap geometry,
+												boolean parentVisible,
+												boolean parentEnabled);
 	public abstract void visitMap(MapDisplay map,
 									boolean parentVisible,
 									boolean parentEnabled);
+	public abstract void visitChart(Chart chart,
+										boolean parentVisible,
+										boolean parentEnabled);
 	public abstract void visitDialogButton(DialogButton button,
 											boolean parentVisible,
 											boolean parentEnabled);
@@ -474,17 +484,24 @@ public abstract class ViewVisitor extends ActionVisitor {
 			Button button = (Button) widget;
 			visitButton(button, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof GeoLocator) {
-			GeoLocator locator = (GeoLocator) widget;
-			visitGeoLocator(locator, parentVisible, parentEnabled);
-		}
 		else if (widget instanceof Geometry) {
 			Geometry geometry = (Geometry) widget;
 			visitGeometry(geometry, parentVisible, parentEnabled);
+			visitFocusable(geometry, parentVisible, parentEnabled);
+			visitChangeable(geometry, parentVisible, parentEnabled);
+		}
+		else if (widget instanceof GeometryMap) {
+			GeometryMap geometry = (GeometryMap) widget;
+			visitGeometryMap(geometry, parentVisible, parentEnabled);
+			visitChangeable(geometry, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof MapDisplay) {
 			MapDisplay map = (MapDisplay) widget;
 			visitMap(map, parentVisible, parentEnabled);
+		}
+		else if (widget instanceof Chart) {
+			Chart chart = (Chart) widget;
+			visitChart(chart, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof DialogButton) {
 			DialogButton button = (DialogButton) widget;

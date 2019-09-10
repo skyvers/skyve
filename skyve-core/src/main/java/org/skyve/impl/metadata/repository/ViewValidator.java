@@ -38,6 +38,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -50,9 +51,9 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -67,6 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -94,13 +96,14 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -121,6 +124,28 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	private void validateBinding(String bindingPrefix,
+									String binding, 
+									boolean bindingRequired,
+									boolean compoundBindingInvalid, 
+									boolean domainValuesRequired,
+									boolean scalarBindingOnly,
+									String widgetIdentifier,
+									AttributeType... assertTypes) {
+		validateBinding(module,
+							document,
+							bindingPrefix,
+							binding,
+							bindingRequired,
+							compoundBindingInvalid,
+							domainValuesRequired,
+							scalarBindingOnly,
+							widgetIdentifier,
+							assertTypes);
+	}
+
+	private void validateBinding(Module contextModule,
+									Document contextDocument,
+									String bindingPrefix,
 									String binding, 
 									boolean bindingRequired,
 									boolean compoundBindingInvalid, 
@@ -149,14 +174,14 @@ class ViewValidator extends ViewVisitor {
 					testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
 				}
 
-				if (document.getConditionNames().contains(testConditionName)) {
+				if (contextDocument.getConditionNames().contains(testConditionName)) {
 					return;
 				}
 			}
 			
 			TargetMetaData target = null;
 			try {
-				target = BindUtil.getMetaDataForBinding(customer, module, document, bindingToTest);
+				target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
 			}
 			catch (MetaDataException e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
@@ -294,6 +319,17 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
+	private void validateNoColon(List<? extends Parameter> parameters, String widgetIdentifier) {
+		if (parameters != null) {
+			for (Parameter parameter : parameters) {
+				if (parameter.getName().indexOf(':') >= 0) {
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a parameter named " + parameter.getName() + 
+													" which contains a colon (:). Use a parameter to bind a value to a named parameter in a query");
+				}
+			}
+		}
+	}
+	
 	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
 		if (queryName != null) {
 			if (modelName != null) {
@@ -343,6 +379,22 @@ class ViewValidator extends ViewVisitor {
 			}
 			catch (Exception e) { // NB could be class cast problems
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid map model of " + modelName, e);
+			}
+		}
+	}
+
+	private void validateChartModelName(String modelName, String widgetIdentifier) {
+		if (modelName != null) {
+			try {
+				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
+				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
+				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
+				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				}
+			}
+			catch (Exception e) { // NB could be class cast problems
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid chart model of " + modelName, e);
 			}
 		}
 	}
@@ -535,7 +587,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							imageIdentifier,
-							AttributeType.content);
+							AttributeType.content,
+							AttributeType.image);
 		validateConditionName(image.getDisabledConditionName(), imageIdentifier);
 		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
 	}
@@ -554,7 +607,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							linkIdentifier,
-							AttributeType.content);
+							AttributeType.content,
+							AttributeType.image);
 		validateConditionName(link.getDisabledConditionName(), linkIdentifier);
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
 		validateParameterBindings(link.getParameters(), linkIdentifier);
@@ -677,77 +731,6 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		String locatorIdentifier = "A GeoLocator";
-		validateBinding(null,
-							locator.getAddressBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getCityBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getCountryBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getDescriptionBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateConditionName(locator.getDisabledConditionName(), locatorIdentifier);
-		validateConditionName(locator.getInvisibleConditionName(), locatorIdentifier);
-		validateBinding(null,
-							locator.getLatitudeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.decimal10);
-		validateBinding(null,
-							locator.getLongitudeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.decimal10);
-		validateBinding(null,
-							locator.getPostcodeBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-		validateBinding(null,
-							locator.getStateBinding(),
-							false,
-							false,
-							false,
-							true,
-							locatorIdentifier,
-							AttributeType.text);
-	}
-
-	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
 		validateBinding(null,
@@ -763,10 +746,148 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to validate
+	}
+	
+	@Override
+	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		String geometryIdentifier = "GeometryMap " + geometry.getBinding();
+		validateBinding(null,
+							geometry.getBinding(),
+							true,
+							false,
+							false,
+							true,
+							geometryIdentifier,
+							AttributeType.geometry);
+		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
+		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+	}
+
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// nothing to validate
+	}
+	
+	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();
 		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
+	}
+
+	@Override
+	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+		String modelName = chart.getModelName();
+		ChartBuilderMetaData model = chart.getModel();
+		String chartIdentifier = "Chart" + ((model == null) ? ((modelName == null) ? " with no model" : " with model named " + modelName) : " with model label " + model.getLabel());
+		if (((modelName == null) && (model == null)) ||
+				((modelName != null) && (model != null))) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " requires a modelName or a model but not both.");
+		}
+		validateConditionName(chart.getInvisibleConditionName(), chartIdentifier);
+		if (modelName != null) {
+			validateChartModelName(chart.getModelName(), chartIdentifier);
+		}
+		else {
+			validateChartModel(model, chartIdentifier);
+		}
+	}
+	
+	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
+		Module contextModule = null;
+		try {
+			contextModule = customer.getModule(model.getModuleName());
+		}
+		catch (Exception e) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
+		}
+		
+		Document contextDocument = null;
+		try {
+			contextDocument = contextModule.getDocument(customer, model.getDocumentName());
+		}
+		catch (Exception e) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid documentName of " + model.getDocumentName(), e);
+		}
+		
+		validateBinding(contextModule,
+							contextDocument,
+							null,
+							model.getCategoryBinding(),
+							true,
+							false,
+							false,
+							true,
+							chartIdentifier + " category binding",
+							AttributeType.bool,
+							AttributeType.colour,
+							AttributeType.date,
+							AttributeType.dateTime,
+							AttributeType.decimal2,
+							AttributeType.decimal5,
+							AttributeType.decimal10,
+							AttributeType.enumeration,
+							AttributeType.integer,
+							AttributeType.longInteger,
+							AttributeType.markup,
+							AttributeType.memo,
+							AttributeType.text,
+							AttributeType.time,
+							AttributeType.timestamp);
+
+		String valueBinding = model.getValueBinding();
+		validateBinding(contextModule,
+							contextDocument,
+							null,
+							valueBinding,
+							true,
+							false,
+							false,
+							true,
+							chartIdentifier + " value binding");
+
+		AggregateFunction function = model.getValueFunction();
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, valueBinding);
+		Attribute attribute = target.getAttribute();
+
+		// check for numeric value if no value function is defined
+		if (function == null) { // we need a number here
+			boolean invalidValueType = false;
+			if (attribute == null) { // implicit attribute
+				invalidValueType = true;
+			}
+			else {
+				AttributeType type = attribute.getAttributeType(); 
+				invalidValueType = (! Number.class.isAssignableFrom(type.getImplementingType()));
+			}
+			if (invalidValueType) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+												" has an invalid value binding of " + valueBinding + 
+												" to a non-numeric or implicit attribute");
+			}
+		}
+		// check that aggregate function can be numeric, otherwise must be count
+		else {
+			if (! AggregateFunction.Count.equals(function)) {
+				String invalidFunctionType = null;
+				if (attribute == null) { // implicit attribute
+					invalidFunctionType = "an implicit attribute";
+				}
+				else {
+					AttributeType type = attribute.getAttributeType(); 
+					if (! Number.class.isAssignableFrom(type.getImplementingType())) {
+						invalidFunctionType = "a non-numeric type of " + type;
+					}
+				}
+				if (invalidFunctionType != null) {
+					throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+													" has an invalid valueFunction of " + function + 
+													" for a value binding which is to " + invalidFunctionType);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -851,7 +972,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
 		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
+		validateParameterBindings(grid.getFilterParameters(), listGridIdentifier);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
+		validateNoColon(grid.getFilterParameters(), listGridIdentifier);
+		validateNoColon(grid.getParameters(), listGridIdentifier);
 		validateQueryOrModel(queryName, modelName, listGridIdentifier);
 	}
 
@@ -862,7 +986,10 @@ class ViewValidator extends ViewVisitor {
 		String listRepeaterIdentifier = "ListRepeater " + ((modelName != null) ? modelName : queryName);
 		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
 		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
+		validateParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
+		validateNoColon(repeater.getFilterParameters(), listRepeaterIdentifier);
+		validateNoColon(repeater.getParameters(), listRepeaterIdentifier);
 		validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 	}
 
@@ -880,7 +1007,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
+		validateParameterBindings(grid.getFilterParameters(), treeGridIdentifier);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
+		validateNoColon(grid.getFilterParameters(), treeGridIdentifier);
+		validateNoColon(grid.getParameters(), treeGridIdentifier);
 		validateQueryOrModel(queryName, modelName, treeGridIdentifier);
 	}
 
@@ -946,7 +1076,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
+		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
+		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColon(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 	}
 
@@ -986,7 +1119,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
+		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
+		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColon(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used

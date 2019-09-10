@@ -9,6 +9,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 	@Override
@@ -33,6 +34,7 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 										String modelName,
 										ListModel<? extends Bean> model,
 										List<FilterParameter> filterParameters,
+										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {

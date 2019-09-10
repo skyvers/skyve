@@ -480,7 +480,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		boolean persistentDocument = (persistent != null) && (persistent.getName() != null);
 	    		// if document is persistent, try to retrieve the instance
 	    		if (persistentDocument) {
-	    			processBean = persistence.retrieve(processDocument, bizId, false);
+	    			processBean = persistence.retrieve(processDocument, bizId);
 	    		}
 	    		// if we have no process bean, this mean it aint persisted yet, its a zoomOut
 	    		// We're at the top level, so just let the process bean be the contextBean
@@ -776,8 +776,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
 																										attribute.getName());
 		    					Bean parameterBean = persistence.retrieve(referenceDocument, 
-																			(String) parameterValue, 
-																			false);
+																			(String) parameterValue);
 		    					// NB parameterBean can be null if it wasn't found in the retrieve above
 		    					if (parameterBean != null) {
 			    					if (! user.canReadBean(parameterBean.getBizId(), 
@@ -1048,8 +1047,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
 		persistence.evictAllCached();
 		PersistentBean persistentBeanToDelete = persistence.retrieve(processDocument, 
-																		beanToDelete.getBizId(), 
-																		false);
+																		beanToDelete.getBizId());
 
 		if (persistentBeanToDelete == null) { // deleted by another user
 			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));

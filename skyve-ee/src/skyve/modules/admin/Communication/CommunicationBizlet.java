@@ -137,10 +137,10 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
 
 			StringBuilder sb = new StringBuilder(64);
-			sb.append(document.getAttribute(Communication.systemPropertyName).getDisplayName());
+			sb.append(document.getAttribute(Communication.systemUsePropertyName).getDisplayName());
 			sb.append(' ').append(document.getPluralAlias());
 			sb.append(" may not be deleted unless ");
-			sb.append(document.getAttribute(Communication.systemPropertyName).getDisplayName());
+			sb.append(document.getAttribute(Communication.systemUsePropertyName).getDisplayName());
 			sb.append(" is set to FALSE.");
 
 			throw new ValidationException(new Message(sb.toString()));

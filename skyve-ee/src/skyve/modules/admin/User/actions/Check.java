@@ -63,7 +63,7 @@ public class Check implements ServerSideAction<UserExtension> {
 				for (SearchResult nameMatch : nameMatches.getResults()) {
 					String bizId = nameMatch.getBizId();
 					if (bizId != null) { // this is data, not content
-						Contact contact = persistence.retrieve(contactDocument, bizId, false);
+						Contact contact = persistence.retrieve(contactDocument, bizId);
 						if ((contact != null) && ContactType.person.equals(contact.getContactType())) {
 							distinctContacts.put(contact, Integer.valueOf(nameMatch.getScore() / 100));
 						}

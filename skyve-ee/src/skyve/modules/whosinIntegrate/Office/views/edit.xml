@@ -41,15 +41,15 @@
 		        </row>
 		        <row>
 		            <item>
-		                <geometry binding="boundary" disabled="notManager"/>
+		                <geometry binding="boundary" disabled="notManager" type="polygon" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</geometry>		                
 		            </item>
 		        </row>
 		    </form>
-		    <hbox>
-		    </hbox>
 		</vbox>
 	    <vbox border="true" borderTitle="Map">
-			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" />
+			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true"/>
 	    </vbox>
 	</hbox>
     <inject>

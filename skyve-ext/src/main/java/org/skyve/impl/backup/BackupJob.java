@@ -249,7 +249,8 @@ public class BackupJob extends CancellableJob {
 																value = new Long(longValue);
 															}
 														}
-														else if (AttributeType.content.equals(attributeType)) {
+														else if (AttributeType.content.equals(attributeType) ||
+																	AttributeType.image.equals(attributeType)) {
 															String stringValue = resultSet.getString(name);
 															if (resultSet.wasNull()) {
 																value = "";

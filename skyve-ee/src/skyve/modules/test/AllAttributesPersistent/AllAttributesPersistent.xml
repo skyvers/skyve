@@ -21,6 +21,10 @@
 			<displayName>Composed Association</displayName>
 			<documentName>AllAttributesPersistent</documentName>
 		</association>
+		<association name="embeddedAssociation" type="embedded" embeddedColumnsPrefix="embedded">
+			<displayName>Embedded Association</displayName>
+			<documentName>AllAttributesEmbedded</documentName>
+		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 		</boolean>

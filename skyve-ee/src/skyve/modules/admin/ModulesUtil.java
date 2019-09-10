@@ -552,8 +552,7 @@ public class ModulesUtil {
 			Persistence p = CORE.getPersistence();
 			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
 									modules.admin.domain.User.DOCUMENT_NAME,
-									p.getUser().getId(),
-									false);
+									p.getUser().getId());
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
@@ -571,7 +570,7 @@ public class ModulesUtil {
 		UserProxy result = null;
 		try {
 			Persistence p = CORE.getPersistence();
-			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId(), false);
+			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			// do nothing
@@ -587,7 +586,7 @@ public class ModulesUtil {
 		Module module = customer.getModule(Contact.MODULE_NAME);
 		Document document = module.getDocument(customer, Contact.DOCUMENT_NAME);
 
-		Contact contact = persistence.retrieve(document, user.getContactId(), false);
+		Contact contact = persistence.retrieve(document, user.getContactId());
 
 		return contact;
 	}
@@ -678,9 +677,7 @@ public class ModulesUtil {
 			} else {
 				// System.out.println("DOCUMENT NUMBER: Previous found");
 				dN = num.get(0);
-				dN = pers.retrieve(document, dN.getBizId(), true); // issue a
-																	// row-level
-																	// lock
+				dN = pers.retrieveAndLock(document, dN.getBizId()); // issue a row-level lock
 				lastNumber = dN.getDocumentNumber();
 			}
 			// just update from the document Number

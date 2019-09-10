@@ -11,9 +11,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class Integer extends ConvertableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 884934642737849696L;
 
 	private IntegerValidator validator;

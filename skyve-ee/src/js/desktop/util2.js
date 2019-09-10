@@ -11,44 +11,37 @@ isc.RPCManager.handleError = function (response, request) {
 		isc.warn(response.data);
 		return false;
 	}
-	else {
-		return this.Super("handleError", arguments);
-	}
+
+	return this.Super("handleError", arguments);
 };
 Date.setShortDisplayFormat("toEuropeanShortDate");
 Date.setNormalDisplayFormat("toEuropeanShortDate");
 Date.setInputFormat("DMY");
 
-// Fix DnD for list grids
 isc.ListGrid.addProperties({
-	recordDrop: function (dropRecords, targetRecord, index, sourceWidget) {
-		if (this.getID() == sourceWidget.getID()) {
-			var dupdata = this.data.slice();
-			dupdata.slideList(dropRecords, index);
-			this.setData(dupdata);
-			this.markForRedraw();
-		}
-		else {
-			this.transferRecords(dropRecords, targetRecord, this.canReorderRecords ? index: null, sourceWidget);  
-		}  
-		
-		if (this.recordsDropped) {
-			this.recordsDropped(dropRecords, index, this, sourceWidget);
-		}
-		
-		return false;    
-	},
-	
 	getFilterEditorType: function(field) {
 	    // Simple case: support explicit filterEditorType on the field
 	    if (field.filterEditorType != null) return field.filterEditorType;
 
-	    // TODO: reimplement this once RecordEditor correctly returns AdvancedCriteria
-//	    if (isc.SimpleType.inheritsFrom(field.type, "date") && this.getDataSource() && 
-//	        this.getDataSource().supportsAdvancedCriteria()) 
+	    // TODO: re-implement this once RecordEditor correctly returns AdvancedCriteria
+	    var ds = this.getDataSource();
+//	    if (isc.SimpleType.inheritsFrom(field.type, "date") &&  ds &&
+//	        ds.supportsAdvancedCriteria())
 //	    {
 //	        return "MiniDateRangeItem";
 //	    }
+
+	    var type = field.type;
+	    var isFileType = (type == this._$binary || type == this._$file ||
+	                        type == this._$imageFile);
+
+	    if (isFileType && field.editorType == null) {
+	        if (field.filenameSuppressed || ds && ds.getFilenameField && ds.getFilenameField(field.name) == null) {
+	            return "StaticTextItem";
+	        } else {
+	            return "TextItem";
+	        }
+	    }
 
 	    // filter editor config is basically picked up from field defaults and explicit
 	    // field.filterEditorProperties.
@@ -58,14 +51,14 @@ isc.ListGrid.addProperties({
 	    // Otherwise generate the editor type based on data type in the normal way
 	    // A couple of exceptions:
 	    // - override canEdit with canFilter, so we don't get a staticTextItem in the field
-	    
+
 	    // - clear out field.length: we don't want to show the long editor type (text area) in our
 	    //   filter editor
 	    var filterEditorConfig = isc.addProperties ({}, field,
 	                                                 {canEdit:field.canFilter !== false,
 	                                                  length:null});
-	    
-	    // the _constructor property can come from XML -> JS conversion, and matches the 
+
+	    // the _constructor property can come from XML -> JS conversion, and matches the
 	    // XML tag name for the field element.
 	    // Don't attempt to use this to determine DynamicForm editor type - it's likely to be
 	    // ListGridField or similar which shouldn't effect the generated form item type.
@@ -74,6 +67,19 @@ isc.ListGrid.addProperties({
 	    isc.addProperties(filterEditorConfig, field.filterEditorProperties);
 	    var type = isc.DynamicForm.getEditorType(filterEditorConfig, this);
 	    return type;
+	}
+});
+
+// isc.ResultSet._willFetchData() doesn't cater for SearchOperator.requiresServer = true.
+// So for spatial operators, I will force a fetch.
+isc.ResultSet.addMethods({
+	skyveSetCriteria: isc.ResultSet.getPrototype().setCriteria,
+	setCriteria: function(newCriteria) {
+		var result = this.skyveSetCriteria(newCriteria);
+		if (newCriteria && JSON.stringify(newCriteria).match(/"operator"\s*:\s*"geo/)) {
+			this.invalidateCache();
+		}
+		return result;
 	}
 });
 
@@ -90,11 +96,11 @@ isc.Page.setEvent('resize', function() {
 });
 
 // register new search operator types for spatial queries
-isc.DataSource.addSearchOperator({ID:'gEquals',
+isc.DataSource.addSearchOperator({ID:'geoEquals',
 	title: 'Equals',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -102,11 +108,11 @@ isc.DataSource.addSearchOperator({ID:'gEquals',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gDisjoint',
+isc.DataSource.addSearchOperator({ID:'geoDisjoint',
 	title: 'Disjoint',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -114,11 +120,11 @@ isc.DataSource.addSearchOperator({ID:'gDisjoint',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gIntersects',
+isc.DataSource.addSearchOperator({ID:'geoIntersects',
 	title: 'Intersects',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -126,19 +132,22 @@ isc.DataSource.addSearchOperator({ID:'gIntersects',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gTouches',
+isc.DataSource.addSearchOperator({ID:'geoTouches',
 	title: 'Touches',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
+	condition: function(value, record, fieldName, criterion, operator) {
+		return true;
+	},
 	compareCriteria: function(newCriterion, oldCriterion) {
 		return -1;
 	}});
-isc.DataSource.addSearchOperator({ID:'gCrosses',
+isc.DataSource.addSearchOperator({ID:'geoCrosses',
 	title: 'Crosses',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -146,20 +155,23 @@ isc.DataSource.addSearchOperator({ID:'gCrosses',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gWithin',
+isc.DataSource.addSearchOperator({ID:'geoWithin',
 	title: 'Within',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
+	condition: function(value, record, fieldName, criterion, operator) {
+		return true;
+	},
 	compareCriteria: function(newCriterion, oldCriterion) {
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gContains',
+isc.DataSource.addSearchOperator({ID:'geoContains',
 	title: 'Contains',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -167,11 +179,11 @@ isc.DataSource.addSearchOperator({ID:'gContains',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator({ID:'gOverlaps',
+isc.DataSource.addSearchOperator({ID:'geoOverlaps',
 	title: 'Overlaps',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
-	requiresServer: false,
+	requiresServer: true,
 	condition: function(value, record, fieldName, criterion, operator) {
 		return true;
 	},
@@ -179,8 +191,6 @@ isc.DataSource.addSearchOperator({ID:'gOverlaps',
 		return -1;
 	}
 });
-isc.DataSource.addSearchOperator('isNull', ['geometry']);
-isc.DataSource.addSearchOperator('notNull', ['geometry']);
 
 // TODO Leave as modals for now and see how error tightening on server goes
 //isc.RPCManager.promptStyle = "cursor";
@@ -197,6 +207,8 @@ isc.BizUtil.addClassProperties({
 	// Data source for the "previous values" mechanism on text fields.
 	PREVIOUS_VALUES_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
+		jsonPrefix: '',
+		jsonSuffix: '',
 		dataURL: "smartprev",
 		fields: [{name: 'value', type: 'text'}]
 	})
@@ -251,16 +263,16 @@ isc.BizUtil.addClassMethods({
 		return result;
 	},
 	
-	// returns an IButton
+	// returns an ToolStripButton
 	createImageButton: function(icon, // src relative to isomorphic directory - use ../images/ etc
 								hasDisabledIcon, // true to look for disabled icon ie icon_Disabled
 								tooltip, // the tooltip to add to the button
 								click) { // function to call when clicked
-		return isc.IButton.create({
-			width: 24,
+		return isc.ToolStripButton.create({
 			icon: icon,
 			iconAlign: "center",
 			showDisabledIcon: hasDisabledIcon,
+			showDownIcon: false,
 			canHover: true,
 			getHoverHTML: function() {return tooltip;},
 			click: click
@@ -277,11 +289,11 @@ isc.BizUtil.addClassMethods({
 									splitTarget, // a canvas sent to checkIf() and enableIf() within the splitItems
 									splitItems) { // array of MenuItem defns including the click functions
 		return isc.HLayout.create({
-			height: 22,
+			align: 'right',
+			height: 1,
 			membersMargin: 1,
 			members:[
 				isc.IButton.create({
-					height: 22,
 					autoFit: true,
 					title: buttonTitle,
 					icon: buttonIcon,
@@ -291,8 +303,8 @@ isc.BizUtil.addClassMethods({
 					click: buttonClick
 				}),
 				isc.MenuButton.create({
-					title: '',
-					width: 23,
+					title: null,
+					width: 26,
 					alignMenuLeft: false,
 					canHover: true,
 					getHoverHTML: function() {return splitTooltip;},
@@ -308,7 +320,8 @@ isc.BizUtil.addClassMethods({
 		});
 	},
 	
-	createUploadButton: function(contentFormItem) { // the item this upload button will live in
+	createUploadButton: function(contentFormItem, // the item this upload button will live in
+									image) { // whether this is a contentImage or a contentLink
 		return isc.BizUtil.createSplitButton(
 			'Upload', 
 			null, 
@@ -316,13 +329,13 @@ isc.BizUtil.addClassMethods({
 			'Upload content', 
 			function() {
 				var instance = contentFormItem.form._view.gather(false);
-				var url = 'contentUpload.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
+				var url = (image ? 'image' : 'content') + 'Upload.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
 							'&_c=' + instance._c;
 				if (contentFormItem.form._view._b) {
 					url += '&_b=' + contentFormItem.form._view._b.replaceAll('_', '.');
 				}
 				isc.WindowStack.popup(null,
-										"Upload Content",
+										image ? 'Upload Image' : 'Upload Content',
 										true,
 										[isc.HTMLPane.create({
 											contentsType: 'page',
@@ -337,70 +350,6 @@ isc.BizUtil.addClassMethods({
 				click: function(event) {
 					contentFormItem.setValue(null);
 				}}]);
-	},
-	
-	createGeoLocator: function(editView,
-								latitudeBinding, 
-								longitudeBinding,
-								descriptionBinding,
-								addressBinding,
-								cityBinding,
-								stateBinding,
-								postcodeBinding,
-								countryBinding) {
-		return isc.IButton.create({
-			height: 22,
-			autoFit: true,
-			title: "Map",
-			canHover: true,
-			getHoverHTML: function() {return "Select or search for a map location";},
-			click: function() {
-				var instance = editView.gather(false);
-				var url = SKYVE.Util.CONTEXT_URL;
-				url += 'pages/map/geolocate.jsp?';
-				if (latitudeBinding) {
-					var latitudeValue = instance[latitudeBinding];
-					url += '_latitude=' + latitudeBinding + '&' + latitudeBinding + '=' + (latitudeValue ? latitudeValue : '') + '&';
-				}
-				if (longitudeBinding) {
-					var longitudeValue = instance[longitudeBinding];
-					url += '_longitude=' + longitudeBinding + '&' + longitudeBinding + '=' + (longitudeValue ? longitudeValue : '') + '&';
-				}
-				if (descriptionBinding) {
-					var descriptionValue = instance[descriptionBinding];
-					url += '_description=' + descriptionBinding + '&' + descriptionBinding + '=' + (descriptionValue ? descriptionValue : '') + '&';
-				}
-				if (addressBinding) {
-					var addressValue = instance[addressBinding];
-					url += '_address=' + addressBinding + '&' + addressBinding + '=' + (addressValue ? addressValue : '') + '&';
-				}
-				if (cityBinding) {
-					var cityValue = instance[cityBinding];
-					url += '_city=' + cityBinding + '&' + cityBinding + '=' + (cityValue ? cityValue : '') + '&';
-				}
-				if (stateBinding) {
-					var stateValue = instance[stateBinding];
-					url += '_state=' + stateBinding + '&' + stateBinding + '=' + (stateValue ? stateValue : '') + '&';
-				}
-				if (postcodeBinding) {
-					var postcodeValue = instance[postcodeBinding];
-					url += '_postcode=' + postcodeBinding + '&' + postcodeBinding + '=' + (postcodeValue ? postcodeValue : '') + '&';
-				}
-				if (countryBinding) {
-					var countryValue = instance[countryBinding];
-					url += '_country=' + countryBinding + '&' + countryBinding + '=' + (countryValue ? countryValue : '') + '&';
-				}
-				
-				isc.WindowStack.popup(null,
-										"Geo Locate",
-										true,
-										[isc.HTMLPane.create({
-											contentsType: 'page',
-											contents: 'Loading Page...',
-											contentsURL: url
-										})]);
-			}
-		});
 	},
 	
 	// returns an edit view

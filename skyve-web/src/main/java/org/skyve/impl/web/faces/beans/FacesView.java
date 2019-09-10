@@ -18,10 +18,13 @@ import javax.faces.model.SelectItem;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -30,6 +33,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
+import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
@@ -53,6 +57,7 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 
 @ViewScoped
@@ -384,18 +389,34 @@ public class FacesView<T extends Bean> extends Harness {
 		if (result == null) {
 			// Collect the filter parameters from the criteria sent
 			List<FilterParameter> filterParameters = null;
+			List<Parameter> parameters = null;
 			if (filterCriteria != null) {
 				filterParameters = new ArrayList<>(filterCriteria.size());
+				parameters = new ArrayList<>(filterCriteria.size());
 				for (List<String> filterCriterium : filterCriteria) {
-					FilterParameterImpl param = new FilterParameterImpl();
-					param.setName(filterCriterium.get(0));
-					param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
-					param.setValue(filterCriterium.get(2));
-					filterParameters.add(param);
+					if (filterCriterium.size() == 3) {
+						FilterParameterImpl param = new FilterParameterImpl();
+						param.setName(filterCriterium.get(0));
+						param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
+						param.setValue(filterCriterium.get(2));
+						filterParameters.add(param);
+					}
+					else {
+						ParameterImpl param = new ParameterImpl();
+						param.setName(filterCriterium.get(0));
+						param.setValue(filterCriterium.get(1));
+						parameters.add(param);
+					}
 				}
 			}
 			
-			result = new SkyveLazyDataModel(this, moduleName, documentName, queryName, modelName, filterParameters);
+			result = new SkyveLazyDataModel(this,
+												moduleName,
+												documentName,
+												queryName,
+												modelName,
+												filterParameters,
+												parameters);
 			lazyDataModels.put(key, result);
 		}
  		
@@ -407,7 +428,8 @@ public class FacesView<T extends Bean> extends Harness {
  												final String bizDocument,
 												final String queryName,
 												@SuppressWarnings("hiding") final String modelName,
-												final List<FilterParameter> parameters) {
+												final List<FilterParameter> filterParameters,
+												final List<Parameter> parameters) {
  		List<BeanMapAdapter<Bean>> result = null;
  		
  		// these are ultimately web parameters that may not be present in the request
@@ -416,8 +438,8 @@ public class FacesView<T extends Bean> extends Harness {
  		}
  		else {
 	 		StringBuilder key = new StringBuilder(64).append(bizModule).append('.').append(queryName);
-	 		if (parameters != null) {
-	 			for (FilterParameter parameter : parameters) {
+	 		if (filterParameters != null) {
+	 			for (FilterParameter parameter : filterParameters) {
 	 				String valueOrBinding = parameter.getValue();
 	 				if (valueOrBinding == null) {
 	 					valueOrBinding = parameter.getBinding();
@@ -425,10 +447,19 @@ public class FacesView<T extends Bean> extends Harness {
 	 				key.append('.').append(parameter.getName()).append(parameter.getOperator()).append(valueOrBinding);
 	 			}
 	 		}
+	 		if (parameters != null) {
+	 			for (Parameter parameter : parameters) {
+	 				String valueOrBinding = parameter.getValue();
+	 				if (valueOrBinding == null) {
+	 					valueOrBinding = parameter.getBinding();
+	 				}
+	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
+	 			}
+	 		}
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, parameters).execute();
+				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, filterParameters, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -452,10 +483,10 @@ public class FacesView<T extends Bean> extends Harness {
 		action(actionName, null, null);
 	}
 
-	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
-	public String getContentUploadUrl(String sanitisedBinding) {
+	// /skyve/{content/image}Upload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
+	public String getContentUploadUrl(String sanitisedBinding, boolean image) {
 		StringBuilder result = new StringBuilder(128);
-		result.append(Util.getSkyveContextUrl()).append("/contentUpload.xhtml?");
+		result.append(Util.getSkyveContextUrl()).append(image ? "/image" : "/content").append("Upload.xhtml?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
 		if (viewBinding != null) {
@@ -551,14 +582,14 @@ public class FacesView<T extends Bean> extends Harness {
 
 		// Take a defensive copy of the parameters collection and add the query to the description binding
 		@SuppressWarnings("unchecked")
-		List<FilterParameter> parameters = (List<FilterParameter>) attributes.get("parameters");
-		if (parameters == null) {
-			parameters = new ArrayList<>();
+		List<FilterParameter> filterParameters = (List<FilterParameter>) attributes.get("filterParameters");
+		if (filterParameters == null) {
+			filterParameters = new ArrayList<>();
 		}
 		else {
-			parameters = new ArrayList<>(parameters);
+			filterParameters = new ArrayList<>(filterParameters);
 		}
-		
+
 		// Add the query parameter if its defined
 		String parameterValue = Util.processStringValue(query);
 		if (parameterValue != null) {
@@ -566,11 +597,14 @@ public class FacesView<T extends Bean> extends Harness {
 			displayParameter.setName(displayBinding);
 			displayParameter.setOperator(FilterOperator.like);
 			displayParameter.setValue(parameterValue);
-			parameters.add(displayParameter);
+			filterParameters.add(displayParameter);
 		}
-		
+
+		@SuppressWarnings("unchecked")
+		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
+
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
-		return getBeans(completeModule, completeDocument, completeQuery, completeModel, parameters);
+		return getBeans(completeModule, completeDocument, completeQuery, completeModel, filterParameters, parameters);
 	}
  	
  	/**
@@ -580,22 +614,58 @@ public class FacesView<T extends Bean> extends Harness {
 								String moduleName,
 								String queryName,
 								String geometryBinding,
-								String mapModelName) {
+								String mapModelName,
+								String loading,
+								Integer refreshTimeInSeconds,
+								Boolean showRefresh,
+								String geometryInputTypeString,
+								boolean disabled,
+								boolean includeScriptTag) {
 		StringBuilder result = new StringBuilder(512);
 
-		result.append("<script type=\"text/javascript\">SKYVE.PF.gmap({elementId:'").append(elementId);
-		if (modelName != null) {
-			result.append("',_c:'").append(getWebContext().getWebId());
+		if (includeScriptTag) {
+			result.append("<script type=\"text/javascript\">");
+		}
+		result.append("SKYVE.PF.");
+		result.append(UtilImpl.MAP_TYPE);
+		result.append("({elementId:'").append(elementId);
+		if (mapModelName != null) {
+			result.append("',refreshTime:").append((refreshTimeInSeconds == null) ? 0 : refreshTimeInSeconds.intValue());
+			result.append(",showRefresh:").append(Boolean.TRUE.equals(showRefresh));
+			result.append(",_c:'").append(getWebContext().getWebId());
+			Bean bean = getCurrentBean().getBean();
+			result.append("',moduleName:'").append(bean.getBizModule());
+			result.append("',documentName:'").append(bean.getBizDocument());
 			result.append("',modelName:'").append(mapModelName);
 		}
 		else {
-			result.append("',moduleName:'").append(moduleName);
-			result.append("',queryName:'").append(queryName);
+			if ((moduleName != null) && (queryName != null)) {
+				result.append("',moduleName:'").append(moduleName);
+				result.append("',queryName:'").append(queryName);
+			}
 			result.append("',geometryBinding:'").append(geometryBinding);
+			if (geometryInputTypeString != null) {
+				result.append("',drawingTools:'").append(geometryInputTypeString);
+			}
 		}
-		result.append("'})</script>");
+		result.append("',loading:'").append(loading);
+		result.append("',disabled:").append(disabled).append("})");
+		if (includeScriptTag) {
+			result.append("</script>");
+		}
 		
 		return result.toString();
+	}
+	
+	/**
+	 * Creates a PF ChartModel for a Skyve ChartModel.
+	 */
+	public ChartModel getChartModel() {
+		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
+		Map<String, Object> attributes = currentComponent.getAttributes();
+		ChartType type = (ChartType) attributes.get("skyveType");
+		Object model = attributes.get("skyveModel");
+		return new ChartAction<>(this, model, type).execute();
 	}
  	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()

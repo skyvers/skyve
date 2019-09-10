@@ -95,7 +95,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 				AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) p.getClass().newInstance();
 				try {
 					tempP.setUser(p.getUser());
-					PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), false);
+					PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 					// oldBean can be null when the bean was inserted and updated within this transaction but not yet committed
 					// ie tempP can't see the bean yet on another DB connection
 					if (oldBean == null) {

@@ -130,6 +130,15 @@
 		<memo name="documentActionResults" persistent="false" trackChanges="false">
 			<displayName>Request</displayName>
 		</memo>
+		<enum name="evictOption" persistent="false" trackChanges="false" audited="false" documentRef="DataMaintenance" attributeRef="evictOption">
+			<displayName>Cache Evict</displayName>
+			<description><![CDATA[
+				<p>Whether to evict each bean after processing.</p>
+				<p>Evicting beans will free memory for large data jobs, however there may be impacts
+				if the action (processing) selected affects items that other beans may reference.</p>
+				]]></description>
+			<defaultValue>bean</defaultValue>
+		</enum>		
 	</attributes>
 	<conditions>
 		<condition name="actionSet">

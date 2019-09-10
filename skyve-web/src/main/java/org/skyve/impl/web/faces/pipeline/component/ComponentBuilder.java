@@ -24,8 +24,10 @@ import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
@@ -34,6 +36,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -55,10 +59,30 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
 
+	public static class EventSourceComponent {
+		private UIComponent component;
+		private UIComponentBase eventSource;
+		
+		public EventSourceComponent(UIComponent component, UIComponentBase eventSource) {
+			super();
+			this.component = component;
+			this.eventSource = eventSource;
+		}
+
+		public UIComponent getComponent() {
+			return component;
+		}
+
+		public UIComponentBase getEventSource() {
+			return eventSource;
+		}
+	}
+	
 	/**
 	 * Used to create a visible/invisible panel for a view based to switch between create and edit views.
 	 * @param invisibleConditionName
@@ -211,39 +235,56 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String modelName,
 												ListModel<? extends Bean> model, 
 												List<FilterParameter> filterParameters,
+												List<Parameter> parameters,
 												String title,
 												boolean showColumnHeaders,
 												boolean showGrid);
 
 	public abstract UIComponent map(UIComponent component, 
+										MapDisplay map,
 										String moduleName,
 										String queryName,
 										String geometryBinding);
 
-	public abstract UIComponent map(UIComponent component, String modelName);
+	public abstract UIComponent map(UIComponent component, MapDisplay map, String modelName);
 	
-	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
-	
-	public abstract UIComponent checkBox(UIComponent component, 
-											String dataWidgetVar, 
-											CheckBox checkBox, 
-											String formDisabledConditionName,
-											String title, 
-											boolean required);
+	public abstract EventSourceComponent geometry(EventSourceComponent component, 
+													String dataWidgetVar, 
+													Geometry geometry, 
+													String formDisabledConditionName,
+													String title, 
+													boolean required);
 
-	public abstract UIComponent colourPicker(UIComponent component, 
+	public abstract EventSourceComponent geometryMap(EventSourceComponent component, 
+														GeometryMap geometry, 
+														String formDisabledConditionName,
+														String title, 
+														boolean required);
+
+	public abstract UIComponent chart(UIComponent component, Chart chart);
+
+	public abstract EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership);
+	
+	public abstract EventSourceComponent checkBox(EventSourceComponent component, 
+													String dataWidgetVar, 
+													CheckBox checkBox, 
+													String formDisabledConditionName,
+													String title, 
+													boolean required);
+
+	public abstract EventSourceComponent colourPicker(EventSourceComponent component, 
+														String dataWidgetVar, 
+														ColourPicker colour, 
+														String formDisabledConditionName,
+														String title, 
+														boolean required);
+	
+	public abstract EventSourceComponent combo(EventSourceComponent component, 
 												String dataWidgetVar, 
-												ColourPicker colour, 
+												Combo combo, 
 												String formDisabledConditionName,
 												String title, 
 												boolean required);
-	
-	public abstract UIComponent combo(UIComponent component, 
-										String dataWidgetVar, 
-										Combo combo, 
-										String formDisabledConditionName,
-										String title, 
-										boolean required);
 
 	public abstract UIComponent contentImage(UIComponent component, 
 												String dataWidgetVar, 
@@ -266,61 +307,61 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String title, 
 										boolean required);
 
-	public abstract UIComponent lookupDescription(UIComponent component, 
+	public abstract EventSourceComponent lookupDescription(EventSourceComponent component, 
+															String dataWidgetVar,
+															LookupDescription lookup,
+															String formDisabledConditionName,
+															String title,
+															boolean required,
+															String displayBinding,
+															QueryDefinition query);
+	
+	public abstract EventSourceComponent password(EventSourceComponent component, 
 													String dataWidgetVar,
-													LookupDescription lookup,
+													Password password,
+													String formDisabledConditionName,
+													String title,
+													boolean required);
+
+	public abstract EventSourceComponent radio(EventSourceComponent component, 
+												String dataWidgetVar,
+												Radio radio,
+												String formDisabledConditionName,
+												String title,
+												boolean required);
+	
+	public abstract EventSourceComponent richText(EventSourceComponent component, 
+													String dataWidgetVar,
+													RichText text,
+													String formDisabledConditionName,
+													String title,
+													boolean required);
+	
+	public abstract EventSourceComponent spinner(EventSourceComponent component, 
+													String dataWidgetVar,
+													Spinner spinner,
+													String formDisabledConditionName,
+													String title,
+													boolean required);
+	
+	public abstract EventSourceComponent text(EventSourceComponent component, 
+												String dataWidgetVar, 
+												TextField text, 
+												String formDisabledConditionName,
+												String title, 
+												boolean required,
+												Integer length,
+												Converter<?> converter,
+												Format<?> format,
+												javax.faces.convert.Converter facesConverter);
+
+	public abstract EventSourceComponent textArea(EventSourceComponent component, 
+													String dataWidgetVar,
+													TextArea text,
 													String formDisabledConditionName,
 													String title,
 													boolean required,
-													String displayBinding,
-													QueryDefinition query);
-	
-	public abstract UIComponent password(UIComponent component, 
-											String dataWidgetVar,
-											Password password,
-											String formDisabledConditionName,
-											String title,
-											boolean required);
-
-	public abstract UIComponent radio(UIComponent component, 
-										String dataWidgetVar,
-										Radio radio,
-										String formDisabledConditionName,
-										String title,
-										boolean required);
-	
-	public abstract UIComponent richText(UIComponent component, 
-											String dataWidgetVar,
-											RichText text,
-											String formDisabledConditionName,
-											String title,
-											boolean required);
-	
-	public abstract UIComponent spinner(UIComponent component, 
-											String dataWidgetVar,
-											Spinner spinner,
-											String formDisabledConditionName,
-											String title,
-											boolean required);
-	
-	public abstract UIComponent text(UIComponent component, 
-										String dataWidgetVar, 
-										TextField text, 
-										String formDisabledConditionName,
-										String title, 
-										boolean required,
-										Integer length,
-										Converter<?> converter,
-										Format<?> format,
-										javax.faces.convert.Converter facesConverter);
-
-	public abstract UIComponent textArea(UIComponent component, 
-											String dataWidgetVar,
-											TextArea text,
-											String formDisabledConditionName,
-											String title,
-											boolean required,
-											Integer length);
+													Integer length);
 	
 	public HtmlOutputLink outputLink(String dataWidgetVar, 
 										String value, 

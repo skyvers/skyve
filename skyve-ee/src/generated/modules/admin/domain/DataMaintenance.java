@@ -427,6 +427,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Cache Evict
+	 * <br/>
+	 * <p>Whether to evict each bean after processing.</p>
+				<p>Evicting beans will free memory for large data jobs, however there may be impacts
+				if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	@XmlEnum
 	public static enum EvictOption implements Enumeration {
@@ -621,6 +625,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private RefreshOption refreshOption;
 	/**
 	 * Cache Evict
+	 * <br/>
+	 * <p>Whether to evict each bean after processing.</p>
+				<p>Evicting beans will free memory for large data jobs, however there may be impacts
+				if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
 

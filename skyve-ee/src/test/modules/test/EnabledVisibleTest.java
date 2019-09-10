@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -62,14 +61,6 @@ public class EnabledVisibleTest {
 		testEnabled(form);
 	}
 	
-	@Test
-	@SuppressWarnings("static-method")
-	public void testGeoLocator() throws Exception {
-		GeoLocator loc = new GeoLocator();
-		testVisible(loc);
-		testEnabled(loc);
-	}
-
 	@Test
 	@SuppressWarnings("static-method")
 	public void testHBox() throws Exception {

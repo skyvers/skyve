@@ -27,7 +27,6 @@ import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
@@ -67,9 +66,10 @@ public class ContentChecker {
 
                             while (resultSet.next()) {
                                 for (String name : table.fields.keySet()) {
-                                    Attribute.AttributeType attributeType = table.fields.get(name);
+                                    AttributeType attributeType = table.fields.get(name);
 
-                                    if (Attribute.AttributeType.content.equals(attributeType)) {
+                                    if (AttributeType.content.equals(attributeType) ||
+                                    		AttributeType.image.equals(attributeType)) {
                                         String stringValue = resultSet.getString(name);
                                         if (! resultSet.wasNull()) {
                                             AttachmentContent content;
@@ -142,9 +142,10 @@ public class ContentChecker {
 	
 								while (resultSet.next()) {
 									for (String name : table.fields.keySet()) {
-										Attribute.AttributeType attributeType = table.fields.get(name);
+										AttributeType attributeType = table.fields.get(name);
 	
-										if (Attribute.AttributeType.content.equals(attributeType)) {
+										if (AttributeType.content.equals(attributeType) ||
+												AttributeType.image.equals(attributeType)) {
 											String stringValue = resultSet.getString(name);
 											if (! resultSet.wasNull()) {
 												AttachmentContent content;
@@ -293,7 +294,8 @@ public class ContentChecker {
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name);
-			if (AttributeType.content.equals(attributeType)) {
+			if (AttributeType.content.equals(attributeType) ||
+					AttributeType.image.equals(attributeType)) {
 				return true;
 			}
 		}

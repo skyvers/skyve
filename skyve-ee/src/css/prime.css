@@ -83,6 +83,9 @@ span.right {
 .repeater-no-headers .ui-datatable-tablewrapper table thead {
 	display: none !important;
 }
+.repeater-no-headers .ui-datatable-tablewrapper table tbody tr td .ui-column-title {
+	display: none !important;
+}
 /* list repeater */
 .repeater .ui-datatable-scrollable-header .ui-datatable-scrollable-header-box table tbody tr {
 	background: none !important;
@@ -104,6 +107,9 @@ span.right {
 	border: none !important;
 }
 .repeater-no-headers .ui-datatable-scrollable-header .ui-datatable-scrollable-header-box table thead {
+	display: none !important;
+}
+.repeater-no-headers .ui-datatable-scrollable-body table tbody tr td .ui-column-title {
 	display: none !important;
 }
 

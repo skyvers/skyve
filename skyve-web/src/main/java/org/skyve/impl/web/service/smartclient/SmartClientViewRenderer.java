@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LayoutUtil;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ShrinkWrap;
@@ -49,9 +50,9 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -66,6 +67,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -220,7 +223,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("',title:'");
 			String iconStyleClass = tab.getIconStyleClass();
 			if (iconStyleClass != null) {
-				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
 			}
 		}
 		code.append(SmartClientGenerateUtils.processString(title));
@@ -543,7 +546,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											label,
 											action.getClientValidation(),
 											iconUrl,
-											action.getIconStyleClass(),
+											iconStyleClass,
 											toolTip,
 											confirmationText,
 											type,
@@ -592,91 +595,38 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = buildGeoLocator(locator);
-		code.append("type:'canvas',showTitle:false,canvas:isc.HLayout.create({height:22,members:[");
-		code.append(geoLocatorCode).append(")]}),");
-	}
-
-	@Override
-	public void renderGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = buildGeoLocator(locator);
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append('=').append(geoLocatorCode).append(");\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-	}
-	
-	private static StringBuilder buildGeoLocator(GeoLocator locator) {
-		StringBuilder geoLocatorCode = new StringBuilder(256);
-		geoLocatorCode.append("isc.BizUtil.createGeoLocator(view,");
-		String binding = locator.getLatitudeBinding();
-		if (binding == null) {
-			geoLocatorCode.append("null");
-		}
-		else {
-			geoLocatorCode.append('\'').append(binding).append('\'');
-		}
-		binding = locator.getLongitudeBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getDescriptionBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getAddressBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getCityBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getStateBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getPostcodeBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		binding = locator.getCountryBinding();
-		if (binding == null) {
-			geoLocatorCode.append(",null");
-		}
-		else {
-			geoLocatorCode.append(",'").append(binding).append('\'');
-		}
-		
-		return geoLocatorCode;
-	}
-
-	@Override
 	public void renderMap(MapDisplay map) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
+		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view,loading:'");
+		LoadingType loading = map.getLoading();
+		code.append((loading == null) ? LoadingType.eager : loading).append("',refreshTime:");
+		Integer refreshTime = map.getRefreshTimeInSeconds();
+		code.append((refreshTime == null) ? 0 : refreshTime.intValue()).append(",showRefresh:");
+		Boolean showRefreshControls = map.getShowRefreshControls();
+		code.append((Boolean.TRUE.equals(showRefreshControls))).append("});");
 		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
+	@Override
+	public void renderChart(Chart chart) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,type:'");
+		code.append(chart.getType()).append("'});");
+		code.append(variable).append(".setDataSource('").append(chart.getModelName()).append("');\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+
+	@Override
+	public void renderBoundColumnGeometry(Geometry geometry) {
+		dataWidgetColumnInputWidget = geometry;
+	}
+	
+	@Override
+	public void renderedBoundColumnGeometry(Geometry geometry) {
+		// do nothing
+	}
+	
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
@@ -687,12 +637,47 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 		
+		GeometryInputType type = geometry.getType();
+		if (type != null) {
+			code.append("drawingTools:'").append(type).append("',");
+		}
+		
 		// TODO add in the filter operators allowed
 	}
 
 	@Override
-	public void renderBoundColumnGeometry(Geometry geometry) {
-		dataWidgetColumnInputWidget = geometry;
+	public void renderedFormGeometry(Geometry geometry) {
+		// do nothing
+	}
+	
+	@Override
+	public void renderFormGeometryMap(GeometryMap geometry) {
+		preProcessFormItem(geometry, "geometryMap");
+
+		// If no height, make the map at least 150px high so that all the map controls fit
+		boolean noHeight = (geometry.getPixelHeight() == null) && (geometry.getPercentageHeight() == null) && (geometry.getMinPixelHeight() == null);
+		if (noHeight) {
+			geometry.setPercentageHeight(Integer.valueOf(100));
+			geometry.setMinPixelHeight(Integer.valueOf(170));
+		}
+		size(geometry, null, code);
+		if (noHeight) {
+			geometry.setPercentageHeight(null);
+			geometry.setMinPixelHeight(null);
+		}
+		
+		disabled(geometry.getDisabledConditionName(), code);
+		invisible(geometry.getInvisibleConditionName(), code);
+
+		GeometryInputType type = geometry.getType();
+		if (type != null) {
+			code.append("drawingTools:'").append(type).append("',");
+		}
+	}
+	
+	@Override
+	public void renderedFormGeometryMap(GeometryMap geometry) {
+		// do nothing
 	}
 	
 	@Override
@@ -965,7 +950,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
-		appendFilterParameters(grid.getParameters(), code);
+		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -1019,7 +1004,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
-		appendFilterParameters(grid.getParameters(), code);
+		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
 
@@ -1541,7 +1526,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
     	code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
 
 		code.append(",_view:view,");
-		appendFilterParameters(lookup.getParameters(), code);
+		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
@@ -1582,7 +1567,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("type:'blurb',defaultValue:'lookup ");
 		code.append(lookup.getBinding()).append("',");
 		disableLookupComponents(lookup, code);
-		appendFilterParameters(lookup.getParameters(), code);
+		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 	}
 
 	@Override
@@ -2765,17 +2750,14 @@ pickListFields:[{name:'value'}],
 		}
 		result.append("',type:'");
 		result.append(type);
-		if (iconUrl != null) {
-			result.append("',icon:'../").append(iconUrl);
-			result.append("',displayName:'");
-		}
-		else {
-			result.append("',displayName:'");
-			if (iconStyleClass != null) {
-				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
-			}
+		result.append("',displayName:'");
+		if (iconStyleClass != null) {
+			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
 		}
 		result.append(SmartClientGenerateUtils.processString(label)).append("',tabIndex:999,");
+		if ((iconStyleClass == null) && (iconUrl != null)) {
+			result.append("icon:'../").append(iconUrl).append("',");
+		}
 		if (button != null) {
 			size(button, null, result);
 		}
@@ -2811,20 +2793,38 @@ pickListFields:[{name:'value'}],
 		}
 	}
 
-	private static void appendFilterParameters(List<FilterParameter> parameters, StringBuilder builder) {
-		if ((parameters != null) && (! parameters.isEmpty())) {
+	private static void appendFilterParameters(List<FilterParameter> filterParameters,
+												List<Parameter> parameters,
+												StringBuilder builder) {
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			builder.append("params:[");
-			for (FilterParameter parameter : parameters) {
-				builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
-				builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
-				String binding = parameter.getBinding();
-				if (binding != null) {
-					builder.append('{').append(binding).append("}'},");
-				}
-				else {
-					builder.append(parameter.getValue()).append("'},");
+			if (filterParameters != null) {
+				for (FilterParameter parameter : filterParameters) {
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
+					String binding = parameter.getBinding();
+					if (binding != null) {
+						builder.append('{').append(binding).append("}'},");
+					}
+					else {
+						builder.append(parameter.getValue()).append("'},");
+					}
 				}
 			}
+			if (parameters != null) {
+				for (Parameter parameter : parameters) {
+					builder.append("{name:':").append(BindUtil.sanitiseBinding(parameter.getName()));
+					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:'");
+					String binding = parameter.getBinding();
+					if (binding != null) {
+						builder.append('{').append(binding).append("}'},");
+					}
+					else {
+						builder.append(parameter.getValue()).append("'},");
+					}
+				}
+			}			
 			builder.setLength(builder.length() - 1); // remove comma
 			builder.append("],");
 		}

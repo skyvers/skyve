@@ -34,10 +34,16 @@ public abstract class ActionVisitor {
 	protected void visitFilterable(Filterable filterable,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		List<FilterParameter> parameters = filterable.getParameters();
-		if (parameters != null) {
-			for (FilterParameter parameter : parameters) {
+		List<FilterParameter> filterParameters = filterable.getFilterParameters();
+		if (filterParameters != null) {
+			for (FilterParameter parameter : filterParameters) {
 				visitFilterParameter(parameter, parentVisible, parentEnabled);
+			}
+		}
+		List<Parameter> parameters = filterable.getParameters();
+		if (parameters != null) {
+			for (Parameter parameter : parameters) {
+				visitParameter(parameter, parentVisible, parentEnabled);
 			}
 		}
 	}

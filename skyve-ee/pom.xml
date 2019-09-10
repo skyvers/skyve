@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20190701-SNAPSHOT</version>
+		<version>20190830-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -845,7 +845,7 @@
 		<dependency>
     		<groupId>org.seleniumhq.selenium</groupId>
     		<artifactId>selenium-support</artifactId>
-    		<version>3.11.0</version>
+    		<version>3.141.59</version>
     		<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -858,13 +858,13 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.11.0</version>
+			<version>3.141.59</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-firefox-driver</artifactId>
-			<version>3.11.0</version>
+			<version>3.141.59</version>
 			<scope>test</scope>
 		</dependency>  
 	</dependencies>

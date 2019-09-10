@@ -186,7 +186,7 @@ public class BulkUserCreationJob extends Job {
 				// so we need to re-retrieve each group
 				String id = group.getBizId();
 				CORE.getPersistence().evictCached(group);
-				group = CORE.getPersistence().retrieve(Group.MODULE_NAME, Group.DOCUMENT_NAME, id, false);
+				group = CORE.getPersistence().retrieve(Group.MODULE_NAME, Group.DOCUMENT_NAME, id);
 
 				// now the group can be added to the new user
 				newUser.getGroups().add(group);

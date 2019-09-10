@@ -68,6 +68,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -757,6 +758,14 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+		return getModel(customer, document, modelName, runtime);
+	}
+
+	@Override
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer,
+															Document document,
+															String modelName,
+															boolean runtime) {
 		return getModel(customer, document, modelName, runtime);
 	}
 

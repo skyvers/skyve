@@ -261,32 +261,32 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent checkBox(UIComponent component,
-									String dataWidgetVar,
-									CheckBox checkBox,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent checkBox(EventSourceComponent component,
+											String dataWidgetVar,
+											CheckBox checkBox,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return putByBinding(checkBox, component);
 	}
 	
 	@Override
-	public UIComponent colourPicker(UIComponent component,
-										String dataWidgetVar,
-										ColourPicker colour,
-										String formDisabledConditionName,
-										String title,
-										boolean required) {
+	public EventSourceComponent colourPicker(EventSourceComponent component,
+												String dataWidgetVar,
+												ColourPicker colour,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
 		return putByBinding(colour, component);
 	}
 	
 	@Override
-	public UIComponent combo(UIComponent component,
-								String dataWidgetVar,
-								Combo combo,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
+	public EventSourceComponent combo(EventSourceComponent component,
+										String dataWidgetVar,
+										Combo combo,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
 		return putByBinding(combo, component);
 	}
 	
@@ -321,54 +321,54 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent lookupDescription(UIComponent component,
-											String dataWidgetVar,
-											LookupDescription lookup,
-											String formDisabledConditionName,
-											String title,
-											boolean required,
-											String displayBinding,
-											QueryDefinition query) {
+	public EventSourceComponent lookupDescription(EventSourceComponent component,
+													String dataWidgetVar,
+													LookupDescription lookup,
+													String formDisabledConditionName,
+													String title,
+													boolean required,
+													String displayBinding,
+													QueryDefinition query) {
 		return putByBinding(lookup, component);
 	}
 	
 	@Override
-	public UIComponent password(UIComponent component,
-									String dataWidgetVar,
-									Password password,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent password(EventSourceComponent component,
+											String dataWidgetVar,
+											Password password,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return putByBinding(password, component);
 	}
 	
 	@Override
-	public UIComponent radio(UIComponent component,
-								String dataWidgetVar,
-								Radio radio,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
+	public EventSourceComponent radio(EventSourceComponent component,
+										String dataWidgetVar,
+										Radio radio,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
 		return putByBinding(radio, component);
 	}
 	
 	@Override
-	public UIComponent richText(UIComponent component,
-									String dataWidgetVar,
-									RichText text,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent richText(EventSourceComponent component,
+											String dataWidgetVar,
+											RichText text,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return putByBinding(text, component);
 	}
 	
 	@Override
-	public UIComponent spinner(UIComponent component,
-									String dataWidgetVar,
-									Spinner spinner,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent spinner(EventSourceComponent component,
+											String dataWidgetVar,
+											Spinner spinner,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		return putByBinding(spinner, component);
 	}
 	
@@ -382,33 +382,41 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent text(UIComponent component,
-								String dataWidgetVar,
-								TextField text,
-								String formDisabledConditionName,
-								String title,
-								boolean required,
-								Integer length,
-								Converter<?> converter,
-								Format<?> format,
-								javax.faces.convert.Converter facesConverter) {
+	public EventSourceComponent text(EventSourceComponent component,
+										String dataWidgetVar,
+										TextField text,
+										String formDisabledConditionName,
+										String title,
+										boolean required,
+										Integer length,
+										Converter<?> converter,
+										Format<?> format,
+										javax.faces.convert.Converter facesConverter) {
 		return putByBinding(text, component);
 	}
 
 	@Override
-	public UIComponent textArea(UIComponent component,
-									String dataWidgetVar,
-									TextArea text,
-									String formDisabledConditionName,
-									String title,
-									boolean required,
-									Integer length) {
+	public EventSourceComponent textArea(EventSourceComponent component,
+											String dataWidgetVar,
+											TextArea text,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											Integer length) {
 		return putByBinding(text, component);
 	}
 	
 	private UIComponent putByBinding(Bound bound, UIComponent component) {
 		if (component != null) {
 			context.put(bound.getBinding(), component, bound);
+		}
+
+		return component;
+	}
+
+	private EventSourceComponent putByBinding(Bound bound, EventSourceComponent component) {
+		if (component != null) {
+			context.put(bound.getBinding(), component.getComponent(), bound);
 		}
 
 		return component;
