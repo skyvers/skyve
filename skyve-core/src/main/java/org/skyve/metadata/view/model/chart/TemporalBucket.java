@@ -3,7 +3,11 @@ package org.skyve.metadata.view.model.chart;
 import java.time.Month;
 import java.time.format.TextStyle;
 
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
 import org.skyve.CORE;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * Bucket a DateOnly, DateTime, TimeOnly or Timestamp (or any extension of java.util.Date)
@@ -11,12 +15,16 @@ import org.skyve.CORE;
  * 
  * @author mike
  */
+@XmlTransient
 public class TemporalBucket implements Bucket {
+	private static final long serialVersionUID = -9134123560010408219L;
+
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public static enum TemporalBucketType {
 		dayMonthYear, day, month, year, monthYear, hour, hourDay, hourDayMonth, minuteHour, secondMinuteHour
 	}
 	
-	private TemporalBucketType type = null;
+	protected TemporalBucketType type = null;
 	
 	public TemporalBucket(TemporalBucketType type) {
 		this.type = type;
@@ -26,9 +34,19 @@ public class TemporalBucket implements Bucket {
 	public String bizQLExpression(String categoryBindingOrAlias) {
 		StringBuilder result = new StringBuilder(128);
 		if (TemporalBucketType.dayMonthYear.equals(type)) {
+			result.append("month(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String month = result.toString();
+			
+			result.setLength(0);
+			result.append("day(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String day = result.toString();
+			
+			result.setLength(0);
 			result.append("concat(year(").append(categoryBindingOrAlias);
-			result.append("), '-', month(").append(categoryBindingOrAlias);
-			result.append("), '-', day(").append(categoryBindingOrAlias).append("))");
+			result.append("), '-', ").append(month);
+			result.append(", '-', ").append(day).append(')');
 		}
 		else if (TemporalBucketType.day.equals(type)) {
 			result.append("day(").append(categoryBindingOrAlias).append(')');
@@ -40,29 +58,82 @@ public class TemporalBucket implements Bucket {
 			result.append("year(").append(categoryBindingOrAlias).append(')');
 		}
 		else if (TemporalBucketType.monthYear.equals(type)) {
+			result.append("month(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String month = result.toString();
+			
+			result.setLength(0);
 			result.append("concat(year(").append(categoryBindingOrAlias);
-			result.append("), '-', month(").append(categoryBindingOrAlias).append("))");
+			result.append("), '-', ").append(month).append(')');
 		}
 		else if (TemporalBucketType.hour.equals(type)) {
 			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
 		}
 		else if (TemporalBucketType.hourDay.equals(type)) {
-			result.append("concat(day(").append(categoryBindingOrAlias);
-			result.append("), ' ', hour(").append(categoryBindingOrAlias).append("))");
+			result.append("day(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String day = result.toString();
+			
+			result.setLength(0);
+			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String hour = result.toString();
+			
+			result.setLength(0);
+			result.append("concat(").append(day).append(", ' ', ").append(hour).append(')');
 		}
 		else if (TemporalBucketType.hourDayMonth.equals(type)) {
-			result.append("concat(month(").append(categoryBindingOrAlias);
-			result.append("), '-', day(").append(categoryBindingOrAlias);
-			result.append("), ' ', hour(").append(categoryBindingOrAlias).append("))");
+			result.append("month(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String month = result.toString();
+
+			result.setLength(0);
+			result.append("day(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String day = result.toString();
+
+			result.setLength(0);
+			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String hour = result.toString();
+
+			result.setLength(0);
+			result.append("concat(").append(month);
+			result.append(", '-', ").append(day);
+			result.append(", ' ', ").append(hour).append(')');
 		}
 		else if (TemporalBucketType.minuteHour.equals(type)) {
-			result.append("concat(hour(").append(categoryBindingOrAlias);
-			result.append("), ':', minute(").append(categoryBindingOrAlias).append("))");
+			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String hour = result.toString();
+
+			result.setLength(0);
+			result.append("minute(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String minute = result.toString();
+
+			result.setLength(0);
+			result.append("concat(").append(hour).append(", ':', ").append(minute).append(')');
 		}
 		else if (TemporalBucketType.secondMinuteHour.equals(type)) {
-			result.append("concat(hour(").append(categoryBindingOrAlias);
-			result.append("), ':', minute(").append(categoryBindingOrAlias);
-			result.append("), ':', second(").append(categoryBindingOrAlias).append("))");
+			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String hour = result.toString();
+
+			result.setLength(0);
+			result.append("minute(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String minute = result.toString();
+
+			result.setLength(0);
+			result.append("second(").append(categoryBindingOrAlias).append(')');
+			padZero(result);
+			String second = result.toString();
+
+			result.setLength(0);
+			result.append("concat(").append(hour).append(", ':', ");
+			result.append(minute).append(", ':', ").append(second).append(')');
 		}
 		return result.toString();
 	}
@@ -92,25 +163,24 @@ public class TemporalBucket implements Bucket {
 			result.append(month(Integer.parseInt(tokens[1]))).append(' ').append(tokens[0]);
 		}
 		else if (TemporalBucketType.hour.equals(type)) {
-			result.append(padZero(category)).append(":00");
+			result.append(category).append(":00");
 		}
 		else if (TemporalBucketType.hourDay.equals(type)) {
 			String[] tokens = category.toString().split("\\s");
-			result.append(day(Integer.parseInt(tokens[0]))).append(' ').append(padZero(tokens[1])).append(":00");
+			result.append(day(Integer.parseInt(tokens[0]))).append(' ').append(tokens[1]).append(":00");
 		}
 		else if (TemporalBucketType.hourDayMonth.equals(type)) {
 			String[] tokens = category.toString().split("(\\s|-)");
 			result.append(month(Integer.parseInt(tokens[0]))).append(' ');
-			result.append(day(Integer.parseInt(tokens[1]))).append(' ').append(padZero(tokens[2])).append(":00");
+			result.append(day(Integer.parseInt(tokens[1]))).append(' ').append(tokens[2]).append(":00");
 		}
 		else if (TemporalBucketType.minuteHour.equals(type)) {
 			String[] tokens = category.toString().split(":");
-			result.append(padZero(tokens[0])).append(':').append(padZero(tokens[1]));
+			result.append(tokens[0]).append(':').append(tokens[1]);
 		}
 		else if (TemporalBucketType.secondMinuteHour.equals(type)) {
 			String[] tokens = category.toString().split(":");
-			result.append(padZero(tokens[0])).append(':');
-			result.append(padZero(tokens[1])).append(':').append(padZero(tokens[2]));
+			result.append(tokens[0]).append(':').append(tokens[1]).append(':').append(tokens[2]);
 		}
 		return result.toString();
 	}
@@ -134,11 +204,10 @@ public class TemporalBucket implements Bucket {
 		return Month.of(month).getDisplayName(TextStyle.SHORT, CORE.getUser().getLocale());
 	}
 	
-	private static String padZero(Object timeComponent) {
-		String result = timeComponent.toString();
-		if (result.length() == 1) {
-			result = "0" + result;
-		}
-		return result;
+	private static void padZero(StringBuilder expression) {
+		String string = expression.toString();
+		expression.insert(0, "case when ");
+		expression.append(" < 10 then concat('0', ").append(string);
+		expression.append(") else concat('', ").append(string).append(") end");
 	}
 }

@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.chart;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,9 +28,9 @@ public class ChartBuilder {
 	private AggregateFunction valueFunction;
 	private int top = Integer.MIN_VALUE;
 	private SortDirection topSort;
-	private boolean topCategory = true;
+	private OrderBy topOrderBy;
 	private SortDirection orderBySort;
-	private boolean orderByCategory = true;
+	private OrderBy orderBy;
 	
 	/**
 	 * Document builder.
@@ -92,50 +93,29 @@ public class ChartBuilder {
 	}
 	
 	/**
-	 * Order the results by the categories ascending or descending.
+	 * Order the results by categories or values, ascending or descending.
 	 * Applied after top processing.
+	 * @param orderBy
 	 * @param sort
 	 */
-	public ChartBuilder orderByCategory(SortDirection sort) {
-		orderByCategory = true;
+	public ChartBuilder orderBy(@SuppressWarnings("hiding") OrderBy orderBy, SortDirection sort) {
+		this.orderBy = orderBy;
 		orderBySort = sort;
 		return this;
 	}
 
 	/**
-	 * Order the results by the values ascending or descending.
-	 * Applied after top processing.
-	 * @param sort
-	 * @return
-	 */
-	public ChartBuilder orderByValue(SortDirection sort) {
-		orderByCategory = false;
-		orderBySort = sort;
-		return this;
-	}
-
-	/**
-	 * Show the top n categories sorted ascending or descending.
+	 * Show the top n categories or values, sorted ascending or descending.
 	 * The orderByCategory or orderByValue is applied after the top sort.
 	 * @param top
+	 * @param orderBy
 	 * @param sort
 	 */
-	public ChartBuilder topCategories(@SuppressWarnings("hiding") int top, SortDirection sort) {
-		topCategory = true;
+	public ChartBuilder top(@SuppressWarnings("hiding") int top,
+								@SuppressWarnings("hiding") OrderBy orderBy,
+								SortDirection sort) {
 		this.top = top;
-		topSort = sort;
-		return this;
-	}
-	
-	/**
-	 * Show the top n values sorted ascending or descending.
-	 * The orderByCategory or orderByValue is applied after the top sort.
-	 * @param top
-	 * @param sort
-	 */
-	public ChartBuilder topValues(@SuppressWarnings("hiding") int top, SortDirection sort) {
-		topCategory = false;
-		this.top = top;
+		topOrderBy = orderBy;
 		topSort = sort;
 		return this;
 	}
@@ -180,7 +160,7 @@ public class ChartBuilder {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(document);
 		String categoryExpression = null;
 		String categoryAlias = "category";
-		String valueExpression = valueFunction + "(" + valueBindingOrAlias + ")";
+		String valueExpression = (valueFunction == null) ? valueBindingOrAlias : valueFunction + "(" + valueBindingOrAlias + ")";
 		if (categoryBucket == null) {
 			categoryExpression = categoryBindingOrAlias;
 			categoryAlias = categoryBindingOrAlias.replace('.', '_'); // So we get display values
@@ -194,22 +174,26 @@ public class ChartBuilder {
 		q.addExpressionGrouping(categoryExpression);
 		
 		if (top > 0) {
-			q.addExpressionOrdering(topCategory ? categoryExpression : valueExpression, topSort);
+			q.addExpressionOrdering(OrderBy.category.equals(topOrderBy) ? categoryExpression : valueExpression, topSort);
 		}
 		else {
 			if (orderBySort == null) {
-				q.addExpressionOrdering(orderByCategory ? categoryExpression : valueExpression);
+				q.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression);
 			}
 			else {
-				q.addExpressionOrdering(orderByCategory ? categoryExpression : valueExpression, orderBySort);
+				q.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression, orderBySort);
 			}
 		}
 
 		List<Bean> result = q.projectedResults();
 
-		if ((top > 0) && (top < result.size())) {
-			result = result.subList(0, top);
-			OrderingImpl ordering = new OrderingImpl(orderByCategory ? ((categoryBucket == null) ? categoryBindingOrAlias : "category") : "value",
+		if (top > 0) {
+			// cull the list if its bigger than the top requirement
+			if (top < result.size()) {
+				result = new ArrayList<>(result.subList(0, top));
+			}
+			// Always order here as the top sort was applied on the data store
+			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBindingOrAlias : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
 			Binder.sortCollectionByOrdering(result, ordering);
 		}

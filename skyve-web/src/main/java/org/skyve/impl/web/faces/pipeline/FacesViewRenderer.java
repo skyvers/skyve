@@ -688,7 +688,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderChart(Chart chart) {
-	    UIComponent l = cb.chart(null, chart, chart.getModelName());
+	    UIComponent l = cb.chart(null, chart);
 	    addComponent(null, 
 	    				false, 
 	    				chart.getInvisibleConditionName(), 

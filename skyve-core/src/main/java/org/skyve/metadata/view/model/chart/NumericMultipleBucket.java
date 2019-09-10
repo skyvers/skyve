@@ -1,17 +1,22 @@
 package org.skyve.metadata.view.model.chart;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Bucket data by multiples.
  * 
  * @author mike
  */
+@XmlTransient
 public class NumericMultipleBucket implements Bucket {
-	private int multiple;
-	
+	private static final long serialVersionUID = -2011511311395433491L;
+
+	protected int multiple;
+
 	public NumericMultipleBucket(int multiple) {
 		this.multiple = multiple;
 	}
-	
+
 	@Override
 	public String bizQLExpression(String categoryBindingOrAlias) {
 		StringBuilder result = new StringBuilder(32);

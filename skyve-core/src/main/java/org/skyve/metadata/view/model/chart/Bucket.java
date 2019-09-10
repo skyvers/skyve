@@ -1,12 +1,14 @@
 package org.skyve.metadata.view.model.chart;
 
+import org.skyve.metadata.MetaData;
+
 /**
  * Used to aggregate chart data.
  * It is a definition of how to aggregate the category values.
  * 
  * @author mike
  */
-public interface Bucket {
+public interface Bucket extends MetaData {
 	/**
 	 * Create a BizQL expression representing the bucket.
 	 * @param categoryBindingOrAlias	The category binding.

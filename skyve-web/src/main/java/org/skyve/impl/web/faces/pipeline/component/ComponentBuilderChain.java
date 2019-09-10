@@ -455,10 +455,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+	public UIComponent chart(UIComponent component, Chart chart) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.chart(result, chart, modelName);
+			result = builder.chart(result, chart);
 		}
 		return result;
 	}

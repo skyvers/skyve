@@ -657,19 +657,15 @@ public class FacesView<T extends Bean> extends Harness {
 		return result.toString();
 	}
 	
-	private transient Map<String, ChartModel> chartModels = new TreeMap<>();
-
 	/**
 	 * Creates a PF ChartModel for a Skyve ChartModel.
 	 */
-	public ChartModel getChartModel(String chartModelName, ChartType type) {
-		ChartModel result = chartModels.get(chartModelName);
-		if (result == null) {
-			result = new ChartAction<>(this, chartModelName, type).execute();
-			chartModels.put(chartModelName, result);
-		}
-
-		return result;
+	public ChartModel getChartModel() {
+		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
+		Map<String, Object> attributes = currentComponent.getAttributes();
+		ChartType type = (ChartType) attributes.get("skyveType");
+		Object model = attributes.get("skyveModel");
+		return new ChartAction<>(this, model, type).execute();
 	}
  	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()

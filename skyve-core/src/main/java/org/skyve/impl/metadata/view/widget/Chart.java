@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
@@ -33,6 +34,7 @@ import org.skyve.metadata.view.Invisible;
 							"maxPixelHeight", 
 							"invisibleConditionName",
 							"visibleConditionName",
+							"model",
 							"properties"})
 public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	private static final long serialVersionUID = 6664085314805510891L;
@@ -62,6 +64,17 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
+	private ChartBuilderMetaData model;
+	
+	public ChartBuilderMetaData getModel() {
+		return model;
+	}
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	public void setModel(ChartBuilderMetaData model) {
+		this.model = model;
+	}
+
 	public ChartType getType() {
 		return type;
 	}
@@ -75,7 +88,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 		return modelName;
 	}
 
-	@XmlAttribute(required = true)
+	@XmlAttribute
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}

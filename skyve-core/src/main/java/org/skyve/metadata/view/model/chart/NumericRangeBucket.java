@@ -1,13 +1,18 @@
 package org.skyve.metadata.view.model.chart;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Bucket data by a number of defined ranges.
  * 
  * @author mike
  */
+@XmlTransient
 public class NumericRangeBucket implements Bucket {
-	private int[] ranges;
-	
+	private static final long serialVersionUID = 6925394592182937839L;
+
+	protected int[] ranges;
+
 	/**
 	 * The ranges parameter specifies the breaking points in category values.
 	 * That is ranges of 0,10,20 means ranges -infinity->0,0->10,10->20,20->+infinity

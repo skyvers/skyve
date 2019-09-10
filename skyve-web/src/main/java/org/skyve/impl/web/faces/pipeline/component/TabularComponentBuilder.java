@@ -1035,7 +1035,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+	public UIComponent chart(UIComponent component, Chart chart) {
 		if (component != null) {
 			return component;
 		}
@@ -1066,9 +1066,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
 		}
 
-		StringBuilder value = new StringBuilder(128);
-		value.append("#{").append(managedBeanName).append(".getChartModel('").append(modelName);
-		value.append("','").append(type).append("')}");
+		Map<String, Object> attributes = result.getAttributes();
+		attributes.put("skyveType", type);
+		String modelName = chart.getModelName();
+		if (modelName != null) {
+			attributes.put("skyveModel", modelName);
+		}
+		else {
+			attributes.put("skyveModel", chart.getModel());
+		}
+		StringBuilder value = new StringBuilder(64);
+		value.append("#{").append(managedBeanName).append(".chartModel}");
 		result.setValueExpression("model", ef.createValueExpression(elc, value.toString(), ChartModel.class));
 		return result;
 	}

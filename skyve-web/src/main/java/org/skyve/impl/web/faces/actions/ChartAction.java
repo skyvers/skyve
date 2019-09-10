@@ -23,6 +23,7 @@ import org.primefaces.model.charts.radar.RadarChartDataSet;
 import org.primefaces.model.charts.radar.RadarChartModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -32,24 +33,25 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.chart.MetaDataChartModel;
 
 /**
  * Create a PF chart model from a Skyve model.
  */
 public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 	private FacesView<T> facesView;
-	private String modelName;
+	private Object model;
 	private ChartType type;
 	
-	public ChartAction(FacesView<T> facesView, String modelName, ChartType type) {
+	public ChartAction(FacesView<T> facesView, Object model, ChartType type) {
 		this.facesView = facesView;
-		this.modelName = modelName;
+		this.model = model;
 		this.type = type;
 	}
 
 	@Override
 	public ChartModel callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ChartAction - CHART " + modelName);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ChartAction - CHART " + model);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
@@ -57,9 +59,15 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-		org.skyve.metadata.view.model.chart.ChartModel<Bean> model = CORE.getRepository().getChartModel(customer, targetDocument, modelName, true);
-		model.setBean(targetBean);
-		org.skyve.metadata.view.model.chart.ChartData data = model.getChartData();
+		org.skyve.metadata.view.model.chart.ChartModel<Bean> chartModel = null;
+		if (model instanceof String) {
+			chartModel = CORE.getRepository().getChartModel(customer, targetDocument, (String) model, true);
+		}
+		else {
+			chartModel = new MetaDataChartModel((ChartBuilderMetaData) model);
+		}
+		chartModel.setBean(targetBean);
+		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
 		
 		ChartModel result = null;
 		
@@ -74,9 +82,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			BarChartModel chartModel = horizontal ? new HorizontalBarChartModel() : new BarChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			BarChartModel barChartModel = horizontal ? new HorizontalBarChartModel() : new BarChartModel();
+			barChartModel.setData(chartData);
+			result = barChartModel;
 		}
 		else if (ChartType.doughnut.equals(type)) {
 			DonutChartDataSet set = new DonutChartDataSet();
@@ -86,9 +94,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			DonutChartModel chartModel = new DonutChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			DonutChartModel donutChartModel = new DonutChartModel();
+			donutChartModel.setData(chartData);
+			result = donutChartModel;
 		}
 		else if (ChartType.line.equals(type) || ChartType.lineArea.equals(type)) {
 			LineChartDataSet set = new LineChartDataSet();
@@ -105,9 +113,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			LineChartModel chartModel = new LineChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			LineChartModel lineChartModel = new LineChartModel();
+			lineChartModel.setData(chartData);
+			result = lineChartModel;
 		}
 		else if (ChartType.pie.equals(type)) {
 			PieChartDataSet set = new PieChartDataSet();
@@ -117,9 +125,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			PieChartModel chartModel = new PieChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			PieChartModel pieChartModel = new PieChartModel();
+			pieChartModel.setData(chartData);
+			result = pieChartModel;
 		}
 		else if (ChartType.polarArea.equals(type)) {
 			PolarAreaChartDataSet set = new PolarAreaChartDataSet();
@@ -129,9 +137,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			PolarAreaChartModel chartModel = new PolarAreaChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			PolarAreaChartModel polarChartModel = new PolarAreaChartModel();
+			polarChartModel.setData(chartData);
+			result = polarChartModel;
 		}
 		else if (ChartType.radar.equals(type)) {
 			RadarChartDataSet set = new RadarChartDataSet();
@@ -145,9 +153,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			ChartData chartData = new ChartData();
 			chartData.addChartDataSet(set);
 			chartData.setLabels(data.getLabels());
-			RadarChartModel chartModel = new RadarChartModel();
-			chartModel.setData(chartData);
-			result = chartModel;
+			RadarChartModel radarChartModel = new RadarChartModel();
+			radarChartModel.setData(chartData);
+			result = radarChartModel;
 		}
 		else {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");

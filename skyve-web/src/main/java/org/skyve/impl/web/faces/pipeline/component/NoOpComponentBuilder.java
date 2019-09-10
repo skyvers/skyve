@@ -245,7 +245,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent chart(UIComponent component, Chart chart, String modelName) {
+	public UIComponent chart(UIComponent component, Chart chart) {
 		return component;
 	}
 

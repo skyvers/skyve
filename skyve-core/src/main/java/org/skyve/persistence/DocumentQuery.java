@@ -1,5 +1,8 @@
 package org.skyve.persistence;
 
+import javax.xml.bind.annotation.XmlType;
+
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Document;
 
@@ -15,6 +18,7 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	/**
 	 * 
 	 */
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public static enum AggregateFunction {
 		Min,
 		Max, 

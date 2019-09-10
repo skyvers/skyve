@@ -38,6 +38,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -102,6 +103,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -122,6 +124,28 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	private void validateBinding(String bindingPrefix,
+									String binding, 
+									boolean bindingRequired,
+									boolean compoundBindingInvalid, 
+									boolean domainValuesRequired,
+									boolean scalarBindingOnly,
+									String widgetIdentifier,
+									AttributeType... assertTypes) {
+		validateBinding(module,
+							document,
+							bindingPrefix,
+							binding,
+							bindingRequired,
+							compoundBindingInvalid,
+							domainValuesRequired,
+							scalarBindingOnly,
+							widgetIdentifier,
+							assertTypes);
+	}
+
+	private void validateBinding(Module contextModule,
+									Document contextDocument,
+									String bindingPrefix,
 									String binding, 
 									boolean bindingRequired,
 									boolean compoundBindingInvalid, 
@@ -150,14 +174,14 @@ class ViewValidator extends ViewVisitor {
 					testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
 				}
 
-				if (document.getConditionNames().contains(testConditionName)) {
+				if (contextDocument.getConditionNames().contains(testConditionName)) {
 					return;
 				}
 			}
 			
 			TargetMetaData target = null;
 			try {
-				target = BindUtil.getMetaDataForBinding(customer, module, document, bindingToTest);
+				target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
 			}
 			catch (MetaDataException e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
@@ -755,9 +779,115 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
-		String chartIdentifier = "Chart with model " + chart.getModelName();
+		String modelName = chart.getModelName();
+		ChartBuilderMetaData model = chart.getModel();
+		String chartIdentifier = "Chart" + ((model == null) ? ((modelName == null) ? " with no model" : " with model named " + modelName) : " with model label " + model.getLabel());
+		if (((modelName == null) && (model == null)) ||
+				((modelName != null) && (model != null))) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " requires a modelName or a model but not both.");
+		}
 		validateConditionName(chart.getInvisibleConditionName(), chartIdentifier);
-		validateChartModelName(chart.getModelName(), chartIdentifier);
+		if (modelName != null) {
+			validateChartModelName(chart.getModelName(), chartIdentifier);
+		}
+		else {
+			validateChartModel(model, chartIdentifier);
+		}
+	}
+	
+	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
+		Module contextModule = null;
+		try {
+			contextModule = customer.getModule(model.getModuleName());
+		}
+		catch (Exception e) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
+		}
+		
+		Document contextDocument = null;
+		try {
+			contextDocument = contextModule.getDocument(customer, model.getDocumentName());
+		}
+		catch (Exception e) {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid documentName of " + model.getDocumentName(), e);
+		}
+		
+		validateBinding(contextModule,
+							contextDocument,
+							null,
+							model.getCategoryBinding(),
+							true,
+							false,
+							false,
+							true,
+							chartIdentifier + " category binding",
+							AttributeType.bool,
+							AttributeType.colour,
+							AttributeType.date,
+							AttributeType.dateTime,
+							AttributeType.decimal2,
+							AttributeType.decimal5,
+							AttributeType.decimal10,
+							AttributeType.enumeration,
+							AttributeType.integer,
+							AttributeType.longInteger,
+							AttributeType.markup,
+							AttributeType.memo,
+							AttributeType.text,
+							AttributeType.time,
+							AttributeType.timestamp);
+
+		String valueBinding = model.getValueBinding();
+		validateBinding(contextModule,
+							contextDocument,
+							null,
+							valueBinding,
+							true,
+							false,
+							false,
+							true,
+							chartIdentifier + " value binding");
+
+		AggregateFunction function = model.getValueFunction();
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, valueBinding);
+		Attribute attribute = target.getAttribute();
+
+		// check for numeric value if no value function is defined
+		if (function == null) { // we need a number here
+			boolean invalidValueType = false;
+			if (attribute == null) { // implicit attribute
+				invalidValueType = true;
+			}
+			else {
+				AttributeType type = attribute.getAttributeType(); 
+				invalidValueType = (! Number.class.isAssignableFrom(type.getImplementingType()));
+			}
+			if (invalidValueType) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+												" has an invalid value binding of " + valueBinding + 
+												" to a non-numeric or implicit attribute");
+			}
+		}
+		// check that aggregate function can be numeric, otherwise must be count
+		else {
+			if (! AggregateFunction.Count.equals(function)) {
+				String invalidFunctionType = null;
+				if (attribute == null) { // implicit attribute
+					invalidFunctionType = "an implicit attribute";
+				}
+				else {
+					AttributeType type = attribute.getAttributeType(); 
+					if (! Number.class.isAssignableFrom(type.getImplementingType())) {
+						invalidFunctionType = "a non-numeric type of " + type;
+					}
+				}
+				if (invalidFunctionType != null) {
+					throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+													" has an invalid valueFunction of " + function + 
+													" for a value binding which is to " + invalidFunctionType);
+				}
+			}
+		}
 	}
 
 	@Override

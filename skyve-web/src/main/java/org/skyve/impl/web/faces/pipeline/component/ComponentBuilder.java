@@ -261,7 +261,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														String title, 
 														boolean required);
 
-	public abstract UIComponent chart(UIComponent component, Chart chart, String modelName);
+	public abstract UIComponent chart(UIComponent component, Chart chart);
 
 	public abstract EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership);
 	
