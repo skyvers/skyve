@@ -28,7 +28,7 @@ import org.skyve.nlp.cron.elementprovider.recurring.EveryYear;
  */
 public class NaturalCronExpressionParser {
 
-	public static final String VALID_PATTERN = "^(((?:[1-9]?\\d|\\*)\\s*(?:(?:[\\/-][1-9]?\\d)|(?:,[1-9]?\\d)+)?\\s*){5})$";
+	public static final String VALID_PATTERN = "^(((?:[1-9]?\\d|\\*)\\s*(?:(?:[\\/-][1-9]?\\d)|(?:,[1-9]?\\d)+)?\\s*){6})$";
 
 	protected ExpressionElementProvider[] elementProviders;
 	private Map<String, CronExpression> mappings;
@@ -54,13 +54,14 @@ public class NaturalCronExpressionParser {
 		};
 
 		mappings = new HashMap<>();
-		mappings.put("yearly", new CronExpression("0", "0", "1", "1", "*"));
-		mappings.put("annually", new CronExpression("0", "0", "1", "1", "*"));
-		mappings.put("monthly", new CronExpression("0", "0", "1", "*", "*"));
-		mappings.put("weekly", new CronExpression("0", "0", "*", "*", "0"));
-		mappings.put("midnight", new CronExpression("0", "0", "*", "*", "*"));
-		mappings.put("daily", new CronExpression("0", "0", "*", "*", "*"));
-		mappings.put("hourly", new CronExpression("0", "*", "*", "*", "*"));
+		mappings.put("yearly", new CronExpression("0", "0", "0", "1", "1", "*"));
+		mappings.put("annually", new CronExpression("0", "0", "0", "1", "1", "*"));
+		mappings.put("monthly", new CronExpression("0", "0", "0", "1", "*", "*"));
+		mappings.put("weekly", new CronExpression("0", "0", "0", "*", "*", "0"));
+		mappings.put("midnight", new CronExpression("0", "0", "0", "*", "*", "*"));
+		mappings.put("daily", new CronExpression("0", "0", "0", "*", "*", "*"));
+		mappings.put("hourly", new CronExpression("0", "0", "*", "*", "*", "*"));
+		mappings.put("midday", new CronExpression("0", "0", "12", "*", "*", "*"));
 
 		pattern = Pattern.compile(VALID_PATTERN);
 	}
@@ -75,7 +76,8 @@ public class NaturalCronExpressionParser {
 			}
 
 			CronExpression ce = new CronExpression();
-			boolean isMinuteElementLocked = false,
+			boolean isSecondElementLocked = false,
+					isMinuteElementLocked = false,
 					isHourElementLocked = false,
 					isDayNumberElementLocked = false,
 					isMonthElementLocked = false,
@@ -83,6 +85,10 @@ public class NaturalCronExpressionParser {
 
 			for (ExpressionElementProvider elementProvider : elementProviders) {
 				if (elementProvider.matches(string)) {
+					if (shouldUpdateSecond(elementProvider, isSecondElementLocked)) {
+						ce.setSecond(elementProvider.getSecondElement());
+					}
+
 					if (shouldUpdateMinute(elementProvider, isMinuteElementLocked)) {
 						ce.setMinute(elementProvider.getMinuteElement());
 					}
@@ -101,6 +107,10 @@ public class NaturalCronExpressionParser {
 
 					if (shouldUpdateDayOfWeek(elementProvider, isDayOfWeekElementLocked)) {
 						ce.setDayOfWeek(elementProvider.getDayOfWeekElement());
+					}
+
+					if (elementProvider.isSecondElementLocked()) {
+						isSecondElementLocked = true;
 					}
 
 					if (elementProvider.isMinuteElementLocked()) {
@@ -134,6 +144,10 @@ public class NaturalCronExpressionParser {
 		}
 
 		return null;
+	}
+
+	private static boolean shouldUpdateSecond(ExpressionElementProvider subParser, boolean isSecondElementLocked) {
+		return subParser.canProvideSecond() && !isSecondElementLocked;
 	}
 
 	private static boolean shouldUpdateMinute(ExpressionElementProvider subParser, boolean isMinuteElementLocked) {

@@ -4,6 +4,14 @@ public interface ExpressionElementProvider {
 
 	public boolean matches(String value);
 
+	default boolean canProvideSecond() {
+		return false;
+	}
+
+	default String getSecondElement() {
+		return null;
+	}
+
 	public boolean canProvideMinute();
 
 	public String getMinuteElement();
@@ -23,6 +31,10 @@ public interface ExpressionElementProvider {
 	public boolean canProvideDayOfWeek();
 
 	public String getDayOfWeekElement();
+
+	default boolean isSecondElementLocked() {
+		return false;
+	}
 
 	public boolean isMinuteElementLocked();
 
