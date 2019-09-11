@@ -14,18 +14,21 @@ public class RainbowColourSeries extends ColourSeries {
 
 	private Rainbow rainbow;
 	private int currentRainbowIndex = 1;
+	private String[] spectrum = { "ff6385", "ffa040", "ffcc56", "4bc0c0", "36a3eb", "9966ff" };
 
 	public RainbowColourSeries() {
 		this.rainbow = new Rainbow();
-		rainbow.setSpectrum("ff6385", "ffa040", "ffcc56", "4bc0c0", "36a3eb");
-		rainbow.setNumberRange(0, size < 5 ? 5 : size);
+		rainbow.setSpectrum(spectrum);
+		rainbow.setNumberRange(0, size < spectrum.length ? spectrum.length : size);
 		current = getColor(0);
 	}
 
 	public RainbowColourSeries(String... spectrum) {
 		this();
 		if (spectrum.length > 0) {
+			this.spectrum = spectrum;
 			rainbow.setSpectrum(spectrum);
+			rainbow.setNumberRange(0, size < spectrum.length ? spectrum.length : size);
 		}
 		current = getColor(0);
 	}
@@ -39,7 +42,7 @@ public class RainbowColourSeries extends ColourSeries {
 	@Override
 	public void setSize(int size) {
 		super.setSize(size);
-		rainbow.setNumberRange(0, size < 5 ? 5 : size);
+		rainbow.setNumberRange(0, size < spectrum.length ? spectrum.length : size);
 	}
 
 	/**
