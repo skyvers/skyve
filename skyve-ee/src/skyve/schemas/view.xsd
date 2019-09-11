@@ -1397,6 +1397,7 @@
       <xs:element ref="tns:top" minOccurs="0"/>
       <xs:element ref="tns:order" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="label" type="xs:string" use="required"/>
     <xs:attribute name="moduleName" type="xs:string" use="required"/>
     <xs:attribute name="documentName" type="xs:string" use="required"/>

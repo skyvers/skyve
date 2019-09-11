@@ -135,7 +135,17 @@ public class ChartBuilder {
 	 * @return	The ChartData.
 	 */
 	public ChartData build(String label) {
-		return build(new RainbowColourSeries(), new RainbowColourSeries(), label);
+		return build(null, label);
+	}
+
+	/**
+	 * Build the ChartData.
+	 * @param title The chart title.
+	 * @param label	The data set label.
+	 * @return	The ChartData.
+	 */
+	public ChartData build(String title, String label) {
+		return build(new RainbowColourSeries(), new RainbowColourSeries(), title, label);
 	}
 	
 	/**
@@ -145,12 +155,30 @@ public class ChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours, ColourSeries borderColours, String label) {
+	public ChartData build(ColourSeries backgroundColours,
+							ColourSeries borderColours,
+							String label) {
+		return build(backgroundColours, borderColours, null, label);
+	}
+	
+	/**
+	 * Build the ChartData using defined ColourSeries.
+	 * @param backgroundColours
+	 * @param borderColours
+	 * @param title
+	 * @param label
+	 * @return	The ChartData.
+	 */
+	public ChartData build(ColourSeries backgroundColours,
+							ColourSeries borderColours,
+							String title,
+							String label) {
 		List<Bean> data = query();
 		backgroundColours.setSize(data.size());
 		borderColours.setSize(data.size());
 		
 		ChartData result = new ChartData();
+		result.setTitle(title);
 		result.setLabel(label);
 		result.setBackground(backgroundColours.getCurrent(200));
 		result.setBorder(borderColours.getCurrent());

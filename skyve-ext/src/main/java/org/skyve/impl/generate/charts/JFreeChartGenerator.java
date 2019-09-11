@@ -26,7 +26,6 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.RectangleEdge;
 import org.jfree.util.TableOrder;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.view.model.chart.ChartData;
@@ -96,7 +95,14 @@ public class JFreeChartGenerator {
 
 	public JFreeChart bar() {
 		CategoryDataset dataSet = dataSet();
-		JFreeChart result = ChartFactory.createBarChart("", "", "", dataSet, PlotOrientation.VERTICAL, true, false, false);
+		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
+															"",
+															"",
+															dataSet,
+															PlotOrientation.VERTICAL,
+															true,
+															false,
+															false);
 		configureCategoryChart(result);
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
@@ -105,7 +111,14 @@ public class JFreeChartGenerator {
 	
 	public JFreeChart horizontalBar() {
 		CategoryDataset dataSet = dataSet();
-		JFreeChart result = ChartFactory.createBarChart("", "", "", dataSet, PlotOrientation.HORIZONTAL, true, false, false);
+		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
+															"",
+															"",
+															dataSet,
+															PlotOrientation.HORIZONTAL,
+															true,
+															false,
+															false);
 		configureCategoryChart(result);
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
@@ -114,14 +127,28 @@ public class JFreeChartGenerator {
 	
 	public JFreeChart lineArea() {
 		CategoryDataset dataSet = dataSet();
-		JFreeChart result = ChartFactory.createAreaChart("", "", "", dataSet, PlotOrientation.VERTICAL, true, false, false);
+		JFreeChart result = ChartFactory.createAreaChart(data.getTitle(),
+															"",
+															"",
+															dataSet,
+															PlotOrientation.VERTICAL,
+															true,
+															false,
+															false);
 		configureCategoryChart(result);
 		return result;
 	}
 	
 	public JFreeChart line() {
 		CategoryDataset dataSet = dataSet();
-		JFreeChart result = ChartFactory.createLineChart("", "", "", dataSet, PlotOrientation.VERTICAL, true, false, false);
+		JFreeChart result = ChartFactory.createLineChart(data.getTitle(),
+															"",
+															"",
+															dataSet,
+															PlotOrientation.VERTICAL,
+															true,
+															false,
+															false);
 		configureCategoryChart(result);
 		LineAndShapeRenderer renderer = (LineAndShapeRenderer) result.getCategoryPlot().getRenderer();
 		renderer.setBaseShapesVisible(true);
@@ -131,14 +158,14 @@ public class JFreeChartGenerator {
 	
 	public JFreeChart pie() {
 		PieDataset dataSet = pieDataSet();
-		JFreeChart result = ChartFactory.createPieChart("", dataSet, true, false, false);
+		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 		return result;
 	}
 	
 	public JFreeChart doughnut() {
 		PieDataset dataSet = pieDataSet();
-		JFreeChart result = ChartFactory.createRingChart("", dataSet, true, false, false);
+		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 		return result;
 	}
@@ -159,7 +186,7 @@ public class JFreeChartGenerator {
 			dataSet.addSeries(series);
 		}
 
-		JFreeChart result = ChartFactory.createPolarChart("", dataSet, true, false, false);
+		JFreeChart result = ChartFactory.createPolarChart(data.getTitle(), dataSet, true, false, false);
 		result.setBackgroundPaint(null);
 		result.setBorderVisible(false);
 		
@@ -188,7 +215,6 @@ public class JFreeChartGenerator {
 		
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
-		legend.setPosition(RectangleEdge.TOP);
 
 		TextTitle title = result.getTitle();
 		title.setFont(THEME_TITLE_FONT);
@@ -204,13 +230,12 @@ public class JFreeChartGenerator {
 		plot.setOutlineVisible(false);
 		plot.setAxisLinePaint(Color.LIGHT_GRAY);
 	    
-	    JFreeChart result = new JFreeChart("", THEME_TITLE_FONT, plot, true);
+	    JFreeChart result = new JFreeChart(data.getTitle(), THEME_TITLE_FONT, plot, true);
 	    result.setBackgroundPaint(null);
 	    result.setBorderVisible(false);
 	    
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
-		legend.setPosition(RectangleEdge.TOP);
 
 		return result;
 	}
@@ -257,7 +282,6 @@ public class JFreeChartGenerator {
 		
 		LegendTitle legend = chart.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
-		legend.setPosition(RectangleEdge.TOP);
 
 		TextTitle title = chart.getTitle();
 		title.setFont(THEME_TITLE_FONT);
@@ -287,7 +311,6 @@ public class JFreeChartGenerator {
 		
 		LegendTitle legend = chart.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
-		legend.setPosition(RectangleEdge.TOP);
 
 		TextTitle title = chart.getTitle();
 		title.setFont(THEME_TITLE_FONT);

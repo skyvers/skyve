@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.List;
 
 public class ChartData {
+	private String title;
 	private List<Number> values;
 	private List<String> labels;
 	private List<Color> backgrounds;
@@ -11,6 +12,13 @@ public class ChartData {
 	private String label;
 	private Color background;
 	private Color border;
+
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
 	public List<Number> getValues() {
 		return values;

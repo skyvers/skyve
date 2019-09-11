@@ -432,7 +432,7 @@ public class EXT {
 	}
 	
 	/**
-	 * Generate a chart.
+	 * Create a new chart generator.
 	 * @param data
 	 * @param pixelWidth
 	 * @param pixelHeight

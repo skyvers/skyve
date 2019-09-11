@@ -14,7 +14,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"label",
+			propOrder = {"title",
+							"label",
 							"moduleName",
 							"documentName",
 							"categoryBinding",
@@ -26,6 +27,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 public class ChartBuilderMetaData implements MetaData {
 	private static final long serialVersionUID = -6525994383289095450L;
 
+	private String title;
 	private String label;
 	private String moduleName;
 	private String documentName;
@@ -35,6 +37,14 @@ public class ChartBuilderMetaData implements MetaData {
 	private AggregateFunction valueFunction;
 	private ChartBuilderTopMetaData top;
 	private ChartBuilderOrderMetaData order;
+
+	public String getTitle() {
+		return title;
+	}
+	@XmlAttribute(required = false)
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
 	public String getLabel() {
 		return label;
