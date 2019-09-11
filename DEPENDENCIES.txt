@@ -239,6 +239,10 @@ WILDCAT depends upon the following libraries:
 		https://github.com/mifmif/Generex
 		See https://www.apache.org/licenses/LICENSE-2.0
 		
+	* RainbowVis-Java
+		https://github.com/anomal/RainbowVis-Java
+		http://www.opensource.org/licenses/mit-license.php
+		
 	* Spring Security
 		https://spring.io/projects/spring-security
 		https://github.com/spring-projects/spring-security/blob/master/license.txt (Apache v2)

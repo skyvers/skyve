@@ -14,6 +14,8 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.view.model.chart.colours.ColourSeries;
+import org.skyve.metadata.view.model.chart.colours.RainbowColourSeries;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
@@ -133,7 +135,7 @@ public class ChartBuilder {
 	 * @return	The ChartData.
 	 */
 	public ChartData build(String label) {
-		return build(new ThemedColourSeries(), new ThemedColourSeries(), label);
+		return build(new RainbowColourSeries(), new RainbowColourSeries(), label);
 	}
 	
 	/**

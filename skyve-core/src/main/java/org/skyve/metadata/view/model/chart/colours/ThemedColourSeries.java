@@ -1,9 +1,9 @@
-package org.skyve.metadata.view.model.chart;
+package org.skyve.metadata.view.model.chart.colours;
 
 import java.awt.Color;
 
 /**
- * Produce darker shaades of the base colour given.
+ * Produce darker shades of the base colour given.
  * 
  * @author mike
  */

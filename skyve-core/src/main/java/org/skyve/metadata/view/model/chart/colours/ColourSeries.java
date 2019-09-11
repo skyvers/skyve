@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model.chart;
+package org.skyve.metadata.view.model.chart.colours;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Use to produce a series of colours for the size given.
  * Note that the class is depleted once <code>size</code> colours have been generated.
- * Sub-classes should set the curent colour in either a constructor or in an override of setSize().
+ * Sub-classes should set the current colour in either a constructor or in an override of setSize().
  * 
  * @author mike
  */
