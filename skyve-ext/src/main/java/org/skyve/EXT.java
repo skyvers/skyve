@@ -1,5 +1,6 @@
 package org.skyve;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import javax.sql.DataSource;
 import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.jfree.chart.JFreeChart;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.AttachmentContent;
@@ -34,6 +36,8 @@ import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
+import org.skyve.impl.generate.charts.JFreeChartGenerator;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportParameters;
@@ -50,6 +54,7 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -404,6 +409,39 @@ public class EXT {
 		return TagUtil.iterateTagged(tagId);
 	}
 
+	/**
+	 * Generate an image of a chart.
+	 * @param data
+	 * @param pixelWidth
+	 * @param pixelHeight
+	 * @return
+	 */
+	public static BufferedImage chartImage(ChartType type, ChartData data, int pixelWidth, int pixelHeight) {
+		return new JFreeChartGenerator(data, pixelWidth, pixelHeight).image(type);
+	}
+	
+	/**
+	 * Generate a chart.
+	 * @param data
+	 * @param pixelWidth
+	 * @param pixelHeight
+	 * @return
+	 */
+	public static JFreeChart chart(ChartType type, ChartData data, int pixelWidth, int pixelHeight) {
+		return new JFreeChartGenerator(data, pixelWidth, pixelHeight).chart(type);
+	}
+	
+	/**
+	 * Generate a chart.
+	 * @param data
+	 * @param pixelWidth
+	 * @param pixelHeight
+	 * @return
+	 */
+	public static JFreeChartGenerator newChartGenerator(ChartData data, int pixelWidth, int pixelHeight) {
+		return new JFreeChartGenerator(data, pixelWidth, pixelHeight);
+	}
+	
 	/**
 	 * 
 	 * @param user
