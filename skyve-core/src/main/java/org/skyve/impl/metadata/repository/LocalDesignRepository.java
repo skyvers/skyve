@@ -134,9 +134,9 @@ public class LocalDesignRepository extends AbstractRepository {
 				if (result == null) {
 					try {
 						final List<Router> routers = new ArrayList<>();
-						final Router mainRouter = getMainRouter();
-						if (mainRouter != null) {
-							routers.add(mainRouter);
+						final Router globalRouter = getGlobalRouter();
+						if (globalRouter != null) {
+							routers.add(globalRouter);
 						}
 						routers.addAll(getModuleRouters());
 						if (routers.isEmpty()) {
@@ -159,7 +159,8 @@ public class LocalDesignRepository extends AbstractRepository {
 		return result;
 	}
 
-	public Router getMainRouter() {
+	@Override
+	public Router getGlobalRouter() {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(UtilImpl.getAbsoluteBasePath());
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
@@ -169,6 +170,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	/**
 	 * @return A list of self-contained module Routers.
 	 */
+	@Override
 	public List<Router> getModuleRouters() {
 		final List<Router> moduleRouters = new ArrayList<>();
 		for (String customerName : getAllCustomerNames()) {

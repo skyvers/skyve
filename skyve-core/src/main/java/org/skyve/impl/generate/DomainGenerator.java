@@ -5,8 +5,10 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -48,6 +50,14 @@ public abstract class DomainGenerator {
 				Document document = module.getDocument(customer, documentName);
 				System.out.println("Validate document " + documentName);
 				repository.validateDocument(customer, document);
+				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
+					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
+				}
+				for (Router moduleRouter : repository.getModuleRouters()) {
+					if (moduleRouter.getUxuiSelectorClassName() != null) {
+						throw new MetaDataException("uxuiSelectorClassName attribute must only be defined in the global router.");
+					}
+				}
 				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
 					String uxuiName = uxui.getName();
 					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
