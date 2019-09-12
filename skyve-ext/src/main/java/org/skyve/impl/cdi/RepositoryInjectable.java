@@ -2,6 +2,7 @@ package org.skyve.impl.cdi;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import javax.enterprise.inject.Alternative;
 
@@ -51,6 +52,16 @@ public class RepositoryInjectable implements Repository, Serializable {
 	@Override
 	public Router getRouter() {
 		return CORE.getRepository().getRouter();
+	}
+
+	@Override
+	public Router getGlobalRouter() {
+		return CORE.getRepository().getGlobalRouter();
+	}
+
+	@Override
+	public List<Router> getModuleRouters() {
+		return CORE.getRepository().getModuleRouters();
 	}
 
 	@Override
