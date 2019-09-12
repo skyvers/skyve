@@ -33,6 +33,6 @@ public class MetaDataChartModel extends ChartModel<Bean> {
 		if (order != null) {
 			result.orderBy(order.getBy(), order.getSort());
 		}
-		return result.build(builder.getLabel());
+		return result.build(builder.getTitle(), builder.getLabel());
 	}
 }

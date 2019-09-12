@@ -9,18 +9,25 @@ import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.ChartModel;
 import org.primefaces.model.charts.bar.BarChartDataSet;
 import org.primefaces.model.charts.bar.BarChartModel;
+import org.primefaces.model.charts.bar.BarChartOptions;
 import org.primefaces.model.charts.donut.DonutChartDataSet;
 import org.primefaces.model.charts.donut.DonutChartModel;
+import org.primefaces.model.charts.donut.DonutChartOptions;
 import org.primefaces.model.charts.hbar.HorizontalBarChartDataSet;
 import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
 import org.primefaces.model.charts.line.LineChartDataSet;
 import org.primefaces.model.charts.line.LineChartModel;
+import org.primefaces.model.charts.line.LineChartOptions;
+import org.primefaces.model.charts.optionconfig.title.Title;
 import org.primefaces.model.charts.pie.PieChartDataSet;
 import org.primefaces.model.charts.pie.PieChartModel;
+import org.primefaces.model.charts.pie.PieChartOptions;
 import org.primefaces.model.charts.polar.PolarAreaChartDataSet;
 import org.primefaces.model.charts.polar.PolarAreaChartModel;
+import org.primefaces.model.charts.polar.PolarAreaChartOptions;
 import org.primefaces.model.charts.radar.RadarChartDataSet;
 import org.primefaces.model.charts.radar.RadarChartModel;
+import org.primefaces.model.charts.radar.RadarChartOptions;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
@@ -68,7 +75,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		}
 		chartModel.setBean(targetBean);
 		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
-		
+
+		Title title = title(data);
+
 		ChartModel result = null;
 		
 		boolean horizontal = ChartType.horizontalBar.equals(type);
@@ -84,6 +93,13 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			BarChartModel barChartModel = horizontal ? new HorizontalBarChartModel() : new BarChartModel();
 			barChartModel.setData(chartData);
+			
+			if (title != null) {
+				BarChartOptions options = new BarChartOptions();
+				options.setTitle(title);
+				barChartModel.setOptions(options);
+			}
+
 			result = barChartModel;
 		}
 		else if (ChartType.doughnut.equals(type)) {
@@ -96,6 +112,13 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			DonutChartModel donutChartModel = new DonutChartModel();
 			donutChartModel.setData(chartData);
+			
+			if (title != null) {
+				DonutChartOptions options = new DonutChartOptions();
+				options.setTitle(title);
+				donutChartModel.setOptions(options);
+			}
+
 			result = donutChartModel;
 		}
 		else if (ChartType.line.equals(type) || ChartType.lineArea.equals(type)) {
@@ -115,6 +138,13 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			LineChartModel lineChartModel = new LineChartModel();
 			lineChartModel.setData(chartData);
+			
+			if (title != null) {
+				LineChartOptions options = new LineChartOptions();
+				options.setTitle(title);
+				lineChartModel.setOptions(options);
+			}
+
 			result = lineChartModel;
 		}
 		else if (ChartType.pie.equals(type)) {
@@ -127,6 +157,13 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			PieChartModel pieChartModel = new PieChartModel();
 			pieChartModel.setData(chartData);
+			
+			if (title != null) {
+				PieChartOptions options = new PieChartOptions();
+				options.setTitle(title);
+				pieChartModel.setOptions(options);
+			}
+
 			result = pieChartModel;
 		}
 		else if (ChartType.polarArea.equals(type)) {
@@ -139,6 +176,13 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			PolarAreaChartModel polarChartModel = new PolarAreaChartModel();
 			polarChartModel.setData(chartData);
+			
+			if (title != null) {
+				PolarAreaChartOptions options = new PolarAreaChartOptions();
+				options.setTitle(title);
+				polarChartModel.setOptions(options);
+			}
+			
 			result = polarChartModel;
 		}
 		else if (ChartType.radar.equals(type)) {
@@ -155,10 +199,28 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			chartData.setLabels(data.getLabels());
 			RadarChartModel radarChartModel = new RadarChartModel();
 			radarChartModel.setData(chartData);
+
+			if (title != null) {
+				RadarChartOptions options = new RadarChartOptions();
+				options.setTitle(title);
+				radarChartModel.setOptions(options);
+			}
+
 			result = radarChartModel;
 		}
 		else {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
+		}
+		return result;
+	}
+	
+	private static Title title(org.skyve.metadata.view.model.chart.ChartData data) {
+		Title result = null;
+		String text = data.getTitle();
+		if (text != null) {
+			result = new Title();
+			result.setDisplay(true);
+			result.setText(text);
 		}
 		return result;
 	}
