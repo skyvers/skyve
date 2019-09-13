@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
@@ -100,6 +101,14 @@ public interface View extends NamedMetaData, Parameterizable, DecoratedMetaData 
 	 * @return
 	 */
 	public Collection<Action> getActions();
+
+	/**
+	 * Get an implicit inlined model - ie a chart model from a given modelId.
+	 * 
+	 * @param modelIndex	The index of the model to get
+	 * @return	Model meta data.
+	 */
+	public ModelMetaData getInlineModel(int modelIndex);
 	
 	/**
 	 * These represent parameters that are allowed to be populated when creating a new record.

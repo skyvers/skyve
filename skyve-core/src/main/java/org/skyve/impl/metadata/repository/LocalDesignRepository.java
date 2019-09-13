@@ -737,7 +737,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 							sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
 							result = view.convert(sb.toString());
-							result.resolveComponents(uxui, customer, document);
+							result.resolve(uxui, customer, document);
 							if (! UtilImpl.DEV_MODE) {
 								put(viewLocation, result);
 							}

@@ -17,6 +17,7 @@ public class MockFacesContext extends FacesContext {
 	private Application a = new MockApplication();
 	private ELContext elc = new MockELContext();
 	private UIViewRoot root = new UIViewRoot();
+	private ResponseWriter responseWriter = null;
 	
 	@Override
 	public Application getApplication() {
@@ -91,12 +92,12 @@ public class MockFacesContext extends FacesContext {
 
 	@Override
 	public ResponseWriter getResponseWriter() {
-		return null;
+		return responseWriter;
 	}
 
 	@Override
 	public void setResponseWriter(ResponseWriter responseWriter) {
-		// nothing to see here
+		this.responseWriter = responseWriter;
 	}
 
 	@Override

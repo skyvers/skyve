@@ -76,6 +76,10 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		chartModel.setBean(targetBean);
 		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
 
+		return pfChartModel(type, data);
+	}
+	
+	public static ChartModel pfChartModel(ChartType type, org.skyve.metadata.view.model.chart.ChartData data) {
 		Title title = title(data);
 
 		ChartModel result = null;
@@ -211,6 +215,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		else {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
 		}
+		
 		return result;
 	}
 	
@@ -231,7 +236,11 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		}
 		int alpha = colour.getAlpha();
 		if (alpha > 0) {
-			return new StringBuilder(16).append("rgba(").append(colour.getRed()).append(',').append(colour.getGreen()).append(',').append(colour.getBlue()).append(',').append(((alpha / 255.0) * 100) / 100.0).append(')').toString();
+			return String.format("rgba(%d,%d,%d,%.2f)",
+									Integer.valueOf(colour.getRed()),
+									Integer.valueOf(colour.getGreen()),
+									Integer.valueOf(colour.getBlue()),
+									Float.valueOf(alpha / 255F));
 		}
 		return new StringBuilder(16).append("rgb(").append(colour.getRed()).append(',').append(colour.getGreen()).append(',').append(colour.getBlue()).append(')').toString();
 	}

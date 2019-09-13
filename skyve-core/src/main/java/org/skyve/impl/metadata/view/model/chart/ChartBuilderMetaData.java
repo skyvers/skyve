@@ -5,10 +5,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
@@ -24,9 +25,10 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 							"valueFunction",
 							"top",
 							"order"})
-public class ChartBuilderMetaData implements MetaData {
+public class ChartBuilderMetaData implements ModelMetaData {
 	private static final long serialVersionUID = -6525994383289095450L;
 
+	private int modelIndex;
 	private String title;
 	private String label;
 	private String moduleName;
@@ -38,6 +40,17 @@ public class ChartBuilderMetaData implements MetaData {
 	private ChartBuilderTopMetaData top;
 	private ChartBuilderOrderMetaData order;
 
+	@Override
+	public int getModelIndex() {
+		return modelIndex;
+	}
+
+	@Override
+	@XmlTransient
+	public void setModelIndex(int modelIndex) {
+		this.modelIndex = modelIndex;
+	}
+	
 	public String getTitle() {
 		return title;
 	}
