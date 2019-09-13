@@ -1,6 +1,8 @@
 package org.skyve.impl.metadata.repository;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +28,7 @@ import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
+import org.skyve.impl.metadata.repository.router.RouterMerger;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
@@ -130,11 +133,18 @@ public class LocalDesignRepository extends AbstractRepository {
 				}
 				if (result == null) {
 					try {
-						StringBuilder sb = new StringBuilder(256);
-						sb.append(UtilImpl.getAbsoluteBasePath());
-						sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-						result = XMLMetaData.unmarshalRouter(sb.toString());
-						result = result.convert(ROUTER_NAME);
+						final List<Router> routers = new ArrayList<>();
+						final Router globalRouter = getGlobalRouter();
+						if (globalRouter != null) {
+							routers.add(globalRouter);
+						}
+						routers.addAll(getModuleRouters());
+						if (routers.isEmpty()) {
+							throw new RuntimeException("No routers found.");
+						}
+
+						result = new RouterMerger().mergeRouters(routers);
+
 						if (! UtilImpl.DEV_MODE) {
 							put(routerKey, result);
 						}
@@ -148,6 +158,33 @@ public class LocalDesignRepository extends AbstractRepository {
 		
 		return result;
 	}
+
+	@Override
+	public Router getGlobalRouter() {
+		StringBuilder sb = new StringBuilder(256);
+		sb.append(UtilImpl.getAbsoluteBasePath());
+		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
+		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME);
+	}
+
+	/**
+	 * @return A list of self-contained module Routers.
+	 */
+	@Override
+	public List<Router> getModuleRouters() {
+		final List<Router> moduleRouters = new ArrayList<>();
+		for (String customerName : getAllCustomerNames()) {
+			final Customer customer = getCustomer(customerName);
+			for (Module module : customer.getModules()) {
+				final Path moduleRouterPath = Paths.get(UtilImpl.getAbsoluteBasePath(), MODULES_NAMESPACE, module.getName(), ROUTER_NAME + ".xml");
+				if (moduleRouterPath.toFile().exists()) {
+					moduleRouters.add(XMLMetaData.unmarshalRouter(moduleRouterPath.toString()).convert(ROUTER_NAME));
+				}
+			}
+		}
+		return moduleRouters;
+	}
+
 
 	@Override
 	public Customer getCustomer(String customerName) {
