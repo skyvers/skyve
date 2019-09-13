@@ -12,6 +12,9 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.component.Component;
+import org.skyve.impl.metadata.view.model.ModelMetaData;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -33,6 +36,8 @@ public class ViewImpl extends Container implements View {
 	private String refreshActionName;
 	private List<Parameter> parameters = new ArrayList<>();
 	private String documentation;
+	// map of modelId -> model metadata used to instantiate models on the server-side
+	private List<ModelMetaData> inlineModels = new ArrayList<>();
 	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
@@ -138,6 +143,16 @@ public class ViewImpl extends Container implements View {
 		this.documentation = documentation;
 	}
 	
+	/**
+	 * Get an implicit inlined model - ie a chart model from a given modelId.
+	 * @param modelIndex	The index of the model to get
+	 * @return	The model.
+	 */
+	@Override
+	public ModelMetaData getInlineModel(int modelIndex) {
+		return inlineModels.get(modelIndex);
+	}
+	
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
@@ -145,15 +160,25 @@ public class ViewImpl extends Container implements View {
 	
 	/**
 	 * Ensure that any component loaded matches the given UX/UI.
-	 * @param uxui
+	 * Ensure that inlined metadata model definitions are added to the implicit models map.
 	 */
-	public void resolveComponents(String uxui, Customer customer, Document document) {
+	public void resolve(String uxui, Customer customer, Document document) {
 		Module module = customer.getModule(document.getOwningModuleName());
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
 				component.setContained(uxui, customer, module, document, name);
+			}
+			
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+				ChartBuilderMetaData model = chart.getModel();
+				if (model != null) {
+					inlineModels.add(model);
+					model.setModelIndex(inlineModels.size() - 1);
+				}
 			}
 		}.visit();
 	}

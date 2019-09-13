@@ -611,9 +611,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderChart(Chart chart) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,type:'");
+		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,chartType:'");
 		code.append(chart.getType()).append("'});");
-		code.append(variable).append(".setDataSource('").append(chart.getModelName()).append("');\n");
+		String dataSource = chart.getModelName();
+		if (dataSource == null) {
+			dataSource = String.valueOf(chart.getModel().getModelIndex());
+		}
+		code.append(variable).append(".setDataSource('").append(dataSource).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 

@@ -2380,6 +2380,152 @@ isc.BizLabel.addMethods({
         this.Super("initWidget", arguments);
 	}
 });
+
+// Chart
+isc.ClassFactory.defineClass("BizChart", "Canvas");
+isc.BizChart.addClassMethods({
+	loadingChartJS: false,
+	loadChartJS: function(callback) {
+		if (isc.BizChart.loadingChartJS) {
+			setTimeout(function() {isc.BizChart.loadChartJS(callback)}, 100);
+		}
+		else if (window.Chart) {
+			callback();
+		}
+		else {
+			isc.BizChart.loadingChartJS = true;
+			SKYVE.Util.loadJS('javax.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('javax.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+					isc.BizChart.loadingChartJS = false;
+					callback();
+				});
+			});
+		}
+	},
+	
+	v: 0,
+	initialise: function() {
+		eval(isc.BizChart.id + '.build()');
+	}
+});
+isc.BizChart.addMethods({
+	// params chartType
+	init: function(config) {
+		this.width = '100%';
+		this.height = '100%';
+		this.ID = 'bizChart' + isc.BizChart.v++;
+		this.redrawOnResize = false;
+		this._refreshing = false; // stop multiple refreshes
+		this.Super("init", arguments);
+	},
+
+	getInnerHTML: function() {
+		return '<canvas id="' + this.ID + '_chart" />';
+	},
+
+	draw: function() {
+		if (window.Chart) {
+			if (! this.isDrawn()) {
+				this.build();
+				return this.Super('draw', arguments);
+			}
+		}
+		else {
+			isc.BizChart.id = this.ID;
+			isc.BizChart.loadChartJS(isc.BizChart.initialise);
+			return this.Super('draw', arguments);
+		}
+	},
+
+	build: function() {
+		if (this.isDrawn()) {
+			this.chartConfig = {};
+		}
+		else {
+			this.delayCall('build', null, 100);
+		}
+	},
+	
+	setDataSource: function(modelName) {
+		if (window.Chart) {
+			this._modelName = modelName;
+			
+			// assign this chart to the edit view _grids property if this chart is on a view
+			var grids = this._view._grids[modelName];
+			if (grids) {} else {
+				grids = {};
+				this._view._grids[modelName] = grids;
+			}
+			grids[this.getID()] = this;
+
+			this._refresh();
+		}
+		else {
+			this.delayCall('setDataSource', arguments, 100);
+		}
+	},
+	
+	rerender: function() {
+		this._refresh();
+	},
+	
+	_refresh: function() {
+		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
+			return;
+		}
+		if (! this.isDrawn()) { // widget isn't even drawn yet
+			return;
+		}
+		if (! this.isVisible()) { // widget is invisible (from condition on the UI or UI is not displayed at the moment)
+			return;
+		}
+		
+		var url = SKYVE.Util.CONTEXT_URL + 'chart?';
+		if (this._modelName) {
+			var instance = this._view.gather(false);
+			url += '_c=' + instance._c + '&t=' + this.chartType + '&_m=' + this._modelName;
+		}
+		else {
+			return;
+		}
+
+		// ensure that only 1 refresh at a time occurs
+		this._refreshing = true;
+
+		var me = this;
+		isc.RPCManager.sendRequest({
+			showPrompt: true,
+			evalResult: true,
+			actionURL: url,
+			httpMethod: 'GET',
+			callback: function(rpcResponse, data, rpcRequest) {
+				try {
+					if (data.config) { // server sends {} when it has an error
+						me.chartConfig.type = data.config.type;
+						me.chartConfig.data = data.config.data;
+						me.chartConfig.options = data.config.options;
+						if (! me.chartConfig.options) {
+							me.chartConfig.options = {};
+						}
+						me.chartConfig.options.responsive = true;
+						me.chartConfig.options.maintainAspectRatio = false;
+						if (me.chart) {
+							me.chart.update();
+						}
+						else { 
+							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
+							me.chart = new Chart(ctx, me.chartConfig);
+						}
+					}
+				}
+				finally {
+					me._refreshing = false;
+				}
+			}
+		});
+	}
+});
+
 // ProgressBar
 isc.ClassFactory.defineClass("BizProgressBar", "ProgressBar");
 // Properties

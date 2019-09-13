@@ -175,6 +175,10 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>ChartServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>BizportExportServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
@@ -511,6 +515,15 @@
 	<servlet-mapping>
 		<servlet-name>PrimeInitialiseServlet</servlet-name>
 		<url-pattern>/primeinit</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ChartServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.ChartServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ChartServlet</servlet-name>
+		<url-pattern>/chart</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
