@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -56,7 +57,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = false)
 	public void setTitle(String title) {
-		this.title = title;
+		this.title = Util.processStringValue(title);
 	}
 
 	public String getLabel() {
@@ -64,7 +65,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setLabel(String label) {
-		this.label = label;
+		this.label = Util.processStringValue(label);
 	}
 	
 	public String getModuleName() {
@@ -72,7 +73,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
+		this.moduleName = Util.processStringValue(moduleName);
 	}
 	
 	public String getDocumentName() {
@@ -80,7 +81,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setDocumentName(String documentName) {
-		this.documentName = documentName;
+		this.documentName = Util.processStringValue(documentName);
 	}
 	
 	public String getCategoryBinding() {
@@ -88,7 +89,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setCategoryBinding(String categoryBinding) {
-		this.categoryBinding = categoryBinding;
+		this.categoryBinding = Util.processStringValue(categoryBinding);
 	}
 
 	public Bucket getCategoryBucket() {
@@ -113,7 +114,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setValueBinding(String valueBinding) {
-		this.valueBinding = valueBinding;
+		this.valueBinding = Util.processStringValue(valueBinding);
 	}
 	
 	public AggregateFunction getValueFunction() {
