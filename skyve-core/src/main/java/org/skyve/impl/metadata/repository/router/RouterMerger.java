@@ -17,12 +17,13 @@ public class RouterMerger {
 				if (existingUxuiMetadatum == null) {
 					newUxUis.add(uxuiMetadatum);
 				} else {
-					for (Route routeToMerge : uxuiMetadatum.getRoutes()) {
+					for (int i = 0; i < uxuiMetadatum.getRoutes().size(); i++) {
+						final Route routeToMerge = uxuiMetadatum.getRoutes().get(i);
 						final Route existingRoute = existingUxuiMetadatum.getRoutes().stream()
 								.filter(route -> Objects.equals(route.getOutcomeUrl(), routeToMerge.getOutcomeUrl()))
 								.findFirst().orElse(null);
 						if (existingRoute == null) {
-							existingUxuiMetadatum.getRoutes().add(routeToMerge);
+							existingUxuiMetadatum.getRoutes().add(i, routeToMerge);
 						} else {
 							existingRoute.getCriteria().addAll(routeToMerge.getCriteria());
 							existingRoute.getProperties().putAll(routeToMerge.getProperties());
