@@ -2385,28 +2385,21 @@ isc.BizLabel.addMethods({
 isc.ClassFactory.defineClass("BizChart", "Canvas");
 isc.BizChart.addClassMethods({
 	loadingChartJS: false,
-	loadChartJS: function(callback) {
+	loadChartJS: function() {
 		if (isc.BizChart.loadingChartJS) {
-			setTimeout(function() {isc.BizChart.loadChartJS(callback)}, 100);
+			setTimeout(function() {isc.BizChart.loadChartJS()}, 100);
 		}
-		else if (window.Chart) {
-			callback();
-		}
-		else {
+		else if (! window.Chart) {
 			isc.BizChart.loadingChartJS = true;
 			SKYVE.Util.loadJS('javax.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
 				SKYVE.Util.loadJS('javax.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
 					isc.BizChart.loadingChartJS = false;
-					callback();
 				});
 			});
 		}
 	},
 	
-	v: 0,
-	initialise: function() {
-		eval(isc.BizChart.id + '.build()');
-	}
+	v: 0
 });
 isc.BizChart.addMethods({
 	// params chartType
@@ -2426,26 +2419,15 @@ isc.BizChart.addMethods({
 	draw: function() {
 		if (window.Chart) {
 			if (! this.isDrawn()) {
-				this.build();
 				return this.Super('draw', arguments);
 			}
 		}
 		else {
-			isc.BizChart.id = this.ID;
-			isc.BizChart.loadChartJS(isc.BizChart.initialise);
+			isc.BizChart.loadChartJS();
 			return this.Super('draw', arguments);
 		}
 	},
 
-	build: function() {
-		if (this.isDrawn()) {
-			this.chartConfig = {};
-		}
-		else {
-			this.delayCall('build', null, 100);
-		}
-	},
-	
 	setDataSource: function(modelName) {
 		if (window.Chart) {
 			this._modelName = modelName;
@@ -2501,6 +2483,9 @@ isc.BizChart.addMethods({
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
 					if (data.config) { // server sends {} when it has an error
+						if (! me.chartConfig) {
+							me.chartConfig = {};
+						}
 						me.chartConfig.type = data.config.type;
 						me.chartConfig.data = data.config.data;
 						me.chartConfig.options = data.config.options;
