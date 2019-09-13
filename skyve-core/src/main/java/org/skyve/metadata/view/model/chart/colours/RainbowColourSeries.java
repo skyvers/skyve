@@ -1,6 +1,7 @@
 package org.skyve.metadata.view.model.chart.colours;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 import org.skyve.metadata.view.model.chart.colours.rainbow.Rainbow;
 import org.skyve.metadata.view.model.chart.colours.rainbow.RainbowException;
@@ -14,7 +15,7 @@ public class RainbowColourSeries extends ColourSeries {
 
 	private Rainbow rainbow;
 	private int currentRainbowIndex = 1;
-	private String[] spectrum = { "ff6385", "ffa040", "ffcc56", "4bc0c0", "36a3eb", "9966ff" };
+	private String[] spectrum = { "ff6385", "ffa040", "ffcc56", "4bc0c0", "36a3eb", "9966ff", "c9cbcf" };
 
 	public RainbowColourSeries() {
 		this.rainbow = new Rainbow();
@@ -42,6 +43,12 @@ public class RainbowColourSeries extends ColourSeries {
 	@Override
 	public void setSize(int size) {
 		super.setSize(size);
+
+		if (size <= 10) {
+			// trim the spectrum if 10 or fewer
+			rainbow.setSpectrum(Arrays.copyOf(spectrum, spectrum.length - 1));
+		}
+
 		rainbow.setNumberRange(0, size < spectrum.length ? spectrum.length : size);
 	}
 
