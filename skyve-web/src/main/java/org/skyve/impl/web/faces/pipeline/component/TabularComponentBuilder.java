@@ -1066,6 +1066,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
 		}
 
+		setId(result, null);
+		
 		Map<String, Object> attributes = result.getAttributes();
 		attributes.put("skyveType", type);
 		String modelName = chart.getModelName();
