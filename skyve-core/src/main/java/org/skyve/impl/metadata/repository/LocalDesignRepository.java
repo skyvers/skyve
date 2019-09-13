@@ -176,9 +176,11 @@ public class LocalDesignRepository extends AbstractRepository {
 		for (String customerName : getAllCustomerNames()) {
 			final Customer customer = getCustomer(customerName);
 			for (Module module : customer.getModules()) {
-				final Path moduleRouterPath = Paths.get(UtilImpl.getAbsoluteBasePath(), MODULES_NAMESPACE, module.getName(), ROUTER_NAME + ".xml");
-				if (moduleRouterPath.toFile().exists()) {
-					moduleRouters.add(XMLMetaData.unmarshalRouter(moduleRouterPath.toString()).convert(ROUTER_NAME));
+				final StringBuilder sb = new StringBuilder(256);
+				sb.append(UtilImpl.getAbsoluteBasePath());
+				sb.append(MODULES_NAMESPACE).append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
+				if (new File(sb.toString()).exists()) {
+					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME));
 				}
 			}
 		}
