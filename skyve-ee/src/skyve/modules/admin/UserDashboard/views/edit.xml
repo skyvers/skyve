@@ -63,12 +63,20 @@
 		</hbox>
 	</vbox>
 	<hbox>
-		<vbox border="true" borderTitle="Activity">
-			<dynamicImage name="UserDashboardActivity" />
-		</vbox>
-		<vbox border="true" borderTitle="Activity Context">
-			<dynamicImage name="UserDashboardActivityContext" />
-		</vbox>
+		<chart type="line">
+			<model title="System Activity" label="Audits by time" moduleName="admin" documentName="Audit" categoryBinding="timestamp" valueBinding="bizId" valueFunction="Count">
+				<temporalBucket type="dayMonthYear" />
+				<order by="category" sort="ascending" />
+			</model>
+		</chart>
+		<chart type="pie">
+			<model title="Audits By Context" label="Numbers of Audits" moduleName="admin" documentName="Audit" categoryBinding="auditDocumentName" valueBinding="bizId"
+				valueFunction="Count">
+				<noBucket />
+				<top sort="ascending" top="5" by="category" includeOthers="true" />
+				<order by="category" sort="ascending" />
+			</model>
+		</chart>
 	</hbox>
 	<tabPane>
 		<tab title="Jobs">

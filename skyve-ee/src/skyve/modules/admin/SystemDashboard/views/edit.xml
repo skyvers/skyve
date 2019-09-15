@@ -2,16 +2,44 @@
 <view title="System Dashboard" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox>
-		<vbox border="true" borderTitle="Activity By User">
-			<dynamicImage name="ActivityBreakdown" />
-		</vbox>
-		<vbox border="true" borderTitle="Activity Context">
-			<dynamicImage name="ActivityContext" />
-		</vbox>
+		<chart type="bar" >
+	          <model title="Activity By User" 
+	          		  label="Count of audits"
+	                  moduleName="admin"
+	                  documentName="Audit" 
+	                  categoryBinding="userName" 
+	                  valueBinding="bizId" 
+	                  valueFunction="Count">
+	                  <noBucket/>
+	              <order by="category" sort="ascending" />
+	          </model>
+		</chart>
+		<chart type="pie" >
+	        <model title="Audits By Context"
+	        		label="Numbers of Audits"
+	                moduleName="admin"
+	                documentName="Audit" 
+	                categoryBinding="auditDocumentName" 
+	                valueBinding="bizId" 
+	                valueFunction="Count">
+	             <noBucket/>
+	             <top sort="ascending" top="5" by="category" includeOthers="true"/>
+	            <order by="category" sort="ascending" />
+	        </model>
+		</chart>
 	</hbox>
-	<vbox border="true" borderTitle="Activity">
-		<dynamicImage name="Activity"/>
-	</vbox>	
+	<chart type="line" pixelHeight="100" >
+        <model title="System Activity" 
+        		label="Audits by time"
+                moduleName="admin"
+                documentName="Audit" 
+                categoryBinding="timestamp" 
+                valueBinding="bizId" 
+                valueFunction="Count">
+            <temporalBucket type="dayMonthYear" />
+            <order by="category" sort="ascending" />
+        </model>
+	</chart>
 	<tabPane>
 		<tab title="Jobs">
 			<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
