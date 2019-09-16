@@ -1,15 +1,19 @@
 package modules.admin.domain;
 
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * System Dashboard
  * 
+ * @navhas n status 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -26,7 +30,13 @@ public class SystemDashboard extends AbstractTransientBean {
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "SystemDashboard";
 
+	/** @hidden */
+	public static final String statusPropertyName = "status";
 
+	/**
+	 * Status
+	 **/
+	private List<Generic> status = new ChangeTrackingArrayList<>("status", this);
 
 	@Override
 	@XmlTransient
@@ -63,5 +73,32 @@ public class SystemDashboard extends AbstractTransientBean {
 	public boolean equals(Object o) {
 		return ((o instanceof SystemDashboard) && 
 					this.getBizId().equals(((SystemDashboard) o).getBizId()));
+	}
+
+	/**
+	 * {@link #status} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getStatus() {
+		return status;
+	}
+
+	/**
+	 * {@link #status} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getStatusElementById(String bizId) {
+		return getElementById(status, bizId);
+	}
+
+	/**
+	 * {@link #status} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setStatusElementById(String bizId, Generic element) {
+		 setElementById(status, element);
 	}
 }
