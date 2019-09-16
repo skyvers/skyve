@@ -113,6 +113,11 @@ public class CustomerInjectable implements Customer {
 	}
 
 	@Override
+	public Class<?> getChartPostProcessor() {
+		return CORE.getCustomer().getChartPostProcessor();
+	}
+
+	@Override
 	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
 																		String moduleName,
 																		String documentName,

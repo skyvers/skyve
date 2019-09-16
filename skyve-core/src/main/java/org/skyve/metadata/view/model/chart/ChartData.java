@@ -12,6 +12,8 @@ public class ChartData {
 	private String label;
 	private Color background;
 	private Color border;
+	// Can't be of type ChartPostProcessor coz this may not be a class visible to this class
+	private Class<?> postProcessor;
 
 	public String getTitle() {
 		return title;
@@ -61,5 +63,11 @@ public class ChartData {
 	}
 	public void setBorder(Color border) {
 		this.border = border;
+	}
+	public Class<?> getPostProcessor() {
+		return postProcessor;
+	}
+	public void setPostProcessor(Class<?> postProcessor) {
+		this.postProcessor = postProcessor;
 	}
 }

@@ -37,6 +37,7 @@ public class ChartBuilder {
 	private boolean topOthers = false;
 	private SortDirection orderBySort;
 	private OrderBy orderBy;
+	private Class<?> postProcessor;
 	
 	/**
 	 * Document builder.
@@ -130,6 +131,15 @@ public class ChartBuilder {
 	}
 	
 	/**
+	 * Add a post processor to this chart.
+	 * @param postProcessor	The postProcessor to add.
+	 */
+	public ChartBuilder postProcessor(@SuppressWarnings("hiding") Class<?> postProcessor) {
+		this.postProcessor = postProcessor;
+		return this;
+	}
+	
+	/**
 	 * Build the ChartData.
 	 * @param label	The data set label.
 	 * @return	The ChartData.
@@ -190,6 +200,7 @@ public class ChartBuilder {
 
 		result.setBackgrounds(backgroundColours.list(200));
 		result.setBorders(borderColours.list());
+		result.setPostProcessor(postProcessor);
 		return result;
 	}
 	

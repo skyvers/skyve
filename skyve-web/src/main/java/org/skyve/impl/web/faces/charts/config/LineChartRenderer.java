@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.charts;
+package org.skyve.impl.web.faces.charts.config;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.impl.sail.mock.MockFacesContext;
 
-public class BarChartRenderer extends org.primefaces.component.barchart.BarChartRenderer {
+public class LineChartRenderer extends org.primefaces.component.linechart.LineChartRenderer {
 	public String encodeConfig(ChartModel model) throws IOException {
 		FacesContext fc = new MockFacesContext();
 		try (ResponseWriter writer = new ResponseWriter()) {

@@ -181,6 +181,8 @@ public class CustomerImpl implements Customer {
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
 
+	private Class<?> chartPostProcessor;
+	
 	/**
 	 * vtable == fullyQualifiedName -> location 
 	 * (later will be - customer defined = TRUE, otherwise FALSE)
@@ -382,6 +384,15 @@ public class CustomerImpl implements Customer {
 		this.loginResources = loginResources;
 	}
 
+	@Override
+	public Class<?> getChartPostProcessor() {
+		return chartPostProcessor;
+	}
+	
+	public void setChartPostProcessor(Class<?> chartPostProcessor) {
+		this.chartPostProcessor = chartPostProcessor;
+	}
+	
 	public void determineDependencies() {
 		for (Module module : getModules()) {
 			for (String documentName : module.getDocumentRefs().keySet()) {

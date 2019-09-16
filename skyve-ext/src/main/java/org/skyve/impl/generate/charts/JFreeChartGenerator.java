@@ -27,8 +27,11 @@ import org.jfree.data.general.PieDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.TableOrder;
+import org.skyve.CORE;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
+import org.skyve.metadata.view.model.chart.TypelessChartPostProcessor;
 
 public class JFreeChartGenerator {
 	private static final String NO_DATA_AVAILABLE = "No data available";
@@ -106,6 +109,8 @@ public class JFreeChartGenerator {
 		configureCategoryChart(result);
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
+
+		postprocess(result);
 		return result;
 	}
 	
@@ -122,6 +127,8 @@ public class JFreeChartGenerator {
 		configureCategoryChart(result);
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
+
+		postprocess(result);
 		return result;
 	}
 	
@@ -136,6 +143,8 @@ public class JFreeChartGenerator {
 															false,
 															false);
 		configureCategoryChart(result);
+
+		postprocess(result);
 		return result;
 	}
 	
@@ -153,6 +162,8 @@ public class JFreeChartGenerator {
 		LineAndShapeRenderer renderer = (LineAndShapeRenderer) result.getCategoryPlot().getRenderer();
 		renderer.setBaseShapesVisible(true);
 		renderer.setBaseShapesFilled(true);
+
+		postprocess(result);
 		return result;
 	}
 	
@@ -160,6 +171,8 @@ public class JFreeChartGenerator {
 		PieDataset dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
+
+		postprocess(result);
 		return result;
 	}
 	
@@ -167,6 +180,8 @@ public class JFreeChartGenerator {
 		PieDataset dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
+
+		postprocess(result);
 		return result;
 	}
 
@@ -219,6 +234,7 @@ public class JFreeChartGenerator {
 		TextTitle title = result.getTitle();
 		title.setFont(THEME_TITLE_FONT);
 
+		postprocess(result);
 		return result;
 	}
 	
@@ -237,6 +253,7 @@ public class JFreeChartGenerator {
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
 
+		postprocess(result);
 		return result;
 	}
 
@@ -314,5 +331,23 @@ public class JFreeChartGenerator {
 
 		TextTitle title = chart.getTitle();
 		title.setFont(THEME_TITLE_FONT);
+	}
+	
+	private void postprocess(JFreeChart chart) {
+		Class<?> postProcessor = data.getPostProcessor();
+		if (postProcessor == null) {
+			Customer c = CORE.getCustomer();
+			postProcessor = c.getChartPostProcessor();
+		}
+		if (postProcessor != null) {
+			try {
+				@SuppressWarnings("unchecked")
+				TypelessChartPostProcessor<Object, Object> instance = (TypelessChartPostProcessor<Object, Object>) postProcessor.newInstance();
+				instance.processJFreeChart(chart);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create chart post processor", e);
+			}
+		}
 	}
 }

@@ -24,7 +24,7 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.actions.ChartAction;
-import org.skyve.impl.web.faces.charts.ChartConfigRenderer;
+import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;

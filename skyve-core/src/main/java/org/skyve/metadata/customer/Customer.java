@@ -106,6 +106,8 @@ public interface Customer extends NamedMetaData {
 	 */
 	public LoginResources getLoginResources();
 
+	public Class<?> getChartPostProcessor();
+	
 	/**
 	 * 
 	 * @param bizlet

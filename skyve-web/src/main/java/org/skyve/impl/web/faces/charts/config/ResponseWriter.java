@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.charts;
+package org.skyve.impl.web.faces.charts.config;
 
 import java.io.IOException;
 import java.io.StringWriter;
