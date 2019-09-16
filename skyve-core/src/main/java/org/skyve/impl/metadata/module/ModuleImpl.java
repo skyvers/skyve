@@ -166,8 +166,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());
 					column.setDisplay(DisplayType.thumbnail);
-					column.setPixelWidth(Integer.valueOf(32));
-					column.setPixelHeight(Integer.valueOf(32));
+					column.setPixelWidth(Integer.valueOf(64));
+					column.setPixelHeight(Integer.valueOf(64));
 					columns.add(column);
 				}
 				else if (attribute instanceof Field) {
