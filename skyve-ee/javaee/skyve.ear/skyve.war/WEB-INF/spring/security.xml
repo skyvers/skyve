@@ -167,4 +167,36 @@
 
 	<b:bean id="tokenRepository" class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
 -->
+
+    <!-- WAFFLE Configuration -->
+<!--
+	<http auto-config="true" use-expressions="true" entry-point-ref="negotiateSecurityFilterEntryPoint">
+		<custom-filter ref="waffleNegotiateSecurityFilter" position="PRE_AUTH_FILTER" />
+		...
+    </http>
+	<b:bean id="waffleWindowsAuthProvider" class="waffle.windows.auth.impl.WindowsAuthProviderImpl" />
+	<b:bean id="negotiateSecurityFilterProvider" class="waffle.servlet.spi.NegotiateSecurityFilterProvider">
+		<b:constructor-arg ref="waffleWindowsAuthProvider" />
+	</b:bean>
+	<b:bean id="basicSecurityFilterProvider" class="waffle.servlet.spi.BasicSecurityFilterProvider">
+		<b:constructor-arg ref="waffleWindowsAuthProvider" />
+	</b:bean>
+	<b:bean id="waffleSecurityFilterProviderCollection" class="waffle.servlet.spi.SecurityFilterProviderCollection">
+		<b:constructor-arg>
+			<b:list>
+				<b:ref bean="negotiateSecurityFilterProvider" />
+				<b:ref bean="basicSecurityFilterProvider" />
+			</b:list>
+		</b:constructor-arg>
+	</b:bean>
+	<b:bean id="negotiateSecurityFilterEntryPoint" class="waffle.spring.NegotiateSecurityFilterEntryPoint">
+		<b:property name="provider" ref="waffleSecurityFilterProviderCollection" />
+	</b:bean>
+	<b:bean id="waffleNegotiateSecurityFilter" class="waffle.spring.NegotiateSecurityFilter">
+		<b:property name="provider" ref="waffleSecurityFilterProviderCollection" />
+		<b:property name="allowGuestLogin" value="false" />
+		<b:property name="principalFormat" value="fqn" />
+		<b:property name="roleFormat" value="both" />
+	</b:bean>
+-->
 </b:beans>
