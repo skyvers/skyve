@@ -106,7 +106,8 @@ public interface Customer extends NamedMetaData {
 	 */
 	public LoginResources getLoginResources();
 
-	public Class<?> getChartPostProcessor();
+	public String getJFreeChartPostProcessorClassName();
+	public String getPrimeFacesChartPostProcessorClassName();
 	
 	/**
 	 * 

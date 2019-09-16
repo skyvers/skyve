@@ -33,6 +33,8 @@ public class MetaDataChartModel extends ChartModel<Bean> {
 		if (order != null) {
 			result.orderBy(order.getBy(), order.getSort());
 		}
+		result.jFreeChartPostProcessorClassName(builder.getJFreeChartPostProcessorClassName());
+		result.primeFacesChartPostProcessorClassName(builder.getPrimeFacesChartPostProcessorClassName());
 		return result.build(builder.getTitle(), builder.getLabel());
 	}
 }

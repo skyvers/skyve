@@ -99,7 +99,7 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jdom-1.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jempbox-1.8.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jhighlight-1.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jna-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jsr305-2.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jxl-2.6.10.jar"/>

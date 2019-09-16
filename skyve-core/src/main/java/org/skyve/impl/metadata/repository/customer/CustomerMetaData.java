@@ -24,7 +24,6 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.view.model.chart.TypelessChartPostProcessor;
 import org.skyve.util.Util;
 
 // TODO Populate defaultActions property in customer returned by convert
@@ -42,7 +41,8 @@ import org.skyve.util.Util;
 							"modules", 
 							"roles",
 							"interceptors",
-							"chartPostProcessor"})
+							"JFreeChartPostProcessorClassName",
+							"primeFacesChartPostProcessorClassName"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private static final long serialVersionUID = 4281621343439667457L;
 
@@ -57,7 +57,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
-	private String chartPostProcessor;
+	private String fullyQualifiedJFreeChartPostProcessorClassName;
+	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
 
 	public String getLanguage() {
 		return language;
@@ -155,13 +156,22 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return interceptors;
 	}
 
-	public String getChartPostProcessor() {
-		return chartPostProcessor;
+	public String getJFreeChartPostProcessorClassName() {
+		return fullyQualifiedJFreeChartPostProcessorClassName;
 	}
 
-	@XmlAttribute
-	public void setChartPostProcessor(String chartPostProcessor) {
-		this.chartPostProcessor = Util.processStringValue(chartPostProcessor);
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setJFreeChartPostProcessorClassName(String fullyQualifiedJFreeChartPostProcessorClassName) {
+		this.fullyQualifiedJFreeChartPostProcessorClassName = Util.processStringValue(fullyQualifiedJFreeChartPostProcessorClassName);
+	}
+
+	public String getPrimeFacesChartPostProcessorClassName() {
+		return fullyQualifiedPrimeFacesChartPostProcessorClassName;
+	}
+
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setPrimeFacesChartPostProcessorClassName(String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = Util.processStringValue(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 	}
 
 	@Override
@@ -280,18 +290,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 			}
 		}
 
-		if (chartPostProcessor != null) {
-			try {
-				Class<?> processor = Thread.currentThread().getContextClassLoader().loadClass(chartPostProcessor);
-				// test instantiation and casting
-				@SuppressWarnings("unused")
-				TypelessChartPostProcessor<?, ?> object = (TypelessChartPostProcessor<?, ?>) processor.newInstance();
-				result.setChartPostProcessor(processor);
-			}
-			catch (Exception e) {
-				throw new MetaDataException(metaDataName + " : The chartPostProcessor class name of " + chartPostProcessor + " is not valid.", e);
-			}
-		}
+		result.setJFreeChartPostProcessorClassName(fullyQualifiedJFreeChartPostProcessorClassName);
+		result.setPrimeFacesChartPostProcessorClassName(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 
 		return result;
 	}

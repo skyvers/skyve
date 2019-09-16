@@ -37,7 +37,8 @@ public class ChartBuilder {
 	private boolean topOthers = false;
 	private SortDirection orderBySort;
 	private OrderBy orderBy;
-	private Class<?> postProcessor;
+	private String fullyQualifiedJFreeChartPostProcessorClassName;
+	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
 	
 	/**
 	 * Document builder.
@@ -131,14 +132,23 @@ public class ChartBuilder {
 	}
 	
 	/**
-	 * Add a post processor to this chart.
-	 * @param postProcessor	The postProcessor to add.
+	 * Add a JFreeChart post processor to this chart.
+	 * @param fullyQualifiedJFreeChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public ChartBuilder postProcessor(@SuppressWarnings("hiding") Class<?> postProcessor) {
-		this.postProcessor = postProcessor;
+	public ChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedJFreeChartPostProcessorClassName) {
+		this.fullyQualifiedJFreeChartPostProcessorClassName = fullyQualifiedJFreeChartPostProcessorClassName;
 		return this;
 	}
-	
+
+	/**
+	 * Add a PrimeFaces Chart post processor to this chart.
+	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName	The postProcessor to add.
+	 */
+	public ChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = fullyQualifiedPrimeFacesChartPostProcessorClassName;
+		return this;
+	}
+
 	/**
 	 * Build the ChartData.
 	 * @param label	The data set label.
@@ -200,7 +210,8 @@ public class ChartBuilder {
 
 		result.setBackgrounds(backgroundColours.list(200));
 		result.setBorders(borderColours.list());
-		result.setPostProcessor(postProcessor);
+		result.setJFreeChartPostProcessorClassName(fullyQualifiedJFreeChartPostProcessorClassName);
+		result.setPrimeFacesChartPostProcessorClassName(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 		return result;
 	}
 	

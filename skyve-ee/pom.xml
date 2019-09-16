@@ -819,11 +819,13 @@
             <artifactId>skyve-web</artifactId>
             <version>${skyve.version}</version>
         </dependency>
+<!-- Only uncomment for SPNEGO on a windows server
 		<dependency>
 			<groupId>com.github.waffle</groupId>
 			<artifactId>waffle-spring-security5</artifactId>
 			<version>1.9.0</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>

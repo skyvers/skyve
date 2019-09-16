@@ -31,7 +31,6 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
-import org.skyve.metadata.view.model.chart.TypelessChartPostProcessor;
 
 public class JFreeChartGenerator {
 	private static final String NO_DATA_AVAILABLE = "No data available";
@@ -110,7 +109,7 @@ public class JFreeChartGenerator {
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -128,7 +127,7 @@ public class JFreeChartGenerator {
 		// Set the bar painting to a flat fill 
 		((BarRenderer) ((CategoryPlot) result.getPlot()).getRenderer()).setBarPainter(new StandardBarPainter());
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -144,7 +143,7 @@ public class JFreeChartGenerator {
 															false);
 		configureCategoryChart(result);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -163,7 +162,7 @@ public class JFreeChartGenerator {
 		renderer.setBaseShapesVisible(true);
 		renderer.setBaseShapesFilled(true);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -172,7 +171,7 @@ public class JFreeChartGenerator {
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -181,7 +180,7 @@ public class JFreeChartGenerator {
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 
@@ -234,7 +233,7 @@ public class JFreeChartGenerator {
 		TextTitle title = result.getTitle();
 		title.setFont(THEME_TITLE_FONT);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 	
@@ -253,7 +252,7 @@ public class JFreeChartGenerator {
 		LegendTitle legend = result.getLegend();
 		legend.setItemFont(THEME_LEGEND_FONT);
 
-		postprocess(result);
+		postProcess(result);
 		return result;
 	}
 
@@ -298,10 +297,14 @@ public class JFreeChartGenerator {
 		renderer.setItemLabelAnchorOffset(0);
 		
 		LegendTitle legend = chart.getLegend();
-		legend.setItemFont(THEME_LEGEND_FONT);
+		if (legend != null) {
+			legend.setItemFont(THEME_LEGEND_FONT);
+		}
 
 		TextTitle title = chart.getTitle();
-		title.setFont(THEME_TITLE_FONT);
+		if (title != null) {
+			title.setFont(THEME_TITLE_FONT);
+		}
 
 		plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
 		plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
@@ -327,23 +330,26 @@ public class JFreeChartGenerator {
 		}
 		
 		LegendTitle legend = chart.getLegend();
-		legend.setItemFont(THEME_LEGEND_FONT);
+		if (legend != null) {
+			legend.setItemFont(THEME_LEGEND_FONT);
+		}
 
 		TextTitle title = chart.getTitle();
-		title.setFont(THEME_TITLE_FONT);
+		if (title != null) {
+			title.setFont(THEME_TITLE_FONT);
+		}
 	}
 	
-	private void postprocess(JFreeChart chart) {
-		Class<?> postProcessor = data.getPostProcessor();
+	private void postProcess(JFreeChart chart) {
+		String postProcessor = data.getJFreeChartPostProcessorClassName();
 		if (postProcessor == null) {
 			Customer c = CORE.getCustomer();
-			postProcessor = c.getChartPostProcessor();
+			postProcessor = c.getJFreeChartPostProcessorClassName();
 		}
 		if (postProcessor != null) {
 			try {
-				@SuppressWarnings("unchecked")
-				TypelessChartPostProcessor<Object, Object> instance = (TypelessChartPostProcessor<Object, Object>) postProcessor.newInstance();
-				instance.processJFreeChart(chart);
+				JFreeChartPostProcessor instance = (JFreeChartPostProcessor) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).newInstance();
+				instance.process(chart);
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Could not create chart post processor", e);

@@ -181,7 +181,8 @@ public class CustomerImpl implements Customer {
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
 
-	private Class<?> chartPostProcessor;
+	private String jFreeChartPostProcessorClassName;
+	private String primeFacesChartPostProcessorClassName;
 	
 	/**
 	 * vtable == fullyQualifiedName -> location 
@@ -385,12 +386,21 @@ public class CustomerImpl implements Customer {
 	}
 
 	@Override
-	public Class<?> getChartPostProcessor() {
-		return chartPostProcessor;
+	public String getJFreeChartPostProcessorClassName() {
+		return jFreeChartPostProcessorClassName;
 	}
 	
-	public void setChartPostProcessor(Class<?> chartPostProcessor) {
-		this.chartPostProcessor = chartPostProcessor;
+	public void setJFreeChartPostProcessorClassName(String jFreeChartPostProcessorClassName) {
+		this.jFreeChartPostProcessorClassName = UtilImpl.processStringValue(jFreeChartPostProcessorClassName);
+	}
+	
+	@Override
+	public String getPrimeFacesChartPostProcessorClassName() {
+		return primeFacesChartPostProcessorClassName;
+	}
+	
+	public void setPrimeFacesChartPostProcessorClassName(String primeFacesChartPostProcessorClassName) {
+		this.primeFacesChartPostProcessorClassName = UtilImpl.processStringValue(primeFacesChartPostProcessorClassName);
 	}
 	
 	public void determineDependencies() {
