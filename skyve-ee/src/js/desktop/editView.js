@@ -1710,7 +1710,7 @@ isc.BizListMembership.addMethods({
 		this._candidateList = isc.ListGrid.create({
 			width: "100%", 
 			height: "100%",
-			minHeight: 100,
+			minHeight: 120,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1732,7 +1732,7 @@ isc.BizListMembership.addMethods({
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
-			minHeight: 100,
+			minHeight: 120,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -2404,8 +2404,13 @@ isc.BizChart.addClassMethods({
 isc.BizChart.addMethods({
 	// params chartType
 	init: function(config) {
-		this.width = '100%';
-		this.height = '100%';
+		if (! config.width) {
+			config.width = '100%';
+		}
+		if (! config.height) {
+			config.height = '100%';
+		}
+		this.styleName = 'googleMapDivParent',
 		this.ID = 'bizChart' + isc.BizChart.v++;
 		this.redrawOnResize = false;
 		this._refreshing = false; // stop multiple refreshes
@@ -2413,7 +2418,7 @@ isc.BizChart.addMethods({
 	},
 
 	getInnerHTML: function() {
-		return '<canvas id="' + this.ID + '_chart" />';
+		return '<canvas id="' + this.ID + '_chart" style="margin:0;padding:0;height:100%" />';
 	},
 
 	draw: function() {

@@ -114,7 +114,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 public class SmartClientViewRenderer extends ViewRenderer {
-	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(100);
+	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(120);
+	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(150);
 
 	private boolean noCreateView;
 	private int variableCounter = 0;
@@ -182,7 +183,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		tabNumbers.push(Integer.valueOf(0));
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizTabPane.create({");
-		size(tabPane, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
+		size(tabPane, DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(tabPane.getDisabledConditionName(), code);
 		invisible(tabPane.getInvisibleConditionName(), code);
 		String selected = tabPane.getSelectedTabIndexBinding();
@@ -611,8 +612,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderChart(Chart chart) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,chartType:'");
-		code.append(chart.getType()).append("'});");
+		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,");
+		size(chart, null, code);
+		code.append("chartType:'").append(chart.getType()).append("'});");
 		String dataSource = chart.getModelName();
 		if (dataSource == null) {
 			dataSource = String.valueOf(chart.getModel().getModelIndex());
