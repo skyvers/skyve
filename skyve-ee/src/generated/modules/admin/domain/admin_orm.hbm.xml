@@ -15,11 +15,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="auditModuleName" length="128" />
 		<property name="auditDocumentName" length="128" />
 		<property name="auditBizId" length="36" index="IDX_auditBizId" />
@@ -43,11 +43,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="description" length="250" />
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
@@ -76,7 +76,7 @@
 		<property name="calendarStartTime" type="DateTime" />
 		<property name="calendarEndTime" type="DateTime" />
 		<property name="calendarDescriptionExpression" length="500" />
-		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" cascade="persist,save-update,refresh,merge" index="IDX_template" foreign-key="FK_ADM_Communication_template" />
+		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_template" />
 		<bag name="subscriptions" inverse="true">
 			<key column="communication_id" />
 			<one-to-many entity-name="adminSubscription" />
@@ -91,11 +91,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="name" length="50" />
 		<property name="description" length="255" />
 		<property name="template" type="text" />
@@ -109,11 +109,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="passwordComplexityModel" length="7">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
@@ -122,7 +122,7 @@
 		<property name="fromEmail" length="254" />
 		<property name="passwordResetEmailSubject" length="250" />
 		<property name="passwordResetEmailBody" type="text" />
-		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" index="IDX_userSelfRegistrationGroup" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup" />
+		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup" />
 		<property name="allowUserSelfRegistration" />
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -134,11 +134,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="name" length="200" />
 		<property name="contactType" length="12">
 			<type name="Enum">
@@ -158,11 +158,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="name" length="30" />
 		<property name="description" type="text" />
 		<filter name="adminDataGroupNoneFilter" condition="1=0"/>
@@ -175,11 +175,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="modDocName" length="100" />
 		<property name="injectBootstrapUser" />
 		<property name="schemaName" length="1024" />
@@ -212,7 +212,7 @@
 		</property>
 		<property name="auditTimestampStart" type="Timestamp" />
 		<property name="auditTimestampEnd" type="Timestamp" />
-		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" index="IDX_auditUser" foreign-key="FK_ADM_DataMaintenance_auditUser" />
+		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -223,11 +223,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="sequenceName" length="500" />
@@ -242,11 +242,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="name" length="30" />
 		<property name="description" length="255" />
 		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
@@ -263,12 +263,12 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="parent" entity-name="adminGroup" column="parent_id" insert="false" update="false" index="IDX_parent" foreign-key="FK_ADM_SecurityGroupRole_parent" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminGroup" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_SecurityGroupRole_parent" />
 		<property name="roleName" length="60" />
 		<filter name="adminGroupRoleNoneFilter" condition="1=0"/>
 		<filter name="adminGroupRoleCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -280,11 +280,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="mode" length="10">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.ImportExport$Mode</param>
@@ -322,13 +322,13 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="bizOrdinal" />
-		<many-to-one name="parent" entity-name="adminImportExport" column="parent_id" insert="false" update="false" index="IDX_parent" foreign-key="FK_ADM_ImportExportColumn_parent" />
+		<many-to-one name="parent" entity-name="adminImportExport" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ImportExportColumn_parent" />
 		<property name="columnName" length="100" />
 		<property name="bindingName" length="100" />
 		<property name="bindingExpression" length="200" />
@@ -347,11 +347,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="startTime" type="Timestamp" />
 		<property name="endTime" type="Timestamp" />
 		<property name="displayName" length="100" />
@@ -368,16 +368,16 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="jobName" length="100" />
 		<property name="cronExpression" length="128" />
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
-		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" index="IDX_runAs" foreign-key="FK_ADM_JobSchedule_runAs" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
 		<property name="disabled" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -389,11 +389,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="moduleName" length="100" />
 		<property name="queryName" length="100" />
 		<property name="name" length="256" />
@@ -408,12 +408,12 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" index="IDX_communication" foreign-key="FK_ADM_Subscription_communication" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Subscription_communication" />
 		<property name="receiverIdentifier" length="254" />
 		<property name="declined" />
 		<property name="formatType" length="5">
@@ -432,11 +432,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="name" length="256" />
 		<property name="visible" />
 		<property name="uploadModuleName" length="500" />
@@ -470,15 +470,15 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="taggedModule" length="30" />
 		<property name="taggedDocument" length="30" />
 		<property name="taggedBizId" length="36" index="IDX_taggedBizId" />
-		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" index="IDX_tag" foreign-key="FK_ADM_Tagged_tag" />
+		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Tagged_tag" />
 		<filter name="adminTaggedNoneFilter" condition="1=0"/>
 		<filter name="adminTaggedCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminTaggedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -489,11 +489,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
 		<property name="password" length="100" />
 		<property name="createdDateTime" type="DateTime" />
@@ -502,15 +502,11 @@
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<property name="passwordResetToken" length="56" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" index="IDX_contact" foreign-key="FK_ADM_SecurityUser_contact" />
-		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" index="IDX_dataGroup" foreign-key="FK_ADM_SecurityUser_dataGroup" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact" />
+		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup" />
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
-			<key foreign-key="FK_ADM_SecurityUser_groups_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-			</key>
-			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
+			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
 		</bag>
 		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
 			<key column="parent_id" />
@@ -527,11 +523,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
 		<property name="loginDateTime" type="DateTime" />
 		<filter name="adminUserLoginRecordNoneFilter" condition="1=0"/>
@@ -544,11 +540,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
 		<property name="year" />
 		<property name="month" />
@@ -563,14 +559,14 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
 		<property name="createdDateTime" type="DateTime" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" index="IDX_contact" foreign-key="FK_ADM_SecurityUser_contact" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact" />
 		<property name="inactive" />
 		<filter name="adminUserProxyNoneFilter" condition="1=0"/>
 		<filter name="adminUserProxyCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -582,12 +578,12 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="parent" entity-name="adminUser" column="parent_id" insert="false" update="false" index="IDX_parent" foreign-key="FK_ADM_SecurityUserRole_parent" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminUser" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_SecurityUserRole_parent" />
 		<property name="roleName" length="60" />
 		<filter name="adminUserRoleNoneFilter" condition="1=0"/>
 		<filter name="adminUserRoleCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -599,11 +595,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="305" />
 		<property name="series" length="64" />
 		<property name="token" length="64" />
