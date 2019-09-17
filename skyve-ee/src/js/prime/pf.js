@@ -238,6 +238,15 @@ SKYVE.PF = function() {
 					});
 				});
 			}
+		},
+
+		// This is called by PF charts to lose the 2:1 aspect ratio.
+		chartExtender: function() {
+			if (! this.cfg.config.options) {
+				this.cfg.config.options = {};
+			}
+			this.cfg.config.options.responsive = true;
+			this.cfg.config.options.maintainAspectRatio = false;
 		}
 	};
 }();

@@ -77,7 +77,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		chartModel.setBean(targetBean);
 		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
 
-		return pfChartModel(type, data);
+		ChartModel result = pfChartModel(type, data);
+		result.setExtender("SKYVE.PF.chartExtender");
+		return result;
 	}
 	
 	public static ChartModel pfChartModel(ChartType type, org.skyve.metadata.view.model.chart.ChartData data) {
