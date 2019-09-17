@@ -2,11 +2,11 @@
 <view name="_emailNotConfiguredBanner" title="Communication" xmlns="http://www.skyve.org/xml/view" 
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-		<vbox border="true" visible="notEmailConfigured" shrinkWrap="height">
+	<vbox border="true" visible="notEmailConfigured" shrinkWrap="height">
 		<form>
 			<column />
 			<row>
-				<item>
+				<item align="centre">
 					<blurb>
 						<![CDATA[
 							<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">

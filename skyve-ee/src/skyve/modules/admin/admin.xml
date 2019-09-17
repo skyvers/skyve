@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <module name="admin" title="Admin" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" prototype="true">
 	<homeRef>edit</homeRef>
 	<homeDocument>UserDashboard</homeDocument>
 	<jobs>
@@ -22,7 +22,7 @@
 		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="CommunicationTemplate" />
 		<document ref="Configuration" />
-		<document ref="Contact" defaultQueryName="qContacts" />
+		<document ref="Contact" />
 		<document ref="Content" />
 		<document ref="ControlPanel" />
 		<document ref="DataGroup" />

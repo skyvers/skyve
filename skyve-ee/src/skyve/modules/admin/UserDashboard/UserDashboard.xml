@@ -6,36 +6,11 @@
 	<singularAlias>User Dashboard</singularAlias>
 	<pluralAlias>User Dashboards</pluralAlias>
 	<iconStyleClass>fa fa-area-chart</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/chart16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/chart32.png</icon32x32RelativeFilePath>
 	<bizKey expression="User Dashboard"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >
 			<displayName>Current User</displayName>
 			<documentName>User</documentName>
 		</association>
-		<text name="groupMembershipList">
-			<displayName>Group Membership</displayName>
-			<length>500</length>
-		</text>
-		<dateTime name="lastLogin">
-			<displayName>Last Login</displayName>
-		</dateTime>
-		<collection name="groups" type="aggregation" >
-			<displayName>Groups</displayName>
-			<documentName>Group</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order by="name" sort="ascending" />
-			</ordering>
-		</collection>		
-		<collection name="roles" type="aggregation" >
-			<displayName>Roles</displayName>
-			<documentName>UserRole</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order by="rolename" sort="ascending" />
-			</ordering>
-		</collection>		
 	</attributes>
 </document>

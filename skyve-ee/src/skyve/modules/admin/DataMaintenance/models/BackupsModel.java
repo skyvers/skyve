@@ -17,8 +17,8 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
-import org.skyve.util.Util;
 
+import modules.admin.DataMaintenance.DataMaintenanceExtension;
 import modules.admin.DownloadFolder.DownloadFolderBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DownloadFolder;
@@ -86,10 +86,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	
 	@Override
 	public Page fetch() throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = Util.getContentDirectory() + "backup_" + customerName;
-		
-		return DownloadFolderBizlet.fetchBackups(backupDirPrefix, getStartRow(), getEndRow());
+		return DownloadFolderBizlet.fetchBackups(DataMaintenanceExtension.backupDirectoryPrefix(), getStartRow(), getEndRow());
 	}
 
 	@Override

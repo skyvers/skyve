@@ -6,7 +6,7 @@
 			<listGrid continueConversation="false" query="qUsers"></listGrid>
 		</tab>
 		<tab title="Invite Users">
-			<component document="Communication" name="_emailNotConfiguredBanner" />
+			<component document="Configuration" name="_emailNotConfiguredBanner" />
 			<vbox border="true" borderTitle="User Invitations" >
 				<form>
 					<column />

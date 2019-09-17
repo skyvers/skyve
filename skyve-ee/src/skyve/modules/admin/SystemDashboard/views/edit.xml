@@ -2,6 +2,28 @@
 <view title="System Dashboard" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox>
+		<vbox border="true" borderTitle="System Activity">
+			<chart type="line">
+		        <model title="System Activity" 
+		        		label="Audits by time"
+		                moduleName="admin"
+		                documentName="Audit" 
+		                categoryBinding="timestamp" 
+		                valueBinding="bizId" 
+		                valueFunction="Count">
+		            <temporalBucket type="dayMonthYear" />
+		            <order by="category" sort="ascending" />
+		        </model>
+			</chart>
+		</vbox>
+		<vbox border="true" borderTitle="System Status">
+			<dataRepeater binding="status">
+				<boundColumn binding="memo1" title="Item" editable="false"/>
+				<boundColumn binding="boolean1" title="Status" editable="false"/>				
+			</dataRepeater>
+		</vbox>
+	</hbox>
+	<hbox border="true" borderTitle="Activity Breakdown">
 		<chart type="bar" >
 	          <model title="Activity By User" 
 	          		  label="Count of audits"
@@ -11,11 +33,12 @@
 	                  valueBinding="bizId" 
 	                  valueFunction="Count">
 	                  <noBucket/>
+	              <top sort="ascending" top="10" by="category" includeOthers="true"/>
 	              <order by="category" sort="ascending" />
 	          </model>
 		</chart>
 		<chart type="pie" >
-	        <model title="Audits By Context"
+	        <model title="Activity By Context"
 	        		label="Numbers of Audits"
 	                moduleName="admin"
 	                documentName="Audit" 
@@ -23,32 +46,12 @@
 	                valueBinding="bizId" 
 	                valueFunction="Count">
 	             <noBucket/>
-	             <top sort="ascending" top="5" by="category" includeOthers="true"/>
+	             <top sort="ascending" top="10" by="category" includeOthers="true"/>
 	            <order by="category" sort="ascending" />
 	        </model>
 		</chart>
 	</hbox>
-	<chart type="line" pixelHeight="100" >
-        <model title="System Activity" 
-        		label="Audits by time"
-                moduleName="admin"
-                documentName="Audit" 
-                categoryBinding="timestamp" 
-                valueBinding="bizId" 
-                valueFunction="Count">
-            <temporalBucket type="dayMonthYear" />
-            <order by="category" sort="ascending" />
-        </model>
-	</chart>
-	<tabPane>
-		<tab title="Jobs">
-			<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
-		</tab>
-		<tab title="Users by Group">
-			<listGrid continueConversation="false" query="qUsersByGroup" title="Number of Users by Group"/>		
-		</tab>
-		<tab title="Contacts by Type">
-			<listGrid continueConversation="false" query="qContactsByContactType" title="Number of Contacts by Type"/>							
-		</tab>
-	</tabPane>
+	<vbox border="true" borderTitle="System Jobs">
+		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
+	</vbox>
 </view>

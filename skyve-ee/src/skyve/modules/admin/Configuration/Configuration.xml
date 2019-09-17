@@ -51,12 +51,17 @@
 	<conditions>
 		<condition name="emailConfigured">
 			<expression>
-				<![CDATA[(
-					((modules.admin.Configuration.ConfigurationExtension) (this))
-						.validSMTPHost())
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
 				]]>
 			</expression>
-
-		</condition>
+		</condition>	
+		<condition name="backupsConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validBackupConfiguration()
+				]]>
+			</expression>
+		</condition>	
 	</conditions>
 </document>
