@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import net.sf.jasperreports.engine.type.*;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -26,8 +25,8 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.report.ReportFormat;
@@ -63,6 +62,19 @@ import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
+import net.sf.jasperreports.engine.type.CalculationEnum;
+import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
+import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
+import net.sf.jasperreports.engine.type.IncrementTypeEnum;
+import net.sf.jasperreports.engine.type.LineStyleEnum;
+import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.PositionTypeEnum;
+import net.sf.jasperreports.engine.type.ResetTypeEnum;
+import net.sf.jasperreports.engine.type.RotationEnum;
+import net.sf.jasperreports.engine.type.ScaleImageEnum;
+import net.sf.jasperreports.engine.type.SplitTypeEnum;
+import net.sf.jasperreports.engine.type.StretchTypeEnum;
+import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
@@ -726,8 +738,8 @@ public class JasperReportRenderer {
     protected JRField createField(ReportField reportField) {
         final JRDesignField jrField = new JRDesignField();
 
-        if (!(Boolean.TRUE.equals(reportField.getCollection()) && Mode.sql.equals(reportField.getParent().getMode()))) {
-            if (reportField.getParent() != null) {
+		if (reportField.getParent() != null) {
+			if (!(Boolean.TRUE.equals(reportField.getCollection()) && Mode.sql.equals(reportField.getParent().getMode()))) {
                 jrField.setName(reportField.getName());
                 jrField.setValueClassName(reportField.getTypeClass());
 

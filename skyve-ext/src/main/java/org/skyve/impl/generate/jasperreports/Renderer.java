@@ -2,6 +2,8 @@ package org.skyve.impl.generate.jasperreports;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -964,34 +966,98 @@ public class Renderer {
 		String moduleName = design.getModuleName();
 		String documentName = design.getDocumentName();
 
-		StringBuilder filePath = new StringBuilder(64);
-		filePath.append(design.getRepositoryPath());
+		Path filePath = Paths.get(design.getRepositoryPath());
 		if (design.getRepositoryPath() != null) {
-			if (!design.getRepositoryPath().endsWith("/")) {
-				filePath.append("/");
-			}
 			if (Boolean.TRUE.equals(design.getSaveToDocumentPackage())) {
-				filePath.append("modules/");
-				filePath.append(moduleName).append('/').append(documentName).append("/reports/");
+				if (!filePath.endsWith("modules")) {
+					filePath = filePath.resolve("modules");
+				}
+
+				filePath = filePath.resolve(moduleName).resolve(documentName).resolve("reports");
 
 				// TODO - handle uxui options
 				// if (uxui != null) {
 				// filePath.append(uxui).append('/');
 				// }
 			} else {
-				filePath.append("generatedReports/");
+				filePath = filePath.resolve("generatedReports");
 			}
-			File file = new File(filePath.toString());
-			file.mkdirs();
-			filePath.append(design.getName() + ".jrxml");
-			file = new File(filePath.toString());
+
+			if (!filePath.toFile().exists()) {
+				filePath.toFile().mkdirs();
+			}
+			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
+			File file = reportPath.toFile();
 			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
 				out.println(reportRenderer.getJrxml());
 				out.flush();
 			}
 		}
+	}
 
+	/**
+	 * Generate the JRXML file
+	 * 
+	 * @param design
+	 */
+	public static void saveJrxml(DesignSpecification design) throws Exception {
+		Path filePath = Paths.get(design.getRepositoryPath());
+		if (design.getRepositoryPath() != null) {
+			if (Boolean.TRUE.equals(design.getSaveToDocumentPackage())) {
+				if (!filePath.endsWith("modules")) {
+					filePath = filePath.resolve("modules");
+				}
+
+				filePath = filePath.resolve(design.getModuleName()).resolve(design.getDocumentName()).resolve("reports");
+
+				// TODO - handle uxui options
+				// if (uxui != null) {
+				// filePath.append(uxui).append('/');
+				// }
+			} else {
+				filePath = filePath.resolve("generatedReports");
+			}
+
+			if (!filePath.toFile().exists()) {
+				filePath.toFile().mkdirs();
+			}
+		}
+
+		saveJrxml(design, filePath);
+	}
+
+	/**
+	 * Generate the JRXML file - recursive call for all subreports
+	 * 
+	 * @param design
+	 */
+	public static void saveJrxml(DesignSpecification design, Path filePath) throws Exception {
+
+		if (!design.getSubReports().isEmpty()) {
+			for (DesignSpecification ds : design.getSubReports()) {
+				saveJrxml(ds, filePath);
+			}
+		}
+
+		if (design.getRepositoryPath() == null) {
+			throw new MetaDataException("ReportDesign has no repository path! Where do you want the files created?");
+		}
+
+		if (design.getRepositoryPath() != null) {
+			Path reportPath = filePath.resolve(design.getName() + ".jrxml");
+			File file = reportPath.toFile();
+			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
+			try (PrintWriter out = new PrintWriter(file)) {
+				try {
+					final JasperReportRenderer reportRenderer = new JasperReportRenderer(design);
+					out.println(reportRenderer.getJrxml());
+					out.flush();
+				} catch (NullPointerException npe) {
+					Util.LOGGER.warning(String.format("NullPointerException while writing report to %s", reportPath.toString()));
+				}
+			}
+		}
 	}
 
 	/**

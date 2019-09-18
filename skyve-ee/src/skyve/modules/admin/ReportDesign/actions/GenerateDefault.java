@@ -1,6 +1,11 @@
 package modules.admin.ReportDesign.actions;
 
-import org.skyve.impl.generate.jasperreports.*;
+import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.impl.generate.jasperreports.DesignSpecification;
+import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
+import org.skyve.impl.generate.jasperreports.Renderer;
+import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
+import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -25,7 +30,8 @@ public class GenerateDefault implements ServerSideAction<ReportDesign> {
 
 		bean.setJrxml(reportRenderer.getJrxml());
 		if (bean.getRepositoryPath() != null) {
-			Renderer.saveJrxml(designSpecification, reportRenderer);
+			Renderer.saveJrxml(designSpecification);
+			webContext.growl(MessageSeverity.info, "Reports generated into " + bean.getRepositoryPath());
 		}
 
 		return new ServerSideActionResult<>(bean);

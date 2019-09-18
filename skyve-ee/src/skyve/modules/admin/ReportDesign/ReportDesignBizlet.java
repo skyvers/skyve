@@ -13,12 +13,12 @@ import org.skyve.impl.generate.jasperreports.ReportField;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
-import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -38,7 +38,14 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 
 	@Override
 	public ReportDesign newInstance(ReportDesign bean) throws Exception {
-		return super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));
+		bean = super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));
+
+		// populate the output directory from the JSON if provided
+		if (Util.getModuleDirectory() != null) {
+			bean.setRepositoryPath(Util.getModuleDirectory());
+		}
+
+		return bean;
 	}
 
 	/**
