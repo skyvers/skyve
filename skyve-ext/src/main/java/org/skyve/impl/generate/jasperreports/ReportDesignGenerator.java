@@ -1,5 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
+import java.util.HashMap;
+
 import org.elasticsearch.common.Preconditions;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -9,8 +11,6 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
-
-import java.util.HashMap;
 
 public abstract class ReportDesignGenerator {
 
@@ -378,7 +378,8 @@ public abstract class ReportDesignGenerator {
      * @param fld
      * @return
      */
-    public void constructSubreportFromField(DesignSpecification design, ReportField fld, Integer colWidth) {
+	@SuppressWarnings("boxing")
+	public void constructSubreportFromField(DesignSpecification design, ReportField fld, Integer colWidth) {
         final Document document = design.getDocument();
 
         DesignSpecification subreport = new DesignSpecification();
@@ -399,6 +400,7 @@ public abstract class ReportDesignGenerator {
         subreport.setField(fld);
         subreport.setParentReportPersistentName(Renderer.getPersistentFromDocument(document));
         subreport.setRepositoryPath(design.getRepositoryPath());
+		subreport.setSaveToDocumentPackage(design.getSaveToDocumentPackage());
 
         // get the attribute and collection type
         for (Attribute attr : document.getAttributes()) {

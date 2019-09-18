@@ -942,6 +942,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		sub.setField(fld);
 		sub.setParentReportPersistentName(Renderer.getPersistentFromDocument(document));
 		sub.setRepositoryPath(design.getRepositoryPath());
+		sub.setSaveToDocumentPackage(design.getSaveToDocumentPackage());
 
 		// get the attribute and collection type
 		for (Attribute attr : document.getAttributes()) {
