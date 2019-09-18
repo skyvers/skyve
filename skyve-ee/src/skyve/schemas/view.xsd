@@ -1402,7 +1402,8 @@
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="label" type="xs:string" use="required"/>
     <xs:attribute name="moduleName" type="xs:string" use="required"/>
-    <xs:attribute name="documentName" type="xs:string" use="required"/>
+    <xs:attribute name="documentName" type="xs:string"/>
+    <xs:attribute name="queryName" type="xs:string"/>
     <xs:attribute name="categoryBinding" type="xs:string" use="required"/>
     <xs:attribute name="valueBinding" type="xs:string" use="required"/>
     <xs:attribute name="valueFunction" type="tns:aggregateFunction"/>

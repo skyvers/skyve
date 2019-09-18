@@ -20,6 +20,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 							"label",
 							"moduleName",
 							"documentName",
+							"queryName",
 							"categoryBinding",
 							"categoryBucket",
 							"valueBinding",
@@ -36,6 +37,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	private String label;
 	private String moduleName;
 	private String documentName;
+	private String queryName;
 	private String categoryBinding;
 	private Bucket categoryBucket;
 	private String valueBinding;
@@ -83,11 +85,19 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	public String getDocumentName() {
 		return documentName;
 	}
-	@XmlAttribute(required = true)
+	@XmlAttribute
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
-	
+
+	public String getQueryName() {
+		return queryName;
+	}
+	@XmlAttribute
+	public void setQueryName(String queryName) {
+		this.queryName = UtilImpl.processStringValue(queryName);
+	}
+
 	public String getCategoryBinding() {
 		return categoryBinding;
 	}

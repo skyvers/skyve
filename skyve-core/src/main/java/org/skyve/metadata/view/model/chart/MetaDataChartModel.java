@@ -22,7 +22,12 @@ public class MetaDataChartModel extends ChartModel<Bean> {
 			bucket = null;
 		}
 		
-		ChartBuilder result = new ChartBuilder().with(builder.getModuleName(), builder.getDocumentName())
+		String documentName = builder.getDocumentName();
+		ChartBuilder result = (documentName != null) ?
+								new ChartBuilder().with(builder.getModuleName(), documentName)
+													.category(builder.getCategoryBinding(), bucket)
+													.value(builder.getValueBinding(), builder.getValueFunction()) :
+								new ChartBuilder().withQuery(builder.getModuleName(), builder.getQueryName())
 													.category(builder.getCategoryBinding(), bucket)
 													.value(builder.getValueBinding(), builder.getValueFunction());
 		ChartBuilderTopMetaData top = builder.getTop();

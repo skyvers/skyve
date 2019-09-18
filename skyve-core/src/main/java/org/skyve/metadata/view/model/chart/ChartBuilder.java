@@ -10,10 +10,12 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.chart.colours.ColourSeries;
 import org.skyve.metadata.view.model.chart.colours.RainbowColourSeries;
 import org.skyve.persistence.DocumentQuery;
@@ -22,11 +24,15 @@ import org.skyve.util.Binder;
 
 /**
  * Generate the ChartData based on a simple declarative method call chain.
+ * The chart is generated from a document, a document query or a metadata query.
+ * The projections, orderings and groupings are cleared and re-applied
+ * based on the method calls made in this builder.
  * 
  * @author mike
  */
 public class ChartBuilder {
 	private Document document;
+	private DocumentQuery query;
 	private String categoryBindingOrAlias;
 	private Bucket categoryBucket;
 	private String valueBindingOrAlias;
@@ -57,45 +63,92 @@ public class ChartBuilder {
 	 */
 	public ChartBuilder with(@SuppressWarnings("hiding") Document document) {
 		this.document = document;
+		this.query = CORE.getPersistence().newDocumentQuery(document);
+		return this;
+	}
+	
+	/**
+	 * Document Query Builder.
+	 * This will clear the projections, orderings and groupings from this query.
+	 * @param query
+	 */
+	public ChartBuilder with(@SuppressWarnings("hiding") DocumentQuery query) {
+		this.query = query;
+		this.document = query.getDrivingDocument();
+
+		AbstractDocumentQuery adq = (AbstractDocumentQuery) this.query;
+		adq.clearProjections();
+		adq.clearOrderings();
+		adq.clearGroups();
+		
+		return this;
+	}
+	
+	/**
+	 * Query builder.
+	 * This will use the query without the projections, orderings and groupings.
+	 * @param moduleName
+	 * @param queryName
+	 */
+	public ChartBuilder withQuery(String moduleName, String queryName) {
+		Customer c = CORE.getCustomer();
+		Module m = c.getModule(moduleName);
+		return with(m.getMetaDataQuery(queryName));
+	}
+
+	/**
+	 * Query builder.
+	 * This will use the query without the projections, orderings and groupings.
+	 * @param query
+	 */
+	public ChartBuilder with(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
+		this.query = query.constructDocumentQuery(null, null);
+		this.document = this.query.getDrivingDocument();
+
+		AbstractDocumentQuery adq = (AbstractDocumentQuery) this.query;
+		adq.clearProjections();
+		adq.clearOrderings();
+		adq.clearGroups();
+		
 		return this;
 	}
 	
 	/**
 	 * Set the category data field
-	 * @param bindingOrAlias
+	 * @param binding
 	 */
-	public ChartBuilder category(String bindingOrAlias) {
-		categoryBindingOrAlias = bindingOrAlias;
+	public ChartBuilder category(String binding) {
+		categoryBindingOrAlias = binding;
 		return this;
 	}
 	
 	/**
 	 * Set the category data field with a bucketing function.
-	 * @param bindingOrAlias
+	 * @param binding
 	 * @param bucket
 	 */
-	public ChartBuilder category(String bindingOrAlias, Bucket bucket) {
-		categoryBindingOrAlias = bindingOrAlias;
+	public ChartBuilder category(String binding, Bucket bucket) {
+		categoryBindingOrAlias = binding;
 		categoryBucket = bucket;
 		return this;
 	}
 
 	/**
 	 * Set the value data field.
-	 * @param bindingOrAlias
+	 * @param binding
 	 */
-	public ChartBuilder value(String bindingOrAlias) {
-		valueBindingOrAlias = bindingOrAlias;
+	public ChartBuilder value(String binding) {
+		valueBindingOrAlias = binding;
 		return this;
 	}
 
 	/**
 	 * Set the value data field with an aggregation function
-	 * @param bindingOrAlias
+	 * @param binding
 	 * @param function
 	 */
-	public ChartBuilder value(String bindingOrAlias, AggregateFunction function) {
-		valueBindingOrAlias = bindingOrAlias;
+	public ChartBuilder value(String binding, AggregateFunction function) {
+		valueBindingOrAlias = binding;
 		valueFunction = function;
 		return this;
 	}
@@ -215,7 +268,7 @@ public class ChartBuilder {
 		return result;
 	}
 	
-	private static String label(String value) {
+	static String label(String value) {
 		if ((value == null) || value.isEmpty()) {
 			return "Others";
 		}
@@ -223,7 +276,6 @@ public class ChartBuilder {
 	}
 	
 	private List<Bean> query() {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(document);
 		String categoryExpression = null;
 		String categoryAlias = "category";
 		String valueExpression = (valueFunction == null) ? valueBindingOrAlias : valueFunction + "(" + valueBindingOrAlias + ")";
@@ -235,23 +287,23 @@ public class ChartBuilder {
 			categoryExpression = categoryBucket.bizQLExpression(categoryBindingOrAlias);
 		}
 
-		q.addExpressionProjection(categoryExpression, categoryAlias);
-		q.addExpressionProjection(valueExpression, "value");
-		q.addExpressionGrouping(categoryExpression);
+		query.addExpressionProjection(categoryExpression, categoryAlias);
+		query.addExpressionProjection(valueExpression, "value");
+		query.addExpressionGrouping(categoryExpression);
 		
 		if (top > 0) {
-			q.addExpressionOrdering(OrderBy.category.equals(topOrderBy) ? categoryExpression : valueExpression, topSort);
+			query.addExpressionOrdering(OrderBy.category.equals(topOrderBy) ? categoryExpression : valueExpression, topSort);
 		}
 		else {
 			if (orderBySort == null) {
-				q.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression);
+				query.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression);
 			}
 			else {
-				q.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression, orderBySort);
+				query.addExpressionOrdering(OrderBy.category.equals(orderBy) ? categoryExpression : valueExpression, orderBySort);
 			}
 		}
 
-		List<Bean> result = q.projectedResults();
+		List<Bean> result = query.projectedResults();
 
 		if (top > 0) {
 			// cull the list if its bigger than the top requirement

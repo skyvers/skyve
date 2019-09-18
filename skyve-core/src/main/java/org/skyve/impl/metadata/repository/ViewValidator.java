@@ -804,14 +804,29 @@ class ViewValidator extends ViewVisitor {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
 		}
 		
+		String documentName = model.getDocumentName();
+		String queryName = model.getQueryName();
+
 		Document contextDocument = null;
-		try {
-			contextDocument = contextModule.getDocument(customer, model.getDocumentName());
+		if (documentName != null) {
+			try {
+				contextDocument = contextModule.getDocument(customer, documentName);
+			}
+			catch (Exception e) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid documentName of " + documentName, e);
+			}
 		}
-		catch (Exception e) {
-			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid documentName of " + model.getDocumentName(), e);
+		else if (queryName != null) {
+			MetaDataQueryDefinition query = contextModule.getMetaDataQuery(queryName);
+			if (query == null) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid queryName of " + queryName);
+			}
+			contextDocument = query.getDocumentModule(customer).getDocument(customer, queryName);
 		}
-		
+		else {
+			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " needs either a documentName or queryName");
+		}
+
 		validateBinding(contextModule,
 							contextDocument,
 							null,
