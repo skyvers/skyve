@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
@@ -24,6 +25,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -300,6 +302,15 @@ public class ViewGenerator {
 				else if (module.isPrototype() && (attribute instanceof Geometry)) {
 					FormItem item = new FormItem();
 					GeometryMap widget = new GeometryMap();
+					widget.setBinding(binding);
+					item.setWidget(widget);
+					FormRow row = new FormRow();
+					row.getItems().add(item);
+					form.getRows().add(row);
+				}
+				else if (module.isPrototype() && (attribute instanceof Content)) {
+					FormItem item = new FormItem();
+					ContentImage widget = new ContentImage();
 					widget.setBinding(binding);
 					item.setWidget(widget);
 					FormRow row = new FormRow();
