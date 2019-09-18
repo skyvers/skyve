@@ -43,7 +43,7 @@
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.16.1</jts.version>
 		<lucene.version>4.10.2</lucene.version>
-		<omnifaces.version>2.7</omnifaces.version>
+		<omnifaces.version>2.7.1</omnifaces.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<!--This is the version tika 1.5 requires -->
 		<poi.version>3.10.1</poi.version>
