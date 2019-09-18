@@ -36,6 +36,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.charts.PrimeFacesChartPostProcessor;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -76,7 +77,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		chartModel.setBean(targetBean);
 		org.skyve.metadata.view.model.chart.ChartData data = chartModel.getChartData();
 
-		return pfChartModel(type, data);
+		ChartModel result = pfChartModel(type, data);
+		result.setExtender("SKYVE.PF.chartExtender");
+		return result;
 	}
 	
 	public static ChartModel pfChartModel(ChartType type, org.skyve.metadata.view.model.chart.ChartData data) {
@@ -216,6 +219,8 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
 		}
 		
+		postProcess(result, data);
+		
 		return result;
 	}
 	
@@ -254,5 +259,24 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 			result.add(web(colour));
 		}
 		return result;
+	}
+	
+	private static void postProcess(ChartModel model,
+										org.skyve.metadata.view.model.chart.ChartData data) {
+		String postProcessor = data.getPrimeFacesChartPostProcessorClassName();
+		if (postProcessor == null) {
+			Customer c = CORE.getCustomer();
+			postProcessor = c.getPrimeFacesChartPostProcessorClassName();
+		}
+		if (postProcessor != null) {
+			try {
+				@SuppressWarnings("unchecked")
+				PrimeFacesChartPostProcessor<ChartModel> instance = (PrimeFacesChartPostProcessor<ChartModel>) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).newInstance();
+				instance.process(model);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create chart post processor", e);
+			}
+		}
 	}
 }

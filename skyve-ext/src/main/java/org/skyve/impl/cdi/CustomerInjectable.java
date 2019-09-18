@@ -113,8 +113,13 @@ public class CustomerInjectable implements Customer {
 	}
 
 	@Override
-	public Class<?> getChartPostProcessor() {
-		return CORE.getCustomer().getChartPostProcessor();
+	public String getJFreeChartPostProcessorClassName() {
+		return CORE.getCustomer().getJFreeChartPostProcessorClassName();
+	}
+
+	@Override
+	public String getPrimeFacesChartPostProcessorClassName() {
+		return CORE.getCustomer().getJFreeChartPostProcessorClassName();
 	}
 
 	@Override

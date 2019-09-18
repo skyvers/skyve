@@ -10,7 +10,8 @@
 			</item>
 		</row>
 	</form>
-	<component document="Communication" name="_emailNotConfiguredBanner" />
+	<component name="_emailNotConfiguredBanner" />
+	<component name="_backupsNotConfiguredBanner"/>
 	<form border="true" borderTitle="Password Reset">
 		<column responsiveWidth="4" />
 		<column />

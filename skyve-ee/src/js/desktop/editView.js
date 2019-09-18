@@ -2405,12 +2405,11 @@ isc.BizChart.addMethods({
 	// params chartType
 	init: function(config) {
 		if (! config.width) {
-			config.width = '100%';
+			this.width = '100%';
 		}
 		if (! config.height) {
-			config.height = '100%';
+			this.height = '100%';
 		}
-		this.styleName = 'googleMapDivParent',
 		this.ID = 'bizChart' + isc.BizChart.v++;
 		this.redrawOnResize = false;
 		this._refreshing = false; // stop multiple refreshes
@@ -2418,7 +2417,7 @@ isc.BizChart.addMethods({
 	},
 
 	getInnerHTML: function() {
-		return '<canvas id="' + this.ID + '_chart" style="margin:0;padding:0;height:100%" />';
+		return '<canvas id="' + this.ID + '_chart" />';
 	},
 
 	draw: function() {
@@ -2430,6 +2429,18 @@ isc.BizChart.addMethods({
 		else {
 			isc.BizChart.loadChartJS();
 			return this.Super('draw', arguments);
+		}
+	},
+
+	resized: function() {
+		if (this.chart) {
+			this.chart.canvas.parentNode.style.width = this.getWidth() + 'px';
+			this.chart.canvas.parentNode.style.height = this.getHeight() +  'px';
+			this.chart.canvas.width = this.getWidth() * 2;
+			this.chart.canvas.height = this.getHeight() * 2;
+			this.chart.canvas.style.width = this.getWidth() + 'px';
+			this.chart.canvas.style.height = this.getHeight() +  'px';
+			this.chart.update();
 		}
 	},
 
@@ -2506,6 +2517,7 @@ isc.BizChart.addMethods({
 							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
 							me.chart = new Chart(ctx, me.chartConfig);
 						}
+						me.resized();
 					}
 				}
 				finally {

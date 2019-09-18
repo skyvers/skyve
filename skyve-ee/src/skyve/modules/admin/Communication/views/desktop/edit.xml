@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<component name="_emailNotConfiguredBanner"/>
+	<component name="_emailNotConfiguredBanner" document="Configuration"/>
 	<tabPane>
 		<tab title="Manage">
 			<form border="true" borderTitle="Configuration">

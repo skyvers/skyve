@@ -1396,6 +1396,8 @@
       </xs:choice>
       <xs:element ref="tns:top" minOccurs="0"/>
       <xs:element ref="tns:order" minOccurs="0"/>
+      <xs:element name="JFreeChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:element name="primeFacesChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="label" type="xs:string" use="required"/>

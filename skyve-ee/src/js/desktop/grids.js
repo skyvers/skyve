@@ -1845,15 +1845,8 @@ isc.BizDataGrid.addMethods({
 			}
 		}
 		var contextMenu = isc.Menu.create({showShadow: true, shadowDepth: 10, data: contextMenuData});
-		
-		var showHeader = true;
-		if (me.isRepeater) {
-			if (me.showColumnHeaders) {} else {
-				showHeader = false;
-			}
-		}
 
-		this._createGrid(this._config, this._fields);
+		this._createGrid(config, this._fields, contextMenu);
 
 		// assign the grid to the form grids...
 		var grids = me._view._grids[me._b];
@@ -1905,7 +1898,16 @@ isc.BizDataGrid.addMethods({
 		me.addMember(me.grid);
 	},
 
-	_createGrid: function(config, fields) {
+	_createGrid: function(config, fields, contextMenu) {
+		var me = this;
+
+		var showHeader = true;
+		if (me.isRepeater) {
+			if (me.showColumnHeaders) {} else {
+				showHeader = false;
+			}
+		}
+
 		var gridConfig = {
 			height: "*",
 			minHeight: me.minHeight,

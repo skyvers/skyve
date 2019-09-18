@@ -1350,7 +1350,7 @@ public class SmartClientGenerateUtils {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append('{');
 		for (DomainValue value : values) {
-			sb.append('\'').append(value.getCode()).append("':'");
+			sb.append('\'').append(processString(value.getCode())).append("':'");
 			sb.append(processString(Util.i18n(value.getDescription(), locale))).append("',");
 		}
 		if (values.isEmpty()) { // no values

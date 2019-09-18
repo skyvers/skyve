@@ -1080,6 +1080,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{").append(managedBeanName).append(".chartModel}");
 		result.setValueExpression("model", ef.createValueExpression(elc, value.toString(), ChartModel.class));
+
+		Integer pixelHeight = chart.getPixelHeight();
+		Integer percentageHeight = chart.getPercentageHeight();
+		Integer minPixelHeight = chart.getMinPixelHeight();
+		// Set a minimum height
+		if ((pixelHeight == null) && (percentageHeight == null)) {
+			pixelHeight = (minPixelHeight != null) ? minPixelHeight : Integer.valueOf(300);
+		}
+		setSize(result, 
+					null, 
+					chart.getPixelWidth(), 
+					chart.getResponsiveWidth(), 
+					chart.getPercentageWidth(), 
+					pixelHeight, 
+					percentageHeight,
+					null);
+
+		
 		return result;
 	}
 	

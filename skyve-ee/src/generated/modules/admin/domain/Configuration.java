@@ -321,15 +321,32 @@ public class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * backupsConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isBackupsConfigured() {
+		return (modules.admin.Configuration.ConfigurationExtension.validBackupConfiguration());
+	}
+
+	/**
+	 * {@link #isBackupsConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotBackupsConfigured() {
+		return (! isBackupsConfigured());
+	}
+
+	/**
 	 * emailConfigured
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return ((
-					((modules.admin.Configuration.ConfigurationExtension) (this))
-						.validSMTPHost()));
+		return (modules.admin.Configuration.ConfigurationExtension.validSMTPHost());
 	}
 
 	/**

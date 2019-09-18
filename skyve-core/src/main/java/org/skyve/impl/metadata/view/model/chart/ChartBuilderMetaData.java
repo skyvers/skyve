@@ -9,10 +9,10 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.model.ModelMetaData;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -25,7 +25,9 @@ import org.skyve.util.Util;
 							"valueBinding",
 							"valueFunction",
 							"top",
-							"order"})
+							"order",
+							"JFreeChartPostProcessorClassName",
+							"primeFacesChartPostProcessorClassName"})
 public class ChartBuilderMetaData implements ModelMetaData {
 	private static final long serialVersionUID = -6525994383289095450L;
 
@@ -40,7 +42,9 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	private AggregateFunction valueFunction;
 	private ChartBuilderTopMetaData top;
 	private ChartBuilderOrderMetaData order;
-
+	private String jFreeChartPostProcessorClassName;
+	private String primeFacesChartPostProcessorClassName;
+	
 	@Override
 	public int getModelIndex() {
 		return modelIndex;
@@ -57,7 +61,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = false)
 	public void setTitle(String title) {
-		this.title = Util.processStringValue(title);
+		this.title = UtilImpl.processStringValue(title);
 	}
 
 	public String getLabel() {
@@ -65,7 +69,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setLabel(String label) {
-		this.label = Util.processStringValue(label);
+		this.label = UtilImpl.processStringValue(label);
 	}
 	
 	public String getModuleName() {
@@ -73,7 +77,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setModuleName(String moduleName) {
-		this.moduleName = Util.processStringValue(moduleName);
+		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 	
 	public String getDocumentName() {
@@ -81,7 +85,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setDocumentName(String documentName) {
-		this.documentName = Util.processStringValue(documentName);
+		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 	
 	public String getCategoryBinding() {
@@ -89,7 +93,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setCategoryBinding(String categoryBinding) {
-		this.categoryBinding = Util.processStringValue(categoryBinding);
+		this.categoryBinding = UtilImpl.processStringValue(categoryBinding);
 	}
 
 	public Bucket getCategoryBucket() {
@@ -114,7 +118,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	}
 	@XmlAttribute(required = true)
 	public void setValueBinding(String valueBinding) {
-		this.valueBinding = Util.processStringValue(valueBinding);
+		this.valueBinding = UtilImpl.processStringValue(valueBinding);
 	}
 	
 	public AggregateFunction getValueFunction() {
@@ -139,5 +143,21 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public void setOrder(ChartBuilderOrderMetaData order) {
 		this.order = order;
+	}
+
+	public String getJFreeChartPostProcessorClassName() {
+		return jFreeChartPostProcessorClassName;
+	}
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	public void setJFreeChartPostProcessorClassName(String jFreeChartPostProcessorClassName) {
+		this.jFreeChartPostProcessorClassName = UtilImpl.processStringValue(jFreeChartPostProcessorClassName);
+	}
+
+	public String getPrimeFacesChartPostProcessorClassName() {
+		return primeFacesChartPostProcessorClassName;
+	}
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	public void setPrimeFacesChartPostProcessorClassName(String primeFacesChartPostProcessorClassName) {
+		this.primeFacesChartPostProcessorClassName = UtilImpl.processStringValue(primeFacesChartPostProcessorClassName);
 	}
 }
