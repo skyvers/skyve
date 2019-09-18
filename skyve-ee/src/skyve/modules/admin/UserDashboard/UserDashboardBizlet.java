@@ -1,62 +1,17 @@
 package modules.admin.UserDashboard;
 
-import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 
-import modules.admin.Group.GroupExtension;
+import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
 import modules.admin.domain.UserDashboard;
-import modules.admin.domain.UserLoginRecord;
-import modules.admin.domain.UserRole;
 
 public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 	private static final long serialVersionUID = -6841455574804123970L;
 
 	@Override
 	public UserDashboard newInstance(UserDashboard bean) throws Exception {
-		Persistence pers = CORE.getPersistence();
-		DocumentQuery qUsers = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-		qUsers.getFilter().addEquals(Binder.createCompoundBinding(User.contactPropertyName, Bean.DOCUMENT_ID), pers.getUser().getContactId());
-		
-		UserExtension user = qUsers.beanResult();
-		if (user != null) {
-			bean.setCurrentUser(user);
-			
-			StringBuilder sb = new StringBuilder(64);
-			for(GroupExtension g: user.getGroups()){
-				bean.getGroups().add(g);
-				if(sb.length()>0){
-					sb.append(',');
-				}
-				sb.append(g.getName());
-			}
-			bean.setGroupMembershipList(sb.toString());
-			
-			for(UserRole r: user.getRoles()){
-				bean.getRoles().add(r);
-			}
-			
-			//get last login time
-			DocumentQuery qLogins = pers.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
-			qLogins.getFilter().addEquals(UserLoginRecord.userNamePropertyName, user.getUserName());
-			qLogins.addBoundOrdering(UserLoginRecord.loginDateTimePropertyName, SortDirection.descending);
-			
-			//we only want the second login (not our current log in)
-			qLogins.setFirstResult(1).setMaxResults(1);
-			
-			//TODO - nothing appears to be being retrieved
-			UserLoginRecord lastLogin = qLogins.beanResult();
-			if(lastLogin!=null){
-				bean.setLastLogin(lastLogin.getLoginDateTime());
-			}
-		}
-		
+		bean.setCurrentUser((UserExtension) ModulesUtil.currentAdminUser());
 			
 		return bean;
 	}

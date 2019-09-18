@@ -3,7 +3,7 @@ isc.ListView.addClassProperties({
 	// the heading HTML at the top of the list
 	// the template for the list view headers - has {title} and {link} in it
 	// this comes from the server renderer
-	_heading: isc.HTMLFlow.create({showEdges:true}),
+	_heading: isc.HTMLFlow.create(),
 
 	// the contents (layout) of the entire list
 	contents: isc.VLayout.create({

@@ -12,12 +12,13 @@ import org.skyve.metadata.model.document.Association;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "association")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "association", 
-			propOrder = {"requiredBool", "type", "databaseIndex"})
+			propOrder = {"requiredBool", "type", "embeddedColumnsPrefix", "databaseIndex"})
 public class AssociationImpl extends ReferenceImpl implements Association {
 	private static final long serialVersionUID = -2839713495173145591L;
 
 	private boolean required;
 	private AssociationType type;
+	private String embeddedColumnsPrefix;
 	private Boolean databaseIndex;
 
 	public AssociationImpl() {
@@ -51,6 +52,16 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	@XmlAttribute(name = "required", required = false)
 	public void setRequiredBool(Boolean required) {
 		this.required = required.booleanValue();
+	}
+	
+	@Override
+	public String getEmbeddedColumnsPrefix() {
+		return embeddedColumnsPrefix;
+	}
+
+	@XmlAttribute(required = false)
+	public void setEmbeddedColumnsPrefix(String embeddedColumnsPrefix) {
+		this.embeddedColumnsPrefix = embeddedColumnsPrefix;
 	}
 	
 	@Override

@@ -29,12 +29,12 @@ isc.AdvancedFilter.addMethods({
 
 		this.Super("initWidget", arguments);
     	
-    	this.toggleButton = isc.ImgButton.create({
-    	    size: 20,
-    	    src: "../images/icons/filterButton.png",
-    	    showRollOver: false,
-    	    showFocused: false,
-    	    actionType: "checkbox",
+		this.toggleButton = isc.ToolStripButton.create({
+		    icon: "../images/icons/filter_add.png",
+		    actionType: "checkbox",
+		    showFocused: false,
+		    showDown: false,
+		    showSelectedIcon: false,
     	    selected: false,
     	    canHover: true,
     		getHoverHTML: function() {
@@ -45,8 +45,8 @@ isc.AdvancedFilter.addMethods({
     				return "Use <b>advanced</b> filtering";
     			}
     		}
-    	});
-    	
+		});
+
     	var me = this;
     	this._styleForm = isc.DynamicForm.create({
     		numCols: 2,

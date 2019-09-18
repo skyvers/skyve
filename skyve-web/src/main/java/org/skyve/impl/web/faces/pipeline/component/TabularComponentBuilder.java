@@ -12,8 +12,10 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIPanel;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlInputHidden;
+import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
@@ -26,6 +28,7 @@ import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
@@ -34,17 +37,23 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.dialog.Dialog;
+import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.linechart.LineChart;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.piechart.PieChart;
+import org.primefaces.component.polarareachart.PolarAreaChart;
+import org.primefaces.component.radarchart.RadarChart;
 import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
@@ -56,6 +65,7 @@ import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.model.DualListModel;
+import org.primefaces.model.charts.ChartModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
@@ -65,13 +75,18 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.LoadingType;
+import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
+import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -79,6 +94,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -760,31 +778,74 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	
 	@Override
 	public UIComponent map(UIComponent component, 
+							MapDisplay map,
 							String moduleName,
 							String queryName,
 							String geometryBinding) {
 		if (component != null) {
 			return component;
 		}
-		return map(moduleName, queryName, geometryBinding, null);
+		return map(map, moduleName, queryName, geometryBinding, null);
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, String modelName) {
+	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
 		if (component != null) {
 			return component;
 		}
-		return map((String) null, null, null, modelName);
+		return map(map, null, null, null, modelName);
 	}
 	
-	private UIComponent map(String moduleName, String queryName, String geometryBinding, String modelName) {
+	private UIComponent map(MapDisplay map, 
+								String moduleName,
+								String queryName,
+								String geometryBinding,
+								String modelName) {
+		HtmlPanelGroup result = mapDiv(map);
+
+		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(result.getChildren().get(0).getClientId());
+		if (modelName != null) {
+			value.append("', null, null, null, '").append(modelName).append("'");
+		}
+		else {
+			value.append("', '").append(moduleName);
+			value.append("', '").append(queryName);
+			value.append("', '").append(geometryBinding).append("', null");
+		}
+		LoadingType loading = map.getLoading();
+		value.append(", '").append((loading == null) ? LoadingType.eager : loading);
+		value.append("', ").append(map.getRefreshTimeInSeconds());
+		value.append(", ").append(map.getShowRefreshControls());
+		value.append(", null, false, true)}");
+		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+		result.getChildren().add(script);
+		
+		return result;
+	}
+	
+	private HtmlPanelGroup mapDiv(RelativeSize widget) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		result.setLayout("block");
-		List<UIComponent> children = result.getChildren();
+		setId(result, null);
 		
+		Integer pixelHeight = widget.getPixelHeight();
+		if (pixelHeight == null) {
+			pixelHeight = Integer.valueOf(300);
+		}
+		setSize(result,
+					null,
+					widget.getPixelWidth(),
+					widget.getResponsiveWidth(),
+					widget.getPercentageWidth(),
+					pixelHeight,
+					widget.getPercentageHeight(),
+					null);
+
 		HtmlPanelGroup mapDiv = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		mapDiv.setLayout("block");
 		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
@@ -794,23 +855,248 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		output.setValue("Loading Map...");
 		mapDiv.getChildren().add(output);
 		
-		children.add(mapDiv);
+		result.getChildren().add(mapDiv);
 		
-		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		return result;		
+	}
+	
+	@Override
+	public EventSourceComponent geometry(EventSourceComponent component,
+											String dataWidgetVar,
+											Geometry geometry,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		if (component != null) {
+			return component;
+		}
 
-		StringBuilder value = new StringBuilder(128);
-		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDiv.getClientId());
-		if (modelName != null) {
-			value.append("', null, null, null, '").append(modelName).append("'");
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		String id = result.getId();
+		setId(result, null); // new id for the panel but we'll use the old id for the text value and the map
+		result.setColumns(3);
+		result.setColumnClasses(",shrink,");
+		Integer pixelWidth = geometry.getPixelWidth();
+		if (pixelWidth != null) {
+			result.setWidth(pixelWidth + "px");
 		}
 		else {
-			value.append("', '").append(moduleName);
-			value.append("', '").append(queryName);
-			value.append("', '").append(geometryBinding).append("', null");
+			result.setStyleClass("inputComponent");
 		}
-		value.append(")}");
-		script.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
-		children.add(script);
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		String binding = geometry.getBinding();
+		InputText textField = textField(dataWidgetVar,
+											geometry.getBinding(),
+											title,
+											required,
+											false,
+											geometry.getDisabledConditionName(),
+											formDisabledConditionName,
+											null,
+											null,
+											null,
+											true);
+		textField.setId(id + "_value");
+		toAddTo.add(textField);
+		editableGeometry(toAddTo,
+							id,
+							binding,
+							geometry.getType(),
+							geometry.getDisabledConditionName(),
+							formDisabledConditionName);
+		return new EventSourceComponent(result, textField);
+	}
+
+	/**
+	 * Add the buttons and overlays etc
+	 * 			<h:panelGrid> (from caller)
+	 * 				...
+	 *				<p:commandButton id="s03" icon="fa fa-globe" title="Map" type="button" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:300px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
+	 *					<h:panelGroup layout="block" style="height:280px">
+	 *						<h:panelGroup id="poo" layout="block" style="margin:0;padding:0;height:100%;width:100%">
+	 *							Loading Map
+	 *						</h:panelGroup>
+	 *					</h:panelGroup>
+	 *			    </p:overlayPanel>
+	 *			</h:panelGrid>
+	 */
+	private void editableGeometry(List<UIComponent> toAddTo,
+									String id,
+									String binding,
+									GeometryInputType type,
+									String disabledConditionName,
+									String formDisabledConditionName) {
+		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(mapButton, null);
+		String mapButtonId = mapButton.getId();
+		mapButton.setIcon("fa fa-globe");
+		mapButton.setTitle("Map");
+		mapButton.setValue(null);
+		mapButton.setType("button");
+		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
+		// for admin theme
+		setSize(mapButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
+		toAddTo.add(mapButton);
+
+		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+		setId(overlay, null);
+		overlay.setFor(mapButtonId);
+		overlay.setHideEffect("fade");
+		overlay.setDynamic(false);
+		overlay.setShowCloseIcon(true);
+		overlay.setModal(true);
+		overlay.setStyle("width:50%;height:300px");
+		
+		MapDisplay display = new MapDisplay();
+		display.setPixelHeight(Integer.valueOf(280));
+		HtmlPanelGroup mapDivs = mapDiv(display);
+		UIComponent mapDiv = mapDivs.getChildren().get(0);
+		mapDiv.setId(id);
+		overlay.getChildren().add(mapDivs);
+		
+		overlay.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
+																			binding,
+																			type,
+																			disabledConditionName,
+																			formDisabledConditionName,
+																			false));
+		toAddTo.add(overlay);
+	}
+	
+	@Override
+	public EventSourceComponent geometryMap(EventSourceComponent component,
+												GeometryMap geometry,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		if (component != null) {
+			return component;
+		}
+		
+		String binding = geometry.getBinding();
+		
+		HtmlPanelGroup result = mapDiv(geometry);
+		UIComponent mapDiv = result.getChildren().get(0);
+		
+		// We use an input text here as there is no change event allowed on HtmlInputHidden
+		HtmlInputText hidden = (HtmlInputText) input(HtmlInputText.COMPONENT_TYPE, null, binding, null, false, null, null);
+		setId(hidden, mapDiv.getId() + "_value");
+		hidden.setStyle("display:none");
+		result.getChildren().add(hidden);
+		
+		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		script.setValueExpression("value", generateMapScriptExpression(mapDiv.getClientId(),
+																		geometry.getBinding(),
+																		geometry.getType(),
+																		geometry.getDisabledConditionName(),
+																		formDisabledConditionName,
+																		true));
+		result.getChildren().add(script);
+		
+		return new EventSourceComponent(result, hidden);
+	}
+	
+	private ValueExpression generateMapScriptExpression(String mapDivClientId,
+															String geometryBinding, 
+															GeometryInputType type,
+															String disabledConditionName,
+															String formDisabledConditionName,
+															boolean includeScriptTag) {
+		StringBuilder value = new StringBuilder(128);
+		value.append("#{").append(managedBeanName).append(".getMapScript('").append(mapDivClientId);
+		value.append("', null, null, '").append(geometryBinding).append("', null, 'eager', null, null,");
+		if (type == null) {
+			value.append("null, ");
+		}
+		else {
+			value.append("'").append(type).append("', ");
+		}
+		if (formDisabledConditionName == null) {
+			if (disabledConditionName != null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName}));
+			}
+			else {
+				value.append("false");
+			}
+		}
+		else {
+			if (disabledConditionName == null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {formDisabledConditionName}));
+			}
+			else {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+			}
+		}
+		value.append(", ").append(includeScriptTag).append(")}");
+		return ef.createValueExpression(elc, value.toString(), String.class);
+	}
+	
+	@Override
+	public UIComponent chart(UIComponent component, Chart chart) {
+		if (component != null) {
+			return component;
+		}
+		UIComponent result = null;
+		ChartType type = chart.getType();
+		switch (type) {
+		case bar:
+		case horizontalBar:
+			result = a.createComponent(BarChart.COMPONENT_TYPE);
+			break;
+		case doughnut:
+			result = a.createComponent(DonutChart.COMPONENT_TYPE);
+			break;
+		case line:
+		case lineArea:
+			result = a.createComponent(LineChart.COMPONENT_TYPE);
+			break;
+		case pie:
+			result = a.createComponent(PieChart.COMPONENT_TYPE);
+			break;
+		case polarArea:
+			result = a.createComponent(PolarAreaChart.COMPONENT_TYPE);
+			break;
+		case radar:
+			result = a.createComponent(RadarChart.COMPONENT_TYPE);
+			break;
+		default:
+			throw new IllegalArgumentException("Chart Type " + type + " is not supported.");
+		}
+
+		setId(result, null);
+		
+		Map<String, Object> attributes = result.getAttributes();
+		attributes.put("skyveType", type);
+		String modelName = chart.getModelName();
+		if (modelName != null) {
+			attributes.put("skyveModel", modelName);
+		}
+		else {
+			attributes.put("skyveModel", chart.getModel());
+		}
+		StringBuilder value = new StringBuilder(64);
+		value.append("#{").append(managedBeanName).append(".chartModel}");
+		result.setValueExpression("model", ef.createValueExpression(elc, value.toString(), ChartModel.class));
+
+		Integer pixelHeight = chart.getPixelHeight();
+		Integer percentageHeight = chart.getPercentageHeight();
+		Integer minPixelHeight = chart.getMinPixelHeight();
+		// Set a minimum height
+		if ((pixelHeight == null) && (percentageHeight == null)) {
+			pixelHeight = (minPixelHeight != null) ? minPixelHeight : Integer.valueOf(300);
+		}
+		setSize(result, 
+					null, 
+					chart.getPixelWidth(), 
+					chart.getResponsiveWidth(), 
+					chart.getPercentageWidth(), 
+					pixelHeight, 
+					percentageHeight,
+					null);
+
 		
 		return result;
 	}
@@ -920,24 +1206,47 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		// Add filter parameters to getLazyDataModel call
 		StringBuilder createUrlParams = null;
-		if ((grid.getParameters() != null) && (! grid.getParameters().isEmpty())) {
+		List<FilterParameter> filterParameters = grid.getFilterParameters();
+		List<Parameter> parameters = grid.getParameters();
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			createUrlParams = new StringBuilder(64);
 			modelExpression.append('[');
-			for (FilterParameter param : grid.getParameters()) {
-				String name = param.getName();
-				String binding = param.getBinding();
-				String value = param.getValue();
-				
-				createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
-				modelExpression.append("['").append(name).append("','");
-				modelExpression.append(param.getOperator()).append("','");
-				if (binding != null) {
-					createUrlParams.append('{').append(binding).append("}']}");
-					modelExpression.append('{').append(binding).append("}'],");
+			if (filterParameters != null) {
+				for (FilterParameter param : filterParameters) {
+					String name = param.getName();
+					String binding = param.getBinding();
+					String value = param.getValue();
+					
+					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					modelExpression.append("['").append(name).append("','");
+					modelExpression.append(param.getOperator()).append("','");
+					if (binding != null) {
+						createUrlParams.append('{').append(binding).append("}']}");
+						modelExpression.append('{').append(binding).append("}'],");
+					}
+					else {
+						createUrlParams.append(binding).append("']}");
+						modelExpression.append(value).append("'],");
+					}
 				}
-				else {
-					createUrlParams.append(binding).append("']}");
-					modelExpression.append(value).append("'],");
+			}
+			if (parameters != null) {
+				for (Parameter param : parameters) {
+					String name = param.getName();
+					String binding = param.getBinding();
+					String value = param.getValue();
+					
+					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					modelExpression.append("['").append(name).append("','");
+					if (binding != null) {
+						createUrlParams.append('{').append(binding).append("}']}");
+						modelExpression.append('{').append(binding).append("}'],");
+					}
+					else {
+						createUrlParams.append(binding).append("']}");
+						modelExpression.append(value).append("'],");
+					}
 				}
 			}
 			modelExpression.setLength(modelExpression.length() - 1); // remove last comma
@@ -1326,6 +1635,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String modelName,
 										ListModel<? extends Bean> model,
 										List<FilterParameter> filterParameters,
+										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
@@ -1357,17 +1667,32 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		// Add filter parameters to getLazyDataModel call
-		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
+		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
+				((parameters != null) && (! parameters.isEmpty()))) {
 			value.append('[');
-			for (FilterParameter param : filterParameters) {
-				value.append("['").append(param.getName()).append("','");
-				value.append(param.getOperator()).append("','");
-				String binding = param.getBinding();
-				if (binding != null) {
-					value.append('{').append(binding).append("}'],");
+			if (filterParameters != null) {
+				for (FilterParameter param : filterParameters) {
+					value.append("['").append(param.getName()).append("','");
+					value.append(param.getOperator()).append("','");
+					String binding = param.getBinding();
+					if (binding != null) {
+						value.append('{').append(binding).append("}'],");
+					}
+					else {
+						value.append(param.getValue()).append("'],");
+					}
 				}
-				else {
-					value.append(param.getValue()).append("'],");
+			}
+			if (parameters != null) {
+				for (Parameter param : parameters) {
+					value.append("['").append(param.getName()).append("','");
+					String binding = param.getBinding();
+					if (binding != null) {
+						value.append('{').append(binding).append("}'],");
+					}
+					else {
+						value.append(param.getValue()).append("'],");
+					}
 				}
 			}
 			value.setLength(value.length() - 1); // remove last comma
@@ -1410,7 +1735,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent listMembership(UIComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
 		if (component != null) {
 			return component;
 		}
@@ -1444,33 +1769,56 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		text.setValue((heading == null) ? "Members" : heading);
 		setId(text, null);
 		facets.put("targetCaption", text);
-		return result;
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent checkBox(UIComponent component,
-									String dataWidgetVar,
-									CheckBox checkBox,
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent checkBox(EventSourceComponent component,
+											String dataWidgetVar,
+											CheckBox checkBox,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return checkbox(dataWidgetVar,
-							checkBox.getBinding(), 
-							title,
-							required,
-							checkBox.getDisabledConditionName(),
-							formDisabledConditionName,
-							! Boolean.FALSE.equals(checkBox.getTriState()));
+		UIInput result = checkbox(dataWidgetVar,
+									checkBox.getBinding(), 
+									title,
+									required,
+									checkBox.getDisabledConditionName(),
+									formDisabledConditionName,
+									! Boolean.FALSE.equals(checkBox.getTriState()));
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent colourPicker(UIComponent component,
+	public EventSourceComponent colourPicker(EventSourceComponent component,
+												String dataWidgetVar,
+												ColourPicker colour,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		if (component != null) {
+			return component;
+		}
+
+		ColorPicker result = colourPicker(dataWidgetVar, 
+											colour.getBinding(), 
+											title, 
+											required, 
+											colour.getDisabledConditionName(),
+											formDisabledConditionName,
+											colour.getPixelWidth(),
+											true);
+		return new EventSourceComponent(result, result);
+	}
+	
+	@Override
+	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
-										ColourPicker colour,
+										Combo combo,
 										String formDisabledConditionName,
 										String title,
 										boolean required) {
@@ -1478,39 +1826,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return colourPicker(dataWidgetVar, 
-								colour.getBinding(), 
-								title, 
-								required, 
-								colour.getDisabledConditionName(),
-								formDisabledConditionName,
-								colour.getPixelWidth(),
-								true);
-	}
-	
-	@Override
-	public UIComponent combo(UIComponent component,
-								String dataWidgetVar,
-								Combo combo,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
-		if (component != null) {
-			return component;
-		}
-
 		String binding = combo.getBinding();
-		HtmlSelectOneMenu s = selectOneMenu(dataWidgetVar,
-												binding,
-								                title,
-								                required,
-								                combo.getDisabledConditionName(),
-								                formDisabledConditionName,
-								                null);
+		HtmlSelectOneMenu result = selectOneMenu(dataWidgetVar,
+													binding,
+									                title,
+									                required,
+									                combo.getDisabledConditionName(),
+									                formDisabledConditionName,
+									                null);
 		UISelectItems i = selectItems(null, null, dataWidgetVar, binding, true);
-		s.getChildren().add(i);
+		result.getChildren().add(i);
 		
-		return s;
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
@@ -1532,10 +1859,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		String binding = image.getBinding();
 		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
-		HtmlPanelGroup contentImage = contentGraphicImage(image.getPixelWidth(), 
+		Integer pixelWidth = image.getPixelWidth();
+		Integer pixelHeight = image.getPixelHeight();
+		HtmlPanelGroup contentImage = contentGraphicImage((pixelWidth == null) ? ONE_HUNDRED : pixelWidth, 
 															null,
 															null, 
-															image.getPixelHeight(), 
+															(pixelHeight == null) ? ONE_HUNDRED : pixelHeight, 
 															null, 
 															binding);
 		// Set the id of the inner image element
@@ -1599,9 +1928,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
-	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *				<p:commandButton id="s05" icon="fa fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
@@ -1633,31 +1962,52 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setSize(uploadButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(uploadButton);
 
-		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
-		setId(overlay, null);
-		overlay.setWidgetVar(sanitisedBinding + "Overlay");
-		overlay.setFor(uploadButtonId);
-		overlay.setHideEffect("fade");
-		overlay.setDynamic(false);
-		overlay.setShowCloseIcon(true);
-		overlay.setModal(true);
-		overlay.setStyle("width:50%;height:300px");
-		// clear the iframe src on hide so there is no flash next open
-		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+		String var = sanitisedBinding + "Overlay";
+		if (image) {
+			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
+		}
 
+		UIPanel panel = null;
+		if (image) {
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			dialog.setWidgetVar(var);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			// clear the iframe src on hide so there is no flash next open
+			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
+			panel = dialog;
+		}
+		else {
+			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+			setId(overlay, null);
+			overlay.setWidgetVar(sanitisedBinding + "Overlay");
+			overlay.setFor(uploadButtonId);
+			overlay.setHideEffect("fade");
+			overlay.setDynamic(false);
+			overlay.setShowCloseIcon(true);
+			overlay.setModal(true);
+			overlay.setStyle("width:50%;height:300px");
+			// clear the iframe src on hide so there is no flash next open
+			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
+			panel = overlay;
+		}
+		
 		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
 		StringBuilder value = new StringBuilder(64);
 		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
-		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
-		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
-		toAddTo.add(overlay);
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("',");
+		value.append(image).append(")).concat('\\')')}");
+		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		toAddTo.add(panel);
 
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:280px;border:none\"></iframe>", id));
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:100%%;border:none\"></iframe>", id));
 		setId(iframe, null);
-		overlay.getChildren().add(iframe);
+		panel.getChildren().add(iframe);
 		
 		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(clearButton, null);
@@ -1697,65 +2047,68 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent lookupDescription(UIComponent component,
+	public EventSourceComponent lookupDescription(EventSourceComponent component,
+													String dataWidgetVar, 
+													LookupDescription lookup, 
+													String formDisabledConditionName,
+													String title, 
+													boolean required,
+													String displayBinding,
+													QueryDefinition query) {
+		if (component != null) {
+			return component;
+		}
+
+		AutoComplete result = autoComplete(dataWidgetVar,
+											lookup.getBinding(),
+											title,
+											required,
+											lookup.getDisabledConditionName(),
+											formDisabledConditionName,
+											displayBinding,
+											query,
+											lookup.getFilterParameters(),
+											lookup.getParameters(),
+											lookup.getPixelWidth(),
+											false);
+		return new EventSourceComponent(result, result);
+	}
+
+	@Override
+	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar, 
-											LookupDescription lookup, 
+											org.skyve.impl.metadata.view.widget.bound.input.Password password,
 											String formDisabledConditionName,
 											String title, 
-											boolean required,
-											String displayBinding,
-											QueryDefinition query) {
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return autoComplete(dataWidgetVar,
-							lookup.getBinding(),
-							title,
-							required,
-							lookup.getDisabledConditionName(),
-							formDisabledConditionName,
-							displayBinding,
-							query,
-							lookup.getParameters(),
-							lookup.getPixelWidth(),
-							false);
+		Password result = password(dataWidgetVar,
+									password.getBinding(), 
+					                title,
+					                required,
+					                password.getDisabledConditionName(),
+					                formDisabledConditionName,
+					                password.getPixelWidth(),
+					                true);
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent password(UIComponent component,
-									String dataWidgetVar, 
-									org.skyve.impl.metadata.view.widget.bound.input.Password password,
-									String formDisabledConditionName,
-									String title, 
-									boolean required) {
-		if (component != null) {
-			return component;
-		}
-
-		return password(dataWidgetVar,
-							password.getBinding(), 
-			                title,
-			                required,
-			                password.getDisabledConditionName(),
-			                formDisabledConditionName,
-			                password.getPixelWidth(),
-			                true);
-	}
-
-	@Override
-	public UIComponent radio(UIComponent component,
-								String dataWidgetVar,
-								Radio radio,
-								String formDisabledConditionName,
-								String title,
-								boolean required) {
+	public EventSourceComponent radio(EventSourceComponent component,
+										String dataWidgetVar,
+										Radio radio,
+										String formDisabledConditionName,
+										String title,
+										boolean required) {
 		if (component != null) {
 			return component;
 		}
 
 		String binding = radio.getBinding();
-        UIComponent result = selectOneRadio(dataWidgetVar,
+        SelectOneRadio result = selectOneRadio(dataWidgetVar,
 												binding,
 				                                title,
 				                                required,
@@ -1764,84 +2117,87 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.getAttributes().put("binding", radio.getBinding());
         UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
 		result.getChildren().add(i);
-		return result;
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent richText(UIComponent component, 
-									String dataWidgetVar, 
-									RichText text, 
-									String formDisabledConditionName,
-									String title,
-									boolean required) {
+	public EventSourceComponent richText(EventSourceComponent component, 
+											String dataWidgetVar, 
+											RichText text, 
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return editor(dataWidgetVar,
-						text.getBinding(),
-						title,
-						required,
-						text.getDisabledConditionName(),
-						formDisabledConditionName);
+		Editor result = editor(dataWidgetVar,
+								text.getBinding(),
+								title,
+								required,
+								text.getDisabledConditionName(),
+								formDisabledConditionName);
+		return new EventSourceComponent(result, result);
 	}
 
 	@Override
-	public UIComponent spinner(UIComponent component,
-								String dataWidgetVar, 
-								org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
-								String formDisabledConditionName,
-								String title, 
-								boolean required) {
+	public EventSourceComponent spinner(EventSourceComponent component,
+											String dataWidgetVar, 
+											org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
+											String formDisabledConditionName,
+											String title, 
+											boolean required) {
 		if (component != null) {
 			return component;
 		}
 
-		return spinner(dataWidgetVar, 
-						spinner.getBinding(), 
-						title, 
-						required, 
-						spinner.getDisabledConditionName(),
-						formDisabledConditionName,
-						spinner.getPixelWidth());
+		Spinner result = spinner(dataWidgetVar, 
+									spinner.getBinding(), 
+									title, 
+									required, 
+									spinner.getDisabledConditionName(),
+									formDisabledConditionName,
+									spinner.getPixelWidth());
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent textArea(UIComponent component,
-									String dataWidgetVar, 
-									TextArea text, 
-									String formDisabledConditionName,
-									String title, 
-									boolean required,
-									Integer length) {
+	public EventSourceComponent textArea(EventSourceComponent component,
+											String dataWidgetVar, 
+											TextArea text, 
+											String formDisabledConditionName,
+											String title, 
+											boolean required,
+											Integer length) {
 		if (component != null) {
 			return component;
 		}
 
-		return textArea(dataWidgetVar,
-							text.getBinding(),
-							title,
-							required,
-							Boolean.FALSE.equals(text.getEditable()),
-							text.getDisabledConditionName(),
-							formDisabledConditionName,
-							length,
-							text.getPixelWidth(),
-							text.getPixelHeight(),
-							true);
+		InputTextarea result = textArea(dataWidgetVar,
+											text.getBinding(),
+											title,
+											required,
+											Boolean.FALSE.equals(text.getEditable()),
+											text.getDisabledConditionName(),
+											formDisabledConditionName,
+											length,
+											text.getPixelWidth(),
+											text.getPixelHeight(),
+											true);
+		return new EventSourceComponent(result, result);
 	}
 	
 	@Override
-	public UIComponent text(UIComponent component,
-								String dataWidgetVar, 
-								TextField text, 
-								String formDisabledConditionName,
-								String title, 
-								boolean required,
-								Integer length,
-								org.skyve.domain.types.converters.Converter<?> converter,
-								Format<?> format,
-								Converter facesConverter) {
+	public EventSourceComponent text(EventSourceComponent component,
+										String dataWidgetVar, 
+										TextField text, 
+										String formDisabledConditionName,
+										String title, 
+										boolean required,
+										Integer length,
+										org.skyve.domain.types.converters.Converter<?> converter,
+										Format<?> format,
+										Converter facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -1860,7 +2216,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        }
 		}
 		
-        UIComponent result = null;
+        UIComponentBase result = null;
         if (useCalendar) {
             result = calendar(dataWidgetVar,
 	            				text.getBinding(),
@@ -1909,7 +2265,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								true);
         }
         
-        return result;
+        return new EventSourceComponent(result, result);
 	}
 
 	@Override
@@ -2384,7 +2740,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					break;
 				case Edit:
 					if (iconStyleClass == null) { 
-						result.setIcon("fa fa-mail-forward");
+						result.setIcon("fa fa-pencil");
 					}
 					break;
 				case Report:
@@ -3008,7 +3364,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String formDisabled,
 											String displayBinding, 
 											QueryDefinition query, 
-											List<FilterParameter> parameters,
+											List<FilterParameter> filterParameters,
+											List<Parameter> parameters,
 											Integer pixelWidth,
 											boolean dontDisplay) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
@@ -3041,6 +3398,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		attributes.put("module", query.getOwningModule().getName());
 		attributes.put("query", query.getName());
 		attributes.put("display", displayBinding);
+		attributes.put("filterParameters", filterParameters);
 		attributes.put("parameters", parameters);
 
 		setSize(result, 

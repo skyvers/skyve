@@ -23,7 +23,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_Hierarchical").scalarResult(Number.class).intValue());
 
 		new Dereferencer().visit(hd, root);
-		child = p.retrieve(hd, child.getBizId(), false);
+		child = p.retrieve(hd, child.getBizId());
 		Assert.assertNull(child.getParent());
 		p.delete(root);
 
@@ -45,7 +45,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(messd, test.getBizId(), false);
+		test = p.retrieve(messd, test.getBizId());
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
 		Assert.assertEquals(test.getAggregatedCollection().size(), 1);
@@ -67,7 +67,7 @@ public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 
 		p.evictAllCached();
 
-		test = p.retrieve(msssd, test.getBizId(), false);
+		test = p.retrieve(msssd, test.getBizId());
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
 		Assert.assertEquals(test.getAggregatedCollection().size(), 1);

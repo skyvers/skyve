@@ -7,6 +7,7 @@ import com.ibm.icu.util.Calendar;
 
 public class CronExpression {
 
+	public String second = null;
 	public String minute = null;
 	public String hour = null;
 	public String dayNumber = null;
@@ -17,8 +18,9 @@ public class CronExpression {
 		// default constructor
 	}
 
-	public CronExpression(String minute, String hour, String dayNumber, String month, String dayOfWeek) {
+	public CronExpression(String second, String minute, String hour, String dayNumber, String month, String dayOfWeek) {
 		super();
+		this.second = second;
 		this.minute = minute;
 		this.hour = hour;
 		this.dayNumber = dayNumber;
@@ -26,8 +28,9 @@ public class CronExpression {
 		this.dayOfWeek = dayOfWeek;
 	}
 
-	public CronExpression(Integer minute, Integer hour, Integer dayNumber, Integer month, Integer dayOfWeek) {
+	public CronExpression(Integer second, Integer minute, Integer hour, Integer dayNumber, Integer month, Integer dayOfWeek) {
 		super();
+		this.second = second != null ? String.valueOf(second) : null;
 		this.minute = minute != null ? String.valueOf(minute) : null;
 		this.hour = hour != null ? String.valueOf(hour) : null;
 		this.dayNumber = dayNumber != null ? String.valueOf(dayNumber) : null;
@@ -44,21 +47,39 @@ public class CronExpression {
 	public static CronExpression fromExpression(final String expression) {
 		if (expression != null) {
 			String[] parts = expression.split("\\s");
-			if (parts.length != 5) {
-				throw new CronParserException("Unexpected expression, expected 5 parts, e.g. * * * * *.");
+			if (parts.length != 6) {
+				throw new CronParserException("Unexpected expression, expected 5 parts, e.g. * * * * * *.");
 			}
 
 			CronExpression ce = new CronExpression();
-			ce.setMinute(parts[0]);
-			ce.setHour(parts[1]);
-			ce.setDayNumber(parts[2]);
-			ce.setMonth(parts[3]);
-			ce.setDayOfWeek(parts[4]);
+			ce.setSecond(parts[0]);
+			ce.setMinute(parts[1]);
+			ce.setHour(parts[2]);
+			ce.setDayNumber(parts[3]);
+			ce.setMonth(parts[4]);
+			ce.setDayOfWeek(parts[5]);
 
 			return ce;
 		}
 
 		return null;
+	}
+
+	public String getSecond() {
+		return second;
+	}
+
+	public boolean hasSecond() {
+		return getSecond() != null;
+	}
+
+	public CronExpression setSecond(String second) {
+		this.second = second;
+		return this;
+	}
+
+	public CronExpression setSecond(Integer second) {
+		return setSecond(String.valueOf(second));
 	}
 
 	public String getMinute() {
@@ -155,23 +176,21 @@ public class CronExpression {
 		if (!hasNothing()) {
 			// check if it's one of our static expressions
 			String expression = toString();
-			if (expression.equals("0 0 1 1 *"))
+			if (expression.equals("0 0 0 1 1 *"))
 				return "yearly";
-			if (expression.equals("0 0 1 * *"))
+			if (expression.equals("0 0 0 1 * *"))
 				return "monthly";
-			if (expression.equals("0 0 * * 0"))
+			if (expression.equals("0 0 0 * * 0"))
 				return "weekly";
-			if (expression.equals("0 0 * * *"))
-				return "daily";
-			if (expression.equals("0 0 * * *"))
-				return "midnight";
-			if (expression.equals("0 12 * * *"))
+			if (expression.equals("0 0 12 * * ?") || expression.equals("0 0 12 * * *"))
 				return "midday";
-			if (expression.equals("* * * * *"))
+			if (expression.equals("* * * * * ?") || expression.equals("* * * * * *"))
+				return "every second";
+			if (expression.equals("0 * * * * ?") || expression.equals("0 * * * * *"))
 				return "every minute";
-			if (expression.equals("0 * * * *"))
+			if (expression.equals("0 0 * * * ?") || expression.equals("0 0 * * * *"))
 				return "hourly";
-			if (expression.equals("0 0 * * *"))
+			if (expression.equals("0 0 0 * * *"))
 				return "daily";
 
 			StringBuilder b = new StringBuilder();
@@ -277,7 +296,8 @@ public class CronExpression {
 	@Override
 	@SuppressWarnings("boxing")
 	public String toString() {
-		return String.format("%s %s %s %s %s",
+		return String.format("%s %s %s %s %s %s",
+				hasSecond() ? getSecond() : 0,
 				hasMinute() ? getMinute() : 0,
 				hasHour() ? getHour() : 0,
 				hasDayNumber() ? getDayNumber() : '*',

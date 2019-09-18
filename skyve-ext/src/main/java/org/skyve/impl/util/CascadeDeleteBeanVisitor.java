@@ -38,12 +38,13 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 			// check if binding isn't a parent binding - parent beans are not cascaded
 			validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
 
-			// don't check aggregations as they are not cascaded
+			// don't check aggregations or embedded documents as they are not cascaded
 			if (validate && (owningRelation != null)) {
 				// Can safely cast to Reference here as we should not be visiting inverses
 				Reference owningReference = (Reference) owningRelation;
 				ReferenceType referenceType = owningReference.getType();
 				validate = (! AssociationType.aggregation.equals(referenceType)) && 
+							(! AssociationType.embedded.equals(referenceType)) && 
 							(! CollectionType.aggregation.equals(referenceType));
 			}
 

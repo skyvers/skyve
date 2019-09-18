@@ -76,6 +76,11 @@ public class Desktop extends Harness {
 		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
+	private String skin;
+	public String getSkin() {
+		return skin;
+	}
+	
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
@@ -98,7 +103,8 @@ public class Desktop extends Harness {
 					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-
+					skin = uxui.getScSkin();
+					
 					StringBuilder sb = new StringBuilder(8192);
 
 					constructMenu(bizModule, uxui.getName(), sb);
@@ -109,18 +115,7 @@ public class Desktop extends Harness {
 					sb.setLength(0);
 	
 					WebAction a = Desktop.this.getWebActionParameter();
-					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
-						sb.append("details.showMember(isc.ListView.contents);");
-						// TODO should cater for map, tree, calendar etc
-						if (bizDocument != null) {
-							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
-						}
-						else {
-							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
-							sb.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
-						}
-					} 
-					else {
+					if (WebAction.e.equals(a)) { // edit
 						sb.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
 						sb.append(bizDocument).append("',function(view){");
 						sb.append("details.addMember(view);isc.BizUtil._currentView=view;");
@@ -129,6 +124,30 @@ public class Desktop extends Harness {
 						}
 						else {
 						    sb.append("view.editInstance('").append(bizId).append("');});");
+						}
+					}
+					else {
+						sb.append("details.showMember(isc.ListView.contents);");
+						sb.append("isc.ListView.set");
+						if (WebAction.l.equals(a)) {
+							sb.append("Grid");
+						}
+						else if (WebAction.t.equals(a)) {
+							sb.append("Tree");
+						}
+						else if (WebAction.m.equals(a)) {
+							sb.append("Map");
+						}
+						else if (WebAction.c.equals(a)) {
+							sb.append("Calendar");
+						}
+						
+						if (bizDocument != null) {
+							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+						}
+						else {
+							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
+							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 						}
 					}
 					uiScript = sb.toString();
@@ -177,6 +196,7 @@ public class Desktop extends Harness {
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 
+		Locale bg_BG = new Locale("bg", "BG");
 		Locale hu_HU = new Locale("hu", "HU");
 		Locale nb_NO = new Locale("nb", "NO");
 		Locale pl_PL = new Locale("pl", "PL");
@@ -185,6 +205,7 @@ public class Desktop extends Harness {
 		Locale ru_RU = new Locale("ru", "RU");
 		Locale sr_Latn = new Locale("sr", "SR", "Latn");
 		Locale sv_SE = new Locale("sv", "SE");
+		Locale tr_TR = new Locale("tr", "TR");
 		Locale uk_UA = new Locale("uk", "UA");
 		Locale zh_CN = new Locale("zh", "CN");
 		Locale zh_TW = new Locale("zh", "TW");
@@ -195,11 +216,19 @@ public class Desktop extends Harness {
 		else if (new Locale("ba").getLanguage().equals(language)) {
 			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ba.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
 		}
+		else if (bg_BG.getLanguage().equals(language)) {
+			if (bg_BG.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_bg_BG.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
 		else if (new Locale("cr").getLanguage().equals(language)) {
 			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_cr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
 		}
 		else if (new Locale("cs").getLanguage().equals(language)) {
 			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_cs.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("da").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_da.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
 		}
 		else if (new Locale("de").getLanguage().equals(language)) {
 			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_de.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
@@ -216,9 +245,6 @@ public class Desktop extends Harness {
 		else if (Locale.FRANCE.getLanguage().equals(language)) {
 			if (Locale.FRANCE.getCountry().equals(country)) {
 				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_fr_FR.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
-			}
-			else {
-				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_fr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
 			}
 		}
 		else if (new Locale("hr").getLanguage().equals(language)) {
@@ -292,6 +318,11 @@ public class Desktop extends Harness {
 		else if (sv_SE.getLanguage().equals(language)) {
 			if (sv_SE.getCountry().equals(country)) {
 				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_sv_SE.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (tr_TR.getLanguage().equals(language)) {
+			if (tr_TR.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_tr_TR.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
 			}
 		}
 		else if (uk_UA.getLanguage().equals(language)) {

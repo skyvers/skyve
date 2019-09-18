@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20190701-SNAPSHOT</version>
+		<version>20190918</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -696,7 +696,7 @@
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
-			<version>4.1.0</version>
+			<version>4.5.1</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -819,6 +819,13 @@
             <artifactId>skyve-web</artifactId>
             <version>${skyve.version}</version>
         </dependency>
+<!-- Only uncomment for SPNEGO on a windows server
+		<dependency>
+			<groupId>com.github.waffle</groupId>
+			<artifactId>waffle-spring-security5</artifactId>
+			<version>1.9.0</version>
+		</dependency>
+-->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
@@ -845,7 +852,7 @@
 		<dependency>
     		<groupId>org.seleniumhq.selenium</groupId>
     		<artifactId>selenium-support</artifactId>
-    		<version>3.11.0</version>
+    		<version>3.141.59</version>
     		<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -858,13 +865,13 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.11.0</version>
+			<version>3.141.59</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-firefox-driver</artifactId>
-			<version>3.11.0</version>
+			<version>3.141.59</version>
 			<scope>test</scope>
 		</dependency>  
 	</dependencies>

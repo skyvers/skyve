@@ -357,7 +357,7 @@ public class TrackmateServlet extends HttpServlet {
 		PersistentBean track = trackDoc.newInstance(user);
 		
 		//get admin user from database
-		Bean adminUserBean = persistence.retrieve(userDoc, user.getId(), false);
+		Bean adminUserBean = persistence.retrieve(userDoc, user.getId());
 		Binder.set(track, TRACK_USER_PROPERTY_NAME, adminUserBean);
 		
 		//stuff type

@@ -19,7 +19,7 @@ public class CommunicationFactory {
 	@SkyveFixture(types = FixtureType.crud)
 	public static Communication crudInstance() {
 		Communication bean = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		bean.setSystem(Boolean.FALSE);
+		bean.setSystemUse(Boolean.FALSE);
 		bean.setTag(new DataBuilder().fixture(FixtureType.crud).build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
 
 		return bean;
@@ -30,7 +30,7 @@ public class CommunicationFactory {
 	@SkyveFixture(types = FixtureType.sail)
 	public Communication sail() {
 		Communication result = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		result.setSystem(Boolean.FALSE);
+		result.setSystemUse(Boolean.FALSE);
 		result.setCalendarStartTime(null);
 		result.setCalendarEndTime(null);
 		return result;

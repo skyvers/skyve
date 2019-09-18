@@ -37,6 +37,7 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
@@ -49,19 +50,22 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private String queryName;
 	private String modelName;
 	private List<FilterParameter> filterParameters;
+	private List<Parameter> parameters;
 	
 	public SkyveLazyDataModel(FacesView<? extends Bean> view,
 								String moduleName, 
 								String documentName, 
 								String queryName,
 								String modelName,
-								List<FilterParameter> filterParameters) {
+								List<FilterParameter> filterParameters,
+								List<Parameter> parameters) {
 		this.view = view;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.queryName = queryName;
 		this.modelName = modelName;
 		this.filterParameters = filterParameters;
+		this.parameters = parameters;
 	}
 	
 	@Override
@@ -133,9 +137,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 
 		Page page;
 		try {
-			if (filterParameters != null) {
-				model.addFilterParameters(d, filterParameters);
-			}
+			model.addFilterParameters(d, filterParameters, parameters);
 			if (filters != null) {
 				filter(filters, model, c);
 			}

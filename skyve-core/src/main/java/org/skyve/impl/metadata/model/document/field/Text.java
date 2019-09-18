@@ -14,9 +14,6 @@ import org.skyve.impl.metadata.model.document.field.TextFormat;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"length", "format", "validator"})
 public class Text extends ConvertableField implements LengthField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 7128775778521517080L;
 
 	private int length;

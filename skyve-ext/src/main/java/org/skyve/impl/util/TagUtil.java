@@ -55,7 +55,7 @@ public final class TagUtil {
 		Module adminModule = customer.getModule("admin");
 		Document tagDocument = adminModule.getDocument(customer, "Tag");
 		Document taggedDocument = adminModule.getDocument(customer, "Tagged");
-		PersistentBean tag = persistence.retrieve(tagDocument, tagId, false);
+		PersistentBean tag = persistence.retrieve(tagDocument, tagId);
 
 		PersistentBean tagged = taggedDocument.newInstance(user);
 		BindUtil.set(tagged, "tag", tag);
@@ -208,7 +208,7 @@ public final class TagUtil {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule("admin");
 		Document document = module.getDocument(customer, "Tag");
-		PersistentBean bean = persistence.retrieve(document, tagId, true);
+		PersistentBean bean = persistence.retrieveAndLock(document, tagId);
 		persistence.delete(document, bean);
 	}
 
@@ -294,7 +294,7 @@ public final class TagUtil {
 						Customer customer = persistence.getUser().getCustomer();
 						Module module = customer.getModule(taggedModule);
 						Document document = module.getDocument(customer, taggedDocument);
-						nextBean = persistence.retrieve(document, taggedBizId, false);
+						nextBean = persistence.retrieve(document, taggedBizId);
 						if (nextBean == null) {
 							throw new Exception("Tagged item does not exist");
 						}

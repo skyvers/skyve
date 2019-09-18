@@ -44,6 +44,9 @@ public class DynamicImageServlet extends HttpServlet {
 	throws ServletException, IOException {
 		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-Control", "private,no-cache,no-store");
+		// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
+		response.setHeader("Accept-Ranges", "bytes");
+
 		ImageFormat format = null;
 		try (OutputStream out = response.getOutputStream()) {
 			try {

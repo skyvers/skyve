@@ -1,6 +1,7 @@
 package org.skyve.metadata.repository;
 
 import java.io.File;
+import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -14,6 +15,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -48,9 +50,19 @@ public interface Repository {
 	public File findResourceFile(String resourcePath, String customerName, String moduleName);
 	
 	/**
-	 * @return
+	 * @return A merged Router consisting of the main router and all of the module routers.
 	 */
 	public Router getRouter();
+
+	/**
+	 * @return The global router that is not module specific.
+	 */
+	Router getGlobalRouter();
+
+	/**
+	 * @return A list of module-specific routers.
+	 */
+	List<Router> getModuleRouters();
 
 	/**
 	 * 
@@ -85,6 +97,8 @@ public interface Repository {
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
 	
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime);
+
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime);
 
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime);
 	

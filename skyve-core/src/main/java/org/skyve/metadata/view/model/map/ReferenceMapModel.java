@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
@@ -26,20 +27,23 @@ public class ReferenceMapModel<T extends Bean> extends DefaultMapModel<T> {
 	}
 
 	@Override
-	public MapResult getResult(Envelope mapExtents) throws Exception {
+	public MapResult getResult(Geometry mapBounds) throws Exception {
+		Envelope mapEnvelope = mapBounds.getEnvelopeInternal();
+		
 		List<MapItem> items = Collections.emptyList();
+		
 		Object value = Binder.get(getBean(), referenceBinding);
 		if (value instanceof List) {
 			@SuppressWarnings("unchecked")
 			List<Bean> collection = (List<Bean>) value;
 			items = new ArrayList<>(collection.size());
 			for (Bean element : collection) {
-				addItem(element, items, mapExtents);
+				addItem(element, items, mapEnvelope);
 			}
 		}
 		else if (value instanceof Bean) {
 			items = new ArrayList<>(1);
-			addItem((Bean) value, items, mapExtents);
+			addItem((Bean) value, items, mapEnvelope);
 		}
 		
 		return new MapResult(items, null);

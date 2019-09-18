@@ -24,6 +24,8 @@ isc.ClassFactory.defineClass("EditView", "BizContainer");
 isc.EditView.addClassProperties({
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
+		jsonPrefix: '',
+		jsonSuffix: '',
 		dataURL: "smartedit",
 		// ensure that only datasource defined fields goes down with the request
 		sendExtraFields: false
@@ -58,7 +60,7 @@ isc.EditView.addMethods({
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
-		this._heading = isc.HTMLFlow.create({showEdges:true});
+		this._heading = isc.HTMLFlow.create();
 
 		// not contained here as it is implicit
 		this.addMember(this._heading);
@@ -201,6 +203,21 @@ isc.EditView.addMethods({
 		var instance = this.gather(false); // no validation
 		if (instance) {
 			this._editInstance('ZoomOut', instance.bizId, this._b, instance._c, this._openedFromDataGrid);
+		}
+	},
+	
+	// resume controls that get paused when they do not have focus like MapDisplay
+	// this is called from windowStack
+	resume: function() {
+		// now that the values are set, we can reset all list grids - which have parameters
+		for (var gridBinding in this._grids) {
+			var grids = this._grids[gridBinding];
+			for (var gridID in grids) {
+				var grid = grids[gridID];
+				if (grid.webmap) { // this is a map
+					grid.resume();
+				}
+			}
 		}
 	},
 	
@@ -787,7 +804,7 @@ isc.EditView.addMethods({
 										if (isDate) {
 											// NB - this handles Logical Dates (2000-01-01) and 
 											//      ISO Dates (2001-01-01T00:00:00+00:00)
-											row[name] = Date.parseSchemaDate(value);
+											row[name] = isc.DateUtil.parseSchemaDate(value);
 										}
 										else if (isTime) {
 											row[name] = isc.Time.parseInput(value);
@@ -935,8 +952,7 @@ isc.EditView.addMethods({
 				var grid = grids[gridID];
 				if (this._refreshedGrids[gridID]) {} else {
 					if (grid.isVisible()) { // only refresh component if it is visible
-						if (grid._map) { // this is a map
-							grid.resume();
+						if (grid.webmap) { // this is a map
 							if (forcePostRefresh || 
 									// refresh only if the grids wants to be
 									(grid.postRefreshConditionName === undefined) ||
@@ -1694,7 +1710,7 @@ isc.BizListMembership.addMethods({
 		this._candidateList = isc.ListGrid.create({
 			width: "100%", 
 			height: "100%",
-			minHeight: 100,
+			minHeight: 120,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1716,7 +1732,7 @@ isc.BizListMembership.addMethods({
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
-			minHeight: 100,
+			minHeight: 120,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1755,13 +1771,13 @@ isc.BizListMembership.addMethods({
 				height: 75,
 				members: [
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberAssign.png",
 						iconWidth: 24,
 						iconHeight: 24,
 						iconAlign: "center",
-						showText: false, 
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._memberList.transferSelectedData(me._candidateList);
 							me._view._vm.setValue('_changed', true); // make the view dirty
@@ -1772,13 +1788,13 @@ isc.BizListMembership.addMethods({
 						getHoverHTML: function() {return "Add the selected candidates.";}
 					}),
 					isc.IButton.create({
+						title: null,
 						icon: "icons/memberUnassign.png",
 						iconWidth: 24,
 						iconHeight:24,
 						iconAlign: "center", 
-						showText: false,
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {
 							me._candidateList.transferSelectedData(me._memberList);
 							me._view._vm.setValue('_changed', true); // make the view dirty
@@ -2364,6 +2380,154 @@ isc.BizLabel.addMethods({
         this.Super("initWidget", arguments);
 	}
 });
+
+// Chart
+isc.ClassFactory.defineClass("BizChart", "Canvas");
+isc.BizChart.addClassMethods({
+	loadingChartJS: false,
+	loadChartJS: function() {
+		if (isc.BizChart.loadingChartJS) {
+			setTimeout(function() {isc.BizChart.loadChartJS()}, 100);
+		}
+		else if (! window.Chart) {
+			isc.BizChart.loadingChartJS = true;
+			SKYVE.Util.loadJS('javax.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('javax.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+					isc.BizChart.loadingChartJS = false;
+				});
+			});
+		}
+	},
+	
+	v: 0
+});
+isc.BizChart.addMethods({
+	// params chartType
+	init: function(config) {
+		if (! config.width) {
+			this.width = '100%';
+		}
+		if (! config.height) {
+			this.height = '100%';
+		}
+		this.ID = 'bizChart' + isc.BizChart.v++;
+		this.redrawOnResize = false;
+		this._refreshing = false; // stop multiple refreshes
+		this.Super("init", arguments);
+	},
+
+	getInnerHTML: function() {
+		return '<canvas id="' + this.ID + '_chart" />';
+	},
+
+	draw: function() {
+		if (window.Chart) {
+			if (! this.isDrawn()) {
+				return this.Super('draw', arguments);
+			}
+		}
+		else {
+			isc.BizChart.loadChartJS();
+			return this.Super('draw', arguments);
+		}
+	},
+
+	resized: function() {
+		if (this.chart) {
+			this.chart.canvas.parentNode.style.width = this.getWidth() + 'px';
+			this.chart.canvas.parentNode.style.height = this.getHeight() +  'px';
+			this.chart.canvas.width = this.getWidth() * 2;
+			this.chart.canvas.height = this.getHeight() * 2;
+			this.chart.canvas.style.width = this.getWidth() + 'px';
+			this.chart.canvas.style.height = this.getHeight() +  'px';
+			this.chart.update();
+		}
+	},
+
+	setDataSource: function(modelName) {
+		if (window.Chart) {
+			this._modelName = modelName;
+			
+			// assign this chart to the edit view _grids property if this chart is on a view
+			var grids = this._view._grids[modelName];
+			if (grids) {} else {
+				grids = {};
+				this._view._grids[modelName] = grids;
+			}
+			grids[this.getID()] = this;
+
+			this._refresh();
+		}
+		else {
+			this.delayCall('setDataSource', arguments, 100);
+		}
+	},
+	
+	rerender: function() {
+		this._refresh();
+	},
+	
+	_refresh: function() {
+		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
+			return;
+		}
+		if (! this.isDrawn()) { // widget isn't even drawn yet
+			return;
+		}
+		if (! this.isVisible()) { // widget is invisible (from condition on the UI or UI is not displayed at the moment)
+			return;
+		}
+		
+		var url = SKYVE.Util.CONTEXT_URL + 'chart?';
+		if (this._modelName) {
+			var instance = this._view.gather(false);
+			url += '_c=' + instance._c + '&t=' + this.chartType + '&_m=' + this._modelName;
+		}
+		else {
+			return;
+		}
+
+		// ensure that only 1 refresh at a time occurs
+		this._refreshing = true;
+
+		var me = this;
+		isc.RPCManager.sendRequest({
+			showPrompt: true,
+			evalResult: true,
+			actionURL: url,
+			httpMethod: 'GET',
+			callback: function(rpcResponse, data, rpcRequest) {
+				try {
+					if (data.config) { // server sends {} when it has an error
+						if (! me.chartConfig) {
+							me.chartConfig = {};
+						}
+						me.chartConfig.type = data.config.type;
+						me.chartConfig.data = data.config.data;
+						me.chartConfig.options = data.config.options;
+						if (! me.chartConfig.options) {
+							me.chartConfig.options = {};
+						}
+						me.chartConfig.options.responsive = true;
+						me.chartConfig.options.maintainAspectRatio = false;
+						if (me.chart) {
+							me.chart.update();
+						}
+						else { 
+							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
+							me.chart = new Chart(ctx, me.chartConfig);
+						}
+						me.resized();
+					}
+				}
+				finally {
+					me._refreshing = false;
+				}
+			}
+		});
+	}
+});
+
 // ProgressBar
 isc.ClassFactory.defineClass("BizProgressBar", "ProgressBar");
 // Properties

@@ -30,8 +30,7 @@
 					<p:focus />
 					<p:remoteCommand name="pushRerender" actionListener="#{skyveMap.rerender('push', false)}" process="@this" update="@form" />
 				</h:form>
-				<s:map id="map"
-						module="#{skyveMap.bizModuleParameter}"
+				<s:map module="#{skyveMap.bizModuleParameter}"
 						document="#{skyveMap.bizDocumentParameter}"
 						query="#{skyveMap.queryNameParameter}"
 						model="#{skyveMap.modelName}"
@@ -40,8 +39,8 @@
 						update="@none" />
 				<!-- Map is height of window - 250px for header and footer -->
 				<script>
-					$('#map').parent().height($(window).height() - 250);
-					$(window).resize(function(e) {$('#map').parent().height($(window).height() - 250)});
+					$('#s0').height($(window).height() - 250);
+					$(window).resize(function(e) {$('#s0').height($(window).height() - 250)});
 				</script>
 			</ui:define>
 		</ui:composition>

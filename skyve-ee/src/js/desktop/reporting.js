@@ -180,25 +180,25 @@ isc.ReportDialog.addClassProperties({
 				height: 100,
 				members: [
 					isc.IButton.create({
+						title: null,
 						icon: "reporting/arrow_right.png",
 						iconWidth: 24,
 						iconHeight: 24,
 						iconAlign: "center",
-						showText: false, 
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {isc.ReportDialog._selectedColumnList.transferSelectedData(isc.ReportDialog._columnList);},
 						canHover: true,
 						getHoverHTML: function() {return "Move the selected columns into the report";}
 					}),
 					isc.IButton.create({
+						title: null,
 						icon: "reporting/arrow_left.png",
 						iconWidth: 24,
 						iconHeight:24,
 						iconAlign: "center", 
-						showText: false,
-						width: 32, 
-						height: 32, 
+						width: 36, 
+						height: 36, 
 						click: function() {isc.ReportDialog._columnList.transferSelectedData(isc.ReportDialog._selectedColumnList);},
 						canHover: true,
 						getHoverHTML: function() {return "Move the selected columns out of the report";}

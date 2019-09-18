@@ -208,7 +208,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 								String selectedTagId)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean bean = p.retrieve(drivingDocument, bizId, true);
+		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		BindUtil.populateProperties(p.getUser(), bean, properties, true);
 		bean = p.save(drivingDocument, bean);
 		
@@ -225,7 +225,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	public static void remove(String bizId, Document drivingDocument)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean bean = p.retrieve(drivingDocument, bizId, true);
+		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		p.delete(drivingDocument, bean);
 	}
 	

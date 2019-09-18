@@ -344,7 +344,7 @@ public class WebUtil {
 			}
 		}
 		if (result == null) {
-			result = persistence.retrieve(referenceDocument, bizId, false);
+			result = persistence.retrieve(referenceDocument, bizId);
 		}
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 

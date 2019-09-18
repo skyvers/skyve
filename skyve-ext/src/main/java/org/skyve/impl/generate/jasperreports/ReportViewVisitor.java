@@ -38,9 +38,9 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -55,6 +55,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -941,6 +942,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		sub.setField(fld);
 		sub.setParentReportPersistentName(Renderer.getPersistentFromDocument(document));
 		sub.setRepositoryPath(design.getRepositoryPath());
+		sub.setSaveToDocumentPackage(design.getSaveToDocumentPackage());
 
 		// get the attribute and collection type
 		for (Attribute attr : document.getAttributes()) {
@@ -1020,16 +1022,25 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator arg0, boolean arg1, boolean arg2) {
-		// Not supported
-
-	}
-
-	@Override
 	public void visitGeometry(Geometry arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
 	}
 
+	@Override
+	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		// No action required
+	}
+	
+	@Override
+	public void visitGeometryMap(GeometryMap arg0, boolean arg1, boolean arg2) {
+		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+	}
+
+	@Override
+	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		// No action required
+	}
+	
 	@Override
 	public void visitHBox(HBox arg0, boolean arg1, boolean arg2) {
 		Boolean horiz = Boolean.TRUE;
@@ -1091,6 +1102,12 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitMap(MapDisplay arg0, boolean arg1, boolean arg2) {
 		// Not supported
+
+	}
+
+	@Override
+	public void visitChart(Chart arg0, boolean arg1, boolean arg2) {
+		// Not supported yet
 
 	}
 

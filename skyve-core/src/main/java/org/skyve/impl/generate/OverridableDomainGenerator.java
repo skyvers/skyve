@@ -17,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +122,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	public static final Set<String> MYSQL_5_RESERVED_WORDS;
 
 	/**
+	 * Array of MySQL 8.x database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> MYSQL_8_RESERVED_WORDS;
+
+	/**
 	 * Array of SqlServer T-SQL reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
 	 */
 	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
@@ -145,7 +149,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"switch", "synchronized", "this", "throw", "throws",
 				"transient", "true", "try", "void", "volatile", "while"
 		};
-		JAVA_RESERVED_WORDS = new HashSet<>(Arrays.asList(javaReserved));
+		JAVA_RESERVED_WORDS = new TreeSet<>(Arrays.asList(javaReserved));
 
 		String h2Reserved[] = {
 				"all", "check", "constraint", "cross", "current_date", "current_time", "current_timestamp",
@@ -154,7 +158,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"offset", "on", "order", "primary", "rownum", "select", "sysdate", "systime", "systimestamp",
 				"today", "true", "union", "unique", "where", "with"
 		};
-		H2_RESERVED_WORDS = new HashSet<>(Arrays.asList(h2Reserved));
+		H2_RESERVED_WORDS = new TreeSet<>(Arrays.asList(h2Reserved));
 
 		String mysql5Reserved[] = {
 				"accessible", "add", "all", "alter", "analyze", "and", "as", "asc", "asensitive", "before", "between", "bigint",
@@ -182,8 +186,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"utc_timestamp", "values", "varbinary", "varchar", "varcharacter", "varying", "virtual", "when", "where", "while",
 				"with", "write", "xor", "year_month", "generated"
 		};
-		MYSQL_5_RESERVED_WORDS = new HashSet<>(Arrays.asList(mysql5Reserved));
+		MYSQL_5_RESERVED_WORDS = new TreeSet<>(Arrays.asList(mysql5Reserved));
 
+		String mysql8ExtraReserved[] = {
+				"array", "cume_dist", "dense_rank", "empty", "except", "first_value", "grouping", "groups",
+				"json_table", "lag", "last_value", "lateral", "lead", "member", "nth_value", "ntile",
+				"of", "over", "percent_rank", "rank", "recursive", "row_number", "system", "window"
+		};
+		MYSQL_8_RESERVED_WORDS = new TreeSet<>(MYSQL_5_RESERVED_WORDS);
+		MYSQL_8_RESERVED_WORDS.addAll(Arrays.asList(mysql8ExtraReserved));
 		String sqlServerReserved[] = {
 				"add", "external", "procedure", "all", "fetch", "public", "alter", "file", "raiserror", "and", "fillfactor", "read",
 				"any", "for", "readtext", "as", "foreign", "reconfigure", "asc", "freetext", "references", "authorization",
@@ -204,7 +215,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
 				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc"
 		};
-		SQL_SERVER_RESERVED_WORDS = new HashSet<>(Arrays.asList(sqlServerReserved));
+		SQL_SERVER_RESERVED_WORDS = new TreeSet<>(Arrays.asList(sqlServerReserved));
 
 		String postgreSQLReserved[] = {
 				"all", "analyse", "analyze", "and", "any", "array",
@@ -241,7 +252,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				"unique", "user", "using",
 				"verbose", "when", "where"
 		};
-		POSTGRESQL_RESERVED_WORDS = new HashSet<>(Arrays.asList(postgreSQLReserved));
+		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
 	}
 
 	OverridableDomainGenerator() {
@@ -771,26 +782,26 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		</joined-subclass>
 	*/
 	private void generateORM(FileWriter fw,
-			Module module,
-			Document document,
-			String packagePathPrefix,
-			boolean forExt,
-			Customer customer,
-			StringBuilder filterDefinitions)
-			throws Exception {
+								Module module,
+								Document document,
+								String packagePathPrefix,
+								boolean forExt,
+								Customer customer,
+								StringBuilder filterDefinitions)
+	throws Exception {
 		generateORM(fw, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
 	}
 
 	private void generateORM(FileWriter fw,
-			Module module,
-			Document document,
-			String packagePathPrefix,
-			boolean forExt, // indicates if we are processing a customer override
-			boolean recursive,
-			Customer customer,
-			StringBuilder filterDefinitions,
-			String indentation) // indents subclass definitions within the class definition
-			throws Exception {
+								Module module,
+								Document document,
+								String packagePathPrefix,
+								boolean forExt, // indicates if we are processing a customer override
+								boolean recursive,
+								Customer customer,
+								StringBuilder filterDefinitions,
+								String indentation) // indents subclass definitions within the class definition
+	throws Exception {
 		Extends inherits = document.getExtends();
 		if ((!recursive) && // not a recursive call
 				(inherits != null)) { // this is a sub-class
@@ -814,8 +825,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		String entityName = null;
 
-		System.out
-				.println("Generate ORM for " + packagePathPrefix + moduleName + '.' + repository.DOMAIN_NAME + '.' + documentName);
+		System.out.println("Generate ORM for " + packagePathPrefix + moduleName + '.' + repository.DOMAIN_NAME + '.' + documentName);
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
@@ -830,10 +840,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
 					fw.append(indent).append("\t<joined-subclass name=\"");
-				} else if (ExtensionStrategy.single.equals(strategy)) {
+				}
+				else if (ExtensionStrategy.single.equals(strategy)) {
 					fw.append(indent).append("\t<subclass name=\"");
 				}
-			} else {
+			}
+			else {
 				fw.append(indent).append("\t<class name=\"");
 			}
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
@@ -890,7 +902,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			
 			if ((baseDocumentName != null) && ExtensionStrategy.joined.equals(strategy)) {
 				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
-			} else if (baseDocumentName == null) {
+			}
+			else if (baseDocumentName == null) {
 				// map inherited properties
 				fw.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
 
@@ -945,7 +958,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							fw.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), HierarchicalBean.PARENT_ID)).append('"');
 						}
 						fw.append(" />\n");
-					} else {
+					}
+					else {
 						// Add bizOrdinal ORM
 						if (document.isOrdered()) {
 							fw.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
@@ -970,7 +984,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 
-			generateAttributeMappings(fw, repository, customer, module, document, persistent, forExt, indent);
+			generateAttributeMappings(fw, repository, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
 		}
 
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);
@@ -982,14 +996,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (ExtensionStrategy.single.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
 					generateORM(fw,
-							derivedModule,
-							derivation,
-							packagePathPrefix,
-							forExt,
-							true,
-							customer,
-							filterDefinitions,
-							indent + "\t");
+									derivedModule,
+									derivation,
+									packagePathPrefix,
+									forExt,
+									true,
+									customer,
+									filterDefinitions,
+									indent + "\t");
 				}
 			}
 			// Do joined-subclasses after subclasses
@@ -999,14 +1013,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (ExtensionStrategy.joined.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
 					generateORM(fw,
-							derivedModule,
-							derivation,
-							packagePathPrefix,
-							forExt,
-							true,
-							customer,
-							filterDefinitions,
-							indent + "\t");
+									derivedModule,
+									derivation,
+									packagePathPrefix,
+									forExt,
+									true,
+									customer,
+									filterDefinitions,
+									indent + "\t");
 				}
 			}
 			// Take care of subclasses with no derivation strategy (persistent subclass with only mapped superclasses)
@@ -1032,10 +1046,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
 					fw.append(indent).append("\t</joined-subclass>\n");
-				} else if (ExtensionStrategy.single.equals(strategy)) {
+				}
+				else if (ExtensionStrategy.single.equals(strategy)) {
 					fw.append(indent).append("\t</subclass>\n");
 				}
-			} else {
+			}
+			else {
 				generateFilterStuff(entityName, fw, filterDefinitions, indent);
 				fw.append(indent).append("\t</class>\n\n");
 			}
@@ -1043,21 +1059,34 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private void generateAttributeMappings(FileWriter fw,
-			AbstractRepository repository,
-			Customer customer,
-			Module module,
-			Document document,
-			Persistent persistent,
-			boolean forExt,
-			String indentation)
-			throws IOException {
+											AbstractRepository repository,
+											Customer customer,
+											Module module,
+											Document document,
+											Persistent persistent,
+											String columnPrefix,
+											Set<String> columnNames,
+											String owningDocumentName,
+											boolean forExt,
+											String indentation)
+	throws IOException {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
 			Persistent basePersistent = baseDocument.getPersistent();
 			if ((basePersistent != null) && ExtensionStrategy.mapped.equals(basePersistent.getStrategy())) {
 				Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
-				generateAttributeMappings(fw, repository, customer, baseModule, baseDocument, persistent, forExt, indentation);
+				generateAttributeMappings(fw,
+											repository,
+											customer,
+											baseModule,
+											baseDocument,
+											persistent,
+											columnPrefix,
+											columnNames,
+											owningDocumentName,
+											forExt,
+											indentation);
 			}
 		}
 
@@ -1070,6 +1099,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (attribute instanceof Collection) {
 				Collection collection = (Collection) attribute;
 
+				String collectionName = collection.getName();
 				String referencedDocumentName = collection.getDocumentName();
 				Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 				Persistent referencedPersistent = referencedDocument.getPersistent();
@@ -1079,7 +1109,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (collection.isPersistent()) {
 					if (referencedPersistent == null) {
 						throw new MetaDataException(String.format("The Collection %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
-																	collection.getName(), moduleName, documentName, referencedDocumentName));
+																	collectionName, moduleName, documentName, referencedDocumentName));
 					}
 				}
 				// ignore transient attributes
@@ -1115,12 +1145,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				if (type == CollectionType.child) {
 					if (mapped) {
-						throw new MetaDataException("Collection " + collection.getName() + " referencing document " +
+						throw new MetaDataException("Collection " + collectionName + " referencing document " +
 								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
 								" cannot be a child collection as the target document is a mapped document." +
 								" Use a composed collection instead.");
 					}
-					fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
+					fw.append(indentation).append("\t\t<bag name=\"").append(collectionName);
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
 					} 
@@ -1140,10 +1170,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				} 
 				else {
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append(indentation).append("\t\t<list name=\"").append(collection.getName());
+						fw.append(indentation).append("\t\t<list name=\"").append(collectionName);
 					} 
 					else {
-						fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
+						fw.append(indentation).append("\t\t<bag name=\"").append(collectionName);
 					}
 
 					String catalog = persistent.getCatalog();
@@ -1154,14 +1184,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (schema != null) {
 						fw.append("\" schema=\"").append(schema);
 					}
-					String collectionTableName = String.format("%s_%s", persistent.getName(), collection.getName());
+					String collectionTableName = String.format("%s_%s", persistent.getName(), collectionName);
 
 					// check collection table name length if required
 					if (identifierIsTooLong(collectionTableName)) {
 						throw new MetaDataException("Collection table name of " + collectionTableName +
-														" for collection " + collection.getName() + 
-														" in document " + document.getName() + 
-														" in module " + module.getName() +
+														" for collection " + collectionName + 
+														" in document " + documentName + 
+														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
 														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 					}
@@ -1170,9 +1200,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					if (CollectionType.aggregation.equals(type)) {
 						fw.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
-					} else if (CollectionType.composition.equals(type)) {
+					}
+					else if (CollectionType.composition.equals(type)) {
 						fw.append("\" cascade=\"all-delete-orphan\">\n");
-					} else {
+					}
+					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
 					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
@@ -1215,12 +1247,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 
 						// check type column name length if required
-						if (identifierIsTooLong(collection.getName() + "_type")) {
-							throw new MetaDataException("Collection name " + collection.getName() + 
-															" in document " + document.getName() + 
-															" in module " + module.getName() +
+						if (identifierIsTooLong(collectionName + "_type")) {
+							throw new MetaDataException("Collection name " + collectionName + 
+															" in document " + documentName + 
+															" in module " + moduleName +
 															" is longer than the allowed data store identifier character limit of " +
-															DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + collection.getName() + "_type)");
+															DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + collectionName + "_type)");
 						}
 
 						// Even though it would be better index wise to put the bizId column first
@@ -1228,7 +1260,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						// So sub-optimal but working if type column is first.
 						// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_type\"");
+						fw.append(collectionName).append("_type\"");
 						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
 							fw.append(" index=\"");
 							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
@@ -1236,7 +1268,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_id\" length=\"36\"");
+						fw.append(collectionName).append("_id\" length=\"36\"");
 						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
 							fw.append(" index=\"");
 							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
@@ -1282,6 +1314,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else if (attribute instanceof Association) {
 				Association association = (Association) attribute;
 
+				String associationName = association.getName();
 				String referencedDocumentName = association.getDocumentName();
 				Document referencedDocument = module.getDocument(null, referencedDocumentName);
 				Persistent referencedPersistent = referencedDocument.getPersistent();
@@ -1291,7 +1324,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (association.isPersistent()) {
 					if (referencedPersistent == null) {
 						throw new MetaDataException(String.format("The Association %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
-																	association.getName(), moduleName, documentName, referencedDocumentName));
+																	associationName, moduleName, documentName, referencedDocumentName));
 					}
 				}
 				// ignore transient attributes
@@ -1300,8 +1333,44 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				
 				AssociationType type = association.getType();
-				if (ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-					fw.append(indentation).append("\t\t<any name=\"").append(association.getName());
+				if (AssociationType.embedded.equals(type)) {
+					if (referencedModuleName.equals(moduleName) && (referencedDocumentName.equals(documentName))) {
+						throw new MetaDataException(String.format("The Association %s in document %s.%s cannot be of type 'embedded' when it references itself.", 
+																	associationName, 
+																	moduleName, 
+																	documentName));
+						
+					}
+					
+					fw.append(indentation).append("\t\t<component name=\"").append(associationName);
+					// TODO need to add class here for customer overrides
+					// <component class="" /> is required for customer overriding otherwise defaults to return type via reflection
+					fw.append("\">\n");
+
+					// Add parent link in
+					if (documentName.equals(referencedDocument.getParentDocumentName())) {
+						fw.append(indentation).append("\t\t\t<parent name=\"parent\" />\n");
+					}
+					
+					Module referencedModule = repository.getModule(customer, referencedModuleName);
+					
+					// use the enclosing document's persistent object
+					generateAttributeMappings(fw,
+												repository,
+												customer,
+												referencedModule,
+												referencedDocument,
+												persistent,
+												association.getEmbeddedColumnsPrefix(),
+												columnNames,
+												documentName,
+												forExt,
+												indentation + "\t");
+
+					fw.append(indentation).append("\t\t</component>\n");
+				}
+				else if (ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+					fw.append(indentation).append("\t\t<any name=\"").append(associationName);
 					fw.append("\" meta-type=\"string\" id-type=\"string\">\n");
 					Map<String, Document> arcs = new TreeMap<>();
 					populateArcs(referencedDocument, arcs);
@@ -1320,12 +1389,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 
 					// check type column name length if required
-					if (identifierIsTooLong(association.getName() + "_type")) {
-						throw new MetaDataException("Association name " + association.getName() + 
-														" in document " + document.getName() + 
-														" in module " + module.getName() +
+					String columnName = columnName(moduleName, owningDocumentName, associationName, columnPrefix, "_type", columnNames);
+					if (identifierIsTooLong(columnName)) {
+						throw new MetaDataException("Association name " + associationName + 
+														" in document " + documentName + 
+														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
-														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + association.getName() + "_type)");
+														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + " (" + columnName + ")");
 					}
 
 					// Even though it would be better index wise to put the bizId column first
@@ -1333,58 +1403,61 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					// So sub-optimal but working if type column is first.
 					// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_type");
+					fw.append(columnName);
 					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_id\" length=\"36");
+					fw.append(columnName(moduleName, owningDocumentName, associationName, columnPrefix, "_id", columnNames)).append("\" length=\"36");
 					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</any>\n");
-				} else {
+				}
+				else {
 					// check id column name length if required
-					if (identifierIsTooLong(association.getName() + "_id")) {
-						throw new MetaDataException("Association name " + association.getName() + 
-														" in document " + document.getName() + 
-														" in module " + module.getName() +
+					String associationColumnName = columnName(moduleName, owningDocumentName, associationName, columnPrefix, "_id", columnNames);
+					if (identifierIsTooLong(associationColumnName)) {
+						throw new MetaDataException("Association name " + associationColumnName + 
+														" in document " + documentName + 
+														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
-														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + association.getName() + "_id)");
+														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + associationColumnName + ")");
 					}
 
 					fw.append(indentation).append("\t\t<many-to-one name=\"");
-					fw.append(association.getName()).append("\" entity-name=\"");
+					fw.append(associationName).append("\" entity-name=\"");
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
 						fw.append(customerName);
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName);
-					fw.append("\" column=\"").append(association.getName());
+					fw.append("\" column=\"").append(associationColumnName);
 					if (AssociationType.composition.equals(type)) {
-						fw.append("_id\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
+						fw.append("\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
 						fw.append("\" unique-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.UK, persistent.getName(), association.getName()));
+						fw.append(generateDataStoreName(DataStoreType.UK, persistent.getName(), associationName));
 					}
 					else if (AssociationType.aggregation.equals(type)) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,merge");
+						fw.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 					else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
 					}
 					if (shouldIndex(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
 					fw.append("\" foreign-key=\"");
-					fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), association.getName()));
+					fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), associationName));
 					fw.append("\" />\n");
 				}
-			} else if (attribute instanceof Enumeration) {
+			}
+			else if (attribute instanceof Enumeration) {
 				// ignore transient attributes
 				if (! attribute.isPersistent()) {
 					continue;
@@ -1397,8 +1470,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// check column name length if required
 				if (identifierIsTooLong(enumerationName)) {
 					throw new MetaDataException("Enumeration name " + enumerationName + 
-													" in document " + document.getName() + 
-													" in module " + module.getName() +
+													" in document " + documentName + 
+													" in module " + moduleName +
 													" is longer than the allowed data store identifier character limit of " +
 													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 				}
@@ -1409,7 +1482,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (fieldLength != null) {
 					fw.append("\" length=\"").append(fieldLength.toString());
 				}
-
+				
+				String enumerationColumnName = columnName(moduleName, owningDocumentName, enumerationName, columnPrefix, null, columnNames);
+				if (! enumerationColumnName.equals(enumerationName)) {
+					fw.append("\" column=\"").append(enumerationColumnName);
+				}
+				
 				IndexType index = enumeration.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
@@ -1442,7 +1520,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append("</param>\n");
 				fw.append(indentation).append("\t\t\t</type>\n");
 				fw.append(indentation).append("\t\t</property>\n");
-			} else if (attribute instanceof Inverse) {
+			}
+			else if (attribute instanceof Inverse) {
 				// ignore transient attributes
 				if (! attribute.isPersistent()) {
 					continue;
@@ -1476,7 +1555,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 
 					fw.append("\" />\n");
-				} else {
+				}
+				else {
 					fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						String catalog = inversePersistent.getCatalog();
@@ -1521,7 +1601,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
 				}
-			} else {
+			}
+			else {
 				// ignore transient attributes
 				if (! attribute.isPersistent()) {
 					continue;
@@ -1529,13 +1610,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				Field field = (Field) attribute;
 				String fieldName = field.getName();
+				String fieldColumnName = columnName(moduleName, owningDocumentName, fieldName, columnPrefix, null, columnNames);
 
 				// check column name length if required
-				if (identifierIsTooLong(fieldName)) {
+				if (identifierIsTooLong(fieldColumnName)) {
 					throw new MetaDataException("Field name " + fieldName + 
 													" in document " + document.getName() + 
 													" in module " + module.getName() +
-													" is longer than the allowed data store identifier character limit of " +
+													" has a column name " + fieldColumnName + 
+													" which is longer than the allowed data store identifier character limit of " +
 													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 				}
 
@@ -1549,21 +1632,29 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				AttributeType type = attribute.getAttributeType();
 				if (type == AttributeType.decimal2) {
 					fw.append("\" type=\"").append(DECIMAL2).append("\" precision=\"20\" scale=\"2");
-				} else if (type == AttributeType.decimal5) {
+				}
+				else if (type == AttributeType.decimal5) {
 					fw.append("\" type=\"").append(DECIMAL5).append("\" precision=\"23\" scale=\"5");
-				} else if (type == AttributeType.decimal10) {
+				}
+				else if (type == AttributeType.decimal10) {
 					fw.append("\" type=\"").append(DECIMAL10).append("\" precision=\"28\" scale=\"10");
-				} else if (type == AttributeType.date) {
+				}
+				else if (type == AttributeType.date) {
 					fw.append("\" type=\"").append(DATE_ONLY);
-				} else if (type == AttributeType.dateTime) {
+				}
+				else if (type == AttributeType.dateTime) {
 					fw.append("\" type=\"").append(DATE_TIME);
-				} else if (type == AttributeType.time) {
+				}
+				else if (type == AttributeType.time) {
 					fw.append("\" type=\"").append(TIME_ONLY);
-				} else if (type == AttributeType.timestamp) {
+				}
+				else if (type == AttributeType.timestamp) {
 					fw.append("\" type=\"").append(TIMESTAMP);
-				} else if (type == AttributeType.id) {
+				}
+				else if (type == AttributeType.id) {
 					fw.append("\" length=\"36");
-				} else if (type == AttributeType.content) {
+				}
+				else if ((type == AttributeType.content) || (type == AttributeType.image)) {
 					fw.append("\" length=\"36");
 				}
 				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
@@ -1588,6 +1679,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else if ((type == AttributeType.memo) || (type == AttributeType.markup)) {
 					fw.append("\" type=\"text");
 				}
+
+				if (! fieldColumnName.equals(fieldName)) {
+					fw.append("\" column=\"").append(fieldColumnName);
+				}
+				
 				IndexType index = field.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
@@ -1598,6 +1694,32 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	// generate the appropriate column name and check it is unique
+	private static String columnName(String moduleName,
+										String owningDocumentName,
+										String attributeName,
+										String columnPrefixWithoutUnderscore,
+										String columnSuffixStartingWithUnderscore,
+										Set<String> columnNames) {
+		String result;
+		if (columnPrefixWithoutUnderscore == null) {
+			result = attributeName;
+		}
+		else {
+			result = columnPrefixWithoutUnderscore + '_' + attributeName;
+		}
+		if (columnSuffixStartingWithUnderscore != null) {
+			result += columnSuffixStartingWithUnderscore;
+		}
+		if (! columnNames.add(result)) {
+			throw new MetaDataException("Column name " + result + 
+											" is duplicated by an embedded association or mapped extension in document " + 
+											owningDocumentName + " in module " + moduleName + 
+											". Use the embeddedColumnsPrefix attribute on the embedded association to add a namespace/prefix.");
+		}
+		return result;
+	}
+	
 	// check identifier length if required
 	private static boolean identifierIsTooLong(String identifier) {
 		return ((DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() > 0) &&
@@ -2953,10 +3075,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (AssociationType.aggregation.equals(type)) {
 				fw.append(" * @navhas n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
 						.append(reference.getDocumentName()).append('\n');
-			} else if (AssociationType.composition.equals(type)) {
+			}
+			else if (AssociationType.composition.equals(type) || AssociationType.embedded.equals(type)) {
 				fw.append(" * @navcomposed n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
 						.append(reference.getDocumentName()).append('\n');
-			} else {
+			}
+			else {
 				if (CollectionType.aggregation.equals(type)) {
 					fw.append(" * @navhas n ");
 				} else if (CollectionType.composition.equals(type)) {
@@ -3183,26 +3307,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Creates a "variable" name for a document. E.g. Audit will return audit. Lowercases
-	 * the first letter of the document name. Also checks if the variable name is
-	 * a Java reserved word, and prefixes it with an underscore if it is.
-	 * 
-	 * @param documentName The name of the document to generate a variable name for
-	 * @return The variable name from the document.
-	 */
-	@SuppressWarnings("unused")
-	private static String getVariableNameForDocument(final String documentName) {
-		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
-
-		// check this is not a Java reserved word
-		if (JAVA_RESERVED_WORDS.contains(variableName)) {
-			return "_" + variableName;
-		}
-
-		return variableName;
-	}
-
-	/**
 	 * Checks if a file in the TEST_PATH already exists for the test about
 	 * to be created in the GENERATED_TEST_PATH.
 	 * 
@@ -3240,13 +3344,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					// return, attribute is transient
 					UtilImpl.LOGGER.fine(String.format("Ignoring transient attribute %s for document %s", attribute.getName(),
 							document.getName()));
-					return;
+					continue;
 				}
 
 				// skip checking association or collections as their persistent field name will be modified
 				if (AttributeType.collection.equals(type) || AttributeType.association.equals(type)
 						|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
-					return;
+					continue;
 				}
 
 				// check not using a reserved word
@@ -3259,7 +3363,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						break;
 					case MYSQL_5:
+					case MYSQL_5_4_BYTE_CHARSET:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+							throw new MetaDataException(
+									createDialectError(document, attribute));
+						}
+						break;
+					case MYSQL_8:
+					case MYSQL_8_4_BYTE_CHARSET:
+						if (MYSQL_8_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
 									createDialectError(document, attribute));
 						}

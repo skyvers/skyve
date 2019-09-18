@@ -76,7 +76,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 							
 							Module module = customer.getModule(moduleName);
 							Document document = module.getDocument(customer, documentName);
-							PersistentBean bean = persistence.retrieve(document, bizId, false);
+							PersistentBean bean = persistence.retrieve(document, bizId);
 		
 							// Use JSONUtil here to ensure that everything is escaped properly
 							

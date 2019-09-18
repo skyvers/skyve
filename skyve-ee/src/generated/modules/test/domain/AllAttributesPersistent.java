@@ -41,6 +41,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @navhas n aggregatedCollection 0..n AllAttributesPersistent
  * @navcomposed n composedAssociation 0..1 AllAttributesPersistent
  * @navhas n aggregatedAssociation 0..1 AllAttributesPersistent
+ * @navcomposed n embeddedAssociation 0..1 AllAttributesEmbedded
  * @stereotype "persistent"
  */
 @XmlType
@@ -61,6 +62,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
 	/** @hidden */
 	public static final String composedAssociationPropertyName = "composedAssociation";
+	/** @hidden */
+	public static final String embeddedAssociationPropertyName = "embeddedAssociation";
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
 	/** @hidden */
@@ -186,6 +189,10 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Composed Association
 	 **/
 	private AllAttributesPersistent composedAssociation = null;
+	/**
+	 * Embedded Association
+	 **/
+	private AllAttributesEmbedded embeddedAssociation = null;
 	/**
 	 * Boolean Flag
 	 **/
@@ -340,6 +347,24 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
 		preset(composedAssociationPropertyName, composedAssociation);
 		this.composedAssociation = composedAssociation;
+	}
+
+	/**
+	 * {@link #embeddedAssociation} accessor.
+	 * @return	The value.
+	 **/
+	public AllAttributesEmbedded getEmbeddedAssociation() {
+		return embeddedAssociation;
+	}
+
+	/**
+	 * {@link #embeddedAssociation} mutator.
+	 * @param embeddedAssociation	The new value.
+	 **/
+	@XmlElement
+	public void setEmbeddedAssociation(AllAttributesEmbedded embeddedAssociation) {
+		preset(embeddedAssociationPropertyName, embeddedAssociation);
+		this.embeddedAssociation = embeddedAssociation;
 	}
 
 	/**

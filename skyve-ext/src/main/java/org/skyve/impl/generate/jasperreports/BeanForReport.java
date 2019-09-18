@@ -17,7 +17,7 @@ public class BeanForReport {
 
 	public static Bean getBean(String moduleName, String documentName, String bizId) {
 		Persistence pers = CORE.getPersistence();
-		return pers.retrieve(moduleName, documentName, bizId, false);
+		return pers.retrieve(moduleName, documentName, bizId);
 	}
 
 	public static User getUser() {

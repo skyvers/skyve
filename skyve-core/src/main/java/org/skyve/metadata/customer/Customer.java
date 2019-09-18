@@ -106,15 +106,20 @@ public interface Customer extends NamedMetaData {
 	 */
 	public LoginResources getLoginResources();
 
+	public String getJFreeChartPostProcessorClassName();
+	public String getPrimeFacesChartPostProcessorClassName();
+	
 	/**
 	 * 
 	 * @param bizlet
+	 * @param moduleName
 	 * @param documentName
 	 * @param attribute
 	 * @return
 	 * @throws Exception
 	 */
 	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet, 
+																		String moduleName,
 																		String documentName, 
 																		Attribute attribute)
 	throws Exception;

@@ -59,12 +59,12 @@ isc.DateTimeItem.addProperties({
 
 isc.ClassFactory.defineClass("BizDateItem", "DateItem");
 isc.BizDateItem.addClassMethods({
-	parseInput: function(value) { // value is not only a string, returns a float
+	parseInput: function(value) { // value is not only a string
 		if (isc.isA.Date(value)) {
 			return value;
 		}
 		
-		if (value) {
+		if (value) { // must be a string
 			value = value.trim();
 			
 			// look for a string month match
@@ -110,27 +110,18 @@ isc.BizDateItem.addClassMethods({
 				}
 			}
 
-			var result = Date.parseSchemaDate(value);
-			if (result) {
-			}
-			else {
+			var result = isc.DateUtil.parseSchemaDate(value);
+			if (! result) {
 				// any non-matches returns null
 				result = Date.parseInput(value, 'DMY', 50, true);
 				// check if we have just a day and month, no year or time etc
-				if (result) {
-				}
-				else {
+				if (! result) {
 					if (/^\d?\d[^A-Za-z0-9]\d?\d$/.test(value)) { // 1 or 2 digits, anything, month word, whitespace or nothing
 						// try adding the current year on the end - any non-matches returns null
 						result = Date.parseInput(value + ' ' + Date.create().getFullYear(), 'DMY', 50, true);
 					}
 				}
 			}
-			// Adjust time to UTC
-//			if (result) {
-//				result.setTime(result.getTime() - result.getTimezoneOffset() * 60000);
-//				result.set
-//			}
 
 			return result;
 		}
@@ -160,7 +151,7 @@ isc.BizDateItem.addProperties({
 	inputFormat: function(value) {
 		return isc.BizDateItem.parseInput(value);
 	},
-	displayFormat: 'toDD_MM_YYYY'
+	dateFormatter: 'toDD_MM_YYYY'
 });
 isc.BizDateItem.addMethods({
 	mapValueToDisplay: function(value) {
@@ -170,7 +161,7 @@ isc.BizDateItem.addMethods({
 		if (! isc.isA.Date(value)) {
 			value = isc.BizDateItem.parseInput(value);
 		}
-		return isc.BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.dateFormatter);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
@@ -184,7 +175,7 @@ isc.BizDateItem.addMethods({
 	},
 	// Override - ensure the value displayed in the element matches the saved value, and is formatted correctly
 	updateValue: function() {
-		// this will map the value to a valid float
+		// this will map the value to a valid date
         this.Super("updateValue", arguments);
         // this will update the displayed string so its formatted correctly
         this.setElementValue(this.mapValueToDisplay(this.getValue()));
@@ -220,7 +211,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_Item", "BizDateItem");
 isc.DD_MMM_YYYY_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY'
+	dateFormatter: 'toDD_MMM_YYYY'
 });
 isc.SimpleType.create({
 	name: "DD_MMM_YYYY",
@@ -247,7 +238,7 @@ isc.BizDateTimeItem.addProperties({
 	inputFormat: function(value) {
 		return isc.BizDateItem.parseInput(value);
 	},
-	displayFormat: 'toDD_MM_YYYY_HH_MI'
+	dateFormatter: 'toDD_MM_YYYY_HH_MI'
 });
 isc.BizDateTimeItem.addMethods({
 	mapValueToDisplay: function(value) {
@@ -257,7 +248,7 @@ isc.BizDateTimeItem.addMethods({
 		if (! isc.isA.Date(value)) {
 			value = isc.BizDateItem.parseInput(value);
 		}
-		return isc.BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.dateFormatter);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
@@ -306,7 +297,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -320,7 +311,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -333,7 +324,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -347,7 +338,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
@@ -361,7 +352,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -376,7 +367,7 @@ isc.SimpleType.create({
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
@@ -390,7 +381,7 @@ isc.SimpleType.create({
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
-	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -460,7 +451,7 @@ isc.ClassFactory.defineClass("HH_MI_SS_Item", "BizTimeItem");
 isc.HH_MI_SS_Item.addProperties({
 	use24HourTime: false,
 	hint: 'HH:MI:SS am/pm',
-   	displayFormat: 'toTime',
+	dateFormatter: 'toTime',
    	timeFormatter: 'toTime'
 });
 isc.SimpleType.create({
@@ -475,7 +466,7 @@ isc.ClassFactory.defineClass("HH24_MI_Item", "BizTimeItem");
 isc.HH24_MI_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI',
-   	displayFormat: 'toShortPadded24HourTime',
+	dateFormatter: 'toShortPadded24HourTime',
    	timeFormatter: 'toShortPadded24HourTime'
 });
 isc.SimpleType.create({
@@ -490,7 +481,7 @@ isc.ClassFactory.defineClass("HH24_MI_SS_Item", "BizTimeItem");
 isc.HH24_MI_SS_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI:SS',
-   	displayFormat: 'toPadded24HourTime',
+	dateFormatter: 'toPadded24HourTime',
    	timeFormatter: 'toPadded24HourTime'
 });
 isc.SimpleType.create({
@@ -1201,7 +1192,7 @@ isc.BizContentLinkItem.addMethods({
 		if (config.editable) {
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this)]
+				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this, false)]
 			});
 		}
 		else {
@@ -1281,7 +1272,7 @@ isc.BizContentImageItem.addMethods({
 				width: 1, // make minimum width of button
 				height: (config.height ? config.height : '100%'),
 				defaultLayoutAlign: 'center', 
-				members: [isc.BizUtil.createUploadButton(this)]
+				members: [isc.BizUtil.createUploadButton(this, true)]
 			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
@@ -1377,7 +1368,6 @@ isc.BizLookupDescriptionItem.addMethods({
 			type: 'comboBox', 
 			showTitle: false,
 			width: '*',
-			height: 22,
 			selectOnFocus: true,
 			fetchMissingValues: false,
 //			addUnknownValues: false, This triggers a fetch on blur
@@ -1467,8 +1457,8 @@ isc.BizLookupDescriptionItem.addMethods({
 		if (config.editable) {
 			this._form = isc.DynamicForm.create({
 				writeFormTag: false, // ensure there are no nested forms
-				numCols: 3,
-				colWidths: ['*', 1, 53],
+				numCols: 2,
+				colWidths: ['*', 65],
 				margin: 0,
 				cellPadding: 0
 			});
@@ -1523,8 +1513,7 @@ isc.BizLookupDescriptionItem.addMethods({
 			
 			this._form.setItems([
 			    combo,
-			    {type: 'spacer', width: 1},
-		        {name: '_splitButton', showTitle: false, type: 'canvas', canvas: this._splitButton}
+		        {name: '_splitButton', showTitle: false, type: 'canvas', canvas: this._splitButton, align: 'right'}
 		    ]);
 		}
 		else {
@@ -1635,49 +1624,51 @@ isc.BizLookupDescriptionItem.addMethods({
 										}
 										// Validate here so we can put out the zoom message if required
 										var instance = me._view.gather(true);
-										if (instance) {} else {
-											isc.warn('You cannot zoom in until you fix the problems found');
-										}
-
-										if (instance._apply || me._view._vm.valuesHaveChanged()) {
-											delete instance._apply;
-											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function() {
+										if (instance) {
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to current form before zoom in
+												me._view.saveInstance(true, null, function() {
+													me.setRequired(required); // reset form item's required-ness
+													isc.WindowStack.popup(fromRect, "New", false, [view]);
+													view.newInstance(newParams, viewBinding, instance._c, false);
+												});
+											}
+											else {
 												me.setRequired(required); // reset form item's required-ness
 												isc.WindowStack.popup(fromRect, "New", false, [view]);
 												view.newInstance(newParams, viewBinding, instance._c, false);
-											});
+											}
 										}
 										else {
-											me.setRequired(required); // reset form item's required-ness
-											isc.WindowStack.popup(fromRect, "New", false, [view]);
-											view.newInstance(newParams, viewBinding, instance._c, false);
+											isc.warn('You cannot zoom in until you fix the problems found');
 										}
 									}
 									else {
 										// Validate here so we can put out the zoom message if required
 										var instance = me._view.gather(true);
-										if (instance) {} else {
-											isc.warn('You cannot zoom in until you fix the problems found');
-										}
-										
-										if (instance._apply || me._view._vm.valuesHaveChanged()) {
-											delete instance._apply;
-											// apply changes to current form before zoom in
-											me._view.saveInstance(true, null, function() {
+										if (instance) {
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to current form before zoom in
+												me._view.saveInstance(true, null, function() {
+													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+													view.editInstance(me.getValue(),
+																		viewBinding,
+																		instance._c,
+																		false);
+												});
+											}
+											else {
 												isc.WindowStack.popup(fromRect, "Edit", false, [view]);
 												view.editInstance(me.getValue(),
 																	viewBinding,
 																	instance._c,
 																	false);
-											});
+											}
 										}
 										else {
-											isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-											view.editInstance(me.getValue(),
-																viewBinding,
-																instance._c,
-																false);
+											isc.warn('You cannot zoom in until you fix the problems found');
 										}
 									}
 								});
@@ -1729,8 +1720,7 @@ isc.BizHTMLItem.addMethods({
 		
 		var me = this;
 		this._editButton = isc.IButton.create({
-			height: 22,
-			width: 30,
+			width: 40,
 			title: 'Edit',
 			canHover: true,
 			getHoverHTML: function() {return 'Edit the HTML';},
@@ -1748,7 +1738,7 @@ isc.BizHTMLItem.addMethods({
 				var owningView = me.form._view;
 				var formValues = owningView.gather(false);
 				
-				var holder = isc.Canvas.create({width:'100%', height:'100%'});
+				var holder = isc.Canvas.create({width:'100%', height:'100%', margin: 5});
 				holder.setContents('<div style="width:100%;height:100%" id="_CKEditor"></div>');
 				holder.draw = function() {
 					this.Super('draw');
@@ -1794,11 +1784,10 @@ isc.BizHTMLItem.addMethods({
 										[holder,
 											isc.HLayout.create({
 												membersMargin: 5,
-												margin: 10,
+												margin: 5,
 												align: "right",
 												members: [
 													isc.IButton.create({
-														height: 22, 
 														width: 60, 
 														title: 'Apply',
 														click: function(applyEvent) {
@@ -1807,7 +1796,6 @@ isc.BizHTMLItem.addMethods({
 														}
 													}),
 													isc.IButton.create({
-														height: 22, 
 														width: 60, 
 														title: 'Cancel',
 														click: function(applyEvent) {
@@ -1817,7 +1805,7 @@ isc.BizHTMLItem.addMethods({
 												]
 											})
 										],
-										405);
+										420);
 			}
 		});
 		
@@ -1850,177 +1838,9 @@ isc.SimpleType.create({
 	editorType: "BizHTMLItem"
 });
 
-isc.ClassFactory.defineClass("BizMapPicker", "HTMLFlow");
-isc.BizMapPicker.addClassMethods({
-	v: 0,
-	initialise: function() {
-		eval(isc.BizMapPicker.id + '.build()');
-	}
-});
-isc.BizMapPicker.addMethods({
-	init: function(config) {
-		this.width = '100%';
-		this.height = '100%';
-		this.styleName = 'googleMapDivParent';
-		this.ID = 'bizMapPicker' + isc.BizMapPicker.v++;
-		this.contents = '<div id="' + this.ID + '_map" style="margin:0;padding:0;height:100%">Loading Map...</div>';
-		this.Super("init", arguments);
-		this._overlays = [];
-		this.field = config.field;
-		
-		if (window.google && window.google.maps) {
-			this.build();
-		}
-		else {
-			isc.BizMapPicker.id = this.ID;
-
-			SKYVE.Util.loadJS('wicket/wicket.js?v=' + SKYVE.Util.v, function() {
-				SKYVE.Util.loadJS('wicket/wicket-gmap3.js?v=' + SKYVE.Util.v, function() {
-					if (SKYVE.Util.googleMapsV3ApiKey) {
-						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
-											SKYVE.Util.googleMapsV3ApiKey);
-					}
-					else {
-						SKYVE.Util.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
-					}
-				});
-			});
-		}
-	},
-
-    mapIt: function() {
-    	var value = this.field.getValue();
-		if (value) {} else {
-			return;
-		}
-
-		var wkt = new Wkt.Wkt();
-        try { // Catch any malformed WKT strings
-        	wkt.read(value);
-        }
-        catch (e) {
-            if (e.name === 'WKTError') {
-                alert('The WKT string is invalid.');
-                return;
-            }
-        }
-
-        var obj = wkt.toObject(this._map.defaults);
-        
-        if (wkt.type === 'polygon' || wkt.type === 'linestring') {
-        }
-		else {
-            if (obj.setEditable) {obj.setEditable(false);}
-        }
-
-        if (Wkt.isArray(obj)) { // Distinguish multigeometries (Arrays) from objects
-        	for (i in obj) {
-                if (obj.hasOwnProperty(i) && ! Wkt.isArray(obj[i])) {
-                    obj[i].setMap(this._map);
-                    this._overlays.push(obj[i]);
-                }
-            }
-        }
-        else {
-            obj.setMap(this._map); // Add it to the map
-            this._overlays.push(obj);
-        }
-
-        // Pan the map to the feature
-        if (obj.getBounds !== undefined && typeof obj.getBounds === 'function') {
-            // For objects that have defined bounds or a way to get them
-            this._map.fitBounds(obj.getBounds());
-        }
-        else {
-            if (obj.getPath !== undefined && typeof obj.getPath === 'function') {
-	            // For Polygons and Polylines - fit the bounds to the vertices
-				var bounds = new google.maps.LatLngBounds();
-				var path = obj.getPath();
-				for (var i = 0, l = path.getLength(); i < l; i++) {
-					bounds.extend(path.getAt(i));
-				}
-				this._map.fitBounds(bounds);
-            }
-            else { // But points (Markers) are different
-            	if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
-            		this._map.panTo(obj.getPosition());
-                }
-                if (this._map.getZoom() < 15) {
-                    this._map.setZoom(15);
-                }
-            }
-        }
-    },
-
-    clearIt: function () {
-        for (var i = 0, l = this._overlays.length; i < l; i++) {
-            this._overlays[i].setMap(null);
-        }
-        this._overlays.length = 0;
-    },
-
-	build: function() {
-		if (this.isDrawn()) {
-			var mapOptions = {
-				zoom: 4,
-				center: new google.maps.LatLng(-26,133.5),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
-			};
-			var drawingDefaults = {
-                    editable: true,
-                    strokeColor: '#990000',
-                    fillColor: '#EEFFCC',
-                    fillOpacity: 0.6
-            };
-			this._map = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
-
-            this._map.drawingManager = new google.maps.drawing.DrawingManager({
-                drawingControlOptions: {
-                    position: google.maps.ControlPosition.TOP_CENTER,
-                    defaults: drawingDefaults,
-                    drawingModes: [
-                        google.maps.drawing.OverlayType.MARKER,
-                        google.maps.drawing.OverlayType.POLYLINE,
-                        google.maps.drawing.OverlayType.POLYGON,
-                        google.maps.drawing.OverlayType.RECTANGLE
-                    ]
-                },
-                markerOptions: drawingDefaults,
-                polygonOptions: drawingDefaults,
-                polylineOptions: drawingDefaults,
-                rectangleOptions: drawingDefaults
-            });
-            this._map.drawingManager.setMap(this._map);
-
-            var me = this;
-            
-            google.maps.event.addListener(this._map.drawingManager, 'overlaycomplete', function (event) {
-                me.clearIt();
-
-                // Set the drawing mode to "pan" (the hand) so users can immediately edit
-                this.setDrawingMode(null);
-
-                me._overlays.push(event.overlay);
-                var wkt = new Wkt.Wkt();
-                wkt.fromObject(event.overlay);
-                var wktValue = wkt.write();
-                me.field.setValue(wktValue);
-            });
-
-			this.clearIt();
-			// delay the mapIt call because even though the maps API is synchronous, sometimes the
-			// maps JS calls seem to beat the initialisation of the map.
-			this.delayCall('mapIt', null, 100);
-		}
-		else {
-			this.delayCall('build', null, 100);
-		}
-	}
-});
-
-isc.ClassFactory.defineClass("GeometryItem", "TextItem");
+isc.ClassFactory.defineClass("GeometryItem", isc.CanvasItem);
 isc.GeometryItem.addClassProperties({
-	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals', 'isNull', 'notNull']
+	validOperators: ['geoWithin', 'geoContains', 'geoOverlaps', 'geoDisjoint', 'geoIntersects', 'geoTouches', 'geoCrosses', 'geoEquals', 'isNull', 'notNull']
 });
 isc.GeometryItem.addClassMethods({
 	format: function(value) {
@@ -2040,32 +1860,131 @@ isc.GeometryItem.addClassMethods({
 	}
 });
 isc.GeometryItem.addProperties({
-//    canEdit: false,
-//    disableIconsOnReadOnly: false,
-    width: 100,
-    operator: 'gWithin',
+	showHint: false,
+	width: 100,
+    operator: 'geoWithin',
 	validOperators: isc.GeometryItem.validOperators,
-	selectOnFocus: true
+	// this is going to be an editable data item
+	shouldSaveValue: true
 });
 isc.GeometryItem.addMethods({
-	init: function(config) {
-		this.icons = [{
+	createCanvas: function() {
+		var me = this;
+		var icons = [{
 	        src: 'icons/map.png',
 	        prompt: 'Click to set or see the geometry on a map',
 	        click: function(form, item, icon) {
-	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
+	        	var options = me.drawingTools ? {field: me, drawingTools: me.drawingTools} : {field: me};
+	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create(options)]);
 	        }
-	    }];
-		if (config.icons) {
-			this.icons.addList(config.icons);
-		}
-		
-		this.Super("init", arguments);
+		}];
+		// Use a HLayout coz if we returned a DynamicForm here, 
+		// CanvasItem would add the form items to the filter criteria automatically
+		return isc.HLayout.create({
+			height: 1,
+			width: '100%',
+			members: [
+				isc.DynamicForm.create({
+					writeFormTag: false, // ensure there are no nested forms
+					numCols: 1,
+					width: '100%',
+					margin: 0,
+					cellPadding: 0,
+					items: [{name: 'value',
+								type: 'text',
+								showTitle: false,
+								width: '*',
+								hint: this.hint,
+								showHintInField: true,
+								selectOnFocus: true,
+								changed: function(form, item, value) {
+									me.storeValue(value, false);
+								},
+								icons: icons}]
+				})
+			]
+		});
+	},
+	
+	showValue: function(displayValue, dataValue, form, item) {
+		item.canvas.getMember(0).setValue('value', displayValue);
+	},
+
+	setHint: function(hint) {
+		this.canvas.getMember(0).setHint(hint);
+	},
+	
+	// called from BizMapPicker
+	setValueFromPicker: function(newValue) {
+		// NB calls change events too.
+		this.storeValue(newValue, true);
 	}
 });
 isc.SimpleType.create({
     name: "geometry",
-    inheritsFrom: "text",
+    inheritsFrom: "canvas",
 	editorType: "GeometryItem",
+	defaultOperator: 'gWithin',
+	validOperators: isc.GeometryItem.validOperators
+});
+
+isc.ClassFactory.defineClass("GeometryMapItem", isc.CanvasItem);
+//instance properties and methods
+isc.GeometryMapItem.addProperties({
+	width: '*',
+	rowSpan: "*", 
+	endRow: false, 
+	startRow: false,
+	canFocus: false,
+	// this is going to be an editable data item
+	shouldSaveValue: true
+});
+
+//Properties are :-
+//
+//width
+//height
+//name
+//title
+//icons
+isc.GeometryMapItem.addMethods({
+	createCanvas: function() {
+		return isc.HLayout.create({defaultLayoutAlign: 'center'});
+	},
+	
+	showValue: function(displayValue, dataValue) {
+		if (! this._valueSetFromPicker) {
+			var options = {
+					field: this, 
+					width: (this.width ? this.width : '100%'),
+					height: (this.height ? this.height : '100%')};
+			if (this.drawingTools) {
+				options.drawingTools = this.drawingTools;
+			}
+			this.canvas.setMembers([
+				isc.BizMapPicker.create(options)
+			]);
+		}
+	},
+	
+	setDisabled: function(disabled) {
+		this.canvas.getMember(0).setDisabled(disabled);
+	},
+	
+	setValueFromPicker: function(newValue) {
+		this._valueSetFromPicker = true;
+		this.setValue(newValue);
+		delete this._valueSetFromPicker;
+		if (this.changed) {
+			this.changed(this.form, this, newValue);
+		}
+	}
+});
+
+//register the editor
+isc.SimpleType.create({
+	name: "geometryMap",
+	inheritsFrom: "canvas",
+	editorType: "GeometryMapItem",
 	validOperators: isc.GeometryItem.validOperators
 });

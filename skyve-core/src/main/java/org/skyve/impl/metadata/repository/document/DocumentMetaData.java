@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.model.document.field.Id;
+import org.skyve.impl.metadata.model.document.field.Image;
 import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
@@ -254,6 +255,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						@XmlElementRef(type = Markup.class),
 						@XmlElementRef(type = Colour.class),
 						@XmlElementRef(type = Content.class),
+						@XmlElementRef(type = Image.class),
 						@XmlElementRef(type = AssociationImpl.class),
 						@XmlElementRef(type = CollectionImpl.class),
 						@XmlElementRef(type = InverseOne.class),

@@ -40,7 +40,9 @@ import org.skyve.util.Util;
 							"defaultTimestampConverter", 
 							"modules", 
 							"roles",
-							"interceptors"})
+							"interceptors",
+							"JFreeChartPostProcessorClassName",
+							"primeFacesChartPostProcessorClassName"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private static final long serialVersionUID = 4281621343439667457L;
 
@@ -55,6 +57,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
+	private String fullyQualifiedJFreeChartPostProcessorClassName;
+	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
 
 	public String getLanguage() {
 		return language;
@@ -150,6 +154,24 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
 		return interceptors;
+	}
+
+	public String getJFreeChartPostProcessorClassName() {
+		return fullyQualifiedJFreeChartPostProcessorClassName;
+	}
+
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setJFreeChartPostProcessorClassName(String fullyQualifiedJFreeChartPostProcessorClassName) {
+		this.fullyQualifiedJFreeChartPostProcessorClassName = Util.processStringValue(fullyQualifiedJFreeChartPostProcessorClassName);
+	}
+
+	public String getPrimeFacesChartPostProcessorClassName() {
+		return fullyQualifiedPrimeFacesChartPostProcessorClassName;
+	}
+
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
+	public void setPrimeFacesChartPostProcessorClassName(String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = Util.processStringValue(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 	}
 
 	@Override
@@ -267,6 +289,9 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 				}
 			}
 		}
+
+		result.setJFreeChartPostProcessorClassName(fullyQualifiedJFreeChartPostProcessorClassName);
+		result.setPrimeFacesChartPostProcessorClassName(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 
 		return result;
 	}

@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -21,6 +22,7 @@ import org.skyve.metadata.view.Invisible;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "map",
 			propOrder = {"modelName",
+							"loading",
 							"refreshTimeInSeconds",
 							"showRefreshControls",
 							"pixelWidth", 
@@ -39,6 +41,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String modelName;
+	private LoadingType loading;
 	private Integer refreshTimeInSeconds;
 	private Boolean showRefreshControls;
 	
@@ -66,6 +69,15 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	@XmlAttribute(required = true)
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
+	}
+
+	public LoadingType getLoading() {
+		return loading;
+	}
+
+	@XmlAttribute
+	public void setLoading(LoadingType loading) {
+		this.loading = loading;
 	}
 
 	public Integer getRefreshTimeInSeconds() {

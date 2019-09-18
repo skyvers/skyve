@@ -51,9 +51,9 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -68,6 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -470,41 +471,57 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormGeoLocator(GeoLocator locator) {
-		renderGeoLocator(locator);
-	}
-
-	@Override
-	public void renderGeoLocator(GeoLocator locator) {
-		RenderedComponent l = cr.label(null, "geoLocator"); // TODO geolocator
-	    addComponent(null, 
-	    				false, 
-	    				locator.getInvisibleConditionName(), 
-	    				null,
-	    				l, 
-	    				null, 
-	    				null, 
-	    				null);
-	}
-
-	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
 		renderFormGeometry(geometry);
 	}
 	
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
-		RenderedComponent l = cr.label(null, "geometry"); // TODO geometry
+//		String title = getCurrentWidgetLabel();
+//		boolean required = isCurrentWidgetRequired();
+		RenderedComponent c = cr.label(null, "geometry"); // TODO geometry
+		eventSource = c;
 	    addComponent(null, 
 	    				false, 
 	    				geometry.getInvisibleConditionName(), 
 	    				null,
-	    				l, 
+	    				c, 
 	    				geometry.getPixelWidth(), 
 	    				null, 
 	    				null);
 	}
 
+	@Override
+	public void renderedBoundColumnGeometry(Geometry geometry) {
+		renderedFormGeometry(geometry);
+	}
+
+	@Override
+	public void renderedFormGeometry(Geometry geometry) {
+		eventSource = null;
+	}
+	
+	@Override
+	public void renderFormGeometryMap(GeometryMap geometry) {
+//		String title = getCurrentWidgetLabel();
+//		boolean required = isCurrentWidgetRequired();
+		RenderedComponent c = cr.label(null, "geometryMap"); // TODO geometryMap
+		eventSource = c;
+	    addComponent(null, 
+	    				false, 
+	    				geometry.getInvisibleConditionName(), 
+	    				null,
+	    				c, 
+	    				geometry.getPixelWidth(), 
+	    				null, 
+	    				null);
+	}
+
+	@Override
+	public void renderedFormGeometryMap(GeometryMap geometry) {
+		eventSource = null;
+	}
+	
 	@Override
 	public void renderMap(MapDisplay map) {
 		RenderedComponent l = cr.label(null, "map"); // TODO map
@@ -516,6 +533,19 @@ public class PWAViewRenderer extends ViewRenderer {
 	    				map.getPixelWidth(), 
 	    				map.getResponsiveWidth(),
 	    				map.getPercentageWidth());
+	}
+
+	@Override
+	public void renderChart(Chart chart) {
+		RenderedComponent l = cr.label(null, "chart"); // TODO chart
+	    addComponent(null, 
+	    				false, 
+	    				chart.getInvisibleConditionName(), 
+	    				null,
+	    				l, 
+	    				chart.getPixelWidth(), 
+	    				chart.getResponsiveWidth(),
+	    				chart.getPercentageWidth());
 	}
 
 	@Override
@@ -799,7 +829,8 @@ public class PWAViewRenderer extends ViewRenderer {
 												getCurrentListWidgetModelDocumentName(), 
 												getCurrentListWidgetModelName(), 
 												getCurrentListWidgetModel(), 
-												repeater.getParameters(), 
+												repeater.getFilterParameters(),
+												repeater.getParameters(),
 												title,
 												Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 												Boolean.TRUE.equals(repeater.getShowGrid()));

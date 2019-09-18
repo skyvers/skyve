@@ -47,7 +47,7 @@ public class UtilImpl {
 	 */
 	public static Map<String, Object> CONFIGURATION = null;
 
-	public static boolean XML_TRACE = true;
+	public static boolean XML_TRACE = false;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
 	public static boolean COMMAND_TRACE = false;
@@ -157,8 +157,14 @@ public class UtilImpl {
 	public static enum MapType {
 		gmap, leaflet;
 	}
-	public static MapType MAP_TYPE = MapType.gmap;
-	
+	public static MapType MAP_TYPE = MapType.leaflet;
+	// the layers to display on the map backdrop
+	public static String MAP_LAYERS = null;
+	// opening a new empty map will centre here
+	public static String MAP_CENTRE = null;
+	// opening a new empty map will apply this zoom level
+	public static int MAP_ZOOM = 1;
+
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
@@ -186,9 +192,9 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "1";
-	public static final String SKYVE_VERSION = "20190701-SNAPSHOT";
-	public static final String SMART_CLIENT_DIR = "isomorphic110";
+	public static final String WEB_RESOURCE_FILE_VERSION = "2";
+	public static final String SKYVE_VERSION = "20190830-SNAPSHOT";
+	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	// for skyve script
 	/**
@@ -389,7 +395,7 @@ public class UtilImpl {
 				if (reference.isPersistent()) {
 					if (reference instanceof AssociationImpl) {
 						AssociationImpl association = (AssociationImpl) reference;
-						if (association.getType() == AssociationType.composition) {
+						if (association.getType() != AssociationType.aggregation) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
 					} else if (reference instanceof Collection) {
@@ -425,7 +431,7 @@ public class UtilImpl {
 				if (reference.isPersistent()) {
 					if (reference instanceof AssociationImpl) {
 						AssociationImpl association = (AssociationImpl) reference;
-						if (association.getType() == AssociationType.composition) {
+						if (association.getType() != AssociationType.aggregation) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
 					} else if (reference instanceof Collection) {

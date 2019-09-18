@@ -29,9 +29,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.GeoLocator;
 import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
@@ -46,6 +46,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
@@ -539,7 +540,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 						relativeIconFileName = "actions/Edit.gif";
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-mail-forward";
+						actionIconStyleClass = "fa fa-pencil";
 					}
 					actionType = 'E';
 					break;
@@ -686,26 +687,20 @@ public abstract class ViewRenderer extends ViewVisitor {
 										Button button);
 
 	@Override
-	public final void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
-		preProcessWidget(locator.getDescriptionBinding(), locator.showsLabelByDefault());
-		if (currentFormItem != null) {
-			renderFormGeoLocator(locator);
-		}
-		else {
-			renderGeoLocator(locator);
-		}
-	}
-
-	public abstract void renderFormGeoLocator(GeoLocator locator);
-	public abstract void renderGeoLocator(GeoLocator locator);
-
-	@Override
 	public final void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		renderMap(map);
 	}
 	
 	public abstract void renderMap(MapDisplay map);
 	
+	@Override
+	public final void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+		renderChart(chart);
+	}
+	
+	public abstract void renderChart(Chart chart);
+	
+
 	@Override
 	public final void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
@@ -719,7 +714,33 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderBoundColumnGeometry(Geometry geometry);
 	public abstract void renderFormGeometry(Geometry geometry);
+	public abstract void renderedBoundColumnGeometry(Geometry geometry);
+	public abstract void renderedFormGeometry(Geometry geometry);
 
+	@Override
+	public final void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+		if (currentBoundColumn != null) {
+			renderedBoundColumnGeometry(geometry);
+		}
+		else {
+			renderedFormGeometry(geometry);
+		}
+	}
+	
+	@Override
+	public final void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(geometry.getBinding(), geometry.showsLabelByDefault());
+		renderFormGeometryMap(geometry);
+	}
+	
+	public abstract void renderFormGeometryMap(GeometryMap geometry);
+	public abstract void renderedFormGeometryMap(GeometryMap geometry);
+	
+	@Override
+	public final void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+		renderedFormGeometryMap(geometry);
+	}
+	
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
@@ -2034,7 +2055,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 			return HorizontalAlignment.right;
 		}
 		if (AttributeType.bool.equals(attributeType) || 
-				AttributeType.content.equals(attributeType)) {
+				AttributeType.content.equals(attributeType) ||
+				AttributeType.image.equals(attributeType)) {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;

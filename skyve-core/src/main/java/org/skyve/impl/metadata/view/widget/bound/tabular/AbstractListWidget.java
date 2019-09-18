@@ -10,17 +10,20 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"queryName",
 							"modelName",
 							"postRefreshConditionName",
+							"filterParameters",
 							"parameters",
 							"pixelWidth",
 							"responsiveWidth",
@@ -42,7 +45,8 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 	private String modelName;
 	private String postRefreshConditionName;
 	
-	private List<FilterParameter> parameters = new ArrayList<>();
+	private List<FilterParameter> filterParameters = new ArrayList<>();
+	private List<Parameter> parameters = new ArrayList<>();
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
@@ -98,10 +102,19 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 					name = "filterParameter",
 					type = FilterParameterImpl.class,
 					required = false)
-	public List<FilterParameter> getParameters() {
+	public List<FilterParameter> getFilterParameters() {
+		return filterParameters;
+	}
+
+	@Override
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, 
+					name = "parameter",
+					type = ParameterImpl.class,
+					required = false)
+	public List<Parameter> getParameters() {
 		return parameters;
 	}
-	
+
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

@@ -263,7 +263,7 @@ public class JSONReader {
 								}
 							}
 						}
-						if (BindUtil.isWriteable(result, propertyName)) {
+						if (BindUtil.isMutable(result, propertyName)) {
 							BindUtil.convertAndSet(result, propertyName, value);
 						}
 					}

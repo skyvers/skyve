@@ -360,11 +360,11 @@ public class SmartClientGenerateUtils {
 							sb.append('{');
 							java.util.Date min = dateValidator.getMin();
 							if (min != null) {
-								sb.append("min:Date.parseSchemaDate('").append(Binder.convert(java.util.Date.class, min)).append("'),");
+								sb.append("min:isc.DateUtil.parseSchemaDate('").append(Binder.convert(java.util.Date.class, min)).append("'),");
 							}
 							java.util.Date max = dateValidator.getMax();
 							if (max != null) {
-								sb.append("max:Date.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
+								sb.append("max:isc.DateUtil.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
 							}
 							sb.append("type:'dateRange',errorMessage:'");
 							sb.append(processString(dateValidator.constructMessage(user, title, converter)));
@@ -552,7 +552,8 @@ public class SmartClientGenerateUtils {
 					type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
 					break;
 				case content:
-					type = "bizUpload";
+				case image:
+					// nothing yet
 					break;
 				case geometry:
 					type = "geometry";
@@ -828,7 +829,7 @@ public class SmartClientGenerateUtils {
     						AttributeType.dateTime.equals(attributeType) || 
     						AttributeType.time.equals(attributeType) || 
     						AttributeType.timestamp.equals(attributeType)) {
-    					defaultValueJavascriptExpression = new StringBuilder(128).append("Date.parseSchemaDate('").append(defaultValueJavascriptExpression).append("')").toString();
+    					defaultValueJavascriptExpression = new StringBuilder(128).append("isc.DateUtil.parseSchemaDate('").append(defaultValueJavascriptExpression).append("')").toString();
     				}
     				else if (! (AttributeType.bool.equals(attributeType) || 
 									AttributeType.integer.equals(attributeType) ||
@@ -1308,7 +1309,8 @@ public class SmartClientGenerateUtils {
 			return HorizontalAlignment.right;
 		}
 		if (AttributeType.bool.equals(attributeType) || 
-				AttributeType.content.equals(attributeType)) {
+				AttributeType.content.equals(attributeType) || 
+				AttributeType.image.equals(attributeType)) {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;
@@ -1316,16 +1318,16 @@ public class SmartClientGenerateUtils {
 	
 	public static Integer determineDefaultColumnWidth(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {
-			return Integer.valueOf(100);
+			return Integer.valueOf(110);
 		}
 		if (AttributeType.dateTime.equals(attributeType)) {
-			return Integer.valueOf(125);
+			return Integer.valueOf(130);
 		}
 		if (AttributeType.time.equals(attributeType)) {
-			return Integer.valueOf(75);
+			return Integer.valueOf(80);
 		}
 		if (AttributeType.timestamp.equals(attributeType)) {
-			return Integer.valueOf(125);
+			return Integer.valueOf(140);
 		}
 		if (AttributeType.bool.equals(attributeType)) {
 			return Integer.valueOf(75);
@@ -1348,7 +1350,7 @@ public class SmartClientGenerateUtils {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append('{');
 		for (DomainValue value : values) {
-			sb.append('\'').append(value.getCode()).append("':'");
+			sb.append('\'').append(processString(value.getCode())).append("':'");
 			sb.append(processString(Util.i18n(value.getDescription(), locale))).append("',");
 		}
 		if (values.isEmpty()) { // no values
@@ -1614,7 +1616,7 @@ public class SmartClientGenerateUtils {
 		}
 		if (visitedQueryNames == null) {
 			toAppendTo.append("if(window.").append(dataSourceId);
-			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',dataURL:'smartlist',");
+			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',");
 			toAppendTo.append("operationBindings:[{operationType:'fetch',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'update',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'add',dataProtocol:'postParams'},");
@@ -1678,7 +1680,13 @@ public class SmartClientGenerateUtils {
 			hiddenBindingsList.add(((LookupDescription) forLookup).getDescriptionBinding());
 		}
 		if (forLookup != null) {
-			List<FilterParameter> parameters = forLookup.getParameters();
+			List<FilterParameter> filterParameters = forLookup.getFilterParameters();
+			if (filterParameters != null) {
+				for (FilterParameter parameter : filterParameters) {
+					hiddenBindingsList.add(parameter.getName());
+				}
+			}
+			List<Parameter> parameters = forLookup.getParameters();
 			if (parameters != null) {
 				for (Parameter parameter : parameters) {
 					hiddenBindingsList.add(parameter.getName());

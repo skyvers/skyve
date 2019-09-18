@@ -19,7 +19,7 @@
 						showRemove="false"
 						percentageWidth="50"
 						responsiveWidth="12">
-				<filterParameter name=":bizId" operator="equal" binding="bizId" />
+				<parameter name="bizId" binding="bizId" />
 			</listGrid>
 		</tab>
 	</tabPane>

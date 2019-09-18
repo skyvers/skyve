@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<router uxuiSelectorClassName="router.DefaultUxUiSelector"
+			xmlns="http://www.skyve.org/xml/router"
+			xsi:schemaLocation="http://www.skyve.org/xml/router ../schemas/router.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<uxui name="desktop">
+		<route outcome="/desktop/home.xhtml" />
+	</uxui>
+	<uxui name="external">
+		<route outcome="/editorial/list.xhtml">
+			<criteria webAction="l" />
+		</route>
+		<route outcome="/editorial/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/editorial/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/editorial/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/editorial/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/editorial/home.xhtml" />
+	</uxui>
+	<uxui name="tablet">
+		<route outcome="/editorial/list.xhtml">
+			<criteria webAction="l" />
+		</route>
+		<route outcome="/editorial/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/editorial/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/editorial/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/editorial/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/editorial/home.xhtml" />
+	</uxui>
+	<uxui name="phone">
+		<route outcome="/whosinIntegrate/inout.xhtml">
+			<criteria webAction="e" module="whosinIntegrate" document="Office" />
+		</route>
+		<route outcome="/whosinIntegrate/mystatus.xhtml">
+			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
+		</route>
+		<route outcome="/editorial/list.xhtml">
+			<criteria webAction="l" />
+		</route>
+		<route outcome="/editorial/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/editorial/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/editorial/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/editorial/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/editorial/home.xhtml" />
+	</uxui>
+</router>

@@ -12,9 +12,6 @@ import org.skyve.impl.metadata.model.document.field.ConstrainableField;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class ConvertableField extends ConstrainableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 7758386077394530922L;
 
 	private ConverterName converterName;

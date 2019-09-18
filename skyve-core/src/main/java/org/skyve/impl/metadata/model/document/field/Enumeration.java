@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.OverridableDomainGenerator;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -24,9 +25,6 @@ import org.skyve.metadata.module.Module;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"xmlTypeName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
 public class Enumeration extends ConstrainableField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -8699424041011741395L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, propOrder = {"name", "code", "description"})
@@ -69,6 +67,9 @@ public class Enumeration extends ConstrainableField {
 
 			if (result == null) {
 				result = BindUtil.toJavaInstanceIdentifier((description == null) ? code : description);
+				if (OverridableDomainGenerator.JAVA_RESERVED_WORDS.contains(result)) {
+					result += "Value";
+				}
 			}
 			
 			return result;

@@ -174,6 +174,10 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		insertedOrderings.clear();
 		appendedOrderings.clear();
 	}
+	
+	public void clearGroups() {
+		groupClause.setLength(0);
+	}
 
 	@Override
 	public DocumentFilter getFilter() {

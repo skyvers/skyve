@@ -175,6 +175,10 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>ChartServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>BizportExportServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
@@ -514,6 +518,15 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>ChartServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.ChartServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ChartServlet</servlet-name>
+		<url-pattern>/chart</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>MapServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MapServlet</servlet-class>
 	</servlet>
@@ -592,6 +605,10 @@
 		<mime-type>image/svg+xml</mime-type>
 	</mime-mapping>
 
+	<error-page>
+		<exception-type>org.springframework.security.web.authentication.rememberme.CookieTheftException</exception-type>
+		<location>/login</location>
+	</error-page>
 	<error-page>
 		<exception-type>java.lang.Throwable</exception-type>
 		<location>/pages/error.jsp</location>

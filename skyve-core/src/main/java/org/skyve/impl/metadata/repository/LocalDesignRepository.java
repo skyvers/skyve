@@ -1,6 +1,8 @@
 package org.skyve.impl.metadata.repository;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +28,7 @@ import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
+import org.skyve.impl.metadata.repository.router.RouterMerger;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
@@ -68,6 +71,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -129,11 +133,18 @@ public class LocalDesignRepository extends AbstractRepository {
 				}
 				if (result == null) {
 					try {
-						StringBuilder sb = new StringBuilder(256);
-						sb.append(UtilImpl.getAbsoluteBasePath());
-						sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-						result = XMLMetaData.unmarshalRouter(sb.toString());
-						result = result.convert(ROUTER_NAME);
+						final List<Router> routers = new ArrayList<>();
+						final Router globalRouter = getGlobalRouter();
+						if (globalRouter != null) {
+							routers.add(globalRouter);
+						}
+						routers.addAll(getModuleRouters());
+						if (routers.isEmpty()) {
+							throw new RuntimeException("No routers found.");
+						}
+
+						result = new RouterMerger().mergeRouters(routers);
+
 						if (! UtilImpl.DEV_MODE) {
 							put(routerKey, result);
 						}
@@ -147,6 +158,35 @@ public class LocalDesignRepository extends AbstractRepository {
 		
 		return result;
 	}
+
+	@Override
+	public Router getGlobalRouter() {
+		StringBuilder sb = new StringBuilder(256);
+		sb.append(UtilImpl.getAbsoluteBasePath());
+		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
+		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME);
+	}
+
+	/**
+	 * @return A list of self-contained module Routers.
+	 */
+	@Override
+	public List<Router> getModuleRouters() {
+		final List<Router> moduleRouters = new ArrayList<>();
+		for (String customerName : getAllCustomerNames()) {
+			final Customer customer = getCustomer(customerName);
+			for (Module module : customer.getModules()) {
+				final StringBuilder sb = new StringBuilder(256);
+				sb.append(UtilImpl.getAbsoluteBasePath());
+				sb.append(MODULES_NAMESPACE).append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
+				if (new File(sb.toString()).exists()) {
+					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME));
+				}
+			}
+		}
+		return moduleRouters;
+	}
+
 
 	@Override
 	public Customer getCustomer(String customerName) {
@@ -697,7 +737,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 							sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
 							result = view.convert(sb.toString());
-							result.resolveComponents(uxui, customer, document);
+							result.resolve(uxui, customer, document);
 							if (! UtilImpl.DEV_MODE) {
 								put(viewLocation, result);
 							}
@@ -757,6 +797,14 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+		return getModel(customer, document, modelName, runtime);
+	}
+
+	@Override
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer,
+															Document document,
+															String modelName,
+															boolean runtime) {
 		return getModel(customer, document, modelName, runtime);
 	}
 

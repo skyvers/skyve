@@ -26,7 +26,7 @@
 		</text>
 		<text name="documentNumber" required="true">
 			<displayName>Number</displayName>
-			<description>The last used number for the document.</description>
+			<description>The last used number for the document (the next number used will increment this).</description>
 			<length>500</length>
 		</text>
 	</attributes>

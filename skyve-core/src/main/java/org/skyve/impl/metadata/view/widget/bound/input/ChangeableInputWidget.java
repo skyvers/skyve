@@ -22,9 +22,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.FocusableInputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions"})
 public abstract class ChangeableInputWidget extends FocusableInputWidget implements Changeable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 8974421976409722475L;
 
 	private List<EventAction> changedActions = new ArrayList<>();

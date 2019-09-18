@@ -198,6 +198,7 @@ isc.BizListGrid.addMethods({
 		
 		me._flagDialog = isc.Window.create({
 			autoCenter: true,
+			autoSize: true,
 			isModal: true,
 			showModalMask: true,
 			canDragReposition: true,
@@ -212,56 +213,14 @@ isc.BizListGrid.addMethods({
 			showHeaderIcon: true,
 			items: [
 				isc.DynamicForm.create({
-					padding: 5,
-//					margin: 5,
-					width:'100%',
+					padding: 0,
+					margin: 5,
 					useAllDataSourceFields: false,
-					fields: [{name:'bizFlagComment', 
-								type:'richText', 
-								height:175,
-								width: '100%',
-								validators: [{type: "lengthRange", min: 0, max: 1024, clientOnly: true}]}]
-				}),
-				isc.HLayout.create({
-					padding: 10,
-					membersMargin: 5,
-					align: 'right',
-					members: [
-						isc.IButton.create({
-							title: "Clear",
-							width: 100,
-							click: function() {
-								var commentField = me._flagForm.getField('bizFlagComment');
-								if (commentField.getValue() != '') {
-									commentField.setValue('');
-									me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-										if (dsResponse.status >= 0) { // success
-											me._flagForm.reset(); // ensure form is not dirty before hiding it
-											me._flagDialog.hide();
-										}
-									});
-								}
-							}
-						}),
-						isc.IButton.create({
-							title: "Flag",
-							width: 100,
-							click: function() {
-								if (me._flagForm.validate(true)) {
-									me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-										if (dsResponse.status >= 0) { // success
-											me._flagForm.reset(); // ensure form is not dirty before hiding it
-											me._flagDialog.hide();
-										}
-									});
-								}
-							}
-						})
-					]
+					numCols: 3,
+					colWidths: ['*', 100, 100],
+					items: [] // this form is built in ListGrid.setDataSource()
 				})
-	        ],
-			width: 580,
-			height: 265
+	        ]
 		});
 
 		var getAllCriteria = function() {
@@ -1168,6 +1127,7 @@ isc.BizListGrid.addMethods({
 					requestProperties.params._cc = '';
 				}
 
+				// Get the filter criteria, so we can set it back after super call
 				var editorCriteria = me._advancedFilter.toggleButton.selected ?
 										me._advancedFilter.getCriteria() :
 										me.grid.getFilterEditorCriteria(true);
@@ -1589,11 +1549,49 @@ isc.BizListGrid.addMethods({
 		me._advancedFilter.setDataSource(me._dataSource);
 
 		me._flagForm.setDataSource(me._dataSource);
-		me._flagForm.setFields([{name:'bizFlagComment', 
-									type:'richText', 
-									height:175,
-									validators: [{type: "lengthRange", min: 0, max: 1024, clientOnly: true}]}]);
-		
+		me._flagForm.setFields([
+			{name:'bizFlagComment', 
+				type:'richText',
+				colSpan: 3,
+				height:175,
+				validators: [{type: 'lengthRange', min: 0, max: 1024, clientOnly: true}]},
+			{type: 'spacer', startRow: true, endRow: false},
+			{type: 'button',
+				title: 'Clear',
+				width: 100,
+				startRow: false,
+				endRow: false,
+				click: function() {
+					var commentField = me._flagForm.getField('bizFlagComment');
+					if (commentField.getValue() != '') {
+						commentField.setValue('');
+						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
+							if (dsResponse.status >= 0) { // success
+								me._flagForm.reset(); // ensure form is not dirty before hiding it
+								me._flagDialog.hide();
+							}
+						});
+					}
+				}
+			},
+			{type: 'button',
+				title: 'Flag',
+				width: 100,
+				startRow: false,
+				endRow: true,
+				click: function() {
+					if (me._flagForm.validate(true)) {
+						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
+							if (dsResponse.status >= 0) { // success
+								me._flagForm.reset(); // ensure form is not dirty before hiding it
+								me._flagDialog.hide();
+							}
+						});
+					}
+				}
+			}
+		]);
+
 		if (me.grid) {
 			me.removeMember(me.grid);
 			me.grid.destroy();
@@ -1847,14 +1845,70 @@ isc.BizDataGrid.addMethods({
 			}
 		}
 		var contextMenu = isc.Menu.create({showShadow: true, shadowDepth: 10, data: contextMenuData});
+
+		this._createGrid(config, this._fields, contextMenu);
+
+		// assign the grid to the form grids...
+		var grids = me._view._grids[me._b];
+		if (grids) {} else {
+			grids = {};
+			me._view._grids[me._b] = grids;
+		}
+		grids[me.getID()] = me;
 		
+		if (me.title) {
+			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
+		}
+		
+		if (config.editable) {
+			if (config.isRepeater) {} else {
+				var toolStripMembers = [];
+				if (me.showAdd) {
+					toolStripMembers.add(me._newButton);
+				}
+				if (me.showZoom) {
+					toolStripMembers.add(me._zoomButton);
+				}
+				if (me.showEdit) {
+					toolStripMembers.add(me._editButton);
+				}
+				if (me.showRemove) {
+					toolStripMembers.add(me.deleteSelectionButton);
+				}
+				if (me.showDeselect) {
+					if (toolStripMembers.length > 0) {
+						toolStripMembers.add("separator");
+					}
+					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																		false,
+																		"<b>Deselect</b> all.",
+																		me.clearSelectionItem.click));
+				}
+
+				if (toolStripMembers.length > 0) {
+					me.addMember(isc.ToolStrip.create({
+						membersMargin: 2,
+						layoutMargin: 2,
+					    width: '100%',
+						members: toolStripMembers
+					}));
+				}
+			}
+		}
+		me.addMember(me.grid);
+	},
+
+	_createGrid: function(config, fields, contextMenu) {
+		var me = this;
+
 		var showHeader = true;
 		if (me.isRepeater) {
 			if (me.showColumnHeaders) {} else {
 				showHeader = false;
 			}
 		}
-		me.grid = isc.ListGrid.create({
+
+		var gridConfig = {
 			height: "*",
 			minHeight: me.minHeight,
 			autoFetchData: false,
@@ -2021,58 +2075,15 @@ isc.BizDataGrid.addMethods({
 				]
 			}
 */
-		});
-
-		// assign the grid to the form grids...
-		var grids = me._view._grids[me._b];
-		if (grids) {} else {
-			grids = {};
-			me._view._grids[me._b] = grids;
-		}
-		grids[me.getID()] = me;
+		};
 		
-		if (me.title) {
-			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
+		if (config.gridConfig) {
+			isc.addProperties(gridConfig, config.gridConfig);
 		}
 		
-		if (config.editable) {
-			if (config.isRepeater) {} else {
-				var toolStripMembers = [];
-				if (me.showAdd) {
-					toolStripMembers.add(me._newButton);
-				}
-				if (me.showZoom) {
-					toolStripMembers.add(me._zoomButton);
-				}
-				if (me.showEdit) {
-					toolStripMembers.add(me._editButton);
-				}
-				if (me.showRemove) {
-					toolStripMembers.add(me.deleteSelectionButton);
-				}
-				if (me.showDeselect) {
-					if (toolStripMembers.length > 0) {
-						toolStripMembers.add("separator");
-					}
-					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																		false,
-																		"<b>Deselect</b> all.",
-																		me.clearSelectionItem.click));
-				}
-
-				if (toolStripMembers.length > 0) {
-					me.addMember(isc.ToolStrip.create({
-						membersMargin: 2,
-						layoutMargin: 2,
-					    width: '100%',
-						members: toolStripMembers
-					}));
-				}
-			}
-		}
-		me.addMember(me.grid);
+		me.grid = isc.ListGrid.create(gridConfig);
 	},
-
+	
 	setDisabled: function(disabled) {
 		this._disabled = disabled;
 		if (this.grid) {

@@ -39,9 +39,9 @@ isc.BizUtil.addClassProperties({
 							ID: "adminStack",
 							width: "100%",
 							visibilityMode: "mutex",
-							animateSections: true,
+							animateSections: false,
 							overflow: "hidden",
-							headerHeight: 20
+							headerHeight: 30
 						})
 					]
 				}),
@@ -137,7 +137,7 @@ isc.BizUtil.addClassProperties({
 					}
 				}
 			});
-			// add the section to the accordian pane
+			// add the section to the accordion pane
 			adminStack.addSection({
 				title: item.title,
 				expanded: item.open,
@@ -161,7 +161,9 @@ isc.BizUtil.addClassProperties({
 			item.fields.addAt({name: 'bizFlagComment', title:'Flag'}, 1);//,length:1024}, 0); long length makes filter builder use a text area
 
 			isc.RestDataSource.create({ID: item.ID,
-										dataFormat:'json',
+										dataFormat: 'json',
+										jsonPrefix: '',
+										jsonSuffix: '',
 										dataURL: "smartlist",
 										operationBindings : [
 											{operationType: "fetch", dataProtocol: "postParams"},
@@ -281,9 +283,9 @@ var eventData = [
 */
 
 		isc.RestDataSource.create({
-			ID:'textSearch', 
-			dataFormat:'json',
-			dataURL:'smartsearch', 
+			ID: 'textSearch', 
+			dataFormat: 'json',
+			dataURL: 'smartsearch', 
 			// ensure all queries are performed server-side
 			criteriaPolicy: "dropOnChange",
 			fields: [

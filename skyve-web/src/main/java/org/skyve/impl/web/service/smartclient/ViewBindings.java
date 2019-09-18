@@ -11,7 +11,7 @@ import org.skyve.metadata.model.document.Document;
 public class ViewBindings {
 	private String bindingPrefix;
 
-	// binding to writable indicator
+	// binding to mutable indicator
 	private Map<String, Boolean> bindings = new TreeMap<>();
 	
 	// binding to child bindings
@@ -43,12 +43,12 @@ public class ViewBindings {
 		return getBindingPrefix();
 	}
 	
-	public void putBinding(String binding, boolean writable) {
-	    Boolean currentlyWritable = bindings.get(binding);
-	    if (currentlyWritable == null) {
-	        bindings.put(binding, Boolean.valueOf(writable));
+	public void putBinding(String binding, boolean mutable) {
+	    Boolean currentlyMutable = bindings.get(binding);
+	    if (currentlyMutable == null) {
+	        bindings.put(binding, Boolean.valueOf(mutable));
 	    }
-	    else if (writable && (! currentlyWritable.booleanValue())) {
+	    else if (mutable && (! currentlyMutable.booleanValue())) {
 	        bindings.put(binding,  Boolean.TRUE);
 	    }
 	}
@@ -57,7 +57,7 @@ public class ViewBindings {
 		return bindings.keySet();
 	}
 
-	public boolean isWritable(String binding) {
+	public boolean isMutable(String binding) {
 	    return Boolean.TRUE.equals(bindings.get(binding));
 	}
 	
