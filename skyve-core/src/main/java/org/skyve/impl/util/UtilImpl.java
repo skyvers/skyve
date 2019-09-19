@@ -192,8 +192,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "3";
-	public static final String SKYVE_VERSION = "20190819";
+	public static final String WEB_RESOURCE_FILE_VERSION = "4";
+	public static final String SKYVE_VERSION = "20190820";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	// for skyve script
