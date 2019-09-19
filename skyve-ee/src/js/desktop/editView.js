@@ -2404,6 +2404,9 @@ isc.BizChart.addClassMethods({
 isc.BizChart.addMethods({
 	// params chartType
 	init: function(config) {
+		if (! window.Chart) {
+			isc.BizChart.loadChartJS();
+		}
 		if (! config.width) {
 			this.width = '100%';
 		}
@@ -2413,6 +2416,7 @@ isc.BizChart.addMethods({
 		this.ID = 'bizChart' + isc.BizChart.v++;
 		this.redrawOnResize = false;
 		this._refreshing = false; // stop multiple refreshes
+		this._resizeChartCalled = false; // throttles resizing events
 		this.Super("init", arguments);
 	},
 
@@ -2420,19 +2424,15 @@ isc.BizChart.addMethods({
 		return '<canvas id="' + this.ID + '_chart" />';
 	},
 
-	draw: function() {
-		if (window.Chart) {
-			if (! this.isDrawn()) {
-				return this.Super('draw', arguments);
-			}
-		}
-		else {
-			isc.BizChart.loadChartJS();
-			return this.Super('draw', arguments);
-		}
-	},
-
+	// throttle the resized event to 100 millis
 	resized: function() {
+		if (! this._resizeChartCalled) {
+			this.delayCall('_resizeChart', arguments, 100);
+		}
+		this._resizeChartCalled = true;
+	},
+	
+	_resizeChart: function() {
 		if (this.chart) {
 			this.chart.canvas.parentNode.style.width = this.getWidth() + 'px';
 			this.chart.canvas.parentNode.style.height = this.getHeight() +  'px';
@@ -2442,10 +2442,11 @@ isc.BizChart.addMethods({
 			this.chart.canvas.style.height = this.getHeight() +  'px';
 			this.chart.update();
 		}
+		this._resizeChartCalled = false;
 	},
 
 	setDataSource: function(modelName) {
-		if (window.Chart) {
+		if ((window.Chart) && this.isDrawn()) {
 			this._modelName = modelName;
 			
 			// assign this chart to the edit view _grids property if this chart is on a view
@@ -2517,7 +2518,6 @@ isc.BizChart.addMethods({
 							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
 							me.chart = new Chart(ctx, me.chartConfig);
 						}
-						me.resized();
 					}
 				}
 				finally {
