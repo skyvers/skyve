@@ -44,8 +44,8 @@ public class TemporalBucket implements Bucket {
 			String day = result.toString();
 			
 			result.setLength(0);
-			result.append("concat(year(").append(categoryBindingOrAlias);
-			result.append("), '-', ").append(month);
+			result.append("concat(cast(year(").append(categoryBindingOrAlias);
+			result.append(") as string), '-', ").append(month);
 			result.append(", '-', ").append(day).append(')');
 		}
 		else if (TemporalBucketType.day.equals(type)) {
@@ -63,8 +63,8 @@ public class TemporalBucket implements Bucket {
 			String month = result.toString();
 			
 			result.setLength(0);
-			result.append("concat(year(").append(categoryBindingOrAlias);
-			result.append("), '-', ").append(month).append(')');
+			result.append("concat(cast(year(").append(categoryBindingOrAlias);
+			result.append(") as string), '-', ").append(month).append(')');
 		}
 		else if (TemporalBucketType.hour.equals(type)) {
 			result.append("hour(").append(categoryBindingOrAlias).append(')');
@@ -208,7 +208,7 @@ public class TemporalBucket implements Bucket {
 	private static void padZero(StringBuilder expression) {
 		String string = expression.toString();
 		expression.insert(0, "case when ");
-		expression.append(" < 10 then concat('0', ").append(string);
-		expression.append(") else concat('', ").append(string).append(") end");
+		expression.append(" < 10 then concat('0', cast(").append(string);
+		expression.append(" as string)) else concat('', cast(").append(string).append(" as string)) end");
 	}
 }
