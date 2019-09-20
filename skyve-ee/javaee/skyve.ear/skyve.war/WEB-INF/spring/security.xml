@@ -66,6 +66,9 @@
 		<intercept-url pattern="/report" access="authenticated" />
 		<intercept-url pattern="/export" access="authenticated" />
 		
+		<!-- Secure chart servlet -->
+		<intercept-url pattern="/chart" access="authenticated" />
+		
 		<!-- Secure Image Servlet for HTML reporting through Jasper -->
 		<intercept-url pattern="/image" access="authenticated" />
 
@@ -93,7 +96,7 @@
 
 		<!-- Secure map servlet -->
 		<intercept-url pattern="/map" access="authenticated" />
-		
+
 		<!-- Secure the Bizport Export Servlet -->
 		<intercept-url pattern="/bizexport.*" access="authenticated" />
 		
