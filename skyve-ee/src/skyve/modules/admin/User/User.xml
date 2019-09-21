@@ -29,7 +29,7 @@
 		<text name="generatedPassword" audited="false"  persistent="false" trackChanges="false">
 			<displayName>Generated Password</displayName>
 			<description>Used to temporarily hold generated passwords for further processing.</description>
-			<length>30</length>
+			<length>255</length>
 		</text>
 		<dateTime name="createdDateTime">
 			<displayName>Created</displayName>
@@ -44,19 +44,19 @@
 		<text name="newPassword" persistent="false" audited="false">
 			<displayName>New Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
-			<length>30</length>
+			<length>255</length>
 		</text>
 		<text name="confirmPassword" persistent="false" audited="false">
 			<displayName>Confirm Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
-			<length>30</length>
+			<length>255</length>
 		</text>
 		<text name="legacyId" >
 			<displayName>Legacy Id</displayName>
 			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
 			<length>100</length>
 		</text>
-		<boolean  name="passwordExpired">
+		<boolean name="passwordExpired">
 			<displayName>Must change password</displayName>
 			<description>Whether the password must be changed</description>
 		</boolean >
