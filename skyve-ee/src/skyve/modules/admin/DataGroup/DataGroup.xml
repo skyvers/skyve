@@ -7,8 +7,6 @@
 	<singularAlias>Data Group</singularAlias>
 	<pluralAlias>Data Groups</pluralAlias>
 	<iconStyleClass>fa fa-users</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/group16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true">

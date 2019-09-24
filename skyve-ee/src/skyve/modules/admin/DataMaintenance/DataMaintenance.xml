@@ -7,8 +7,6 @@
 	<singularAlias>Data Maintenance</singularAlias>
 	<pluralAlias>Data Maintenance</pluralAlias>
 	<iconStyleClass>fa fa-wrench</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/maintenance16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/maintenance32.png</icon32x32RelativeFilePath>
 	<bizKey expression="Data Maintenance"/>
 	<attributes>
 		<text name="modDocName">
