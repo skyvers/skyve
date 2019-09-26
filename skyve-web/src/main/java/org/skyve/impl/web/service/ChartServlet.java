@@ -28,6 +28,7 @@ import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
@@ -37,6 +38,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.chart.MetaDataChartModel;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 /**
@@ -52,11 +54,17 @@ import org.skyve.util.Util;
  * 		parameters
  * 			webContext
  * 			modelId
+ * 3) This mode receives a model definition from the client and generates the chart from that
+ *		parameters
+ *			type - chart type name
+ *			builder - ChartBuilderMetaData JSON
  */
 public class ChartServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private static final String CHART_TYPE_NAME = "t";
+	private static final String DATA_SOURCE_NAME = "ds";
+	private static final String BUILDER_NAME = "b";
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -77,7 +85,10 @@ public class ChartServlet extends HttpServlet {
 					}
 					persistence.setUser(user);
 
-					String result = processModel(request, response);
+					String dataSourceName = request.getParameter(DATA_SOURCE_NAME);
+					String result = (dataSourceName == null) ? 
+										processChartModel(request, response) :
+										processListModel(request, response);
 					if (result != null) {
 						pw.print(result);
 					}
@@ -102,7 +113,13 @@ public class ChartServlet extends HttpServlet {
 		}
 	}
 	
-	private static String processModel(HttpServletRequest request, HttpServletResponse response)
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
+		doGet(request, response);
+	}
+	
+	private static String processChartModel(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
@@ -146,7 +163,54 @@ public class ChartServlet extends HttpServlet {
 		
 		return ChartConfigRenderer.config(type, model);
 	}
-	
+
+	private static String processListModel(HttpServletRequest request, HttpServletResponse response)
+	throws Exception {
+		Customer customer = CORE.getCustomer();
+		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+		Bean bean = null;
+		if (contextKey != null) {
+			AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+			bean = webContext.getCurrentBean();
+		}
+
+		String module_QueryOrModel = request.getParameter(DATA_SOURCE_NAME);
+		int _Index = module_QueryOrModel.indexOf('_');
+		Module module = customer.getModule(module_QueryOrModel.substring(0, _Index));
+		String documentOrQueryOrModelName = module_QueryOrModel.substring(_Index + 1);
+		int __Index = documentOrQueryOrModelName.indexOf("__");
+		if (__Index >= 0) { // this is a model
+			return emptyResponse();
+		}
+
+		String documentName = null;
+		String queryName = null;
+		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+		if (query == null) {
+			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+			documentName = documentOrQueryOrModelName;
+		}
+		else {
+			queryName = documentOrQueryOrModelName;
+		}
+		if (query == null) {
+			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+		}
+		
+		ChartBuilderMetaData builder = (ChartBuilderMetaData) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
+		builder.setModuleName(module.getName());
+		builder.setDocumentName(documentName);
+		builder.setQueryName(queryName);
+		MetaDataChartModel model = new MetaDataChartModel(builder);
+		model.setBean(bean);
+
+		ChartData data = model.getChartData();
+		ChartType type = ChartType.valueOf(request.getParameter(CHART_TYPE_NAME));
+		org.primefaces.model.charts.ChartModel pfModel = ChartAction.pfChartModel(type, data);
+		
+		return ChartConfigRenderer.config(type, pfModel);
+	}
+
 	private static String emptyResponse() {
 		return "{}";
 	}

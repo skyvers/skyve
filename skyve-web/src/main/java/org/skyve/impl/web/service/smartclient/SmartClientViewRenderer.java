@@ -114,8 +114,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 public class SmartClientViewRenderer extends ViewRenderer {
-	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(120);
-	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(150);
+	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
+	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
 
 	private boolean noCreateView;
 	private int variableCounter = 0;
@@ -1477,6 +1477,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
 		}
 		code.append(",_view:view,");
+		size(membership, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(membership.getDisabledConditionName(), code);
 		invisible(membership.getInvisibleConditionName(), code);
 		

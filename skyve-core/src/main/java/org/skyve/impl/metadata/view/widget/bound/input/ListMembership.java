@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
+import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
@@ -30,14 +31,17 @@ import org.skyve.impl.metadata.view.widget.bound.input.MembershipWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"changedActions", "membersHeading", "candidatesHeading", "pixelWidth", "properties"})
-public class ListMembership extends InputWidget implements MembershipWidget, AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
+			propOrder = {"changedActions",
+							"membersHeading",
+							"candidatesHeading",
+							"pixelWidth",
+							"minPixelHeight",
+							"properties"})
+public class ListMembership extends InputWidget implements MembershipWidget, AbsoluteWidth, MinimumHeight {
 	private static final long serialVersionUID = -2470035788382174503L;
 
 	private Integer pixelWidth;
+	private Integer minPixelHeight;
 	private String candidatesHeading = "Candidates";
 	private String membersHeading = "Members";
 	private List<EventAction> changedActions = new ArrayList<>();
@@ -67,6 +71,17 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	@XmlAttribute(name = "pixelWidth", required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(name = "minPixelHeight", required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
 	}
 
 	public String getCandidatesHeading() {

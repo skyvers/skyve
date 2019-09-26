@@ -1710,7 +1710,7 @@ isc.BizListMembership.addMethods({
 		this._candidateList = isc.ListGrid.create({
 			width: "100%", 
 			height: "100%",
-			minHeight: 120,
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1732,7 +1732,7 @@ isc.BizListMembership.addMethods({
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
-			minHeight: 120,
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -2499,32 +2499,40 @@ isc.BizChart.addMethods({
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
-					if (data.config) { // server sends {} when it has an error
-						if (! me.chartConfig) {
-							me.chartConfig = {};
-						}
-						me.chartConfig.type = data.config.type;
-						me.chartConfig.data = data.config.data;
-						me.chartConfig.options = data.config.options;
-						if (! me.chartConfig.options) {
-							me.chartConfig.options = {};
-						}
-						me.chartConfig.options.responsive = true;
-						me.chartConfig.options.maintainAspectRatio = false;
-						if (me.chart) {
-							me.chart.update();
-						}
-						else { 
-							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
-							me.chart = new Chart(ctx, me.chartConfig);
-						}
-					}
+					me._update(data);
 				}
 				finally {
 					me._refreshing = false;
 				}
 			}
 		});
+	},
+	
+	// called from the ListGrid chart function too.
+	_update: function(data) { // the response data from the server
+		if (data.config) { // server sends {} when it has an error
+			if (! this.chartConfig) {
+				this.chartConfig = {};
+			}
+			this.chartConfig.type = data.config.type;
+			this.chartConfig.data = data.config.data;
+			this.chartConfig.options = data.config.options;
+			if (! this.chartConfig.options) {
+				this.chartConfig.options = {};
+			}
+			this.chartConfig.options.responsive = true;
+			this.chartConfig.options.maintainAspectRatio = false;
+			if (this.chart) {
+				this.chart.update();
+			}
+			else { 
+				if (! this.isDrawn()) {
+					this.draw();
+				}
+				var ctx = document.getElementById(this.ID + '_chart').getContext('2d');
+				this.chart = new Chart(ctx, this.chartConfig);
+			}
+		}
 	}
 });
 

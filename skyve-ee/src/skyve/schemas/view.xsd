@@ -1530,6 +1530,7 @@
         <xs:attribute name="membersHeading" type="xs:string"/>
         <xs:attribute name="candidatesHeading" type="xs:string"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
