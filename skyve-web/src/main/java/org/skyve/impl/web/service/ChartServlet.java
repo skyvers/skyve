@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
+import org.skyve.impl.metadata.view.model.chart.TextLengthBucketMetaData;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -25,6 +27,7 @@ import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -35,9 +38,18 @@ import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.chart.Bucket;
+import org.skyve.metadata.view.model.chart.ChartBuilder;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.chart.MetaDataChartModel;
+import org.skyve.metadata.view.model.chart.NumericMultipleBucket;
+import org.skyve.metadata.view.model.chart.OrderBy;
+import org.skyve.metadata.view.model.chart.TemporalBucket;
+import org.skyve.metadata.view.model.chart.TemporalBucket.TemporalBucketType;
+import org.skyve.metadata.view.model.chart.TextLengthBucket;
+import org.skyve.metadata.view.model.chart.TextStartsWithBucket;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -88,7 +100,7 @@ public class ChartServlet extends HttpServlet {
 					String dataSourceName = request.getParameter(DATA_SOURCE_NAME);
 					String result = (dataSourceName == null) ? 
 										processChartModel(request, response) :
-										processListModel(request, response);
+										processListModel(request);
 					if (result != null) {
 						pw.print(result);
 					}
@@ -164,15 +176,9 @@ public class ChartServlet extends HttpServlet {
 		return ChartConfigRenderer.config(type, model);
 	}
 
-	private static String processListModel(HttpServletRequest request, HttpServletResponse response)
+	private static String processListModel(HttpServletRequest request)
 	throws Exception {
 		Customer customer = CORE.getCustomer();
-		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		Bean bean = null;
-		if (contextKey != null) {
-			AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
-			bean = webContext.getCurrentBean();
-		}
 
 		String module_QueryOrModel = request.getParameter(DATA_SOURCE_NAME);
 		int _Index = module_QueryOrModel.indexOf('_');
@@ -183,28 +189,67 @@ public class ChartServlet extends HttpServlet {
 			return emptyResponse();
 		}
 
-		String documentName = null;
-		String queryName = null;
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
-			documentName = documentOrQueryOrModelName;
-		}
-		else {
-			queryName = documentOrQueryOrModelName;
 		}
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 		}
 		
-		ChartBuilderMetaData builder = (ChartBuilderMetaData) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
-		builder.setModuleName(module.getName());
-		builder.setDocumentName(documentName);
-		builder.setQueryName(queryName);
-		MetaDataChartModel model = new MetaDataChartModel(builder);
-		model.setBean(bean);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
 
-		ChartData data = model.getChartData();
+		String categoryBinding = (String) json.get("categoryBinding");
+		String categoryBucketSimpleName = (String) json.get("categoryBucket");
+		Bucket categoryBucket = null;
+		if (categoryBucketSimpleName != null) {
+			if (NumericMultipleBucket.class.getSimpleName().equals(categoryBucketSimpleName)) {
+				int multiple = ((Number) json.get("numericMultiple")).intValue();
+				categoryBucket = new NumericMultipleBucket(multiple);
+			}
+			else if (TextLengthBucket.class.getSimpleName().equals(categoryBucketSimpleName)) {
+				categoryBucket = new TextLengthBucketMetaData();
+			}
+			else if (TextStartsWithBucket.class.getSimpleName().equals(categoryBucketSimpleName)) {
+				int length = ((Number) json.get("startsWithLength")).intValue();
+				boolean caseSensitive = Boolean.TRUE.equals(json.get("startsWithCaseSensitive"));
+				categoryBucket = new TextStartsWithBucket(length, caseSensitive);
+			}
+			else if (TemporalBucket.class.getSimpleName().equals(categoryBucketSimpleName)) {
+				TemporalBucketType type = TemporalBucketType.valueOf((String) json.get("temporalBucketType"));
+				categoryBucket = new TemporalBucket(type);
+			}
+		}
+		
+		String valueBinding = (String) json.get("valueBinding");
+		AggregateFunction valueFunction = AggregateFunction.valueOf((String) json.get("valueFunction"));
+
+		ChartBuilder builder = new ChartBuilder();
+		builder.with(query);
+		builder.category(categoryBinding, categoryBucket);
+		builder.value(valueBinding, valueFunction);
+
+		boolean topOn = Boolean.TRUE.equals(json.get("topOn"));
+		if (topOn) {
+			int top = ((Number) json.get("top")).intValue();
+			OrderBy orderBy = OrderBy.valueOf((String) json.get("topBy"));
+			SortDirection sort = SortDirection.valueOf((String) json.get("topSort"));
+			boolean includeOthers = Boolean.TRUE.equals(json.get("includeOthers"));
+			builder.top(top, orderBy, sort, includeOthers);
+		}
+		
+		boolean orderOn = Boolean.TRUE.equals(json.get("orderOn"));
+		if (orderOn) {
+			OrderBy orderBy = OrderBy.valueOf((String) json.get("orderBy"));
+			SortDirection sort = SortDirection.valueOf((String) json.get("orderSort"));
+			builder.orderBy(orderBy, sort);
+		}
+
+		String title = (String) json.get("title");
+		String label = (String) json.get("label");
+		ChartData data = builder.build(title, label);
+		
 		ChartType type = ChartType.valueOf(request.getParameter(CHART_TYPE_NAME));
 		org.primefaces.model.charts.ChartModel pfModel = ChartAction.pfChartModel(type, data);
 		

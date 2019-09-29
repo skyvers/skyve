@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.chart;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -311,17 +313,17 @@ public class ChartBuilder {
 				if (topOthers) {
 					List<Bean> best = new ArrayList<>(result.subList(0, top));
 					result = result.subList(top, result.size());
-
+					
 					Number rest = null;
 					if ((valueFunction == null) || 
 							AggregateFunction.Count.equals(valueFunction) ||
 							AggregateFunction.Sum.equals(valueFunction)) {
 						// sum the rest
-						rest = Double.valueOf(sum(result));
+						rest = sum(best, result, false);
 					}
 					else if (AggregateFunction.Avg.equals(valueFunction)) {
 						// average the rest
-						rest = Double.valueOf(sum(result) / result.size());
+						rest = sum(best, result, true);
 					}
 					else if (AggregateFunction.Min.equals(valueFunction)) {
 						rest = minMax(result, true);
@@ -348,8 +350,17 @@ public class ChartBuilder {
 		return result;
 	}
 	
-	private static double sum(List<Bean> beans) {
+	private static Number sum(List<Bean> best, List<Bean> beans, boolean avg) {
 		double result = 0.0;
+		
+		Class<?> numberType = null;
+		for (Bean bean : best) {
+			Number number = (Number) Binder.get(bean, "value");
+			if (number != null) {
+				numberType = number.getClass();
+				break;
+			}
+		}
 		
 		for (Bean bean : beans) {
 			Number number = (Number) Binder.get(bean, "value");
@@ -357,8 +368,28 @@ public class ChartBuilder {
 				result += number.doubleValue();
 			}
 		}
+
+		if (avg) {
+			result = result / beans.size();
+		}
+		result = Math.round((result * 100000d) / 100000d);
 		
-		return Math.round((result * 100000d) / 100000d);
+		if (Integer.class.equals(numberType)) {
+			return Integer.valueOf((int) result);
+		}
+		if (Long.class.equals(numberType)) {
+			return Long.valueOf((long) result);
+		}
+		if (Float.class.equals(numberType)) {
+			return Float.valueOf((float) result);
+		}
+		if (BigInteger.class.equals(numberType)) {
+			return BigInteger.valueOf((long) result);
+		}
+		if (BigDecimal.class.equals(numberType)) {
+			return BigDecimal.valueOf(result);
+		}
+		return Double.valueOf(result);
 	}
 	
 	private static Number minMax(List<Bean> beans, boolean min) {

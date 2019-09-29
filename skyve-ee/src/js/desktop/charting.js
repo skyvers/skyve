@@ -38,7 +38,7 @@ isc.ChartDialog.addClassProperties({
 		numCols: 7,
 		colWidths: [100, '*', 110, 140, 60, 60, 150],
 		items: [
-			{name: 'categoryField',
+			{name: 'categoryBinding',
 				type: 'select',
 				title: 'Category Field',
 				width: '*',
@@ -49,10 +49,10 @@ isc.ChartDialog.addClassProperties({
 				title: 'Category Bucket',
 				width: '*',
 				allowEmptyValue: true,
-				valueMap: {numericMultipleBucket: 'Numeric Multiple',
-							textLengthBucket: 'Text Length',
-							textStartsWithBucket: 'Text Starts With',
-							temporalBucket: 'Temporal'},
+				valueMap: {NumericMultipleBucket: 'Numeric Multiple',
+							TextLengthBucket: 'Text Length',
+							TextStartsWithBucket: 'Text Starts With',
+							TemporalBucket: 'Temporal'},
 				redrawOnChange: true},
 			{name: 'numericMultiple',
 				type: 'spinner',
@@ -62,7 +62,7 @@ isc.ChartDialog.addClassProperties({
 				step: 1,
 				defaultValue: 100,
 				validators: [{type: 'requiredIf', expression: 'item.isVisible()'}],
-				showIf: "form.getItem('categoryBucket').getValue() == 'numericMultipleBucket'"},
+				showIf: "form.getItem('categoryBucket').getValue() == 'NumericMultipleBucket'"},
 			{name: 'startsWithLength',
 				type: 'spinner',
 				width: '*',
@@ -71,7 +71,7 @@ isc.ChartDialog.addClassProperties({
 				step: 1,
 				defaultValue: 1,
 				validators: [{type: 'requiredIf', expression: 'item.isVisible()'}],
-				showIf: "form.getItem('categoryBucket').getValue() == 'textStartsWithBucket'"},
+				showIf: "form.getItem('categoryBucket').getValue() == 'TextStartsWithBucket'"},
 			{name: 'startsWithCaseSensitive',
 				type: 'checkbox',
 				allowEmptyValue: false,
@@ -79,7 +79,7 @@ isc.ChartDialog.addClassProperties({
 				showTitle: false,
 				defaultValue: false,
 				validators: [{type: 'requiredIf', expression: 'item.isVisible()'}],
-				showIf: "form.getItem('categoryBucket').getValue() == 'textStartsWithBucket'"},
+				showIf: "form.getItem('categoryBucket').getValue() == 'TextStartsWithBucket'"},
 			{name: 'temporalBucketType',
 				type: "enum", 
 				width: '*',
@@ -99,7 +99,7 @@ isc.ChartDialog.addClassProperties({
 					year: 'Year'
 				},
 				validators: [{type: 'requiredIf', expression: 'item.isVisible()'}],
-				showIf: "form.getItem('categoryBucket').getValue() == 'temporalBucket'"}
+				showIf: "form.getItem('categoryBucket').getValue() == 'TemporalBucket'"}
 		]
 	}),
 	_valueForm: isc.DynamicForm.create({
@@ -107,7 +107,7 @@ isc.ChartDialog.addClassProperties({
 		numCols: 4,
 		colWidths: [100, '*', 105, 100],
 		items: [
-			{name: 'valueField',
+			{name: 'valueBinding',
 				type: 'select',
 				title: 'Value Field',
 				startRow: true,
@@ -327,18 +327,7 @@ isc.ChartDialog.addClassProperties({
 									}
 									params.t = isc.ChartDialog._valuesManager.getValue('type');
 									
-									var values = isc.ChartDialog._valuesManager.getValues();
-									var builder = {'class': 'org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData'};
-									if (values.title) {
-										builder.title = values.title;
-									}
-									builder.label = values.label;
-									builder.categoryBinding = values.categoryField;
-									builder.valueBinding = values.valueField;
-									if (values.valueFunction) {
-										builder.valueFunction = values.valueFunction;
-									}
-									params.b = builder;
+									params.b = isc.ChartDialog._valuesManager.getValues();
 
 									isc.RPCManager.sendRequest({
 										showPrompt: true,
@@ -348,11 +337,10 @@ isc.ChartDialog.addClassProperties({
 										params: params,
 										callback: function(rpcResponse, data, rpcRequest) {
 											if (data.config) {
-												var oldChartType = isc.ChartDialog._chart ? 
-																	(isc.ChartDialog._chart.chartConfig ? 
-																		isc.ChartDialog._chart.chartConfig.type :
-																			null) : 
-																	null;
+												var oldChartType = null;
+												if (isc.ChartDialog._chart && isc.ChartDialog._chart.chartConfig) { 
+													oldChartType = isc.ChartDialog._chart.chartConfig.type;
+												}
 												var newChartType = data.config.type;
 
 												if (oldChartType != newChartType) {
@@ -416,10 +404,10 @@ isc.ChartDialog.addClassProperties({
 		isc.ChartDialog._criteria = criteria;
 		isc.ChartDialog._tagId = tagId;
 		
-		var field = isc.ChartDialog._categoryForm.getItem('categoryField');
+		var field = isc.ChartDialog._categoryForm.getItem('categoryBinding');
 		field.setValue('');
 		field.setValueMap(fieldNames);
-		field = isc.ChartDialog._valueForm.getItem('valueField');
+		field = isc.ChartDialog._valueForm.getItem('valueBinding');
 		field.setValue('');
 		field.setValueMap(fieldNames);
 		
