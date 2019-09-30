@@ -471,24 +471,15 @@ isc.BizListGrid.addMethods({
         };
 
 		var chartData = function() {
-			// Make the field lists
-			var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-			for (var i = 0; i < fieldNames.length; i++) {
-				if ((fieldNames[i] == 'bizTagged') || (fieldNames[i] == 'bizFlagComment')) {
-					fieldNames.splice(i, 1); 
-					i--;
-				}
-			}
-			
 			// Put the filter parameters into this call also
 			var allCriteria = getAllCriteria();
 
 			// Make the call
-			isc.ChartDialog.popupChart(me._dataSource.ID,
+			isc.ChartDialog.popupChart(me._dataSource,
 										me._view ? me._view.gather(false)._c : null,
 										allCriteria,
 										me.tagId,
-										fieldNames);
+										me._dataSource.fields);
 		};
 		var chartItem = {
 			title: "Chart Data...", 

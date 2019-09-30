@@ -29,14 +29,13 @@ isc.ChartDialog.addClassProperties({
 			{name: 'label',
 				type: 'text',
 				width: '*',
-				title: 'Data Label',
-				required: true}
+				title: 'Data Label'}
 		]
 	}),
 	_categoryForm: isc.DynamicForm.create({
 		valuesManager: isc.ChartDialog._valuesManager,
 		numCols: 7,
-		colWidths: [100, '*', 110, 140, 60, 60, 150],
+		colWidths: [100, '*', 110, 160, 60, 60, 150],
 		items: [
 			{name: 'categoryBinding',
 				type: 'select',
@@ -240,7 +239,7 @@ isc.ChartDialog.addClassProperties({
 	_tagId: null,
 	
 	// The data source representing the server-side query or model
-	_dataSourceID: null,
+	_dataSource: null,
 
 	_border: function(title, // border title
 						members) { // the layout members array
@@ -318,7 +317,7 @@ isc.ChartDialog.addClassProperties({
 							click: function() {
 								if (isc.ChartDialog._valuesManager.validate()) {
 									var params = {};
-									params.ds = isc.ChartDialog._dataSourceID;
+									params.ds = isc.ChartDialog._dataSource.ID;
 									if (isc.ChartDialog._criteria) {
 										params.criteria = isc.ChartDialog._criteria;
 									}
@@ -329,6 +328,78 @@ isc.ChartDialog.addClassProperties({
 									
 									params.b = isc.ChartDialog._valuesManager.getValues();
 
+									// do some type validation on the bucket
+									var categoryBinding = params.b.categoryBinding;
+									var categoryBucket = params.b.categoryBucket;
+									if (categoryBucket) {
+										var field = isc.ChartDialog._dataSource.getField(categoryBinding);
+										var type = field.type;
+										if ((type == 'integer') && (type == 'float')) {
+											if (categoryBucket != 'NumericMultipleBucket') {
+												isc.ChartDialog._valuesManager.setErrors({
+													categoryBinding: 'Use a numeric bucket only with a number field',
+													categoryBucket: 'Use a numeric bucket only with a number field'
+												}, true);
+												return true;
+											}
+										}
+										else if ((type == 'date') && 
+													(type == 'time') && 
+													(type == 'datetime') && 
+													(type == 'bizDate') &&
+													(type == 'bizTime') &&
+													type.startsWith('DD_')) {
+											if (categoryBucket != 'TemporalBucket') {
+												isc.ChartDialog._valuesManager.setErrors({
+													categoryBinding: 'Use a temporal bucket only with a date or time field',
+													categoryBucket: 'Use a temporal bucket only with a date or time field'
+												}, true);
+												return true;
+											}
+										}
+										else {
+											if (categoryBucket == 'TemporalBucket') {
+												isc.ChartDialog._valuesManager.setErrors({
+													categoryBinding: 'Use a temporal bucket only with a date or time field',
+													categoryBucket: 'Use a temporal bucket only with a date or time field'
+												}, true);
+												return true;
+											}
+											else if (categoryBucket == 'NumericMultipleBucket') {
+												isc.ChartDialog._valuesManager.setErrors({
+													categoryBinding: 'Use a numeric bucket only with a number field',
+													categoryBucket: 'Use a numeric bucket only with a number field'
+												}, true);
+												return true;
+											}
+										}
+									}
+									
+									// do some type validation on the aggregate function
+									var valueBinding = params.b.valueBinding;
+									var valueFunction = params.b.valueFunction;
+									var field = isc.ChartDialog._dataSource.getField(valueBinding);
+									var type = field.type;
+									if ((type != 'integer') && (type != 'float') && (valueFunction != 'Count')) {
+										isc.ChartDialog._valuesManager.setErrors({
+											valueBinding: 'Use the [Count] value function with a non-numeric field',
+											valueFunction: 'Use the [Count] value function with a non-numeric field'
+										}, true);
+										return true;
+									}
+									
+									// Create a data label if there isnt one defined
+									if (! params.b.label) {
+										params.b.label = (valueFunction ? 
+																isc.ChartDialog._valueForm.getItem('valueFunction').getDisplayValue() + ' ' :
+																'') +
+															isc.ChartDialog._valueForm.getItem('valueBinding').getDisplayValue() + 
+															' by ' + 
+															isc.ChartDialog._categoryForm.getItem('categoryBinding').getDisplayValue();
+									}
+
+									isc.ChartDialog._valuesManager.clearErrors(true);
+									
 									isc.RPCManager.sendRequest({
 										showPrompt: true,
 										evalResult: true,
@@ -392,24 +463,34 @@ isc.ChartDialog.addClassProperties({
 		}
 	},
 	
-	popupChart: function(dataSourceID, // the ID of the data source - and thus the server-side query or model
+	popupChart: function(dataSource, // the data source - and the ID is the server-side query or model
 							_c, // the web context identifier
 							criteria, // the criteria to apply to the server-side query or model
 							tagId, // the tagId of the selected tag from the listgrid to apply server-side
-							fieldNames) { // data for the fields in field selection
+							fields) { // data for the fields in field selection
 		isc.ChartDialog._create();
 		
-		isc.ChartDialog._dataSourceID = dataSourceID;
+		isc.ChartDialog._dataSource = dataSource;
 		isc.ChartDialog._c = _c;
 		isc.ChartDialog._criteria = criteria;
 		isc.ChartDialog._tagId = tagId;
 		
+		// Make the field valueMap
+		var valueMap = {};
+		var fieldNames = dataSource.getFieldNames(true); // no hidden fields
+		for (var i = 0, l = fieldNames.length; i < l; i++) {
+			if ((fieldNames[i] != 'bizTagged') && (fieldNames[i] != 'bizFlagComment')) {
+				var field = dataSource.getField(fieldNames[i]);
+				valueMap[field.name] = field.title;
+			}
+		}
+
 		var field = isc.ChartDialog._categoryForm.getItem('categoryBinding');
 		field.setValue('');
-		field.setValueMap(fieldNames);
+		field.setValueMap(valueMap);
 		field = isc.ChartDialog._valueForm.getItem('valueBinding');
 		field.setValue('');
-		field.setValueMap(fieldNames);
+		field.setValueMap(valueMap);
 		
 		isc.WindowStack.popup(null, "Charting", true, [isc.ChartDialog._layout]);
 	}

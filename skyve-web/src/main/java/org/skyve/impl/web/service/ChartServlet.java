@@ -223,7 +223,8 @@ public class ChartServlet extends HttpServlet {
 		}
 		
 		String valueBinding = (String) json.get("valueBinding");
-		AggregateFunction valueFunction = AggregateFunction.valueOf((String) json.get("valueFunction"));
+		String valueFunctionString = (String) json.get("valueFunction");
+		AggregateFunction valueFunction = (valueFunctionString == null) ? null : AggregateFunction.valueOf(valueFunctionString);
 
 		ChartBuilder builder = new ChartBuilder();
 		builder.with(query);
