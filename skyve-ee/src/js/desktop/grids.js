@@ -552,12 +552,13 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		contextMenuData.add(refreshItem);
-		if (me.showExport || me.showChart) {
+		var showChart = me.showChart && config.dataSource && (! config.dataSource.contains('__'));
+		if (me.showExport || showChart) {
 			contextMenuData.add({isSeparator: true});
 			if (me.showExport) {
 				contextMenuData.add(exportItem);
 			}
-			if (me.showChart) {
+			if (showChart) {
 				contextMenuData.add(chartItem);
 			}
 		}
@@ -913,7 +914,7 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		if (config && config.isPickList) {} else {
-			if (me.showExport || me.showChart) {
+			if (me.showExport || showChart) {
 				toolStripMembers.add('separator');
 				if (me.showExport) {
 					toolStripMembers.add(isc.BizUtil.createImageButton(exportItem.icon,
@@ -921,7 +922,7 @@ isc.BizListGrid.addMethods({
 																		"<b>Export</b> table data.",
 																		exportItem.click));
 				}
-				if (me.showChart) {
+				if (showChart) {
 					toolStripMembers.add(isc.BizUtil.createImageButton(chartItem.icon,
 																		false,
 																		"<b>Chart</b> table data.",

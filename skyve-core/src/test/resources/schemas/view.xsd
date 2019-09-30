@@ -1766,6 +1766,7 @@
         <xs:attribute name="showFilter" type="xs:boolean"/>
         <xs:attribute name="showSummary" type="xs:boolean"/>
         <xs:attribute name="showExport" type="xs:boolean"/>
+        <xs:attribute name="showChart" type="xs:boolean"/>
         <xs:attribute name="showSnap" type="xs:boolean"/>
         <xs:attribute name="showTag" type="xs:boolean"/>
         <xs:attribute name="autoPopulate" type="xs:boolean"/>

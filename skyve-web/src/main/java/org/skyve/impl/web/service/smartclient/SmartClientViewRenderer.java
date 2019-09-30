@@ -1098,6 +1098,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.FALSE.equals(grid.getShowExport())) {
 			code.append("showExport:false,");
 		}
+		if (Boolean.FALSE.equals(grid.getShowChart())) {
+			code.append("showChart:false,");
+		}
 		if (Boolean.FALSE.equals(grid.getShowSnap())) {
 			code.append("showSnap:false,");
 		}

@@ -50,6 +50,7 @@ import org.skyve.metadata.view.Disableable;
 							"showFilter",
 							"showSummary",
 							"showExport",
+							"showChart",
 							"showSnap",
 							"showTag",
 							"autoPopulate",
@@ -80,6 +81,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	private Boolean showRemove;
 	private Boolean showDeselect;
 	private Boolean showExport;
+	private Boolean showChart;
 	private Boolean showFilter;
 	private Boolean showSummary;
 	private Boolean showSnap;
@@ -274,6 +276,15 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	@XmlAttribute(name = "showExport", required = false)
 	public void setShowExport(Boolean showExport) {
 		this.showExport = showExport;
+	}
+
+	public Boolean getShowChart() {
+		return showChart;
+	}
+
+	@XmlAttribute(name = "showChart", required = false)
+	public void setShowChart(Boolean showChart) {
+		this.showChart = showChart;
 	}
 
 	public Boolean getShowFilter() {
