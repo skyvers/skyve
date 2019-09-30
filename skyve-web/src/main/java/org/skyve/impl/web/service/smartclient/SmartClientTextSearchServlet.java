@@ -82,10 +82,10 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 							
 				            Map<String, Object> row = new TreeMap<>();
 				            String icon16 = document.getIcon16x16RelativeFileName();
-				            String icon = document.getIconStyleClass();
+				            String iconStyleClass = document.getIconStyleClass();
 				            iconMarkup.setLength(0);
-				            if (icon != null) {
-				            	iconMarkup.append("<i class=\"bizhubFontIcon ").append(icon).append("\"></i>");
+				            if (iconStyleClass != null) {
+				            	iconMarkup.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 				            }
 				            else if (icon16 != null) {
 					            iconMarkup.append("<img style=\"width:16px;height:16px\" src=\"resources?_doc=");

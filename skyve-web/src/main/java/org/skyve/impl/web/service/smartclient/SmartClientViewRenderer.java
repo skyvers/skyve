@@ -216,17 +216,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String tabPaneVariable = containerVariables.peek();
 		Integer tabNumber = tabNumbers.pop();
 		code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber);
-		if (icon16x16Url != null) {
+		String iconStyleClass = tab.getIconStyleClass();
+		if (iconStyleClass != null) {
+			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
+		}
+		else if (icon16x16Url != null) {
 			code.append("',icon:'../").append(icon16x16Url);
 			code.append("',title:'");
 		}
 		else {
 			code.append("',title:'");
-			String iconStyleClass = tab.getIconStyleClass();
-			if (iconStyleClass != null) {
-				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
-			}
 		}
+
 		code.append(SmartClientGenerateUtils.processString(title));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));

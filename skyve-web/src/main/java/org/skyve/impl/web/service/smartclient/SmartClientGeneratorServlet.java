@@ -118,28 +118,30 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				pw.append(module.getName()).append(".create").append(document.getName()).append("=function(){");
 				pw.append("var view=isc.EditView.create({width:'100%',height:'100%',title:'");
 				pw.append("',_mod:'").append(module.getName()).append("',_doc:'").append(document.getName());
-				String icon32 = editView.getIcon32x32RelativeFileName();
-				if (icon32 == null) {
-					icon32 = document.getIcon32x32RelativeFileName();
-					if (icon32 == null) {
-						String iconStyleClass = editView.getIconStyleClass();
-						if (iconStyleClass == null) {
-							iconStyleClass = document.getIconStyleClass();
-							if (iconStyleClass != null) {
-								pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
-							}
-						}
-						else {
-							pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
-						}
+
+				String iconStyleClass = editView.getIconStyleClass();
+				if (iconStyleClass == null) {
+					iconStyleClass = document.getIconStyleClass();
+					if (iconStyleClass != null) {
+						pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
 					}
 					else {
-						pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+						String icon32 = editView.getIcon32x32RelativeFileName();
+						if (icon32 == null) {
+							icon32 = document.getIcon32x32RelativeFileName();
+							if (icon32 != null) {
+								pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+							}
+						}
+						else { 
+							pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+						}
 					}
 				}
-				else { 
-					pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+				else {
+					pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
 				}
+
 				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(Util.i18n(document.getSingularAlias(), user.getLocale())));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");

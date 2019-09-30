@@ -1633,16 +1633,18 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(drivingDocumentModule.getName());
 		toAppendTo.append('.');
 		toAppendTo.append(drivingDocumentName);
-		String icon32 = drivingDocument.getIcon32x32RelativeFileName();
-		if (icon32 != null) {
-			toAppendTo.append("',icon:'").append(icon32);
+
+		String icon = drivingDocument.getIconStyleClass();
+		if (icon != null) {
+			toAppendTo.append("',fontIcon:'").append(icon);
 		}
 		else {
-			String icon = drivingDocument.getIconStyleClass();
-			if (icon != null) {
-				toAppendTo.append("',fontIcon:'").append(icon);
+			String icon32 = drivingDocument.getIcon32x32RelativeFileName();
+			if (icon32 != null) {
+				toAppendTo.append("',icon:'").append(icon32);
 			}
 		}
+
 		if (! config) {
 			// ensure all filtering is server-side
 			// this enables the summary row to always stay in sync and

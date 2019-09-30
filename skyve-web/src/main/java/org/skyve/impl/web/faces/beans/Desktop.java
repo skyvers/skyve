@@ -483,19 +483,19 @@ public class Desktop extends Harness {
 										Module itemModule,
 										Document itemDocument) {
 				result.append("',desc:'");
-				if ((icon16 == null) && (iconStyleClass != null)) {
+				if (iconStyleClass != null) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 				}
 				// Leave some space between the icon and its label
 				if ((icon16 != null) || (iconStyleClass != null)) {
-					result.append("&nbsp;");
+					result.append("&nbsp;&nbsp;");
 				}
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
 				}
 				result.append(",ref:'").append(ref);
-				if (icon16 != null) {
+				if ((iconStyleClass == null) && (icon16 != null)) {
 					result.append("',icon:'../resources?");
 					if ((itemModule != null) && (itemDocument != null)) { // NB link items have no document
 						result.append("_doc=").append(itemModule.getName()).append('.').append(itemDocument.getName()).append('&');
