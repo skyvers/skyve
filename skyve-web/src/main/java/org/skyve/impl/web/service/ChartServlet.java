@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -27,6 +28,9 @@ import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
+import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
+import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
+import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -42,6 +46,7 @@ import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.metadata.view.model.chart.ChartBuilder;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.chart.ChartModel;
+import org.skyve.metadata.view.model.chart.ListGridChartListModel;
 import org.skyve.metadata.view.model.chart.MetaDataChartModel;
 import org.skyve.metadata.view.model.chart.NumericMultipleBucket;
 import org.skyve.metadata.view.model.chart.OrderBy;
@@ -196,7 +201,41 @@ public class ChartServlet extends HttpServlet {
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 		}
-		
+
+		ListGridChartListModel model = new ListGridChartListModel();
+		model.setQuery(query);
+
+		String tagId = request.getParameter("tagId");
+		model.setSelectedTagId(tagId);
+
+		// add filter criteria
+		String criteriaString = request.getParameter("criteria");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> criteria = (Map<String, Object>) JSON.unmarshall(null, criteriaString);
+		if (criteria != null) {
+			String operator = (String) criteria.get("operator");
+			if (operator != null) { // advanced criteria
+				@SuppressWarnings("unchecked")
+				List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
+				SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
+																			model.getDrivingDocument(),
+																			CORE.getUser(),
+																			CompoundFilterOperator.valueOf(operator),
+																			advancedCriteria,
+																			tagId,
+																			model);
+			}
+			else { // simple criteria
+				SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
+																		model.getDrivingDocument(),
+																		customer,
+																		SmartClientFilterOperator.substring,
+																		criteria,
+																		tagId,
+																		model);
+			}
+		}
+
 		@SuppressWarnings("unchecked")
 		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
 
@@ -227,7 +266,7 @@ public class ChartServlet extends HttpServlet {
 		AggregateFunction valueFunction = (valueFunctionString == null) ? null : AggregateFunction.valueOf(valueFunctionString);
 
 		ChartBuilder builder = new ChartBuilder();
-		builder.with(query);
+		builder.with(model.getDocumentQuery());
 		builder.category(categoryBinding, categoryBucket);
 		builder.value(valueBinding, valueFunction);
 
