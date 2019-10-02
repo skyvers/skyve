@@ -897,6 +897,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											null,
 											null,
 											null,
+											null,
 											true);
 		textField.setId(id + "_value");
 		toAddTo.add(textField);
@@ -2227,7 +2228,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	                            formDisabledConditionName,
 	                            facesConverter);
         }
-        else if (mutableFormat != null) {
+        else if ((mutableFormat != null) && (mutableFormat.getMask() != null)) {
             result = maskField(dataWidgetVar,
 								text.getBinding(),
 								title,
@@ -2260,6 +2261,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								text.getDisabledConditionName(),
 								formDisabledConditionName,
 								length,
+								(mutableFormat == null) ? null : mutableFormat.getTextCase(),
 								facesConverter,
 								text.getPixelWidth(),
 								true);
@@ -2442,6 +2444,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String disabled,
 									String formDisabled,
 									Integer maxLength, 
+									TextCase textCase,
 									Converter converter, 
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
@@ -2461,7 +2464,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		String existingStyle = determineTextTransformStyle(textCase);
+		setSize(result, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -2491,23 +2495,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setReadonly(true);
 		}
 		result.setMask(determineMask(format));
-		String existingStyle = null;
-		TextCase textCase = format.getTextCase();
-		if (textCase != null) {
-			switch (textCase) {
-			case upper:
-				existingStyle = "text-transform:uppercase;";
-				break;
-			case capital:
-				existingStyle = "text-transform:capitalize;";
-				break;
-			case lower:
-				existingStyle = "text-transform:lowercase;";
-				break;
-			default:
-				throw new IllegalStateException(textCase + " is not supported");
-			}
-		}
+		String existingStyle = determineTextTransformStyle(format.getTextCase());
 		if (converter != null) {
 			result.setConverter(converter);
 		}
@@ -2515,6 +2503,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	private static String determineTextTransformStyle(TextCase textCase) {
+		String result = null;
+		if (textCase != null) {
+			switch (textCase) {
+			case upper:
+				result = "text-transform:uppercase;";
+				break;
+			case capital:
+				result = "text-transform:capitalize;";
+				break;
+			case lower:
+				result = "text-transform:lowercase;";
+				break;
+			default:
+				throw new IllegalStateException(textCase + " is not supported");
+			}
+		}
+		return result;
+	}
 	/**
 	 * My spec is A - alphanumeric # - digit L - letter
 	 * 
