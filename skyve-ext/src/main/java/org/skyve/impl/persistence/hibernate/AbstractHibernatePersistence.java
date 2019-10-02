@@ -1258,6 +1258,7 @@ t.printStackTrace();
 					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
 					beanToDelete = (T) session.merge(entityName, beanToDelete);
 					em.flush();
+					UtilImpl.populateFully(beanToDelete);
 	
 					// Call preDelete()
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
