@@ -121,6 +121,9 @@ import com.mifmif.common.regex.Generex;
  */
 public class DataBuilder {
 	private static final SecureRandom RANDOM = new SecureRandom();
+	static {
+		RANDOM.setSeed(RANDOM.generateSeed(20));
+	}
 
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -835,7 +838,6 @@ public class DataBuilder {
 			}
 		}
 
-		RANDOM.setSeed(RANDOM.generateSeed(20));
 		return new Decimal2(RANDOM.nextInt(
 				(max.subtract(min))
 						.add(new Decimal2(1)).intValue())).add(min);
@@ -909,7 +911,6 @@ public class DataBuilder {
 			}
 		}
 
-		RANDOM.setSeed(RANDOM.generateSeed(20));
 		return new Integer(RANDOM.nextInt((max - min) + 1) + min);
 	}
 
@@ -1078,18 +1079,20 @@ public class DataBuilder {
 					i++;
 					if (b.length() > r) {
 						String out = b.toString();
-						out = out.substring(0, r).trim();
+						out = out.trim().substring(0, r).trim();
 						if (out.indexOf(".") > 0) {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
-						Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
-								attribute.getAttributeType(),
-								attribute.getName(),
-								Integer.valueOf(r),
-								length,
-								out));
-						return out;
+						if (out.length() > 0) {
+							Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
+									attribute.getAttributeType(),
+									attribute.getName(),
+									Integer.valueOf(r),
+									length,
+									out));
+							return out;
+						}
 					}
 				}
 

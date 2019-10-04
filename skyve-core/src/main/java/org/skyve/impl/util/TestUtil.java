@@ -52,6 +52,9 @@ import com.mifmif.common.regex.Generex;
 public class TestUtil {
 
 	private static final SecureRandom random = new SecureRandom();
+	static {
+		random.setSeed(random.generateSeed(20));
+	}
 
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -362,7 +365,6 @@ public class TestUtil {
 			}
 		}
 
-		random.setSeed(random.generateSeed(20));
 		return new Decimal2(random.nextInt(
 				(max.subtract(min))
 						.add(new Decimal2(1)).intValue())).add(min);
@@ -479,7 +481,6 @@ public class TestUtil {
 			}
 		}
 
-		random.setSeed(random.generateSeed(20));
 		return new Integer(random.nextInt((max - min) + 1) + min);
 	}
 
