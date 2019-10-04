@@ -121,6 +121,9 @@ import com.mifmif.common.regex.Generex;
  */
 public class DataBuilder {
 	private static final SecureRandom RANDOM = new SecureRandom();
+	static {
+		RANDOM.setSeed(RANDOM.generateSeed(20));
+	}
 
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -835,7 +838,6 @@ public class DataBuilder {
 			}
 		}
 
-		RANDOM.setSeed(RANDOM.generateSeed(20));
 		return new Decimal2(RANDOM.nextInt(
 				(max.subtract(min))
 						.add(new Decimal2(1)).intValue())).add(min);
@@ -909,7 +911,6 @@ public class DataBuilder {
 			}
 		}
 
-		RANDOM.setSeed(RANDOM.generateSeed(20));
 		return new Integer(RANDOM.nextInt((max - min) + 1) + min);
 	}
 
