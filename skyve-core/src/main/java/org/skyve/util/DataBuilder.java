@@ -1078,18 +1078,20 @@ public class DataBuilder {
 					i++;
 					if (b.length() > r) {
 						String out = b.toString();
-						out = out.substring(0, r).trim();
+						out = out.trim().substring(0, r).trim();
 						if (out.indexOf(".") > 0) {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
-						Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
-								attribute.getAttributeType(),
-								attribute.getName(),
-								Integer.valueOf(r),
-								length,
-								out));
-						return out;
+						if (out.length() > 0) {
+							Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
+									attribute.getAttributeType(),
+									attribute.getName(),
+									Integer.valueOf(r),
+									length,
+									out));
+							return out;
+						}
 					}
 				}
 
