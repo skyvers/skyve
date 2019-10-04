@@ -254,8 +254,10 @@ public class ViewGenerator {
 									bindingPrefix + attribute.getName();
 
 				DomainType domainType = attribute.getDomainType();
-				if (DomainType.constant.equals(domainType) ||
-						AttributeType.enumeration.equals(attribute.getAttributeType())) {
+				if (module.isPrototype() &&
+						attribute.isRequired() &&
+						(DomainType.constant.equals(domainType) ||
+						AttributeType.enumeration.equals(attribute.getAttributeType()))) {
 					List<DomainValue> domainValues = null;
 					try {
 						if (bizlet == null) {
