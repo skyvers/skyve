@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.repository;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -73,6 +72,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -1168,10 +1168,14 @@ class ViewValidator extends ViewVisitor {
 		}
 
 		// validate drop down columns and description binding
-		Set<String> dropDownColumns = lookup.getDropDownColumns();
-		LinkedHashSet<String> testColumns = ((dropDownColumns == null) || dropDownColumns.isEmpty()) ? 
-												null : 
-												new LinkedHashSet<>(dropDownColumns);
+		List<LookupDescriptionColumn> dropDownColumns = lookup.getDropDownColumns();
+		LinkedHashSet<String> testColumns = null;
+		if (dropDownColumns != null) {
+			testColumns = new LinkedHashSet<>(dropDownColumns.size());
+			for (LookupDescriptionColumn dropDownColumn : dropDownColumns) {
+				testColumns.add(dropDownColumn.getName());
+			}
+		}
 		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
 		
 		for (MetaDataQueryColumn column : query.getColumns()) {

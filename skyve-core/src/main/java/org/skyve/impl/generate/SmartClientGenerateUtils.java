@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -56,6 +57,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.metadata.MetaDataException;
@@ -141,7 +143,7 @@ public class SmartClientGenerateUtils {
 	            canUpdate = user.canUpdateDocument(queryDocument);
             }
             
-            Set<String> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
+            List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
             if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
             	pickListFields.add(displayField);
             }
@@ -151,7 +153,9 @@ public class SmartClientGenerateUtils {
                 	if (alias == null) {
                 		alias = column.getBinding();
                 	}
-                	if (dropDownColumns.contains(alias)) {
+                	final String a = alias;
+                	Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
+                	if (optional.isPresent()) {
                 		if ((column instanceof MetaDataQueryProjectedColumn) &&
                 				((MetaDataQueryProjectedColumn) column).isProjected()) {
                             SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(user,
@@ -162,8 +166,14 @@ public class SmartClientGenerateUtils {
 																	                                        runtime);
 
                         	pickListFields.add(def.getName());
-                        	// only add fields that can use the substring operator
-                        	if (def.getHasTextFilterOperators()) {
+                        	// only add fields that are filterable and can use the substring operator
+                        	Boolean filterable = optional.get().getFilterable();
+                        	if (Boolean.TRUE.equals(filterable)) {
+                        		filterFields.add(def.getName());
+                        	}
+                        	else if ((filterable == null) && 
+                        				def.isCanFilter() && 
+                        				def.getHasTextFilterOperators()) {
                         		filterFields.add(def.getName());
                         	}
                 		}

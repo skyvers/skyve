@@ -105,6 +105,8 @@
 
   <xs:element name="lookupDescription" type="tns:lookupDescription"/>
 
+  <xs:element name="lookupDescriptionColumn" type="tns:lookupDescriptionColumn"/>
+
   <xs:element name="map" type="tns:map"/>
 
   <xs:element name="new" type="tns:newAction"/>
@@ -460,7 +462,7 @@
           <xs:element name="dropDown" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="column" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="column" type="tns:lookupDescriptionColumn" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
               </xs:sequence>
             </xs:complexType>
           </xs:element>
@@ -539,6 +541,14 @@
         <xs:attribute name="enablePick" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionColumn">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="filterable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="filterParameterImpl" final="extension restriction">
