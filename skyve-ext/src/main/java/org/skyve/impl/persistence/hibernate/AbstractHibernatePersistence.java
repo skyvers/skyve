@@ -1891,7 +1891,9 @@ public void doWorkOnConnection(Session session) {
 			query.append("update ").append(document.getPersistent().getPersistentIdentifier()).append(" set ");
 			query.append(PersistentBean.VERSION_NAME).append('=').append(PersistentBean.VERSION_NAME).append("+1");
 			query.append(',').append(PersistentBean.LOCK_NAME).append("=:").append(PersistentBean.LOCK_NAME);
+			query.append(',').append(Bean.CUSTOMER_NAME).append("=:").append(Bean.CUSTOMER_NAME);
 			query.append(',').append(Bean.DATA_GROUP_ID).append("=:").append(Bean.DATA_GROUP_ID);
+			query.append(',').append(Bean.USER_ID).append("=:").append(Bean.USER_ID);
 			query.append(',').append(Bean.BIZ_KEY).append("=:").append(Bean.BIZ_KEY);
 			if (parentDocumentName != null) {
 				if (parentDocumentName.equals(document.getName())) {
@@ -2008,10 +2010,10 @@ public void doWorkOnConnection(Session session) {
 		sql.putParameter(PersistentBean.LOCK_NAME, bean.getBizLock().toString(), false);
 		if (! bean.isPersisted()) {
 			sql.putParameter(PersistentBean.VERSION_NAME, NEW_VERSION);
-			sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
-			sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
 		}
+		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId(), false);
+		sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
 		sql.putParameter(Bean.BIZ_KEY, Util.processStringValue(bean.getBizKey()), false);
 
 		// Bind parent if required
