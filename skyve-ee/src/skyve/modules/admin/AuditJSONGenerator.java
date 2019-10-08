@@ -23,7 +23,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 	}
 	
 	public String toJSON() throws Exception {
-		return JSON.marshall(customer, audit, null);
+		return JSON.marshall(customer, audit);
 	}
 
 	@Override

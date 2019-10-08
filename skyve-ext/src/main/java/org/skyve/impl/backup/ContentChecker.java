@@ -276,7 +276,7 @@ public class ContentChecker {
 																					meta.get(Bean.DOCUMENT_KEY),
 																					meta.get(Bean.DOCUMENT_ID)));
 												try (FileWriter fw = new FileWriter(metaFile)) {
-													fw.write(JSON.marshall(null, meta, null));
+													fw.write(JSON.marshall(meta));
 													fw.flush();
 												}
 											}

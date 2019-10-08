@@ -139,7 +139,7 @@ public class MapServlet extends HttpServlet {
 		}
 		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
-		return JSON.marshall(customer, model.getResult(mapBounds(request)), null);
+		return JSON.marshall(customer, model.getResult(mapBounds(request)));
 	}
 	
 	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
@@ -154,7 +154,7 @@ public class MapServlet extends HttpServlet {
 		ReferenceMapModel<Bean> model = new ReferenceMapModel<>(collectionBinding);
 		model.setGeometryBinding(geometryBinding);
 		model.setBean(bean);
-		return JSON.marshall(customer, model.getResult(mapBounds(request)), null);
+		return JSON.marshall(customer, model.getResult(mapBounds(request)));
 	}
 
 	private static String processModel(HttpServletRequest request, HttpServletResponse response)
@@ -172,7 +172,7 @@ public class MapServlet extends HttpServlet {
 		
 		MapResult result = model.getResult(mapBounds(request));
 
-		String json = JSON.marshall(customer, result, null);
+		String json = JSON.marshall(customer, result);
 		
 		// Add _doc property to json response for resources such as images for map pins.
 		String _doc = bean.getBizModule() + '.' + bean.getBizDocument();
@@ -221,6 +221,6 @@ public class MapServlet extends HttpServlet {
 	}
 	
 	private static String emptyResponse() {
-		return JSON.marshall(CORE.getCustomer(), new MapResult(), null);
+		return JSON.marshall(CORE.getCustomer(), new MapResult());
 	}
 }

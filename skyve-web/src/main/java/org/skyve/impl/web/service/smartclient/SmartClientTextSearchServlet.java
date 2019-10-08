@@ -115,7 +115,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 			                    url.append("&_b=").append(attributeName);
 					            row.put("content", url.toString());
 				            }
-				            message.append(JSON.marshall(customer, row, null)).append(',');
+				            message.append(JSON.marshall(customer, row)).append(',');
 						}
 						catch (Exception e) { // don't allow anything that goes wrong to stop us returning the searches
 							e.printStackTrace();

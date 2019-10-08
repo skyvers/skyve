@@ -352,7 +352,7 @@ public class ElasticContentManager extends AbstractContentManager {
 				fos.flush();
 			}
 			try (FileWriter fw = new FileWriter(new File(dir, META_JSON))) {
-				fw.write(JSON.marshall(null, meta, null));
+				fw.write(JSON.marshall(meta));
 				fw.flush();
 			}
 		}

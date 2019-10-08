@@ -345,7 +345,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			result.put(binding, comparisons.get(binding));
 		}
 		
-		return JSON.marshall(user.getCustomer(), result, null);
+		return JSON.marshall(user.getCustomer(), result);
 	}
 	
 	private void constructJSONObjectFromBinding(ViewBindings bindings,

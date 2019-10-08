@@ -22,6 +22,27 @@ public class JSON {
 	}
 
 	/**
+	 * Create JSON.
+	 * 
+	 * @param customer
+	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
+	 * @return The JSON.
+	 */
+	public static final String marshall(Customer customer, Object beanOrBeans) {
+		return marshall(customer, beanOrBeans, null);
+	}
+
+	/**
+	 * Create JSON.
+	 * 
+	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
+	 * @return The JSON.
+	 */
+	public static final String marshall(Object beanOrBeans) {
+		return marshall(null, beanOrBeans, null);
+	}
+
+	/**
 	 * Consume JSON.
 	 * 
 	 * @param user
