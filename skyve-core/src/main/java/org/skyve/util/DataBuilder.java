@@ -1079,7 +1079,7 @@ public class DataBuilder {
 					i++;
 					if (b.length() > r) {
 						String out = b.toString();
-						out = out.trim().substring(0, r).trim();
+						out = out.substring(0, out.length() < r ? out.length() : r).trim();
 						if (out.indexOf(".") > 0) {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
