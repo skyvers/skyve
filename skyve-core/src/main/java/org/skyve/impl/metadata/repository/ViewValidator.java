@@ -1702,6 +1702,9 @@ class ViewValidator extends ViewVisitor {
 		validateParameterBindings(view.getParameters(), viewIdentifier);
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
 		validateConditionName(view.getRefreshConditionName(), viewIdentifier);
+		if ((view.getHelpURL() != null) && (view.getHelpRelativeFileName() != null)) {
+			throw new MetaDataException(viewIdentifier + " should define one of helpURL or helpRelativeFileName but not both");
+		}
 	}
 
 	@Override
