@@ -60,6 +60,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -961,12 +962,17 @@ public class SmartClientGenerateUtils {
 					textAlign = HorizontalAlignment.right;
 				}
 			}
+			// Use a drop down for grids but in the edit view, use the text field as specified
+			if (widget instanceof TextField) {
+				editorType = null; // is set to "select" in the SmartClientAttributeDefinition
+				valueMap = null; // ensure there is no value map of SC will create a combo anyway
+			}
 			// Use a drop down for grids but in the edit view, use the radio group as specified
-			if (widget instanceof Radio) {
+			else if (widget instanceof Radio) {
 				editorType = null; // is set to "select" in the SmartClientDataGridFieldDefinition
 			}
 			// Use a combo box for grids but in the edit view, use the lookup description as specified
-			if (widget instanceof LookupDescription) {
+			else if (widget instanceof LookupDescription) {
 				editorType = null; // is set to "comboBox" in the SmartClientDataGridFieldDefinition
 			}
 		}
