@@ -130,7 +130,7 @@
 							<tasks>
 								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
 									<fileset dir="${ear-path}/lib" 
-												includes="all-themes-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,admin-t*-*.jar,omnifaces-*.jar,skyve-web-*.jar" />
+												includes="all-themes-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,omnifaces-*.jar,skyve-web-*.jar" />
 								</move>
 								<move file="${ear-path}/lib/skyve-core-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-core.jar" />
 								<move file="${ear-path}/lib/skyve-ext-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-ext.jar" />
@@ -412,11 +412,6 @@
 			<groupId>org.primefaces.themes</groupId>
 			<artifactId>all-themes</artifactId>
 			<version>${primefaces-allthemes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.adminfaces</groupId>
-			<artifactId>admin-template</artifactId>
-			<version>${adminfaces.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>

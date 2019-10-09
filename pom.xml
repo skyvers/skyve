@@ -50,7 +50,6 @@
 		<primefaces.version>7.0</primefaces.version>
 		<primefaces-extensions.version>7.0</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
-        <adminfaces.version>1.0.0</adminfaces.version>
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
@@ -303,11 +302,6 @@
 				<groupId>org.primefaces.themes</groupId>
 				<artifactId>all-themes</artifactId>
 				<version>${primefaces-allthemes.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.adminfaces</groupId>
-				<artifactId>admin-template</artifactId>
-				<version>${adminfaces.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-fileupload</groupId>
