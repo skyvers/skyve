@@ -968,7 +968,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							true,
+							false,
 							labelIdentifier);
 		validateMessageBindings(label.getValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
