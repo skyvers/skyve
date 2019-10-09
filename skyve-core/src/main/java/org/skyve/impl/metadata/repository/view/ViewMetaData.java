@@ -37,6 +37,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"title",
 							"iconStyleClass",
 							"icon32x32RelativeFileName",
+							"helpRelativeFileName",
+							"helpURL",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
@@ -49,6 +51,8 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	private String title;
 	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
+	private String helpRelativeFileName;
+	private String helpURL;
 	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -95,6 +99,24 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	@XmlAttribute(name = "iconStyleClass")
 	public void setIconStyleClass(String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
+	}
+
+	public String getHelpRelativeFileName() {
+		return helpRelativeFileName;
+	}
+
+	@XmlAttribute(name = "helpRelativeFileName")
+	public void setHelpRelativeFileName(String helpRelativeFileName) {
+		this.helpRelativeFileName = UtilImpl.processStringValue(helpRelativeFileName);
+	}
+
+	public String getHelpURL() {
+		return helpURL;
+	}
+
+	@XmlAttribute(name = "helpURL")
+	public void setHelpURL(String helpURL) {
+		this.helpURL = UtilImpl.processStringValue(helpURL);
 	}
 
 	public Actions getActions() {
@@ -167,7 +189,10 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 
 		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
-		
+
+		result.setHelpRelativeFileName(getHelpRelativeFileName());
+		result.setHelpURL(getHelpURL());
+
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The view [name] is required for view " + metaDataName);

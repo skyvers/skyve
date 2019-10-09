@@ -123,25 +123,71 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				if (iconStyleClass == null) {
 					iconStyleClass = document.getIconStyleClass();
 					if (iconStyleClass != null) {
-						pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+						pw.append("',_editFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
 					}
 					else {
 						String icon32 = editView.getIcon32x32RelativeFileName();
 						if (icon32 == null) {
 							icon32 = document.getIcon32x32RelativeFileName();
 							if (icon32 != null) {
-								pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+								pw.append("',_editIcon:'").append(SmartClientGenerateUtils.processString(icon32));
 							}
 						}
 						else { 
-							pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon32));
+							pw.append("',_editIcon:'").append(SmartClientGenerateUtils.processString(icon32));
 						}
 					}
 				}
 				else {
-					pw.append("',_fontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+					pw.append("',_editFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
 				}
 
+				String help = editView.getHelpRelativeFileName();
+				if (help != null) {
+					pw.append("',_editHelpFile:'").append(SmartClientGenerateUtils.processString(help));
+				}
+				else {
+					help = editView.getHelpURL();
+					if (help != null) {
+						pw.append("',_editHelpURL:'").append(SmartClientGenerateUtils.processString(help));
+					}
+				}
+
+				// create and edit view are not the same - add the create view icons and help stuff
+				iconStyleClass = createView.getIconStyleClass();
+				if (iconStyleClass == null) {
+					iconStyleClass = document.getIconStyleClass();
+					if (iconStyleClass != null) {
+						pw.append("',_createFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+					}
+					else {
+						String icon32 = createView.getIcon32x32RelativeFileName();
+						if (icon32 == null) {
+							icon32 = document.getIcon32x32RelativeFileName();
+							if (icon32 != null) {
+								pw.append("',_createIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+							}
+						}
+						else { 
+							pw.append("',_createIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+						}
+					}
+				}
+				else {
+					pw.append("',_createFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+				}
+
+				help = createView.getHelpRelativeFileName();
+				if (help != null) {
+					pw.append("',_createHelpFile:'").append(SmartClientGenerateUtils.processString(help));
+				}
+				else {
+					help = createView.getHelpURL();
+					if (help != null) {
+						pw.append("',_createHelpURL:'").append(SmartClientGenerateUtils.processString(help));
+					}
+				}
+				
 				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(Util.i18n(document.getSingularAlias(), user.getLocale())));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");

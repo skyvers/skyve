@@ -82,6 +82,10 @@ public interface View extends NamedMetaData, Parameterizable, DecoratedMetaData 
 	 */
 	public String getIconStyleClass();
 	
+	public String getHelpRelativeFileName();
+
+	public String getHelpURL();
+
 	/**
 	 * The widgetId of the actions panel for the renderer to point at if needed in isolation.
 	 * 

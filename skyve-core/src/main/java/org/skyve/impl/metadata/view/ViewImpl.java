@@ -28,6 +28,8 @@ public class ViewImpl extends Container implements View {
 	private String name;
 	private String icon32x32RelativeFileName;
 	private String iconStyleClass;
+	private String helpRelativeFileName;
+	private String helpURL;
 	private String title;
 	private String actionsWidgetId;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
@@ -92,6 +94,24 @@ public class ViewImpl extends Container implements View {
 
 	public void setIconStyleClass(String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
+	}
+
+	@Override
+	public String getHelpRelativeFileName() {
+		return helpRelativeFileName;
+	}
+
+	public void setHelpRelativeFileName(String helpRelativeFileName) {
+		this.helpRelativeFileName = helpRelativeFileName;
+	}
+
+	@Override
+	public String getHelpURL() {
+		return helpURL;
+	}
+
+	public void setHelpURL(String helpURL) {
+		this.helpURL = helpURL;
 	}
 
 	@Override

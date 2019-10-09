@@ -674,6 +674,8 @@
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="iconStyleClass" type="xs:string"/>
         <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
+        <xs:attribute name="helpRelativeFileName" type="xs:string"/>
+        <xs:attribute name="helpURL" type="xs:string"/>
         <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
         <xs:attribute name="refreshIf" type="xs:string"/>
         <xs:attribute name="refreshAction" type="xs:string"/>

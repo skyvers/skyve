@@ -715,13 +715,36 @@ isc.EditView.addMethods({
 		
 		var header = isc.BizUtil.headerTemplate;
 		var icon = '';
-		if (this._icon) {
-			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + SKYVE.Util.v + '"/>';
+		var help = '';
+		if (values.created) {
+			if (this._editIcon) {
+				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._editIcon + '&v=' + SKYVE.Util.v + '"/>';
+			}
+			else if (this._editFontIcon) {
+				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._editFontIcon + '"></i>';
+			}
+			if (this._editHelpFile) {
+				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._editHelpFile + '&v=' + SKYVE.Util.v + "'";
+			}
+			else if (this._editHelpURL) {
+				help = "'" + this._editHelpURL + "'";
+			}
 		}
-		else if (this._fontIcon) {
-			icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
+		else {
+			if (this._createIcon) {
+				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._createIcon + '&v=' + SKYVE.Util.v + '"/>';
+			}
+			else if (this._createFontIcon) {
+				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._createFontIcon + '"></i>';
+			}
+			if (this._createHelpFile) {
+				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._createHelpFile + '&v=' + SKYVE.Util.v + "'";
+			}
+			else if (this._createHelpURL) {
+				help = "'" + this._createHelpURL + "'";
+			}
 		}
-		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link);
+		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link).replace('{help}', help);
 		this._heading.setContents(header);
 
 		// remove the form title so it is not subsequently posted
