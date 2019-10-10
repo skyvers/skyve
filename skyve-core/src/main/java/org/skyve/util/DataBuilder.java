@@ -848,29 +848,51 @@ public class DataBuilder {
 	 * of the text attribute
 	 * 
 	 * @param textFormat The format to comply to
+	 * @param length The maximum length of the random string
 	 * @return A format compliant random string
 	 */
-	private static String randomFormat(TextFormat textFormat) {
+	private static String randomFormat(TextFormat textFormat, int length) {
 
 		String mask = textFormat.getMask();
 		String out = new String();
 
-		for (int i = 0; i < mask.length(); i++) {
-			char c = mask.charAt(i);
-			switch (c) {
-				case '#':
-					out += NUMBERS.charAt(RANDOM.nextInt(NUMBERS.length()));
+		if (mask != null) {
+			for (int i = 0; i < mask.length(); i++) {
+				char c = mask.charAt(i);
+				switch (c) {
+					case '#':
+						out += NUMBERS.charAt(RANDOM.nextInt(NUMBERS.length()));
+						break;
+					case 'A':
+						out += ALPHA_NUMERIC.charAt(RANDOM.nextInt(ALPHA_NUMERIC.length()));
+						break;
+					case 'L':
+						out += LETTERS.charAt(RANDOM.nextInt(LETTERS.length()));
+						break;
+					default:
+						out += c;
+						break;
+				}
+			}
+		} else if (textFormat.getCase() != null) {
+			out = randomString(RANDOM.nextInt(length));
+			switch (textFormat.getCase()) {
+				case capital:
+					out = StringUtils.capitalize(out);
 					break;
-				case 'A':
-					out += ALPHA_NUMERIC.charAt(RANDOM.nextInt(ALPHA_NUMERIC.length()));
+				case lower:
+					out = out.toLowerCase();
 					break;
-				case 'L':
-					out += LETTERS.charAt(RANDOM.nextInt(LETTERS.length()));
+				case upper:
+					out = out.toUpperCase();
 					break;
 				default:
-					out += c;
 					break;
 			}
+		}
+
+		if (out.length() > length) {
+			out = StringUtils.left(out, length);
 		}
 
 		return out;
@@ -1037,7 +1059,7 @@ public class DataBuilder {
 					}
 
 					// return text matching the format mask
-					return randomFormat(text.getFormat());
+					return randomFormat(text.getFormat(), length.intValue());
 				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
 						&& text.getValidator().getType() == null) {
 					// check if this string has a regex and no validator type
