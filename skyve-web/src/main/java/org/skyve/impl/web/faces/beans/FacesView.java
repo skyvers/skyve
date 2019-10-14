@@ -396,7 +396,7 @@ public class FacesView<T extends Bean> extends Harness {
 				for (List<String> filterCriterium : filterCriteria) {
 					if (filterCriterium.size() == 3) {
 						FilterParameterImpl param = new FilterParameterImpl();
-						param.setName(filterCriterium.get(0));
+						param.setFilterBinding(filterCriterium.get(0));
 						param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
 						param.setValue(filterCriterium.get(2));
 						filterParameters.add(param);
@@ -442,16 +442,16 @@ public class FacesView<T extends Bean> extends Harness {
 	 			for (FilterParameter parameter : filterParameters) {
 	 				String valueOrBinding = parameter.getValue();
 	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getBinding();
+	 					valueOrBinding = parameter.getValueBinding();
 	 				}
-	 				key.append('.').append(parameter.getName()).append(parameter.getOperator()).append(valueOrBinding);
+	 				key.append('.').append(parameter.getFilterBinding()).append(parameter.getOperator()).append(valueOrBinding);
 	 			}
 	 		}
 	 		if (parameters != null) {
 	 			for (Parameter parameter : parameters) {
 	 				String valueOrBinding = parameter.getValue();
 	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getBinding();
+	 					valueOrBinding = parameter.getValueBinding();
 	 				}
 	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
 	 			}
@@ -594,7 +594,7 @@ public class FacesView<T extends Bean> extends Harness {
 		String parameterValue = Util.processStringValue(query);
 		if (parameterValue != null) {
 			FilterParameterImpl displayParameter = new FilterParameterImpl();
-			displayParameter.setName(displayBinding);
+			displayParameter.setFilterBinding(displayBinding);
 			displayParameter.setOperator(FilterOperator.like);
 			displayParameter.setValue(parameterValue);
 			filterParameters.add(displayParameter);

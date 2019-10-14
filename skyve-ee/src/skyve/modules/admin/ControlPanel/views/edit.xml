@@ -44,7 +44,7 @@
 					</item>
 					<item label="OR Contact Email">
 						<lookupDescription binding="emailToContact" descriptionBinding="email1">
-							<filterParameter name="email1" operator="notNull" />
+							<filterParameter filterBinding="email1" operator="notNull" />
 						</lookupDescription>
 					</item>
 				</row>

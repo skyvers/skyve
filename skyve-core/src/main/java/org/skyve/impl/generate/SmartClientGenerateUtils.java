@@ -1701,7 +1701,7 @@ public class SmartClientGenerateUtils {
 			List<FilterParameter> filterParameters = forLookup.getFilterParameters();
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
-					hiddenBindingsList.add(parameter.getName());
+					hiddenBindingsList.add(parameter.getFilterBinding());
 				}
 			}
 			List<Parameter> parameters = forLookup.getParameters();

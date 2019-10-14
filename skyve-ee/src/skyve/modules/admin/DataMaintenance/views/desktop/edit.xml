@@ -293,12 +293,12 @@
 				</row>
 			</form>
 			<listGrid continueConversation="false" query="qAudits">
-				<filterParameter operator="equal" name="auditModuleName" binding="auditModuleName"/>
-				<filterParameter operator="equal" name="auditDocumentName" binding="auditDocumentName"/>
-				<filterParameter operator="equal" name="operation" binding="auditOperation"/>
-				<filterParameter operator="greaterEqual" name="timestamp" binding="auditTimestampStart"/>
-				<filterParameter operator="lessEqual" name="timestamp" binding="auditTimestampEnd"/>
-				<filterParameter operator="equal" name="userName" binding="auditUser.userName"/>
+				<filterParameter filterBinding="auditModuleName" operator="equal" valueBinding="auditModuleName"/>
+				<filterParameter filterBinding="auditDocumentName" operator="equal" valueBinding="auditDocumentName"/>
+				<filterParameter filterBinding="operation"  operator="equal" valueBinding="auditOperation"/>
+				<filterParameter filterBinding="timestamp" operator="greaterEqual" valueBinding="auditTimestampStart"/>
+				<filterParameter filterBinding="timestamp" operator="lessEqual" valueBinding="auditTimestampEnd"/>
+				<filterParameter filterBinding="userName" operator="equal" valueBinding="auditUser.userName"/>
 			</listGrid>
 		</tab>
 		<tab title="Refresh">

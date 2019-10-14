@@ -269,13 +269,10 @@
   </xs:complexType>
 
   <xs:complexType name="parameterImpl">
-    <xs:complexContent>
-      <xs:extension base="tns:abstractBound">
-        <xs:sequence/>
-        <xs:attribute name="name" type="xs:string" use="required"/>
-        <xs:attribute name="value" type="xs:string"/>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="valueBinding" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="checkBox">
@@ -552,12 +549,11 @@
   </xs:complexType>
 
   <xs:complexType name="filterParameterImpl" final="extension restriction">
-    <xs:complexContent>
-      <xs:extension base="tns:parameterImpl">
-        <xs:sequence/>
-        <xs:attribute name="operator" type="ns1:filterOperator" use="required"/>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:sequence/>
+    <xs:attribute name="filterBinding" type="xs:string" use="required"/>
+    <xs:attribute name="operator" type="ns1:filterOperator" use="required"/>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="valueBinding" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="password">
@@ -664,7 +660,7 @@
           <xs:element name="newParameters" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="parameter" type="tns:viewParameter" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
               </xs:sequence>
             </xs:complexType>
           </xs:element>
@@ -924,6 +920,12 @@
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewParameter">
+    <xs:sequence/>
+    <xs:attribute name="boundTo" type="xs:string" use="required"/>
+    <xs:attribute name="fromBinding" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="staticImage">

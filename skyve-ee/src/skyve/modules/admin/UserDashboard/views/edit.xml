@@ -63,7 +63,7 @@
 	</hbox>
 	<vbox border="true" borderTitle="My Jobs">
 		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true">
-			<filterParameter operator="equal" name="bizUserId" binding="currentUser.bizId"/>
+			<filterParameter filterBinding="bizUserId" operator="equal" valueBinding="currentUser.bizId"/>
 		</listGrid>
 	</vbox>			
 	<actions>

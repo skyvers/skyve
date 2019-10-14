@@ -1215,8 +1215,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			modelExpression.append('[');
 			if (filterParameters != null) {
 				for (FilterParameter param : filterParameters) {
-					String name = param.getName();
-					String binding = param.getBinding();
+					String name = param.getFilterBinding();
+					String binding = param.getValueBinding();
 					String value = param.getValue();
 					
 					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
@@ -1235,7 +1235,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (parameters != null) {
 				for (Parameter param : parameters) {
 					String name = param.getName();
-					String binding = param.getBinding();
+					String binding = param.getValueBinding();
 					String value = param.getValue();
 					
 					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
@@ -1673,9 +1673,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append('[');
 			if (filterParameters != null) {
 				for (FilterParameter param : filterParameters) {
-					value.append("['").append(param.getName()).append("','");
+					String name = param.getFilterBinding();
+					value.append("['").append(name).append("','");
 					value.append(param.getOperator()).append("','");
-					String binding = param.getBinding();
+					String binding = param.getValueBinding();
 					if (binding != null) {
 						value.append('{').append(binding).append("}'],");
 					}
@@ -1687,7 +1688,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (parameters != null) {
 				for (Parameter param : parameters) {
 					value.append("['").append(param.getName()).append("','");
-					String binding = param.getBinding();
+					String binding = param.getValueBinding();
 					if (binding != null) {
 						value.append('{').append(binding).append("}'],");
 					}
@@ -2865,7 +2866,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		for (Parameter param : parameters) {
 			String paramName = param.getName();
 			String paramValue = param.getValue();
-			String paramBinding = param.getBinding();
+			String paramBinding = param.getValueBinding();
 			if (AbstractWebContext.REPORT_NAME.equals(paramName)) {
 				reportName = paramValue;
 			}

@@ -2791,7 +2791,7 @@ pickListFields:[{name:'value'}],
 			builder.append("params:{");
 			for (Parameter parameter : parameters) {
 				builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':'");
-				String binding = parameter.getBinding();
+				String binding = parameter.getValueBinding();
 				if (binding != null) {
 					builder.append('{').append(binding).append("}',");
 				}
@@ -2812,9 +2812,9 @@ pickListFields:[{name:'value'}],
 			builder.append("params:[");
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
-					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getFilterBinding())).append("',operator:'");
 					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
-					String binding = parameter.getBinding();
+					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}'},");
 					}
@@ -2827,7 +2827,7 @@ pickListFields:[{name:'value'}],
 				for (Parameter parameter : parameters) {
 					builder.append("{name:':").append(BindUtil.sanitiseBinding(parameter.getName()));
 					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:'");
-					String binding = parameter.getBinding();
+					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}'},");
 					}

@@ -98,8 +98,8 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		
 		if (filterParameters != null) {
 			for (FilterParameter param : filterParameters) {
-				String parameterName = param.getName();
-				String parameterBinding = param.getBinding();
+				String parameterName = param.getFilterBinding();
+				String parameterBinding = param.getValueBinding();
 				String parameterValue = param.getValue();
 	
 				// Determine the parameter value to use
@@ -252,7 +252,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		if (parameters != null) {
 			for (Parameter param : parameters) {
 				String parameterName = param.getName();
-				String parameterBinding = param.getBinding();
+				String parameterBinding = param.getValueBinding();
 				String parameterValue = param.getValue();
 	
 				// Determine the parameter value to use

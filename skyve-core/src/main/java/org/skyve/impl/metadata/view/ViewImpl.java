@@ -20,7 +20,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
@@ -36,7 +35,7 @@ public class ViewImpl extends Container implements View {
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
 	private String refreshActionName;
-	private List<Parameter> parameters = new ArrayList<>();
+	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
 	// map of modelId -> model metadata used to instantiate models on the server-side
 	private List<ModelMetaData> inlineModels = new ArrayList<>();
@@ -150,7 +149,7 @@ public class ViewImpl extends Container implements View {
 	 * These represent parameters that are allowed to be populated when creating a new record.
 	 */
 	@Override
-	public List<Parameter> getParameters() {
+	public List<ViewParameter> getParameters() {
 		return parameters;
 	}
 

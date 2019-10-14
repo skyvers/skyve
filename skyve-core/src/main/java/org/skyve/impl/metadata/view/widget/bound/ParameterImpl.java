@@ -6,10 +6,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
-@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"name", "value"})
-public class ParameterImpl extends AbstractBound implements Parameter {
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"name", "value", "valueBinding"})
+public class ParameterImpl implements Parameter {
 	private static final long serialVersionUID = 3545853099050411888L;
 
 	/**
@@ -21,6 +20,11 @@ public class ParameterImpl extends AbstractBound implements Parameter {
 	 * Literal value.
 	 */
 	private String value;
+
+	/**
+	 * Value derived from a binding.
+	 */
+	private String valueBinding;
 
 	@Override
 	public String getName() {
@@ -40,5 +44,15 @@ public class ParameterImpl extends AbstractBound implements Parameter {
 	@XmlAttribute(required = false)
 	public void setValue(String value) {
 		this.value = UtilImpl.processStringValue(value);
+	}
+	
+	@Override
+	public String getValueBinding() {
+		return valueBinding;
+	}
+
+	@XmlAttribute(required = false)
+	public void setValueBinding(String valueBinding) {
+		this.valueBinding = UtilImpl.processStringValue(valueBinding);
 	}
 }

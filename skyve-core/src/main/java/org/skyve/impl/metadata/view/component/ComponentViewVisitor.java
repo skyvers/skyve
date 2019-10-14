@@ -828,17 +828,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
-		bound(parameter);
 		if (parameter instanceof ParameterImpl) {
-			((ParameterImpl) parameter).setValue(prefixExpression(parameter.getValue()));
+			ParameterImpl p = (ParameterImpl) parameter;
+			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
+			p.setValue(prefixExpression(parameter.getValue()));
 		}
 	}
 
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
-		bound(parameter);
 		if (parameter instanceof FilterParameterImpl) {
-			((FilterParameterImpl) parameter).setValue(prefixExpression(parameter.getValue()));
+			FilterParameterImpl p = (FilterParameterImpl) parameter;
+			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
+			p.setValue(prefixExpression(parameter.getValue()));
 		}
 	}
 

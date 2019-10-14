@@ -5,10 +5,7 @@ import org.skyve.metadata.NamedMetaData;
 /**
  * 
  */
-public interface Parameter extends Bound, NamedMetaData {
-	/**
-	 * 
-	 * @return
-	 */
+public interface Parameter extends NamedMetaData {
 	public String getValue();
+	public String getValueBinding();
 }

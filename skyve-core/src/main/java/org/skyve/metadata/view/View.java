@@ -3,18 +3,19 @@ package org.skyve.metadata.view;
 import java.util.Collection;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.model.ModelMetaData;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.view.widget.bound.Parameter;
 
 /**
  * 
  */
-public interface View extends NamedMetaData, Parameterizable, DecoratedMetaData {
+public interface View extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 */
@@ -46,6 +47,28 @@ public interface View extends NamedMetaData, Parameterizable, DecoratedMetaData 
 		params
 	}
 
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+	public static class ViewParameter {
+		private String fromBinding;
+		private String boundTo;
+		
+		public String getFromBinding() {
+			return fromBinding;
+		}
+		@XmlAttribute(required = true)
+		public void setFromBinding(String fromBinding) {
+			this.fromBinding = UtilImpl.processStringValue(fromBinding);
+		}
+		
+		public String getBoundTo() {
+			return boundTo;
+		}
+		@XmlAttribute(required = true)
+		public void setBoundTo(String boundTo) {
+			this.boundTo = UtilImpl.processStringValue(boundTo);
+		}
+	}
+	
 	/**
 	 * 
 	 * @return
@@ -117,8 +140,7 @@ public interface View extends NamedMetaData, Parameterizable, DecoratedMetaData 
 	/**
 	 * These represent parameters that are allowed to be populated when creating a new record.
 	 */
-	@Override
-	public List<Parameter> getParameters();
+	public List<ViewParameter> getParameters();
 	
 	/**
 	 * 
