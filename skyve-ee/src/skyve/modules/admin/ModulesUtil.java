@@ -36,6 +36,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
 
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
 import modules.admin.domain.UserProxy;
@@ -544,10 +545,10 @@ public class ModulesUtil {
 	/**
 	 * Returns the current session/conversation user as an Admin module User
 	 * 
-	 * @return The current {@link modules.admin.domain.User}
+	 * @return The current {@link modules.admin.User.UserExtension}
 	 */
-	public static modules.admin.domain.User currentAdminUser() {
-		modules.admin.domain.User result = null;
+	public static UserExtension currentAdminUser() {
+		UserExtension result = null;
 		try {
 			Persistence p = CORE.getPersistence();
 			result = p.retrieve(modules.admin.domain.User.MODULE_NAME,
