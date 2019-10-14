@@ -47,6 +47,11 @@ public class UtilImpl {
 	 */
 	public static Map<String, Object> CONFIGURATION = null;
 
+	// For versioning javascript/css etc for web site
+	public static final String WEB_RESOURCE_FILE_VERSION = "5";
+	public static final String SKYVE_VERSION = "20190921-SNAPSHOT";
+	public static final String SMART_CLIENT_DIR = "isomorphic120";
+
 	public static boolean XML_TRACE = false;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
@@ -191,11 +196,6 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
-	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "4";
-	public static final String SKYVE_VERSION = "20190820";
-	public static final String SMART_CLIENT_DIR = "isomorphic120";
-
 	// for skyve script
 	/**
 	 * Absolute path on the filesystem to the source directory where modules live.
