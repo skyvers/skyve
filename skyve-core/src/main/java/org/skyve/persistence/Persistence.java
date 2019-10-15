@@ -60,11 +60,6 @@ public interface Persistence extends Serializable {
 	public void evictCached(Bean bean);
 	
 	/**
-	 * Refresh the bean's state from the database.
-	 */
-	public void refresh(Bean bean);
-	
-	/**
 	 * Processing that occurs before the merging of beans into the persistent context.
 	 * This method can either be hijacked for a Persistence implementation or used in 
 	 * application code to enable the same behaviour as skyve applies pre save/merge - eg before an upsert.

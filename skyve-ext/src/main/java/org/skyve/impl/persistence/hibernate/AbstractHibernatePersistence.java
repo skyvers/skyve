@@ -683,7 +683,13 @@ t.printStackTrace();
 		}
 	}
 
-	@Override
+	/**
+	 * The refresh method is not on the Persistence interface as Hibernate can
+	 * call et.setRollbackOnly() when exceptions are thrown by session.refresh().
+	 * Use this with caution - if et.setRollbackOnly() is called there is no way to undo it
+	 * and any calls to Persistence.commit() will just not work.
+	 * @param bean
+	 */
 	public void refresh(Bean bean) {
 		if (bean.isPersisted()) {
 			try {

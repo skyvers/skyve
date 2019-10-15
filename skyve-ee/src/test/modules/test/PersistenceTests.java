@@ -723,14 +723,14 @@ public class PersistenceTests extends AbstractSkyveTest {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
 		test.setText("optimistic lock test");
-		p.refresh(test);
+		((AbstractHibernatePersistence) p).refresh(test);
 		Assert.assertNotEquals("optimistic lock test", test.getText());
 	}
 
 	@Test
 	public void testRefreshTransient() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		p.refresh(test);
+		((AbstractHibernatePersistence) p).refresh(test);
 	}
 
 	@Test(expected = DomainException.class)
@@ -738,7 +738,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
 		p.evictCached(test);
-		p.refresh(test);
+		((AbstractHibernatePersistence) p).refresh(test);
 	}
 
 	@Test
