@@ -8,11 +8,11 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.TestUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.test.TestUtil;
 
 /**
  *
