@@ -2,11 +2,11 @@ package org.skyve.impl.tools.jasperreports;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.jasperreports.SkyveDataSource;
-import org.skyve.impl.util.TestUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.test.TestUtil;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
