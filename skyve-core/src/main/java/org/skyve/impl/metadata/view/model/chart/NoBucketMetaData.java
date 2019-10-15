@@ -13,7 +13,7 @@ public class NoBucketMetaData implements Bucket {
 
 	@Override
 	public String bizQLExpression(String categoryBindingOrAlias) {
-		return categoryBindingOrAlias;
+		return "bean." + categoryBindingOrAlias;
 	}
 
 	@Override

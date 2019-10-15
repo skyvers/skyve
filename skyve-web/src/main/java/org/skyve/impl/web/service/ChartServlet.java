@@ -267,8 +267,8 @@ public class ChartServlet extends HttpServlet {
 
 		ChartBuilder builder = new ChartBuilder();
 		builder.with(model.getDocumentQuery());
-		builder.category(categoryBinding, categoryBucket);
-		builder.value(valueBinding, valueFunction);
+		builder.category(categoryBinding.replace('_', '.'), categoryBucket);
+		builder.value(valueBinding.replace('_', '.'), valueFunction);
 
 		boolean topOn = Boolean.TRUE.equals(json.get("topOn"));
 		if (topOn) {

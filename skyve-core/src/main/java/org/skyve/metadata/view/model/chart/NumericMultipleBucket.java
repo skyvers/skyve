@@ -18,9 +18,9 @@ public class NumericMultipleBucket implements Bucket {
 	}
 
 	@Override
-	public String bizQLExpression(String categoryBindingOrAlias) {
+	public String bizQLExpression(String categoryBinding) {
 		StringBuilder result = new StringBuilder(32);
-		result.append("floor(").append(categoryBindingOrAlias).append(" / ").append(multiple).append(".0 + 0.001)");
+		result.append("floor(bean.").append(categoryBinding).append(" / ").append(multiple).append(".0 + 0.001)");
 		return result.toString();
 	}
 	

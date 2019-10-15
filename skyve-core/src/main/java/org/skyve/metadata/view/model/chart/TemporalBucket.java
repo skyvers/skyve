@@ -31,52 +31,52 @@ public class TemporalBucket implements Bucket {
 	}
 
 	@Override
-	public String bizQLExpression(String categoryBindingOrAlias) {
+	public String bizQLExpression(String categoryBinding) {
 		StringBuilder result = new StringBuilder(128);
 		if (TemporalBucketType.dayMonthYear.equals(type)) {
-			result.append("month(").append(categoryBindingOrAlias).append(')');
+			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
 			
 			result.setLength(0);
-			result.append("day(").append(categoryBindingOrAlias).append(')');
+			result.append("day(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String day = result.toString();
 			
 			result.setLength(0);
-			result.append("concat(cast(year(").append(categoryBindingOrAlias);
+			result.append("concat(cast(year(bean.").append(categoryBinding);
 			result.append(") as string), '-', ").append(month);
 			result.append(", '-', ").append(day).append(')');
 		}
 		else if (TemporalBucketType.day.equals(type)) {
-			result.append("day(").append(categoryBindingOrAlias).append(')');
+			result.append("day(bean.").append(categoryBinding).append(')');
 		}
 		else if (TemporalBucketType.month.equals(type)) {
-			result.append("month(").append(categoryBindingOrAlias).append(')');
+			result.append("month(bean.").append(categoryBinding).append(')');
 		}
 		else if (TemporalBucketType.year.equals(type)) {
-			result.append("year(").append(categoryBindingOrAlias).append(')');
+			result.append("year(bean.").append(categoryBinding).append(')');
 		}
 		else if (TemporalBucketType.monthYear.equals(type)) {
-			result.append("month(").append(categoryBindingOrAlias).append(')');
+			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
 			
 			result.setLength(0);
-			result.append("concat(cast(year(").append(categoryBindingOrAlias);
+			result.append("concat(cast(year(bean.").append(categoryBinding);
 			result.append(") as string), '-', ").append(month).append(')');
 		}
 		else if (TemporalBucketType.hour.equals(type)) {
-			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 		}
 		else if (TemporalBucketType.hourDay.equals(type)) {
-			result.append("day(").append(categoryBindingOrAlias).append(')');
+			result.append("day(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String day = result.toString();
 			
 			result.setLength(0);
-			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
 			
@@ -84,17 +84,17 @@ public class TemporalBucket implements Bucket {
 			result.append("concat(").append(day).append(", ' ', ").append(hour).append(')');
 		}
 		else if (TemporalBucketType.hourDayMonth.equals(type)) {
-			result.append("month(").append(categoryBindingOrAlias).append(')');
+			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
 
 			result.setLength(0);
-			result.append("day(").append(categoryBindingOrAlias).append(')');
+			result.append("day(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String day = result.toString();
 
 			result.setLength(0);
-			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
 
@@ -104,12 +104,12 @@ public class TemporalBucket implements Bucket {
 			result.append(", ' ', ").append(hour).append(')');
 		}
 		else if (TemporalBucketType.minuteHour.equals(type)) {
-			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
 
 			result.setLength(0);
-			result.append("minute(").append(categoryBindingOrAlias).append(')');
+			result.append("minute(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String minute = result.toString();
 
@@ -117,17 +117,17 @@ public class TemporalBucket implements Bucket {
 			result.append("concat(").append(hour).append(", ':', ").append(minute).append(')');
 		}
 		else if (TemporalBucketType.secondMinuteHour.equals(type)) {
-			result.append("hour(").append(categoryBindingOrAlias).append(')');
+			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
 
 			result.setLength(0);
-			result.append("minute(").append(categoryBindingOrAlias).append(')');
+			result.append("minute(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String minute = result.toString();
 
 			result.setLength(0);
-			result.append("second(").append(categoryBindingOrAlias).append(')');
+			result.append("second(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String second = result.toString();
 
