@@ -147,6 +147,9 @@ isc.BizListGrid.addProperties({
 	_editButton: null,
 	_pickButton: null,
 	
+	// Buttons that are enable disabled based on other factors
+	_chartButton: null,
+	
 	// Switches to turn off tool buttons / menu items
 	showAdd: true,
 	showZoom: true,
@@ -484,6 +487,12 @@ isc.BizListGrid.addMethods({
 		var chartItem = {
 			title: "Chart Data...", 
 			icon: "../images/icons/chart.png",
+			enableIf: function(target, menu, item) {
+				// enable chart if we have a non-model data source and its not a tree
+				return me._dataSource &&
+						(! me._config.isTree) &&
+						(! me._dataSource.ID.contains('__'));
+			},
 			click: function() {
 				var count = me.grid.getTotalRows();
 				if (count > 10000) {
@@ -507,6 +516,13 @@ isc.BizListGrid.addMethods({
 				}
 			}
         };
+		
+		me._chartButton = isc.BizUtil.createImageButton(chartItem.icon, 
+															true,
+															"<b>Chart</b> this data.",
+															chartItem.click);
+		me._chartButton.setDisabled(true);
+
 
 /*
 		var printItem = {title: "Print", 
@@ -543,13 +559,12 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		contextMenuData.add(refreshItem);
-		var showChart = me.showChart && config.dataSource && (! config.dataSource.contains('__'));
-		if (me.showExport || showChart) {
+		if (me.showExport || me.showChart) {
 			contextMenuData.add({isSeparator: true});
 			if (me.showExport) {
 				contextMenuData.add(exportItem);
 			}
-			if (showChart) {
+			if (me.showChart) {
 				contextMenuData.add(chartItem);
 			}
 		}
@@ -905,7 +920,7 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		if (config && config.isPickList) {} else {
-			if (me.showExport || showChart) {
+			if (me.showExport || me.showChart) {
 				toolStripMembers.add('separator');
 				if (me.showExport) {
 					toolStripMembers.add(isc.BizUtil.createImageButton(exportItem.icon,
@@ -913,11 +928,8 @@ isc.BizListGrid.addMethods({
 																		"<b>Export</b> table data.",
 																		exportItem.click));
 				}
-				if (showChart) {
-					toolStripMembers.add(isc.BizUtil.createImageButton(chartItem.icon,
-																		false,
-																		"<b>Chart</b> table data.",
-																		chartItem.click));
+				if (me.showChart) {
+					toolStripMembers.add(me._chartButton);
 				}
 			}
 			if (me.showSnap) {
@@ -1457,9 +1469,13 @@ isc.BizListGrid.addMethods({
 			me.canZoom = false;
 		}
 		else {
-			if (me._config.isRepeater) {} else {
+			if (! me._config.isRepeater) {
 				me.showMember(me._toolbar);
-				if (me._config.isTree) {} else {
+
+				// disable chart if a tree or a model data source
+				me._chartButton.setDisabled(me._config.isTree || me._dataSource.ID.contains('__'));
+				
+				if (! me._config.isTree) {
 					me.showMember(me._summaryGrid);
 				}
 			}
