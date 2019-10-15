@@ -334,7 +334,7 @@ isc.ChartDialog.addClassProperties({
 									if (categoryBucket) {
 										var field = isc.ChartDialog._dataSource.getField(categoryBinding);
 										var type = field.type;
-										if ((type == 'integer') && (type == 'float')) {
+										if (isc.BizUtil.isNumeric(type)) {
 											if (categoryBucket != 'NumericMultipleBucket') {
 												isc.ChartDialog._valuesManager.setErrors({
 													categoryBinding: 'Use a numeric bucket only with a number field',
@@ -343,12 +343,7 @@ isc.ChartDialog.addClassProperties({
 												return true;
 											}
 										}
-										else if ((type == 'date') && 
-													(type == 'time') && 
-													(type == 'datetime') && 
-													(type == 'bizDate') &&
-													(type == 'bizTime') &&
-													type.startsWith('DD_')) {
+										else if (isc.BizUtil.isTemporal(type)) {
 											if (categoryBucket != 'TemporalBucket') {
 												isc.ChartDialog._valuesManager.setErrors({
 													categoryBinding: 'Use a temporal bucket only with a date or time field',

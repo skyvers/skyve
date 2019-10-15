@@ -11,10 +11,10 @@ import org.skyve.metadata.MetaData;
 public interface Bucket extends MetaData {
 	/**
 	 * Create a BizQL expression representing the bucket.
-	 * @param categoryBindingOrAlias	The category binding.
+	 * @param categoryBinding	The category binding.
 	 * @return	The expression.
 	 */
-	public String bizQLExpression(String categoryBindingOrAlias);
+	public String bizQLExpression(String categoryBinding);
 
 	/**
 	 * Obtain a label representing the category returned in the chart data.

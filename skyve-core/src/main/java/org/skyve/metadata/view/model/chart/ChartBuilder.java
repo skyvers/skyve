@@ -35,9 +35,9 @@ import org.skyve.util.Binder;
 public class ChartBuilder {
 	private Document document;
 	private DocumentQuery query;
-	private String categoryBindingOrAlias;
+	private String categoryBinding;
 	private Bucket categoryBucket;
-	private String valueBindingOrAlias;
+	private String valueBinding;
 	private AggregateFunction valueFunction;
 	private int top = Integer.MIN_VALUE;
 	private SortDirection topSort;
@@ -120,7 +120,7 @@ public class ChartBuilder {
 	 * @param binding
 	 */
 	public ChartBuilder category(String binding) {
-		categoryBindingOrAlias = binding;
+		categoryBinding = binding;
 		return this;
 	}
 	
@@ -130,7 +130,7 @@ public class ChartBuilder {
 	 * @param bucket
 	 */
 	public ChartBuilder category(String binding, Bucket bucket) {
-		categoryBindingOrAlias = binding;
+		categoryBinding = binding;
 		categoryBucket = bucket;
 		return this;
 	}
@@ -140,7 +140,7 @@ public class ChartBuilder {
 	 * @param binding
 	 */
 	public ChartBuilder value(String binding) {
-		valueBindingOrAlias = binding;
+		valueBinding = binding;
 		return this;
 	}
 
@@ -150,7 +150,7 @@ public class ChartBuilder {
 	 * @param function
 	 */
 	public ChartBuilder value(String binding, AggregateFunction function) {
-		valueBindingOrAlias = binding;
+		valueBinding = binding;
 		valueFunction = function;
 		return this;
 	}
@@ -259,7 +259,7 @@ public class ChartBuilder {
 		result.setBorder(borderColours.getCurrent());
 		Customer c = CORE.getCustomer();
 		result.setLabels(data.stream().map(r -> (categoryBucket == null) ?
-													label(Binder.getDisplay(c, r, categoryBindingOrAlias)) :
+													label(Binder.getDisplay(c, r, categoryBinding)) :
 													label(categoryBucket.label(Binder.get(r, "category")))).collect(Collectors.toList()));
 		result.setValues(data.stream().map(r -> (Number) Binder.get(r, "value")).collect(Collectors.toList()));
 
@@ -280,13 +280,15 @@ public class ChartBuilder {
 	private List<Bean> query() {
 		String categoryExpression = null;
 		String categoryAlias = "category";
-		String valueExpression = (valueFunction == null) ? valueBindingOrAlias : valueFunction + "(" + valueBindingOrAlias + ")";
+		String valueExpression = (valueFunction == null) ? 
+									"bean." + valueBinding : 
+									valueFunction + "(bean." + valueBinding + ")";
 		if (categoryBucket == null) {
-			categoryExpression = categoryBindingOrAlias;
-			categoryAlias = categoryBindingOrAlias.replace('.', '_'); // So we get display values
+			categoryExpression = "bean." + categoryBinding;
+			categoryAlias = categoryBinding.replace('.', '_'); // So we get display values
 		}
 		else {
-			categoryExpression = categoryBucket.bizQLExpression(categoryBindingOrAlias);
+			categoryExpression = categoryBucket.bizQLExpression(categoryBinding);
 		}
 
 		query.addExpressionProjection(categoryExpression, categoryAlias);
@@ -333,7 +335,7 @@ public class ChartBuilder {
 					}
 					
 					Map<String, Object> properties = new TreeMap<>();
-					properties.put((categoryBucket == null) ? categoryBindingOrAlias : "category", null);
+					properties.put((categoryBucket == null) ? categoryBinding : "category", null);
 					properties.put("value", rest);
 					best.add(new MapBean(document.getOwningModuleName(), document.getName(), properties));
 					result = best;
@@ -343,7 +345,7 @@ public class ChartBuilder {
 				}
 			}
 			// Always order here as the top sort was applied on the data store
-			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBindingOrAlias : "category") : "value",
+			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
 			Binder.sortCollectionByOrdering(result, ordering);
 		}

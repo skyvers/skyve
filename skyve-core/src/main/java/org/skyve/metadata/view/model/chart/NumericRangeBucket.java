@@ -23,15 +23,15 @@ public class NumericRangeBucket implements Bucket {
 	}
 	
 	@Override
-	public String bizQLExpression(String categoryBindingOrAlias) {
+	public String bizQLExpression(String categoryBinding) {
 		StringBuilder result = new StringBuilder(256);
 		for (int i = 0, l = ranges.length; i < l; i++) {
 			if (i == 0) {
-				result.append("case when ").append(categoryBindingOrAlias).append(" < ").append(ranges[0]);
+				result.append("case when bean.").append(categoryBinding).append(" < ").append(ranges[0]);
 				result.append(" then 0");
 			}
 			if (i > 0) {
-				result.append(" when ").append(categoryBindingOrAlias).append(" between ");
+				result.append(" when bean.").append(categoryBinding).append(" between ");
 				result.append(ranges[i - 1]).append(" and ").append(ranges[i]);
 				result.append(" then ").append(i);
 			}

@@ -61,7 +61,7 @@
 			<vbox border="true" borderTitle="Backups">
 				<listGrid model="BackupsModel" selectedIdBinding="selectedBackupName" continueConversation="false" showAdd="false"
 					showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
-					showTag="false" showZoom="false" postRefresh="backupsRefreshRequired">
+					showTag="false" showZoom="false" showChart="false" postRefresh="backupsRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BackupSelected" />
 					</onSelectedHandlers>
@@ -161,7 +161,7 @@
 		<tab title="Content">
 			<listGrid model="ContentModel" selectedIdBinding="selectedContentId" continueConversation="false" showAdd="false"
 				showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
-				showTag="false" showZoom="false" postRefresh="contentRefreshRequired">
+				showTag="false" showZoom="false" showChart="false" postRefresh="contentRefreshRequired">
 				<onSelectedHandlers>
 					<server action="ContentSelected" />
 				</onSelectedHandlers>
