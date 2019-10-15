@@ -15,7 +15,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.util.TestUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -24,6 +23,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
+import org.skyve.util.test.TestUtil;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
