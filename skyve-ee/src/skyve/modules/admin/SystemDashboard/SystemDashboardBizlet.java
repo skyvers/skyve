@@ -1,11 +1,8 @@
 package modules.admin.SystemDashboard;
 
-import java.util.Set;
-
 import org.skyve.metadata.model.document.Bizlet;
 
 import modules.admin.Configuration.ConfigurationExtension;
-import modules.admin.DataMaintenance.DataMaintenanceExtension;
 import modules.admin.domain.Generic;
 import modules.admin.domain.SystemDashboard;
 
@@ -39,15 +36,6 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		backupScheduled.setBoolean1(new Boolean(ConfigurationExtension.validBackupSchedule()));
 		bean.getStatus().add(backupScheduled);
 		
-		//TODO
-		// failed backups
-//		Set<String> backups = DataMaintenanceExtension.backups();
-		
-		// days since last backup
-		
-		
-		// maybe unusual system activity		
-
 		return super.newInstance(bean);
 	}
 
