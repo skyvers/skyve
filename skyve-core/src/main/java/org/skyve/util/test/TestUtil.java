@@ -374,17 +374,17 @@ public class TestUtil {
 
 		char[] address = new char[addressLength];
 		for (int i = 0; i < addressLength; i++) {
-			address[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			address[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		char[] domain = new char[domainLength];
 		for (int i = 0; i < domainLength; i++) {
-			domain[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			domain[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		char[] code = new char[2];
 		for (int i = 0; i < 2; i++) {
-			code[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			code[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		return String.valueOf(address) + "@" + String.valueOf(domain) + "." + String.valueOf(code);
@@ -444,7 +444,7 @@ public class TestUtil {
 				}
 			}
 		} else if (textFormat.getCase() != null) {
-			out = randomString(RANDOM.nextInt(length));
+			out = randomString(RANDOM.nextInt(length) + 1);
 			switch (textFormat.getCase()) {
 				case capital:
 					out = StringUtils.capitalize(out);
@@ -532,7 +532,7 @@ public class TestUtil {
 	private static String randomString(int length) {
 		char[] guts = new char[length];
 		for (int i = 0; i < length; i++) {
-			guts[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			guts[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		return String.valueOf(guts);

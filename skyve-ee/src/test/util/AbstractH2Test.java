@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.skyve.CORE;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -17,7 +16,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
-import org.skyve.persistence.Persistence;
 
 public abstract class AbstractH2Test {
 	protected static final String USER = "TestUser";
@@ -28,13 +26,11 @@ public abstract class AbstractH2Test {
 	private static final String DB_URL = "jdbc:h2:mem:test";
 	private static final String DB_UNAME = "user";
 	private static final String DB_PWD = "password";
-	private static final String CONTENT_DIRECTORY = "content/";
+	private static final String CONTENT_DIRECTORY = "./target/test/content/";
 
 	// Add common mocks here
 	// @Mock
 	// protected WebContext webContext;
-
-	protected Persistence p;
 
 	private static Weld weld;
 
@@ -47,6 +43,7 @@ public abstract class AbstractH2Test {
 	public static void beforeClass() throws Exception {
 		weld = new Weld();
 		weld.addPackage(true, SkyveCDIProducer.class);
+
 		weld.initialize();
 	}
 	
@@ -58,7 +55,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@Before
-	public void beforeBase() {
+	public void beforeBase() throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
@@ -74,20 +71,16 @@ public abstract class AbstractH2Test {
 		user.setCustomerName(CUSTOMER);
 		user.setName(USER);
 		user.setId(USER);
+
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 		persistence.begin();
-
-		p = CORE.getPersistence();
 	}
 
 	@After
 	public void afterBase() {
-		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
-		// For H2 by default, closing the last connection to a database closes the database.
-		// For an in-memory database, this means the content is lost.
-		// See http://www.h2database.com/html/features.html (In-Memory Databases)
-		p.commit(true);
-		((AbstractPersistence) p).disposeAllPersistenceInstances();
+		final AbstractPersistence persistence = AbstractPersistence.get();
+		persistence.rollback();
+		persistence.evictAllCached();
 	}
 }

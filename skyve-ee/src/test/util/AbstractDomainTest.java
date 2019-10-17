@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeTrue;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,8 +27,6 @@ import org.skyve.util.test.TestUtil;
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
 	protected abstract T getBean() throws Exception;
-
-	private static final SecureRandom random = new SecureRandom();
 
 	@Test
 	@SuppressWarnings("boxing")
@@ -266,7 +263,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes());
 
 		// randomise the attributes in the collection
-		Collections.shuffle(allAttributes, random);
+		Collections.shuffle(allAttributes);
 
 		for (Attribute attribute : allAttributes) {
 			AttributeType type = attribute.getAttributeType();

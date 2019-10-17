@@ -1,9 +1,12 @@
 package modules.test;
 
+import org.junit.Before;
+import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
@@ -21,9 +24,9 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
-import util.AbstractH2Test;
+import util.AbstractH2TestTruncate;
 
-public abstract class AbstractSkyveTest extends AbstractH2Test {
+public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 
 	protected User u;
 	protected Customer c;
@@ -45,10 +48,11 @@ public abstract class AbstractSkyveTest extends AbstractH2Test {
 	protected Document ucn;
 	protected Document ucnn;
 
-	@Override
-	public void beforeBase() {
-		super.beforeBase();
+	protected Persistence p;
 
+	@Before
+	public void before() {
+		p = CORE.getPersistence();
 		u = p.getUser();
 		c = u.getCustomer();
 		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
