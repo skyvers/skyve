@@ -126,7 +126,7 @@ class Table {
 			result.put("ownerTableName", join.ownerTableName);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}
-		return JSON.marshall(null, result, null);
+		return JSON.marshall(result);
 	}
 	
 	@SuppressWarnings("unchecked")

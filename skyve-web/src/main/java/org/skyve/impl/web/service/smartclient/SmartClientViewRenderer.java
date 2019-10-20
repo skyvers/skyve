@@ -114,8 +114,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 public class SmartClientViewRenderer extends ViewRenderer {
-	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(120);
-	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(150);
+	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
+	private static final Integer DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(200);
 
 	private boolean noCreateView;
 	private int variableCounter = 0;
@@ -216,17 +216,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String tabPaneVariable = containerVariables.peek();
 		Integer tabNumber = tabNumbers.pop();
 		code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber);
-		if (icon16x16Url != null) {
+		String iconStyleClass = tab.getIconStyleClass();
+		if (iconStyleClass != null) {
+			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
+		}
+		else if (icon16x16Url != null) {
 			code.append("',icon:'../").append(icon16x16Url);
 			code.append("',title:'");
 		}
 		else {
 			code.append("',title:'");
-			String iconStyleClass = tab.getIconStyleClass();
-			if (iconStyleClass != null) {
-				code.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
-			}
 		}
+
 		code.append(SmartClientGenerateUtils.processString(title));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
@@ -1097,6 +1098,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.FALSE.equals(grid.getShowExport())) {
 			code.append("showExport:false,");
 		}
+		if (Boolean.FALSE.equals(grid.getShowChart())) {
+			code.append("showChart:false,");
+		}
 		if (Boolean.FALSE.equals(grid.getShowSnap())) {
 			code.append("showSnap:false,");
 		}
@@ -1477,6 +1481,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
 		}
 		code.append(",_view:view,");
+		size(membership, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(membership.getDisabledConditionName(), code);
 		invisible(membership.getInvisibleConditionName(), code);
 		
@@ -2786,7 +2791,7 @@ pickListFields:[{name:'value'}],
 			builder.append("params:{");
 			for (Parameter parameter : parameters) {
 				builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':'");
-				String binding = parameter.getBinding();
+				String binding = parameter.getValueBinding();
 				if (binding != null) {
 					builder.append('{').append(binding).append("}',");
 				}
@@ -2807,9 +2812,9 @@ pickListFields:[{name:'value'}],
 			builder.append("params:[");
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
-					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getFilterBinding())).append("',operator:'");
 					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
-					String binding = parameter.getBinding();
+					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}'},");
 					}
@@ -2822,7 +2827,7 @@ pickListFields:[{name:'value'}],
 				for (Parameter parameter : parameters) {
 					builder.append("{name:':").append(BindUtil.sanitiseBinding(parameter.getName()));
 					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:'");
-					String binding = parameter.getBinding();
+					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}'},");
 					}

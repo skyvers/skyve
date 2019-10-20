@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -56,8 +57,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -141,7 +144,7 @@ public class SmartClientGenerateUtils {
 	            canUpdate = user.canUpdateDocument(queryDocument);
             }
             
-            Set<String> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
+            List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
             if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
             	pickListFields.add(displayField);
             }
@@ -151,7 +154,9 @@ public class SmartClientGenerateUtils {
                 	if (alias == null) {
                 		alias = column.getBinding();
                 	}
-                	if (dropDownColumns.contains(alias)) {
+                	final String a = alias;
+                	Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
+                	if (optional.isPresent()) {
                 		if ((column instanceof MetaDataQueryProjectedColumn) &&
                 				((MetaDataQueryProjectedColumn) column).isProjected()) {
                             SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(user,
@@ -162,8 +167,14 @@ public class SmartClientGenerateUtils {
 																	                                        runtime);
 
                         	pickListFields.add(def.getName());
-                        	// only add fields that can use the substring operator
-                        	if (def.getHasTextFilterOperators()) {
+                        	// only add fields that are filterable and can use the substring operator
+                        	Boolean filterable = optional.get().getFilterable();
+                        	if (Boolean.TRUE.equals(filterable)) {
+                        		filterFields.add(def.getName());
+                        	}
+                        	else if ((filterable == null) && 
+                        				def.isCanFilter() && 
+                        				def.getHasTextFilterOperators()) {
                         		filterFields.add(def.getName());
                         	}
                 		}
@@ -951,12 +962,17 @@ public class SmartClientGenerateUtils {
 					textAlign = HorizontalAlignment.right;
 				}
 			}
+			// Use a drop down for grids but in the edit view, use the text field as specified
+			if (widget instanceof TextField) {
+				editorType = null; // is set to "select" in the SmartClientAttributeDefinition
+				valueMap = null; // ensure there is no value map of SC will create a combo anyway
+			}
 			// Use a drop down for grids but in the edit view, use the radio group as specified
-			if (widget instanceof Radio) {
+			else if (widget instanceof Radio) {
 				editorType = null; // is set to "select" in the SmartClientDataGridFieldDefinition
 			}
 			// Use a combo box for grids but in the edit view, use the lookup description as specified
-			if (widget instanceof LookupDescription) {
+			else if (widget instanceof LookupDescription) {
 				editorType = null; // is set to "comboBox" in the SmartClientDataGridFieldDefinition
 			}
 		}
@@ -1633,16 +1649,18 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(drivingDocumentModule.getName());
 		toAppendTo.append('.');
 		toAppendTo.append(drivingDocumentName);
-		String icon32 = drivingDocument.getIcon32x32RelativeFileName();
-		if (icon32 != null) {
-			toAppendTo.append("',icon:'").append(icon32);
+
+		String icon = drivingDocument.getIconStyleClass();
+		if (icon != null) {
+			toAppendTo.append("',fontIcon:'").append(icon);
 		}
 		else {
-			String icon = drivingDocument.getIconStyleClass();
-			if (icon != null) {
-				toAppendTo.append("',fontIcon:'").append(icon);
+			String icon32 = drivingDocument.getIcon32x32RelativeFileName();
+			if (icon32 != null) {
+				toAppendTo.append("',icon:'").append(icon32);
 			}
 		}
+
 		if (! config) {
 			// ensure all filtering is server-side
 			// this enables the summary row to always stay in sync and
@@ -1683,7 +1701,7 @@ public class SmartClientGenerateUtils {
 			List<FilterParameter> filterParameters = forLookup.getFilterParameters();
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
-					hiddenBindingsList.add(parameter.getName());
+					hiddenBindingsList.add(parameter.getFilterBinding());
 				}
 			}
 			List<Parameter> parameters = forLookup.getParameters();

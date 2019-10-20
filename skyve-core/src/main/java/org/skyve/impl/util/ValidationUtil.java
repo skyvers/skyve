@@ -115,7 +115,7 @@ public class ValidationUtil {
 
 		if (converter != null) {
 			if (attributeValue != null) {
-				validateFormat(converter.getFormat(), attributeValue, binding, displayName, e);
+				validateFormat(converter.getFormat(), attributeValue, binding, bean, displayName, e);
 				@SuppressWarnings("rawtypes")
 				Validator validator = converter.getValidator();
 				if (validator != null) {
@@ -164,7 +164,7 @@ public class ValidationUtil {
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
-					validateFormat(format.getFormat(), stringValue, binding, displayName, e);
+					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, e);
 				}
 				TextValidator validator = text.getValidator();
 				if (validator != null) {
@@ -291,15 +291,23 @@ public class ValidationUtil {
 	}
 
 	private static void validateFormat(Format<?> format,
-										Object value,
-										String binding,
-										String displayName,
-										ValidationException e) {
+											Object value,
+											String binding,
+											Bean bean,
+											String displayName,
+											ValidationException e) {
 		if (format != null) {
 			try {
 				@SuppressWarnings({"rawtypes", "unchecked"})
 				String display = ((Format) format).toDisplayValue(value);
-				format.fromDisplayValue(display);
+				Object newValue = format.fromDisplayValue(display);
+
+				// ok, we've passed validation from the 2 calls above...
+				// now, only set the newValue back on the bean if it was a reformatted string,
+				// otherwise its another type that is just displayed a certain way
+				if ((value instanceof String) && (newValue instanceof String)) {
+					BindUtil.set(bean, binding, newValue);
+				}
 			}
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 

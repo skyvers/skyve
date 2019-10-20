@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.repository;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -73,6 +72,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -88,6 +88,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -99,6 +100,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -282,16 +284,32 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateParameterBindings(List<? extends Parameter> parameters, String parentWidgetIdentifier) {
+	private void validateParameterBindings(List<Parameter> parameters, String parentWidgetIdentifier) {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
 				validateBinding(null,
-									parameter.getBinding(),
+									parameter.getValueBinding(),
 									false,
 									false,
 									false,
 									false,
 									"Parameter " + parameter.getName() + " in " + parentWidgetIdentifier);
+			}
+		}
+	}
+	
+	private void validateFilterParameterBindings(List<FilterParameter> parameters, String parentWidgetIdentifier) {
+		if (parameters != null) {
+			for (FilterParameter parameter : parameters) {
+				String name = parameter.getFilterBinding();
+				// TODO should validate filterBinding against child document.
+				validateBinding(null,
+									parameter.getValueBinding(),
+									false,
+									false,
+									false,
+									false,
+									"Filter Parameter " + name + " in " + parentWidgetIdentifier);
 			}
 		}
 	}
@@ -319,7 +337,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateNoColon(List<? extends Parameter> parameters, String widgetIdentifier) {
+	private void validateNoColonInParameter(List<Parameter> parameters, String widgetIdentifier) {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
 				if (parameter.getName().indexOf(':') >= 0) {
@@ -329,7 +347,18 @@ class ViewValidator extends ViewVisitor {
 			}
 		}
 	}
-	
+
+	private void validateNoColonInFilterParameter(List<FilterParameter> parameters, String widgetIdentifier) {
+		if (parameters != null) {
+			for (FilterParameter parameter : parameters) {
+				if (parameter.getFilterBinding().indexOf(':') >= 0) {
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a parameter with filterBinding " + parameter.getFilterBinding() + 
+													" which contains a colon (:). Use a parameter to bind a value to a named parameter in a query");
+				}
+			}
+		}
+	}
+
 	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
 		if (queryName != null) {
 			if (modelName != null) {
@@ -968,7 +997,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							true,
+							false,
 							labelIdentifier);
 		validateMessageBindings(label.getValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
@@ -987,10 +1016,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
 		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
-		validateParameterBindings(grid.getFilterParameters(), listGridIdentifier);
+		validateFilterParameterBindings(grid.getFilterParameters(), listGridIdentifier);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
-		validateNoColon(grid.getFilterParameters(), listGridIdentifier);
-		validateNoColon(grid.getParameters(), listGridIdentifier);
+		validateNoColonInFilterParameter(grid.getFilterParameters(), listGridIdentifier);
+		validateNoColonInParameter(grid.getParameters(), listGridIdentifier);
 		validateQueryOrModel(queryName, modelName, listGridIdentifier);
 	}
 
@@ -1001,10 +1030,10 @@ class ViewValidator extends ViewVisitor {
 		String listRepeaterIdentifier = "ListRepeater " + ((modelName != null) ? modelName : queryName);
 		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
 		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
-		validateParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier);
+		validateFilterParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
-		validateNoColon(repeater.getFilterParameters(), listRepeaterIdentifier);
-		validateNoColon(repeater.getParameters(), listRepeaterIdentifier);
+		validateNoColonInFilterParameter(repeater.getFilterParameters(), listRepeaterIdentifier);
+		validateNoColonInParameter(repeater.getParameters(), listRepeaterIdentifier);
 		validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 	}
 
@@ -1022,10 +1051,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
-		validateParameterBindings(grid.getFilterParameters(), treeGridIdentifier);
+		validateFilterParameterBindings(grid.getFilterParameters(), treeGridIdentifier);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
-		validateNoColon(grid.getFilterParameters(), treeGridIdentifier);
-		validateNoColon(grid.getParameters(), treeGridIdentifier);
+		validateNoColonInFilterParameter(grid.getFilterParameters(), treeGridIdentifier);
+		validateNoColonInParameter(grid.getParameters(), treeGridIdentifier);
 		validateQueryOrModel(queryName, modelName, treeGridIdentifier);
 	}
 
@@ -1091,10 +1120,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
+		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
-		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
-		validateNoColon(lookup.getParameters(), lookupIdentifier);
+		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 	}
 
@@ -1134,10 +1163,10 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		validateParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
+		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
-		validateNoColon(lookup.getFilterParameters(), lookupIdentifier);
-		validateNoColon(lookup.getParameters(), lookupIdentifier);
+		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
+		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used
@@ -1168,10 +1197,14 @@ class ViewValidator extends ViewVisitor {
 		}
 
 		// validate drop down columns and description binding
-		Set<String> dropDownColumns = lookup.getDropDownColumns();
-		LinkedHashSet<String> testColumns = ((dropDownColumns == null) || dropDownColumns.isEmpty()) ? 
-												null : 
-												new LinkedHashSet<>(dropDownColumns);
+		List<LookupDescriptionColumn> dropDownColumns = lookup.getDropDownColumns();
+		LinkedHashSet<String> testColumns = null;
+		if (dropDownColumns != null) {
+			testColumns = new LinkedHashSet<>(dropDownColumns.size());
+			for (LookupDescriptionColumn dropDownColumn : dropDownColumns) {
+				testColumns.add(dropDownColumn.getName());
+			}
+		}
 		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
 		
 		for (MetaDataQueryColumn column : query.getColumns()) {
@@ -1211,12 +1244,22 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
-		// no validation required as parameters are checked by their parent widgets
+		// Check that value or valueBinding is populated
+		if ((parameter.getValue() == null) && (parameter.getValueBinding() == null)) {
+			throw new MetaDataException("Parameter " + parameter.getName() + " requires either a value or a valueBinding.");
+		}
 	}
 
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
-		// no validation required as parameters are checked by their parent widgets
+		// Check that value or valueBinding is populated for pertinent operators
+		FilterOperator operator = parameter.getOperator();
+		if ((! FilterOperator.isNull.equals(operator)) &&
+				(! FilterOperator.notNull.equals(operator)) &&
+				(parameter.getValue() == null) &&
+				(parameter.getValueBinding() == null)) {
+			throw new MetaDataException("Filter Parameter " + parameter.getFilterBinding() + " requires either a value or a valueBinding for operator " + parameter.getOperator());
+		}
 	}
 
 	@Override
@@ -1695,9 +1738,25 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitView() {
 		validateMessageBindings(view.getTitle(), viewIdentifier, "a title");
-		validateParameterBindings(view.getParameters(), viewIdentifier);
+
+		List<ViewParameter> parameters = view.getParameters();
+		if (parameters != null) {
+			for (ViewParameter parameter : parameters) {
+				validateBinding(null,
+									parameter.getBoundTo(),
+									false,
+									false,
+									false,
+									false,
+									"Parameter " + parameter.getFromBinding() + " in " + viewIdentifier);
+			}
+		}
+		
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
 		validateConditionName(view.getRefreshConditionName(), viewIdentifier);
+		if ((view.getHelpURL() != null) && (view.getHelpRelativeFileName() != null)) {
+			throw new MetaDataException(viewIdentifier + " should define one of helpURL or helpRelativeFileName but not both");
+		}
 	}
 
 	@Override

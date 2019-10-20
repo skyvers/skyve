@@ -1,10 +1,11 @@
-package org.skyve.impl.util;
+package org.skyve.util.test;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Decimal;
@@ -34,6 +36,8 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
+import org.skyve.impl.util.TimeUtil;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Collection;
@@ -44,15 +48,12 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
-import org.skyve.util.test.DataMap;
-import org.skyve.util.test.SkyveFactory;
 
 import com.mifmif.common.regex.Generex;
 
 public class TestUtil {
 
-	private static final SecureRandom random = new SecureRandom();
-
+	private static final Random RANDOM = new Random();
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
 	private static final String ALPHA_NUMERIC = LETTERS + NUMBERS;
@@ -126,7 +127,7 @@ public class TestUtil {
 		if (attribute == null) {
 			return bean;
 		}
-
+		
 		final String name = attribute.getName();
 		final AttributeType type = attribute.getAttributeType();
 
@@ -142,14 +143,14 @@ public class TestUtil {
 				break;
 			case date:
 				Date futureDate = new Date();
-				TimeUtil.addDays(futureDate, random.nextInt(10) + 1);
+				TimeUtil.addDays(futureDate, RANDOM.nextInt(10) + 1);
 				BindUtil.convertAndSet(bean, name, futureDate);
 				break;
 			case dateTime:
 			case time:
 			case timestamp:
 				Date futureTime = new Date();
-				TimeUtil.addHours(futureTime, random.nextInt(10) + 1);
+				TimeUtil.addHours(futureTime, RANDOM.nextInt(10) + 1);
 				BindUtil.convertAndSet(bean, name, futureTime);
 				break;
 			case decimal10:
@@ -177,7 +178,7 @@ public class TestUtil {
 				break;
 			case geometry:
 				BindUtil.set(bean, name, new GeometryFactory().createPoint(
-						new Coordinate(random.nextInt(10), random.nextInt(10))));
+						new Coordinate(RANDOM.nextInt(10), RANDOM.nextInt(10))));
 				break;
 			case id:
 				BindUtil.set(bean, name, UUID.randomUUID().toString());
@@ -310,7 +311,7 @@ public class TestUtil {
 				case markup:
 				case memo:
 				case text:
-					BindUtil.set(result, name, randomText(module, document, attribute));
+					BindUtil.set(result, name, randomText(user.getCustomerName(), module, document, attribute));
 					break;
 			}
 		}
@@ -338,7 +339,7 @@ public class TestUtil {
 	 * @param attribute The attribute to generate the random decimal for
 	 * @return A random decimal
 	 */
-	private static Decimal randomDecimal(Attribute attribute) {
+	public static Decimal randomDecimal(Attribute attribute) {
 		Decimal min = new Decimal2(0), max = new Decimal2(10000);
 
 		DecimalValidator validator = null;
@@ -362,29 +363,28 @@ public class TestUtil {
 			}
 		}
 
-		random.setSeed(random.generateSeed(20));
-		return new Decimal2(random.nextInt(
+		return new Decimal2(RANDOM.nextInt(
 				(max.subtract(min))
 						.add(new Decimal2(1)).intValue())).add(min);
 	}
 
-	private static String randomEmail(int length) {
+	public static String randomEmail(int length) {
 		int addressLength = (int) Math.floor((length - 2) / 2);
 		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
 
 		char[] address = new char[addressLength];
 		for (int i = 0; i < addressLength; i++) {
-			address[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			address[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		char[] domain = new char[domainLength];
 		for (int i = 0; i < domainLength; i++) {
-			domain[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			domain[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		char[] code = new char[2];
 		for (int i = 0; i < 2; i++) {
-			code[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			code[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		return String.valueOf(address) + "@" + String.valueOf(domain) + "." + String.valueOf(code);
@@ -398,14 +398,15 @@ public class TestUtil {
 	 * @return A random enum constant
 	 */
 	@SuppressWarnings("boxing")
-	private static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
+	public static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
 		int x;
-		if (currentValue != null && clazz.getEnumConstants().length > 1) {
+		if (currentValue != null) {
+			int currentValueInt = currentValue.intValue();
 			do {
-				x = random.nextInt(clazz.getEnumConstants().length);
-			} while (x == currentValue);
+				x = RANDOM.nextInt(clazz.getEnumConstants().length);
+			} while (x == currentValueInt);
 		} else {
-			x = random.nextInt(clazz.getEnumConstants().length);
+			x = RANDOM.nextInt(clazz.getEnumConstants().length);
 		}
 
 		return clazz.getEnumConstants()[x];
@@ -416,29 +417,51 @@ public class TestUtil {
 	 * of the text attribute
 	 * 
 	 * @param textFormat The format to comply to
+	 * @param length The maximum length of the random string
 	 * @return A format compliant random string
 	 */
-	private static String randomFormat(TextFormat textFormat) {
+	private static String randomFormat(TextFormat textFormat, int length) {
 
 		String mask = textFormat.getMask();
 		String out = new String();
 
-		for (int i = 0; i < mask.length(); i++) {
-			char c = mask.charAt(i);
-			switch (c) {
-				case '#':
-					out += NUMBERS.charAt(random.nextInt(NUMBERS.length()));
+		if (mask != null) {
+			for (int i = 0; i < mask.length(); i++) {
+				char c = mask.charAt(i);
+				switch (c) {
+					case '#':
+						out += NUMBERS.charAt(RANDOM.nextInt(NUMBERS.length()));
+						break;
+					case 'A':
+						out += ALPHA_NUMERIC.charAt(RANDOM.nextInt(ALPHA_NUMERIC.length()));
+						break;
+					case 'L':
+						out += LETTERS.charAt(RANDOM.nextInt(LETTERS.length()));
+						break;
+					default:
+						out += c;
+						break;
+				}
+			}
+		} else if (textFormat.getCase() != null) {
+			out = randomString(RANDOM.nextInt(length) + 1);
+			switch (textFormat.getCase()) {
+				case capital:
+					out = StringUtils.capitalize(out);
 					break;
-				case 'A':
-					out += ALPHA_NUMERIC.charAt(random.nextInt(ALPHA_NUMERIC.length()));
+				case lower:
+					out = out.toLowerCase();
 					break;
-				case 'L':
-					out += LETTERS.charAt(random.nextInt(LETTERS.length()));
+				case upper:
+					out = out.toUpperCase();
 					break;
 				default:
-					out += c;
 					break;
 			}
+		}
+
+		if (out.length() > length) {
+			out = StringUtils.left(out, length);
 		}
 
 		return out;
@@ -451,7 +474,7 @@ public class TestUtil {
 	 * @param attribute The attribute to generate the random integer for
 	 * @return A random integer
 	 */
-	private static Integer randomInteger(Attribute attribute) {
+	public static Integer randomInteger(Attribute attribute) {
 		int min = 0, max = 10000;
 
 		// if there is a min and max make sure it is within the range
@@ -479,8 +502,7 @@ public class TestUtil {
 			}
 		}
 
-		random.setSeed(random.generateSeed(20));
-		return new Integer(random.nextInt((max - min) + 1) + min);
+		return new Integer(RANDOM.nextInt((max - min) + 1) + min);
 	}
 
 	/**
@@ -510,7 +532,7 @@ public class TestUtil {
 	private static String randomString(int length) {
 		char[] guts = new char[length];
 		for (int i = 0; i < length; i++) {
-			guts[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+			guts[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
 		}
 
 		return String.valueOf(guts);
@@ -525,13 +547,15 @@ public class TestUtil {
 	 * <li>a regular expression or other validator
 	 * <li>random text
 	 * 
+	 * @param customerName The name of the current logged in user's customer to locate any test data files
 	 * @param module The module this attribute belongs to
 	 * @param document The document this attribute belongs to
 	 * @param text The attribute to create the random data for
 	 * @return A string containing random data for the text attribute
 	 * @throws IOException
 	 */
-	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
+	public static String randomText(String customerName, Module module, Document document, Attribute attribute)
+			throws IOException {
 		if (attribute != null) {
 			String fileName = null;
 			Integer length = null;
@@ -544,6 +568,7 @@ public class TestUtil {
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
+					Util.LOGGER.fine("Looking for factory class " + className);
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
@@ -579,7 +604,7 @@ public class TestUtil {
 				// check if there is a data file for this field
 				Util.LOGGER.fine(String.format(
 						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
-				String value = randomValueFromFile(module, document, attribute.getName(), fileName);
+				String value = randomValueFromFile(customerName, module, document, attribute.getName(), fileName);
 				if (value != null) {
 					Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
 					return value;
@@ -603,7 +628,7 @@ public class TestUtil {
 					}
 
 					// return text matching the format mask
-					return randomFormat(text.getFormat());
+					return randomFormat(text.getFormat(), length.intValue());
 				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
 						&& text.getValidator().getType() == null) {
 					// check if this string has a regex and no validator type
@@ -630,13 +655,13 @@ public class TestUtil {
 				// set an arbitrary max length for memo fields
 				length = Integer.valueOf(2048);
 			}
-			String value = randomValueFromFile(null, null, LOREM);
+			String value = randomValueFromFile(null, null, null, LOREM);
 			if (value != null) {
 				String[] sentences = value.split("\\.");
 				shuffleArray(sentences);
 				int i = 0,
 						min = length.intValue() / 3,
-						r = random.nextInt(length.intValue() + 1 - min) + min;
+						r = RANDOM.nextInt(length.intValue() + 1 - min) + min;
 
 				// keep adding sentences until we hit the length
 				StringBuilder b = new StringBuilder();
@@ -645,21 +670,22 @@ public class TestUtil {
 					i++;
 					if (b.length() > r) {
 						String out = b.toString();
-						out = out.substring(0, r).trim();
+						out = out.substring(0, out.length() < r ? out.length() : r).trim();
 						if (out.indexOf(".") > 0) {
 							// trim to last sentence boundary
 							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
 						}
-						Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
-								attribute.getAttributeType(),
-								attribute.getName(),
-								Integer.valueOf(r),
-								length,
-								out));
-						return out;
+						if (out.length() > 0) {
+							Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
+									attribute.getAttributeType(),
+									attribute.getName(),
+									Integer.valueOf(r),
+									length,
+									out));
+							return out;
+						}
 					}
 				}
-
 			}
 
 			// return random text
@@ -667,6 +693,18 @@ public class TestUtil {
 		}
 
 		return null;
+	}
+
+	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
+		String customerName = null;
+		User user = CORE.getUser();
+		if (user != null) {
+			Customer customer = CORE.getCustomer();
+			if (customer != null) {
+				customerName = customer.getName();
+			}
+		}
+		return randomText(customerName, module, document, attribute);
 	}
 
 	/**
@@ -693,7 +731,8 @@ public class TestUtil {
 	 * @return A random value from the data file if it exists, null otherwise
 	 * @throws IOException
 	 */
-	private static String randomValueFromFile(final Module module, final Document document, final String attributeName,
+	private static String randomValueFromFile(String customerName, final Module module, final Document document,
+			final String attributeName,
 			final String... fileName) throws IOException {
 		if (attributeName != null) {
 			final String key = attributeKey(module, document, attributeName);
@@ -703,7 +742,6 @@ public class TestUtil {
 				values = DATA_CACHE.get(key);
 				Util.LOGGER.fine(String.format("Loaded %s list from cache", key));
 			} else {
-				ClassLoader classLoader = TestUtil.class.getClassLoader();
 				String fileToLoad = attributeName;
 				if (fileName != null && fileName.length == 1 && fileName[0] != null) {
 					fileToLoad = fileName[0];
@@ -715,13 +753,19 @@ public class TestUtil {
 				}
 
 				Util.LOGGER.fine("Attempting to find on the classpath: " + String.format("data/%s", fileToLoad));
-				try (InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s", fileToLoad))) {
-					values = readFromInputStream(inputStream);
-					DATA_CACHE.put(key, values);
-					Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
-					if (values != null && values.size() > 0) {
-						Util.LOGGER.fine(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
-								Integer.valueOf(values.size())));
+				File file = CORE.getRepository().findResourceFile(String.format("data/%s",
+						fileToLoad),
+						customerName,
+						(module == null) ? null : module.getName());
+				if ((file != null) && file.exists()) {
+					try (InputStream inputStream = new FileInputStream(file)) {
+						values = readFromInputStream(inputStream);
+						DATA_CACHE.put(key, values);
+						Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
+						if (values != null && values.size() > 0) {
+							Util.LOGGER.fine(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
+									Integer.valueOf(values.size())));
+						}
 					}
 				}
 			}
@@ -731,7 +775,7 @@ public class TestUtil {
 				if (attributeName.equals(LOREM)) {
 					return values.stream().collect(Collectors.joining("\n"));
 				}
-				return values.get(random.nextInt(values.size()));
+				return values.get(RANDOM.nextInt(values.size()));
 			}
 		}
 
@@ -767,7 +811,7 @@ public class TestUtil {
 	 */
 	private static void shuffleArray(String[] arr) {
 		for (int i = arr.length - 1; i > 0; i--) {
-			int index = random.nextInt(i + 1);
+			int index = RANDOM.nextInt(i + 1);
 			// Simple swap
 			String a = arr[index];
 			arr[index] = arr[i];

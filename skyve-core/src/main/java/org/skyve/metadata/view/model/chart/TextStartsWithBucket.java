@@ -20,12 +20,12 @@ public class TextStartsWithBucket implements Bucket {
 	}
 	
 	@Override
-	public String bizQLExpression(String categoryBindingOrAlias) {
+	public String bizQLExpression(String categoryBinding) {
 		StringBuilder result = new StringBuilder(32);
 		if (! caseSensitive) {
 			result.append("upper(");
 		}
-		result.append("substring(").append(categoryBindingOrAlias).append(",1,").append(length).append(')');
+		result.append("substring(bean.").append(categoryBinding).append(",1,").append(length).append(')');
 		if (! caseSensitive) {
 			result.append(')');
 		}

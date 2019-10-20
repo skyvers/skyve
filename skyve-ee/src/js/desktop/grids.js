@@ -45,8 +45,8 @@ isc.BizGrid.addProperties({
 });
 
 isc.BizGrid.addMethods({
-	initWidget : function () {
-        this.Super("initWidget", arguments);
+	initWidget : function(config) {
+		this.Super("initWidget", arguments);
 		var me = this;
 
 		me.deleteSelectionItem = {
@@ -147,6 +147,9 @@ isc.BizListGrid.addProperties({
 	_editButton: null,
 	_pickButton: null,
 	
+	// Buttons that are enable disabled based on other factors
+	_chartButton: null,
+	
 	// Switches to turn off tool buttons / menu items
 	showAdd: true,
 	showZoom: true,
@@ -154,6 +157,7 @@ isc.BizListGrid.addProperties({
 	showRemove: true,
 	showDeselect: true,
 	showExport: true,
+	showChart: true,
 	showFilter: true,
 	showSummary: true,
 	showSnap: true,
@@ -468,6 +472,58 @@ isc.BizListGrid.addMethods({
 				}
 			}
         };
+
+		var chartData = function() {
+			// Put the filter parameters into this call also
+			var allCriteria = getAllCriteria();
+
+			// Make the call
+			isc.ChartDialog.popupChart(me._dataSource,
+										me._view ? me._view.gather(false)._c : null,
+										allCriteria,
+										me.tagId,
+										me._dataSource.fields);
+		};
+		var chartItem = {
+			title: "Chart Data...", 
+			icon: "../images/icons/chart.png",
+			enableIf: function(target, menu, item) {
+				// enable chart if we have a non-model data source and its not a tree
+				return me._dataSource &&
+						(! me._config.isTree) &&
+						(! me._dataSource.ID.contains('__'));
+			},
+			click: function() {
+				var count = me.grid.getTotalRows();
+				if (count > 10000) {
+					isc.ask('There are ' + count + ' rows in this list to chart which could take more than 1 minute!  Do you want to continue?',
+								function(value) {
+									if (value) {
+										chartData();
+									}
+								});
+				}
+				else if (count > 1000) {
+					isc.ask('There are ' + count + ' rows to export which may take a few seconds.  Do you want to continue?',
+								function(value) {
+									if (value) {
+										chartData();
+									}
+								});
+				}
+				else {
+					chartData();
+				}
+			}
+        };
+		
+		me._chartButton = isc.BizUtil.createImageButton(chartItem.icon, 
+															true,
+															"<b>Chart</b> this data.",
+															chartItem.click);
+		me._chartButton.setDisabled(true);
+
+
 /*
 		var printItem = {title: "Print", 
         	//enabled: false, 
@@ -503,8 +559,14 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		contextMenuData.add(refreshItem);
-		if (me.showExport) {
-			contextMenuData.addList([{isSeparator: true}, exportItem]);
+		if (me.showExport || me.showChart) {
+			contextMenuData.add({isSeparator: true});
+			if (me.showExport) {
+				contextMenuData.add(exportItem);
+			}
+			if (me.showChart) {
+				contextMenuData.add(chartItem);
+			}
 		}
 		
 		// the context menu of the BizListGrid
@@ -858,14 +920,17 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		if (config && config.isPickList) {} else {
-			if (me.showExport) {
-				toolStripMembers.addList([
-	                "separator",
-	                isc.BizUtil.createImageButton(exportItem.icon,
-													false,
-													"<b>Export</b> table data.",
-													exportItem.click)
-				]);
+			if (me.showExport || me.showChart) {
+				toolStripMembers.add('separator');
+				if (me.showExport) {
+					toolStripMembers.add(isc.BizUtil.createImageButton(exportItem.icon,
+																		false,
+																		"<b>Export</b> table data.",
+																		exportItem.click));
+				}
+				if (me.showChart) {
+					toolStripMembers.add(me._chartButton);
+				}
 			}
 			if (me.showSnap) {
 				toolStripMembers.addList([
@@ -914,7 +979,7 @@ isc.BizListGrid.addMethods({
 				this.selectRecord(0, false);
 				return false;
 			},
-			height: 26,
+			height: 28,
 			leaveScrollbarGap: true,
 			autoFetchData: false,
 			autoFitData: null,
@@ -966,7 +1031,7 @@ isc.BizListGrid.addMethods({
 			// to set data straight away instead of waiting for it to paint
 			autoDraw: true, 
 			height: '*',
-			minHeight: me.minHeight,
+			minHeight: 100,
 			leaveScrollbarGap: true,
 			// width: '100%', - causes scrollbars under firefox
 			autoFetchData: false,
@@ -1404,9 +1469,13 @@ isc.BizListGrid.addMethods({
 			me.canZoom = false;
 		}
 		else {
-			if (me._config.isRepeater) {} else {
+			if (! me._config.isRepeater) {
 				me.showMember(me._toolbar);
-				if (me._config.isTree) {} else {
+
+				// disable chart if a tree or a model data source
+				me._chartButton.setDisabled(me._config.isTree || me._dataSource.ID.contains('__'));
+				
+				if (! me._config.isTree) {
 					me.showMember(me._summaryGrid);
 				}
 			}
@@ -1765,7 +1834,7 @@ isc.BizDataGrid.addProperties({
  * inline: true to add and edit records inline, false to add and edit records in edit view.
  */
 isc.BizDataGrid.addMethods({
-	initWidget : function (config) {
+	initWidget : function(config) {
         this.Super("initWidget", arguments);
 		var me = this;
 
@@ -1910,7 +1979,7 @@ isc.BizDataGrid.addMethods({
 
 		var gridConfig = {
 			height: "*",
-			minHeight: me.minHeight,
+			minHeight: 100,
 			autoFetchData: false,
 			showHeader: showHeader,
 			headerHeight: 30,

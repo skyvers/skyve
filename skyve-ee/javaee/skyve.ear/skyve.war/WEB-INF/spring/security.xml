@@ -31,7 +31,7 @@
 	<http auto-config="true" use-expressions="true" security="none" pattern="/rest/**" />
 
 	<!-- Secure everything else -->
-	<http auto-config="true" use-expressions="true">
+	<http auto-config="false" use-expressions="true">
 		<form-login default-target-url="/" login-page="/login" />
 		<logout logout-success-url="/loggedOut" />
 		<remember-me key="remember"
@@ -66,6 +66,9 @@
 		<intercept-url pattern="/report" access="authenticated" />
 		<intercept-url pattern="/export" access="authenticated" />
 		
+		<!-- Secure chart servlet -->
+		<intercept-url pattern="/chart" access="authenticated" />
+		
 		<!-- Secure Image Servlet for HTML reporting through Jasper -->
 		<intercept-url pattern="/image" access="authenticated" />
 
@@ -93,7 +96,7 @@
 
 		<!-- Secure map servlet -->
 		<intercept-url pattern="/map" access="authenticated" />
-		
+
 		<!-- Secure the Bizport Export Servlet -->
 		<intercept-url pattern="/bizexport.*" access="authenticated" />
 		
@@ -170,7 +173,7 @@
 
     <!-- WAFFLE Configuration -->
 <!--
-	<http auto-config="true" use-expressions="true" entry-point-ref="negotiateSecurityFilterEntryPoint">
+	<http auto-config="false" use-expressions="true" entry-point-ref="negotiateSecurityFilterEntryPoint">
 		<custom-filter ref="waffleNegotiateSecurityFilter" position="PRE_AUTH_FILTER" />
 		...
     </http>
@@ -185,7 +188,6 @@
 		<b:constructor-arg>
 			<b:list>
 				<b:ref bean="negotiateSecurityFilterProvider" />
-				<b:ref bean="basicSecurityFilterProvider" />
 			</b:list>
 		</b:constructor-arg>
 	</b:bean>

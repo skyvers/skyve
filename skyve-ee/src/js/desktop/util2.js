@@ -220,6 +220,32 @@ isc.BizUtil.addClassMethods({
 		return isc.BizUtil._currentView;
 	},
 
+	// returns true if the field type is numeric
+	isNumeric: function(type) { // the field type as a string as specified in a data source
+		return (type == 'integer') || 
+				(type == 'float') ||
+				(type == "bizDecimal0") ||
+				(type == "bizDecimal1") ||
+				(type == "bizDecimal10") ||
+				(type == "bizDecimal2") ||
+				(type == "bizDecimal5") ||
+				(type == "bizDollarsAndCents") ||
+				(type == "bizIntegerPercentage") ||
+				(type == "bizIntegerSeparator") ||
+				(type == "bizTwoDecimalPlacesPercentage") ||
+				(type == "bizTimeDuration");
+	},
+	
+	// returns true if the field type is temporal
+	isTemporal: function(type) { // the field type as a string as specified in a data source
+		return (type == 'date') || 
+				(type == 'time') || 
+				(type == 'datetime') || 
+				(type == 'bizDate') ||
+				(type == 'bizTime') ||
+				type.startsWith('DD_');
+	},
+	
 	// Change something like [{name: 'poo', operator: 'equals', value 'wee'}] filter params to 
 	// {poo: 'wee'} request params for the list servlet
 	//

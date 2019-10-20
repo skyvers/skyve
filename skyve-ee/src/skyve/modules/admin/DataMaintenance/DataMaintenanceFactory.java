@@ -11,8 +11,11 @@ import modules.admin.domain.DataMaintenance;
 public class DataMaintenanceFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
-	public static DataMaintenance crudInstance() throws Exception {
-		DataMaintenance bean = new DataBuilder().build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+	public static DataMaintenanceExtension crudInstance() throws Exception {
+		DataMaintenanceExtension bean = new DataBuilder()
+				.optional(true, false)
+				.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
+
 		bean.setModDocName(null);
 		bean.setRestorePreProcess(null);
 		bean.setAuditModuleName(null);

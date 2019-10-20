@@ -78,7 +78,7 @@ public class RestService {
 	    		throw new NoResultsException();
 	    	}
 	    	Util.populateFully(bean);
-	    	result = JSON.marshall(CORE.getUser().getCustomer(), bean, null);
+	    	result = JSON.marshall(CORE.getUser().getCustomer(), bean);
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
@@ -153,7 +153,7 @@ public class RestService {
 	    	for (Bean bean : beans) {
 	    		Util.populateFully(bean);
 	    	}
-			result = JSON.marshall(CORE.getUser().getCustomer(), beans, null);
+			result = JSON.marshall(CORE.getUser().getCustomer(), beans);
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
@@ -189,7 +189,7 @@ public class RestService {
 			
 			PersistentBean bean = (PersistentBean) JSON.unmarshall(u, json);
 			bean = p.save(bean);
-			result = JSON.marshall(u.getCustomer(), bean, null);
+			result = JSON.marshall(u.getCustomer(), bean);
 		}
 		catch (Throwable t) {
 			t.printStackTrace();
@@ -227,7 +227,7 @@ public class RestService {
 			PersistentBean beanToUpdate = p.retrieveAndLock(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 			Binder.copy(bean, beanToUpdate);
 			beanToUpdate = p.save(beanToUpdate);
-			result = JSON.marshall(u.getCustomer(), beanToUpdate, null);
+			result = JSON.marshall(u.getCustomer(), beanToUpdate);
 		}
 		catch (Throwable t) {
 			t.printStackTrace();

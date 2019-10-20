@@ -31,7 +31,7 @@ public class Router implements PersistentMetaData<Router> {
 	public String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
 	}
-	@XmlAttribute(name = "uxuiSelectorClassName", required = true)
+	@XmlAttribute(name = "uxuiSelectorClassName")
 	public void setUxuiSelectorClassName(String uxuiSelectorClassName) {
 		this.uxuiSelectorClassName = uxuiSelectorClassName;
 	}

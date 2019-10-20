@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Content;
@@ -30,6 +31,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
@@ -40,9 +42,12 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -238,11 +243,50 @@ public class ViewGenerator {
 			processAttributes(customer, module, baseDocument, form, details, bindingPrefix);
 		}
 
+		Bizlet<Bean> bizlet = null;
+		String moduleName = module.getName();
+		String documentName = document.getName();
+		
 		for (Attribute attribute : document.getAttributes()) {
 			if (! attribute.isDeprecated()) {
-				String binding = (bindingPrefix == null) ? attribute.getName() : bindingPrefix + attribute.getName();
-	
-				if (attribute instanceof Collection) {
+				String binding = (bindingPrefix == null) ?
+									attribute.getName() :
+									bindingPrefix + attribute.getName();
+
+				DomainType domainType = attribute.getDomainType();
+				if (module.isPrototype() &&
+						attribute.isRequired() &&
+						(DomainType.constant.equals(domainType) ||
+						AttributeType.enumeration.equals(attribute.getAttributeType()))) {
+					List<DomainValue> domainValues = null;
+					try {
+						if (bizlet == null) {
+							bizlet = ((AbstractRepository) CORE.getRepository()).getBizlet(customer, document, false);
+						}
+						domainValues = customer.getConstantDomainValues(bizlet, moduleName, documentName, attribute);
+					}
+					catch (@SuppressWarnings("unused") Exception e) {
+						// nothing to do here - who cares
+					}
+					MetaData widget = null;
+					if ((domainValues != null) && (domainValues.size() <= 3)) {
+						Radio radio = new Radio();
+						radio.setBinding(binding);
+						widget = radio;
+					}
+					else {
+						DefaultWidget defaultWidget = new DefaultWidget();
+						defaultWidget.setBinding(binding);
+						widget = defaultWidget;
+					}
+
+					FormItem item = new FormItem();
+					item.setWidget(widget);
+					FormRow row = new FormRow();
+					row.getItems().add(item);
+					form.getRows().add(row);
+				}
+				else if (attribute instanceof Collection) {
 					Collection collection = (Collection) attribute;
 					Document detailDocument = module.getDocument(customer, collection.getDocumentName());
 	

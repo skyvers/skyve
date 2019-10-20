@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.User.UserExtension;
+import modules.admin.UserDashboard.UserDashboardExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
@@ -31,11 +32,17 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
+	/** @hidden */
+	public static final String favouritesPropertyName = "favourites";
 
 	/**
 	 * Current User
 	 **/
 	private UserExtension currentUser = null;
+	/**
+	 * Clickable favourites
+	 **/
+	private String favourites;
 
 	@Override
 	@XmlTransient
@@ -49,7 +56,7 @@ public class UserDashboard extends AbstractTransientBean {
 		return UserDashboard.DOCUMENT_NAME;
 	}
 
-	public static UserDashboard newInstance() {
+	public static UserDashboardExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -96,5 +103,23 @@ public class UserDashboard extends AbstractTransientBean {
 	public void setCurrentUser(UserExtension currentUser) {
 		preset(currentUserPropertyName, currentUser);
 		this.currentUser = currentUser;
+	}
+
+	/**
+	 * {@link #favourites} accessor.
+	 * @return	The value.
+	 **/
+	public String getFavourites() {
+		return favourites;
+	}
+
+	/**
+	 * {@link #favourites} mutator.
+	 * @param favourites	The new value.
+	 **/
+	@XmlElement
+	public void setFavourites(String favourites) {
+		preset(favouritesPropertyName, favourites);
+		this.favourites = favourites;
 	}
 }

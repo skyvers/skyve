@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.chart;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +35,9 @@ import org.skyve.util.Binder;
 public class ChartBuilder {
 	private Document document;
 	private DocumentQuery query;
-	private String categoryBindingOrAlias;
+	private String categoryBinding;
 	private Bucket categoryBucket;
-	private String valueBindingOrAlias;
+	private String valueBinding;
 	private AggregateFunction valueFunction;
 	private int top = Integer.MIN_VALUE;
 	private SortDirection topSort;
@@ -118,7 +120,7 @@ public class ChartBuilder {
 	 * @param binding
 	 */
 	public ChartBuilder category(String binding) {
-		categoryBindingOrAlias = binding;
+		categoryBinding = binding;
 		return this;
 	}
 	
@@ -128,7 +130,7 @@ public class ChartBuilder {
 	 * @param bucket
 	 */
 	public ChartBuilder category(String binding, Bucket bucket) {
-		categoryBindingOrAlias = binding;
+		categoryBinding = binding;
 		categoryBucket = bucket;
 		return this;
 	}
@@ -138,7 +140,7 @@ public class ChartBuilder {
 	 * @param binding
 	 */
 	public ChartBuilder value(String binding) {
-		valueBindingOrAlias = binding;
+		valueBinding = binding;
 		return this;
 	}
 
@@ -148,7 +150,7 @@ public class ChartBuilder {
 	 * @param function
 	 */
 	public ChartBuilder value(String binding, AggregateFunction function) {
-		valueBindingOrAlias = binding;
+		valueBinding = binding;
 		valueFunction = function;
 		return this;
 	}
@@ -257,7 +259,7 @@ public class ChartBuilder {
 		result.setBorder(borderColours.getCurrent());
 		Customer c = CORE.getCustomer();
 		result.setLabels(data.stream().map(r -> (categoryBucket == null) ?
-													label(Binder.getDisplay(c, r, categoryBindingOrAlias)) :
+													label(Binder.getDisplay(c, r, categoryBinding)) :
 													label(categoryBucket.label(Binder.get(r, "category")))).collect(Collectors.toList()));
 		result.setValues(data.stream().map(r -> (Number) Binder.get(r, "value")).collect(Collectors.toList()));
 
@@ -278,13 +280,15 @@ public class ChartBuilder {
 	private List<Bean> query() {
 		String categoryExpression = null;
 		String categoryAlias = "category";
-		String valueExpression = (valueFunction == null) ? valueBindingOrAlias : valueFunction + "(" + valueBindingOrAlias + ")";
+		String valueExpression = (valueFunction == null) ? 
+									"bean." + valueBinding : 
+									valueFunction + "(bean." + valueBinding + ")";
 		if (categoryBucket == null) {
-			categoryExpression = categoryBindingOrAlias;
-			categoryAlias = categoryBindingOrAlias.replace('.', '_'); // So we get display values
+			categoryExpression = "bean." + categoryBinding;
+			categoryAlias = categoryBinding.replace('.', '_'); // So we get display values
 		}
 		else {
-			categoryExpression = categoryBucket.bizQLExpression(categoryBindingOrAlias);
+			categoryExpression = categoryBucket.bizQLExpression(categoryBinding);
 		}
 
 		query.addExpressionProjection(categoryExpression, categoryAlias);
@@ -311,17 +315,17 @@ public class ChartBuilder {
 				if (topOthers) {
 					List<Bean> best = new ArrayList<>(result.subList(0, top));
 					result = result.subList(top, result.size());
-
+					
 					Number rest = null;
 					if ((valueFunction == null) || 
 							AggregateFunction.Count.equals(valueFunction) ||
 							AggregateFunction.Sum.equals(valueFunction)) {
 						// sum the rest
-						rest = Double.valueOf(sum(result));
+						rest = sum(best, result, false);
 					}
 					else if (AggregateFunction.Avg.equals(valueFunction)) {
 						// average the rest
-						rest = Double.valueOf(sum(result) / result.size());
+						rest = sum(best, result, true);
 					}
 					else if (AggregateFunction.Min.equals(valueFunction)) {
 						rest = minMax(result, true);
@@ -331,7 +335,7 @@ public class ChartBuilder {
 					}
 					
 					Map<String, Object> properties = new TreeMap<>();
-					properties.put((categoryBucket == null) ? categoryBindingOrAlias : "category", null);
+					properties.put((categoryBucket == null) ? categoryBinding : "category", null);
 					properties.put("value", rest);
 					best.add(new MapBean(document.getOwningModuleName(), document.getName(), properties));
 					result = best;
@@ -341,15 +345,24 @@ public class ChartBuilder {
 				}
 			}
 			// Always order here as the top sort was applied on the data store
-			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBindingOrAlias : "category") : "value",
+			OrderingImpl ordering = new OrderingImpl(OrderBy.category.equals(orderBy) ? ((categoryBucket == null) ? categoryBinding : "category") : "value",
 														SortDirection.descending.equals(orderBySort) ? SortDirection.descending : SortDirection.ascending);
 			Binder.sortCollectionByOrdering(result, ordering);
 		}
 		return result;
 	}
 	
-	private static double sum(List<Bean> beans) {
+	private static Number sum(List<Bean> best, List<Bean> beans, boolean avg) {
 		double result = 0.0;
+		
+		Class<?> numberType = null;
+		for (Bean bean : best) {
+			Number number = (Number) Binder.get(bean, "value");
+			if (number != null) {
+				numberType = number.getClass();
+				break;
+			}
+		}
 		
 		for (Bean bean : beans) {
 			Number number = (Number) Binder.get(bean, "value");
@@ -357,8 +370,28 @@ public class ChartBuilder {
 				result += number.doubleValue();
 			}
 		}
+
+		if (avg) {
+			result = result / beans.size();
+		}
+		result = Math.round((result * 100000d) / 100000d);
 		
-		return Math.round((result * 100000d) / 100000d);
+		if (Integer.class.equals(numberType)) {
+			return Integer.valueOf((int) result);
+		}
+		if (Long.class.equals(numberType)) {
+			return Long.valueOf((long) result);
+		}
+		if (Float.class.equals(numberType)) {
+			return Float.valueOf((float) result);
+		}
+		if (BigInteger.class.equals(numberType)) {
+			return BigInteger.valueOf((long) result);
+		}
+		if (BigDecimal.class.equals(numberType)) {
+			return BigDecimal.valueOf(result);
+		}
+		return Double.valueOf(result);
 	}
 	
 	private static Number minMax(List<Bean> beans, boolean min) {

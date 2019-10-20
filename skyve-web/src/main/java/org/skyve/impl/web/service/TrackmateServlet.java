@@ -251,7 +251,7 @@ public class TrackmateServlet extends HttpServlet {
 					//and return
 					Map<String, Object> result = new TreeMap<>();
 					result.put("data", userPositions);
-					String jsonString = JSON.marshall(persistence.getUser().getCustomer(), result, null);
+					String jsonString = JSON.marshall(persistence.getUser().getCustomer(), result);
 					System.out.println(jsonString);
 					pw.append(jsonString);
 				}

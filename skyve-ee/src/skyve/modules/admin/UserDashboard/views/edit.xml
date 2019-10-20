@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="{currentUser.contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" borderTitle="My Details">
+	<vbox >
 		<hbox>
-			<form responsiveWidth="6" >
+			<form border="true" borderTitle="Favourites - click to ...">
+				<column/>
+				<row>
+					<item>
+						<blurb >
+							<![CDATA[
+							{favourites}
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+		
+			<form responsiveWidth="6" border="true" borderTitle="My Details">
 				<column responsiveWidth="4" />
 				<column />
 				<row>
@@ -35,35 +48,15 @@
 					</item>
 				</row>
 			</form>
-			<form responsiveWidth="6">
-				<column />
-				<row>
-					<item showLabel="false">
-						<contentImage binding="currentUser.contact.image" pixelWidth="200" pixelHeight="200" />
-					</item>
-				</row>
-			</form>
 		</hbox>
 	</vbox>
 	<hbox border="true" borderTitle="My Activity">
-		<chart type="line">
-			<model title="System Activity" label="Audits by time" moduleName="admin" documentName="Audit" categoryBinding="timestamp" valueBinding="bizId" valueFunction="Count">
-				<temporalBucket type="dayMonthYear" />
-				<order by="category" sort="ascending" />
-			</model>
-		</chart>
-		<chart type="pie">
-			<model title="Activity By Context" label="Numbers of Audits" moduleName="admin" documentName="Audit" categoryBinding="auditDocumentName" valueBinding="bizId"
-				valueFunction="Count">
-				<noBucket />
-				<top sort="ascending" top="10" by="category" includeOthers="true" />
-				<order by="category" sort="ascending" />
-			</model>
-		</chart>
+		<chart type="line" modelName="UserActivityModel"/>
+		<chart type="pie" modelName="UserActivityContextModel"/>
 	</hbox>
 	<vbox border="true" borderTitle="My Jobs">
 		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true">
-			<filterParameter operator="equal" name="bizUserId" binding="currentUser.bizId"/>
+			<filterParameter filterBinding="bizUserId" operator="equal" valueBinding="currentUser.bizId"/>
 		</listGrid>
 	</vbox>			
 	<actions>

@@ -6,9 +6,7 @@
 	<persistent name="ADM_Contact" />
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
-	<iconStyleClass>fa fa-user</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/contact16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/contact32.png</icon32x32RelativeFilePath>
+	<iconStyleClass>fa fa-address-book</iconStyleClass>
 	<bizKey>
 		<![CDATA[
 		  	return modules.admin.Contact.ContactBizlet.bizKey(this);

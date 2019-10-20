@@ -11,6 +11,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.1.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
+	<classpathentry kind="lib" path="lib/objenesis-2.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
@@ -147,5 +148,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-5.1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xz-1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-7.0.jar"/>
+	<classpathentry kind="lib" path="lib/mockito-core-2.21.0.jar" sourcepath="/Users/benpetito/.m2/repository/org/mockito/mockito-core/2.21.0/mockito-core-2.21.0-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

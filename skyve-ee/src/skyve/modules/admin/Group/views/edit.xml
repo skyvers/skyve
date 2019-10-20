@@ -19,7 +19,7 @@
 						showRemove="false"
 						percentageWidth="50"
 						responsiveWidth="12">
-				<parameter name="bizId" binding="bizId" />
+				<parameter name="bizId" valueBinding="bizId" />
 			</listGrid>
 		</tab>
 	</tabPane>

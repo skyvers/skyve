@@ -12,5 +12,8 @@
 			<displayName>Current User</displayName>
 			<documentName>User</documentName>
 		</association>
+		<markup name="favourites">
+			<displayName>Clickable favourites</displayName>
+		</markup>
 	</attributes>
 </document>

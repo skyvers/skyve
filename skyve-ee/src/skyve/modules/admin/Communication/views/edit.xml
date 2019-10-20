@@ -294,7 +294,7 @@
 		</tab>
 		<tab title="Subscriptions">
 			<listGrid continueConversation="true" query="qSubscriptions">
-				<filterParameter operator="equal" name="communication" binding="bizId" />
+				<filterParameter filterBinding="communication" operator="equal" valueBinding="bizId" />
 			</listGrid>
 		</tab>
 	</tabPane>

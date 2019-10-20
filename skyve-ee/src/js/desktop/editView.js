@@ -715,13 +715,36 @@ isc.EditView.addMethods({
 		
 		var header = isc.BizUtil.headerTemplate;
 		var icon = '';
-		if (this._icon) {
-			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + SKYVE.Util.v + '"/>';
+		var help = '';
+		if (values.created) {
+			if (this._editIcon) {
+				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._editIcon + '&v=' + SKYVE.Util.v + '"/>';
+			}
+			else if (this._editFontIcon) {
+				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._editFontIcon + '"></i>';
+			}
+			if (this._editHelpFile) {
+				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._editHelpFile + '&v=' + SKYVE.Util.v + "'";
+			}
+			else if (this._editHelpURL) {
+				help = "'" + this._editHelpURL + "'";
+			}
 		}
-		else if (this._fontIcon) {
-			icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
+		else {
+			if (this._createIcon) {
+				icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._createIcon + '&v=' + SKYVE.Util.v + '"/>';
+			}
+			else if (this._createFontIcon) {
+				icon = '<i style="padding-left:5px;font-size:28px;width:32px !important" class="titleBar bizhubFontIcon ' + this._createFontIcon + '"></i>';
+			}
+			if (this._createHelpFile) {
+				help = "'resources?_doc" + this._mod + '.' + this._doc + '&_n=' + this._createHelpFile + '&v=' + SKYVE.Util.v + "'";
+			}
+			else if (this._createHelpURL) {
+				help = "'" + this._createHelpURL + "'";
+			}
 		}
-		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link);
+		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link).replace('{help}', help);
 		this._heading.setContents(header);
 
 		// remove the form title so it is not subsequently posted
@@ -1710,7 +1733,7 @@ isc.BizListMembership.addMethods({
 		this._candidateList = isc.ListGrid.create({
 			width: "100%", 
 			height: "100%",
-			minHeight: 120,
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1732,7 +1755,7 @@ isc.BizListMembership.addMethods({
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
-			minHeight: 120,
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -2404,6 +2427,9 @@ isc.BizChart.addClassMethods({
 isc.BizChart.addMethods({
 	// params chartType
 	init: function(config) {
+		if (! window.Chart) {
+			isc.BizChart.loadChartJS();
+		}
 		if (! config.width) {
 			this.width = '100%';
 		}
@@ -2413,6 +2439,7 @@ isc.BizChart.addMethods({
 		this.ID = 'bizChart' + isc.BizChart.v++;
 		this.redrawOnResize = false;
 		this._refreshing = false; // stop multiple refreshes
+		this._resizeChartCalled = false; // throttles resizing events
 		this.Super("init", arguments);
 	},
 
@@ -2420,19 +2447,15 @@ isc.BizChart.addMethods({
 		return '<canvas id="' + this.ID + '_chart" />';
 	},
 
-	draw: function() {
-		if (window.Chart) {
-			if (! this.isDrawn()) {
-				return this.Super('draw', arguments);
-			}
-		}
-		else {
-			isc.BizChart.loadChartJS();
-			return this.Super('draw', arguments);
-		}
-	},
-
+	// throttle the resized event to 100 millis
 	resized: function() {
+		if (! this._resizeChartCalled) {
+			this.delayCall('_resizeChart', arguments, 100);
+		}
+		this._resizeChartCalled = true;
+	},
+	
+	_resizeChart: function() {
 		if (this.chart) {
 			this.chart.canvas.parentNode.style.width = this.getWidth() + 'px';
 			this.chart.canvas.parentNode.style.height = this.getHeight() +  'px';
@@ -2442,10 +2465,11 @@ isc.BizChart.addMethods({
 			this.chart.canvas.style.height = this.getHeight() +  'px';
 			this.chart.update();
 		}
+		this._resizeChartCalled = false;
 	},
 
 	setDataSource: function(modelName) {
-		if (window.Chart) {
+		if ((window.Chart) && this.isDrawn()) {
 			this._modelName = modelName;
 			
 			// assign this chart to the edit view _grids property if this chart is on a view
@@ -2498,33 +2522,40 @@ isc.BizChart.addMethods({
 			httpMethod: 'GET',
 			callback: function(rpcResponse, data, rpcRequest) {
 				try {
-					if (data.config) { // server sends {} when it has an error
-						if (! me.chartConfig) {
-							me.chartConfig = {};
-						}
-						me.chartConfig.type = data.config.type;
-						me.chartConfig.data = data.config.data;
-						me.chartConfig.options = data.config.options;
-						if (! me.chartConfig.options) {
-							me.chartConfig.options = {};
-						}
-						me.chartConfig.options.responsive = true;
-						me.chartConfig.options.maintainAspectRatio = false;
-						if (me.chart) {
-							me.chart.update();
-						}
-						else { 
-							var ctx = document.getElementById(me.ID + '_chart').getContext('2d');
-							me.chart = new Chart(ctx, me.chartConfig);
-						}
-						me.resized();
-					}
+					me._update(data);
 				}
 				finally {
 					me._refreshing = false;
 				}
 			}
 		});
+	},
+	
+	// called from the ListGrid chart function too.
+	_update: function(data) { // the response data from the server
+		if (data.config) { // server sends {} when it has an error
+			if (! this.chartConfig) {
+				this.chartConfig = {};
+			}
+			this.chartConfig.type = data.config.type;
+			this.chartConfig.data = data.config.data;
+			this.chartConfig.options = data.config.options;
+			if (! this.chartConfig.options) {
+				this.chartConfig.options = {};
+			}
+			this.chartConfig.options.responsive = true;
+			this.chartConfig.options.maintainAspectRatio = false;
+			if (this.chart) {
+				this.chart.update();
+			}
+			else { 
+				if (! this.isDrawn()) {
+					this.draw();
+				}
+				var ctx = document.getElementById(this.ID + '_chart').getContext('2d');
+				this.chart = new Chart(ctx, this.chartConfig);
+			}
+		}
 	}
 });
 

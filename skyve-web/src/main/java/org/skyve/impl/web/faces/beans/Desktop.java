@@ -182,7 +182,7 @@ public class Desktop extends Harness {
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"fa fa-2x fa-share-square-o\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"fa fa-2x fa-search\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"fa fa-2x fa-info-circle\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"fa fa-2x fa-info-circle\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"fa fa-2x fa-home\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><i class=\"fa fa-2x fa-power-off\"></i></a></td>");
     	result.append("</tr></table>");
@@ -483,19 +483,19 @@ public class Desktop extends Harness {
 										Module itemModule,
 										Document itemDocument) {
 				result.append("',desc:'");
-				if ((icon16 == null) && (iconStyleClass != null)) {
+				if (iconStyleClass != null) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 				}
 				// Leave some space between the icon and its label
 				if ((icon16 != null) || (iconStyleClass != null)) {
-					result.append("&nbsp;");
+					result.append("&nbsp;&nbsp;");
 				}
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
 				}
 				result.append(",ref:'").append(ref);
-				if (icon16 != null) {
+				if ((iconStyleClass == null) && (icon16 != null)) {
 					result.append("',icon:'../resources?");
 					if ((itemModule != null) && (itemDocument != null)) { // NB link items have no document
 						result.append("_doc=").append(itemModule.getName()).append('.').append(itemDocument.getName()).append('&');

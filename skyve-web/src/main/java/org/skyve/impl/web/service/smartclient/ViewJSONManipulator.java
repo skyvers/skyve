@@ -202,7 +202,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append("&_doc=").append(reference.getModuleName()).append('.').append(reference.getDocumentName());
 			for (Parameter parameter : reference.getParameters()) {
 				htmlGuts.append('&').append(parameter.getName()).append('=');
-				String stuff = parameter.getBinding();
+				String stuff = parameter.getValueBinding();
 				if (stuff != null) {
 					htmlGuts.append('{').append(stuff).append('}');
 				}
@@ -345,7 +345,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			result.put(binding, comparisons.get(binding));
 		}
 		
-		return JSON.marshall(user.getCustomer(), result, null);
+		return JSON.marshall(user.getCustomer(), result);
 	}
 	
 	private void constructJSONObjectFromBinding(ViewBindings bindings,
@@ -1420,7 +1420,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(parameter.getBinding(), false);
+				addBinding(parameter.getValueBinding(), false);
 			}
 		}
 	}
@@ -1429,7 +1429,12 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitFilterParameter(FilterParameter parameter,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		visitParameter(parameter, parentVisible, parentEnabled);
+		if (parentVisible) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addBinding(parameter.getValueBinding(), false);
+			}
+		}
 	}
 
 	@Override

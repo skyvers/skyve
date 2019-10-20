@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
-import org.skyve.impl.util.TestUtil;
+import org.skyve.util.test.TestUtil;
 
 import modules.test.domain.UniqueConstraintNonNullable;
 

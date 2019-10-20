@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -22,7 +21,7 @@ public class LookupDescription extends Lookup implements Editable, AbsoluteWidth
 	private String descriptionBinding;
 	private Boolean editable;
 	private Integer pixelWidth;
-	private Set<String> dropDownColumns = new LinkedHashSet<>();
+	private List<LookupDescriptionColumn> dropDownColumns = new ArrayList<>();
 	
 	@Override
 	public boolean showsLabelByDefault() {
@@ -62,7 +61,7 @@ public class LookupDescription extends Lookup implements Editable, AbsoluteWidth
 	
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "dropDown")
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = false)
-	public Set<String> getDropDownColumns() {
+	public List<LookupDescriptionColumn> getDropDownColumns() {
 		return dropDownColumns;
 	}
 }

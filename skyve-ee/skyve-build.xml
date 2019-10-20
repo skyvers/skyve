@@ -52,6 +52,8 @@
 				<file name="windowStack.js" />
 				<!-- bizhub reporting -->
 				<file name="reporting.js" />
+				<!-- bizhub charting -->
+				<file name="charting.js" />
 				<!-- bizhub advanced filter builder -->
 				<file name="advancedFilter.js" />
 				<!-- bizhub grid implementations -->

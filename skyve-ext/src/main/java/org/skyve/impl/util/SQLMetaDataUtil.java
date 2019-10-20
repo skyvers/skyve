@@ -1,7 +1,16 @@
 package org.skyve.impl.util;
 
-import org.apache.commons.beanutils.DynaBean;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.skyve.EXT;
+import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
@@ -14,13 +23,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class SQLMetaDataUtil {
 	/**
@@ -93,8 +95,8 @@ public class SQLMetaDataUtil {
 						"and r.bizCustomer = u.bizCustomer ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
-			sql.append("where u.userName = '").append(user.getName()).append("' ");
-			sql.append("and u.bizCustomer = '").append(customer.getName()).append("' ");
+			sql.append("where u.userName = ? ");
+			sql.append("and u.bizCustomer = ? ");
 			sql.append("union " +
 						"select u.bizId, " +
 						"u.password, " +
@@ -115,76 +117,85 @@ public class SQLMetaDataUtil {
 						"and r.bizCustomer = g.bizCustomer ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
-			sql.append("where u.userName = '").append(user.getName()).append("' ");
-			sql.append("and u.bizCustomer = '").append(customer.getName()).append("'");
+			sql.append("where u.userName = ? ");
+			sql.append("and u.bizCustomer = ?");
 
-			boolean firstRow = true;
-			for (DynaBean userRoleRow : SQLUtil.retrieveListForSQL(connection, null, null, sql.toString(), null)) {
-				if (firstRow) {
-					internalUser.setId((String) userRoleRow.get("bizid"));
-					internalUser.setPasswordHash((String) userRoleRow.get("password"));
-					Boolean passwordChangeRequired = (Boolean) userRoleRow.get("passwordexpired");
-					internalUser.setPasswordChangeRequired(Boolean.TRUE.equals(passwordChangeRequired));
-					internalUser.setContactId((String) userRoleRow.get("contactid"));
-					internalUser.setContactName((String) userRoleRow.get("contactname"));
-					internalUser.setContactImageId((String) userRoleRow.get("contactimageid"));
-					internalUser.setDataGroupId((String) userRoleRow.get("datagroupid"));
-					internalUser.setHomeModuleName((String) userRoleRow.get("homemodule"));
-					firstRow = false;
-				}
+			String query = sql.toString();
+			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
+			try (PreparedStatement s = connection.prepareStatement(query)) {
+				s.setString(1, user.getName());
+				s.setString(2, customer.getName());
+				s.setString(3, user.getName());
+				s.setString(4, customer.getName());
+				try (ResultSet rs = s.executeQuery()) {
+					boolean firstRow = true;
+					while (rs.next()) {
+						if (firstRow) {
+							internalUser.setId(rs.getString(1)); // bizId
+							internalUser.setPasswordHash(rs.getString(2)); // password
+							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
+							internalUser.setPasswordChangeRequired(passwordChangeRequired);
+							internalUser.setContactId(rs.getString(4)); // contactId
+							internalUser.setContactName(rs.getString(5)); // contactName
+							internalUser.setContactImageId(rs.getString(6)); // contactImageId
+							internalUser.setDataGroupId(rs.getString(7)); // dataGroupId
+							internalUser.setHomeModuleName(rs.getString(8)); // homeModule
+							firstRow = false;
+						}
 
-				String moduleDotRoleName = (String) userRoleRow.get("rolename");
-				int dotIndex = moduleDotRoleName.indexOf('.');
-				if (dotIndex > 0) {
-					String moduleName = moduleDotRoleName.substring(0, dotIndex);
-					String roleName = moduleDotRoleName.substring(dotIndex + 1);
-					Module module = customer.getModule(moduleName);
-					Role role = module.getRole(roleName);
-					if (role != null) {
-						internalUser.addRole((RoleImpl) role);
-					}
-				}
-				else {
-					String roleName = moduleDotRoleName;
-					CustomerRoleMetaData customerRole = (CustomerRoleMetaData) customer.getRole(roleName);
-					if (customerRole != null) {
-						for (Role role : customerRole.getModuleRoles(customer)) {
-							internalUser.addRole((RoleImpl) role);
+						String moduleDotRoleName = rs.getString(9); // roleName
+						int dotIndex = moduleDotRoleName.indexOf('.');
+						if (dotIndex > 0) {
+							String moduleName = moduleDotRoleName.substring(0, dotIndex);
+							String roleName = moduleDotRoleName.substring(dotIndex + 1);
+							Module module = customer.getModule(moduleName);
+							Role role = module.getRole(roleName);
+							if (role != null) {
+								internalUser.addRole((RoleImpl) role);
+							}
+						}
+						else {
+							String roleName = moduleDotRoleName;
+							CustomerRoleMetaData customerRole = (CustomerRoleMetaData) customer.getRole(roleName);
+							if (customerRole != null) {
+								for (Role role : customerRole.getModuleRoles(customer)) {
+									internalUser.addRole((RoleImpl) role);
+								}
+							}
 						}
 					}
+					if (firstRow) { // no data for this user
+						throw new DomainException("The user " + user.getName() + " does not exist.");
+					}
 				}
 			}
-			if (firstRow) { // no data for this user
-				throw new DomainException("The user " + user.getName() + " does not exist.");
-			}
 		}
-		catch (DomainException e) {
+		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
 	}
 
-	public static List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+	public static List<Bean> retrieveAllJobSchedulesForAllCustomers() throws Exception {
 		List<Bean> result = new ArrayList<>();
 		
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 		
 		AbstractRepository repository = AbstractRepository.get();
+		Module admin = repository.getModule(null, "admin");
+		String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
+		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
 
+		StringBuilder sql = new StringBuilder(256);
+		sql.append("select s.bizId, s.bizCustomer, s.jobName, s.startTime, s.endTime, s.cronExpression, s.disabled,  u.userName from ");
+		sql.append(ADM_JobSchedule).append(" s inner join ").append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
 		
-		try (Connection connection = EXT.getDataStoreConnection()) {
-			Module admin = repository.getModule(null, "admin");
-			String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
-			String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
-
-			StringBuilder sql = new StringBuilder(256);
-			sql.append("select s.*, u.userName from ").append(ADM_JobSchedule).append(" s inner join ");
-			sql.append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
-			
-			for (DynaBean jobScheduleRow : SQLUtil.retrieveListForSQL(connection, null, null, sql.toString(), null)) {
+		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
+			List<Object[]> rows = da.newSQL(sql.toString()).tupleResults();
+			for (Object[] row : rows) {
 				StringBuilder userPrincipalBuilder = new StringBuilder(128);
-				userPrincipalBuilder.append(jobScheduleRow.get("bizcustomer"));
-				userPrincipalBuilder.append('/').append(jobScheduleRow.get("username"));
+				userPrincipalBuilder.append(row[1]); // bizCustomer
+				userPrincipalBuilder.append('/').append(row[7]); // userName
 				String userPrincipal = userPrincipalBuilder.toString();
 				User user = users.get(userPrincipal);
 				if (user == null) {
@@ -193,20 +204,17 @@ public class SQLMetaDataUtil {
 				}
 
 				Map<String, Object> properties = new TreeMap<>();
-				properties.put(Bean.DOCUMENT_ID, jobScheduleRow.get("bizid"));
-				properties.put("jobName", jobScheduleRow.get("jobname"));
-				properties.put("startTime", jobScheduleRow.get("starttime"));
-				properties.put("endTime", jobScheduleRow.get("endtime"));
-				properties.put("cronExpression", jobScheduleRow.get("cronexpression"));
-				properties.put("disabled", jobScheduleRow.get("disabled"));
+				properties.put(Bean.DOCUMENT_ID, row[0]); // bizId
+				properties.put("jobName", row[2]);
+				properties.put("startTime", row[3]);
+				properties.put("endTime", row[4]);
+				properties.put("cronExpression", row[5]);
+				properties.put("disabled", row[6]);
 				properties.put("user", user);
 				
 				MapBean jobSchedule = new MapBean("admin", "JobSchedule", properties);
 				result.add(jobSchedule);
 			}
-		}
-		catch (Exception e) {
-			throw new MetaDataException(e);
 		}
 		
 		return result;

@@ -66,11 +66,6 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public void refresh(Bean bean) {
-		CORE.getPersistence().refresh(bean);
-	}
-
-	@Override
 	public void preMerge(Document document, Bean beanToSave) {
 		CORE.getPersistence().preMerge(document, beanToSave);
 	}

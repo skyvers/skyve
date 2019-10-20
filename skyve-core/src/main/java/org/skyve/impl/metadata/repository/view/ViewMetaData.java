@@ -18,15 +18,13 @@ import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.view.Parameterizable;
-import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.metadata.view.View.ViewParameter;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
@@ -37,23 +35,27 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"title",
 							"iconStyleClass",
 							"icon32x32RelativeFileName",
+							"helpRelativeFileName",
+							"helpURL",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
 							"parameters",
 							"properties"})
-public class ViewMetaData extends Container implements NamedMetaData, PersistentMetaData<ViewImpl>, Parameterizable, DecoratedMetaData {
+public class ViewMetaData extends Container implements NamedMetaData, PersistentMetaData<ViewImpl>, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private String name;
 	private String title;
 	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
+	private String helpRelativeFileName;
+	private String helpURL;
 	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
 	private String refreshActionName;
-	private List<Parameter> parameters = new ArrayList<>();
+	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -97,6 +99,24 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
+	public String getHelpRelativeFileName() {
+		return helpRelativeFileName;
+	}
+
+	@XmlAttribute(name = "helpRelativeFileName")
+	public void setHelpRelativeFileName(String helpRelativeFileName) {
+		this.helpRelativeFileName = UtilImpl.processStringValue(helpRelativeFileName);
+	}
+
+	public String getHelpURL() {
+		return helpURL;
+	}
+
+	@XmlAttribute(name = "helpURL")
+	public void setHelpURL(String helpURL) {
+		this.helpURL = UtilImpl.processStringValue(helpURL);
+	}
+
 	public Actions getActions() {
 		return actions;
 	}
@@ -136,13 +156,12 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	/**
 	 * These represent parameters that are allowed to be populated when creating a new record.
 	 */
-	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "newParameters")
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,
 					name = "parameter",
-					type = ParameterImpl.class,
+					type = ViewParameter.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public List<ViewParameter> getParameters() {
 		return parameters;
 	}
 	
@@ -167,7 +186,10 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 
 		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
-		
+
+		result.setHelpRelativeFileName(getHelpRelativeFileName());
+		result.setHelpURL(getHelpURL());
+
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The view [name] is required for view " + metaDataName);
@@ -232,12 +254,12 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 		}
 
 		if ((parameters != null) && (! parameters.isEmpty())) {
-			for (Parameter parameter : parameters) {
-				if (parameter.getName() == null) {
-					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [name] is required in " + getName() + " view " + metaDataName);
+			for (ViewParameter parameter : parameters) {
+				if (parameter.getFromBinding() == null) {
+					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [fromBinding] is required in " + getName() + " view " + metaDataName);
 				}
-				if (parameter.getValue() != null) {
-					throw new MetaDataException(metaDataName + " : The " + getName() + " view " + parameter.getName() + " newParameter [value] is not required in " + getName() + " view " + metaDataName);
+				if (parameter.getBoundTo() == null) {
+					throw new MetaDataException(metaDataName + " : The " + getName() + " view " + parameter.getFromBinding() + " newParameter [boundTo] is required in " + getName() + " view " + metaDataName);
 				}
 			}
 			result.getParameters().addAll(parameters);

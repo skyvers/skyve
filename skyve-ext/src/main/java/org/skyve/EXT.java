@@ -178,12 +178,12 @@ public class EXT {
 		for (Session session : PushMessage.SESSIONS) {
 			if (session.isOpen()) {
 				if (broadcast) {
-					session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+					session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
 				}
 				else {
 					Object userId = session.getUserProperties().get("user");
 					if ((userId == null) || userIds.contains(userId)) {
-						session.getAsyncRemote().sendText(JSON.marshall(null, message.getItems(), null));
+						session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
 					}
 				}
 			}

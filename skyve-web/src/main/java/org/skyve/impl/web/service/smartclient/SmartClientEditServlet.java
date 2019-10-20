@@ -60,8 +60,8 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
@@ -755,8 +755,8 @@ public class SmartClientEditServlet extends HttpServlet {
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
 		TreeMap<String, String> newParameterNamesToBindings = new TreeMap<>();
-		for (Parameter parameter : view.getParameters()) {
-			newParameterNamesToBindings.put(parameter.getName(), parameter.getBinding());
+		for (ViewParameter parameter : view.getParameters()) {
+			newParameterNamesToBindings.put(parameter.getFromBinding(), parameter.getBoundTo());
 		}
 		
 		if (! newParameterNamesToBindings.isEmpty()) { // we have new parameters to apply
@@ -793,14 +793,9 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			}
 	    			}
 	    			
-	    			// For the new parameters on the target edit view, if it has a binding defined,
-	    			// use it, otherwise rely on the name.
-	    			// This allows us to bind on something other than the parameter name given.
-	    			String targetBinding = newParameterNamesToBindings.get(parameterBinding);
-	    			if (targetBinding == null) {
-	    				targetBinding = parameterBinding;
-	    			}
-	    			BindUtil.set(processBean, targetBinding, parameterValue);
+	    			// For the new parameters on the target edit view, set the value of the boundTo
+	    			String boundTo = newParameterNamesToBindings.get(parameterBinding);
+	    			BindUtil.set(processBean, boundTo, parameterValue);
 				}
 			}
 		}

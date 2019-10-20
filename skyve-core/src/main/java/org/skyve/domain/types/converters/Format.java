@@ -5,7 +5,7 @@ import java.text.ParseException;
 import javax.swing.text.MaskFormatter;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.skyve.impl.util.XMLMetaData;
 
 public class Format<T> {
@@ -41,7 +41,8 @@ public class Format<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public final T fromDisplayValue(String value) throws ParseException {
-		T result = (T) getMaskFormatter().stringToValue(value);
+		MaskFormatter maskFormatter = getMaskFormatter();
+		T result = (maskFormatter == null) ? (T) value : (T) maskFormatter.stringToValue(value);
 		if (result instanceof String) {
 			result = (T) applyCase((String) result, textCase);
 		}
@@ -54,7 +55,11 @@ public class Format<T> {
 	 * @throws ParseException
 	 */
 	public final String toDisplayValue(T value) throws ParseException {
-		return applyCase(getMaskFormatter().valueToString(value), textCase);
+		MaskFormatter maskFormatter = getMaskFormatter();
+		String displayValue = (maskFormatter == null) ? 
+								((value == null) ? "" : value.toString()) : 
+								maskFormatter.valueToString(value);
+		return applyCase(displayValue, textCase);
 	}
 
 	private static String applyCase(String value, TextCase textCase) {
@@ -67,7 +72,7 @@ public class Format<T> {
 				result = result.toUpperCase();
 			}
 			else { // capital
-				result = StringUtils.capitalize(result);
+				result = WordUtils.capitalize(result);
 			}
 		}
 		
@@ -92,33 +97,31 @@ public class Format<T> {
 	 * 
 	 */
 	private MaskFormatter getMaskFormatter() throws ParseException {
-		if (maskFormatterMask == null) {
-			if (mask == null) {
-				maskFormatterMask = "*";
+		if ((mask != null) && (maskFormatterMask == null)) {
+			maskFormatterMask = mask.replace("U", "'U");
+			maskFormatterMask = maskFormatterMask.replace("?", "'?");
+			maskFormatterMask = maskFormatterMask.replace("*", "'*");
+			maskFormatterMask = maskFormatterMask.replace("H", "'H");
+			
+			if (textCase == null) {
+				maskFormatterMask = maskFormatterMask.replace('L', '?'); // my spec has 'L', MaskFormatter is '?' for letter
 			}
-			else {
-				maskFormatterMask = mask.replace("U", "'U");
-				maskFormatterMask = maskFormatterMask.replace("?", "'?");
-				maskFormatterMask = maskFormatterMask.replace("*", "'*");
-				maskFormatterMask = maskFormatterMask.replace("H", "'H");
-				
-				if (textCase == null) {
-					maskFormatterMask = maskFormatterMask.replace('L', '?'); // my spec has 'L', MaskFormatter is '?' for letter
-				}
-				else if (TextCase.upper.equals(textCase)) {
-					maskFormatterMask = maskFormatterMask.replace('L', 'U'); // my spec has 'L', MaskFormatter for upper letter is 'U'
-				}
-				else if (TextCase.capital.equals(textCase)) {
-					// MaskFormatter upper case is 'U', so replace first 'L', 'L' means lower case so leave them alone
-					maskFormatterMask = maskFormatterMask.replaceFirst("L", "U");
-				}
-				// no need to cater for lower as 'L' means lower letter anyway
+			else if (TextCase.upper.equals(textCase)) {
+				maskFormatterMask = maskFormatterMask.replace('L', 'U'); // my spec has 'L', MaskFormatter for upper letter is 'U'
 			}
+			else if (TextCase.capital.equals(textCase)) {
+				// MaskFormatter upper case is 'U', so replace first 'L', 'L' means lower case so leave them alone
+				maskFormatterMask = maskFormatterMask.replaceFirst("L", "U");
+			}
+			// no need to cater for lower as 'L' means lower letter anyway
 		}
 		
-		MaskFormatter formatter = new MaskFormatter(maskFormatterMask);
-		formatter.setAllowsInvalid(false);
-		formatter.setValueContainsLiteralCharacters(true);
-		return formatter;
+		if (maskFormatterMask != null) {
+			MaskFormatter formatter = new MaskFormatter(maskFormatterMask);
+			formatter.setAllowsInvalid(false);
+			formatter.setValueContainsLiteralCharacters(true);
+			return formatter;
+		}
+		return null;
 	}
 }

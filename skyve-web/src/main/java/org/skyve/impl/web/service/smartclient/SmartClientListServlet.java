@@ -622,7 +622,7 @@ public class SmartClientListServlet extends HttpServlet {
 		if (criteria != null) {
 			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
 			for (Map<String, Object> criterium : criteria) {
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSON.marshall(null, criterium, null));
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSON.marshall(criterium));
 				String binding = ((String) criterium.get("fieldName"));
 				binding = BindUtil.unsanitiseBinding(binding);
 				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterium.get("operator"));
