@@ -244,9 +244,6 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
 		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);
-		if (UtilImpl.SMTP_TEST_BOGUS_SEND && (UtilImpl.SMTP_TEST_RECIPIENT == null)) {
-			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
-		}
 
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		if (map != null) {
