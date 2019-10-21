@@ -1,9 +1,11 @@
 package org.skyve.admin.web;
 
+import java.io.IOException;
+
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
@@ -17,15 +19,22 @@ public class StartupView extends FacesView<Startup> {
 
 	@Override
 	public void preRender() {
-		setWebActionParameter(WebAction.e);
-		setBizModuleParameter(Startup.MODULE_NAME);
-		setBizDocumentParameter(Startup.DOCUMENT_NAME);
+		if (! FacesContext.getCurrentInstance().isPostback()) {
+			setWebActionParameter(WebAction.e);
+			setBizModuleParameter(Startup.MODULE_NAME);
+			setBizDocumentParameter(Startup.DOCUMENT_NAME);
+		}
 		super.preRender();
 	}
 	
 	@Override
 	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		super.action(actionName, dataWidgetBinding, bizId);
-		FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl());
+		try {
+			FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getSkyveContextUrl() + "/");
+		}
+		catch (@SuppressWarnings("unused") IOException e) {
+			// do nothing
+		}
 	}
 }
