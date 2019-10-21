@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -1227,32 +1229,32 @@ t.printStackTrace();
 	}
 
 	/**
+	 * This is a stack so that delete operations called in preDelete bizlet methods will work correctly.
+	 * 
+	 * The beanToDelete is put into the Map under the key of "" with a singleton set.
+	 * The beanToDelete is used to detect the same event in preRemove.
+	 * 
+	 * Other beans that will base cascaded are put using 
 	 * entity name -> set of beans that are being deleted during the delete operation.
 	 * This attribute holds all beans being deleted during the delete operation, by entity name,
 	 * so that when we check referential integrity, we can ensure that we do not include links to these beans
 	 * which will be deleted (by cascading) anyway.
 	 * 
-	 * This variable is cleared at the end of the delete operation.
+	 * This stack is popped and the set variable is cleared at the end of the delete operation.
 	 * See the finally block below.
 	 * The beans to delete are collected by delete() firstly.
 	 * The referential integrity test is done in the preDelete() callback.
 	 */
-	private Map<String, Set<Bean>> beansToDelete = new TreeMap<>();
+	private Stack<Map<String, Set<Bean>>> deleteContext = new Stack<>();
 
-	/**
-	 * The bean to delete - this is used to detect the same event in preRemove.
-	 * This variable is cleared at the end of the delete operation.
-	 * See the finally block below.
-	 */
-	private PersistentBean beanToDelete;
-	
 	/**
 	 * Delete a document bean from the data store.
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
-		beanToDelete = bean;
+		Map<String, Set<Bean>> beansToDelete = new TreeMap<>();
+		T beanToDelete = bean;
 		
 		if (isPersisted(beanToDelete)) {
 			try {
@@ -1266,6 +1268,10 @@ t.printStackTrace();
 					em.flush();
 					UtilImpl.populateFully(beanToDelete);
 	
+					// Push a new delete context on
+					beansToDelete.put("", Collections.singleton(beanToDelete));
+					deleteContext.push(beansToDelete);
+					
 					// Call preDelete()
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
 					if (bizlet != null) {
@@ -1294,7 +1300,7 @@ t.printStackTrace();
 			}
 			finally {
 				beansToDelete.clear();
-				beanToDelete = null;
+				deleteContext.pop();
 			}
 		}
 	}
@@ -1769,15 +1775,19 @@ t.printStackTrace();
 	
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@Override
-	@SuppressWarnings("synthetic-access")
 	public void preRemove(AbstractPersistentBean bean)
 	throws Exception {
-		// Don't continue if we've already called preDelete on this bean 
-		// as it was the argument in a Persistence.delete() call
-		if (bean.equals(beanToDelete)) {
-			return;
-		}
+		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
 
+		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
+			// Don't continue if we've already called preDelete on this bean 
+			// as it was the argument in a Persistence.delete() call
+			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
+			if (bean.equals(beanToDelete)) {
+				return;
+			}
+		}
+		
 		final Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
