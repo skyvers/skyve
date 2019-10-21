@@ -32,10 +32,44 @@
 				<h:form prependId="false">
 					<p:focus />
 					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@this" update="@form" />
-					<s:view module="#{skyve.bizModuleParameter}"
-								document="#{skyve.bizDocumentParameter}"
-								managedBean="skyve"
-								update="@form" />
+					
+					<p:accordionPanel>
+						<p:tab title="Environment Settings">
+							<s:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
+										widgetId="formEnvironment"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Mail Settings">
+							<s:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
+										widgetId="formMail"
+										update="@form" />
+						</p:tab>
+	        			<p:tab title="Map Settings">
+							<s:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
+										widgetId="formMap"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Security Settings">
+							<s:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
+										widgetId="formSecurity"
+										update="@form" />
+						</p:tab>
+						<p:tab title="SMS Settings">
+							<s:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
+										widgetId="formSMS"
+										update="@form" />
+						</p:tab>
+					</p:accordionPanel>
 				</h:form>
 			</ui:define>
 		</ui:composition>

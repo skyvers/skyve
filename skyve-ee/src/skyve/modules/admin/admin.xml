@@ -389,7 +389,7 @@
 			</edit>
 		</group>
 		<edit document="Startup" name="Startup">
-			<uxui name="external" />
+			<uxui name="startup" />
 			<role name="SecurityAdministrator" />
 		</edit>
 		<group name="DevOps">

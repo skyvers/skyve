@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
-    <form responsiveWidth="12" border="true" borderTitle="Environment Settings" widgetId="formEnvironment">
+    <form responsiveWidth="12" widgetId="formEnvironment">
         <column responsiveWidth="2"/>
         <column/>
         <column responsiveWidth="2"/>
@@ -16,7 +16,7 @@
         </row>
 	</form>
 	
-	<form responsiveWidth="12" border="true" borderTitle="Mail Settings" widgetId="formMail">
+	<form responsiveWidth="12" widgetId="formMail">
         <column responsiveWidth="2"/>
         <column/>
         <column responsiveWidth="2"/>
@@ -57,7 +57,7 @@
         </row>
 	</form>
 	
-    <form responsiveWidth="12" border="true" borderTitle="Map Settings" widgetId="formMap">
+    <form responsiveWidth="12" widgetId="formMap">
         <column responsiveWidth="2"/>
         <column/>
         <column responsiveWidth="2"/>
@@ -88,7 +88,7 @@
         </row>
 	</form>
 	
-	<form responsiveWidth="12" border="true" borderTitle="Security Settings" widgetId="formSecurity">
+	<form responsiveWidth="12" widgetId="formSecurity">
         <column responsiveWidth="2"/>
         <column/>
         <column responsiveWidth="2"/>
@@ -99,7 +99,7 @@
         </row>
     </form>
     
-    <form responsiveWidth="12" border="true" borderTitle="SMS Settings" widgetId="formSMS">
+    <form responsiveWidth="12" widgetId="formSMS">
         <column responsiveWidth="2"/>
         <column/>
         <column responsiveWidth="2"/>
