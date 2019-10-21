@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
@@ -424,6 +425,13 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							metaDataName, attribute.getName()));
 				}
 				
+				// do not allow unicode document names, see https://hibernate.atlassian.net/browse/HHH-13383
+				if (!StringUtils.deleteWhitespace(attribute.getName())
+						.matches("^([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*$")) {
+					throw new MetaDataException(String.format("%s : %s must only contain non-unicode letters and digits.",
+							metaDataName, attribute.getName()));
+				}
+
 				// Default auditing to off for view attributes 
 				// that don't have an audited value set in their definition.
 				if (attribute instanceof AbstractAttribute) {

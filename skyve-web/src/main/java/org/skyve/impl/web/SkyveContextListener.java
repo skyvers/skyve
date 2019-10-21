@@ -64,6 +64,7 @@ public class SkyveContextListener implements ServletContextListener {
 			archiveName = archiveName.substring(0, archiveName.length() - 4);
 			UtilImpl.PROPERTIES_FILE_PATH = archive.getParent() + '/' + archiveName + ".json";
 		}
+		UtilImpl.ARCHIVE_NAME = archiveName;
 
 		Map<String, Object> properties = null;
 		try (FileInputStream fis = new FileInputStream(UtilImpl.PROPERTIES_FILE_PATH)) {

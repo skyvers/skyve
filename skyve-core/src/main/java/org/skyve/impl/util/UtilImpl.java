@@ -65,6 +65,9 @@ public class UtilImpl {
 	public static boolean PRETTY_SQL_OUTPUT = false;
 	public static final Logger LOGGER = Logger.getLogger("SKYVE");
 
+	// the name of the application archive, e.g. typically projectName.war or projectName.ear
+	public static String ARCHIVE_NAME;
+
 	// This is set in the web.xml but defaults to windows
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
