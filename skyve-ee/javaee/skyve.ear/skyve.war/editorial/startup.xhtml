@@ -7,19 +7,14 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:o="http://omnifaces.org/ui"
-		dir="#{skyve.dir}">
+		dir="#{skyveStartup.dir}">
 	<f:view encoding="UTF-8">
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
-			<f:viewParam name="a" value="e" />
-			<f:viewParam name="m" value="admin" />
-			<f:viewParam name="d" value="Startup" />
-			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
-			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
-			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
+			<f:event type="preRenderView" listener="#{skyveStartup.preRender}"/>
 		</f:metadata>
 		<ui:composition template="./template.xhtml">
-			<ui:param name="bean" value="#{skyve}" />
+			<ui:param name="bean" value="#{skyveStartup}" />
 			<ui:define name="head">
 				<h:outputScript library="primefaces" name="moment/moment.js" />
 				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
@@ -28,10 +23,10 @@
 				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
 				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
 				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
-				<s:conversation managedBean="skyve" />
+				<s:conversation managedBean="skyveStartup" />
 				<h:form prependId="false">
 					<p:focus />
-					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@this" update="@form" />
+					<p:remoteCommand name="pushRerender" actionListener="#{skyveStartup.rerender('push', false)}" process="@this" update="@form" />
 					
 					<ui:include src="../pages/fragments/_startupAccordion.xhtml" />
 				</h:form>

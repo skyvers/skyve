@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.router.UxUi;
@@ -37,7 +38,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 
 		// check if this is the first login
 		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator")) {
+		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator") && UtilImpl.SHOW_SETUP) {
 			Util.LOGGER.info("ROUTING TO STARTUP");
 			return STARTUP;
 		}
