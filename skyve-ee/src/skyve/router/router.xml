@@ -10,6 +10,9 @@
 		<route outcome="/editorial/startup.xhtml" />
 	</uxui>
 	<uxui name="external">
+		<route outcome="/editorial/startup.xhtml">
+			<criteria webAction="e" document="Startup" />
+		</route>
 		<route outcome="/editorial/list.xhtml">
 			<criteria webAction="l" />
 		</route>
