@@ -26,8 +26,6 @@ public class StartupView extends FacesView<Startup> {
 	@Override
 	public void action(String actionName, String dataWidgetBinding, String bizId) {
 		super.action(actionName, dataWidgetBinding, bizId);
-		if (actionName.equals("Dismiss")) {
-			FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl());
-		}
+		FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl());
 	}
 }
