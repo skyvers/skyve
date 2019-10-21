@@ -6,6 +6,9 @@
 	<uxui name="desktop">
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
+	<uxui name="startup">
+		<route outcome="/editorial/startup.xhtml" />
+	</uxui>
 	<uxui name="external">
 		<route outcome="/editorial/list.xhtml">
 			<criteria webAction="l" />

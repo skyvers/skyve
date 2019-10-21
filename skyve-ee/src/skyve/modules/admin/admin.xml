@@ -41,6 +41,7 @@
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="ReportDesign" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
+		<document ref="Startup"/>
 		<document ref="Subscription"/>
 		<document ref="SystemDashboard" />
 		<document ref="Tag" defaultQueryName="qTags" />
@@ -296,6 +297,7 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
+				<document name="Startup" permission="_____" />
 				<document name="Subscription" permission="CRUDC"/>
 				<document name="SystemDashboard" permission="_____" />
 				<document name="User" permission="CRUDC">
@@ -386,6 +388,10 @@
 				<role name="SecurityAdministrator" />
 			</edit>
 		</group>
+		<edit document="Startup" name="Startup">
+			<uxui name="external" />
+			<role name="SecurityAdministrator" />
+		</edit>
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
 				<uxui name="desktop" />

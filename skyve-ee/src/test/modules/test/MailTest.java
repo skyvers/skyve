@@ -23,11 +23,13 @@ public class MailTest extends AbstractSkyveTest {
 	public static final String SUBJECT = "SUBJECT";
 	public static final String BODY = "BODY";
 
+	@Override
 	@Before
-	@SuppressWarnings("static-method")
 	public void before() {
+		super.before();
+
 		UtilImpl.SMTP = "localhost";
-		UtilImpl.SMTP_PORT = "25";
+		UtilImpl.SMTP_PORT = 25;
 	}
 	
 	@Test
