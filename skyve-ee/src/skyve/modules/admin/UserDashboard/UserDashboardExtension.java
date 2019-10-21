@@ -51,12 +51,12 @@ public class UserDashboardExtension extends UserDashboard {
 	 * 
 	 * @return
 	 */
-	public static List<Bean> popularUpdates(UserExtension filterUser){
-		
+	public static List<Bean> popularUpdates(UserExtension filterUser) {
+
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
-		if(filterUser!=null) {
+		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
 		}
 		q.addBoundGrouping(Audit.auditModuleNamePropertyName);
@@ -73,18 +73,18 @@ public class UserDashboardExtension extends UserDashboard {
 
 		return q.projectedResults();
 	}
-	
+
 	/**
 	 * Records most recently updated by the filter user
 	 * 
 	 * @return
 	 */
-	public static List<Bean> recentUpdates(UserExtension filterUser){
-		
+	public static List<Bean> recentUpdates(UserExtension filterUser) {
+
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
-		if(filterUser!=null) {
+		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
 		}
 		q.addBoundProjection(Audit.timestampPropertyName);
@@ -94,22 +94,22 @@ public class UserDashboardExtension extends UserDashboard {
 		q.addBoundOrdering(Audit.timestampPropertyName, SortDirection.descending);
 		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
 		q.setMaxResults(10);
-		
+
 		return q.projectedResults();
 	}
-	
+
 	/**
 	 * Documents most recently created by the filter user
 	 * 
 	 * @param filterUser
 	 * @return
 	 */
-	public static List<Bean> recentInsertDocuments(UserExtension filterUser){
+	public static List<Bean> recentInsertDocuments(UserExtension filterUser) {
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addEquals(Audit.operationPropertyName, Operation.insert);
 		q.getFilter().addNotEquals(Audit.auditModuleNamePropertyName, Audit.MODULE_NAME);
-		if(filterUser!=null) {
+		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
 		}
 		q.addBoundProjection(Audit.timestampPropertyName);
@@ -120,7 +120,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 		return q.projectedResults();
 	}
-	
+
 	/**
 	 * Create markup for shortcut links to favourite actions for this user
 	 * 
@@ -132,7 +132,7 @@ public class UserDashboardExtension extends UserDashboard {
 		tiles = new ArrayList<>();
 		UserExtension currentUser = ModulesUtil.currentAdminUser();
 
-		//temporarily elevate user permissions to view Audit records
+		// temporarily elevate user permissions to view Audit records
 		pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
 
 		// favourites for the most common record saved by me (which hasn't been deleted)
@@ -150,16 +150,15 @@ public class UserDashboardExtension extends UserDashboard {
 		// favourite for the most common record saved by anyone (which hasn't been deleted)
 		if (tiles.size() < TILE_COUNT_LIMIT) {
 
-
 			createTilesCommon(popularUpdates(null), Operation.update, 1, "Popular by everyone");
 		}
 
 		if (tiles.size() < TILE_COUNT_LIMIT) {
 
-			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert,1, "Recently created");
-			
+			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
+
 		}
-		
+
 		if (tiles.size() < TILE_COUNT_LIMIT) {
 			// add favourites to home documents for all modules the user has access to
 			Customer customer = pers.getUser().getCustomer();
@@ -172,7 +171,8 @@ public class UserDashboardExtension extends UserDashboard {
 						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null), "Suggested for creation");
 					}
 				} else {
-					if (CORE.getUser().canAccessDocument(document)) {
+					// exclude user dashboard -we are already here
+					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
 						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null), "Suggested for viewing");
 					}
 				}
@@ -194,36 +194,43 @@ public class UserDashboardExtension extends UserDashboard {
 
 	/**
 	 * Construct a list of tiles shortcuts to perform the operation on the audited beans
-	 *  
+	 * 
 	 * @param audits
 	 * @param operation
 	 * @param top
 	 * @param reason
 	 */
 	public static void createTilesCommon(List<Bean> audits, Operation operation, int top, String reason) {
-		
-		int count = 0;
-		for (Bean audit : audits) {
-			String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
-			String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
-			Customer customer = CORE.getCustomer();
-			Module module = customer.getModule(moduleName);
-			Document document = module.getDocument(customer, documentName);
-			
-			if (CORE.getUser().canAccessDocument(document)) {
-				String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
-				Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
-				// Long score = (Long) Binder.get(b, "Score");
-				if (exists != null) {
-					boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists), reason);
-					if (added) {
-						count++;
+
+		try {
+			int count = 0;
+			for (Bean audit : audits) {
+				String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
+				String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
+				Customer customer = CORE.getCustomer();
+				Module module = customer.getModule(moduleName);
+				Document document = module.getDocument(customer, documentName);
+
+				if (CORE.getUser().canAccessDocument(document)) {
+					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
+					if (id != null) {
+						Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
+						// Long score = (Long) Binder.get(b, "Score");
+						if (exists != null) {
+							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists), reason);
+							if (added) {
+								count++;
+							}
+						}
 					}
 				}
+				if (count == top) {
+					break;
+				}
 			}
-			if (count == top) {
-				break;
-			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			Util.LOGGER.warning("Failed to create " + reason + " tile.");
 		}
 	}
 
@@ -242,7 +249,7 @@ public class UserDashboardExtension extends UserDashboard {
 			Timestamp timestamp = (Timestamp) Binder.get(audit, Audit.timestampPropertyName);
 			String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
 			String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
-			if(Operation.update.equals(operation)) {
+			if (Operation.update.equals(operation)) {
 				String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
 				Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
 				if (exists != null) {
@@ -263,7 +270,7 @@ public class UserDashboardExtension extends UserDashboard {
 					if (added) {
 						count++;
 					}
-				}				
+				}
 			}
 			if (count == top) {
 				break;
@@ -340,12 +347,13 @@ public class UserDashboardExtension extends UserDashboard {
 		}
 
 		// div style
-		String divStyle = "style=\"cursor: pointer; background-color: " + backgroundColour + "; opacity: 0.9; border: 1px solid grey; border-radius: 3px; padding: 3px 3px 3px 3px;\"";
+		String divStyle = "style=\"cursor: pointer; background-color: " + backgroundColour
+				+ "; opacity: 0.9; border: 1px solid grey; border-radius: 3px; padding: 3px 3px 3px 3px;\"";
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("<div onclick=\"location.href='").append(link.toString()).append("';\"");
 		sb.append(divStyle);
-		//hover 
+		// hover
 		sb.append(" onMouseOver=\"this.style.opacity=1.0\"");
 		sb.append(" onMouseOut=\"this.style.opacity=0.9\"");
 		sb.append(">");
@@ -387,5 +395,5 @@ public class UserDashboardExtension extends UserDashboard {
 
 		return sb.toString();
 	}
-	
+
 }

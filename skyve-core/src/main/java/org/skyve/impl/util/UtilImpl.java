@@ -147,7 +147,7 @@ public class UtilImpl {
 	
 	// For E-Mail
 	public static String SMTP = null;
-	public static String SMTP_PORT = null;
+	public static int SMTP_PORT = 0;
 	public static String SMTP_UID = null;
 	public static String SMTP_PWD = null;
 	// Extra java mail properties
@@ -186,6 +186,10 @@ public class UtilImpl {
 
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
+	public static int PASSWORD_AGE_IN_DAYS = 0;
+	public static int PASSWORD_HISTORY_RETENTION = 0;
+	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
+	public static int ACCOUNT_LOCKOUT_DURATION_IN_SECONDS = 10;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;

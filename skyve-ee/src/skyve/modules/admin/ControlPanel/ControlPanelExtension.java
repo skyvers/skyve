@@ -207,7 +207,7 @@ public class ControlPanelExtension extends ControlPanel {
 
 		getStartupProperties().clear();
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_SERVER_KEY, UtilImpl.SMTP, "Mail Server URL");
-		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_PORT_KEY, UtilImpl.SMTP_PORT, "Mail Server Port");
+		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_PORT_KEY, String.valueOf(UtilImpl.SMTP_PORT), "Mail Server Port");
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_UID_KEY, UtilImpl.SMTP_UID, "Mail Server User Name");
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_PWD_KEY, UtilImpl.SMTP_PWD, "Mail server password");
 		addProperty(SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_SENDER_KEY, UtilImpl.SMTP_SENDER, "Sender header value");
@@ -480,7 +480,8 @@ public class ControlPanelExtension extends ControlPanel {
 					UtilImpl.SMTP_TEST_RECIPIENT = (String) changed.get(k);
 					break;
 				case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_PORT_KEY:
-					UtilImpl.SMTP_PORT = (String) changed.get(k);
+						String port = (String) changed.get(k);
+						UtilImpl.SMTP_PORT = port != null ? Integer.valueOf(port).intValue() : 25;
 					break;
 				case SMTP_STANZA_KEY + DISPLAY_DELIM + SMTP_TEST_BOGUS_SEND_KEY:
 					UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean((String) changed.get(k));

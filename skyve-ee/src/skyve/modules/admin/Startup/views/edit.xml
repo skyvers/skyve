@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <form responsiveWidth="12" widgetId="formEnvironment">
+        <column responsiveWidth="2"/>
+        <column/>
+        <column responsiveWidth="2"/>
+        <row>
+            <item>
+                <default binding="environmentIdentifier"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="environmentSupportEmail"/>
+            </item>
+        </row>
+	</form>
+	
+	<form responsiveWidth="12" widgetId="formMail">
+        <column responsiveWidth="2"/>
+        <column/>
+        <column responsiveWidth="2"/>
+        <row>
+            <item>
+                <default binding="mailServerUrl"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mailPort"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mailUsername"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <password binding="mailPassword"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mailSender"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <checkBox binding="mailBogusSend" triState="false"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mailTestRecipient"/>
+            </item>
+        </row>
+	</form>
+	
+    <form responsiveWidth="12" widgetId="formMap">
+        <column responsiveWidth="2"/>
+        <column/>
+        <column responsiveWidth="2"/>
+        <row>
+            <item>
+                <default binding="mapType"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="apiGoogleMaps"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mapZoom"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="mapLayer"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <geometryMap binding="mapCentre" type="point"/>
+            </item>
+        </row>
+	</form>
+	
+	<form responsiveWidth="12" widgetId="formSecurity">
+        <column responsiveWidth="2"/>
+        <column/>
+        <column responsiveWidth="2"/>
+        <row>
+            <item>
+                <default binding="apiGoogleRecaptchaKey"/>
+            </item>
+        </row>
+    </form>
+    
+    <form responsiveWidth="12" widgetId="formSMS">
+        <column responsiveWidth="2"/>
+        <column/>
+        <column responsiveWidth="2"/>
+        <row>
+            <item>
+                <textField binding="apiTwilioSID" disabled="true"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="apiTwilioAuthToken" disabled="true"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="apiTwilioDefaultSendNumber" disabled="true"/>
+            </item>
+        </row>
+    </form>
+    
+    <actions>
+        <defaults/>
+    </actions>
+    <newParameters/>
+</view>

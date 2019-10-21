@@ -502,6 +502,9 @@
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<property name="passwordResetToken" length="56" />
+		<property name="passwordHistory" type="text" />
+		<property name="authenticationFailures" />
+		<property name="lastAuthenticationFailure" type="Timestamp" />
 		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact" />
 		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup" />
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">

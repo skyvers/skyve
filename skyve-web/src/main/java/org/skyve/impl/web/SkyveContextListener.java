@@ -227,7 +227,7 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
-		UtilImpl.SMTP_PORT = Integer.toString(getInt("smtp", "port", smtp));
+		UtilImpl.SMTP_PORT = getInt("smtp", "port", smtp);
 		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
 		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
 		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp, false);
@@ -244,9 +244,6 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
 		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);
-		if (UtilImpl.SMTP_TEST_BOGUS_SEND && (UtilImpl.SMTP_TEST_RECIPIENT == null)) {
-			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
-		}
 
 		Map<String, Object> map = getObject(null, "map", properties, true);
 		if (map != null) {

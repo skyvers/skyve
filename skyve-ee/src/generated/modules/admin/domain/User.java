@@ -15,9 +15,11 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
+import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
@@ -70,6 +72,12 @@ public class User extends AbstractPersistentBean {
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
+	/** @hidden */
+	public static final String passwordHistoryPropertyName = "passwordHistory";
+	/** @hidden */
+	public static final String authenticationFailuresPropertyName = "authenticationFailures";
+	/** @hidden */
+	public static final String lastAuthenticationFailurePropertyName = "lastAuthenticationFailure";
 	/** @hidden */
 	public static final String contactPropertyName = "contact";
 	/** @hidden */
@@ -330,6 +338,26 @@ public class User extends AbstractPersistentBean {
 	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
 	 **/
 	private String passwordResetToken;
+	/**
+	 * Password History
+	 * <br/>
+	 * A tab separated list of previous password hashes used
+	 **/
+	private String passwordHistory;
+	/**
+	 * Authentication Failures
+	 * <br/>
+	 * The number of authentication failures since the last successful authentication
+	 * <br/>
+	 * This value is zeroed on successful authentication.
+	 **/
+	private Integer authenticationFailures;
+	/**
+	 * Last Authentication Failure
+	 * <br/>
+	 * Time that last authentication failure occurred
+	 **/
+	private Timestamp lastAuthenticationFailure;
 	/**
 	 * Contact
 	 * <br/>
@@ -651,6 +679,61 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordResetToken(String passwordResetToken) {
 		preset(passwordResetTokenPropertyName, passwordResetToken);
 		this.passwordResetToken = passwordResetToken;
+	}
+
+	/**
+	 * {@link #passwordHistory} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordHistory() {
+		return passwordHistory;
+	}
+
+	/**
+	 * {@link #passwordHistory} mutator.
+	 * @param passwordHistory	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordHistory(String passwordHistory) {
+		this.passwordHistory = passwordHistory;
+	}
+
+	/**
+	 * {@link #authenticationFailures} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getAuthenticationFailures() {
+		return authenticationFailures;
+	}
+
+	/**
+	 * {@link #authenticationFailures} mutator.
+	 * @param authenticationFailures	The new value.
+	 **/
+	@XmlElement
+	public void setAuthenticationFailures(Integer authenticationFailures) {
+		preset(authenticationFailuresPropertyName, authenticationFailures);
+		this.authenticationFailures = authenticationFailures;
+	}
+
+	/**
+	 * {@link #lastAuthenticationFailure} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getLastAuthenticationFailure() {
+		return lastAuthenticationFailure;
+	}
+
+	/**
+	 * {@link #lastAuthenticationFailure} mutator.
+	 * @param lastAuthenticationFailure	The new value.
+	 **/
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	@XmlElement
+	public void setLastAuthenticationFailure(Timestamp lastAuthenticationFailure) {
+		preset(lastAuthenticationFailurePropertyName, lastAuthenticationFailure);
+		this.lastAuthenticationFailure = lastAuthenticationFailure;
 	}
 
 	/**
