@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Startup.StartupExtension;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -281,7 +282,7 @@ public class Startup extends AbstractTransientBean {
 		return Startup.DOCUMENT_NAME;
 	}
 
-	public static Startup newInstance() {
+	public static StartupExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -647,5 +648,24 @@ public class Startup extends AbstractTransientBean {
 	public void setApiTwilioDefaultSendNumber(String apiTwilioDefaultSendNumber) {
 		preset(apiTwilioDefaultSendNumberPropertyName, apiTwilioDefaultSendNumber);
 		this.apiTwilioDefaultSendNumber = apiTwilioDefaultSendNumber;
+	}
+
+	/**
+	 * True when the selected map type is Google Maps
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isMapTypeGmap() {
+		return (MapType.gmap == getMapType());
+	}
+
+	/**
+	 * {@link #isMapTypeGmap} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotMapTypeGmap() {
+		return (! isMapTypeGmap());
 	}
 }
