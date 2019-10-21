@@ -117,7 +117,7 @@ public class MailUtil {
 		if (UtilImpl.processStringValue(UtilImpl.SMTP_UID) == null) {
 			Properties props = new Properties();
 			props.setProperty("mail.smtp.auth", "false");
-			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
+			props.setProperty("mail.smtp.port", String.valueOf(UtilImpl.SMTP_PORT));
 			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
 			if (UtilImpl.SMTP_PROPERTIES != null) {
 				for (Entry<String, String> entry : UtilImpl.SMTP_PROPERTIES.entrySet()) {
@@ -130,7 +130,7 @@ public class MailUtil {
 			Authenticator authenticator = new Authenticator();
 			Properties props = System.getProperties();
 			props.setProperty("mail.smtp.auth", "true");
-			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
+			props.setProperty("mail.smtp.port", String.valueOf(UtilImpl.SMTP_PORT));
 			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
 			if (UtilImpl.SMTP_PROPERTIES != null) {
 				for (Entry<String, String> entry : UtilImpl.SMTP_PROPERTIES.entrySet()) {

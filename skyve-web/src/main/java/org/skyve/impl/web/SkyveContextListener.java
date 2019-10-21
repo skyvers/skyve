@@ -227,7 +227,7 @@ public class SkyveContextListener implements ServletContextListener {
 		
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
-		UtilImpl.SMTP_PORT = Integer.toString(getInt("smtp", "port", smtp));
+		UtilImpl.SMTP_PORT = getInt("smtp", "port", smtp);
 		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
 		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
 		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp, false);
