@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui">
+	<p:accordionPanel>
+		<p:tab title="Environment Settings">
+			<s:view module="admin"
+						document="Startup"
+						managedBean="skyve"
+						widgetId="formEnvironment"
+						update="@form" />
+		</p:tab>
+		<p:tab title="Mail Settings">
+			<s:view module="admin"
+						document="Startup"
+						managedBean="skyve"
+						widgetId="formMail"
+						update="@form" />
+		</p:tab>
+		<p:tab title="Map Settings">
+			<s:view module="admin"
+						document="Startup"
+						managedBean="skyve"
+						widgetId="formMap"
+						update="@form" />
+		</p:tab>
+		<p:tab title="Security Settings">
+			<s:view module="admin"
+						document="Startup"
+						managedBean="skyve"
+						widgetId="formSecurity"
+						update="@form" />
+		</p:tab>
+		<p:tab title="SMS Settings">
+			<s:view module="admin"
+						document="Startup"
+						managedBean="skyve"
+						widgetId="formSMS"
+						update="@form" />
+		</p:tab>
+	</p:accordionPanel>
+</html>

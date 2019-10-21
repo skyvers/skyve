@@ -9,16 +9,18 @@
 		xmlns:o="http://omnifaces.org/ui"
 		dir="#{skyve.dir}">
 	<f:view encoding="UTF-8">
-		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />
 		<f:metadata>
 			<f:viewParam name="a" value="e" />
 			<f:viewParam name="m" value="admin" />
 			<f:viewParam name="d" value="Startup" />
 			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
-			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
+			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
 		<ui:composition template="./template.xhtml">
+			<ui:param name="topMenu" value="true" />
+			<ui:param name="leftMenu" value="true" />
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:define name="head">
 				<h:outputScript library="primefaces" name="moment/moment.js" />
