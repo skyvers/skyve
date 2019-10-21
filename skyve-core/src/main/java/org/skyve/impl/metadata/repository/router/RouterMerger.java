@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class RouterMerger {
+	@SuppressWarnings("static-method")
 	public Router mergeRouters(List<Router> routersToMerge) {
 		final Router mergedRouter = routersToMerge.get(0);
 		for (Router routerToMerge : routersToMerge.subList(1, routersToMerge.size())) {
