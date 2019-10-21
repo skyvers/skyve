@@ -172,7 +172,8 @@ public class UserDashboardExtension extends UserDashboard {
 						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null), "Suggested for creation");
 					}
 				} else {
-					if (CORE.getUser().canAccessDocument(document)) {
+					//exclude user dashboard -we are already here
+					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
 						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null), "Suggested for viewing");
 					}
 				}
