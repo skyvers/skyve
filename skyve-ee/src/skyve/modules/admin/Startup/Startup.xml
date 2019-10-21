@@ -11,6 +11,12 @@
 	<pluralAlias>Startup Configuration</pluralAlias>
 	<iconStyleClass>fa fa-sliders</iconStyleClass>
 	<attributes>
+		<boolean name="dontShowAgain">
+			<documentation>Allow the user to bypass the setup screen and set the showSetup value to false.</documentation>
+			<displayName>Don't show this again</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+	
 		<!-- environment settings -->
 		<text name="environmentIdentifier">
 			<displayName>Identifier</displayName>

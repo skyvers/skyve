@@ -1,7 +1,26 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui">
+		
+	<s:view module="admin"
+				document="Startup"
+				managedBean="skyveStartup"
+				widgetId="actionPanel"
+				update="@form" />
+		
+	<div class="ui-g">
+		<h:panelGroup layout="block" styleClass="ui-g-11 rightFormLabel">
+			<p:outputLabel for="inputDontShow" value="Don't show this again:" />
+		</h:panelGroup>
+		<h:panelGroup layout="block" styleClass="ui-g-1 left">
+			<h:panelGrid columns="2" styleClass="inputComponent">
+				<p:selectBooleanCheckbox id="inputDontShow" value="#{skyveStartup.currentBean['neverShowAgain']}" />
+			</h:panelGrid>
+		</h:panelGroup>
+    </div>
+	
 	<p:accordionPanel>
 		<p:tab title="Environment Settings">
 			<s:view module="admin"

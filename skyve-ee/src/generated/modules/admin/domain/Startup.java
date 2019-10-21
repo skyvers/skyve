@@ -40,6 +40,8 @@ public class Startup extends AbstractTransientBean {
 	public static final String DOCUMENT_NAME = "Startup";
 
 	/** @hidden */
+	public static final String dontShowAgainPropertyName = "dontShowAgain";
+	/** @hidden */
 	public static final String environmentIdentifierPropertyName = "environmentIdentifier";
 	/** @hidden */
 	public static final String environmentSupportEmailPropertyName = "environmentSupportEmail";
@@ -155,6 +157,12 @@ public class Startup extends AbstractTransientBean {
 		}
 	}
 
+	/**
+	 * Don't show this again
+	 * <br/>
+	 * Allow the user to bypass the setup screen and set the showSetup value to false.
+	 **/
+	private Boolean dontShowAgain = new Boolean(false);
 	/**
 	 * Identifier
 	 * <br/>
@@ -296,6 +304,24 @@ public class Startup extends AbstractTransientBean {
 	public boolean equals(Object o) {
 		return ((o instanceof Startup) && 
 					this.getBizId().equals(((Startup) o).getBizId()));
+	}
+
+	/**
+	 * {@link #dontShowAgain} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getDontShowAgain() {
+		return dontShowAgain;
+	}
+
+	/**
+	 * {@link #dontShowAgain} mutator.
+	 * @param dontShowAgain	The new value.
+	 **/
+	@XmlElement
+	public void setDontShowAgain(Boolean dontShowAgain) {
+		preset(dontShowAgainPropertyName, dontShowAgain);
+		this.dontShowAgain = dontShowAgain;
 	}
 
 	/**

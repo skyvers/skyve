@@ -297,7 +297,10 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
-				<document name="Startup" permission="_____" />
+				<document name="Startup" permission="_____">
+					<action name="Dismiss"/>
+					<action name="SaveChanges"/>
+				</document>
 				<document name="Subscription" permission="CRUDC"/>
 				<document name="SystemDashboard" permission="_____" />
 				<document name="User" permission="CRUDC">
@@ -388,10 +391,10 @@
 				<role name="SecurityAdministrator" />
 			</edit>
 		</group>
-		<edit document="Startup" name="Startup">
+		<!-- <edit document="Startup" name="Startup">
 			<uxui name="startup" />
 			<role name="SecurityAdministrator" />
-		</edit>
+		</edit> -->
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
 				<uxui name="desktop" />
