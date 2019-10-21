@@ -21,7 +21,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	public static final UxUi TABLET = new UxUi("tablet", "nova-light");
 	public static final UxUi DESKTOP = new UxUi("desktop", "Tahoe", "casablanca", null);
 	public static final UxUi EXTERNAL = new UxUi("external", "nova-light");
-	public static final UxUi STARTUP = new UxUi("external", "nova-light");
+	public static final UxUi STARTUP = new UxUi("startup", "nova-light");
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);
