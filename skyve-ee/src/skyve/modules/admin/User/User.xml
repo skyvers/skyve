@@ -70,6 +70,24 @@
 			<description>The password reset token emailed to the user on pass reset request.</description>
 			<length>56</length>
 		</text>
+		<memo name="passwordHistory" audited="false" trackChanges="false">
+			<documentation>
+				A tab separated list of previous password hashes used
+			</documentation>
+			<displayName>Password History</displayName>
+			<index>none</index>
+		</memo>
+		<integer name="authenticationFailures">
+			<documentation>
+				This value is zeroed on successful authentication.
+			</documentation>
+			<displayName>Authentication Failures</displayName>
+			<description>The number of authentication failures since the last successful authentication</description>
+		</integer>
+		<timestamp name="lastAuthenticationFailure">
+			<displayName>Last Authentication Failure</displayName>
+			<description>Time that last authentication failure occurred</description>
+		</timestamp>
 
 		<association name="contact" type="aggregation" required="true">
 			<displayName>Contact</displayName>
