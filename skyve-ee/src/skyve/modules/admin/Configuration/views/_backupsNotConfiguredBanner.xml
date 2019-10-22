@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="_backupsNotConfiguredBanner" title="Backups" xmlns="http://www.skyve.org/xml/view" 
+<view name="_backupsNotConfiguredBanner" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" visible="notBackupsConfigured" shrinkWrap="height">
+	<vbox visible="notBackupsConfigured" shrinkWrap="height">
 		<form>
 			<column />
 			<row>
@@ -27,7 +27,4 @@
 			</row>
 		</form>		
 	</vbox>
-	<actions>
-	</actions>
-	<newParameters />
 </view>

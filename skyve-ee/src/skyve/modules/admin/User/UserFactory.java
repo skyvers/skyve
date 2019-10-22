@@ -6,12 +6,13 @@ import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.actions.Check;
+import modules.admin.User.actions.GeneratePassword;
 import modules.admin.User.actions.Next;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 
-@SkyveFactory(excludedActions = { Check.class, Next.class })
+@SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class })
 public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)

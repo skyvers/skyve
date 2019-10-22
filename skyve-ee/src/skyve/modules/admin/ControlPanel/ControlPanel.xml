@@ -71,25 +71,7 @@
 			<domain>variant</domain>
 			<length>50</length>
 		</text>
-		<text name="emailFrom">
-			<displayName>Email From</displayName>
-			<length>254</length>
-		</text>
-		<text name="emailTo">
-			<displayName>Email To</displayName>
-			<length>254</length>
-		</text>
-		<association name="emailToContact" type="aggregation">
-			<displayName>Email To Contact</displayName>
-			<documentName>Contact</documentName>
-		</association>
-		<text name="emailSubject">
-			<displayName>Email Subject</displayName>
-			<length>128</length>
-		</text>
-		<markup name="emailContent">
-			<displayName>Email</displayName>
-		</markup>
+		
 		<!-- SAIL Attributes -->
 		<association name="sailUser" type="aggregation">
 			<displayName>User</displayName>

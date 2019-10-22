@@ -2,162 +2,172 @@
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:c="http://www.skyve.org/xml/common">
 	
-    <form responsiveWidth="12" widgetId="formEnvironment">
-        <column responsiveWidth="2"/>
-        <column/>
-        <column responsiveWidth="2"/>
-        <row>
-            <item>
-                <default binding="environmentIdentifier"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="environmentSupportEmail"/>
-            </item>
-        </row>
-	</form>
+	<vbox border="true" borderTitle="Environment Settings">
+	    <form responsiveWidth="12" widgetId="formEnvironment">
+	        <column responsiveWidth="2"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="environmentIdentifier"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="environmentSupportEmail"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
 	
-	<form responsiveWidth="12" widgetId="formMail">
-        <column responsiveWidth="2"/>
-        <column/>
-        <column responsiveWidth="2"/>
-        <row>
-            <item>
-                <default binding="mailServerUrl"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="mailPort"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="mailUsername"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <password binding="mailPassword"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="mailSender"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <checkBox binding="mailBogusSend" triState="false"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="mailTestRecipient"/>
-            </item>
-        </row>
-	</form>
+	<vbox border="true" borderTitle="Mail Settings">
+		<form responsiveWidth="12" widgetId="formMail">
+	        <column responsiveWidth="2"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="mailServerUrl"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailPort"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailUsername"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <password binding="mailPassword"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailSender"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <checkBox binding="mailBogusSend" triState="false"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailTestRecipient"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
 	
-    <form responsiveWidth="12" widgetId="formMap">
-        <column responsiveWidth="2"/>
-        <column/>
-        <column responsiveWidth="2"/>
-        <row>
-            <item>
-                <combo binding="mapType">
-                	<onChangedHandlers>
-                		<rerender clientValidation="false">
-                			<properties>
-					            <c:property key="update">formMap</c:property>
-                			</properties>
-                		</rerender>
-                	</onChangedHandlers>
-                </combo>
-            </item>
-        </row>
-        <row>
-            <item>
-                <textField binding="apiGoogleMapsKey" visible="mapTypeGmap"/>
-            </item>
-        </row>
-        <row>
-        	<item>
-        		<spacer visible="mapTypeGmap" />
-        	</item>
-        	<item>
-        		<blurb visible="mapTypeGmap">
-        			<![CDATA[
-        				<span style="font-size: 80%; color: #888;">
-        					Note: Google Maps will be in Developer Mode when used without an API 
-        					key. To obtain a Google maps API Key, visit <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>.
-       					</span>
-        			]]>
-        		</blurb>
-        	</item>
-        </row>
-        <row>
-            <item>
-                <default binding="mapZoom"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <default binding="mapLayer"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <geometryMap binding="mapCentre" type="point"/>
-            </item>
-        </row>
-	</form>
+	<vbox border="true" borderTitle="Map Settings">
+	    <form responsiveWidth="12" widgetId="formMap">
+	        <column responsiveWidth="2"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <combo binding="mapType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false">
+	                			<properties>
+						            <c:property key="update">formMap</c:property>
+	                			</properties>
+	                		</rerender>
+	                	</onChangedHandlers>
+	                </combo>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiGoogleMapsKey" visible="mapTypeGmap"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer visible="mapTypeGmap" />
+	        	</item>
+	        	<item>
+	        		<blurb visible="mapTypeGmap">
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					Note: Google Maps will be in Developer Mode when used without an API 
+	        					key. To obtain a Google maps API Key, visit <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>.
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mapZoom"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mapLayer"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <geometryMap binding="mapCentre" type="point"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
 	
-	<form responsiveWidth="12" widgetId="formSecurity">
-        <column responsiveWidth="2"/>
-        <column/>
-        <column responsiveWidth="2"/>
-        <row>
-            <item>
-                <default binding="apiGoogleRecaptchaKey"/>
-            </item>
-        </row>
-        <row>
-        	<item>
-        		<spacer />
-        	</item>
-        	<item>
-        		<blurb>
-        			<![CDATA[
-        				<span style="font-size: 80%; color: #888;">
-        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
-       					</span>
-        			]]>
-        		</blurb>
-        	</item>
-        </row>
-    </form>
+	<vbox border="true" borderTitle="Securitu Settings">
+		<form responsiveWidth="12" widgetId="formSecurity">
+	        <column responsiveWidth="2"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="apiGoogleRecaptchaKey"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
     
-    <form responsiveWidth="12" widgetId="formSMS">
-        <column responsiveWidth="2"/>
-        <column/>
-        <column responsiveWidth="2"/>
-        <row>
-            <item>
-                <textField binding="apiTwilioSID" disabled="true"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <textField binding="apiTwilioAuthToken" disabled="true"/>
-            </item>
-        </row>
-        <row>
-            <item>
-                <textField binding="apiTwilioDefaultSendNumber" disabled="true"/>
-            </item>
-        </row>
-    </form>
+    <vbox border="true" borderTitle="SMS Settings">
+	    <form responsiveWidth="12" widgetId="formSMS">
+	        <column responsiveWidth="2"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioSID" disabled="true"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioAuthToken" disabled="true"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioDefaultSendNumber" disabled="true"/>
+	            </item>
+	        </row>
+	    </form>
+    </vbox>
     
     <actions widgetId="actionPanel">
         <!-- <defaults/> -->

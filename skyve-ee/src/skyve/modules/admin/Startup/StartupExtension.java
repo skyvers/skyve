@@ -11,6 +11,10 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -50,6 +54,45 @@ public class StartupExtension extends Startup {
 	static final String SMTP_PORT_KEY = "port";
 	static final String SMTP_SERVER_KEY = "server";
 
+	/**
+	 * Populate this bean's attributes from the current configuration properties values
+	 * read from the application json and override json.
+	 */
+	public void loadProperties() {
+		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
+		setApiGoogleRecaptchaKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
+
+		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+
+		setMailBogusSend(Boolean.valueOf(UtilImpl.SMTP_TEST_BOGUS_SEND));
+		setMailPassword(UtilImpl.SMTP_PWD);
+		setMailPort(Integer.valueOf(UtilImpl.SMTP_PORT));
+		setMailSender(UtilImpl.SMTP_SENDER);
+		setMailServerUrl(UtilImpl.SMTP);
+		setMailTestRecipient(UtilImpl.SMTP_TEST_RECIPIENT);
+		setMailUsername(UtilImpl.SMTP_UID);
+
+		String mapCentre = UtilImpl.MAP_CENTRE;
+		if (StringUtils.isBlank(mapCentre)) {
+			setMapCentre(new GeometryFactory().createPoint(new Coordinate(0, 0)));
+		} else {
+			try {
+				setMapCentre(new WKTReader().read(mapCentre));
+			} catch (ParseException e) {
+				setMapCentre(new GeometryFactory().createPoint(new Coordinate(0, 0)));
+			}
+		}
+		setMapLayer(UtilImpl.MAP_LAYERS);
+		setMapType(MapType.fromCode(UtilImpl.MAP_TYPE.name()));
+		setMapZoom(Integer.valueOf(UtilImpl.MAP_ZOOM));
+	}
+
+	/**
+	 * Write any modified configuration properties to the application's override json file.
+	 * 
+	 * @throws IOException
+	 */
 	public void saveConfiguration() throws IOException {
 		if (Boolean.TRUE.equals(getDontShowAgain())) {
 			UtilImpl.SHOW_SETUP = false;

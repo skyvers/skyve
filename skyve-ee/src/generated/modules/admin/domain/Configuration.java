@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.Startup.StartupExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -19,6 +20,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Setup
  * 
  * @depend - - - PasswordComplexityModel
+ * @navhas n emailToContact 0..1 Contact
+ * @navhas n startup 0..1 Startup
  * @navhas n userSelfRegistrationGroup 0..1 Group
  * @stereotype "persistent"
  */
@@ -48,6 +51,18 @@ public class Configuration extends AbstractPersistentBean {
 	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
 	/** @hidden */
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	/** @hidden */
+	public static final String emailFromPropertyName = "emailFrom";
+	/** @hidden */
+	public static final String emailToPropertyName = "emailTo";
+	/** @hidden */
+	public static final String emailSubjectPropertyName = "emailSubject";
+	/** @hidden */
+	public static final String emailContentPropertyName = "emailContent";
+	/** @hidden */
+	public static final String emailToContactPropertyName = "emailToContact";
+	/** @hidden */
+	public static final String startupPropertyName = "startup";
 
 	/**
 	 * Password Complexity
@@ -168,6 +183,30 @@ public class Configuration extends AbstractPersistentBean {
 	 * Master switch to allow or disallow self registration.
 	 **/
 	private Boolean allowUserSelfRegistration;
+	/**
+	 * Email From
+	 **/
+	private String emailFrom;
+	/**
+	 * Email To
+	 **/
+	private String emailTo;
+	/**
+	 * Email Subject
+	 **/
+	private String emailSubject;
+	/**
+	 * Email
+	 **/
+	private String emailContent;
+	/**
+	 * Email To Contact
+	 **/
+	private Contact emailToContact = null;
+	/**
+	 * Startup
+	 **/
+	private StartupExtension startup = null;
 
 	@Override
 	@XmlTransient
@@ -321,6 +360,114 @@ public class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #emailFrom} accessor.
+	 * @return	The value.
+	 **/
+	public String getEmailFrom() {
+		return emailFrom;
+	}
+
+	/**
+	 * {@link #emailFrom} mutator.
+	 * @param emailFrom	The new value.
+	 **/
+	@XmlElement
+	public void setEmailFrom(String emailFrom) {
+		preset(emailFromPropertyName, emailFrom);
+		this.emailFrom = emailFrom;
+	}
+
+	/**
+	 * {@link #emailTo} accessor.
+	 * @return	The value.
+	 **/
+	public String getEmailTo() {
+		return emailTo;
+	}
+
+	/**
+	 * {@link #emailTo} mutator.
+	 * @param emailTo	The new value.
+	 **/
+	@XmlElement
+	public void setEmailTo(String emailTo) {
+		preset(emailToPropertyName, emailTo);
+		this.emailTo = emailTo;
+	}
+
+	/**
+	 * {@link #emailSubject} accessor.
+	 * @return	The value.
+	 **/
+	public String getEmailSubject() {
+		return emailSubject;
+	}
+
+	/**
+	 * {@link #emailSubject} mutator.
+	 * @param emailSubject	The new value.
+	 **/
+	@XmlElement
+	public void setEmailSubject(String emailSubject) {
+		preset(emailSubjectPropertyName, emailSubject);
+		this.emailSubject = emailSubject;
+	}
+
+	/**
+	 * {@link #emailContent} accessor.
+	 * @return	The value.
+	 **/
+	public String getEmailContent() {
+		return emailContent;
+	}
+
+	/**
+	 * {@link #emailContent} mutator.
+	 * @param emailContent	The new value.
+	 **/
+	@XmlElement
+	public void setEmailContent(String emailContent) {
+		preset(emailContentPropertyName, emailContent);
+		this.emailContent = emailContent;
+	}
+
+	/**
+	 * {@link #emailToContact} accessor.
+	 * @return	The value.
+	 **/
+	public Contact getEmailToContact() {
+		return emailToContact;
+	}
+
+	/**
+	 * {@link #emailToContact} mutator.
+	 * @param emailToContact	The new value.
+	 **/
+	@XmlElement
+	public void setEmailToContact(Contact emailToContact) {
+		preset(emailToContactPropertyName, emailToContact);
+		this.emailToContact = emailToContact;
+	}
+
+	/**
+	 * {@link #startup} accessor.
+	 * @return	The value.
+	 **/
+	public StartupExtension getStartup() {
+		return startup;
+	}
+
+	/**
+	 * {@link #startup} mutator.
+	 * @param startup	The new value.
+	 **/
+	@XmlElement
+	public void setStartup(StartupExtension startup) {
+		preset(startupPropertyName, startup);
+		this.startup = startup;
+	}
+
+	/**
 	 * backupsConfigured
 	 *
 	 * @return The condition
@@ -356,5 +503,24 @@ public class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotEmailConfigured() {
 		return (! isEmailConfigured());
+	}
+
+	/**
+	 * True when the selected startup map type is Google Maps
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isMapTypeGmap() {
+		return (getStartup() != null && Startup.MapType.gmap == getStartup().getMapType());
+	}
+
+	/**
+	 * {@link #isMapTypeGmap} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotMapTypeGmap() {
+		return (! isMapTypeGmap());
 	}
 }

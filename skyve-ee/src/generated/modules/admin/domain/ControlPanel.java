@@ -21,7 +21,6 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - SailUserAgentType
  * @depend - - - SailTestStrategy
  * @depend - - - SailExecutor
- * @navhas n emailToContact 0..1 Contact
  * @navhas n newProperty 0..1 Generic
  * @navhas n sailUser 0..1 UserProxy
  * @navhas n originalStartupProperties 0..n Generic
@@ -66,16 +65,6 @@ public class ControlPanel extends AbstractTransientBean {
 	public static final String queryPropertyName = "query";
 	/** @hidden */
 	public static final String customerNameToSwapToPropertyName = "customerNameToSwapTo";
-	/** @hidden */
-	public static final String emailFromPropertyName = "emailFrom";
-	/** @hidden */
-	public static final String emailToPropertyName = "emailTo";
-	/** @hidden */
-	public static final String emailToContactPropertyName = "emailToContact";
-	/** @hidden */
-	public static final String emailSubjectPropertyName = "emailSubject";
-	/** @hidden */
-	public static final String emailContentPropertyName = "emailContent";
 	/** @hidden */
 	public static final String sailUserPropertyName = "sailUser";
 	/** @hidden */
@@ -416,26 +405,6 @@ public class ControlPanel extends AbstractTransientBean {
 	 **/
 	private String customerNameToSwapTo;
 	/**
-	 * Email From
-	 **/
-	private String emailFrom;
-	/**
-	 * Email To
-	 **/
-	private String emailTo;
-	/**
-	 * Email To Contact
-	 **/
-	private Contact emailToContact = null;
-	/**
-	 * Email Subject
-	 **/
-	private String emailSubject;
-	/**
-	 * Email
-	 **/
-	private String emailContent;
-	/**
 	 * User
 	 **/
 	private UserProxy sailUser = null;
@@ -771,96 +740,6 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setCustomerNameToSwapTo(String customerNameToSwapTo) {
 		preset(customerNameToSwapToPropertyName, customerNameToSwapTo);
 		this.customerNameToSwapTo = customerNameToSwapTo;
-	}
-
-	/**
-	 * {@link #emailFrom} accessor.
-	 * @return	The value.
-	 **/
-	public String getEmailFrom() {
-		return emailFrom;
-	}
-
-	/**
-	 * {@link #emailFrom} mutator.
-	 * @param emailFrom	The new value.
-	 **/
-	@XmlElement
-	public void setEmailFrom(String emailFrom) {
-		preset(emailFromPropertyName, emailFrom);
-		this.emailFrom = emailFrom;
-	}
-
-	/**
-	 * {@link #emailTo} accessor.
-	 * @return	The value.
-	 **/
-	public String getEmailTo() {
-		return emailTo;
-	}
-
-	/**
-	 * {@link #emailTo} mutator.
-	 * @param emailTo	The new value.
-	 **/
-	@XmlElement
-	public void setEmailTo(String emailTo) {
-		preset(emailToPropertyName, emailTo);
-		this.emailTo = emailTo;
-	}
-
-	/**
-	 * {@link #emailToContact} accessor.
-	 * @return	The value.
-	 **/
-	public Contact getEmailToContact() {
-		return emailToContact;
-	}
-
-	/**
-	 * {@link #emailToContact} mutator.
-	 * @param emailToContact	The new value.
-	 **/
-	@XmlElement
-	public void setEmailToContact(Contact emailToContact) {
-		preset(emailToContactPropertyName, emailToContact);
-		this.emailToContact = emailToContact;
-	}
-
-	/**
-	 * {@link #emailSubject} accessor.
-	 * @return	The value.
-	 **/
-	public String getEmailSubject() {
-		return emailSubject;
-	}
-
-	/**
-	 * {@link #emailSubject} mutator.
-	 * @param emailSubject	The new value.
-	 **/
-	@XmlElement
-	public void setEmailSubject(String emailSubject) {
-		preset(emailSubjectPropertyName, emailSubject);
-		this.emailSubject = emailSubject;
-	}
-
-	/**
-	 * {@link #emailContent} accessor.
-	 * @return	The value.
-	 **/
-	public String getEmailContent() {
-		return emailContent;
-	}
-
-	/**
-	 * {@link #emailContent} mutator.
-	 * @param emailContent	The new value.
-	 **/
-	@XmlElement
-	public void setEmailContent(String emailContent) {
-		preset(emailContentPropertyName, emailContent);
-		this.emailContent = emailContent;
 	}
 
 	/**

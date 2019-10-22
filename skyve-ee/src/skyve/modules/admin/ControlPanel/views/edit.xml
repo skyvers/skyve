@@ -33,37 +33,6 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Test Email">
-				<column pixelWidth="175" />
-				<column />
-				<column pixelWidth="110" />
-				<column />
-				<row>
-					<item>
-						<textField binding="emailTo" />
-					</item>
-					<item label="OR Contact Email">
-						<lookupDescription binding="emailToContact" descriptionBinding="email1">
-							<filterParameter filterBinding="email1" operator="notNull" />
-						</lookupDescription>
-					</item>
-				</row>
-				<row>
-					<item>
-						<textField binding="emailSubject" />
-					</item>
-				</row>
-				<row>
-					<item showLabel="true">
-						<richText binding="emailContent" minPixelHeight="100" pixelWidth="400" pixelHeight="100" maxPixelHeight="100" />
-					</item>
-				</row>
-				<row>
-					<item colspan="2" align="right">
-						<button actionName="SendMail" pixelWidth="90" />
-					</item>
-				</row>
-			</form>
 			<form border="true" borderTitle="Query">
 				<column pixelWidth="175" />
 				<column />
@@ -305,7 +274,7 @@
 		<tab title="User Remember-Me Tokens">
 			<listGrid query="qUserTokens" continueConversation="false" />
 		</tab>
-		<tab title="Startup Configuration">
+		<tab title="Startup Configuration" visible="false">
 			<vbox>
 				<form>
 					<column />
@@ -355,7 +324,6 @@
 		<action className="SwapCustomer" displayName="Swap Customer" inActionPanel="false" />
 		<action className="GenerateEditView" displayName="Edit View" inActionPanel="false" />
 		<action className="GenerateQuery" displayName="Query XML" inActionPanel="false" />
-		<action className="SendMail" displayName="Send Mail" inActionPanel="false" />
 		<action className="ExecuteQuery" displayName="Execute" inActionPanel="false" />
 		<action className="GenerateMenuSAIL" displayName="Menu SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) menu" />
 		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
