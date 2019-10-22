@@ -112,7 +112,9 @@ public class CustomerResourceServlet extends HttpServlet {
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				load();
-				result = image.getMimeType().toString();
+				if (image != null) {
+					result = image.getMimeType().toString();
+				}
 			}
 			else if (file != null) {
 				MimeType mimeType = MimeType.fromFileName(file.getName());
@@ -132,7 +134,9 @@ public class CustomerResourceServlet extends HttpServlet {
 			
 			if ((imageWidth > 0) && (imageHeight > 0)) {
 				load();
-				result = "thumbnail." + image.getMimeType().getStandardFileSuffix();
+				if (image != null) {
+					result = "thumbnail." + image.getMimeType().getStandardFileSuffix();
+				}
 			}
 			else if (file != null) {
 				result = file.getName();
@@ -216,7 +220,9 @@ public class CustomerResourceServlet extends HttpServlet {
 				}
 
 				if (DownloadAreaType.content.toString().equals(resourceArea)) {
-					if ((user != null) && (customer != null)) {
+					if ((user != null) && 
+							(customer != null) && 
+							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
 						cm = EXT.newContentManager();
 						content = cm.get(resourceFileName);
 					}
@@ -369,7 +375,7 @@ public class CustomerResourceServlet extends HttpServlet {
 	 * @param intendedCustomerName	The customer name from a customer cookie (if no principal).
 	 * @throws SecurityException
 	 */
-	@SuppressWarnings({"static-method", "unused"})
+	@SuppressWarnings({"static-method"})
 	protected void secure(Resource resource, 
 							String moduleName, 
 							String documentName, 
