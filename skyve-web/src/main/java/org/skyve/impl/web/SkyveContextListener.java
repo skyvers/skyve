@@ -2,7 +2,7 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -96,8 +96,9 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 		else {
-			overrides = Collections.emptyMap();
+			overrides = new HashMap<>();
 		}
+		UtilImpl.OVERRIDE_CONFIGURATION = overrides;
 
 		// Apply overrides to configuration
 		merge(overrides, properties);

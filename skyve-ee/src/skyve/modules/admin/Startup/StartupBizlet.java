@@ -22,7 +22,7 @@ public class StartupBizlet extends Bizlet<Startup> {
 	@Override
 	public Startup newInstance(Startup bean) throws Exception {
 		// set all the current property values from the current configuration
-		bean.setApiGoogleMaps(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
+		bean.setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
 		bean.setApiGoogleRecaptchaKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
 
 		bean.setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);

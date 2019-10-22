@@ -47,6 +47,12 @@ public class UtilImpl {
 	 */
 	public static Map<String, Object> CONFIGURATION = null;
 
+	/**
+	 * The raw configuration data from reading the override JSON.
+	 * This will be an empty map if there are no overrides defined.
+	 */
+	public static Map<String, Object> OVERRIDE_CONFIGURATION;
+
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "5";
 	public static final String SKYVE_VERSION = "20190921-SNAPSHOT";

@@ -90,7 +90,7 @@
         </row>
         <row>
             <item>
-                <textField binding="apiGoogleMaps" visible="mapTypeGmap"/>
+                <textField binding="apiGoogleMapsKey" visible="mapTypeGmap"/>
             </item>
         </row>
         <row>

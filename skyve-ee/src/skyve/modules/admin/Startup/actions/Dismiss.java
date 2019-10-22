@@ -10,15 +10,13 @@ public class Dismiss implements ServerSideAction<StartupExtension> {
 
 	private static final long serialVersionUID = -2131639715230917502L;
 
-
-
 	@Override
 	public ServerSideActionResult<StartupExtension> execute(StartupExtension bean, WebContext webContext) throws Exception {
 
 		// check if the user ticket don't show again
 		if (Boolean.TRUE.equals(bean.getDontShowAgain())) {
 			// update the configuration
-			bean.saveConfiguration();
+			bean.setDontShow();
 		}
 
 		return new ServerSideActionResult<>(bean);

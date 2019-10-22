@@ -69,7 +69,7 @@ public class Startup extends AbstractTransientBean {
 	/** @hidden */
 	public static final String mailTestRecipientPropertyName = "mailTestRecipient";
 	/** @hidden */
-	public static final String apiGoogleMapsPropertyName = "apiGoogleMaps";
+	public static final String apiGoogleMapsKeyPropertyName = "apiGoogleMapsKey";
 	/** @hidden */
 	public static final String apiGoogleRecaptchaKeyPropertyName = "apiGoogleRecaptchaKey";
 	/** @hidden */
@@ -247,7 +247,7 @@ public class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * If using Google Maps for your map type, specify your map key here
 	 **/
-	private String apiGoogleMaps;
+	private String apiGoogleMapsKey;
 	/**
 	 * Google Recaptcha Site Key
 	 * <br/>
@@ -561,21 +561,21 @@ public class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #apiGoogleMaps} accessor.
+	 * {@link #apiGoogleMapsKey} accessor.
 	 * @return	The value.
 	 **/
-	public String getApiGoogleMaps() {
-		return apiGoogleMaps;
+	public String getApiGoogleMapsKey() {
+		return apiGoogleMapsKey;
 	}
 
 	/**
-	 * {@link #apiGoogleMaps} mutator.
-	 * @param apiGoogleMaps	The new value.
+	 * {@link #apiGoogleMapsKey} mutator.
+	 * @param apiGoogleMapsKey	The new value.
 	 **/
 	@XmlElement
-	public void setApiGoogleMaps(String apiGoogleMaps) {
-		preset(apiGoogleMapsPropertyName, apiGoogleMaps);
-		this.apiGoogleMaps = apiGoogleMaps;
+	public void setApiGoogleMapsKey(String apiGoogleMapsKey) {
+		preset(apiGoogleMapsKeyPropertyName, apiGoogleMapsKey);
+		this.apiGoogleMapsKey = apiGoogleMapsKey;
 	}
 
 	/**

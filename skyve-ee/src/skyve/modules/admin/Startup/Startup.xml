@@ -96,7 +96,7 @@
 		</text>
 			
 		<!-- api settings -->
-		<text name="apiGoogleMaps">
+		<text name="apiGoogleMapsKey">
 			<displayName>Google Maps Key</displayName>
 			<description>If using Google Maps for your map type, specify your map key here</description>
 			<length>200</length>
