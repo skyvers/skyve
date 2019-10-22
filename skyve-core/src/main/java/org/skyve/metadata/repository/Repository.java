@@ -1,7 +1,6 @@
 package org.skyve.metadata.repository;
 
 import java.io.File;
-import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -53,16 +52,6 @@ public interface Repository {
 	 * @return A merged Router consisting of the main router and all of the module routers.
 	 */
 	public Router getRouter();
-
-	/**
-	 * @return The global router that is not module specific.
-	 */
-	Router getGlobalRouter();
-
-	/**
-	 * @return A list of module-specific routers.
-	 */
-	List<Router> getModuleRouters();
 
 	/**
 	 * 

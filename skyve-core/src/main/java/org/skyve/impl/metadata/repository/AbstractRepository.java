@@ -9,6 +9,7 @@ import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -344,6 +345,16 @@ public abstract class AbstractRepository implements Repository {
 	public abstract void validateDocument(Customer customer, Document document);
 
 	public abstract void validateView(Customer customer, Document document, View view, String uxui);
+
+	/**
+	 * @return The global router that is not module specific.
+	 */
+	public abstract Router getGlobalRouter();
+
+	/**
+	 * @return A list of module-specific routers.
+	 */
+	public abstract List<Router> getModuleRouters();
 
 	/**
 	 * Override the interface method on AbstractRepository to return UserImpl.

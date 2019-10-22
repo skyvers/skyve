@@ -66,6 +66,7 @@
 			<displayName>Server Port</displayName>
 			<description>Which port should be used to access the mail server? This is usually 25, 465 or 587 depending if it is secure or insecure.</description>
 			<defaultValue>25</defaultValue>
+			<validator min="1" max="65535"/>
 		</integer>
 		<text name="mailUsername">
 			<displayName>Username</displayName>
@@ -128,4 +129,10 @@
 			<length>20</length>
 		</text>
 	</attributes>
+	<conditions>
+		<condition name="mapTypeGmap">
+			<description>True when the selected map type is Google Maps</description>
+			<expression>MapType.gmap == getMapType()</expression>
+		</condition>
+	</conditions>
 </document>
