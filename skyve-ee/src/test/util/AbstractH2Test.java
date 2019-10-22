@@ -16,6 +16,11 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
+
+import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 
 public abstract class AbstractH2Test {
 	protected static final String USER = "TestUser";
@@ -75,6 +80,10 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 		persistence.begin();
+
+		// create admin user
+		User adminUser = createAdminUser(user);
+		persistence.save(adminUser);
 	}
 
 	@After
@@ -82,5 +91,17 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
 		persistence.evictAllCached();
+	}
+
+	/**
+	 * Create a new {@link User} which corresponds to the metadata superuser
+	 * running as the current persistence user so that requests to currentAdminUser resolve.
+	 */
+	private static UserExtension createAdminUser(SuperUser superUser) {
+		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		adminUser.setUserName(superUser.getName());
+		superUser.setContactId(adminUser.getContact().getBizId());
+		adminUser.setBizId(superUser.getId());
+		return adminUser;
 	}
 }

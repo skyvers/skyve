@@ -17,9 +17,7 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
-	/**
-	 * For Serialization
-	 */
+
 	private static final long serialVersionUID = -1282437688681930236L;
 
 	@Override
