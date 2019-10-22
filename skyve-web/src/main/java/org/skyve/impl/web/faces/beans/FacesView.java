@@ -140,6 +140,28 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 	}
 
+	public String getThemeColour(String defaultColour) {
+		String result = defaultColour;
+		if (uxui != null) {
+			result = uxui.getPfThemeColour();
+			if (result == null) {
+				result = defaultColour;
+			}
+		}
+		return result;
+	}
+
+	public String getTemplateName() {
+		String result = "external";
+		if (uxui != null) {
+			result = uxui.getPfTemplateName();
+			if (result == null) {
+				result = "external";
+			}
+		}
+		return result;
+	}
+
 	public String getViewBinding() {
 		return viewBinding;
 	}

@@ -4,7 +4,9 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
-		xmlns:pe="http://primefaces.org/ui/extensions">
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:o="http://omnifaces.org/ui"
+		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
 	        <f:facet name="first">
@@ -26,7 +28,7 @@
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
-			<link rel="stylesheet" href="editorial/assets/css/main.css" />
+			<h:outputStylesheet name="editorial/assets/css/main.css" library="skyve" />
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				#{bean.apiScript}
@@ -93,6 +95,9 @@
 							<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:growl>
+							<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
+							<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+							<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 							<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 							<p:confirmDialog id="confirm" global="true">
 								<p:commandButton id="confirmCancel" 
@@ -131,10 +136,10 @@
 				</div>
 			</div>
 			<!-- Scripts -->
-			<script src="editorial/assets/js/browser.min.js"></script>
-			<script src="editorial/assets/js/breakpoints.min.js"></script>
-			<script src="editorial/assets/js/util.js"></script>
-			<script src="editorial/assets/js/main.js"></script>
+			<h:outputScript name="editorial/assets/js/browser.min.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/breakpoints.min.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/util.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/main.js" library="skyve" />
 		</h:body>
 	</f:view>
 </html>

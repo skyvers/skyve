@@ -4,12 +4,9 @@
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
-		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:s="http://skyve.org/xml/ui"
-		xmlns:o="http://omnifaces.org/ui"
 		dir="#{skyveMap.dir}">
 	<f:view encoding="UTF-8">
-		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
 			<f:viewParam name="a" value="#{skyveMap.webActionParameter}" />
 			<f:viewParam name="m" value="#{skyveMap.bizModuleParameter}" />
@@ -18,17 +15,14 @@
 			<f:viewParam name="b" value="#{skyveMap.bindingParameter}" />
 			<f:event type="preRenderView" listener="#{skyveMap.preRender}"/>
 		</f:metadata>
-		<ui:composition template="./template.xhtml">
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyveMap.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyveMap}" />
-			<ui:define name="head">
-			</ui:define>
 			<ui:define name="body">
-				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
-				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
-				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 				<h:form prependId="false">
-					<p:focus />
-					<p:remoteCommand name="pushRerender" actionListener="#{skyveMap.rerender('push', false)}" process="@this" update="@form" />
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyveMap}" />
+					</ui:include>
 				</h:form>
 				<s:map module="#{skyveMap.bizModuleParameter}"
 						document="#{skyveMap.bizDocumentParameter}"

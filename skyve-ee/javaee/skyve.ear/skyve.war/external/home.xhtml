@@ -4,9 +4,7 @@
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
-		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:s="http://skyve.org/xml/ui"
-		xmlns:o="http://omnifaces.org/ui"
 		dir="#{skyve.dir}">
 	<f:view encoding="UTF-8">
 		<f:metadata>
@@ -17,27 +15,24 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<ui:composition template="./template.xhtml">
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyve.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyve}" />
-			<ui:define name="head">
-				<h:outputScript library="primefaces" name="moment/moment.js" />
-				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
-			</ui:define>
 			<ui:define name="body">
-				<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
-				<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
-				<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 				<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
 				<h:form prependId="false">
-					<p:focus />
-					<p:remoteCommand name="pushRerender" actionListener="#{skyve.rerender('push', false)}" process="@this" update="@form" />
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyve}" />
+					</ui:include>
 					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}"
 								managedBean="skyve"
+								update="@form"
 								rendered="#{'e' eq skyve.webActionParameter}" />
 					<s:listGrid module="#{skyve.bizModuleParameter}"
 									query="#{skyve.queryNameParameter}"
 									managedBean="skyve"
+									update="@form"
 									rendered="#{'l' eq skyve.webActionParameter}" />
 				</h:form>
 			</ui:define>

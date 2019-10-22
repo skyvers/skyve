@@ -7,43 +7,43 @@
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
 	<uxui name="startup">
-		<route outcome="/editorial/startup.xhtml" />
+		<route outcome="/external/startup.xhtml" />
 	</uxui>
 	<uxui name="external">
-		<route outcome="/editorial/list.xhtml">
+		<route outcome="/external/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/editorial/edit.xhtml">
+		<route outcome="/external/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/editorial/calendar.xhtml">
+		<route outcome="/external/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/editorial/map.xhtml">
+		<route outcome="/external/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/editorial/tree.xhtml">
+		<route outcome="/external/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/editorial/home.xhtml" />
+		<route outcome="/external/home.xhtml" />
 	</uxui>
 	<uxui name="tablet">
-		<route outcome="/editorial/list.xhtml">
+		<route outcome="/external/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/editorial/edit.xhtml">
+		<route outcome="/external/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/editorial/calendar.xhtml">
+		<route outcome="/external/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/editorial/map.xhtml">
+		<route outcome="/external/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/editorial/tree.xhtml">
+		<route outcome="/external/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/editorial/home.xhtml" />
+		<route outcome="/external/home.xhtml" />
 	</uxui>
 	<uxui name="phone">
 		<route outcome="/whosinIntegrate/inout.xhtml">
@@ -52,21 +52,21 @@
 		<route outcome="/whosinIntegrate/mystatus.xhtml">
 			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
 		</route>
-		<route outcome="/editorial/list.xhtml">
+		<route outcome="/external/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/editorial/edit.xhtml">
+		<route outcome="/external/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/editorial/calendar.xhtml">
+		<route outcome="/external/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/editorial/map.xhtml">
+		<route outcome="/external/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/editorial/tree.xhtml">
+		<route outcome="/external/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/editorial/home.xhtml" />
+		<route outcome="/external/home.xhtml" />
 	</uxui>
 </router>

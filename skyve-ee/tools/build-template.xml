@@ -66,13 +66,11 @@
 	</target>
 	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
-		<delete dir="${war-path}/desktop" includes="**" />
-		<delete dir="${war-path}/external" includes="**" />
-		<delete dir="${war-path}/mobile" includes="**" />
+		<delete dir="${war-path}/smartclient" includes="**" />
+		<delete dir="${war-path}/primefaces" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
-		<delete dir="${war-path}/ultima" includes="**" />
-		<delete dir="${war-path}/WEB-INF/resources/primefaces-water" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/skyve" includes="**" />
+		<delete dir="${war-path}/WEB-INF/pages" includes="**" />
 		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,imageUpload.xhtml,home.jsp,unsubscribe.xhtml" />
 
 		<delete dir="src/modules" includes="*.java" />
@@ -90,26 +88,20 @@
 			<fileset dir="${skyve-ear-path}/META-INF" includes="**" excludes="application.xml" />
 		</copy>
 
-		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/desktop" includes="**" />
+		<copy todir="${war-path}/smartclient" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/smartclient" includes="**" />
 		</copy>
-		<copy todir="${war-path}/external" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/external" includes="**" />
-		</copy>
-		<copy todir="${war-path}/mobile" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/mobile" includes="**" />
+		<copy todir="${war-path}/primefaces" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/primefaces" includes="**" />
 		</copy>
 		<copy todir="${war-path}/pages" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/pages" includes="**" />
 		</copy>
-		<copy todir="${war-path}/ultima" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/ultima" includes="**" />
-		</copy>
 		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
 		</copy>
-		<copy todir="${war-path}/WEB-INF/resources/primefaces-water/" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/WEB-INF/resources/primefaces-water/" includes="**" />
+		<copy todir="${war-path}/WEB-INF/pages/" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/WEB-INF/pages/" includes="**" />
 		</copy>
 		<copy todir="${war-path}/WEB-INF/resources/skyve/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/resources/skyve/" includes="**" />

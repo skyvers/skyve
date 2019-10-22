@@ -6,6 +6,7 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pu="http://primefaces.org/ultima"
+		xmlns:o="http://omnifaces.org/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -68,6 +69,9 @@
 					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
 						<p:autoUpdate />
 					</p:growl>
+					<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" />
+					<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+					<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 					<p:confirmDialog id="confirm" global="true">
 						<p:commandButton id="confirmCancel" 
@@ -117,10 +121,7 @@
 			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
 			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
-			<h:outputStylesheet name="#{'css/layout-'.concat(not empty request.getAttribute('skyveUxUi') 
-				and not empty request.getAttribute('skyveUxUi').getPfThemeColour() ? 
-				request.getAttribute('skyveUxUi').getPfThemeColour() : 'indigo')
-				.concat('.css')}" library="ultima-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(skyve.getThemeColour('indigo')).concat('.css')}" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>
