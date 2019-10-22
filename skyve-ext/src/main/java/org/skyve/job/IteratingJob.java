@@ -22,6 +22,8 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	private int numProcessedElements;
 	private int numSuccessfulElements;
 	private int numFailedElements;
+	private int numFlushedElements;
+	private int numRolledBackElements;
 
 	@Override
 	public void execute() throws Exception {
@@ -32,16 +34,31 @@ public abstract class IteratingJob<T> extends CancellableJob {
 		numProcessedElements = 0;
 		numSuccessfulElements = 0;
 		numFailedElements = 0;
+		numFlushedElements = 0;
+		numRolledBackElements = 0;
+		int numRolledBackElementsSinceLastCommit = 0;
 		for (T element : elementsToProcess) {
 			if (!isCancelled()) {
 				try {
 					operation(element);
-					commitIfRequired(numProcessedElements);
+					if (commitIfRequired(numProcessedElements + 1)) {
+						incrementNumFlushedElements(numRolledBackElementsSinceLastCommit);
+						numRolledBackElementsSinceLastCommit = 0;
+					}
 					incrementNumSuccessfulElements();
 				} catch (final Exception e) {
 					incrementNumFailedElements();
 					if (!continueOnFailure()) {
 						throw e;
+					} else if (getCommitFrequency() != 0) {
+						persistence.rollback();
+						persistence.begin();
+						if (getCommitFrequency() > 1) {
+							numRolledBackElementsSinceLastCommit = (numProcessedElements + 1) - (numFlushedElements + numRolledBackElements);
+							numRolledBackElements += numRolledBackElementsSinceLastCommit;
+						} else {
+							numRolledBackElements++;
+						}
 					}
 					getLog().add(String.format("Exception processing element %d: %s", numProcessedElements, e.getMessage()));
 					LOGGER.error("Exception processing element {}.", numProcessedElements, e);
@@ -56,8 +73,22 @@ public abstract class IteratingJob<T> extends CancellableJob {
 		}
 
 		setPercentComplete(100);
+
+		// Check if there were any successful elements that were not flushed due to a rollback triggered by a processing failure.
+		final int numUnflushedElements = numSuccessfulElements - numFlushedElements;
+		if (getCommitFrequency() > 1 && numUnflushedElements > 0) {
+			getLog().add(String.format("%d elements were not flushed to the database due to a rollback that was triggered by a processing failure. " +
+							"You may want to change your commit frequency to 1 to ensure each successful element is flushed after it is processed.",
+					numUnflushedElements));
+		}
+
 		getLog().add(String.format("Completing job %s. Successful: %d, Failed %d, Total: %d.", getDisplayName(),
 				numSuccessfulElements, numFailedElements, numProcessedElements));
+
+		// Throw an exception at the end if there were any failures so that the job gets marked as failed.
+		if (numFailedElements > 0) {
+			throw new RuntimeException(String.format("Failed to process %d elements.", numFailedElements));
+		}
 	}
 
 	/**
@@ -96,13 +127,16 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	 * Commits the current transaction if required.
 	 *
 	 * @param numProcessedElements The number of elements that have been processed so far.
+	 * @return True if a commit was performed.
 	 */
-	protected void commitIfRequired(int numProcessedElements) {
+	protected boolean commitIfRequired(int numProcessedElements) {
 		final int commitFrequency = getCommitFrequency();
 		if (commitFrequency > 0 && numProcessedElements % commitFrequency == 0) {
 			persistence.commit(false);
 			persistence.begin();
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -136,5 +170,20 @@ public abstract class IteratingJob<T> extends CancellableJob {
 
 	protected void incrementNumFailedElements() {
 		numFailedElements++;
+	}
+
+	/**
+	 * @return The number of elements manually flushed by the job. Note that this will always be 0 if commit frequency is 0.
+	 */
+	public int getNumFlushedElements() {
+		return numFlushedElements;
+	}
+
+	protected void incrementNumFlushedElements(int numElementsRolledBack) {
+		numFlushedElements += getCommitFrequency() - numElementsRolledBack;
+	}
+
+	public int getNumRolledBackElements() {
+		return numRolledBackElements;
 	}
 }
