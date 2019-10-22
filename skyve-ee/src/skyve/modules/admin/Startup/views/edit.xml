@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:c="http://www.skyve.org/xml/common">
-	<form responsiveWidth="12" widgetId="formDontShow">
-		<column responsiveWidth="8" />
-		<column responsiveWidth="3" />
-		<column responsiveWidth="1" />
-		<row>
-			<item>
-				<spacer />
-			</item>
-			<item>
-				<checkBox binding="dontShowAgain" triState="false" />
-			</item>
-		</row>
-	</form>
+	
     <form responsiveWidth="12" widgetId="formEnvironment">
         <column responsiveWidth="2"/>
         <column/>
@@ -100,7 +88,10 @@
         	<item>
         		<blurb visible="mapTypeGmap">
         			<![CDATA[
-        				<span style="font-size: 80%; color: #888;">Note: Google Maps will be in Developer Mode when used without an API key.</span>
+        				<span style="font-size: 80%; color: #888;">
+        					Note: Google Maps will be in Developer Mode when used without an API 
+        					key. To obtain a Google maps API Key, visit <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>.
+       					</span>
         			]]>
         		</blurb>
         	</item>
@@ -130,6 +121,20 @@
             <item>
                 <default binding="apiGoogleRecaptchaKey"/>
             </item>
+        </row>
+        <row>
+        	<item>
+        		<spacer />
+        	</item>
+        	<item>
+        		<blurb>
+        			<![CDATA[
+        				<span style="font-size: 80%; color: #888;">
+        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
+       					</span>
+        			]]>
+        		</blurb>
+        	</item>
         </row>
     </form>
     

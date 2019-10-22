@@ -253,8 +253,6 @@ public class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * To enable the forgot password function, this application must be registered 
 					for Google Recaptcha and the site key must be specified here.
-					<br>
-					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>.
 	 **/
 	private String apiGoogleRecaptchaKey;
 	/**
