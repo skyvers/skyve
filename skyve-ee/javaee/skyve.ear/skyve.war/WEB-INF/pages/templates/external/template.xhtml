@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets"
 		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
@@ -58,29 +59,37 @@
 								</div>
 							</div>
 						</td>
-						<td width="40px">
-							<a href="javascript:setUxUi()" title="Switch Mode">
-								<i style="color:whitesmoke" class="fa fa-share-square-o fa-2x" />
-							</a>
-						</td>
-						<td width="40px">
-							<a href="loggedOut" title="Logout">
-								<i style="color:whitesmoke" class="fa fa-power-off fa-2x" />
-							</a>
-						</td>
+						<c:if test="#{showSwitchMode}">
+							<td width="40px">
+								<a href="javascript:setUxUi()" title="Switch Mode">
+									<i style="color:whitesmoke" class="fa fa-share-square-o fa-2x" />
+								</a>
+							</td>
+						</c:if>
+						<c:if test="#{showLogout}">
+							<td width="40px">
+								<a href="loggedOut" title="Logout">
+									<i style="color:whitesmoke" class="fa fa-power-off fa-2x" />
+								</a>
+							</td>
+						</c:if>
 					</tr>
 					<tr>
-						<td style="height:100%;vertical-align:top">
-							<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
-							<h:form id="menuform" prependId="false"> 
-								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
-								<p:panelMenu model="#{menu.menu}" />
-							</h:form>
-						</td>
+						<c:if test="#{showMenu}">
+							<td style="height:100%;vertical-align:top">
+								<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
+								<h:form id="menuform" prependId="false"> 
+									<p:panelMenu model="#{menu.menu}" />
+								</h:form>
+							</td>
+						</c:if>
 						<td colspan="2" style="height:100%;vertical-align:top">
 <!--
 								<ui:insert name="breadcrumbs" />
 -->
+							<h:form id="uxuiform" prependId="false"> 
+								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
+							</h:form>
 							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:messages>

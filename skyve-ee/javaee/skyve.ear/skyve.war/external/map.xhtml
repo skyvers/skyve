@@ -18,6 +18,9 @@
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyveMap.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyveMap}" />
+			<ui:param name="showMenu" value="true" />
+			<ui:param name="showSwitchMode" value="true" />
+			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<h:form prependId="false">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">

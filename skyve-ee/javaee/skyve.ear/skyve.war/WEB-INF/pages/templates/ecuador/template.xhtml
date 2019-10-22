@@ -42,19 +42,20 @@
 		<h:body styleClass="main-body layout-compact">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<div class="#{leftMenu ? 'layout-wrapper layout-menu-static layout-menu-light' : 'layout-wrapper layout-menu-light'}">
+			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light' : 'layout-wrapper layout-menu-light'}">
 	
 				<ui:include src="./topbar.xhtml">
-					<ui:param name="leftMenu" value="#{leftMenu}" />
-					<ui:param name="topMenu" value="#{topMenu}" />
+					<ui:param name="showMenu" value="#{showMenu}" />
+					<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
+					<ui:param name="showLogout" value="#{showLogout}" />
 					<ui:param name="title" value="#{bean.title}" />
 					<ui:param name="bean" value="#{bean}" />
 				</ui:include>
 	
-				<h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{leftMenu}">
+				<h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{showMenu}">
 					<div class="nano">
 						<div class="nano-content menu-scroll-content">
-							<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
+							<h:form id="menuform" prependId="false" rendered="#{showMenu}">
 								<pt:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
 							</h:form>
 						</div>

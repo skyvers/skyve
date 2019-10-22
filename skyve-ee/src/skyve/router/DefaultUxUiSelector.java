@@ -19,11 +19,11 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Startup;
 
 public class DefaultUxUiSelector implements UxUiSelector {
-	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", "ecuador", "nova-light");
-	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", "ecuador", "nova-light");
+	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", "editorial", "nova-light");
+	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", "editorial", "nova-light");
 	public static final UxUi DESKTOP = UxUi.newSmartClient("desktop", "Tahoe", "casablanca");
-	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", "ecuador", "nova-light");
-	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", "ecuador", "nova-light");
+	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", "editorial", "nova-light");
+	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", "editorial", "nova-light");
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);

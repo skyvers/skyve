@@ -11,6 +11,9 @@
 	<f:view encoding="UTF-8">
 		<ui:composition template="./template.xhtml">
 			<ui:param name="bean" value="#{bean}" />
+			<ui:param name="showMenu" value="#{showMenu}" />
+			<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
+			<ui:param name="showLogout" value="#{showLogout}" />
 			<ui:define name="head">
 				<h:outputScript library="primefaces" name="moment/moment.js" />
 				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />

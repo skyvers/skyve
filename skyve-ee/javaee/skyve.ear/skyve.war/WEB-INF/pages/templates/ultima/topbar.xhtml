@@ -12,7 +12,7 @@
 			</div>
 		</div>
 		<div class="topbar-right">
-			<c:if test="#{leftMenu}">
+			<c:if test="#{showMenu}">
 				<a id="menu-button" href="#">
 					<i></i>
 				</a>
@@ -23,7 +23,7 @@
 					<p:autoUpdate />
 				</p:outputPanel>
 			</span>
-			<c:if test="#{topMenu}">
+			<c:if test="#{showSwitchMode or showLogout}">
 				<a id="topbar-menu-button" href="#">
 					<i class="material-icons">menu</i>
 				</a>
@@ -34,18 +34,22 @@
 							<i style="font-size:1.5em;" class="topbar-icon fa fa-angle-down"></i>
 						</a>
 						<ul class="ultima-menu fadeInDown animated topbar-menu">
-							<li role="menuitem">
-								<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
-									<i class="fa fa-share-square-o"></i>
-									<span>Switch Mode</span>
-								</p:commandLink>
-							</li>
-							<li role="menuitem">
-								<a href="loggedOut"> 
-									<i class="fa fa-power-off"></i>
-									<span>Logout</span>
-								</a>
-							</li>
+							<c:if test="#{showSwitchMode}">
+								<li role="menuitem">
+									<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+										<i class="fa fa-share-square-o"></i>
+										<span>Switch Mode</span>
+									</p:commandLink>
+								</li>
+							</c:if>
+							<c:if test="#{showLogout}">
+								<li role="menuitem">
+									<a href="loggedOut"> 
+										<i class="fa fa-power-off"></i>
+										<span>Logout</span>
+									</a>
+								</li>
+							</c:if>
 						</ul>
 					</li>
 				</ul>
