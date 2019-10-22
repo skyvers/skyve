@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_tabGeneral" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<component name="_emailNotConfiguredBanner" />
+	<component name="_backupsNotConfiguredBanner" />
+	
+	<form border="true" borderTitle="Password Complexity">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="1"/>
+		<row>
+			<item>
+				<default binding="passwordComplexityModel" />
+			</item>
+		</row>
+	</form>
+	
+	<!-- test email has a different component for desktop and external -->
+	<component name="_testEmail" />
+	<vbox border="true" borderTitle="Test Email" shrinkWrap="height" invisible="emailConfigured">
+		<blurb pixelHeight="20">
+			<![CDATA[<em>Email must be configured before Test Email can be used.</em>]]>
+		</blurb>
+	</vbox>
+	
+	<!-- password reset has a different component for desktop and external -->
+	<component name="_passwordReset" />
+	<vbox border="true" borderTitle="Password Reset" shrinkWrap="height" invisible="emailConfigured">
+		<blurb pixelHeight="20">
+			<![CDATA[<em>Email must be configured before Password Reset can be customised.</em>]]>
+		</blurb>
+	</vbox>
+	
+	<form border="true" borderTitle="User Self-Registration">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="1"/>
+		<row>
+			<item>
+				<default binding="userSelfRegistrationGroup" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="allowUserSelfRegistration" />
+			</item>
+		</row>
+	</form>
+</view>

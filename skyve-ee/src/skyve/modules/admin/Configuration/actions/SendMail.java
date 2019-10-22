@@ -1,21 +1,22 @@
-package modules.admin.ControlPanel.actions;
+package modules.admin.Configuration.actions;
 
 import org.skyve.EXT;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.Mail;
 import org.skyve.web.WebContext;
 
-import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Contact;
 
-public class SendMail implements ServerSideAction<ControlPanelExtension> {
+public class SendMail implements ServerSideAction<ConfigurationExtension> {
+
 	private static final long serialVersionUID = -4439819451806091821L;
 
 	@Override
-	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
+	public ServerSideActionResult<ConfigurationExtension> execute(ConfigurationExtension bean, WebContext webContext)
 	throws Exception {
-		bean.setTabIndex(null);
 		try {
 			String emailTo = bean.getEmailTo();
 			Contact emailToContact = bean.getEmailToContact();
@@ -31,7 +32,7 @@ public class SendMail implements ServerSideAction<ControlPanelExtension> {
 			}
 		}
 		catch (Exception e) {
-			bean.trapException(e);
+			webContext.growl(MessageSeverity.error, String.format("There was an error sending the test email: %s", e.getMessage()));
 		}
 		return new ServerSideActionResult<>(bean);
 	}

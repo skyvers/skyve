@@ -47,6 +47,31 @@
 			<displayName>Allow User Self Registration</displayName>
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
+		
+		<!-- non-persistent configuration attributes -->
+		<text name="emailFrom" persistent="false">
+			<displayName>Email From</displayName>
+			<length>254</length>
+		</text>
+		<text name="emailTo" persistent="false">
+			<displayName>Email To</displayName>
+			<length>254</length>
+		</text>
+		<text name="emailSubject" persistent="false">
+			<displayName>Email Subject</displayName>
+			<length>128</length>
+		</text>
+		<markup name="emailContent" persistent="false">
+			<displayName>Email</displayName>
+		</markup>
+		<association name="emailToContact" type="aggregation" persistent="false">
+			<displayName>Email To Contact</displayName>
+			<documentName>Contact</documentName>
+		</association>
+		<association name="startup" type="aggregation" persistent="false">
+			<displayName>Startup</displayName>
+			<documentName>Startup</documentName>
+		</association>
 	</attributes>
 	<conditions>
 		<condition name="emailConfigured">
@@ -62,6 +87,14 @@
 					modules.admin.Configuration.ConfigurationExtension.validBackupConfiguration()
 				]]>
 			</expression>
-		</condition>	
+		</condition>
+		<condition name="mapTypeGmap">
+			<description>True when the selected startup map type is Google Maps</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && Startup.MapType.gmap == getStartup().getMapType()
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>

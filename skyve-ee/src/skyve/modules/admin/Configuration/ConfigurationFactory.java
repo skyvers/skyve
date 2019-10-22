@@ -2,7 +2,9 @@ package modules.admin.Configuration;
 
 import org.skyve.util.test.SkyveFactory;
 
-@SkyveFactory(testDomain = false)
+import modules.admin.Configuration.actions.SendMail;
+
+@SkyveFactory(testDomain = false, excludedActions = { SendMail.class })
 public class ConfigurationFactory {
 	// nothing to see here
 }

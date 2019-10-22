@@ -189,7 +189,6 @@
 					<action name="ExecuteQuery" />
 					<action name="GenerateEditView" />
 					<action name="GenerateQuery" />
-					<action name="SendMail" />
 					<action name="SwapCustomer" />
 					<action name="GenerateMenuSAIL" />
 					<action name="GenerateModuleSAIL" />
@@ -287,7 +286,9 @@
 					<action name="ZipBatch" />
 				</document>
 				<document name="CommunicationTemplate" permission="CRUDC" />
-				<document name="Configuration" permission="CRUDC" />
+				<document name="Configuration" permission="CRUDC">
+					<action name="SendMail" />
+				</document>
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
 				<document name="DataGroup" permission="CRUDC" />
