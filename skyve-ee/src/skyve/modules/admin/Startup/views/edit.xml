@@ -119,7 +119,7 @@
 		</form>
 	</vbox>
 	
-	<vbox border="true" borderTitle="Securitu Settings">
+	<vbox border="true" borderTitle="Security Settings">
 		<form responsiveWidth="12" widgetId="formSecurity">
 	        <column responsiveWidth="2"/>
 	        <column/>
