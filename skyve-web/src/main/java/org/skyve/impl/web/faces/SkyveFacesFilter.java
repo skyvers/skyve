@@ -14,7 +14,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.ConversationUtil;
@@ -45,7 +47,7 @@ public class SkyveFacesFilter implements Filter {
 				unsecuredURLPrefixes[i] = Util.processStringValue(unsecuredURLPrefixes[i]);
 			}
     	}
-
+    	
     	String facesSuffixParameter = config.getServletContext().getInitParameter("javax.faces.DEFAULT_SUFFIX");
     	if ((facesSuffixParameter != null) && (! facesSuffixParameter.isEmpty())) {
     		facesSuffix = facesSuffixParameter;
@@ -78,7 +80,7 @@ public class SkyveFacesFilter implements Filter {
     			chain.doFilter(req, resp);
         		return;
 	        }
-	        // Test if this URL is unsecured, and bug out if so
+	        // Test if this URL is unsecured in the web.xml, and bug out if so
 	        // NB can't use queryString here as there could be AJAX posts etc in faces so not good practice
 	        if (unsecuredURLPrefixes != null) {
 		        for (String unsecuredURLPrefix : unsecuredURLPrefixes) {
@@ -87,6 +89,17 @@ public class SkyveFacesFilter implements Filter {
 		        		return;
 		        	}
 		        }
+	        }
+	        
+	        // NB Get the routes each time here in case dev mode is on
+	        Router router = CORE.getRepository().getRouter();
+
+	        // Test if this URL is unsecured in the router, and bug out if so
+	        for (String unsecuredURLPrefix : router.getUnsecuredUrlPrefixes()) {
+	        	if (pathToTest.startsWith(unsecuredURLPrefix)) {
+        			chain.doFilter(req, resp);
+	        		return;
+	        	}
 	        }
 	        
 	        if (request.getUserPrincipal() == null) { // not logged in

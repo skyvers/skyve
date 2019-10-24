@@ -3,7 +3,9 @@ package org.skyve.impl.metadata.repository.router;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,8 +24,15 @@ public class Router implements PersistentMetaData<Router> {
 	private String uxuiSelectorClassName;
 	private TaggingUxUiSelector uxuiSelector;
 	
-	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "uxui", required = true)
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "uxui")
 	private List<UxUiMetadata> uxuis = new ArrayList<>();
+
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "unsecured")
+	private Set<String> unsecuredUrlPrefixes = new TreeSet<>();
+
+	public Set<String> getUnsecuredUrlPrefixes() {
+		return unsecuredUrlPrefixes;
+	}
 
 	@XmlTransient
 	private Map<String, UxUiMetadata> uxuiMap = new TreeMap<>();

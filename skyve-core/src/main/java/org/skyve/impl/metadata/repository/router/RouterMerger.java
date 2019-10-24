@@ -34,6 +34,8 @@ public class RouterMerger {
 				}
 			}
 			mergedRouter.getUxUis().addAll(newUxUis);
+
+			mergedRouter.getUnsecuredUrlPrefixes().addAll(routerToMerge.getUnsecuredUrlPrefixes());
 		}
 		return mergedRouter;
 	}

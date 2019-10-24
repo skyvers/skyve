@@ -102,7 +102,6 @@
         	<param-value>
         		<![CDATA[
 					/javax.faces.resource/
-					/unsubscribe.xhtml
         		]]>
         	</param-value>
         </init-param>

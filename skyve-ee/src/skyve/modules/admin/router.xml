@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<router uxuiSelectorClassName="router.DefaultUxUiSelector"
+			xmlns="http://www.skyve.org/xml/router"
+			xsi:schemaLocation="http://www.skyve.org/xml/router ../../schemas/router.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<unsecured>/unsubscribe.xhtml</unsecured>
+</router>

@@ -219,4 +219,21 @@ public class SQLMetaDataUtil {
 		
 		return result;
 	}
+	
+	public static String retrievePublicUserName(String customerName) {
+		String result = null;
+		
+		String sql = "select u.userName from ADM_Configuration c " +
+						"inner join ADM_SecurityUser u on u.bizId = c.publicUser_id " +
+						"where c.bizCustomer = :bizCustomer";
+		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
+			result = da.newSQL(sql).putParameter(Bean.CUSTOMER_NAME, customerName, false).retrieveScalar(String.class);
+		}
+		catch (Exception e) {
+			UtilImpl.LOGGER.warning("Could not retrieve public user for customer " + customerName);
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
 }
