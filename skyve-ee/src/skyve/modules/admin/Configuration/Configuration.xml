@@ -48,6 +48,12 @@
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
 		
+		<association name="publicUser" type="aggregation">
+			<displayName>Public User</displayName>
+			<description>The public user asserted on all public pages.</description>
+			<documentName>User</documentName>
+		</association>
+		
 		<!-- non-persistent configuration attributes -->
 		<text name="emailFrom" persistent="false">
 			<displayName>Email From</displayName>

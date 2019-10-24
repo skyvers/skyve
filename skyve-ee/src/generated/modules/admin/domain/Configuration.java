@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.Startup.StartupExtension;
+import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -20,6 +21,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Setup
  * 
  * @depend - - - PasswordComplexityModel
+ * @navhas n publicUser 0..1 User
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
  * @navhas n userSelfRegistrationGroup 0..1 Group
@@ -51,6 +53,8 @@ public class Configuration extends AbstractPersistentBean {
 	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
 	/** @hidden */
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	/** @hidden */
+	public static final String publicUserPropertyName = "publicUser";
 	/** @hidden */
 	public static final String emailFromPropertyName = "emailFrom";
 	/** @hidden */
@@ -183,6 +187,12 @@ public class Configuration extends AbstractPersistentBean {
 	 * Master switch to allow or disallow self registration.
 	 **/
 	private Boolean allowUserSelfRegistration;
+	/**
+	 * Public User
+	 * <br/>
+	 * The public user asserted on all public pages.
+	 **/
+	private UserExtension publicUser = null;
 	/**
 	 * Email From
 	 **/
@@ -357,6 +367,24 @@ public class Configuration extends AbstractPersistentBean {
 	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
 		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
 		this.allowUserSelfRegistration = allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #publicUser} accessor.
+	 * @return	The value.
+	 **/
+	public UserExtension getPublicUser() {
+		return publicUser;
+	}
+
+	/**
+	 * {@link #publicUser} mutator.
+	 * @param publicUser	The new value.
+	 **/
+	@XmlElement
+	public void setPublicUser(UserExtension publicUser) {
+		preset(publicUserPropertyName, publicUser);
+		this.publicUser = publicUser;
 	}
 
 	/**

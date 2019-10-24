@@ -11,7 +11,8 @@
 
   <xs:complexType name="router">
     <xs:sequence>
-      <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" maxOccurs="unbounded"/>
+      <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="unsecured" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="uxuiSelectorClassName" type="xs:string"/>
   </xs:complexType>

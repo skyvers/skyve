@@ -1,22 +1,23 @@
 package org.skyve.admin.web;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
+import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 
 import modules.admin.Communication.CommunicationBizlet;
 import modules.admin.Subscription.SubscriptionBizlet;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.Harness;
+import org.skyve.impl.web.faces.beans.PublicFacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.Persistence;
 
-@ManagedBean
-@ViewScoped
-public class Unsubscribe extends Harness {
+@RequestScoped
+@ManagedBean(name = "adminUnsubscribe")
+public class UnsubscribeView extends PublicFacesView<Bean> {
 	private static final long serialVersionUID = 6713621260342289323L;
 
 	// indicates if the RSVP processing on HTTP GET was successful or not
@@ -26,7 +27,10 @@ public class Unsubscribe extends Harness {
 		return success;
 	}
 
+	@Override
 	public void preRender() {
+		super.preRender();
+		
 		new FacesAction<Void>() {
 			@Override
 			@SuppressWarnings("synthetic-access")
@@ -40,8 +44,8 @@ public class Unsubscribe extends Harness {
 						initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
 					}
 					
-					String bizCustomer = fc.getExternalContext().getRequestParameterMap().get("c");
-					String communicationId = fc.getExternalContext().getRequestParameterMap().get("i");
+					String bizCustomer = getBizCustomerParameter();
+					String communicationId = getBizIdParameter();
 					String receiverIdentifier = fc.getExternalContext().getRequestParameterMap().get("r");
 
 					boolean communicationExists = CommunicationBizlet.anonymouslyCommunicationExists(p, bizCustomer, communicationId);
