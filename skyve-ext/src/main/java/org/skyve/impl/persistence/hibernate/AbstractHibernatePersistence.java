@@ -340,7 +340,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect(), true);
 			}
 			catch (Exception e) {
-				throw new MetaDataException("Could not apply skyve extra schema updates", e);
+				UtilImpl.LOGGER.severe("Could not apply skyve extra schema updates");
+				e.printStackTrace();
 			}
 		}
 	}
