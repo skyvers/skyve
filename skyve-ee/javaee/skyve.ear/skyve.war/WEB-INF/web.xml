@@ -329,15 +329,16 @@
 		<servlet-name>DocsServlet</servlet-name>
 		<url-pattern>/docs</url-pattern>
 	</servlet-mapping> -->
-	
-	<servlet>
+
+	<!-- Uncomment the following to allow access to the H2 web console. -->
+	<!--<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.WebServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>H2Console</servlet-name>
 		<url-pattern>/h2/*</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 
 	<servlet>
 		<servlet-name>HomeServlet</servlet-name>
