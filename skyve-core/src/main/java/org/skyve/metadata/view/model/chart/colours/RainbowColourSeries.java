@@ -16,18 +16,15 @@ public class RainbowColourSeries extends ColourSeries {
 	private Rainbow rainbow;
 	private int currentRainbowIndex = 1;
 	private String[] spectrum = {
-			"36a3eb", // light blue
-			"257dbe", // blue
-			"4bc0c0", // cyan
-			"248669", // teal
-			"9966ff", // purple
-			"b172b2", // violet
 			"ff6385", // red
 			"ffa040", // orange
 			"ffcc56", // yellow
-			"c9cbcf" // grey
+			"4bc0c0", // cyan
+			"36a3eb", // light blue
+			"9966ff", // purple
+			"c9cbcf" // grey	
 	};
-
+	
 	public RainbowColourSeries() {
 		this.rainbow = new Rainbow();
 		rainbow.setSpectrum(spectrum);
