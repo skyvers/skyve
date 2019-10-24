@@ -249,31 +249,33 @@ public class UserDashboardExtension extends UserDashboard {
 			Timestamp timestamp = (Timestamp) Binder.get(audit, Audit.timestampPropertyName);
 			String moduleName = (String) Binder.get(audit, Audit.auditModuleNamePropertyName);
 			String documentName = (String) Binder.get(audit, Audit.auditDocumentNamePropertyName);
-			if (Operation.update.equals(operation)) {
-				String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
-				Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
-				if (exists != null) {
+			if (checkModuleDocumentCanBeRead(moduleName, documentName)) {
+				if (Operation.update.equals(operation)) {
+					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
+					Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
+					if (exists != null) {
+						if ((lastTime == null || lastTime.before(timestamp))
+								&& !documents.contains(documentName)) {
+							boolean added = addTile(createTile(operation, moduleName, documentName, exists), reason);
+							lastTime = timestamp;
+							if (added) {
+								count++;
+							}
+						}
+					}
+				} else {
 					if ((lastTime == null || lastTime.before(timestamp))
 							&& !documents.contains(documentName)) {
-						boolean added = addTile(createTile(operation, moduleName, documentName, exists), reason);
+						boolean added = addTile(createTile(operation, moduleName, documentName, null), reason);
 						lastTime = timestamp;
 						if (added) {
 							count++;
 						}
 					}
 				}
-			} else {
-				if ((lastTime == null || lastTime.before(timestamp))
-						&& !documents.contains(documentName)) {
-					boolean added = addTile(createTile(operation, moduleName, documentName, null), reason);
-					lastTime = timestamp;
-					if (added) {
-						count++;
-					}
+				if (count == top) {
+					break;
 				}
-			}
-			if (count == top) {
-				break;
 			}
 		}
 	}
@@ -285,6 +287,9 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param tile
 	 */
 	private static boolean addTile(String tile, @SuppressWarnings("unused") String justification) {
+		if (tile == null) {
+			return false;
+		}
 		int size = tiles.size();
 		if (tiles.size() < TILE_COUNT_LIMIT) {
 			boolean found = false;
@@ -310,6 +315,11 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return
 	 */
 	private static String createTile(Operation operation, String moduleName, String documentName, Bean bean) {
+
+		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
+			return null;
+		}
+
 		StringBuilder link = new StringBuilder();
 		link.append(Util.getHomeUrl());
 		link.append("?a=e&m=").append(moduleName).append("&d=").append(documentName);
@@ -392,8 +402,36 @@ public class UserDashboardExtension extends UserDashboard {
 		// close tile
 		sb.append("</tr></table>");
 		sb.append("</div>");
-
 		return sb.toString();
 	}
 
+	/**
+	 * Since we are generating favourites from the audit history, it could be the case that:
+	 * - the referenced module no longer exists, or can no longer be accessed by the user
+	 * - the referenced document no longer exists, or can no longer be accessed by the user
+	 * 
+	 * @param moduleName
+	 * @param documentName
+	 * @return
+	 */
+	private static boolean checkModuleDocumentCanBeRead(String moduleName, String documentName) {
+		Customer customer = CORE.getCustomer();
+		Module module = null;
+		Document document = null;
+		boolean found = false;
+		for (Module modl : customer.getModules()) {
+			if (modl.getName().equals(moduleName)) {
+				for (String docName : modl.getDocumentRefs().keySet()) {
+					if (docName.equals(documentName)) {
+						module = customer.getModule(moduleName);
+						document = module.getDocument(customer, documentName);
+						found = CORE.getUser().canReadDocument(document);
+						break;
+					}
+				}
+				break;
+			}
+		}
+		return found;
+	}
 }
