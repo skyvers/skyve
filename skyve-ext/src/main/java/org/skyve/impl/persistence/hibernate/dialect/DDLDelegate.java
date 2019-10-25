@@ -79,7 +79,13 @@ public class DDLDelegate {
 	                        		result.add(ddl);
 	                        		if (execute) {
 		                        		UtilImpl.LOGGER.info(ddl);
-	                        			statement.executeUpdate(ddl);
+		                        		try {
+		                        			statement.executeUpdate(ddl);
+		                        		}
+		                        		catch (Exception e) {
+		                    				UtilImpl.LOGGER.severe("Could not apply skyve extra schema update of " + ddl);
+		                    				e.printStackTrace();
+		                        		}
 	                        		}
 								}
 							}
