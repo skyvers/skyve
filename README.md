@@ -30,11 +30,11 @@ Skyve is platform/operating-system independent, works with all common database t
 
 By incorporating and integrating a range of other open-source technologies to handle persistence, rich UI, security, navigation, reporting, jobs, content, spatial, mobile integration; Skyve provides a platform with all the technology specific areas required to support the Skyve standard for enterprise applications.
 
-Skyve also provides sophisticated validation and a high-level API so that you can build powerful enterprise SaaS solutions today.
+Skyve also provides sophisticated validation and a high-level API so that you can build powerful enterprise SaaS solutions.
 
 At any time, branch out into "traditional" development without restriction, but will all the benefits of the API and integrated platform.
 
-Skyve supports spatial concepts natively with MySQL, SQL Server and H2 - Oracle and Postgres coming soon. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
+Skyve supports spatial concepts natively with MySQL, SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
 
 For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
@@ -67,9 +67,10 @@ The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://g
 These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
 
 ### Overview
-1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email.
+(Note - these steps are demonstrated in detail in the video on the help-tab of the Skyve project creator or here - https://youtu.be/jcwk6pFnErg)
+1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email. 
 2. Import the project as a maven project and run the Generate Domain run configuration.
-3. Configure your application server security domain, create an empty database, and deploy your application.
+3. Configure your application instance properties `.json` file and data source `-ds.xml` files and place them into the Wildfly deployment folder. In the `.json` settings file, you will need to (at a minimum) specify the location for Skyve to store 'content' and specify an environment identifier string to be able to get it with a bootstrap credential (also specified in the `.json` file)
 4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions
@@ -106,7 +107,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 
 #### Sign in
 * Open your preferred browser and navigate to `localhost:8080/<projectName>`.
-* Sign in with the credentials specified in the `boostrap` stanza of the json settings file.
+* Sign in with the credentials specified in the `boostrap` stanza of the json settings file (ensure that you have specified an environment identifier string  - e.g. `identifier: "dev"`
 * Once signed in, use the Security Admin section of the admin module to create a user group with required roles, and create users as required.
 
 Note that the bootstrap user only has effect if there is no user with the same name, so if you already had a bootstrap user in your database, you can either:
