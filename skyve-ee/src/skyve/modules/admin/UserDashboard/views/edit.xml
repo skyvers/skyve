@@ -3,6 +3,13 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox >
 		<hbox>
+			<inject>
+				<script>
+					<![CDATA[
+						SKYVE.Util.loadCSS('pages/css/admin.css?v=' + SKYVE.Util.v);
+					]]>
+				</script>
+			</inject>
 			<form border="true" borderTitle="Favourites - click to ...">
 				<column/>
 				<row>
@@ -17,7 +24,7 @@
 			</form>
 		
 			<form responsiveWidth="6" border="true" borderTitle="My Details">
-				<column responsiveWidth="4" />
+				<column responsiveWidth="3" />
 				<column />
 				<row>
 					<item>

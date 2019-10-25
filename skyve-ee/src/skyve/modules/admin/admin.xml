@@ -580,8 +580,8 @@
 			<description>All completed jobs for display on a dashboard.</description>
 			<columns>
 				<column binding="displayName" />
-				<column binding="status" />
-				<column binding="percentComplete" />
+				<column binding="status" pixelWidth="125" />
+				<column binding="percentComplete" pixelWidth="150" />
 				<column binding="startTime" sortOrder="descending" />
 				<column binding="endTime" />
 			</columns>

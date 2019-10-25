@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
@@ -31,15 +33,19 @@ import modules.admin.domain.UserDashboard;
 
 public class UserDashboardExtension extends UserDashboard {
 
+	private static final long serialVersionUID = -6841455574804123970L;
+
 	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
-	private static final int TILE_CELL_PADDING = 2;
+	// private static final int TILE_CELL_PADDING = 2;
 	private static final int TILE_COUNT_LIMIT = 6;
 	private static final int TILE_TEXT_LIMIT = 50;
-	private static final String TILE_NEW_COLOUR = "#82E0AA";
-	private static final String TILE_UPDATE_COLOUR = "#AED6F1";
-	private static final String TILE_VIEW_COLOUR = "#FDEBD0";
-	private static final long serialVersionUID = -6841455574804123970L;
-	private static List<String> tiles;
+	// private static final String TILE_NEW_COLOUR = "#82E0AA";
+	// private static final String TILE_UPDATE_COLOUR = "#AED6F1";
+	// private static final String TILE_VIEW_COLOUR = "#FDEBD0";
+	private List<String> tiles;
+
+	@Inject
+	private transient Persistence persistence;
 
 	@Override
 	public String getFavourites() {
@@ -47,14 +53,79 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	/**
+	 * Create markup for shortcut links to favourite actions for this user
+	 * 
+	 * @return The HTML markup for the favourites
+	 */
+	private String createFavourites() {
+
+		tiles = new ArrayList<>();
+		UserExtension currentUser = ModulesUtil.currentAdminUser();
+
+		// temporarily elevate user permissions to view Audit records
+		persistence.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+
+		// favourites for the most common record saved by me (which hasn't been deleted)
+		if (tiles.size() < TILE_COUNT_LIMIT) {
+			createTilesCommon(popularUpdates(currentUser), Operation.update, 1, "Popular by me");
+		}
+
+		// favourite for the most recent record saved by me (which hasn't been deleted)
+		if (tiles.size() < TILE_COUNT_LIMIT) {
+			createTilesRecent(recentUpdates(currentUser), Operation.update, 1, "Recent by me");
+		}
+
+		// favourite for the most common record saved by anyone (which hasn't been deleted)
+		if (tiles.size() < TILE_COUNT_LIMIT) {
+			createTilesCommon(popularUpdates(null), Operation.update, 3, "Popular by everyone");
+		}
+
+		if (tiles.size() < TILE_COUNT_LIMIT) {
+			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
+		}
+
+		if (tiles.size() < TILE_COUNT_LIMIT) {
+			// add favourites to home documents for all modules the user has access to
+			Customer customer = persistence.getUser().getCustomer();
+			for (Module module : customer.getModules()) {
+				// check if user has access to the home document
+				Document document = module.getDocument(customer, module.getHomeDocumentName());
+				if (ViewType.list.equals(module.getHomeRef())) {
+					if (CORE.getUser().canCreateDocument(document)) {
+						String reason = "Suggested for creation";
+						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null,
+								reason), reason);
+					}
+				} else {
+					// exclude user dashboard - we are already here
+					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
+						String reason = "Suggested for viewing";
+						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null,
+								reason), reason);
+					}
+				}
+			}
+		}
+
+		persistence.resetDocumentPermissionScopes();
+
+		// render the tiles for display
+		StringBuilder favourites = new StringBuilder();
+		for (String tile : tiles) {
+			favourites.append(tile);
+		}
+
+		return favourites.toString();
+	}
+
+	/**
 	 * Records most popularly updated by the filter user
 	 * 
 	 * @return
 	 */
-	public static List<Bean> popularUpdates(UserExtension filterUser) {
+	private List<Bean> popularUpdates(UserExtension filterUser) {
 
-		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
@@ -75,38 +146,13 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	/**
-	 * Records most recently updated by the filter user
-	 * 
-	 * @return
-	 */
-	public static List<Bean> recentUpdates(UserExtension filterUser) {
-
-		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
-		if (filterUser != null) {
-			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
-		}
-		q.addBoundProjection(Audit.timestampPropertyName);
-		q.addBoundProjection(Audit.auditModuleNamePropertyName);
-		q.addBoundProjection(Audit.auditDocumentNamePropertyName);
-		q.addBoundProjection(Audit.auditBizIdPropertyName);
-		q.addBoundOrdering(Audit.timestampPropertyName, SortDirection.descending);
-		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
-		q.setMaxResults(10);
-
-		return q.projectedResults();
-	}
-
-	/**
 	 * Documents most recently created by the filter user
 	 * 
 	 * @param filterUser
 	 * @return
 	 */
-	public static List<Bean> recentInsertDocuments(UserExtension filterUser) {
-		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+	private List<Bean> recentInsertDocuments(UserExtension filterUser) {
+		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addEquals(Audit.operationPropertyName, Operation.insert);
 		q.getFilter().addNotEquals(Audit.auditModuleNamePropertyName, Audit.MODULE_NAME);
 		if (filterUser != null) {
@@ -122,85 +168,14 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	/**
-	 * Create markup for shortcut links to favourite actions for this user
-	 * 
-	 * @return
-	 */
-	private static String createFavourites() {
-
-		Persistence pers = CORE.getPersistence();
-		tiles = new ArrayList<>();
-		UserExtension currentUser = ModulesUtil.currentAdminUser();
-
-		// temporarily elevate user permissions to view Audit records
-		pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-
-		// favourites for the most common record saved by me (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-
-			createTilesCommon(popularUpdates(currentUser), Operation.update, 1, "Popular by me");
-		}
-
-		// favourite for the most recent record saved by me (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-
-			createTilesRecent(recentUpdates(currentUser), Operation.update, 1, "Recent by me");
-		}
-
-		// favourite for the most common record saved by anyone (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-
-			createTilesCommon(popularUpdates(null), Operation.update, 1, "Popular by everyone");
-		}
-
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-
-			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
-
-		}
-
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			// add favourites to home documents for all modules the user has access to
-			Customer customer = pers.getUser().getCustomer();
-			for (Module module : customer.getModules()) {
-
-				// check if user has access to the home document
-				Document document = module.getDocument(customer, module.getHomeDocumentName());
-				if (ViewType.list.equals(module.getHomeRef())) {
-					if (CORE.getUser().canCreateDocument(document)) {
-						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null), "Suggested for creation");
-					}
-				} else {
-					// exclude user dashboard -we are already here
-					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
-						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null), "Suggested for viewing");
-					}
-				}
-			}
-		}
-
-		pers.resetDocumentPermissionScopes();
-
-		// render the tiles for display
-		StringBuilder favourites = new StringBuilder();
-		favourites.append("<table cellpadding=\"").append(TILE_CELL_PADDING).append("\">");
-		for (String tile : tiles) {
-			favourites.append("<tr><td>").append(tile).append("</td></tr>");
-		}
-		favourites.append("</table>");
-
-		return favourites.toString();
-	}
-
-	/**
-	 * Construct a list of tiles shortcuts to perform the operation on the audited beans
+	 * Construct a list of tile shortcuts to perform the operation on the audited beans
 	 * 
 	 * @param audits
 	 * @param operation
 	 * @param top
 	 * @param reason
 	 */
-	public static void createTilesCommon(List<Bean> audits, Operation operation, int top, String reason) {
+	private void createTilesCommon(List<Bean> audits, Operation operation, int top, String reason) {
 
 		try {
 			int count = 0;
@@ -214,10 +189,9 @@ public class UserDashboardExtension extends UserDashboard {
 				if (CORE.getUser().canAccessDocument(document)) {
 					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
 					if (id != null) {
-						Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
-						// Long score = (Long) Binder.get(b, "Score");
+						Bean exists = persistence.retrieve(moduleName, documentName, id);
 						if (exists != null) {
-							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists), reason);
+							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason), reason);
 							if (added) {
 								count++;
 							}
@@ -240,7 +214,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param audits
 	 * @param operation
 	 */
-	public static void createTilesRecent(List<Bean> audits, Operation operation, int top, String reason) {
+	private void createTilesRecent(List<Bean> audits, Operation operation, int top, String reason) {
 
 		int count = 0;
 		Set<String> documents = new HashSet<>();
@@ -252,11 +226,11 @@ public class UserDashboardExtension extends UserDashboard {
 			if (checkModuleDocumentCanBeRead(moduleName, documentName)) {
 				if (Operation.update.equals(operation)) {
 					String id = (String) Binder.get(audit, Audit.auditBizIdPropertyName);
-					Bean exists = CORE.getPersistence().retrieve(moduleName, documentName, id);
+					Bean exists = persistence.retrieve(moduleName, documentName, id);
 					if (exists != null) {
 						if ((lastTime == null || lastTime.before(timestamp))
 								&& !documents.contains(documentName)) {
-							boolean added = addTile(createTile(operation, moduleName, documentName, exists), reason);
+							boolean added = addTile(createTile(operation, moduleName, documentName, exists, reason), reason);
 							lastTime = timestamp;
 							if (added) {
 								count++;
@@ -266,7 +240,7 @@ public class UserDashboardExtension extends UserDashboard {
 				} else {
 					if ((lastTime == null || lastTime.before(timestamp))
 							&& !documents.contains(documentName)) {
-						boolean added = addTile(createTile(operation, moduleName, documentName, null), reason);
+						boolean added = addTile(createTile(operation, moduleName, documentName, null, reason), reason);
 						lastTime = timestamp;
 						if (added) {
 							count++;
@@ -286,7 +260,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * 
 	 * @param tile
 	 */
-	private static boolean addTile(String tile, @SuppressWarnings("unused") String justification) {
+	private boolean addTile(String tile, @SuppressWarnings("unused") String justification) {
 		if (tile == null) {
 			return false;
 		}
@@ -311,10 +285,11 @@ public class UserDashboardExtension extends UserDashboard {
 	 * 
 	 * @param moduleName
 	 * @param documentName
+	 * @param reason
 	 * @param action
 	 * @return
 	 */
-	private static String createTile(Operation operation, String moduleName, String documentName, Bean bean) {
+	private static String createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
 			return null;
@@ -334,75 +309,123 @@ public class UserDashboardExtension extends UserDashboard {
 
 		String iconClass = (document.getIconStyleClass() == null ? DEFAULT_ICON_CLASS : document.getIconStyleClass());
 		String singularAlias = document.getSingularAlias();
-		String backgroundColour;
+		// String backgroundColour;
 		String action;
+
+		String actionClass = null;
 		switch (operation) {
-		case insert:
-			action = "Create a new ";
-			backgroundColour = TILE_NEW_COLOUR;
-			break;
-		case update:
-			// check if the document is persistent for "view" or "edit"
-			if (document.getPersistent() == null) {
-				action = "View ";
-				backgroundColour = TILE_VIEW_COLOUR;
-			} else {
+			case delete:
+				actionClass = "fa-times";
+				break;
+			case insert:
+				actionClass = "fa-plus";
+				break;
+			case update:
+				actionClass = "fa-angle-up";
+				break;
+			default:
+				actionClass = "fa-chevron-right";
+		}
+
+		// 1 - update/create/view
+		// 2 - link
+		// 3 - document icon / content image
+		// 4 - action icon
+		// 5 - title
+		// 6 - description
+		String template = "<div class=\"tile %1$s\" onclick=\"location.href='%2$s';\">"
+				+ "  <div>"
+				// + " <i class=\"icon %3$s\" style=\"font-size:24px;\"></i>"
+				+ "    %3$s"
+				+ "    <div class=\"title\"><i class=\"fa %4$s\"></i>%5$s</i></a></div>"
+				+ "    <div class=\"description\">%6$s</div>"
+				+ "  </div>"
+				+ "</div>";
+
+		switch (operation) {
+			case insert:
+				action = "Create a new ";
+				// backgroundColour = TILE_NEW_COLOUR;
+				break;
+			case update:
+				// check if the document is persistent for "view" or "edit"
+				if (document.getPersistent() == null) {
+					action = "View ";
+					// backgroundColour = TILE_VIEW_COLOUR;
+				} else {
+					action = operation.toDescription();
+					// backgroundColour = TILE_UPDATE_COLOUR;
+				}
+				break;
+			default:
 				action = operation.toDescription();
-				backgroundColour = TILE_UPDATE_COLOUR;
-			}
-			break;
-		default:
-			action = operation.toDescription();
-			backgroundColour = TILE_VIEW_COLOUR;
+				// backgroundColour = TILE_VIEW_COLOUR;
 		}
 
 		// div style
-		String divStyle = "style=\"cursor: pointer; background-color: " + backgroundColour
+		/*String divStyle = "style=\"cursor: pointer; background-color: " + backgroundColour
 				+ "; opacity: 0.9; border: 1px solid grey; border-radius: 3px; padding: 3px 3px 3px 3px;\"";
-
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append("<div onclick=\"location.href='").append(link.toString()).append("';\"");
+		sb.append("<div onclick=\"location.href='").append(link).append("';\"");
 		sb.append(divStyle);
 		// hover
 		sb.append(" onMouseOver=\"this.style.opacity=1.0\"");
 		sb.append(" onMouseOut=\"this.style.opacity=0.9\"");
 		sb.append(">");
-
+		
 		// tile is a table with an icon and text
-		sb.append("<table cellpadding=\"").append(TILE_CELL_PADDING).append("\"><tr>");
+		sb.append("<table cellpadding=\"").append(TILE_CELL_PADDING).append("\"><tr>");*/
 
 		// icon
-		sb.append("<td width=\"28px\" align=\"center\">");
-		String icon = "<i class=\"" + iconClass + "\" style=\"font-size:24px;\"></i>";
+		// sb.append("<td width=\"28px\" align=\"center\">");
+		// String icon = "<i class=\"" + iconClass + "\" style=\"font-size:24px;\"></i>";
+
+		// set the document icon
+		String icon = String.format(""
+				+ "<span class='icon'>"
+				+ "  <i class='%1$s' style=\"font-size:24px;\"></i>"
+				+ "</span>", iconClass);
 		if (bean != null) {
-			// provide a thumbnail for the first image attribute type
-			for (Attribute a : document.getAttributes()) {
-				if (AttributeType.image.equals(a.getAttributeType())) {
+			// provide a thumbnail for the first image or content attribute type
+			for (Attribute a : document.getAllAttributes()) {
+				if (AttributeType.content.equals(a.getAttributeType())
+						|| AttributeType.image.equals(a.getAttributeType())) {
 					String cId = (String) Binder.get(bean, a.getName());
 					String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName() + "&_w=24&_h=24";
-					icon = "<img src=\"" + imgSrc + "\" />";
+					// icon = "<img src=\"" + imgSrc + "\" />";
+					icon = String.format("<span class='icon'>"
+							+ "  <img src='%1$s'/>"
+							+ "</span>", imgSrc);
 					break;
 				}
 			}
 		}
-		sb.append(icon);
-		sb.append("</td>");
+		// sb.append(icon);
+		// sb.append("</td>");
 
 		// link text
-		sb.append("<td>");
+		// sb.append("<td>");
 
 		StringBuilder tileText = new StringBuilder();
 		tileText.append(action).append(" ").append(singularAlias);
 		if (bean != null && bean.getBizKey() != null) {
 			tileText.append(" - ").append(bean.getBizKey());
 		}
-		sb.append((tileText.length() > TILE_TEXT_LIMIT ? tileText.toString().substring(0, TILE_TEXT_LIMIT - 3) + "..." : tileText));
-		sb.append("</td>");
-
+		// sb.append((tileText.length() > TILE_TEXT_LIMIT ? tileText.toString().substring(0, TILE_TEXT_LIMIT - 3) + "..." :
+		// tileText));
+		// sb.append("</td>");
+		
 		// close tile
-		sb.append("</tr></table>");
-		sb.append("</div>");
-		return sb.toString();
+		// sb.append("</tr></table>");
+		// sb.append("</div>");
+
+		// return sb.toString();
+		return String.format(template,
+				operation, link, icon, actionClass,
+				(tileText.length() > TILE_TEXT_LIMIT ? tileText.toString().substring(0, TILE_TEXT_LIMIT - 3) + "..."
+						: tileText.toString()),
+				reason);
 	}
 
 	/**
@@ -433,5 +456,29 @@ public class UserDashboardExtension extends UserDashboard {
 			}
 		}
 		return found;
+	}
+
+	/**
+	 * Queries the 10 most recently updated audit records, filtered by the specified user if provided.
+	 * 
+	 * @param The user to filter the audits by
+	 * @return The last 10 audits in the system
+	 */
+	private List<Bean> recentUpdates(UserExtension filterUser) {
+
+		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
+		if (filterUser != null) {
+			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
+		}
+		q.addBoundProjection(Audit.timestampPropertyName);
+		q.addBoundProjection(Audit.auditModuleNamePropertyName);
+		q.addBoundProjection(Audit.auditDocumentNamePropertyName);
+		q.addBoundProjection(Audit.auditBizIdPropertyName);
+		q.addBoundOrdering(Audit.timestampPropertyName, SortDirection.descending);
+		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
+		q.setMaxResults(10);
+
+		return q.projectedResults();
 	}
 }
