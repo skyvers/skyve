@@ -19,6 +19,7 @@ import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.addin.DefaultAddInManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -128,11 +129,11 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt("thumbnail", "subsamplingMinimumTargetSize", thumbnail);
 			UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean("thumbnail", "fileStorage", thumbnail);
 			UtilImpl.THUMBNAIL_DIRECTORY = getString("thumbnail", "directory", thumbnail, false);
-		if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
-			// clean up the thumb nail directory path
-			UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
-			testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
-		}
+			if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
+				// clean up the thumb nail directory path
+				UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
+				testWritableDirectory("thumbnail.directory", UtilImpl.THUMBNAIL_DIRECTORY);
+			}
 		}
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
@@ -226,6 +227,8 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
 			}
 		}
+		
+		DefaultAddInManager.get().start();
 		
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
@@ -424,6 +427,8 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
 			e.printStackTrace();
 		}
+		
+		DefaultAddInManager.get().stop();
 	}
 
 	/**

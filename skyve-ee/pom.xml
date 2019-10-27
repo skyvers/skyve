@@ -807,6 +807,11 @@
 			<version>${reactive-streams.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.pf4j</groupId>
+			<artifactId>pf4j</artifactId>
+			<version>${pf4j.version}</version>
+		</dependency>
 
 		<!-- These need to remain and are not a copy of the skyve dependencies -->
         <dependency>

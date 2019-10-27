@@ -19,6 +19,8 @@ import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jfree.chart.JFreeChart;
+import org.skyve.addin.AddInManager;
+import org.skyve.addin.DefaultAddInManager;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.AttachmentContent;
@@ -584,6 +586,10 @@ public class EXT {
 	// Not a CDI provider as it is auto-closeable 
 	public static ContentManager newContentManager() {
 		return AbstractContentManager.get();
+	}
+
+	public static AddInManager getAddInManager() {
+		return DefaultAddInManager.get();
 	}
 
 	/**

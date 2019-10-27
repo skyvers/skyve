@@ -149,5 +149,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xz-1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-7.0.jar"/>
 	<classpathentry kind="lib" path="lib/mockito-core-2.21.0.jar" sourcepath="/Users/benpetito/.m2/repository/org/mockito/mockito-core/2.21.0/mockito-core-2.21.0-sources.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
