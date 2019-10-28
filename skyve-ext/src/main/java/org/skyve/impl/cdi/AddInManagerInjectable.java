@@ -14,7 +14,7 @@ import org.skyve.addin.AddInManager;
 public class AddInManagerInjectable implements AddInManager {
 
 	@Override
-	public <T extends Object> T getAddIn(Class<T> type) {
-		return EXT.getAddInManager().getAddIn(type);
+	public <T extends Object> T getExtension(Class<T> type) {
+		return EXT.getAddInManager().getExtension(type);
 	}
 }

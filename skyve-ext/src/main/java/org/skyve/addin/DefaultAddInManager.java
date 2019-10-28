@@ -43,7 +43,7 @@ public class DefaultAddInManager implements AddInManager {
 	}
 	
 	@Override
-	public <T extends Object> T getAddIn(Class<T> type) {
+	public <T extends Object> T getExtension(Class<T> type) {
 		List<T> extensions = plugInManager.getExtensions(type);
 		if ((extensions != null) && (! extensions.isEmpty())) {
 			return extensions.get(0);

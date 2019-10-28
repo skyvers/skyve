@@ -1,10 +1,15 @@
 package org.skyve.addin;
 
-import org.pf4j.ExtensionPoint;
+import org.pf4j.Plugin;
+import org.pf4j.PluginWrapper;
 
 /**
- * Interface to extend for Skyve AddIns.
+ * Abstract class to extend for Skyve AddIns.
  */
-public interface AddIn extends ExtensionPoint {
+public abstract class AddIn extends Plugin {
 	// Expose configuration of add-in required
+	
+	public AddIn(PluginWrapper wrapper) {
+		super(wrapper);
+	}
 }
