@@ -218,7 +218,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber);
 		String iconStyleClass = tab.getIconStyleClass();
 		if (iconStyleClass != null) {
-			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
+			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span>&nbsp;&nbsp;</span>");
 		}
 		else if (icon16x16Url != null) {
 			code.append("',icon:'../").append(icon16x16Url);
@@ -2763,7 +2763,7 @@ pickListFields:[{name:'value'}],
 		result.append(type);
 		result.append("',displayName:'");
 		if (iconStyleClass != null) {
-			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>&nbsp;&nbsp;");
+			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span>&nbsp;&nbsp;</span>");
 		}
 		result.append(SmartClientGenerateUtils.processString(label)).append("',tabIndex:999,");
 		if ((iconStyleClass == null) && (iconUrl != null)) {
