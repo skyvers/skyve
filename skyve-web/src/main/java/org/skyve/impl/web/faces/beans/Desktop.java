@@ -488,7 +488,7 @@ public class Desktop extends Harness {
 				}
 				// Leave some space between the icon and its label
 				if ((icon16 != null) || (iconStyleClass != null)) {
-					result.append("<span>&nbsp;&nbsp;</span>");
+					result.append("<span> &nbsp;</span>");
 				}
 				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
 				if (config != null) {
