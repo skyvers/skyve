@@ -37,6 +37,21 @@ public class RouterMerger {
 
 			mergedRouter.getUnsecuredUrlPrefixes().addAll(routerToMerge.getUnsecuredUrlPrefixes());
 		}
+		
+		// Now, add any unsecured routes
+		List<RouteCriteria> unsecuredRoutes = mergedRouter.getUnsecuredRoutes();
+		for (UxUiMetadata uxui : mergedRouter.getUxUis()) {
+			for (Route route : uxui.getRoutes()) {
+				if (mergedRouter.isUnsecured(route.getOutcomeUrl())) {
+					for (RouteCriteria criteria : route.getCriteria()) {
+						if ((criteria.getUserId() == null) && (criteria.getDataGroupId() == null)) {
+							unsecuredRoutes.add(criteria);
+						}
+					}
+				}
+			}
+		}
+		
 		return mergedRouter;
 	}
 }

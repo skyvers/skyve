@@ -69,4 +69,5 @@
 		</route>
 		<route outcome="/external/home.xhtml" />
 	</uxui>
+	<unsecured>/external/public.xhtml</unsecured>
 </router>

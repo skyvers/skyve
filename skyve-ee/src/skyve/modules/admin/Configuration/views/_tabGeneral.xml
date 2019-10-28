@@ -49,7 +49,7 @@
 		</row>
 	</form>
 	
-	<form border="true" borderTitle="Public User">
+	<form border="true" borderTitle="Anonymous Public User">
 		<column responsiveWidth="3"/>
 		<column />
 		<column responsiveWidth="1"/>

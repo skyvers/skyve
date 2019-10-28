@@ -47,8 +47,10 @@
 		<intercept-url pattern="/pages/requestPasswordReset.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/resetPassword.jsp" access="permitAll" />
 
+		<!-- Permit home.jsp as it controls access to public and private pages itself -->
+		<intercept-url pattern="/home.jsp" access="permitAll" />
+
 		<!-- Secure the system JSPs and HTMLs -->
-		<intercept-url pattern="/home.jsp" access="authenticated" />
 		<intercept-url pattern="/pages/changePassword.jsp" access="authenticated" />
 		<intercept-url pattern="/pages/htmlEdit/browseImages.jsp" access="authenticated" />
 		<intercept-url pattern="/pages/map/geolocate.jsp" access="authenticated" />

@@ -1,6 +1,4 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@page isErrorPage="true"%>
-<%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
@@ -10,9 +8,7 @@
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
-	Principal p = request.getUserPrincipal();
-	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
-	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
+	Locale locale = request.getLocale();
 	if (locale == null) {
 		locale = Locale.ENGLISH;
 	}
@@ -55,14 +51,11 @@
 		            			<%=Util.i18n("page.error.banner", locale)%>
 		            		</div>
 		            		<div class="field">
-		            			<%=Util.i18n("page.error.explanation", locale)%>
+		            			<%=Util.i18n("page.public.noPublicUser", locale)%>
 		            		</div>
 		            	</div>
 						<div class="field">
-							<a href="<%=request.getContextPath()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
-						</div>
-						<div class="field">
-							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
+							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=Util.i18n("page.public.noPublicUser", locale)%> for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"
 									class="ui fluid large blue basic button">
 								<i class="envelope icon"></i><%=Util.i18n("page.loginError.report", locale)%>
 							</a>

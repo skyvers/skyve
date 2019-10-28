@@ -18,6 +18,7 @@
 <%@ page import="org.skyve.impl.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
+<%@ page import="org.skyve.impl.util.SQLMetaDataUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 
 <%
@@ -44,43 +45,69 @@
 	response.addCookie(cookie);
 
 	String a = request.getParameter("a"); // action
+	WebAction webAction = null;
+	if (a != null) {
+		webAction = WebAction.valueOf(a);
+	}
 	String m = request.getParameter("m"); // module
 	String d = request.getParameter("d"); // document
 	String q = request.getParameter("q"); // query
 	String i = request.getParameter("i"); // id
+	String c = request.getParameter("c"); // customer
 
-	// NB Some app servers can detect if a welcome URL is secured and will forward to the login form.
-	// Some do not, if we make it here without a principal, then we should redirect directly to home.jsp
+	// Set the UX/UI and user agent type
+	UserAgentType userAgentType = UserAgent.getType(request);
+	request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
+	Router router = repository.getRouter();
+	UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+	request.setAttribute(AbstractWebContext.UXUI, uxui);
+
+	RouteCriteria criteria = new RouteCriteria();
+	criteria.setDocumentName(d);
+	criteria.setModuleName(m);
+	criteria.setQueryName(q);
+	criteria.setWebAction(webAction);
+	if (WebAction.e.equals(webAction)) { // editing
+		criteria.setViewType((i == null) ? ViewType.create : ViewType.edit);
+	}
+	
+	// If we make it here without a principal, then we should either continue to a public unsecured page or login.
+	String userName = null;
 	Principal userPrincipal = request.getUserPrincipal();
-	if (userPrincipal == null) { // some welcome files send redirect, some server-side forward
-		StringBuilder sb = new StringBuilder(64);
-		sb.append(Util.getHomeUrl()).append("home.jsp");
-		if ((m != null) && (d != null)) {
-			sb.append("?m=").append(m);
-			sb.append("&d=").append(d);
-			if (a != null) {
-				sb.append("&a=").append(a);
+	if (userPrincipal == null) {
+		customerName = (UtilImpl.CUSTOMER == null) ? c : UtilImpl.CUSTOMER;
+		criteria.setCustomerName(customerName);
+		if (router.isUnsecured(criteria)) {
+			if (customerName == null) {
+				throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
 			}
-			if (q != null) {
-				sb.append("&q=").append(q);
+			userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
+			if (userName == null) {
+				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
+				return;
 			}
-			if (i != null) {
-				sb.append("&i=").append(i);
-			}
+			userName = customerName + "/" + userName;
 		}
-		response.sendRedirect(response.encodeRedirectURL(sb.toString()));
+		else {
+			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "login"));
+			return;
+		}
 	}
 	else if (customerName != null) {
 		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl()));
 	}
 	else {
+		userName = userPrincipal.getName();
+	}
+	
+	if (userName != null) { // we have a logged in user or at least 1 to assert
 		// Get the user
 		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		if (user == null) { // if the user is not established yet (but we've logged in...)
+		if (user == null) { // if the user is not established yet (but we've logged in or have a public user...)
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
 				persistence.begin();
-				user = WebUtil.processUserPrincipalForRequest(request, userPrincipal.getName(), true);
+				user = WebUtil.processUserPrincipalForRequest(request, userName, true);
 			}
 			finally {
 				if (persistence != null) {
@@ -94,29 +121,10 @@
 			return;
 		}
 		
-		// Set the UX/UI and user agent type
-		UserAgentType userAgentType = UserAgent.getType(request);
-		request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
-		Router router = repository.getRouter();
-		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-		request.setAttribute(AbstractWebContext.UXUI, uxui);
-		
 		// Determine the route
-		RouteCriteria criteria = new RouteCriteria();
-		WebAction webAction = null;
 		criteria.setCustomerName(user.getCustomerName());
 		criteria.setDataGroupId(user.getDataGroupId());
-		criteria.setDocumentName(d);
-		criteria.setModuleName(m);
-		criteria.setQueryName(q);
 		criteria.setUserId(user.getId());
-		if (a != null) {
-			webAction = WebAction.valueOf(a);
-			criteria.setWebAction(webAction);
-		}
-		if (WebAction.e.equals(webAction)) { // editing
-			criteria.setViewType((i == null) ? ViewType.create : ViewType.edit);
-		}
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (UtilImpl.COMMAND_TRACE) {
 			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",

@@ -188,9 +188,9 @@ public class Configuration extends AbstractPersistentBean {
 	 **/
 	private Boolean allowUserSelfRegistration;
 	/**
-	 * Public User
+	 * Anonymous Public User
 	 * <br/>
-	 * The public user asserted on all public pages.
+	 * The anonymous public user asserted on all public pages.
 	 **/
 	private UserExtension publicUser = null;
 	/**

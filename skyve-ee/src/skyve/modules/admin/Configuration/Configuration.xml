@@ -49,8 +49,8 @@
 		</boolean>
 		
 		<association name="publicUser" type="aggregation">
-			<displayName>Public User</displayName>
-			<description>The public user asserted on all public pages.</description>
+			<displayName>Anonymous Public User</displayName>
+			<description>The anonymous public user asserted on all public pages.</description>
 			<documentName>User</documentName>
 		</association>
 		

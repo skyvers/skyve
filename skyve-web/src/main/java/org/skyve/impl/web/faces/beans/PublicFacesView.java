@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.beans;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
 import org.skyve.domain.Bean;
@@ -32,12 +33,15 @@ public class PublicFacesView <T extends Bean> extends FacesView<T> {
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if (! fc.isPostback()) {
-			if (FacesContext.getCurrentInstance().getExternalContext().getUserPrincipal() == null) {
-				String customerName = (UtilImpl.CUSTOMER == null) ? bizCustomerParameter : UtilImpl.CUSTOMER;
-				if (customerName != null) {
-					String userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
-					if (userName != null) {
-						setUser(customerName, userName);
+			ExternalContext ec = fc.getExternalContext();
+			if (ec.getUserPrincipal() == null) {
+				if (getUser() == null) {
+					String customerName = (UtilImpl.CUSTOMER == null) ? bizCustomerParameter : UtilImpl.CUSTOMER;
+					if (customerName != null) {
+						String userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
+						if (userName != null) {
+							setUser(customerName, userName);
+						}
 					}
 				}
 			}

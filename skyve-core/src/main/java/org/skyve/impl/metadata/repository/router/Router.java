@@ -27,6 +27,9 @@ public class Router implements PersistentMetaData<Router> {
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "uxui")
 	private List<UxUiMetadata> uxuis = new ArrayList<>();
 
+	@XmlTransient
+	private Map<String, UxUiMetadata> uxuiMap = new TreeMap<>();
+
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "unsecured")
 	private Set<String> unsecuredUrlPrefixes = new TreeSet<>();
 
@@ -35,7 +38,11 @@ public class Router implements PersistentMetaData<Router> {
 	}
 
 	@XmlTransient
-	private Map<String, UxUiMetadata> uxuiMap = new TreeMap<>();
+	private List<RouteCriteria> unsecuredRoutes = new ArrayList<>();
+
+	List<RouteCriteria> getUnsecuredRoutes() {
+		return unsecuredRoutes;
+	}
 	
 	public String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
@@ -79,10 +86,30 @@ public class Router implements PersistentMetaData<Router> {
 		return null;
 	}
 	
+	public boolean isUnsecured(String urlPrefixToTest) {
+		if (urlPrefixToTest != null) {
+			for (String unsecuredURLPrefix : unsecuredUrlPrefixes) {
+	        	if (urlPrefixToTest.startsWith(unsecuredURLPrefix)) {
+	        		return true;
+	        	}
+	        }
+		}
+        return false;
+	}
+	
+	public boolean isUnsecured(RouteCriteria routeToTest) {
+		if (routeToTest != null) {
+			for (RouteCriteria unsecuredRoute : unsecuredRoutes) {
+	        	if (unsecuredRoute.matches(routeToTest)) {
+	        		return true;
+	        	}
+	        }
+		}
+        return false;
+	}
+	
 	@Override
 	public Router convert(String metaDataName) {
-		// TODO look at conversion 
-		
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);
 		}
