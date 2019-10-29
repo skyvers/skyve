@@ -57,7 +57,7 @@
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
 		<!-- This is the version elasticsearch 1.4.2 requires -->
-		<tika.version>1.5</tika.version>
+		<tika.version>1.22</tika.version>
 		<umlgraph.version>5.6.6</umlgraph.version>
 		<UserAgentUtils.version>1.20</UserAgentUtils.version>
 		<xercesImpl.version>2.8.1</xercesImpl.version>
