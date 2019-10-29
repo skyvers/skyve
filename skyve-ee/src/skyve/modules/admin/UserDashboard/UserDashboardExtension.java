@@ -1,6 +1,5 @@
 package modules.admin.UserDashboard;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,13 +35,8 @@ public class UserDashboardExtension extends UserDashboard {
 	private static final long serialVersionUID = -6841455574804123970L;
 
 	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
-	// private static final int TILE_CELL_PADDING = 2;
 	private static final int TILE_COUNT_LIMIT = 6;
-	private static final int TILE_TEXT_LIMIT = 50;
-	// private static final String TILE_NEW_COLOUR = "#82E0AA";
-	// private static final String TILE_UPDATE_COLOUR = "#AED6F1";
-	// private static final String TILE_VIEW_COLOUR = "#FDEBD0";
-	private List<String> tiles;
+	private final Set<Tile> tiles = new HashSet<>();
 
 	@Inject
 	private transient Persistence persistence;
@@ -59,7 +53,6 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	private String createFavourites() {
 
-		tiles = new ArrayList<>();
 		UserExtension currentUser = ModulesUtil.currentAdminUser();
 
 		// temporarily elevate user permissions to view Audit records
@@ -77,7 +70,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 		// favourite for the most common record saved by anyone (which hasn't been deleted)
 		if (tiles.size() < TILE_COUNT_LIMIT) {
-			createTilesCommon(popularUpdates(null), Operation.update, 3, "Popular by everyone");
+			createTilesCommon(popularUpdates(null), Operation.update, 1, "Popular by everyone");
 		}
 
 		if (tiles.size() < TILE_COUNT_LIMIT) {
@@ -94,14 +87,14 @@ public class UserDashboardExtension extends UserDashboard {
 					if (CORE.getUser().canCreateDocument(document)) {
 						String reason = "Suggested for creation";
 						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null,
-								reason), reason);
+								reason));
 					}
 				} else {
 					// exclude user dashboard - we are already here
 					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
 						String reason = "Suggested for viewing";
 						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null,
-								reason), reason);
+								reason));
 					}
 				}
 			}
@@ -111,8 +104,8 @@ public class UserDashboardExtension extends UserDashboard {
 
 		// render the tiles for display
 		StringBuilder favourites = new StringBuilder();
-		for (String tile : tiles) {
-			favourites.append(tile);
+		for (Tile tile : tiles) {
+			favourites.append(tile.toMarkup());
 		}
 
 		return favourites.toString();
@@ -191,7 +184,7 @@ public class UserDashboardExtension extends UserDashboard {
 					if (id != null) {
 						Bean exists = persistence.retrieve(moduleName, documentName, id);
 						if (exists != null) {
-							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason), reason);
+							boolean added = addTile(createTile(Operation.update, moduleName, documentName, exists, reason));
 							if (added) {
 								count++;
 							}
@@ -230,7 +223,7 @@ public class UserDashboardExtension extends UserDashboard {
 					if (exists != null) {
 						if ((lastTime == null || lastTime.before(timestamp))
 								&& !documents.contains(documentName)) {
-							boolean added = addTile(createTile(operation, moduleName, documentName, exists, reason), reason);
+							boolean added = addTile(createTile(operation, moduleName, documentName, exists, reason));
 							lastTime = timestamp;
 							if (added) {
 								count++;
@@ -240,7 +233,7 @@ public class UserDashboardExtension extends UserDashboard {
 				} else {
 					if ((lastTime == null || lastTime.before(timestamp))
 							&& !documents.contains(documentName)) {
-						boolean added = addTile(createTile(operation, moduleName, documentName, null, reason), reason);
+						boolean added = addTile(createTile(operation, moduleName, documentName, null, reason));
 						lastTime = timestamp;
 						if (added) {
 							count++;
@@ -255,28 +248,21 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	/**
-	 * Limit the number of tiles to display
-	 * returns true if tile was added
+	 * Adds a tile to the working set of tiles if it hasn't already been
+	 * added, and the tile limit has not already been reached.
 	 * 
-	 * @param tile
+	 * @param tile The {@link Tile} to add
+	 * @return True if a tile was added
 	 */
-	private boolean addTile(String tile, @SuppressWarnings("unused") String justification) {
+	private boolean addTile(final Tile tile) {
 		if (tile == null) {
 			return false;
 		}
 		int size = tiles.size();
 		if (tiles.size() < TILE_COUNT_LIMIT) {
-			boolean found = false;
-			for (String prev : tiles) {
-				if (prev.equals(tile)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				tiles.add(tile);
-			}
+			tiles.add(tile);
 		}
+
 		return size != tiles.size();
 	}
 
@@ -289,7 +275,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @param action
 	 * @return
 	 */
-	private static String createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
+	private static Tile createTile(Operation operation, String moduleName, String documentName, Bean bean, String reason) {
 
 		if (!checkModuleDocumentCanBeRead(moduleName, documentName)) {
 			return null;
@@ -307,85 +293,47 @@ public class UserDashboardExtension extends UserDashboard {
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 
+		String action;
+		String actionClass = null;
 		String iconClass = (document.getIconStyleClass() == null ? DEFAULT_ICON_CLASS : document.getIconStyleClass());
 		String singularAlias = document.getSingularAlias();
-		// String backgroundColour;
-		String action;
 
-		String actionClass = null;
+
+		Tile.Operation tileOperation = Tile.Operation.view;
+
 		switch (operation) {
 			case delete:
+				action = "Delete ";
 				actionClass = "fa-times";
+				tileOperation = Tile.Operation.delete;
 				break;
-			case insert:
-				actionClass = "fa-plus";
-				break;
-			case update:
-				actionClass = "fa-angle-up";
-				break;
-			default:
-				actionClass = "fa-chevron-right";
-		}
-
-		// 1 - update/create/view
-		// 2 - link
-		// 3 - document icon / content image
-		// 4 - action icon
-		// 5 - title
-		// 6 - description
-		String template = "<div class=\"tile %1$s\" onclick=\"location.href='%2$s';\">"
-				+ "  <div>"
-				// + " <i class=\"icon %3$s\" style=\"font-size:24px;\"></i>"
-				+ "    %3$s"
-				+ "    <div class=\"title\"><i class=\"fa %4$s\"></i>%5$s</i></a></div>"
-				+ "    <div class=\"description\">%6$s</div>"
-				+ "  </div>"
-				+ "</div>";
-
-		switch (operation) {
 			case insert:
 				action = "Create a new ";
-				// backgroundColour = TILE_NEW_COLOUR;
+				actionClass = "fa-plus";
+				tileOperation = Tile.Operation.insert;
 				break;
 			case update:
 				// check if the document is persistent for "view" or "edit"
 				if (document.getPersistent() == null) {
 					action = "View ";
-					// backgroundColour = TILE_VIEW_COLOUR;
+					actionClass = "fa-chevron-right";
 				} else {
 					action = operation.toDescription();
-					// backgroundColour = TILE_UPDATE_COLOUR;
+					actionClass = "fa-angle-up";
+					tileOperation = Tile.Operation.update;
 				}
 				break;
 			default:
 				action = operation.toDescription();
-				// backgroundColour = TILE_VIEW_COLOUR;
+				actionClass = "fa-chevron-right";
 		}
-
-		// div style
-		/*String divStyle = "style=\"cursor: pointer; background-color: " + backgroundColour
-				+ "; opacity: 0.9; border: 1px solid grey; border-radius: 3px; padding: 3px 3px 3px 3px;\"";
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("<div onclick=\"location.href='").append(link).append("';\"");
-		sb.append(divStyle);
-		// hover
-		sb.append(" onMouseOver=\"this.style.opacity=1.0\"");
-		sb.append(" onMouseOut=\"this.style.opacity=0.9\"");
-		sb.append(">");
-		
-		// tile is a table with an icon and text
-		sb.append("<table cellpadding=\"").append(TILE_CELL_PADDING).append("\"><tr>");*/
-
-		// icon
-		// sb.append("<td width=\"28px\" align=\"center\">");
-		// String icon = "<i class=\"" + iconClass + "\" style=\"font-size:24px;\"></i>";
 
 		// set the document icon
 		String icon = String.format(""
 				+ "<span class='icon'>"
 				+ "  <i class='%1$s' style=\"font-size:24px;\"></i>"
 				+ "</span>", iconClass);
+
 		if (bean != null) {
 			// provide a thumbnail for the first image or content attribute type
 			for (Attribute a : document.getAllAttributes()) {
@@ -401,31 +349,23 @@ public class UserDashboardExtension extends UserDashboard {
 				}
 			}
 		}
-		// sb.append(icon);
-		// sb.append("</td>");
-
-		// link text
-		// sb.append("<td>");
 
 		StringBuilder tileText = new StringBuilder();
 		tileText.append(action).append(" ").append(singularAlias);
 		if (bean != null && bean.getBizKey() != null) {
 			tileText.append(" - ").append(bean.getBizKey());
 		}
-		// sb.append((tileText.length() > TILE_TEXT_LIMIT ? tileText.toString().substring(0, TILE_TEXT_LIMIT - 3) + "..." :
-		// tileText));
-		// sb.append("</td>");
-		
-		// close tile
-		// sb.append("</tr></table>");
-		// sb.append("</div>");
 
-		// return sb.toString();
-		return String.format(template,
-				operation, link, icon, actionClass,
-				(tileText.length() > TILE_TEXT_LIMIT ? tileText.toString().substring(0, TILE_TEXT_LIMIT - 3) + "..."
-						: tileText.toString()),
-				reason);
+		Tile tile = new Tile.Builder().action(action)
+				.actionClass(actionClass)
+				.icon(icon)
+				.link(link.toString())
+				.operation(tileOperation)
+				.reason(reason)
+				.title(tileText.toString())
+				.build();
+
+		return tile;
 	}
 
 	/**
