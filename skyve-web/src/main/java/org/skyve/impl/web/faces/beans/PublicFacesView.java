@@ -1,13 +1,17 @@
 package org.skyve.impl.web.faces.beans;
 
+import java.io.IOException;
+
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Util;
 
 /**
  * Used to assert a public user from admin.Configuration data for use with public forms.
@@ -37,12 +41,21 @@ public class PublicFacesView <T extends Bean> extends FacesView<T> {
 			if (ec.getUserPrincipal() == null) {
 				if (getUser() == null) {
 					String customerName = (UtilImpl.CUSTOMER == null) ? bizCustomerParameter : UtilImpl.CUSTOMER;
-					if (customerName != null) {
-						String userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
-						if (userName != null) {
-							setUser(customerName, userName);
-						}
+					if (customerName == null) {
+						throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
 					}
+					String userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
+					if (userName == null) {
+						HttpServletResponse response = (HttpServletResponse) ec.getResponse();
+						try {
+							response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
+						}
+						catch (IOException e) {
+							throw new IllegalStateException("Could not redirect to /pages/noPublicUser.jsp", e);
+						}
+						return;
+					}
+					setUser(customerName, userName);
 				}
 			}
 		}
