@@ -35,6 +35,11 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
+		// public pages are destined for external UX/UI always
+		if (request.getUserPrincipal() == null) {
+			return EXTERNAL;
+		}
+
 		HttpSession session = request.getSession(false);
 
 		// check if this is the first login

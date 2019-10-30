@@ -81,6 +81,15 @@
 			if (customerName == null) {
 				throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
 			}
+			else {
+				// This will throw if the customerName value ain't a customer name
+				try {
+					repository.getCustomer(customerName);
+				}
+				catch (Exception e) {
+					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer");
+				}
+			}
 			userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
 			if (userName == null) {
 				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
