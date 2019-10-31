@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.domain.Contact;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -21,6 +23,8 @@ import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.Persistence;
 
 /**
  * Staff
@@ -30,12 +34,12 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - Status
  * @navhas n contact 0..1 Contact
  * @navhas n baseOffice 0..1 Office
- * @navhas n reportsTo 0..1 Position
- * @stereotype "persistent"
+ * @navhas n reportsTo 0..1 Staff
+ * @stereotype "persistent child"
  */
 @XmlType
 @XmlRootElement
-public class Staff extends AbstractPersistentBean {
+public class Staff extends AbstractPersistentBean implements HierarchicalBean<Staff> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -67,8 +71,6 @@ public class Staff extends AbstractPersistentBean {
 	public static final String demoDataPropertyName = "demoData";
 	/** @hidden */
 	public static final String reportsToPropertyName = "reportsTo";
-	/** @hidden */
-	public static final String positionPropertyName = "position";
 
 	/**
 	 * Status
@@ -196,11 +198,9 @@ public class Staff extends AbstractPersistentBean {
 	/**
 	 * Reports To
 	 **/
-	private Position reportsTo = null;
-	/**
-	 * Position
-	 **/
-	private Position position;
+	private Staff reportsTo = null;
+	private String bizParentId;
+
 
 	@Override
 	@XmlTransient
@@ -416,7 +416,7 @@ public class Staff extends AbstractPersistentBean {
 	 * {@link #reportsTo} accessor.
 	 * @return	The value.
 	 **/
-	public Position getReportsTo() {
+	public Staff getReportsTo() {
 		return reportsTo;
 	}
 
@@ -425,25 +425,43 @@ public class Staff extends AbstractPersistentBean {
 	 * @param reportsTo	The new value.
 	 **/
 	@XmlElement
-	public void setReportsTo(Position reportsTo) {
+	public void setReportsTo(Staff reportsTo) {
 		preset(reportsToPropertyName, reportsTo);
 		this.reportsTo = reportsTo;
 	}
 
-	/**
-	 * {@link #position} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public Position getPosition() {
-		return position;
+	@Override
+	public String getBizParentId() {
+		return bizParentId;
 	}
 
-	/**
-	 * {@link #position} mutator.
-	 * @param position	The new value.
-	 **/
-	public void setPosition(Position position) {
-		this.position = position;
+	@Override
+	@XmlElement
+	public void setBizParentId(String bizParentId) {
+		preset(HierarchicalBean.PARENT_ID, bizParentId);
+		this.bizParentId = bizParentId;
+	}
+
+	@Override
+	public Staff getParent() {
+		Staff result = null;
+
+		if (bizParentId != null) {
+			Persistence p = CORE.getPersistence();
+			DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+			q.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);
+			result = q.retrieveBean();
+		}
+
+		return result;
+	}
+
+	@Override
+	@XmlTransient
+	public List<Staff> getChildren() {
+		Persistence p = CORE.getPersistence();
+		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);
+		return q.beanResults();
 	}
 }

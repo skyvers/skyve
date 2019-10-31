@@ -1,6 +1,5 @@
 package modules.whosin;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -14,14 +13,12 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.whosin.domain.Office;
-import modules.whosin.domain.Position;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
@@ -147,8 +144,6 @@ public class LoadDemonstrationDataJob extends Job {
 		for (int i = 0; i < 40; i++) {
 			createRandomStaff(persistence, newOffice2, null, i);
 		}
-
-		createOrganisationalStructure(persistence);
 	}
 
 	private static void createRandomStaff(Persistence persistence, Office baseOffice, Geometry location, int index) throws Exception {
@@ -239,55 +234,7 @@ public class LoadDemonstrationDataJob extends Job {
 
 	}
 
-	private static void createOrganisationalStructure(Persistence persistence) throws Exception {
-		
-		// create Direct reports, top down
-		createDirectReports(persistence, "Manager", null);
-		createDirectReports(persistence, "Sales Manager", "Manager");
-		createDirectReports(persistence, "Sales Consultant", "Sales Manager");
-		createDirectReports(persistence, "Sales Support Technician", "Sales Manager");
-		createDirectReports(persistence, "Accountant", "Manager");
-		createDirectReports(persistence, "Receptionist", "Manager");
-	}
-
-	private static void createDirectReports(Persistence persistence, String subOrdinateRoleTitle, String reportsToRoleTitle) throws Exception {
-
-		DocumentQuery qStaff = persistence.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
-		qStaff.getFilter().addEquals(Staff.roleTitlePropertyName, subOrdinateRoleTitle);
-
-		List<Staff> staff = qStaff.beanResults();
-		for (Staff staffMember : staff) {
-
-			// create a position for this staff
-			Position position = Position.newInstance();
-			position.setStaff(staffMember);
-			position.setPositionTitle(staffMember.getRoleTitle());
-			position.setDemoData(Boolean.TRUE);
-			
-			if (reportsToRoleTitle != null) {
-				// find a random superior at the same office
-				DocumentQuery qManager = persistence.newDocumentQuery(Position.MODULE_NAME, Position.DOCUMENT_NAME);
-				qManager.getFilter().addEquals(Position.positionTitlePropertyName, reportsToRoleTitle);
-				qManager.getFilter().addEquals(Binder.createCompoundBinding(Position.staffPropertyName, Staff.baseOfficePropertyName), staffMember.getBaseOffice());
-				
-				List<Position> superiorPositions = qManager.beanResults();
-				Collections.shuffle(superiorPositions);
-				position.setReportsTo(superiorPositions.get(0));
-			}
-			
-			persistence.save(position);
-		}
-	}
-
 	private static void clearPreviousData(Persistence persistence) throws Exception {
-
-		// try to delete all Positions (organisational Structure) in reverse hierarchical order
-		clearPosition(persistence, "Receptionist");
-		clearPosition(persistence, "Accountant");
-		clearPosition(persistence, "Sales Support Technician");
-		clearPosition(persistence, "Sales Consultant");
-		clearPosition(persistence, "Sales Manager");
-		clearPosition(persistence, "Manager");
 
 		// try to delete all staff (some may fail if users have been created)
 		DocumentQuery qStaff = persistence.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
@@ -327,27 +274,5 @@ public class LoadDemonstrationDataJob extends Job {
 				// just fail and move on
 			}
 		}
-	}
-	
-	private static void clearPosition(Persistence persistence, String positionTitle) throws Exception{
-		DocumentQuery qPosition = persistence.newDocumentQuery(Position.MODULE_NAME, Position.DOCUMENT_NAME);
-		qPosition.getFilter().addEquals(Staff.demoDataPropertyName, Boolean.TRUE);
-		qPosition.getFilter().addEquals(Position.positionTitlePropertyName, positionTitle);
-
-		List<Position> allPositions = qPosition.beanResults();
-		for (Position p : allPositions) {
-			try {
-				persistence.delete(p);
-				persistence.commit(false);
-				persistence.evictCached(p);
-
-				// after evicting start a new transaction
-				persistence.begin();
-			} catch (Exception e) {
-				// I figure these are probably not intended to be deleted, so
-				// just fail and move on
-			}
-		}
-				
 	}
 }
