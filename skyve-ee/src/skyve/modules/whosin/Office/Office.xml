@@ -51,4 +51,14 @@
 			]]></description>
 		</boolean>
 	</attributes>
+	<conditions>
+		<condition name="manager">
+			<description>Does the user have the manager role?</description>
+			<expression>
+				<![CDATA[
+					isUserInRole("whosin","Manager")
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

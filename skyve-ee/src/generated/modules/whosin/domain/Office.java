@@ -297,4 +297,23 @@ public class Office extends AbstractPersistentBean {
 		preset(demoDataPropertyName, demoData);
 		this.demoData = demoData;
 	}
+
+	/**
+	 * Does the user have the manager role?
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isManager() {
+		return (isUserInRole("whosin","Manager"));
+	}
+
+	/**
+	 * {@link #isManager} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotManager() {
+		return (! isManager());
+	}
 }

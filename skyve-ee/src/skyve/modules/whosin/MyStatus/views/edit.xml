@@ -5,7 +5,7 @@
 		<column />
 		<row>
 			<item>
-				<label value="You are not a staff member for the Who's In (Integrate) module." />
+				<label value="You are not a staff member." />
 			</item>
 		</row>
 	</form>
@@ -16,22 +16,22 @@
 				<column />
 				<row>
 					<item>
-						<textField binding="myStaff.contact.name" disabled="true" />
+						<textField binding="myStaff.contact.name" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.contact.mobile" disabled="true" />
+						<textField binding="myStaff.contact.mobile" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.contact.email1" disabled="true" />
+						<textField binding="myStaff.contact.email1" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.roleTitle" disabled="true" />
+						<textField binding="myStaff.roleTitle"/>
 					</item>
 				</row>
 			</form>
@@ -40,7 +40,7 @@
 				<column />
 				<row>
 					<item>
-						<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" editable="false" />
+						<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" />
 					</item>
 				</row>
 
@@ -51,17 +51,17 @@
 			<column />
 			<row>
 				<item>
-					<geometry binding="myStaff.location" disabled="notStaffMember" />
+					<geometry binding="myStaff.location"/>
 				</item>
 			</row>
 			<row>
 				<item>
-					<combo binding="myStaff.status" disabled="notStaffMember" />
+					<combo binding="myStaff.status"/>
 				</item>
 			</row>
 			<row>
 				<item>
-					<textField binding="myStaff.dueBack" disabled="notStaffMember" />
+					<textField binding="myStaff.dueBack"/>
 				</item>
 			</row>
 		</form>

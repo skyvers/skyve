@@ -1,7 +1,7 @@
-package modules.whosinIntegrate.MyStatus.actions;
+package modules.whosin.MyStatus.actions;
 
-import modules.whosinIntegrate.domain.Staff;
-import modules.whosinIntegrate.domain.MyStatus;
+import modules.whosin.domain.Staff;
+import modules.whosin.domain.MyStatus;
 
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;

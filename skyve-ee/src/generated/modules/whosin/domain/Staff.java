@@ -29,7 +29,8 @@ import org.skyve.persistence.Persistence;
 /**
  * Staff
  * <br/>
- * Someone who works for this organisation
+ * Someone who works for this organisation.
+			Note that this document is hierarchical - as Staff report to other Staff.
  * 
  * @depend - - - Status
  * @navhas n contact 0..1 Contact

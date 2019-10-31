@@ -1,4 +1,4 @@
-package modules.whosinIntegrate.domain;
+package modules.whosin.domain;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -24,7 +24,7 @@ public class MyStatus extends AbstractTransientBean {
 	private static final long serialVersionUID = 1L;
 
 	/** @hidden */
-	public static final String MODULE_NAME = "whosinIntegrate";
+	public static final String MODULE_NAME = "whosin";
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "MyStatus";
 
@@ -107,24 +107,5 @@ return "My Status";
 	 */
 	public boolean isNotExists() {
 		return (! isExists());
-	}
-
-	/**
-	 * Is a Staff Member
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isStaffMember() {
-		return (isUserInRole("whosinIntegrate","StaffMember"));
-	}
-
-	/**
-	 * {@link #isStaffMember} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotStaffMember() {
-		return (! isStaffMember());
 	}
 }
