@@ -1,7 +1,7 @@
-package modules.whosinIntegrate.MyStatus;
+package modules.whosin.MyStatus;
 
-import modules.whosinIntegrate.domain.MyStatus;
-import modules.whosinIntegrate.domain.Staff;
+import modules.whosin.domain.MyStatus;
+import modules.whosin.domain.Staff;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -15,6 +15,7 @@ public class MyStatusBizlet extends Bizlet<MyStatus> {
 
 	@Override
 	public MyStatus newInstance(MyStatus bean) throws Exception {
+		
 		//get the contact corresponding to the currently logged in user
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery q = pers.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);

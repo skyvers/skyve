@@ -6,8 +6,6 @@
 	<singularAlias>My Status</singularAlias>
 	<pluralAlias>My Statuses</pluralAlias>
 	<iconStyleClass>fa fa-user</iconStyleClass>
-	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 		  	return "My Status";
@@ -24,12 +22,6 @@
 			<description>My Staff exists</description>
 			<expression>
 				<![CDATA[getMyStaff()!=null]]>
-			</expression>
-		</condition>
-		<condition name="staffMember">
-			<description>Is a Staff Member</description>
-			<expression>
-				<![CDATA[isUserInRole("whosinIntegrate","StaffMember")]]>
 			</expression>
 		</condition>
 	</conditions>

@@ -9,6 +9,7 @@
 	<documents>
 		<document ref="Office" />
 		<document ref="Staff" defaultQueryName="qStaff"/>
+		<document ref="MyStatus" />
 
 		<document ref="Contact" moduleRef="admin" />
 		<document ref="User" moduleRef="admin" />
@@ -19,6 +20,7 @@
 			<privileges>
 				<document name="Office" permission="CRUDC" />
 				<document name="Staff" permission="CRUDC" />
+				<document name="MyStatus" permission="_____" />
 			</privileges>
 		</role>
 		<role name="StaffMember">
@@ -26,19 +28,20 @@
 			<privileges>
 				<document name="Office" permission="_R__C" />
 				<document name="Staff" permission="_RU_C" />
+				<document name="MyStatus" permission="_____" >
+					<action name="UpdateMyStatus"/>
+				</document>				
 			</privileges>
 		</role>
 	</roles>
 	<menu>
+		<edit name="My Status" document="MyStatus">
+			<role name="StaffMember" />
+		</edit>
 		<list name="Offices" document="Office">
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<uxui name="external"/>
-			<role name="Manager" />
-			<role name="StaffMember" />
-		</list>
-		<list name="Offices" query="qOfficeForPhone">
-			<uxui name="phone"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</list>
@@ -71,10 +74,13 @@
 				<column binding="location" hidden="true"/>
 			</columns>
 		</query>
-		<query name="qOfficeForPhone" documentName="Office">
-			<description>All Offices</description>
+		<query name="qStaffForOffice" documentName="Staff">
+			<description>Staff based at this office</description>
 			<columns>
-				<column binding="bizKey" sortOrder="ascending"/>
+				<content display="thumbnail" binding="contact.image" displayName="Image"
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
+				<column binding="contact.name" sortOrder="ascending"/>
+				<column binding="status" />
 			</columns>
 		</query>
 	</queries>

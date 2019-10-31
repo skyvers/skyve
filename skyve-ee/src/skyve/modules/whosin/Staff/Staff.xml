@@ -2,7 +2,15 @@
 <document name="Staff" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
-		<![CDATA[ Someone who works for this organisation ]]>
+		<![CDATA[ 
+			Someone who works for this organisation.
+			Note that this document is hierarchical - as Staff report to other Staff.
+			The hierarchy relationship is defined by Staff having a parent relationship to other Staff.
+			As the parent relationship can't be set directly through the UI, the Staff document contains a transient reportsTo attribute - 
+			an association to another staff. In the preSave method in the StaffBizlet, this association is used to update the bean's
+			bizParentId to persist the parent relationship.
+			A filter parameter is used in the view to ensure a Staff member can't be assigned as reporting to themselves.
+		]]>
 	</documentation>
 	<persistent name="WHO_Staff" />
 	<singularAlias>Staff</singularAlias>

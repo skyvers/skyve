@@ -1,11 +1,11 @@
-package modules.whosinIntegrate.Office.models;
+package modules.whosin.Office.models;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import modules.whosinIntegrate.domain.Office;
-import modules.whosinIntegrate.domain.Staff;
-import modules.whosinIntegrate.domain.Staff.Status;
+import modules.whosin.domain.Office;
+import modules.whosin.domain.Staff;
+import modules.whosin.domain.Staff.Status;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
