@@ -21,14 +21,16 @@ public class SpringSeurityListener {
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
 		String username = (String) evt.getAuthentication().getPrincipal();
+		UtilImpl.LOGGER.warning("Login Attempt failed for user " + username);
 		recordLoginFailure(username);
 	}
 	
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
-		User user = (User) evt.getAuthentication().getPrincipal();
-		resetLoginFailure(user.getUsername());
+		String username = ((User) evt.getAuthentication().getPrincipal()).getUsername();
+		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
+		resetLoginFailure(username);
 	}
 	
 	private static void recordLoginFailure(String username) {

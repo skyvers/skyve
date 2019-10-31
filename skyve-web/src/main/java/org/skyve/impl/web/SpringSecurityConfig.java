@@ -5,9 +5,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.naming.InitialContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -17,10 +15,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,19 +36,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 		return (DataSource) ctx.lookup(UtilImpl.DATA_STORE.getJndiDataSourceName());
 	}
 
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
-
 	@Bean 
 	public JdbcUserDetailsManager jdbcUserService() throws Exception {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			
+			// return the user just queried (with the 
 			@Override
-			public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-System.out.println("ATH = " + authenticationManager);
-				super.setAuthenticationManager(authenticationManager);
+			protected UserDetails createUserDetails(String username,
+														UserDetails userFromUserQuery,
+														List<GrantedAuthority> combinedAuthorities) {
+				return userFromUserQuery;
 			}
 			
 			@Override
@@ -75,38 +69,23 @@ System.out.println("ATH = " + authenticationManager);
 									authenticationFailures = 0;
 								}
 								Timestamp lastAuthenticationFailure = rs.getTimestamp(5);
-/*
-System.out.println(authenticationFailures +  " : " + lastAuthenticationFailure);
 								if ((lastAuthenticationFailure != null) &&
 										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
 										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS > 0)) {
-									int lockoutMultiple = authenticationFailures - UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD + 1;
-									if (lockoutMultiple > 0) {
-										long lockoutMillis = lockoutMultiple * UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS * 1000;
+									if (authenticationFailures >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) {
+										long lockoutMillis = authenticationFailures * UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS * 1000;
 										long millisRemaining = (lastAuthenticationFailure.getTime() + lockoutMillis) - System.currentTimeMillis();
 										if (millisRemaining > 0) {
-											// The account is locked here, but if the password is wrong
-											// we should not show the locked message to the user
-											// So check the password first...
 											long secondsRemaining = millisRemaining / 1000;
 											if (secondsRemaining == 0) {
 												secondsRemaining++;
 											}
 											locked = true;
-
-											return new User("locked",
-																"locked",
-																false,
-																false,
-																false,
-																false,
-																AuthorityUtils.NO_AUTHORITIES);
-
-//											throw new LockedException(String.valueOf(secondsRemaining));
+											UtilImpl.LOGGER.warning("Account " + username + " is locked for another " + secondsRemaining + " seconds");
 										}
 									}
 								}
-*/								
+
 								return new User(user,
 													password,
 													enabled,

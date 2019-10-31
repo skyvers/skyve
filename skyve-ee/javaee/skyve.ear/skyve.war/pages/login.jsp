@@ -1,32 +1,25 @@
-<%@page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.skyve.CORE"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.util.Util"%>
+<%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.web.WebContext"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
-<%@ page import="org.springframework.security.authentication.CredentialsExpiredException"%>
-<%@ page import="org.springframework.security.authentication.LockedException"%>
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
-	Throwable lastError = null;
-	
+
 	// Clear the user object from the session if it exists
 	// If there is a public user set, this will ensure it doesn't get in the way.
 	if (session != null) {
 		Object user = session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null) {
 			session.removeAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		}
-
-		if (loginError) {
-			lastError = (Throwable) session.getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
 		}
 	}
 	
@@ -175,18 +168,12 @@
             		<div class="ui error message">
 	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
 			        	<p>
-			        	<% if ((lastError != null) && ((lastError instanceof LockedException) || (lastError.getCause() instanceof LockedException))) {
-							String seconds = (lastError instanceof LockedException) ?
-												((LockedException) lastError).getMessage() :
-												((LockedException) lastError.getCause()).getMessage(); %>
-			        		<%=Util.i18n("page.loginError.locked", locale, seconds)%>
-			        	<% } else { %>
 			        		<%=Util.i18n("page.loginError.invalid", locale)%>
 			        		<% if (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) { %>
-			        			<br/>
-				        		<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD))%>
+			        			<div style="text-align:left;">
+				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS))%>
+				        		</div>
 				        	<% } %>
-			        	<% } %>
 			        	</p>
             		</div>
 				<% } %>

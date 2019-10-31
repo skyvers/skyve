@@ -69,7 +69,7 @@
 		            	<div class="ui header">
 		            		<%=Util.i18n("page.logout.banner", locale)%>
 		            	</div>
-						<% if (referer == null) { %>
+						<% if ((referer == null) || referer.contains("/login")) { // no referer or came from the login page %>
 							<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 						<% } else { %>
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.banner", locale)%></a>
