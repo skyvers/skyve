@@ -34,22 +34,22 @@ public abstract class DomainGenerator {
 
 	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.H2_NO_INDEXES;
 
-	public static final void validate(String customerName) throws Exception {
+	public static final void validate(String customerName, boolean pre) throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
 
 		System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
 		System.out.println("Validate customer " + customerName);
-		repository.validateCustomer(customer);
+		repository.validateCustomerForGenerateDomain(customer, pre);
 		for (Module module : customer.getModules()) {
 			System.out.println("Validate module " + module.getName());
-			repository.validateModule(customer, module);
+			repository.validateModuleForGenerateDomain(customer, module, pre);
 			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 				String documentName = entry.getKey();
 				System.out.println("Get document " + documentName);
 				Document document = module.getDocument(customer, documentName);
 				System.out.println("Validate document " + documentName);
-				repository.validateDocument(customer, document);
+				repository.validateDocumentForGenerateDomain(customer, document, pre);
 				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
 					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
 				}
@@ -63,11 +63,11 @@ public abstract class DomainGenerator {
 					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
 					System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
-					repository.validateView(customer, document, view, uxuiName);
+					repository.validateViewForGenerateDomain(customer, document, view, uxuiName, pre);
 					view = repository.getView(uxuiName, customer, document, ViewType.create.toString());
 					if (view != null) {
 						System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
-						repository.validateView(customer, document, view, uxuiName);
+						repository.validateViewForGenerateDomain(customer, document, view, uxuiName, pre);
 					}
 				}
 			}
@@ -172,8 +172,11 @@ public abstract class DomainGenerator {
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
-			validate(customerName);
+			validate(customerName, true);
 		}
 		foo.generate();
+		for (String customerName : repository.getAllCustomerNames()) {
+			validate(customerName, false);
+		}
 	}
 }
