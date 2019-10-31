@@ -1,13 +1,10 @@
 package modules.whosin.Staff;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-import modules.whosin.domain.Position;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
@@ -21,38 +18,20 @@ public class StaffBizlet extends Bizlet<Staff> {
 	@Override
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 
-		// Load the transient reportsTo attribute
-		if (ImplicitActionName.Edit.equals(actionName)) {
-			Position position = bean.getPosition();
-			if (position != null) {
-				bean.setReportsTo(position.getParent());
-			}
+		if(ImplicitActionName.Edit.equals(actionName)) {
+			//load to the staff this person reports to
+			bean.setReportsTo(bean.getParent());
 		}
 
 		// Update the hierarchy according to what is set in the reportsTo transient attribute
 		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			Persistence pers = CORE.getPersistence();
-			Position myPosition = bean.getPosition();
-
-			if (myPosition != null) {
-
-				// assign reports to of the associated position
-				myPosition.setReportsTo(bean.getReportsTo());
-
-				// need to update the position that contains this staff
-				myPosition.setPositionTitle(bean.getRoleTitle());
-				myPosition = pers.save(myPosition);
-
-			} else if (bean.originalValues().containsKey(Staff.reportsToPropertyName)) {
-
-				// create a new position and set the reports to
-
-				Position newPosition = Position.newInstance();
-				newPosition.setStaff(bean);
-				newPosition.setPositionTitle(bean.getRoleTitle());
-				newPosition.setReportsTo(bean.getReportsTo());
-
-				newPosition = pers.save(newPosition);
+			
+			if(bean.originalValues().containsKey(Staff.reportsToPropertyName)) {
+				if(bean.getReportsTo()==null) {
+					bean.setBizParentId(null);
+				} else {
+					bean.setBizParentId(bean.getReportsTo().getBizId());
+				}
 			}
 
 			// if location is within the office, set the status

@@ -8,6 +8,7 @@
 	<singularAlias>Staff</singularAlias>
 	<pluralAlias>Staff Members</pluralAlias>
 	<iconStyleClass>fa fa-users</iconStyleClass>
+	<parentDocument>Staff</parentDocument>
 	<bizKey expression="{contact.name} ({contact.mobile})"/>
 	<attributes>
 		<association name="contact" type="aggregation">
@@ -53,13 +54,8 @@
 		</boolean>
 		<association type="aggregation" name="reportsTo" persistent="false">
 			<displayName>Reports To</displayName>
-			<documentName>Position</documentName>
-			<queryName>qPositions</queryName>
+			<documentName>Staff</documentName>
+			<queryName>qStaff</queryName>
 		</association>
-		<inverseOne name="position">
-			<displayName>Position</displayName>
-			<documentName>Position</documentName>
-			<referenceName>staff</referenceName>
-		</inverseOne>
 	</attributes>
 </document>

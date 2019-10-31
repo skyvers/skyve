@@ -24,7 +24,7 @@
 				<row>
 					<item>
 						<lookupDescription binding="reportsTo" descriptionBinding="bizKey">
-							<filterParameter filterBinding="staff" operator="notEqual" valueBinding="bizId" />
+							<filterParameter filterBinding="bizId" operator="notEqual" valueBinding="bizId" />
 						</lookupDescription>
 					</item>
 				</row>
