@@ -945,7 +945,11 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public void validateCustomer(Customer customer) {
+	public void validateCustomerForGenerateDomain(Customer customer, boolean pre) {
+		if (! pre) {
+			return;
+		}
+		
 		populateVTable((CustomerImpl) customer);
 
 		try {
@@ -992,96 +996,99 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public void validateModule(Customer customer, Module module) {
-		// if home document is transient then home ref had better be edit
-		String homeDocumentName = module.getHomeDocumentName();
-		if (homeDocumentName != null) {
-			Document homeDocument = module.getDocument(customer, homeDocumentName);
-			if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
-				throw new MetaDataException("Home document " + homeDocumentName + 
-												" for customer " + customer.getName() + 
-												" in module " + module.getName() +
-												" is transient and therefore the module requires a homeRef of 'edit'.");
-			}
-		}
-		
-		// check action privilege references an action in the given document view
-		for (Role role : module.getRoles()) {
-			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
-				if (privilege instanceof ActionPrivilege) {
-					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
-					String actionPrivilegeName = actionPrivilege.getName();
-					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
-					if (getAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
-						throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
-														" for customer " + customer.getName() + 
-														" in module " + module.getName() +
-														" for document " + actionDocument.getName() + 
-														" for role " + role.getName() +
-														" does not reference a valid action");
-					}
+	public void validateModuleForGenerateDomain(Customer customer, Module module, boolean pre) {
+		if (pre) {
+			// if home document is transient then home ref had better be edit
+			String homeDocumentName = module.getHomeDocumentName();
+			if (homeDocumentName != null) {
+				Document homeDocument = module.getDocument(customer, homeDocumentName);
+				if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
+					throw new MetaDataException("Home document " + homeDocumentName + 
+													" for customer " + customer.getName() + 
+													" in module " + module.getName() +
+													" is transient and therefore the module requires a homeRef of 'edit'.");
 				}
 			}
-		}
-		
-		// check query columns
-		for (QueryDefinition query : module.getMetadataQueries()) {
-			if (query instanceof MetaDataQueryDefinition) {
-				MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
-				Module queryDocumentModule = documentQuery.getDocumentModule(customer);
-				Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
-				for (MetaDataQueryColumn column : documentQuery.getColumns()) {
-					String binding = column.getBinding();
-					if (binding != null) {
-						TargetMetaData target = null;
-						try {
-							target = BindUtil.getMetaDataForBinding(customer, 
-																		queryDocumentModule,
-																		queryDocument,
-																		binding);
-						}
-						catch (MetaDataException e) {
-							throw new MetaDataException("Query " + query.getName() + 
-															" in module " + query.getOwningModule().getName() +
-															" with column binding " + binding +
-															" is not a valid binding.", e);
-						}
-	
-						Document targetDocument = target.getDocument();
-						Attribute targetAttribute = target.getAttribute();
-						Persistent targetPersistent = targetDocument.getPersistent();
-						if ((targetPersistent == null) || (targetPersistent.getName() == null) || // transient document
-								((targetAttribute != null) && 
-									(! BindUtil.isImplicit(targetAttribute.getName())) &&
-									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
-							if (column instanceof MetaDataQueryProjectedColumn) {
-								MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
-								if (projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable()) {
-									throw new MetaDataException("Query " + query.getName() + 
+
+			// check query columns
+			for (QueryDefinition query : module.getMetadataQueries()) {
+				if (query instanceof MetaDataQueryDefinition) {
+					MetaDataQueryDefinition documentQuery = (MetaDataQueryDefinition) query;
+					Module queryDocumentModule = documentQuery.getDocumentModule(customer);
+					Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
+					for (MetaDataQueryColumn column : documentQuery.getColumns()) {
+						String binding = column.getBinding();
+						if (binding != null) {
+							TargetMetaData target = null;
+							try {
+								target = BindUtil.getMetaDataForBinding(customer, 
+																			queryDocumentModule,
+																			queryDocument,
+																			binding);
+							}
+							catch (MetaDataException e) {
+								throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
 																" with column binding " + binding +
-																" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+																" is not a valid binding.", e);
+							}
+		
+							Document targetDocument = target.getDocument();
+							Attribute targetAttribute = target.getAttribute();
+							Persistent targetPersistent = targetDocument.getPersistent();
+							if ((targetPersistent == null) || (targetPersistent.getName() == null) || // transient document
+									((targetAttribute != null) && 
+										(! BindUtil.isImplicit(targetAttribute.getName())) &&
+										(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
+								if (column instanceof MetaDataQueryProjectedColumn) {
+									MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+									if (projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable()) {
+										throw new MetaDataException("Query " + query.getName() + 
+																	" in module " + query.getOwningModule().getName() +
+																	" with column binding " + binding +
+																	" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+									}
 								}
 							}
+							
+							// Customer overridden documents that are used in metadata queries cause an error unless 
+							// <association>.bizId is used as the binding.
+							if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&
+									(column.getFilterOperator() != null)) {
+								throw new MetaDataException("Query " + query.getName() + 
+																" in module " + query.getOwningModule().getName() +
+																" with column binding " + binding +
+																" references an association which has a column filter defined.  Use [" + 
+																binding + ".bizId] as the binding for the column.");
+							}
 						}
-						
-						// Customer overridden documents that are used in metadata queries cause an error unless 
-						// <association>.bizId is used as the binding.
-						if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&
-								(column.getFilterOperator() != null)) {
-							throw new MetaDataException("Query " + query.getName() + 
-															" in module " + query.getOwningModule().getName() +
-															" with column binding " + binding +
-															" references an association which has a column filter defined.  Use [" + 
-															binding + ".bizId] as the binding for the column.");
+					}
+				}
+			}
+			
+			// check menu items
+			checkMenu(module.getMenu().getItems(), customer, module);
+		}
+		else {
+			// check action privilege references an action in the given document view
+			for (Role role : module.getRoles()) {
+				for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
+					if (privilege instanceof ActionPrivilege) {
+						ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
+						String actionPrivilegeName = actionPrivilege.getName();
+						Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
+						if (getAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
+							throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
+															" for customer " + customer.getName() + 
+															" in module " + module.getName() +
+															" for document " + actionDocument.getName() + 
+															" for role " + role.getName() +
+															" does not reference a valid action");
 						}
 					}
 				}
 			}
 		}
-		
-		// check menu items
-		checkMenu(module.getMenu().getItems(), customer, module);
 	}
 
 	private void checkMenu(List<MenuItem> items, Customer customer, Module module) {
@@ -1185,7 +1192,11 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 	
 	@Override
-	public void validateDocument(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(Customer customer, Document document, boolean pre) {
+		if (! pre) {
+			return;
+		}
+
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 
 		// Check that conditions do not start with is or not
@@ -1328,7 +1339,11 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	@SuppressWarnings("unused")
-	public void validateView(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui, boolean pre) {
+		if (! pre) {
+			return;
+		}
+
 		new ViewValidator((ViewImpl) view,
 							(CustomerImpl) customer,
 							(DocumentImpl) document,
