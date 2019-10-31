@@ -117,6 +117,7 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 	/**
 	 * Called before the download method.
 	 * Use this method to validate the bean and prepare for the download.
+	 * This is called in a separate request (and thread) from the download method.
 	 * 
 	 * @param bean	The bean to execute on.
 	 * @param webContext	The context to manipulate.
@@ -127,6 +128,7 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 	/**
 	 * Called to get the download stream/file.
 	 * This method can not fail gracefully which is why prepare should be used to validate.
+	 * This is called in a separate request (and thread) from the prepare method.
 	 * 
 	 * @param bean	The bean to execute on.
 	 * @param webContext	The context to manipulate.
