@@ -251,15 +251,32 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);
 
 		Map<String, Object> map = getObject(null, "map", properties, true);
-		if (map != null) {
-			String value = getString("map", "type", map, true);
-			UtilImpl.MAP_TYPE = (value == null) ?  MapType.leaflet : MapType.valueOf(value);
-			UtilImpl.MAP_LAYERS = getString("map", "layers", map, true);
-			UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
-			Number zoom = getNumber("map", "zoom", map, false);
-			if (zoom != null) {
-				UtilImpl.MAP_ZOOM = zoom.intValue();
-			}
+		String value = getString("map", "type", map, true);
+		UtilImpl.MAP_TYPE = (value == null) ?  MapType.leaflet : MapType.valueOf(value);
+		UtilImpl.MAP_LAYERS = getString("map", "layers", map, true);
+		UtilImpl.MAP_CENTRE = getString("map", "centre", map, false);
+		Number zoom = getNumber("map", "zoom", map, false);
+		if (zoom != null) {
+			UtilImpl.MAP_ZOOM = zoom.intValue();
+		}
+
+		Map<String, Object> account = getObject(null, "account", properties, true);
+		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString("account", "passwordHashingAlgorithm", account, true);
+		Number number = getNumber("account", "passwordExpiryInDays", account, false);
+		if (number != null) {
+			UtilImpl.PASSWORD_EXPIRY_IN_DAYS = number.intValue();
+		}
+		number = getNumber("account", "passwordHistoryRetention", account, false);
+		if (number != null) {
+			UtilImpl.PASSWORD_HISTORY_RETENTION = number.intValue();
+		}
+		number = getNumber("account", "accountLockoutThreshold", account, false);
+		if (number != null) {
+			UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = number.intValue();
+		}
+		number = getNumber("account", "accountLockoutDurationMultipleInSeconds", account, false);
+		if (number != null) {
+			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = number.intValue();
 		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
@@ -267,7 +284,6 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
 		UtilImpl.CUSTOMER = getString("environment", "customer", environment, false);
 		UtilImpl.JOB_SCHEDULER = getBoolean("environment", "jobScheduler", environment);
-		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString("environment", "passwordHashingAlgorithm", environment, true);
 		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);
 		UtilImpl.MODULE_DIRECTORY = getString("environment", "moduleDirectory", environment, false);
 		if (UtilImpl.MODULE_DIRECTORY != null) {

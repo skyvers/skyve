@@ -171,7 +171,7 @@
 			        		<%=Util.i18n("page.loginError.invalid", locale)%>
 			        		<% if (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) { %>
 			        			<div style="text-align:left;">
-				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS))%>
+				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS))%>
 				        		</div>
 				        	<% } %>
 			        	</p>

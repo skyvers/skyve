@@ -193,12 +193,16 @@ public class UtilImpl {
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;
 
-	// Password hash algorithm
+	// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
 	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
-	public static int PASSWORD_AGE_IN_DAYS = 0;
+	// Number of days until a password change is required - Use null to indicate no password aging
+	public static int PASSWORD_EXPIRY_IN_DAYS = 0;
+	// Number of previous passwords to check for duplicates - Use null to indicate no password history
 	public static int PASSWORD_HISTORY_RETENTION = 0;
+	// Number of sign in attempts until the user account is locked - Use null to indicate no account lockout
 	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
-	public static int ACCOUNT_LOCKOUT_DURATION_IN_SECONDS = 10;
+	// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
+	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;

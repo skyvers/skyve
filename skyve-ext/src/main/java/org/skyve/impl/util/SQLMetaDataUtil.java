@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,11 +79,14 @@ public class SQLMetaDataUtil {
 			String ADM_SecurityUser_groups = ADM_SecurityUser + "_groups";
 			String ADM_SecurityGroup = admin.getDocument(customer, "Group").getPersistent().getPersistentIdentifier();
 			String ADM_SecurityGroupRole = admin.getDocument(customer, "GroupRole").getPersistent().getPersistentIdentifier();
+			String ADM_Configuration = admin.getDocument(customer, CONFIGURATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +
 						"u.password, " +
 						"u.passwordExpired, " +
+						"u.passwordLastChanged, " +
+						"p.publicUser_id, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"c.image as contactImageId, " +
@@ -95,12 +99,16 @@ public class SQLMetaDataUtil {
 						"and r.bizCustomer = u.bizCustomer ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
+			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
+			sql.append("on u.bizId = p.publicUser_id ");
 			sql.append("where u.userName = ? ");
 			sql.append("and u.bizCustomer = ? ");
 			sql.append("union " +
 						"select u.bizId, " +
 						"u.password, " +
 						"u.passwordExpired, " +
+						"u.passwordLastChanged, " +
+						"p.publicUser_id, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"c.image as contactImageId, " +
@@ -117,6 +125,8 @@ public class SQLMetaDataUtil {
 						"and r.bizCustomer = g.bizCustomer ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
+			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
+			sql.append("on u.bizId = p.publicUser_id ");
 			sql.append("where u.userName = ? ");
 			sql.append("and u.bizCustomer = ?");
 
@@ -133,17 +143,36 @@ public class SQLMetaDataUtil {
 						if (firstRow) {
 							internalUser.setId(rs.getString(1)); // bizId
 							internalUser.setPasswordHash(rs.getString(2)); // password
+							
+							// Determine if a password change is required
 							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
+							Date passwordLastChanged = rs.getDate(4);
+							String publicUserId = rs.getString(5);
+							if (passwordChangeRequired) {
+								// the public user never requires a password change
+								if (publicUserId != null) {
+									passwordChangeRequired = false;
+								}
+							}
+							else {
+								if (UtilImpl.PASSWORD_EXPIRY_IN_DAYS > 0) {
+									long passwordExpiryInMillis = passwordLastChanged.getTime() + (UtilImpl.PASSWORD_EXPIRY_IN_DAYS * 86400000);
+									if (System.currentTimeMillis() >= passwordExpiryInMillis) {
+										passwordChangeRequired = true;
+									}
+								}
+							}
 							internalUser.setPasswordChangeRequired(passwordChangeRequired);
-							internalUser.setContactId(rs.getString(4)); // contactId
-							internalUser.setContactName(rs.getString(5)); // contactName
-							internalUser.setContactImageId(rs.getString(6)); // contactImageId
-							internalUser.setDataGroupId(rs.getString(7)); // dataGroupId
-							internalUser.setHomeModuleName(rs.getString(8)); // homeModule
+
+							internalUser.setContactId(rs.getString(6)); // contactId
+							internalUser.setContactName(rs.getString(7)); // contactName
+							internalUser.setContactImageId(rs.getString(8)); // contactImageId
+							internalUser.setDataGroupId(rs.getString(9)); // dataGroupId
+							internalUser.setHomeModuleName(rs.getString(10)); // homeModule
 							firstRow = false;
 						}
 
-						String moduleDotRoleName = rs.getString(9); // roleName
+						String moduleDotRoleName = rs.getString(11); // roleName
 						int dotIndex = moduleDotRoleName.indexOf('.');
 						if (dotIndex > 0) {
 							String moduleName = moduleDotRoleName.substring(0, dotIndex);

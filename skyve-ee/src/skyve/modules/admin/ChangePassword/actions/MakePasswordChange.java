@@ -6,6 +6,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -76,7 +77,48 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			throw new ValidationException(message);			
 		}
 
-		userBean.setPassword(EXT.hashPassword(newPassword));
+		String hashedPassword = EXT.hashPassword(newPassword);
+
+		// check password history if it is switched on
+		if (UtilImpl.PASSWORD_HISTORY_RETENTION > 0) {
+			String passwordHistory = userBean.getPasswordHistory();
+			if (passwordHistory == null) { // no history
+				// just set this password in the history
+				userBean.setPasswordHistory(hashedPassword);
+			}
+			else { // we have history
+				String[] passwords = passwordHistory.split("\\t");
+				
+				// Check this password doesn't match a previous one
+				for (String password : passwords) {
+					if (EXT.checkPassword(newPassword, password)) {
+						Message message = new Message("This password matches a previous one.  Please re-enter and confirm the password.");
+						message.addBinding(ChangePassword.confirmPasswordPropertyName);
+						throw new ValidationException(message);			
+					}
+				}
+
+				// We are right, make the new history
+				StringBuilder newPasswordHistory = new StringBuilder(passwords.length * 128);
+				
+				// Cull old history
+				if (passwords.length >= UtilImpl.PASSWORD_HISTORY_RETENTION) {
+					for (int i = passwords.length - UtilImpl.PASSWORD_HISTORY_RETENTION + 1, l = passwords.length; i < l; i++) {
+						newPasswordHistory.append(passwords[i]).append('\t');
+					}
+				}
+				else {
+					newPasswordHistory.append(passwordHistory).append('\t');
+				}
+				newPasswordHistory.append(hashedPassword);
+				userBean.setPasswordHistory(newPasswordHistory.toString());
+			}
+		}
+		else { // zero password history if it is switched offS
+			userBean.setPasswordHistory(null);
+		}
+
+		userBean.setPassword(hashedPassword);
 
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);

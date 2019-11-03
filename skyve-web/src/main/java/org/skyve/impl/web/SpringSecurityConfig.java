@@ -71,9 +71,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 								Timestamp lastAuthenticationFailure = rs.getTimestamp(5);
 								if ((lastAuthenticationFailure != null) &&
 										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
-										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS > 0)) {
+										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0)) {
 									if (authenticationFailures >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) {
-										long lockoutMillis = authenticationFailures * UtilImpl.ACCOUNT_LOCKOUT_DURATION_IN_SECONDS * 1000;
+										long lockoutMillis = authenticationFailures * UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS * 1000;
 										long millisRemaining = (lastAuthenticationFailure.getTime() + lockoutMillis) - System.currentTimeMillis();
 										if (millisRemaining > 0) {
 											long secondsRemaining = millisRemaining / 1000;

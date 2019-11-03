@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.skyve.EXT;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -24,6 +25,7 @@ import modules.admin.domain.User;
 
 public abstract class AbstractH2Test {
 	protected static final String USER = "TestUser";
+	protected static final String PASSWORD = "TestPassword0!";
 	protected static final String CUSTOMER = "bizhub";
 
 	private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
@@ -100,6 +102,8 @@ public abstract class AbstractH2Test {
 	private static UserExtension createAdminUser(SuperUser superUser) {
 		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		adminUser.setUserName(superUser.getName());
+		adminUser.setPassword(EXT.hashPassword(PASSWORD));
+		adminUser.setPasswordHistory(null);
 		superUser.setContactId(adminUser.getContact().getBizId());
 		adminUser.setBizId(superUser.getId());
 		return adminUser;
