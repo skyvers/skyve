@@ -2464,8 +2464,11 @@ isc.BizChart.addMethods({
 			this.chart.canvas.style.width = this.getWidth() + 'px';
 			this.chart.canvas.style.height = this.getHeight() +  'px';
 			this.chart.update();
+			this._resizeChartCalled = false;
 		}
-		this._resizeChartCalled = false;
+		else {
+			this.delayCall('_resizeChart', arguments, 100);
+		}
 	},
 
 	setDataSource: function(modelName) {
