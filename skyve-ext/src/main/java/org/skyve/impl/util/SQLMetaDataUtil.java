@@ -1,10 +1,10 @@
 package org.skyve.impl.util;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +146,7 @@ public class SQLMetaDataUtil {
 							
 							// Determine if a password change is required
 							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
-							Date passwordLastChanged = rs.getDate(4);
+							Timestamp passwordLastChanged = rs.getTimestamp(4);
 							String publicUserId = rs.getString(5);
 							if (passwordChangeRequired) {
 								// the public user never requires a password change

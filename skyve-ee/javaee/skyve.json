@@ -140,7 +140,7 @@
 		// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
 		passwordHashingAlgorithm: "bcrypt",
 		// Number of days until a password change is required - Use null to indicate no password aging
-		passwordAgeInDays: null,
+		passwordExpiryInDays: null,
 		// Number of previous passwords to check for duplicates - Use null to indicate no password history
 		passwordHistoryRetention: null,
 		// Number of sign in attempts until the user account is locked - Use null to indicate no account lockout
