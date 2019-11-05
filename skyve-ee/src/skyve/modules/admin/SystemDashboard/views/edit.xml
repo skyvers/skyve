@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="System Dashboard" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<hbox>
-		<vbox border="true" borderTitle="System Activity">
+	<hbox minPixelHeight="300">
+		<vbox border="true" borderTitle="System Activity" percentageHeight="100">
 			<chart type="line">
 		        <model title="System Activity" 
 		        		label="Activity - last 14 days"
@@ -17,14 +17,14 @@
 		        </model>
 			</chart>
 		</vbox>
-		<vbox border="true" borderTitle="System Status">
+		<vbox border="true" borderTitle="System Status" percentageHeight="100">
 			<dataRepeater binding="status">
 				<boundColumn binding="memo1" title="Item" editable="false"/>
 				<boundColumn binding="boolean1" title="Status" editable="false"/>				
 			</dataRepeater>
 		</vbox>
 	</hbox>
-	<hbox border="true" borderTitle="Activity Breakdown">
+	<hbox border="true" borderTitle="Activity Breakdown" minPixelHeight="400">
 		<chart type="pie" >
 	        <model title="Activity By Context"
 	        		label="Numbers of Audits"

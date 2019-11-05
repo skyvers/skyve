@@ -57,7 +57,7 @@
 			</form>
 		</hbox>
 	</vbox>
-	<hbox border="true" borderTitle="My Activity">
+	<hbox border="true" borderTitle="My Activity" minPixelHeight="400">
 		<chart type="line" modelName="UserActivityModel"/>
 		<chart type="pie" modelName="UserActivityContextModel"/>
 	</hbox>
