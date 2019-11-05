@@ -31,6 +31,11 @@ import org.skyve.persistence.Persistence;
  * <br/>
  * Someone who works for this organisation.
 			Note that this document is hierarchical - as Staff report to other Staff.
+			The hierarchy relationship is defined by Staff having a parent relationship to other Staff.
+			As the parent relationship can't be set directly through the UI, the Staff document contains a transient reportsTo attribute - 
+			an association to another staff. In the preSave method in the StaffBizlet, this association is used to update the bean's
+			bizParentId to persist the parent relationship.
+			A filter parameter is used in the view to ensure a Staff member can't be assigned as reporting to themselves.
  * 
  * @depend - - - Status
  * @navhas n contact 0..1 Contact

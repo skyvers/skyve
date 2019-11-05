@@ -389,7 +389,8 @@ isc.EditView.addMethods({
 		this._saved = true;
 	},
 
-	// called on the server-side code generation for rerender actions from a blur event
+	// Called on the server-side code generation for rerender actions from a blur event
+	// This is to circumvent the lost click event when blurring to a button click
 	rerenderBlurryAction: function(validate, source) {
 		this.delayCall('_rerenderBlurryAction', [validate, source], 100);
 	},
@@ -400,7 +401,8 @@ isc.EditView.addMethods({
 			if (me._blurry) {
 				var blurry = me._blurry;
 				me._blurry = null;
-				// test for a BizButton as this could just be the form item that was blurred
+				// Test for a BizButton as this could just be the form item that was blurred
+				// If its a button, call its action as this was the click event that was lost
 				if (blurry.action) {
 					// delay the call, otherwise the _vm.saveData() callback function is not invoked
 					blurry.delayCall('action');
@@ -682,7 +684,8 @@ isc.EditView.addMethods({
 		}
 	},
 
-	// called on the server-side code generation for server-side actions from a blur event
+	// Called on the server-side code generation for rerender actions from a blur event
+	// This is to circumvent the lost click event when blurring to a button click
 	doBlurryAction: function(action, validate) {
 		this.delayCall('_doBlurryAction', [action, validate], 100);
 	},
@@ -692,7 +695,8 @@ isc.EditView.addMethods({
 			if (me._blurry) {
 				var blurry = me._blurry;
 				me._blurry = null;
-				// test for a BizButton as this could just be the form item that was blurred
+				// Test for a BizButton as this could just be the form item that was blurred
+				// If its a button, call its action as this was the click event that was lost
 				if (blurry.action) {
 					// delay the call, otherwise the _vm.saveData() callback function is not invoked
 					blurry.delayCall('action');
