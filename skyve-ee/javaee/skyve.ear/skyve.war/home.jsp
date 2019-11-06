@@ -59,8 +59,6 @@
 	UserAgentType userAgentType = UserAgent.getType(request);
 	request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 	Router router = repository.getRouter();
-	UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-	request.setAttribute(AbstractWebContext.UXUI, uxui);
 
 	RouteCriteria criteria = new RouteCriteria();
 	criteria.setDocumentName(d);
@@ -130,10 +128,15 @@
 			return;
 		}
 		
+		// Determine the UX/UI
+		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+		request.setAttribute(AbstractWebContext.UXUI, uxui);
+
 		// Determine the route
 		criteria.setCustomerName(user.getCustomerName());
 		criteria.setDataGroupId(user.getDataGroupId());
 		criteria.setUserId(user.getId());
+
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (UtilImpl.COMMAND_TRACE) {
 			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",
