@@ -27,21 +27,25 @@ public class UserExtension extends User {
 			determinedRoles = true;
 			assignedRoles.clear();
 			if (isPersisted()) {
-				
-				org.skyve.metadata.user.User metaDataUser = toMetaDataUser();
-
-				// Add the assigned roles
-				Customer c = metaDataUser.getCustomer();
-				for (Module m : c.getModules()) {
-					String moduleName = m.getName();
-					for (Role role : m.getRoles()) {
-						String roleName = role.getName();
-						if (metaDataUser.isInRole(moduleName, roleName)) {
-							UserRole assignedRole = UserRole.newInstance();
-							assignedRole.setRoleName(moduleName + "." + roleName);
-							assignedRoles.add(assignedRole);
+				try {
+					org.skyve.metadata.user.User metaDataUser = toMetaDataUser();
+	
+					// Add the assigned roles
+					Customer c = metaDataUser.getCustomer();
+					for (Module m : c.getModules()) {
+						String moduleName = m.getName();
+						for (Role role : m.getRoles()) {
+							String roleName = role.getName();
+							if (metaDataUser.isInRole(moduleName, roleName)) {
+								UserRole assignedRole = UserRole.newInstance();
+								assignedRole.setRoleName(moduleName + "." + roleName);
+								assignedRoles.add(assignedRole);
+							}
 						}
 					}
+				}
+				catch (@SuppressWarnings("unused") Exception e) {
+					// assigned roles is already empty
 				}
 			}
 		}
