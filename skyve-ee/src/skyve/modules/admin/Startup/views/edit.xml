@@ -113,7 +113,7 @@
 	        </row>
 	        <row>
 	            <item>
-	                <geometryMap binding="mapCentre" type="point"/>
+	                <geometry binding="mapCentre" type="point"/>
 	            </item>
 	        </row>
 		</form>
