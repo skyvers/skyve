@@ -78,7 +78,7 @@ public final class UxUi implements Serializable {
 	}
 
 	public static UxUi newSmartClient(String name, String scSkin, String pfThemeName, String pfThemeColour) {
-		UxUi result = newPrimeFaces(name, scSkin, pfThemeName);
+		UxUi result = newSmartClient(name, scSkin, pfThemeName);
 		result.setPfThemeColour(pfThemeColour);
 		return result;
 	}
