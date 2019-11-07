@@ -1,5 +1,9 @@
 @CHARSET "UTF-8";
+/*****************************
+ * Styles for the admin module
+ *****************************/
 
+/* user dashboard tiles */
 .tile {
   padding: 5px;
 }
