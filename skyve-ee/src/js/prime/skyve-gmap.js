@@ -163,7 +163,11 @@ SKYVE.BizMap = function() {
 	    		display.infoWindow.open(display.webmap);
 	    		display.infoWindow.setContent(contents);
 	    	}
-	    }
+	    },
+
+		resizeAll: function() {
+			// not sure if we need this or not
+		}
 	}
 }();
 
@@ -217,6 +221,10 @@ SKYVE.BizMapPicker = function() {
 			// as we don't want to send malformed WKT to the server
         	textElement.attr('readonly', true);
         	SKYVE.GMap.scatterValue(display, textElement.val());
+		},
+		
+		resizeAll: function() {
+			// not sure if we need this or not
 		}
 	}
 }();

@@ -43,7 +43,7 @@
 						</div>
 				    </div>
 				
-					<p:accordionPanel>
+					<p:accordionPanel onTabChange="SKYVE.PF.tabChange()">
 						<p:tab title="Environment Settings">
 							<s:view module="admin"
 										document="Startup"
@@ -79,6 +79,11 @@
 										widgetId="formSMS"
 										update="@form" />
 						</p:tab>
+						<script type="text/javascript">
+							SKYVE.PF.getByIdEndsWith$('s635').on('resize', function() {
+								console.log('resized');
+							});
+						</script>
 					</p:accordionPanel>
 				</h:form>
 			</ui:define>

@@ -187,10 +187,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class));
+			result.setOnTabChange("SKYVE.PF.tabChange()");
 		}
 		else {
 			result.setWidgetVar(id);
-			result.setOnTabChange(String.format("sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
+			result.setOnTabChange(String.format("SKYVE.PF.tabChange();sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
 			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
 													id,

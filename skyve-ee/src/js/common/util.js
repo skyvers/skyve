@@ -464,7 +464,7 @@ SKYVE.GMap = function() {
 			control.style.padding = '5px';
 			control.style.textAlign = 'center';
 			control.title = 'Click to set the refresh rate of the map';
-			control.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
+			control.innerHTML = '<input type="number" min="0" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
 									'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
 			control.index = 1;
 			control.children[0].addEventListener('change', function() {
@@ -1107,7 +1107,7 @@ SKYVE.Leaflet = function() {
 				onAdd: function (map) {
 					var container = L.DomUtil.create('div', 'leaflet-control');
 
-					container.innerHTML = '<input type="number" min="1" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
+					container.innerHTML = '<input type="number" min="0" max="500" step="1" value="' + display.refreshTime + '" size="3" />' +
 											'<input type="checkbox"' + (display._refreshRequired ? ' checked' : '') + '><label>Refresh</label>';
 					
 					container.children[0].addEventListener('change', function() {

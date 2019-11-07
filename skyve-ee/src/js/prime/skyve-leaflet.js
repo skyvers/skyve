@@ -154,6 +154,14 @@ SKYVE.BizMap = function() {
 	    	result += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
 			result += '?m=' + layer.zoomData.mod + '&d=' + layer.zoomData.doc + '&i=' + layer.zoomData.bizId + "'\"/>";
 			return result;
+		},
+		
+		resizeAll: function() {
+			setTimeout(function() {
+				for (var elementId in displays) {
+					displays[elementId].webmap.invalidateSize(false);
+				}
+			}, 0);
 		}
 	}
 }();
@@ -210,6 +218,14 @@ SKYVE.BizMapPicker = function() {
 			// as we don't want to send malformed WKT to the server
         	textElement.attr('readonly', true);
         	SKYVE.Leaflet.scatterValue(display, textElement.val());
+		},
+
+		resizeAll: function() {
+			setTimeout(function() {
+				for (var elementId in displays) {
+					displays[elementId].webmap.invalidateSize(false);
+				}
+			}, 0);
 		}
 	}
 }();

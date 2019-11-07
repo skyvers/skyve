@@ -38,6 +38,15 @@ SKYVE.PF = function() {
 			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>');
 		},
 		
+		tabChange: function() {
+			if (SKYVE.BizMap) {
+				SKYVE.BizMap.resizeAll();
+			}
+			if (SKYVE.BizMapPicker) {
+				SKYVE.BizMapPicker.resizeAll();
+			}
+		},
+		
 		getTextElement: function(id) {
 			return SKYVE.PF.getById(id);
 		},
