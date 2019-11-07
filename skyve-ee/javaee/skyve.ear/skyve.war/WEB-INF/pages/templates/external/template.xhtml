@@ -21,13 +21,15 @@
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 		
-			<base href="#{bean.baseHref}" />
-			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
-			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<title>Skyve</title>
+			<base href="#{bean.baseHref}" />
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
+			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
+			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
+			
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				#{bean.apiScript}

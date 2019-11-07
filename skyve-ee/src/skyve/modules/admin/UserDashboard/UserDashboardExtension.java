@@ -340,11 +340,13 @@ public class UserDashboardExtension extends UserDashboard {
 				if (AttributeType.content.equals(a.getAttributeType())
 						|| AttributeType.image.equals(a.getAttributeType())) {
 					String cId = (String) Binder.get(bean, a.getName());
-					String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName() + "&_w=24&_h=24";
-					// icon = "<img src=\"" + imgSrc + "\" />";
-					icon = String.format("<span class='icon'>"
-							+ "  <img src='%1$s'/>"
-							+ "</span>", imgSrc);
+					if (cId != null) {
+						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName()
+								+ "&_w=24&_h=24";
+						icon = String.format("<span class='icon'>"
+								+ "  <img src='%1$s'/>"
+								+ "</span>", imgSrc);
+					}
 					break;
 				}
 			}
