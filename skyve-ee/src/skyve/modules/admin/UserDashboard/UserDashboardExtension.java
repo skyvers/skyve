@@ -28,6 +28,7 @@ import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
+import modules.admin.domain.Generic;
 import modules.admin.domain.UserDashboard;
 
 public class UserDashboardExtension extends UserDashboard {
@@ -42,8 +43,11 @@ public class UserDashboardExtension extends UserDashboard {
 	private transient Persistence persistence;
 
 	@Override
-	public String getFavourites() {
-		return createFavourites();
+	public List<Generic> getFavourites() {
+		super.getFavourites().clear();
+		createFavourites();
+
+		return super.getFavourites();
 	}
 
 	/**
@@ -51,7 +55,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 * 
 	 * @return The HTML markup for the favourites
 	 */
-	private String createFavourites() {
+	private void createFavourites() {
 
 		UserExtension currentUser = ModulesUtil.currentAdminUser();
 
@@ -103,12 +107,11 @@ public class UserDashboardExtension extends UserDashboard {
 		persistence.resetDocumentPermissionScopes();
 
 		// render the tiles for display
-		StringBuilder favourites = new StringBuilder();
 		for (Tile tile : tiles) {
-			favourites.append(tile.toMarkup());
+			Generic g = Generic.newInstance();
+			g.setMarkup1(tile.toMarkup());
+			super.getFavourites().add(g);
 		}
-
-		return favourites.toString();
 	}
 
 	/**

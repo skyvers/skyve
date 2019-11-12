@@ -11,6 +11,11 @@
 	margin-top: 10px;
 }
 
+td > div > div.tile {
+	/* margin for SC */
+	margin-bottom: 5px;
+}
+
 .tile.delete {
 	border-left: 4px solid #f5c6cb;
 }

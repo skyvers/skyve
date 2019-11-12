@@ -12,8 +12,10 @@
 			<displayName>Current User</displayName>
 			<documentName>User</documentName>
 		</association>
-		<markup name="favourites">
-			<displayName>Clickable favourites</displayName>
-		</markup>
+		<collection name="favourites" type="composition">
+			<displayName>Favourites</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 </document>

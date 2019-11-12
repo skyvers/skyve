@@ -10,18 +10,9 @@
 					]]>
 				</script>
 			</inject>
-			<form border="true" borderTitle="Favourites - click to ...">
-				<column/>
-				<row>
-					<item>
-						<blurb >
-							<![CDATA[
-							{favourites}
-							]]>
-						</blurb>
-					</item>
-				</row>
-			</form>
+			<vbox border="true" borderTitle="Favourites - click to ...">
+				<listRepeater model="FavouritesModel"/>
+			</vbox>
 		
 			<form responsiveWidth="6" border="true" borderTitle="My Details">
 				<column responsiveWidth="3" />
