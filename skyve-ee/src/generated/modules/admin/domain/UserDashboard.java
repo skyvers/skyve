@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -9,11 +10,13 @@ import modules.admin.UserDashboard.UserDashboardExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * User Dashboard
  * 
  * @navhas n currentUser 0..1 User
+ * @navcomposed n favourites 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -40,9 +43,9 @@ public class UserDashboard extends AbstractTransientBean {
 	 **/
 	private UserExtension currentUser = null;
 	/**
-	 * Clickable favourites
+	 * Favourites
 	 **/
-	private String favourites;
+	private List<Generic> favourites = new ChangeTrackingArrayList<>("favourites", this);
 
 	@Override
 	@XmlTransient
@@ -109,17 +112,26 @@ public class UserDashboard extends AbstractTransientBean {
 	 * {@link #favourites} accessor.
 	 * @return	The value.
 	 **/
-	public String getFavourites() {
+	@XmlElement
+	public List<Generic> getFavourites() {
 		return favourites;
 	}
 
 	/**
-	 * {@link #favourites} mutator.
-	 * @param favourites	The new value.
+	 * {@link #favourites} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
-	@XmlElement
-	public void setFavourites(String favourites) {
-		preset(favouritesPropertyName, favourites);
-		this.favourites = favourites;
+	public Generic getFavouritesElementById(String bizId) {
+		return getElementById(favourites, bizId);
+	}
+
+	/**
+	 * {@link #favourites} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setFavouritesElementById(String bizId, Generic element) {
+		 setElementById(favourites, element);
 	}
 }

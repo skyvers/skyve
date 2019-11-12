@@ -133,6 +133,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	/** @hidden */
 	public static final String geometry3PropertyName = "geometry3";
 	/** @hidden */
+	public static final String markup1PropertyName = "markup1";
+	/** @hidden */
 	public static final String text5001PropertyName = "text5001";
 	/** @hidden */
 	public static final String text5002PropertyName = "text5002";
@@ -295,6 +297,10 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * geometry3
 	 **/
 	private Geometry geometry3;
+	/**
+	 * markup1
+	 **/
+	private String markup1;
 	/**
 	 * text 500 1
 	 **/
@@ -1083,6 +1089,24 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	public void setGeometry3(Geometry geometry3) {
 		preset(geometry3PropertyName, geometry3);
 		this.geometry3 = geometry3;
+	}
+
+	/**
+	 * {@link #markup1} accessor.
+	 * @return	The value.
+	 **/
+	public String getMarkup1() {
+		return markup1;
+	}
+
+	/**
+	 * {@link #markup1} mutator.
+	 * @param markup1	The new value.
+	 **/
+	@XmlElement
+	public void setMarkup1(String markup1) {
+		preset(markup1PropertyName, markup1);
+		this.markup1 = markup1;
 	}
 
 	/**

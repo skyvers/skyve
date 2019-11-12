@@ -131,6 +131,9 @@
 		<geometry name="geometry3">
 			<displayName>geometry3</displayName>
 		</geometry>
+		<markup name="markup1">
+			<displayName>markup1</displayName>
+		</markup>
 		<text name="text5001">
 			<displayName>text 500 1</displayName>
 			<length>500</length>
