@@ -16,6 +16,8 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.types.jaxb.OptimisticLockMapper;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -166,6 +168,16 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	 */
 	public String getBizKeyBizIdString() {
 		return String.format("%s (%s)", bizKey, bizId);
+	}
+
+	/**
+	 * @return A url to the edit view for this bean.
+	 */
+	public String getEditUrl() {
+		return Util.getSkyveContextUrl() + "/?a=e&" +
+				"m=" + getBizModule() + "&" +
+				"d=" + getBizDocument() + "&" +
+				"i=" + getBizId();
 	}
 
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
