@@ -133,7 +133,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				if ((persistent == null) || (persistent.getName() == null)) {
 					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
 				}
-				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl(repository);
 
 				String queryTitle = "All " + document.getPluralAlias();
 				query.setDescription(queryTitle);

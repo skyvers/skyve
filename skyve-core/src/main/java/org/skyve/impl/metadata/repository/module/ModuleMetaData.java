@@ -269,7 +269,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				}
 				else if (queryMetaData instanceof MetaDataQueryMetaData) {
 					MetaDataQueryMetaData documentQueryMetaData = (MetaDataQueryMetaData) queryMetaData;
-					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl();
+					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl(repository);
 					populateQueryProperties(queryMetaData,
 												documentQueryImpl,
 												metaDataName,

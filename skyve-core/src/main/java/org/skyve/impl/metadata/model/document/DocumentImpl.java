@@ -95,7 +95,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
-	private AbstractRepository repository;
+	private transient AbstractRepository repository;
 	
 	public DocumentImpl(AbstractRepository repository) {
 		this.repository = repository;

@@ -63,6 +63,12 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 
+	private transient AbstractRepository repository;
+	
+	public MetaDataQueryDefinitionImpl(AbstractRepository repository) {
+		this.repository = repository;
+	}
+	
 	@Override
 	public Module getDocumentModule(Customer customer) {
 		Module result = getOwningModule();
@@ -461,7 +467,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							Class<?> type = String.class;
 							if (attribute != null) {
 								if (attribute instanceof Enumeration) {
-									type = AbstractRepository.get().getEnum((Enumeration) attribute);
+									type = repository.getEnum((Enumeration) attribute);
 								}
 								else if (attribute.getAttributeType() != null) {
 									type = attribute.getAttributeType().getImplementingType();

@@ -133,7 +133,7 @@ public class CustomerImpl implements Customer {
 	private Map<String, List<DomainValue>> domainValueCache = new TreeMap<>();
 
 
-	private AbstractRepository repository;
+	private transient AbstractRepository repository;
 	
 	public CustomerImpl(AbstractRepository repository) {
 		this.repository = repository;
