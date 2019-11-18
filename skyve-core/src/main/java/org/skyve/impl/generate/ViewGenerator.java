@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Content;
@@ -67,11 +66,13 @@ public class ViewGenerator {
 	private static final Integer FOUR = new Integer(4);
 	private static final Integer TWELVE = new Integer(12);
 	
-	private ViewGenerator() {
-		// do nothing
+	private AbstractRepository repository;
+	
+	public ViewGenerator(AbstractRepository repository) {
+		this.repository = repository;
 	}
 
-	public static ViewImpl generate(Customer customer, Document document, String viewName) {
+	public ViewImpl generate(Customer customer, Document document, String viewName) {
 		ViewImpl result = null;
 
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -127,7 +128,7 @@ public class ViewGenerator {
 		MetaData widget;
 	}
 	
-	private static ViewImpl generateEditView(Customer customer, Module module, Document document) {
+	private ViewImpl generateEditView(Customer customer, Module module, Document document) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
 
@@ -136,8 +137,6 @@ public class ViewGenerator {
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
-
-		AbstractRepository repository = AbstractRepository.get();
 
 		// Add any actions that have privileges
 		for (String actionName : ((DocumentImpl) document).getDefinedActionNames()) {
@@ -231,12 +230,12 @@ public class ViewGenerator {
 		return result;
 	}
 
-	private static void processAttributes(Customer customer, 
-											Module module, 
-											Document document,
-											Form form,
-											List<Detail> details,
-											String bindingPrefix) {
+	private void processAttributes(Customer customer, 
+									Module module, 
+									Document document,
+									Form form,
+									List<Detail> details,
+									String bindingPrefix) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -261,7 +260,7 @@ public class ViewGenerator {
 					List<DomainValue> domainValues = null;
 					try {
 						if (bizlet == null) {
-							bizlet = ((AbstractRepository) CORE.getRepository()).getBizlet(customer, document, false);
+							bizlet = repository.getBizlet(customer, document, false);
 						}
 						domainValues = customer.getConstantDomainValues(bizlet, moduleName, documentName, attribute);
 					}
@@ -452,7 +451,7 @@ public class ViewGenerator {
 		return result;
 	}
 	
-	public static String generateEditViewXML(Customer customer,
+	public String generateEditViewXML(Customer customer,
 												Document document,
 												boolean customerOverridden,
 												boolean uxuiOverridden) {
@@ -472,6 +471,38 @@ public class ViewGenerator {
 		return XMLMetaData.marshalView(repositoryView, customerOverridden, uxuiOverridden);
 	}
 	
+
+	private void writeEditView(String srcPath,
+								Module module,
+								Document document,
+								Customer customer,
+								boolean customerOverridden,
+								String uxui)
+	throws IOException {
+		StringBuilder filePath = new StringBuilder(64);
+		filePath.append(srcPath);
+		if (customerOverridden) {
+			filePath.append("customers/").append(customer.getName()).append("/modules/");
+		}
+		else {
+			filePath.append("modules/");
+		}
+		filePath.append(module.getName()).append('/').append(document.getName()).append("/views/");
+		if (uxui != null) {
+			filePath.append(uxui).append('/');
+		}
+		File file = new File(filePath.toString());
+		file.mkdirs();
+		filePath.append("generatedEdit.xml");
+		file = new File(filePath.toString());
+		UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
+		try (PrintWriter out = new PrintWriter(file)) {
+			out.println(generateEditViewXML(customer, document, customerOverridden, uxui != null));
+			out.flush();
+		}
+		UtilImpl.LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
+	}
+
 	public static void main(String[] args) throws Exception {
 		String srcPath = null;
 		String customerName = null;
@@ -502,8 +533,8 @@ public class ViewGenerator {
 			System.exit(1);
 		}
 
-		AbstractRepository.set(new LocalDesignRepository());
-		AbstractRepository repository = AbstractRepository.get();
+		
+		AbstractRepository repository = new LocalDesignRepository();
 		Customer customer = repository.getCustomer(customerName);
 
 		// If the module and/or document was not specified, we will just generate all edit views.
@@ -514,45 +545,20 @@ public class ViewGenerator {
 					if (documentRef.getOwningModuleName().equals(module.getName())) {
 						Document document = module.getDocument(customer, entry.getKey());
 						try {
-							writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
-						} catch (Exception e) {
+							new ViewGenerator(repository).writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
+						}
+						catch (Exception e) {
 							UtilImpl.LOGGER.warning(String.format("Failed to generate edit view for %s.%s, %s.",
 									module.getName(), document.getName(), e.getMessage()));
 						}
 					}
 				}
 			}
-		} else {
-			Module module = repository.getModule(customer, moduleName);
-			Document document = repository.getDocument(customer, module, documentName);
-			writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
-		}
-	}
-
-	private static void writeEditView(String srcPath, Module module, Document document, Customer customer,
-							   boolean customerOverridden,
-							   String uxui) throws IOException {
-		StringBuilder filePath = new StringBuilder(64);
-		filePath.append(srcPath);
-		if (customerOverridden) {
-			filePath.append("customers/").append(customer.getName()).append("/modules/");
 		}
 		else {
-			filePath.append("modules/");
+			Module module = repository.getModule(customer, moduleName);
+			Document document = repository.getDocument(customer, module, documentName);
+			new ViewGenerator(repository).writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
 		}
-		filePath.append(module.getName()).append('/').append(document.getName()).append("/views/");
-		if (uxui != null) {
-			filePath.append(uxui).append('/');
-		}
-		File file = new File(filePath.toString());
-		file.mkdirs();
-		filePath.append("generatedEdit.xml");
-		file = new File(filePath.toString());
-		UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
-		try (PrintWriter out = new PrintWriter(file)) {
-			out.println(generateEditViewXML(customer, document, customerOverridden, uxui != null));
-			out.flush();
-		}
-		UtilImpl.LOGGER.info("Remember to rename this to 'edit.xml' to make this view active.");
 	}
 }

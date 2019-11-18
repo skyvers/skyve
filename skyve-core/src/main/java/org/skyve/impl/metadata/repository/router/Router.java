@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -109,7 +110,7 @@ public class Router implements PersistentMetaData<Router> {
 	}
 	
 	@Override
-	public Router convert(String metaDataName) {
+	public Router convert(String metaDataName, AbstractRepository repository) {
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);
 		}

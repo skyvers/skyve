@@ -70,6 +70,12 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String documentation; 
 
+	private transient AbstractRepository repository;
+	
+	public ModuleImpl(AbstractRepository repository) {
+		this.repository = repository;
+	}
+	
 	@Override
 	public String getName() {
 		return name;
@@ -226,7 +232,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 */
 	@Override
 	public Document getDocument(Customer customer, String documentName) {
-		Document result = AbstractRepository.get().getDocument(customer, this, documentName);
+		Document result = repository.getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new IllegalStateException("Document " + documentName + " does not exist in module " + getName());
 		}

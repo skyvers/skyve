@@ -74,7 +74,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;

@@ -87,6 +87,13 @@ public class Enumeration extends ConstrainableField {
 	private String attributeRef;
 	private Document owningDocument;
 	
+	private transient AbstractRepository repository;
+	
+	@XmlTransient
+	public void setRepository(AbstractRepository repository) {
+		this.repository = repository;
+	}
+	
 	@XmlTransient
 	public String getTypeName() {
 		return getTarget().typeName;
@@ -175,7 +182,7 @@ public class Enumeration extends ConstrainableField {
 			Document referencedDocument = owningDocument;
 			
 			if ((moduleRef != null) || (documentRef != null)) {
-				Module referencedModule = AbstractRepository.get().getModule(null, referencedModuleName);
+				Module referencedModule = repository.getModule(null, referencedModuleName);
 				referencedDocument = referencedModule.getDocument(null, referencedDocumentName);
 			}
 			

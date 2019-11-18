@@ -28,14 +28,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 public final class JPADomainGenerator extends DomainGenerator {
-	JPADomainGenerator() {
-		// reduce visibility
+	// reduce visibility
+	JPADomainGenerator(AbstractRepository repository) {
+		super(repository);
 	}
 
 	@Override
 	public void generate() throws Exception {
-		// TODO delete all code before generating
-		AbstractRepository repository = AbstractRepository.get();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
 
@@ -45,7 +44,6 @@ public final class JPADomainGenerator extends DomainGenerator {
 					DocumentRef ref = entry.getValue();
 
 					Document document = module.getDocument(customer, documentName);
-
 					// do it for persistent and transient documents defined in this module - not external references
 					if (// ((ref.getRelatedTo() != null) ||
 							ref.getOwningModuleName().equals(module.getName()))// )

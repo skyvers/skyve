@@ -71,7 +71,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("Test Document");
+		document.convert("Test Document", null);
 		
 		assertThat(v.getMin(), is(0));
 		assertThat(v.getMax(), is(10));
@@ -106,7 +106,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestMetaData");
+		document.convert("TestMetaData", null);
 
 		assertThat(v.getMin(), is(0L));
 		assertThat(v.getMax(), is(10L));
@@ -137,7 +137,7 @@ public class XMLMetaDataTest {
 
 		document.getAttributes().add(field);
 
-		document.convert("TestDocument");
+		document.convert("TestDocument", null);
 		
 		assertThat(field.getConverter(), is(notNullValue()));
 

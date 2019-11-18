@@ -44,8 +44,6 @@ public abstract class AbstractRepository implements Repository {
 		AbstractRepository.repository = repository;
 	}
 
-	public static final String SUBVERSION_DIRECTORY = ".svn";
-
 	public final String ROUTER_NAME = "router";
 	public final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	public final String CUSTOMERS_NAME = "customers";
@@ -143,10 +141,10 @@ public abstract class AbstractRepository implements Repository {
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends MetaData> T getJavaCode(Customer customer, 
-													String fullyQualifiedJavaCodeName,
-													boolean assertExistence,
-													boolean runtime) {
+	public final <T extends MetaData> T getJavaMetaData(Customer customer, 
+															String fullyQualifiedJavaCodeName,
+															boolean assertExistence,
+															boolean runtime) {
 		T result = null;
 		
 		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);

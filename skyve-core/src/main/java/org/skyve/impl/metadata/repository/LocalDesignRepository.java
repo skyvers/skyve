@@ -162,7 +162,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(UtilImpl.getAbsoluteBasePath());
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME);
+		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				sb.append(UtilImpl.getAbsoluteBasePath());
 				sb.append(MODULES_NAMESPACE).append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
 				if (new File(sb.toString()).exists()) {
-					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME));
+					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this));
 				}
 			}
 		}
@@ -205,7 +205,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
 															" but the name attribute is " + customer.getName());
 						}
-						result = customer.convert(customerName);
+						result = customer.convert(customerName, this);
 						populateVTable((CustomerImpl) result);
 						put(customerKey, result);
 					}
@@ -226,7 +226,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		File customersDirectory = new File(UtilImpl.getAbsoluteBasePath() + CUSTOMERS_NAMESPACE);
 		if (customersDirectory.exists() && customersDirectory.isDirectory()) {
 			for (File customerDirectory : customersDirectory.listFiles()) {
-				if (customerDirectory.isDirectory() && (! customerDirectory.getName().equals(SUBVERSION_DIRECTORY))) {
+				if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
 					result.add(customerDirectory.getName());
 				}
 			}
@@ -242,7 +242,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		File modulesDirectory = new File(UtilImpl.getAbsoluteBasePath() + MODULES_NAMESPACE);
 		if (modulesDirectory.exists() && modulesDirectory.isDirectory()) {
 			for (File moduleDirectory : modulesDirectory.listFiles()) {
-				if (moduleDirectory.isDirectory() && (! moduleDirectory.getName().equals(SUBVERSION_DIRECTORY))) {
+				if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
 					// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
 					for (File moduleChild : moduleDirectory.listFiles()) {
 						if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
@@ -546,7 +546,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						
 						sb.setLength(0);
 						sb.append(moduleName).append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
-						result = module.convert(sb.toString());
+						result = module.convert(sb.toString(), this);
 						put(moduleLocation, result);
 					}
 					catch (Exception e) {
@@ -606,7 +606,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						sb.setLength(0);
 						sb.append(module.getName()).append('.').append(documentName);
 						sb.append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
-						result = document.convert(sb.toString());
+						result = document.convert(sb.toString(), this);
 						internalResult = (DocumentImpl) result;
 						internalResult.setOwningModuleName(documentModuleName);
 
@@ -660,7 +660,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder fullyQualifiedBizletName = new StringBuilder(64);
 		fullyQualifiedBizletName.append(document.getOwningModuleName()).append('.');
 		fullyQualifiedBizletName.append(document.getName()).append("Bizlet");
-		return getJavaCode(customer, fullyQualifiedBizletName.toString(), false, runtime);
+		return getJavaMetaData(customer, fullyQualifiedBizletName.toString(), false, runtime);
 	}
 
 	
@@ -687,7 +687,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder fullyQualifiedImageName = new StringBuilder(128);
 		fullyQualifiedImageName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedImageName.append(".images.").append(imageName);
-		return getJavaCode(customer, fullyQualifiedImageName.toString(), true, runtime);
+		return getJavaMetaData(customer, fullyQualifiedImageName.toString(), true, runtime);
 	}
 
 	@Override
@@ -734,7 +734,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.setLength(0);
 							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 							sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
-							result = view.convert(sb.toString());
+							result = view.convert(sb.toString(), this);
 							result.resolve(uxui, customer, document);
 							if (! UtilImpl.DEV_MODE) {
 								put(viewLocation, result);
@@ -765,7 +765,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						result = get(viewLocation);
 					}
 					if (result == null) {
-						result = ViewGenerator.generate(customer, document, name);
+						result = new ViewGenerator(this).generate(customer, document, name);
 						if (! UtilImpl.DEV_MODE) {
 							put(viewLocation, result);
 						}
@@ -782,7 +782,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
-		return getJavaCode(customer, String.format("%s.%s.models.%s", document.getOwningModuleName(), document.getName(), modelName), true, runtime);
+		return getJavaMetaData(customer, String.format("%s.%s.models.%s", document.getOwningModuleName(), document.getName(), modelName), true, runtime);
 	}
 
 	@Override
@@ -812,7 +812,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	private <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
-		return getJavaCode(customer, String.format("%s.%s.actions.%s", document.getOwningModuleName(), document.getName(), actionName), assertExistence, runtime);
+		return getJavaMetaData(customer, String.format("%s.%s.actions.%s", document.getOwningModuleName(), document.getName(), actionName), assertExistence, runtime);
 	}
 	
 	@Override
@@ -1345,6 +1345,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		}
 
 		new ViewValidator((ViewImpl) view,
+							this,
 							(CustomerImpl) customer,
 							(DocumentImpl) document,
 							uxui);

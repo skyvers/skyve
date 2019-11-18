@@ -21,7 +21,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;

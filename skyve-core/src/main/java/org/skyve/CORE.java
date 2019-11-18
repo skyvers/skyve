@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.SortedMap;
 
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.metadata.SortDirection;
@@ -84,7 +85,7 @@ public class CORE {
 	 * @return The repository.
 	 */
 	public static Repository getRepository() {
-		return org.skyve.impl.metadata.repository.AbstractRepository.get();
+		return AbstractRepository.get();
 	}
 	
 	/**

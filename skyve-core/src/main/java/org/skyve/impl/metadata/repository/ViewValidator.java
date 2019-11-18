@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -111,6 +110,8 @@ import org.skyve.util.Binder.TargetMetaData;
 
 // TODO check suggestion attributes on text fields etc
 class ViewValidator extends ViewVisitor {
+	private AbstractRepository repository;
+	
 	private String viewIdentifier;
 	private String uxui;
 	
@@ -118,8 +119,13 @@ class ViewValidator extends ViewVisitor {
 	private String dataWidgetIdentifier;
 	private String dataWidgetBinding;
 	
-	ViewValidator(ViewImpl view, CustomerImpl customer, DocumentImpl document, String uxui) {
+	ViewValidator(ViewImpl view, 
+					AbstractRepository repository, 
+					CustomerImpl customer, 
+					DocumentImpl document, 
+					String uxui) {
 		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view);
+		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 		this.uxui = uxui;
 		visit();
@@ -386,7 +392,7 @@ class ViewValidator extends ViewVisitor {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
 				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
 				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
 					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
 				}
 			}
@@ -402,7 +408,7 @@ class ViewValidator extends ViewVisitor {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
 				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
 				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
 					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
 				}
 			}
@@ -418,7 +424,7 @@ class ViewValidator extends ViewVisitor {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
 				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
 				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
 					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
 				}
 			}
@@ -434,7 +440,7 @@ class ViewValidator extends ViewVisitor {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
 				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
 				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
 					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
 				}
 			}
@@ -1525,7 +1531,7 @@ class ViewValidator extends ViewVisitor {
 																				"a report");
 					if (reportDocument != null) { // valid module name with no '{'
 						try {
-							if (CORE.getRepository().getReportFileName(customer, reportDocument, reference.getReportName()) == null) {
+							if (repository.getReportFileName(customer, reportDocument, reference.getReportName()) == null) {
 								throw new IllegalStateException("Report DNE");
 							}
 						}
@@ -1840,7 +1846,7 @@ class ViewValidator extends ViewVisitor {
 															document.getOwningModuleName(),
 															document.getName(),
 															resourceName);
-		if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName) == null) {
+		if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName) == null) {
 			throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
 		}
 	}

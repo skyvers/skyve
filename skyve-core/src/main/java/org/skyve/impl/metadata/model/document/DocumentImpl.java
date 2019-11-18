@@ -46,9 +46,6 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 public final class DocumentImpl extends ModelImpl implements Document {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 9091172268741052691L;
 
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
@@ -98,6 +95,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
+	private AbstractRepository repository;
+	
+	public DocumentImpl(AbstractRepository repository) {
+		this.repository = repository;
+	}
+
 	@Override
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
@@ -144,8 +147,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	throws ClassNotFoundException {
 		Class<T> result = null;
 		
-		AbstractRepository repository = AbstractRepository.get();
-
 		String documentName = getName();
 		String packagePath = ((CustomerImpl) customer).getVTable().get(getOwningModuleName() + '.' + documentName);
 		packagePath = packagePath.replace('/', '.');
@@ -208,7 +209,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return AbstractRepository.get().getDynamicImage(customer, this, name, true);
+		return repository.getDynamicImage(customer, this, name, true);
 	}
 
 	@Override
@@ -358,7 +359,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		if (parentDocumentName != null) {
 			if (customer == null) {
-				result = AbstractRepository.get().getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
+				result = repository.getModule(null, getOwningModuleName()).getDocument(null, parentDocumentName);
 			}
 			else {
 				result = customer.getModule(getOwningModuleName()).getDocument(customer, parentDocumentName);
@@ -369,7 +370,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		return AbstractRepository.get().getBizlet(customer, this, true);
+		return repository.getBizlet(customer, this, true);
 	}
 
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
@@ -380,7 +381,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
-			Bizlet<T> bizlet = AbstractRepository.get().getBizlet(customer, this, runtime);
+			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
 			try {
 				if (DomainType.constant.equals(domainType)) {
 					result = customer.getConstantDomainValues(bizlet,
@@ -487,7 +488,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public View getView(String uxui, Customer customer, String name) {
-		AbstractRepository repository = AbstractRepository.get();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {

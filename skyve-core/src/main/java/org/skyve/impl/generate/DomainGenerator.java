@@ -34,9 +34,13 @@ public abstract class DomainGenerator {
 
 	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.H2_NO_INDEXES;
 
-	public static final void validate(String customerName, boolean pre) throws Exception {
-		AbstractRepository repository = AbstractRepository.get();
-
+	protected AbstractRepository repository;
+	
+	protected DomainGenerator(AbstractRepository repository) {
+		this.repository = repository;
+	}
+	
+	public void validate(String customerName, boolean pre) throws Exception {
 		System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
 		System.out.println("Validate customer " + customerName);
@@ -166,17 +170,18 @@ public abstract class DomainGenerator {
 		System.out.println("DIALECT_OPTIONS=" + DIALECT_OPTIONS.toString());
 		System.out.println("EXCLUDED_MODULES=" + (args.length == 7 ? args[6] : ""));
 
-		DomainGenerator foo = UtilImpl.USING_JPA ? new JPADomainGenerator() : new OverridableDomainGenerator();
 		AbstractRepository repository = new LocalDesignRepository();
-		AbstractRepository.set(repository);
+		DomainGenerator foo = UtilImpl.USING_JPA ? 
+								new JPADomainGenerator(repository) : 
+								new OverridableDomainGenerator(repository);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
-			validate(customerName, true);
+			foo.validate(customerName, true);
 		}
 		foo.generate();
 		for (String customerName : repository.getAllCustomerNames()) {
-			validate(customerName, false);
+			foo.validate(customerName, false);
 		}
 	}
 }

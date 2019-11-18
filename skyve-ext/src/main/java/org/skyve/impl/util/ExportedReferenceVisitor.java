@@ -12,7 +12,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Persistent;

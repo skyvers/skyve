@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
@@ -150,8 +151,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@Override
-	public Module convert(String metaDataName) {
-		ModuleImpl result = new ModuleImpl();
+	public Module convert(String metaDataName, AbstractRepository repository) {
+		ModuleImpl result = new ModuleImpl(repository);
 
 		String value = getName();
 		if (value == null) {

@@ -32,7 +32,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -255,14 +255,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
 	}
 
-	OverridableDomainGenerator() {
-		// reduce visibility
+	// reduce visibility
+	OverridableDomainGenerator(AbstractRepository repository) {
+		super(repository);
 	}
 
 	@Override
 	public void generate() throws Exception {
-		AbstractRepository repository = AbstractRepository.get();
-
 		populateDataStructures();
 
 		// delete generated and generatedTest directories
@@ -294,8 +293,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	@SuppressWarnings("synthetic-access")
 	private void populateDataStructures() throws Exception {
-		final AbstractRepository repository = AbstractRepository.get();
-
 		// Populate Base Data Structure with Vanilla definitions
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			final Module module = repository.getModule(null, moduleName);
@@ -308,13 +305,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				@Override
 				public void accept(Document document) throws Exception {
 					validateDocumentAttributeNames(document);
-					populatePropertyLengths(repository, null, module, document, null);
+					populatePropertyLengths(null, module, document, null);
 					String documentName = document.getName();
 					DomainClass domainClass = new DomainClass();
 					domainClass.attributes = generateDocumentPropertyNames(document);
 					documentClasses.put(documentName, domainClass);
 
-					populateModocDerivations(repository, module, document, null);
+					populateModocDerivations(module, document, null);
 				}
 			}.visit(null, module);
 		}
@@ -340,7 +337,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							String modoc = moduleName + '.' + documentName;
 							String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
 							if (documentPackagePath.startsWith(repository.CUSTOMERS_NAMESPACE)) {
-								populatePropertyLengths(repository, customer, module, document, null);
+								populatePropertyLengths(customer, module, document, null);
 
 								// Refine the moduleDocumentProperties, if the vanilla class exists
 								// NB this will not exist if there is a customer document included that is not an override of a
@@ -369,10 +366,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	// create a map of derived classes for use by the ORM generator and ARC processing.
-	private void populateModocDerivations(AbstractRepository repository,
-			Module module,
-			Document document,
-			ExtensionStrategy strategyToAssert) {
+	private void populateModocDerivations(Module module,
+											Document document,
+											ExtensionStrategy strategyToAssert) {
 		Extends inherits = document.getExtends();
 		Persistent persistent = document.getPersistent();
 		ExtensionStrategy strategy = (persistent == null) ? null : persistent.getStrategy();
@@ -442,10 +438,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			putModocDerivation(document, baseDocument);
 			Module baseModule = repository.getModule(null, baseDocument.getOwningModuleName());
-			populateModocDerivations(repository,
-					baseModule,
-					baseDocument,
-					(strategyToAssert != null) ? strategyToAssert : (ExtensionStrategy.mapped.equals(strategy) ? null : strategy));
+			populateModocDerivations(baseModule,
+										baseDocument,
+										(strategyToAssert != null) ? 
+											strategyToAssert : 
+											(ExtensionStrategy.mapped.equals(strategy) ? null : strategy));
 		}
 	}
 
@@ -461,7 +458,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	@SuppressWarnings("synthetic-access")
 	private void generateVanilla(final Module module) throws Exception {
-		final AbstractRepository repository = AbstractRepository.get();
 		final String moduleName = module.getName();
 
 		// clear out the domain folder
@@ -499,15 +495,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					try (FileWriter fw = new FileWriter(classFile)) {
 						Extends inherits = document.getExtends();
-						generateJava(repository,
-								null,
-								module,
-								document,
-								fw,
-								packagePath.replaceAll("\\\\|\\/", "."),
-								documentName,
-								(inherits != null) ? inherits.getDocumentName() : null,
-								false);
+						generateJava(null,
+										module,
+										document,
+										fw,
+										packagePath.replaceAll("\\\\|\\/", "."),
+										documentName,
+										(inherits != null) ? inherits.getDocumentName() : null,
+										false);
 					}
 
 					if ((domainClass != null) && domainClass.isAbstract) {
@@ -516,25 +511,24 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						classFile.createNewFile();
 
 						try (FileWriter fw = new FileWriter(classFile)) {
-							generateJava(repository,
-									null,
-									module,
-									document,
-									fw,
-									packagePath.replaceAll("\\\\|\\/", "."),
-									documentName,
-									documentName,
-									true);
+							generateJava(null,
+											module,
+											document,
+											fw,
+											packagePath.replaceAll("\\\\|\\/", "."),
+											documentName,
+											documentName,
+											true);
 						}
 					}
 
 					generateORM(mappingFileWriter,
-							module,
-							document,
-							repository.MODULES_NAME + '.',
-							(domainClass != null) && domainClass.isAbstract,
-							null,
-							filterDefinitions);
+									module,
+									document,
+									repository.MODULES_NAME + '.',
+									(domainClass != null) && domainClass.isAbstract,
+									null,
+									filterDefinitions);
 
 					// if this is not an excluded module, generate tests
 					if (EXCLUDED_MODULES == null || !Arrays.asList(EXCLUDED_MODULES).contains(moduleName.toLowerCase())) {
@@ -621,7 +615,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		try (FileWriter mappingFileWriter = new FileWriter(mappingFile)) {
 			createMappingFileHeader(mappingFileWriter);
 
-			final AbstractRepository repository = AbstractRepository.get();
 			for (final Module module : customer.getModules()) {
 				final String moduleName = module.getName();
 				System.out.println("Module " + moduleName);
@@ -676,15 +669,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							classFile.createNewFile();
 
 							try (FileWriter fw = new FileWriter(classFile)) {
-								generateJava(repository,
-										customer,
-										module,
-										document,
-										fw,
-										packagePath.replaceAll("\\\\|\\/", "."),
-										documentName,
-										vanillaDocumentName,
-										true);
+								generateJava(customer,
+												module,
+												document,
+												fw,
+												packagePath.replaceAll("\\\\|\\/", "."),
+												documentName,
+												vanillaDocumentName,
+												true);
 							}
 							generateOverriddenORM(mappingFileWriter, customer, module, document, filterDefinitions);
 						}
@@ -808,7 +800,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			return;
 		}
 
-		AbstractRepository repository = AbstractRepository.get();
 		Persistent persistent = document.getPersistent();
 		String customerName = (customer == null) ? null : customer.getName();
 		String documentName = document.getName();
@@ -984,7 +975,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 
-			generateAttributeMappings(fw, repository, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
+			generateAttributeMappings(fw, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
 		}
 
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);
@@ -1059,7 +1050,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private void generateAttributeMappings(FileWriter fw,
-											AbstractRepository repository,
 											Customer customer,
 											Module module,
 											Document document,
@@ -1077,7 +1067,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if ((basePersistent != null) && ExtensionStrategy.mapped.equals(basePersistent.getStrategy())) {
 				Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
 				generateAttributeMappings(fw,
-											repository,
 											customer,
 											baseModule,
 											baseDocument,
@@ -1356,7 +1345,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					
 					// use the enclosing document's persistent object
 					generateAttributeMappings(fw,
-												repository,
 												customer,
 												referencedModule,
 												referencedDocument,
@@ -1771,12 +1759,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private void generateOverriddenORM(FileWriter fw,
-			Customer customer,
-			Module module,
-			Document document,
-			StringBuilder filterDefinitions)
-			throws Exception {
-		AbstractRepository repository = AbstractRepository.get();
+										Customer customer,
+										Module module,
+										Document document,
+										StringBuilder filterDefinitions)
+										throws Exception {
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		String moduleName = module.getName();
 		String documentName = document.getName();
@@ -1931,11 +1918,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return result;
 	}
 
-	private void populatePropertyLengths(AbstractRepository repository,
-			Customer customer,
-			Module module,
-			Document document,
-			String derivedPersistentIdentifier) {
+	private void populatePropertyLengths(Customer customer,
+											Module module,
+											Document document,
+											String derivedPersistentIdentifier) {
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
 			String persistentIdentifier = null;
@@ -1955,7 +1941,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (inherits != null) {
 				Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
 				Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
-				populatePropertyLengths(repository, customer, baseModule, baseDocument, persistentIdentifier);
+				populatePropertyLengths(customer, baseModule, baseDocument, persistentIdentifier);
 			}
 
 			TreeMap<String, Integer> propertyLengths = persistentPropertyLengths.get(persistentIdentifier);
@@ -2135,7 +2121,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		
 		// Check for Extension class defined and alter the class name accordingly
-		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + propertyPackageName;
+		String modulePath = repository.MODULES_NAMESPACE + propertyPackageName;
 		if (domainExtensionClassExists(modulePath, propertyClassName)) {
 			propertyPackagePath = String.format("modules.%s.%s", propertyPackageName, propertyClassName);
 			propertyClassName += "Extension";
@@ -2253,13 +2239,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private void addInverse(AbstractInverse inverse,
-			boolean overriddenInverse,
-			Customer customer,
-			Module module,
-			String packagePath,
-			Set<String> imports,
-			StringBuilder attributes,
-			StringBuilder methods) {
+								boolean overriddenInverse,
+								Customer customer,
+								Module module,
+								String packagePath,
+								Set<String> imports,
+								StringBuilder attributes,
+								StringBuilder methods) {
 		String propertyClassName = inverse.getDocumentName();
 		String propertyPackageName = module.getDocument(customer, propertyClassName).getOwningModuleName();
 		String name = inverse.getName();
@@ -2275,7 +2261,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		
 		// Check for Extension class defined and alter the class name accordingly
-		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + propertyPackageName;
+		String modulePath = repository.MODULES_NAMESPACE + propertyPackageName;
 		if (domainExtensionClassExists(modulePath, propertyClassName)) {
 			propertyPackagePath = String.format("modules.%s.%s", propertyPackageName, propertyClassName);
 			propertyClassName += "Extension";
@@ -2361,9 +2347,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("boxing")
-	private static void generateActionTests(final String moduleName, final String packagePath, final String modulePath,
+	private void generateActionTests(final String moduleName, final String packagePath, final String modulePath,
 			Document document, String documentName, SkyveFactory annotation) throws IOException {
-		final String actionPath = AbstractRepository.get().MODULES_NAMESPACE + moduleName + File.separator + documentName
+		final String actionPath = repository.MODULES_NAMESPACE + moduleName + File.separator + documentName
 				+ File.separator + "actions";
 		final File actionTestPath = new File(GENERATED_TEST_PATH + actionPath);
 
@@ -2549,8 +2535,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("synthetic-access")
-	private void generateJava(AbstractRepository repository, Customer customer, Module module, Document document, FileWriter fw,
-			String packagePath, String documentName, String baseDocumentName, boolean overridden) throws IOException {
+	private void generateJava(Customer customer,
+								Module module,
+								Document document,
+								FileWriter fw,
+								String packagePath,
+								String documentName,
+								String baseDocumentName,
+								boolean overridden)
+	throws IOException {
 		System.out.println("Generate class for " + packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
@@ -2589,7 +2582,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t}\n");
 
 			// Check for Extension class defined and alter the class returned accordingly
-			String modulePath = AbstractRepository.get().MODULES_NAMESPACE + module.getName();
+			String modulePath = repository.MODULES_NAMESPACE + module.getName();
 			if (domainExtensionClassExists(modulePath, documentName)) {
 				imports.add(String.format("modules.%s.%s.%sExtension", module.getName(), documentName, documentName));
 				methods.append("\n\tpublic static ").append(documentName).append("Extension newInstance() {\n");
@@ -2661,7 +2654,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						if (enumeration.getDocumentRef() != null) { // references a different document
 							StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
 							fullyQualifiedEnumName
-									.append(AbstractRepository.get().getEncapsulatingClassNameForEnumeration(enumeration));
+									.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
 							fullyQualifiedEnumName.append('.').append(enumeration.toJavaIdentifier());
 							imports.add(fullyQualifiedEnumName.toString());
 						}
@@ -2829,7 +2822,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String parentPackageName = module.getDocument(customer, parentDocumentName).getOwningModuleName();
 			parentPackagePath = String.format("modules.%s.domain.", parentPackageName);
 			parentClassName = parentDocumentName;
-			String modulePath = AbstractRepository.get().MODULES_NAMESPACE + parentPackageName;
+			String modulePath = repository.MODULES_NAMESPACE + parentPackageName;
 			if (domainExtensionClassExists(modulePath, parentDocumentName)) {
 				parentPackagePath = String.format("modules.%s.%s.", parentPackageName, parentDocumentName);
 				parentClassName += "Extension";
@@ -3278,12 +3271,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Return all vanilla attributes for the specified document.
 	 */
 	@SuppressWarnings("unused")
-	private static List<? extends Attribute> getAllAttributes(Document document) {
+	private List<? extends Attribute> getAllAttributes(Document document) {
 		List<Attribute> result = new ArrayList<>(document.getAttributes());
 		Extends currentInherits = document.getExtends();
 		if (currentInherits != null) {
 			while (currentInherits != null) {
-				Module module = AbstractRepository.get().getModule(null, document.getOwningModuleName());
+				Module module = repository.getModule(null, document.getOwningModuleName());
 				Document baseDocument = module.getDocument(null, currentInherits.getDocumentName());
 				result.addAll(baseDocument.getAttributes());
 				currentInherits = baseDocument.getExtends();
@@ -3437,14 +3430,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 
 	 * @throws IOException
 	 */
-	private static void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
+	private void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
 		// src/main/java/generated/modules
-		final Path generatedDirectory = Paths.get(GENERATED_PATH, AbstractRepository.get().MODULES_NAMESPACE);
+		final Path generatedDirectory = Paths.get(GENERATED_PATH, repository.MODULES_NAMESPACE);
 
 		// get all directories at this level
 		for (File child : generatedDirectory.toFile().listFiles()) {
 			if (child.isDirectory() && moduleNames.contains(child.getName())) {
-				final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(AbstractRepository.get().DOMAIN_NAME);
+				final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(repository.DOMAIN_NAME);
 				if (packagePath.toFile().exists()) {
 					for (File domainFile : packagePath.toFile().listFiles()) {
 						domainFile.delete();

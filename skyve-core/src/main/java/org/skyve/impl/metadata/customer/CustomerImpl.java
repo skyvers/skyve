@@ -1,6 +1,5 @@
 package org.skyve.impl.metadata.customer;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -42,11 +41,9 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
-import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.view.Action;
@@ -54,78 +51,6 @@ import org.skyve.web.WebContext;
 
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
-
-	public class ExportedReference implements Serializable {
-		private static final long serialVersionUID = 3054965257788501970L;
-
-		private String moduleName;
-		private String documentName;
-		private Persistent persistent;
-		private String documentAlias;
-		private String referenceFieldName;
-		private ReferenceType type;
-		private boolean required;
-		
-		public String getDocumentAlias() {
-			return documentAlias;
-		}
-
-		public void setDocumentAlias(String documentAlias) {
-			this.documentAlias = documentAlias;
-		}
-
-		public String getReferenceFieldName() {
-			return referenceFieldName;
-		}
-
-		public void setReferenceFieldName(String referenceFieldName) {
-			this.referenceFieldName = referenceFieldName;
-		}
-
-		public Persistent getPersistent() {
-			return persistent;
-		}
-
-		public void setPersistent(Persistent persistent) {
-			this.persistent = persistent;
-		}
-
-		public String getDocumentName() {
-			return documentName;
-		}
-
-		public void setDocumentName(String documentName) {
-			this.documentName = documentName;
-		}
-
-		public String getModuleName() {
-			return moduleName;
-		}
-
-		public void setModuleName(String moduleName) {
-			this.moduleName = moduleName;
-		}
-
-		public boolean isCollection() {
-			return (type instanceof CollectionType);
-		}
-
-		public ReferenceType getType() {
-			return type;
-		}
-
-		public void setType(ReferenceType type) {
-			this.type = type;
-		}
-
-		public boolean isRequired() {
-			return required;
-		}
-
-		public void setRequired(boolean required) {
-			this.required = required;
-		}
-	}
 
 	/*
 	 * Change derived field groups to "relations". 
@@ -206,6 +131,13 @@ public class CustomerImpl implements Customer {
 	 * A cache of constant domains.
 	 */
 	private Map<String, List<DomainValue>> domainValueCache = new TreeMap<>();
+
+
+	private AbstractRepository repository;
+	
+	public CustomerImpl(AbstractRepository repository) {
+		this.repository = repository;
+	}
 
 	@Override
 	public String getName() {
@@ -304,7 +236,7 @@ public class CustomerImpl implements Customer {
 
 	@Override
 	public final Module getModule(String moduleName) {
-		return AbstractRepository.get().getModule(this, moduleName);
+		return repository.getModule(this, moduleName);
 	}
 
 	@Override
@@ -532,7 +464,7 @@ public class CustomerImpl implements Customer {
 					domainValueCache.put(key, result);
 				}
 				if ((result == null) && (attribute instanceof Enumeration)) {
-					Class<org.skyve.domain.types.Enumeration> domainEnum = AbstractRepository.get().getEnum((Enumeration) attribute);
+					Class<org.skyve.domain.types.Enumeration> domainEnum = repository.getEnum((Enumeration) attribute);
 					result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 					domainValueCache.put(key, result);
 				}

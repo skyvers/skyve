@@ -4,6 +4,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.generate.ViewGenerator;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -40,7 +41,7 @@ public class GenerateEditView implements ServerSideAction<ControlPanelExtension>
 			Module module = customer.getModule(modoc[0]);
 			Document document = module.getDocument(customer, modoc[1]);
 			
-			bean.setResults(ViewGenerator.generateEditViewXML(customer, document, false, false));
+			bean.setResults(new ViewGenerator(AbstractRepository.get()).generateEditViewXML(customer, document, false, false));
 		}
 		catch (Exception e) {
 			bean.trapException(e);

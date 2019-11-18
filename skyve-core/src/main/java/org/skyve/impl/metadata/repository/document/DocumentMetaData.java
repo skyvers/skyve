@@ -58,6 +58,7 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -290,8 +291,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document convert(String metaDataName) {
-		DocumentImpl result = new DocumentImpl();
+	public org.skyve.metadata.model.document.Document convert(String metaDataName, AbstractRepository repository) {
+		DocumentImpl result = new DocumentImpl(repository);
 
 		// Set document metadata
 		String value = getName();
@@ -650,6 +651,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 					if (attribute instanceof Enumeration) {
 						Enumeration enumeration = (Enumeration) attribute;
+						enumeration.setRepository(repository);
 						
 						// Enumeration can be defined inline (ie a new one) or
 						// a reference (module, document, attribute) to another definition
