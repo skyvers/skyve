@@ -55,7 +55,7 @@
 	String i = request.getParameter("i"); // id
 	String c = request.getParameter("c"); // customer
 
-	// Set the UX/UI and user agent type
+	// Set the user agent type
 	UserAgentType userAgentType = UserAgent.getType(request);
 	request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 	Router router = repository.getRouter();
