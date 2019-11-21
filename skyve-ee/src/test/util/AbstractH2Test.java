@@ -20,6 +20,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.WeldMarker;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 
@@ -50,6 +51,7 @@ public abstract class AbstractH2Test {
 	public static void beforeClass() throws Exception {
 		weld = new Weld();
 		weld.addPackage(true, SkyveCDIProducer.class);
+		weld.addPackage(true, WeldMarker.class);
 
 		weld.initialize();
 	}
@@ -62,6 +64,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@Before
+	@SuppressWarnings("static-method")
 	public void beforeBase() throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
@@ -89,6 +92,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@After
+	@SuppressWarnings("static-method")
 	public void afterBase() {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();

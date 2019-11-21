@@ -19,6 +19,7 @@ import org.skyve.persistence.Persistence;
 public class AbstractH2TestDispose extends AbstractH2Test {
 
 	@After
+	@SuppressWarnings("static-method")
 	public void after() throws Exception {
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 		// For H2 by default, closing the last connection to a database closes the database.

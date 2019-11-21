@@ -20,6 +20,7 @@ public class AbstractH2TestTruncate extends AbstractH2Test {
 	private static final String SCHEMA = "PUBLIC";
 
 	@After
+	@SuppressWarnings("static-method")
 	public void after() throws Exception {
 		Persistence p = CORE.getPersistence();
 		Truncate.truncate(SCHEMA, true, true);
