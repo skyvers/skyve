@@ -8,4 +8,5 @@ package modules;
  * @author mike
  */
 public class WeldMarker {
+	// nothing to see here.
 }
