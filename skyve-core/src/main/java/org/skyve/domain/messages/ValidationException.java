@@ -35,6 +35,16 @@ public class ValidationException extends DomainException implements MessageExcep
 	}
 
 	/**
+	 * This is a convenience constructor.
+	 *
+	 * @param binding The binding for the validation exception.
+	 * @param message A message describing the validation exception.
+	 */
+	public ValidationException(String binding, String message) {
+		this(new Message(binding, message));
+	}
+
+	/**
 	 * @param messages A list of messages to add to the ValidationException.
 	 */
 	public ValidationException(List<Message> messages) {
