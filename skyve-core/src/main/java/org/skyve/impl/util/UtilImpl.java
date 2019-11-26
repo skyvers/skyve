@@ -144,7 +144,9 @@ public class UtilImpl {
 	public static boolean USING_JPA = false;
 
 	// For conversations cache
-	public static int MAX_CONVERSATIONS_IN_MEMORY = 1000;
+	public static int CONVERSATION_HEAP_MAX_ENTRIES = 1000;
+	public static int CONVERSATION_OFF_HEAP_MAX_SIZE_MB = 512;
+	public static int CONVERSATION_DISK_MAX_SIZE_GB = 10;
 	public static int CONVERSATION_EVICTION_TIME_MINUTES = 60;
 
 	// For database

@@ -28,7 +28,7 @@
 		<commons-lang3.version>3.2</commons-lang3.version>
 		<commons-validator.version>1.5.1</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
-		<ehcache.version>2.10.3</ehcache.version>
+		<ehcache.version>3.8.1</ehcache.version>
 		<elasticsearch.version>1.4.2</elasticsearch.version>
 		<geodb.version>0.9</geodb.version>
 		<h2.version>1.3.173</h2.version>
@@ -172,7 +172,7 @@
 				<version>${thumbnailator.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sf.ehcache</groupId>
+				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>${ehcache.version}</version>
 			</dependency>
@@ -222,9 +222,9 @@
 				<version>${hibernate-spatial.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.hibernate</groupId>
-			    <artifactId>hibernate-ehcache</artifactId>
-			    <version>${hibernate.version}</version>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-jcache</artifactId>
+				<version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>cglib</groupId>

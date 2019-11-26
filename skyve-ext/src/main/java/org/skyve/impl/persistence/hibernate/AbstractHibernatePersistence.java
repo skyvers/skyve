@@ -44,6 +44,7 @@ import org.hibernate.boot.cfgxml.spi.LoadedConfig;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.boot.spi.MetadataImplementor;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
@@ -181,64 +182,64 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
 		if (dataSource == null) {
-			cfg.put("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
-			cfg.put("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
+			cfg.put(AvailableSettings.DRIVER, UtilImpl.DATA_STORE.getJdbcDriverClassName());
+			cfg.put(AvailableSettings.URL, UtilImpl.DATA_STORE.getJdbcUrl());
 			String value = UtilImpl.DATA_STORE.getUserName();
 			if (value != null) {
-				cfg.put("hibernate.connection.username", value);
+				cfg.put(AvailableSettings.USER, value);
 			}
 			value = UtilImpl.DATA_STORE.getPassword();
 			if (value != null) {
-				cfg.put("hibernate.connection.password", value);
+				cfg.put(AvailableSettings.PASS, value);
 			}
-			cfg.put("hibernate.connection.autocommit", "false");
+			cfg.put(AvailableSettings.AUTOCOMMIT, "false");
 		}
 		else {
-			cfg.put("hibernate.connection.datasource", dataSource);
+			cfg.put(AvailableSettings.DATASOURCE, dataSource);
 		}
-		cfg.put("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
+		cfg.put(AvailableSettings.DIALECT, UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
-		cfg.put("hibernate.cache.use_query_cache", "false");
+		cfg.put(AvailableSettings.USE_QUERY_CACHE, "false");
 
-		// turn off second level caching (for now)
-		cfg.put("hibernate.cache.use_second_level_cache", "false");
-		cfg.put("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
-		cfg.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+		// turn on second level caching
+		cfg.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
+		cfg.put(AvailableSettings.CACHE_REGION_FACTORY, "org.hibernate.cache.jcache.JCacheRegionFactory");
+		cfg.put("hibernate.javax.cache.provider", "org.ehcache.jsr107.EhcacheCachingProvider");
 		
 		// Allow more than 1 representation of the same detached entity to be merged,
 		// possibly from multiple sessions, multiple caches, or various serializations.
-		cfg.put("hibernate.event.merge.entity_copy_observer", "allow");
+		cfg.put(AvailableSettings.MERGE_ENTITY_COPY_OBSERVER, "allow");
 		
 		// JDBC parameters
-		cfg.put("hibernate.jdbc.use_streams_for_binary", "true");
-		cfg.put("hibernate.jdbc.batch_size", "16");
-		cfg.put("hibernate.max_fetch_depth", "3");
+		cfg.put(AvailableSettings.USE_STREAMS_FOR_BINARY, "true");
+		cfg.put(AvailableSettings.STATEMENT_BATCH_SIZE, "16");
+		cfg.put(AvailableSettings.MAX_FETCH_DEPTH, "3");
 
 		if (UtilImpl.CATALOG != null) {
-			cfg.put("hibernate.default_catalog", UtilImpl.CATALOG);
+			cfg.put(AvailableSettings.DEFAULT_CATALOG, UtilImpl.CATALOG);
 		}
 		if (UtilImpl.SCHEMA != null) {
-			cfg.put("hibernate.default_schema", UtilImpl.SCHEMA);
+			cfg.put(AvailableSettings.DEFAULT_SCHEMA, UtilImpl.SCHEMA);
 		}
 
 		// Whether to generate dynamic proxies as classes or not (adds to classes loaded and thus Permanent Generation)
-		cfg.put("hibernate.bytecode.use_reflection_optimizer", "false");
+		cfg.put(AvailableSettings.USE_REFLECTION_OPTIMIZER, "false");
 
 		// Update the database schema on first use
 		if (UtilImpl.DDL_SYNC) {
-			cfg.put("hibernate.hbm2ddl.auto", "update");
+			cfg.put(AvailableSettings.HBM2DDL_AUTO, "update");
 		}
 		// The default of "grouped" may require hibernate.default_schema and/or hibernate.default_catalog to be provided.
 		// Will have more luck with "individually".
-		cfg.put("hibernate.hbm2ddl.jdbc_metadata_extraction_strategy", "individually");
+		cfg.put(AvailableSettings.HBM2DDL_JDBC_METADATA_EXTRACTOR_STRATEGY, "individually");
 
 		// Keep stats on usage
-		cfg.put("hibernate.generate_statistics", "false");
+		cfg.put(AvailableSettings.GENERATE_STATISTICS, "false");
 
 		// Log SQL to stdout
-		cfg.put("hibernate.show_sql", Boolean.toString(UtilImpl.SQL_TRACE));
-		cfg.put("hibernate.format_sql", Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
+		cfg.put(AvailableSettings.SHOW_SQL, Boolean.toString(UtilImpl.SQL_TRACE));
+		cfg.put(AvailableSettings.FORMAT_SQL, Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
 
 		// Don't import simple class names as entity names
 		cfg.put("auto-import", "false");

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -422,7 +423,10 @@ public class ViewGenerator {
 				DataGridBoundColumn column = new DataGridBoundColumn();
 
 				DomainType domainType = attribute.getDomainType();
-				if (DomainType.dynamic.equals(domainType)) {
+				// Set this field as non-editable coz the default widget (lookup description) 
+				// cannot work with dynamic domain values in a list
+				if (DomainType.dynamic.equals(domainType) &&
+						((attribute instanceof Association) || (attribute instanceof InverseOne))) {
 					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
 					column.setEditable(Boolean.FALSE);
 				}

@@ -62,8 +62,12 @@
 	},
 	// Conversation cache settings
 	conversations: {
-		// Max conversations allowed in memory before being spooled to disk
-		maxInMemory: 1000, 
+		// Max conversations allowed in heap memory before being moved off-heap or to disk
+		heapMaxEntries: 1000,
+		// Max off-heap memory size - 0 indicates no usage
+		offHeapMaxSizeMB: 512,
+		// Max disk size - 0 indicates no usage
+		diskMaxSizeGB: 10,
 		// Number of seconds to wait until evicting a conversation from the cache
 		evictionTimeMinutes: 60
 	},

@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.util.CacheUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
@@ -144,7 +145,9 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
 		Map<String, Object> conversations = getObject(null, "conversations", properties, true);
-		UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = getInt("conversations", "maxInMemory", conversations);
+		UtilImpl.CONVERSATION_HEAP_MAX_ENTRIES = getInt("conversations", "heapMaxEntries", conversations);
+		UtilImpl.CONVERSATION_OFF_HEAP_MAX_SIZE_MB = getInt("conversations", "offHeapMaxSizeMB", conversations);
+		UtilImpl.CONVERSATION_DISK_MAX_SIZE_GB = getInt("conversations", "diskMaxSizeGB", conversations);
 		UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = getInt("conversations", "evictionTimeMinutes", conversations);
 
 		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
@@ -350,6 +353,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		JobScheduler.init();
+		CacheUtil.init();
 		ConversationUtil.initConversationsCache();
 		
 		// Start a websocket end point
@@ -432,6 +436,7 @@ public class SkyveContextListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
 		ConversationUtil.destroyConversationsCache();
+		CacheUtil.dispose();
 		
 		@SuppressWarnings("resource")
 		AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
