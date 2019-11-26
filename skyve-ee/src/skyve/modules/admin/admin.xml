@@ -652,7 +652,6 @@
 				<column binding="description" sortOrder="ascending" />
 				<column binding="documentName" />
 				<column binding="subject" />
-				<column binding="tag.name" />
 			</columns>
 		</query>
 		<query name="qSubscriptions" documentName="Subscription">

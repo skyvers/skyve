@@ -21,6 +21,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -121,31 +122,37 @@ public class CommunicationUtil {
 			resolvedSendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
 		} else {
 			// handle Subscriptions
-			DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-			q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, resolvedSendTo);
-			Subscription subscription = q.beanResult();
-
-			if (subscription != null) {
-				// check for declined
-				if (Boolean.TRUE.equals(subscription.getDeclined())) {
-					StringBuilder msg = new StringBuilder(128);
-					if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
-						msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
-						msg.append(resolvedSendTo).append(" has a ").append(subDoc.getSingularAlias());
-						msg.append(" set ").append(Subscription.declinedPropertyName);
-						if (subscription.getFormatType() != null) {
-							msg.append(" for ").append(subscription.getFormatType().toDescription());
+			try {
+				pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+				
+				DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+				q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, resolvedSendTo);
+				Subscription subscription = q.beanResult();
+	
+				if (subscription != null) {
+					// check for declined
+					if (Boolean.TRUE.equals(subscription.getDeclined())) {
+						StringBuilder msg = new StringBuilder(128);
+						if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
+							msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
+							msg.append(resolvedSendTo).append(" has a ").append(subDoc.getSingularAlias());
+							msg.append(" set ").append(Subscription.declinedPropertyName);
+							if (subscription.getFormatType() != null) {
+								msg.append(" for ").append(subscription.getFormatType().toDescription());
+							}
+	
+							// block the communication if explicit mode
+							if (ResponseMode.EXPLICIT.equals(responseMode)) {
+								throw new Exception(msg.toString());
+							}
 						}
-
-						// block the communication if explicit mode
-						if (ResponseMode.EXPLICIT.equals(responseMode)) {
-							throw new Exception(msg.toString());
-						}
+					} else {
+						format = subscription.getFormatType();
+						resolvedSendTo = subscription.getPreferredReceiverIdentifier();
 					}
-				} else {
-					format = subscription.getFormatType();
-					resolvedSendTo = subscription.getPreferredReceiverIdentifier();
 				}
+			} finally {
+			pers.resetDocumentPermissionScopes();
 			}
 		}
 
@@ -275,9 +282,9 @@ public class CommunicationUtil {
 		
 		return resultingFilePath;
 	}
-	
+
 	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
-		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode,additionalAttachments, specificBeans);
+		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
 	/**
@@ -306,7 +313,7 @@ public class CommunicationUtil {
 	 */
 	public static void send(WebContext webContext, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
-		if(RunMode.ACTION.equals(runMode) && ResponseMode.EXPLICIT.equals(responseMode) && webContext!=null){
+		if (RunMode.ACTION.equals(runMode) && ResponseMode.EXPLICIT.equals(responseMode) && webContext != null) {
 			webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
 		}
 	}
@@ -334,10 +341,16 @@ public class CommunicationUtil {
 	 */
 	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
 		Persistence pers = CORE.getPersistence();
-		DocumentQuery query = pers.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		query.getFilter().addEquals(Communication.descriptionPropertyName, description);
+		Communication result = null;
+		try {
+			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+			DocumentQuery query = pers.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+			query.getFilter().addEquals(Communication.descriptionPropertyName, description);
 
-		Communication result = query.beanResult();
+			result = query.beanResult();
+		} finally {
+			pers.resetDocumentPermissionScopes();
+		}
 
 		return result;
 	}
@@ -397,12 +410,11 @@ public class CommunicationUtil {
 
 		return result;
 	}
-	
-	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
-		
-		return initialiseSystemCommunication(description, "{contact.email1}",null,  defaultSubject, defaultBody);
-	}
 
+	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+
+		return initialiseSystemCommunication(description, "{contact.email1}", null, defaultSubject, defaultBody);
+	}
 
 	/**
 	 * Initialise system communication if it doesn't exist and then send it.
@@ -415,18 +427,17 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
-		
+
 		String sendTo = "{contact.email1}"; // user contact email address
 		String ccTo = null;
-		
+
 		sendFailSafeSystemCommunication(webContext, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
-	
+
 	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
-	
 	/**
 	 * Initialise system communication if it doesn't exist and then send it.
 	 * 
@@ -443,7 +454,7 @@ public class CommunicationUtil {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
 		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
-	
+
 	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
@@ -462,7 +473,7 @@ public class CommunicationUtil {
 	public static Communication kickOffJob(Communication bean) throws Exception {
 
 		Communication communication = bean;
-		
+
 		String results = GetResults.getResults(communication);
 
 		// save this communication if it has not been saved yet
@@ -621,7 +632,7 @@ public class CommunicationUtil {
 		String result = expression;
 
 		// default url binding to first bean
-		if (beans != null && beans.length > 0 && expression!=null) {
+		if (beans != null && beans.length > 0 && expression != null) {
 			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
 			result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
 			result = Binder.formatMessage(customer, result, beans);
@@ -659,5 +670,5 @@ public class CommunicationUtil {
 		}
 
 		return sb.toString();
-	}	
+	}
 }
