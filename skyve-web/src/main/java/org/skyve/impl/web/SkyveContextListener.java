@@ -2,6 +2,7 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.CacheUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -230,7 +232,10 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
 			}
 		}
-		
+
+		CacheUtil.init();
+		CacheUtil.createJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME, 1000, 0, 10, Serializable.class, Serializable.class);
+
 		DefaultAddInManager.get().start();
 		
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
@@ -353,7 +358,6 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		JobScheduler.init();
-		CacheUtil.init();
 		ConversationUtil.initConversationsCache();
 		
 		// Start a websocket end point
@@ -436,6 +440,7 @@ public class SkyveContextListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
 		ConversationUtil.destroyConversationsCache();
+		CacheUtil.destroyJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME);
 		CacheUtil.dispose();
 		
 		@SuppressWarnings("resource")

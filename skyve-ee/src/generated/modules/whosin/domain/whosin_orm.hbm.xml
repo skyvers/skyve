@@ -12,6 +12,7 @@
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
 	<class name="modules.whosin.domain.Office" table="WHO_Office" entity-name="whosinOffice">
+		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -36,6 +37,7 @@
 	</class>
 
 	<class name="modules.whosin.domain.Staff" table="WHO_Staff" entity-name="whosinStaff">
+		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -45,11 +47,11 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="bizParentId" length="36" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_WHO_Staff_contact" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_WHO_Staff_contact"/>
 		<property name="staffCode" length="50" />
 		<property name="dateOfBirth" type="DateOnly" />
 		<property name="roleTitle" length="200" />
-		<many-to-one name="baseOffice" entity-name="whosinOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_WHO_Staff_baseOffice" />
+		<many-to-one name="baseOffice" entity-name="whosinOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_WHO_Staff_baseOffice"/>
 		<property name="location" />
 		<property name="status" length="9">
 			<type name="Enum">

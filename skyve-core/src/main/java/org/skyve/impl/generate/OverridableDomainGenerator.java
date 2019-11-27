@@ -890,11 +890,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				entityName = entityNameBuilder.toString();
 				fw.append(entityName).append("\">\n");
 			}
-			
 			if ((baseDocumentName != null) && ExtensionStrategy.joined.equals(strategy)) {
 				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
 			}
 			else if (baseDocumentName == null) {
+				fw.append(indent).append("\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
+				
 				// map inherited properties
 				fw.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
 
@@ -1147,6 +1148,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						fw.append("\" order-by=\"").append(orderBy);
 					}
 					fw.append("\" cascade=\"all-delete-orphan\">\n");
+					fw.append(indentation).append("\t\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
 					fw.append(indentation).append("\t\t\t<key column=\"parent_id\" />\n");
 
 					fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
@@ -1196,6 +1198,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
+					fw.append(indentation).append("\t\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
 					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
 						fw.append(indentation).append("\t\t\t<key foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
@@ -1442,7 +1445,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					fw.append("\" foreign-key=\"");
 					fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), associationName));
-					fw.append("\" />\n");
+					fw.append("\"/>\n");
 				}
 			}
 			else if (attribute instanceof Enumeration) {

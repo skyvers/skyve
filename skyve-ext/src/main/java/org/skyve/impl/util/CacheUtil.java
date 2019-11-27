@@ -45,11 +45,16 @@ public class CacheUtil {
 	}
 	
 	public static void init() {
-		ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
-							.using(statisticsService)
-							.with(CacheManagerBuilder.persistence(UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/"))
-							.build(true);
-		jCacheManager = Caching.getCachingProvider().getCacheManager();   
+		try {
+			dispose(); // call this just in case the last deployment failed to get around ehcache's file lock.
+		}
+		finally {
+			ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
+								.using(statisticsService)
+								.with(CacheManagerBuilder.persistence(UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/"))
+								.build(true);
+			jCacheManager = Caching.getCachingProvider().getCacheManager();
+		}
 	}
 
 	public static void dispose() {

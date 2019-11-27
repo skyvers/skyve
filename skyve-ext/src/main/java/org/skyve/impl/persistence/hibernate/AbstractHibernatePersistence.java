@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import javax.cache.management.CacheStatisticsMXBean;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
@@ -85,6 +86,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.util.CacheUtil;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -122,6 +124,8 @@ import org.skyve.util.Util;
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
+	public static final String HIBERNATE_CACHE_NAME = "hibernate";
+	
 	private static SessionFactory sf = null;
 	private static Metadata metadata = null;
 	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
@@ -368,6 +372,13 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	
 	public static SkyveDialect getDialect() {
 		return getDialect(UtilImpl.DATA_STORE.getDialectClassName());
+	}
+	
+	public static void logSecondLevelCacheStats() {
+		CacheStatisticsMXBean bean = CacheUtil.getJCacheStatisticsMXBean(HIBERNATE_CACHE_NAME);
+		if (bean != null) {
+			UtilImpl.LOGGER.info("HIBERNATE 2ND LEVEL CACHE:- " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
+		}
 	}
 	
 	@Override
