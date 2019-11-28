@@ -425,10 +425,11 @@ public class ViewGenerator {
 				DomainType domainType = attribute.getDomainType();
 				// Set this field as non-editable coz the default widget (lookup description) 
 				// cannot work with dynamic domain values in a list
-				if (DomainType.dynamic.equals(domainType) &&
-						((attribute instanceof Association) || (attribute instanceof InverseOne))) {
-					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
+				if (DomainType.dynamic.equals(domainType)) {
 					column.setEditable(Boolean.FALSE);
+					if ((attribute instanceof Association) || (attribute instanceof InverseOne)) {
+						column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
+					}
 				}
 				// Set this field as non-editable coz the default widget (lookup description) 
 				// cannot query the document as its an embedded association
