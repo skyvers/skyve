@@ -256,8 +256,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	// reduce visibility
-	OverridableDomainGenerator(AbstractRepository repository) {
-		super(repository);
+	OverridableDomainGenerator(AbstractRepository repository,
+								DialectOptions dialectOptions,
+								String srcPath,
+								String generatedSrcPath,
+								String testPath,
+								String generatedTestPath,
+								String[] excludedModules) {
+		super(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -276,7 +282,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate for customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
-			String modulesPath = GENERATED_PATH + repository.CUSTOMERS_NAMESPACE +
+			String modulesPath = generatedSrcPath + repository.CUSTOMERS_NAMESPACE +
 					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
@@ -321,7 +327,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// Restrict the base class definitions based on customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			final Customer customer = repository.getCustomer(customerName);
-			String modulesPath = GENERATED_PATH + repository.CUSTOMERS_NAMESPACE +
+			String modulesPath = generatedSrcPath + repository.CUSTOMERS_NAMESPACE +
 					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
@@ -462,17 +468,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// clear out the domain folder
 		final String packagePath = repository.MODULES_NAMESPACE + moduleName + '/' + repository.DOMAIN_NAME;
-		File domainFolder = new File(GENERATED_PATH + packagePath + '/');
+		File domainFolder = new File(generatedSrcPath + packagePath + '/');
 		if (!domainFolder.exists()) {
 			domainFolder.mkdirs();
 		}
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
+		final File domainTestPath = new File(generatedTestPath + packagePath);
 
 		// Make a orm.hbm.xml file
-		File mappingFile = new File(GENERATED_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
+		File mappingFile = new File(generatedSrcPath + packagePath + '/' + moduleName + "_orm.hbm.xml");
 		if (UtilImpl.XML_TRACE) {
 			UtilImpl.LOGGER.fine("Mapping file is " + mappingFile);
 		}
@@ -490,7 +496,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 
 					// Generate base
-					File classFile = new File(GENERATED_PATH + packagePath + '/' + documentName + ".java");
+					File classFile = new File(generatedSrcPath + packagePath + '/' + documentName + ".java");
 					classFile.createNewFile();
 
 					try (FileWriter fw = new FileWriter(classFile)) {
@@ -507,7 +513,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					if ((domainClass != null) && domainClass.isAbstract) {
 						// Generate extension
-						classFile = new File(GENERATED_PATH + packagePath + '/' + documentName + "Ext.java");
+						classFile = new File(generatedSrcPath + packagePath + '/' + documentName + "Ext.java");
 						classFile.createNewFile();
 
 						try (FileWriter fw = new FileWriter(classFile)) {
@@ -531,7 +537,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									filterDefinitions);
 
 					// if this is not an excluded module, generate tests
-					if (EXCLUDED_MODULES == null || !Arrays.asList(EXCLUDED_MODULES).contains(moduleName.toLowerCase())) {
+					if (excludedModules == null || !Arrays.asList(excludedModules).contains(moduleName.toLowerCase())) {
 						// check if this document is annotated to skip domain tests
 						File factoryFile = new File(getFactoryPath(modulePath, documentName));
 						SkyveFactory annotation = retrieveFactoryAnnotation(factoryFile);
@@ -554,7 +560,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								if (testAlreadyExists(testFile)) {
 									System.out.println(
 											String.format("Skipping domain test generation for %s.%s, file already exists in %s",
-													packagePath.replaceAll("\\\\|\\/", "."), documentName, TEST_PATH));
+													packagePath.replaceAll("\\\\|\\/", "."), documentName, testPath));
 								} else {
 									// generate the domain test
 									domainTestPath.mkdirs();
@@ -579,12 +585,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
+	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
 		SkyveFactory annotation = null;
 
 		if (factoryFile.exists()) {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
-					.replace(SRC_PATH.replaceAll("\\\\|\\/", "."), "");
+					.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
 			UtilImpl.LOGGER.fine("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
@@ -623,7 +629,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						customer.getName() + '/' +
 						repository.MODULES_NAMESPACE +
 						moduleName + '/' + repository.DOMAIN_NAME;
-				final File domainFolder = new File(GENERATED_PATH + packagePath + '/');
+				final File domainFolder = new File(generatedSrcPath + packagePath + '/');
 				if (domainFolder.exists()) {
 					for (File domainFile : domainFolder.listFiles()) {
 						domainFile.delete();
@@ -661,7 +667,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 
 							// Generate extension
-							String classFileName = GENERATED_PATH + packagePath + '/' + documentName;
+							String classFileName = generatedSrcPath + packagePath + '/' + documentName;
 							if (vanillaDocumentName != null) {
 								classFileName += "Ext";
 							}
@@ -826,7 +832,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												" in document " + document.getName() + 
 												" in module " + module.getName() +
 												" is longer than the allowed data store identifier character limit of " +
-												DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
+												dialectOptions.getDataStoreIdentifierCharacterLimit());
 			}
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
@@ -840,7 +846,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append(indent).append("\t<class name=\"");
 			}
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
-				String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
+				String extensionPath = srcPath + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
 						+ documentName + "Extension.java";
 				if (new File(extensionPath).exists()) {
 					System.out.println("    Generate ORM using " + extensionPath);
@@ -913,7 +919,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (shouldIndex(null)) {
 					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
 															Bean.BIZ_KEY, 
-															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength()),
+															Integer.valueOf(dialectOptions.getDataStoreBizKeyLength()),
 															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
 					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
 															Bean.CUSTOMER_NAME, 
@@ -922,7 +928,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else {
 					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" not-null=\"true\" />\n",
 															Bean.BIZ_KEY, 
-															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength())));
+															Integer.valueOf(dialectOptions.getDataStoreBizKeyLength())));
 					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" not-null=\"true\" />\n",
 															Bean.CUSTOMER_NAME));
 				}
@@ -1184,7 +1190,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + documentName + 
 														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
-														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
+														dialectOptions.getDataStoreIdentifierCharacterLimit());
 					}
 					
 					fw.append("\" table=\"").append(collectionTableName);
@@ -1244,7 +1250,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 															" in document " + documentName + 
 															" in module " + moduleName +
 															" is longer than the allowed data store identifier character limit of " +
-															DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + collectionName + "_type)");
+															dialectOptions.getDataStoreIdentifierCharacterLimit() + "(" + collectionName + "_type)");
 						}
 
 						// Even though it would be better index wise to put the bizId column first
@@ -1386,7 +1392,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + documentName + 
 														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
-														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + " (" + columnName + ")");
+														dialectOptions.getDataStoreIdentifierCharacterLimit() + " (" + columnName + ")");
 					}
 
 					// Even though it would be better index wise to put the bizId column first
@@ -1417,7 +1423,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + documentName + 
 														" in module " + moduleName +
 														" is longer than the allowed data store identifier character limit of " +
-														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + associationColumnName + ")");
+														dialectOptions.getDataStoreIdentifierCharacterLimit() + "(" + associationColumnName + ")");
 					}
 
 					fw.append(indentation).append("\t\t<many-to-one name=\"");
@@ -1464,7 +1470,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													" in document " + documentName + 
 													" in module " + moduleName +
 													" is longer than the allowed data store identifier character limit of " +
-													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
+													dialectOptions.getDataStoreIdentifierCharacterLimit());
 				}
 
 				fw.append(indentation).append("\t\t<property name=\"").append(enumerationName);
@@ -1610,7 +1616,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													" in module " + module.getName() +
 													" has a column name " + fieldColumnName + 
 													" which is longer than the allowed data store identifier character limit of " +
-													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
+													dialectOptions.getDataStoreIdentifierCharacterLimit());
 				}
 
 				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
@@ -1712,9 +1718,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 	
 	// check identifier length if required
-	private static boolean identifierIsTooLong(String identifier) {
-		return ((DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() > 0) &&
-				(identifier.length() > DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit()));
+	private boolean identifierIsTooLong(String identifier) {
+		return ((dialectOptions.getDataStoreIdentifierCharacterLimit() > 0) &&
+				(identifier.length() > dialectOptions.getDataStoreIdentifierCharacterLimit()));
 	}
 	
 	private void populateArcs(Document document, Map<String, Document> result) {
@@ -1867,10 +1873,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private enum DataStoreType {
 		PK, FK, UK, IDX
 	}
-	private static String generateDataStoreName(DataStoreType type, String tableName, String columnName) {
+	private String generateDataStoreName(DataStoreType type, String tableName, String columnName) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(type).append('_');
-		if (DIALECT_OPTIONS.isDataStoreIndexNamesInGlobalNamespace() || DataStoreType.FK.equals(type)) {
+		if (dialectOptions.isDataStoreIndexNamesInGlobalNamespace() || DataStoreType.FK.equals(type)) {
 			result.append(tableName).append('_');
 		}
 		result.append(columnName);
@@ -1897,9 +1903,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return name;
 	}
 	
-	private static boolean shouldIndex(Boolean index) {
+	private boolean shouldIndex(Boolean index) {
 		if (index == null) {
-			return DIALECT_OPTIONS.isDataStoreIndexForeignKeys();
+			return dialectOptions.isDataStoreIndexForeignKeys();
 		}
 
 		return index.booleanValue();
@@ -2354,7 +2360,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			Document document, String documentName, SkyveFactory annotation) throws IOException {
 		final String actionPath = repository.MODULES_NAMESPACE + moduleName + File.separator + documentName
 				+ File.separator + "actions";
-		final File actionTestPath = new File(GENERATED_TEST_PATH + actionPath);
+		final File actionTestPath = new File(generatedTestPath + actionPath);
 
 		if (actionTestPath.exists()) {
 			for (File testFile : actionTestPath.listFiles()) {
@@ -2368,7 +2374,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// check this is a ServerSideAction
 			String className = actionTestPath.getPath().replaceAll("\\\\|\\/", ".")
-					.replace(GENERATED_TEST_PATH.replaceAll("\\\\|\\/", "."), "") + "."
+					.replace(generatedTestPath.replaceAll("\\\\|\\/", "."), "") + "."
 					+ actionName;
 
 			// check if this is a server side action, all other types are ignored
@@ -2421,7 +2427,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// don't generate a test if the developer has created an action test in this location in the test directory
 				if (testAlreadyExists(actionFile)) {
 					System.out.println(String.format("Skipping action test generation for %s.%s, file already exists in %s",
-							actionPath.replaceAll("\\\\|\\/", "."), actionName, TEST_PATH));
+							actionPath.replaceAll("\\\\|\\/", "."), actionName, testPath));
 					continue;
 				}
 
@@ -2860,7 +2866,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
 			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java",
-					SRC_PATH,
+					srcPath,
 					repository.MODULES_NAMESPACE,
 					baseDocument.getOwningModuleName(),
 					baseDocumentName,
@@ -3261,8 +3267,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param documentName The name of the document, e.g. Audit
 	 * @return true if the extension class exists in the expected location, false otherwise
 	 */
-	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
-		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "Extension.java";
+	private boolean domainExtensionClassExists(String modulePath, String documentName) {
+		String extensionPath = srcPath + modulePath + '/' + documentName + '/' + documentName + "Extension.java";
 		if (new File(extensionPath).exists()) {
 			return true;
 		}
@@ -3296,8 +3302,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param documentName The name of the document; e.g. Audit
 	 * @return The path as a String, e.g. src/main/java/modules/admin/Audit/AuditFactory.java
 	 */
-	private static String getFactoryPath(final String modulePath, final String documentName) {
-		final String path = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "Factory.java";
+	private String getFactoryPath(final String modulePath, final String documentName) {
+		final String path = srcPath + modulePath + '/' + documentName + '/' + documentName + "Factory.java";
 		System.err.println("Looking for factory in " + path);
 		return path;
 	}
@@ -3309,10 +3315,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param testToBeCreated The full file path to the test file about to be created
 	 * @return True if developer has already created a file with the name, false otherwise
 	 */
-	private static boolean testAlreadyExists(File testToBeCreated) {
+	private boolean testAlreadyExists(File testToBeCreated) {
 		File testFile = new File(testToBeCreated.getPath().replace("\\", "/").replace(
-				GENERATED_TEST_PATH.replace("\\", "/"),
-				TEST_PATH.replace("\\", "/")));
+				generatedTestPath.replace("\\", "/"),
+				testPath.replace("\\", "/")));
 		return testFile.exists();
 	}
 
@@ -3322,7 +3328,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 
 	 * @param document The document containing the attributes to be visited
 	 */
-	private static void validateDocumentAttributeNames(final Document document) {
+	private void validateDocumentAttributeNames(final Document document) {
 		if (document != null) {
 			for (Attribute attribute : document.getAttributes()) {
 				// attribute names cannot contain underscore
@@ -3350,7 +3356,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				// check not using a reserved word
-				switch (DIALECT_OPTIONS) {
+				switch (dialectOptions) {
 					case MSSQL_2014:
 					case MSSQL_2016:
 						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
@@ -3393,11 +3399,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static String createDialectError(final Document document, Attribute attribute) {
+	private String createDialectError(final Document document, Attribute attribute) {
 		return String.format(
 				"Document %s.%s cannot contain attribute named \"%s\" because it is a reserved word in database dialect %s.",
 				document.getOwningModuleName(), document.getName(), attribute.getName(),
-				DIALECT_OPTIONS.getDescription());
+				dialectOptions.getDescription());
 	}
 
 	/**
@@ -3435,7 +3441,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
 		// src/main/java/generated/modules
-		final Path generatedDirectory = Paths.get(GENERATED_PATH, repository.MODULES_NAMESPACE);
+		final Path generatedDirectory = Paths.get(generatedSrcPath, repository.MODULES_NAMESPACE);
 
 		// get all directories at this level
 		for (File child : generatedDirectory.toFile().listFiles()) {
@@ -3456,7 +3462,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		
 		// delete the generated test directory
-		final Path generatedTestDirectory = Paths.get(GENERATED_TEST_PATH);
+		final Path generatedTestDirectory = Paths.get(generatedTestPath);
 		if (generatedTestDirectory.toFile().exists()) {
 			System.out.println(String.format("Deleting generated test directory %s", generatedTestDirectory.toString()));
 			deleteDirectory(generatedTestDirectory);

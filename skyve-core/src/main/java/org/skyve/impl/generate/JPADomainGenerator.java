@@ -29,8 +29,14 @@ import org.skyve.metadata.module.Module.DocumentRef;
 
 public final class JPADomainGenerator extends DomainGenerator {
 	// reduce visibility
-	JPADomainGenerator(AbstractRepository repository) {
-		super(repository);
+	JPADomainGenerator(AbstractRepository repository,
+						DialectOptions dialectOptions,
+						String srcPath,
+						String generatedSrcPath,
+						String testPath,
+						String generatedTestPath,
+						String[] excludedModules) {
+		super(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -51,11 +57,11 @@ public final class JPADomainGenerator extends DomainGenerator {
 						String packagePath = repository.MODULES_NAMESPACE + 
 												module.getName() + '/' +
 												repository.DOMAIN_NAME;
-						File domainFolder = new File(SRC_PATH + packagePath + '/');
+						File domainFolder = new File(srcPath + packagePath + '/');
 						domainFolder.delete();
 						domainFolder.mkdir();
 
-						File classFile = new File(SRC_PATH + packagePath + '/' + documentName + ".java");
+						File classFile = new File(srcPath + packagePath + '/' + documentName + ".java");
 						classFile.delete();
 						classFile.createNewFile();
 

@@ -26,18 +26,30 @@ public abstract class DomainGenerator {
 	protected static final String TIMESTAMP = "Timestamp";
 	protected static final String GEOMETRY = "Geometry";
 
-	protected static String SRC_PATH;
-	protected static String GENERATED_PATH;
-	protected static String TEST_PATH;
-	protected static String GENERATED_TEST_PATH;
-	protected static String[] EXCLUDED_MODULES;
+	protected String srcPath;
+	protected String generatedSrcPath;
+	protected String testPath;
+	protected String generatedTestPath;
+	protected String[] excludedModules;
 
-	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.H2_NO_INDEXES;
+	protected DialectOptions dialectOptions = DialectOptions.H2_NO_INDEXES;
 
 	protected AbstractRepository repository;
 	
-	protected DomainGenerator(AbstractRepository repository) {
+	protected DomainGenerator(AbstractRepository repository,
+								DialectOptions dialectOptions,
+								String srcPath,
+								String generatedSrcPath,
+								String testPath,
+								String generatedTestPath,
+								String[] excludedModules) {
 		this.repository = repository;
+		this.dialectOptions = dialectOptions;
+		this.srcPath = srcPath;
+		this.generatedSrcPath = generatedSrcPath;
+		this.testPath = testPath;
+		this.generatedTestPath = generatedTestPath;
+		this.excludedModules = excludedModules;
 	}
 	
 	public void validate(String customerName, boolean pre) throws Exception {
@@ -123,10 +135,10 @@ public abstract class DomainGenerator {
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.XML_TRACE = false;
 
-		SRC_PATH = args[0];
-		GENERATED_PATH = args[1];// "src/generated/";
-		TEST_PATH = args[2];// "src/test/";
-		GENERATED_TEST_PATH = args[3];// "src/generatedTest/";
+		String srcPath = args[0];
+		String generatedSrcPath = args[1];// "src/generated/";
+		String testPath = args[2];// "src/test/";
+		String generatedTestPath = args[3];// "src/generatedTest/";
 
 		if (args.length >= 5) { // allow for debug mode if there are 4 arguments
 			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
@@ -146,34 +158,37 @@ public abstract class DomainGenerator {
 			}
 		}
 
+		DialectOptions dialectOptions = DialectOptions.H2_NO_INDEXES;
 		if (args.length >= 6) {
 			try {
-				DIALECT_OPTIONS = DialectOptions.valueOf(args[5]);
-			} catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+				dialectOptions = DialectOptions.valueOf(args[5]);
+			}
+			catch (@SuppressWarnings("unused") IllegalArgumentException e) {
 				System.err.println("The sixth argument DIALECT_OPTIONS should be one of the following "
 						+ StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);
 			}
 		}
 
+		String[] excludedModules = null;
 		if (args.length == 7) {
 			if ((args[6] != null) && (!args[6].isEmpty())) {
-				EXCLUDED_MODULES = args[6].toLowerCase().split(",");
+				excludedModules = args[6].toLowerCase().split(",");
 			}
 		}
 
-		System.out.println("SRC_PATH=" + SRC_PATH);
-		System.out.println("GENERATED_PATH=" + GENERATED_PATH);
-		System.out.println("TEST_PATH=" + TEST_PATH);
-		System.out.println("GENERATED_TEST_PATH=" + GENERATED_TEST_PATH);
+		System.out.println("SRC PATH=" + srcPath);
+		System.out.println("GENERATED SRC PATH=" + generatedSrcPath);
+		System.out.println("TEST PATH=" + testPath);
+		System.out.println("GENERATED TEST PATH=" + generatedTestPath);
 		System.out.println("DEBUG=" + (args.length >= 5 ? args[4] : "false"));
-		System.out.println("DIALECT_OPTIONS=" + DIALECT_OPTIONS.toString());
-		System.out.println("EXCLUDED_MODULES=" + (args.length == 7 ? args[6] : ""));
+		System.out.println("DIALECT OPTIONS=" + dialectOptions.toString());
+		System.out.println("EXCLUDED MODULES=" + (args.length == 7 ? args[6] : ""));
 
 		AbstractRepository repository = new LocalDesignRepository();
 		DomainGenerator foo = UtilImpl.USING_JPA ? 
-								new JPADomainGenerator(repository) : 
-								new OverridableDomainGenerator(repository);
+								new JPADomainGenerator(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
+								new OverridableDomainGenerator(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
