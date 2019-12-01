@@ -3,7 +3,9 @@ package org.skyve.impl.metadata.module.query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -68,7 +70,12 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	public MetaDataQueryDefinitionImpl(AbstractRepository repository) {
 		this.repository = repository;
 	}
-	
+
+	// Required for Serialization
+	public MetaDataQueryDefinitionImpl() {
+		this.repository = AbstractRepository.get();
+	}
+
 	@Override
 	public Module getDocumentModule(Customer customer) {
 		Module result = getOwningModule();
@@ -131,6 +138,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return columns;
 	}
 
+	// Used to ensure that the same left outer join isn't added multiple times
+	private Set<String> leftOuterJoinBindings = new TreeSet<>();
+	
 	@Override
 	@SuppressWarnings("incomplete-switch")
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
@@ -205,7 +215,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					// determine if the projected value is transient
 					// NB check each token of the binding and if ANY is transient, the lot is transient
 					boolean transientBinding = false;
-
 					int dotIndex = associationBinding.indexOf('.');
 					if (dotIndex < 0) {
 						dotIndex = associationBinding.length();
@@ -256,7 +265,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							Relation relation = (Relation) attribute;
 							// If we have a relation directly to a non-required document, add a left outer join
 							if (! relation.isRequired()) {
-								result.addLeftOuterJoin(binding);
+								if (leftOuterJoinBindings.add(binding)) { // only add if not added before
+									result.addLeftOuterJoin(binding);
+								}
 							}
 
 							// If we have a relation directly to a mapped document, don't process it coz it can't be joined.
@@ -302,7 +313,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					
 					// left join this reference if required 
 					if (leftJoin) {
-						result.addLeftOuterJoin(associationBinding);
+						if (leftOuterJoinBindings.add(associationBinding)) { // only add if not added before
+							result.addLeftOuterJoin(associationBinding);
+						}
 					}
 				}
 				else { // simple binding
@@ -347,7 +360,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							
 							// Outer join if this attribute is not required
 							if (! association.isRequired()) {
-								result.addLeftOuterJoin(binding);
+								if (leftOuterJoinBindings.add(binding)) { // only add if not added before
+									result.addLeftOuterJoin(binding);
+								}
 							}
 						}
 					}
