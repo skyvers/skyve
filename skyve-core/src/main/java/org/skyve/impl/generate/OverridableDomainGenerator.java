@@ -3293,23 +3293,26 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		final Path generatedDirectory = Paths.get(generatedSrcPath, repository.MODULES_NAMESPACE);
 
 		// get all directories at this level
-		for (File child : generatedDirectory.toFile().listFiles()) {
-			if (child.isDirectory() && moduleNames.contains(child.getName())) {
-				final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(repository.DOMAIN_NAME);
-				if (packagePath.toFile().exists()) {
-					for (File domainFile : packagePath.toFile().listFiles()) {
-						domainFile.delete();
+		final File[] generatedFiles = generatedDirectory.toFile().listFiles();
+		if (generatedFiles != null) {
+			for (File child : generatedFiles) {
+				if (child.isDirectory() && moduleNames.contains(child.getName())) {
+					final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(repository.DOMAIN_NAME);
+					if (packagePath.toFile().exists()) {
+						for (File domainFile : packagePath.toFile().listFiles()) {
+							domainFile.delete();
+						}
+					} else {
+						packagePath.toFile().mkdirs();
 					}
 				} else {
-					packagePath.toFile().mkdirs();
+					System.out
+							.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
+					deleteDirectory(child.toPath());
 				}
-			} else {
-				System.out
-						.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
-				deleteDirectory(child.toPath());
 			}
 		}
-		
+
 		// delete the generated test directory
 		final Path generatedTestDirectory = Paths.get(generatedTestPath);
 		if (generatedTestDirectory.toFile().exists()) {
