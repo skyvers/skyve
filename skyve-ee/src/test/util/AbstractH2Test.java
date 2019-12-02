@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.util.CacheUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
@@ -89,6 +90,9 @@ public abstract class AbstractH2Test {
 		// create admin user
 		User adminUser = createAdminUser(user);
 		persistence.save(adminUser);
+
+		// init the cache
+		CacheUtil.init();
 	}
 
 	@After
@@ -97,6 +101,8 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
 		persistence.evictAllCached();
+
+		CacheUtil.dispose();
 	}
 
 	/**
