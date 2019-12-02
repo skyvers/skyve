@@ -600,9 +600,48 @@ public class PersistenceTests extends AbstractSkyveTest {
 				.scalarResult(Number.class).intValue());
 		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
 				.scalarResult(Number.class).intValue());
-
 	}
 
+	@Test
+	public void testComposedCollectionMoveMemberSingleStrategy() throws Exception {
+		MappedExtensionSingleStrategy source = Util.constructRandomInstance(u, m, messd, 2);
+		source = p.save(source);
+
+		Assert.assertEquals(7,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
+		MappedExtensionSingleStrategy dest = Util.constructRandomInstance(u, m, messd, 2);
+		dest = p.save(dest);
+
+		Assert.assertEquals(14,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
+		MappedExtensionSingleStrategyExtension element = source.getComposedCollection().remove(0);
+		source = p.save(source);
+		dest.getComposedCollection().add(element);
+		dest = p.save(dest);
+		
+		// Check the composed collection element got cascaded with no referential integrity troubles
+		Assert.assertEquals(14,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection where owner_id = :id")
+								.putParameter("id", source.getBizId(), false)
+								.scalarResult(Number.class).intValue());
+		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection where owner_id = :id")
+								.putParameter("id", dest.getBizId(), false)
+								.scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+								.scalarResult(Number.class).intValue());
+	}
+	
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
@@ -663,6 +702,46 @@ public class PersistenceTests extends AbstractSkyveTest {
 		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
 				.scalarResult(Number.class).intValue());
 
+	}
+
+	@Test
+	public void testComposedCollectionMoveMemberJoinedStrategy() throws Exception {
+		MappedExtensionJoinedStrategy source = Util.constructRandomInstance(u, m, mejsd, 2);
+		source = p.save(source);
+
+		Assert.assertEquals(6,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
+		MappedExtensionJoinedStrategy dest = Util.constructRandomInstance(u, m, mejsd, 2);
+		dest = p.save(dest);
+
+		Assert.assertEquals(12,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
+		MappedExtensionJoinedStrategyExtension element = source.getComposedCollection().remove(0);
+		source = p.save(source);
+		dest.getComposedCollection().add(element);
+		dest = p.save(dest);
+		
+		// Check the composed collection element got cascaded with no referential integrity troubles
+		Assert.assertEquals(12,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection where owner_id = :id")
+								.putParameter("id", source.getBizId(), false)
+								.scalarResult(Number.class).intValue());
+		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection where owner_id = :id")
+								.putParameter("id", dest.getBizId(), false)
+								.scalarResult(Number.class).intValue());
+		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+								.scalarResult(Number.class).intValue());
 	}
 
 	@Test(expected = OptimisticLockException.class)
