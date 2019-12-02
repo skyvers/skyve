@@ -75,7 +75,12 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	public ModuleImpl(AbstractRepository repository) {
 		this.repository = repository;
 	}
-	
+
+	// Required for Serialization
+	public ModuleImpl() {
+		this.repository = AbstractRepository.get();
+	}
+
 	@Override
 	public String getName() {
 		return name;

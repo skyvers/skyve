@@ -1,6 +1,9 @@
 package org.skyve.impl.generate;
 
+import java.util.Arrays;
+import java.util.Set;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -26,6 +29,155 @@ public abstract class DomainGenerator {
 	protected static final String TIMESTAMP = "Timestamp";
 	protected static final String GEOMETRY = "Geometry";
 
+	/**
+	 * Array of Java reserved words. Used to checks if an attribute name is valid, e.g. <code>return</code>.
+	 */
+	public static final Set<String> JAVA_RESERVED_WORDS;
+
+	/**
+	 * Array of H2 database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> H2_RESERVED_WORDS;
+
+	/**
+	 * Array of MySQL 5.x database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> MYSQL_5_RESERVED_WORDS;
+
+	/**
+	 * Array of MySQL 8.x database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> MYSQL_8_RESERVED_WORDS;
+
+	/**
+	 * Array of SqlServer T-SQL reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> SQL_SERVER_RESERVED_WORDS;
+
+	/**
+	 * Array of POSTGRESQL database reserved words. Used to check if an attribute name is valid, e.g. <code>from</code>.
+	 */
+	public static final Set<String> POSTGRESQL_RESERVED_WORDS;
+
+	static {
+		String javaReserved[] = {
+				"abstract", "assert", "boolean", "break", "byte", "case",
+				"catch", "char", "class", "const", "continue",
+				"default", "do", "double", "else", "extends",
+				"false", "final", "finally", "float", "for",
+				"goto", "if", "implements", "import", "instanceof",
+				"int", "interface", "long", "native", "new",
+				"null", "package", "private", "protected", "public",
+				"return", "short", "static", "strictfp", "super",
+				"switch", "synchronized", "this", "throw", "throws",
+				"transient", "true", "try", "void", "volatile", "while"
+		};
+		JAVA_RESERVED_WORDS = new TreeSet<>(Arrays.asList(javaReserved));
+
+		String h2Reserved[] = {
+				"all", "check", "constraint", "cross", "current_date", "current_time", "current_timestamp",
+				"distinct", "except", "exists", "false", "fetch", "for", "foreign", "from", "full", "group",
+				"having", "inner", "intersect", "is", "join", "like", "limit", "minus", "natural", "not", "null",
+				"offset", "on", "order", "primary", "rownum", "select", "sysdate", "systime", "systimestamp",
+				"today", "true", "union", "unique", "where", "with"
+		};
+		H2_RESERVED_WORDS = new TreeSet<>(Arrays.asList(h2Reserved));
+
+		String mysql5Reserved[] = {
+				"accessible", "add", "all", "alter", "analyze", "and", "as", "asc", "asensitive", "before", "between", "bigint",
+				"binary", "blob", "both", "by", "call", "cascade", "case", "change", "char", "character", "check", "collate",
+				"column", "condition", "constraint", "continue", "convert", "create", "cross", "current_date", "current_time",
+				"current_timestamp", "current_user", "cursor", "database", "databases",
+				"day_hour", "day_microsecond", "day_minute", "day_second", "dec", "decimal", "declare", "default", "delayed",
+				"delete", "desc", "describe", "deterministic", "distinct", "distinctrow", "div", "double", "drop", "dual", "each",
+				"else", "elseif", "enclosed", "escaped", "exists", "exit", "explain", "false", "fetch", "float", "float4", "float8",
+				"for", "force", "foreign", "from", "fulltext", "get", "grant", "group", "having", "high_priority",
+				"hour_microsecond", "hour_minute", "hour_second", "if", "ignore", "in", "index", "infile", "inner", "inout",
+				"insensitive", "insert", "int", "int1", "int2", "int3", "int4", "int8", "integer", "interval", "into",
+				"io_after_gtids", "io_before_gtids", "is", "iterate", "join", "key", "keys", "kill", "leading", "leave", "left",
+				"like", "limit", "linear", "lines", "load", "localtime", "localtimestamp", "lock", "long", "longblob", "longtext",
+				"loop", "low_priority", "master_bind", "master_ssl_verify_server_cert", "match", "maxvalue", "mediumblob",
+				"mediumint", "mediumtext", "middleint", "minute_microsecond", "minute_second", "mod", "modifies", "natural", "not",
+				"no_write_to_binlog", "null", "numeric", "on", "optimize", "optimizer_costs", "option", "optionally", "or", "order",
+				"out", "outer", "outfile", "partition", "precision", "primary", "procedure", "purge", "range", "read", "reads",
+				"read_write", "real", "references", "regexp", "release", "rename", "repeat", "replace", "require", "resignal",
+				"restrict", "return", "revoke", "right", "rlike", "schema", "schemas", "second_microsecond", "select", "sensitive",
+				"separator", "set", "show", "signal", "smallint", "spatial", "specific", "sql", "sqlexception", "sqlstate",
+				"sqlwarning", "sql_big_result", "sql_calc_found_rows", "sql_small_result", "ssl", "starting", "stored",
+				"straight_join", "table", "terminated", "then", "tinyblob", "tinyint", "tinytext", "to", "trailing", "trigger",
+				"true", "undo", "union", "unique", "unlock", "unsigned", "update", "usage", "use", "using", "utc_date", "utc_time",
+				"utc_timestamp", "values", "varbinary", "varchar", "varcharacter", "varying", "virtual", "when", "where", "while",
+				"with", "write", "xor", "year_month", "generated"
+		};
+		MYSQL_5_RESERVED_WORDS = new TreeSet<>(Arrays.asList(mysql5Reserved));
+
+		String mysql8ExtraReserved[] = {
+				"array", "cume_dist", "dense_rank", "empty", "except", "first_value", "grouping", "groups",
+				"json_table", "lag", "last_value", "lateral", "lead", "member", "nth_value", "ntile",
+				"of", "over", "percent_rank", "rank", "recursive", "row_number", "system", "window"
+		};
+		MYSQL_8_RESERVED_WORDS = new TreeSet<>(MYSQL_5_RESERVED_WORDS);
+		MYSQL_8_RESERVED_WORDS.addAll(Arrays.asList(mysql8ExtraReserved));
+		String sqlServerReserved[] = {
+				"add", "external", "procedure", "all", "fetch", "public", "alter", "file", "raiserror", "and", "fillfactor", "read",
+				"any", "for", "readtext", "as", "foreign", "reconfigure", "asc", "freetext", "references", "authorization",
+				"freetexttable", "replication", "backup", "from", "restore", "begin", "full", "restrict", "between", "function",
+				"return", "break", "goto", "revert", "browse", "grant", "revoke", "bulk", "group", "right", "by", "having",
+				"rollback", "cascade", "holdlock", "rowcount", "case", "identity", "rowguidcol", "check", "identity_insert", "rule",
+				"checkpoint", "identitycol", "save", "close", "if", "schema", "clustered", "in", "securityaudit", "coalesce",
+				"index", "select", "collate", "inner", "semantickeyphrasetable", "column", "insert",
+				"semanticsimilaritydetailstable", "commit", "intersect", "semanticsimilaritytable", "compute", "into",
+				"session_user", "constraint", "is", "set", "contains", "join", "setuser", "containstable", "key", "shutdown",
+				"continue", "kill", "some", "convert", "left", "statistics", "create", "like", "system_user", "cross", "lineno",
+				"table", "current", "load", "tablesample", "current_date", "merge", "textsize", "current_time", "national", "then",
+				"current_timestamp", "nocheck", "to", "current_user", "nonclustered", "top", "cursor", "not", "tran", "database",
+				"null", "transaction", "dbcc", "nullif", "trigger", "deallocate", "of", "truncate", "declare", "off", "try_convert",
+				"default", "offsets", "tsequal", "delete", "on", "union", "deny", "open", "unique", "desc", "opendatasource",
+				"unpivot", "disk", "openquery", "update", "distinct", "openrowset", "updatetext", "distributed", "openxml", "use",
+				"double", "option", "user", "drop", "or", "values", "dump", "order", "varying", "else", "outer", "view", "end",
+				"over", "waitfor", "errlvl", "percent", "when", "escape", "pivot", "where", "except", "plan", "while", "exec",
+				"precision", "execute", "primary", "within", "exists", "print", "exit", "proc"
+		};
+		SQL_SERVER_RESERVED_WORDS = new TreeSet<>(Arrays.asList(sqlServerReserved));
+
+		String postgreSQLReserved[] = {
+				"all", "analyse", "analyze", "and", "any", "array",
+				"as", "asc", "authorization",
+				"between", "binary", 
+				"both", "case", "cast",
+				"check",
+				"column", "constraint",
+				"create", "cross",
+				"current_date", "current_role",
+				"current_time", "current_timestamp",
+				"default", "deferrable",
+				"desc", "distinct",
+				"do", "else", "end",
+				"except",
+				"false", "for", "foreign",
+				"freeze", "from", "full", "grant", "group",
+				"having", "ilike", "in", "initially", "inner",
+				"intersect", "into", "is", "isnull",
+				"join", "leading", "left",
+				"like", "limit", "localtime", "localtimestamp",
+				"natural",
+				"new", "not", "notnull", "null",
+				"off", "offset", "old", "on", "only", "or", "order", "outer",
+				"overlaps",
+				"placing",
+				"primary",
+				"references",
+				"right",
+				"select", "session_user", "similar", "some",
+				"symmetric",
+				"table", "then", "to", "trailing",
+				"true", "union",
+				"unique", "user", "using",
+				"verbose", "when", "where"
+		};
+		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
+	}
+	
 	protected String srcPath;
 	protected String generatedSrcPath;
 	protected String testPath;
@@ -35,6 +187,8 @@ public abstract class DomainGenerator {
 	protected DialectOptions dialectOptions = DialectOptions.H2_NO_INDEXES;
 
 	protected AbstractRepository repository;
+	
+//	protected Map<File, String> generatedFilesAndDirectories = new TreeMap<>();
 	
 	protected DomainGenerator(AbstractRepository repository,
 								DialectOptions dialectOptions,

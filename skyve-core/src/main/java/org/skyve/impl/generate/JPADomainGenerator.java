@@ -28,7 +28,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 public final class JPADomainGenerator extends DomainGenerator {
-	// reduce visibility
 	JPADomainGenerator(AbstractRepository repository,
 						DialectOptions dialectOptions,
 						String srcPath,

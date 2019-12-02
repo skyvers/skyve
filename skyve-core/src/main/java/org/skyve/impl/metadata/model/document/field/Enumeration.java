@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.generate.OverridableDomainGenerator;
+import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -67,7 +67,7 @@ public class Enumeration extends ConstrainableField {
 
 			if (result == null) {
 				result = BindUtil.toJavaInstanceIdentifier((description == null) ? code : description);
-				if (OverridableDomainGenerator.JAVA_RESERVED_WORDS.contains(result)) {
+				if (DomainGenerator.JAVA_RESERVED_WORDS.contains(result)) {
 					result += "Value";
 				}
 			}
