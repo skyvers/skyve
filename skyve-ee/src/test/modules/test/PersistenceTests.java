@@ -641,7 +641,19 @@ public class PersistenceTests extends AbstractSkyveTest {
 		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
 								.scalarResult(Number.class).intValue());
 	}
-	
+
+	@Test(expected = Exception.class)
+	public void testComposedCollectionMoveMemberWithoutFlushThrows() throws Exception {
+		MappedExtensionSingleStrategy source = Util.constructRandomInstance(u, m, messd, 2);
+		source = p.save(source);
+		MappedExtensionSingleStrategy dest = Util.constructRandomInstance(u, m, messd, 2);
+		dest = p.save(dest);
+
+		MappedExtensionSingleStrategyExtension element = source.getComposedCollection().remove(0);
+		dest.getComposedCollection().add(element);
+		p.save(source, dest);
+	}
+
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
