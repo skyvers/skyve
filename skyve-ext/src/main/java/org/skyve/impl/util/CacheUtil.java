@@ -13,6 +13,7 @@ import javax.management.ObjectName;
 
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
+import org.ehcache.Status;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
@@ -58,7 +59,7 @@ public class CacheUtil {
 	}
 
 	public static void dispose() {
-		if (ehCacheManager != null) {
+		if ((ehCacheManager != null) && (! Status.UNINITIALIZED.equals(ehCacheManager.getStatus()))) {
 			ehCacheManager.close();
 		}
 		if ((jCacheManager != null) && (! jCacheManager.isClosed())) {
