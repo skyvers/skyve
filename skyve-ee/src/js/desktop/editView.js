@@ -850,21 +850,34 @@ isc.EditView.addMethods({
 							}
 						}
 
-						grid.grid.setData(data);
-
 						// NB set the selection from the server when we refresh the data
 						if (grid.selectedIdBinding) {
-							var selectedBizId = values[grid.selectedIdBinding];
-							if (selectedBizId) {
-								var index = data.findIndex('bizId', selectedBizId);
-								if (index >= 0) {
-									// NB remove the event callback temporarily
-									var method = grid.grid.selectionUpdated;
-									grid.grid.selectionUpdated = null;
-									grid.grid.selectSingleRecord(index);
-									grid.grid.selectionUpdated = method;
+							var method = grid.grid.selectionUpdated;
+							// NB remove the event callback temporarily
+							try {
+								grid.grid.selectionUpdated = null;
+								grid.grid.setData(data);
+	
+								var selectedBizId = values[grid.selectedIdBinding];
+								if (selectedBizId) {
+									var index = data.findIndex('bizId', selectedBizId);
+									if (index >= 0) {
+										grid.grid.selectSingleRecord(index);
+									}
+									else {
+										grid.grid.deselectAllRecords();
+									}
+								}
+								else {
+									grid.grid.deselectAllRecords();
 								}
 							}
+							finally {
+								grid.grid.selectionUpdated = method;
+							}
+						}
+						else {
+							grid.grid.setData(data);
 						}
 					}
 				}
