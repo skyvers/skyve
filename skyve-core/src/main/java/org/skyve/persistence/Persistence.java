@@ -58,6 +58,34 @@ public interface Persistence extends Serializable {
 	 * @param bean
 	 */
 	public void evictCached(Bean bean);
+
+	public boolean cached(Bean bean);
+	
+	public boolean sharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId);
+	
+	public boolean sharedCacheCollection(Bean owner, String collectionName);
+	
+	public boolean sharedCacheBean(String moduleName, String documentName, String bizId);
+
+	public boolean sharedCacheBean(Bean bean);
+	
+	public void evictAllSharedCache();
+	
+	public void evictSharedCacheCollections();
+	
+	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName);
+	
+	public void evictSharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId);
+	
+	public void evictSharedCacheCollection(Bean owner, String collectionName);
+	
+	public void evictSharedCacheBeans();
+	
+	public void evictSharedCacheBeans(String moduleName, String documentName);
+	
+	public void evictSharedCachedBean(String moduleName, String documentName, String bizId);
+	
+	public void evictSharedCachedBean(Bean bean);
 	
 	/**
 	 * Processing that occurs before the merging of beans into the persistent context.

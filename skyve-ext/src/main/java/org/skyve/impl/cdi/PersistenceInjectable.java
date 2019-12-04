@@ -66,6 +66,82 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
+	public boolean cached(Bean bean) {
+		return CORE.getPersistence().cached(bean);
+	}
+
+	@Override
+	public boolean sharedCacheCollection(String moduleName,
+											String documentName,
+											String collectionName,
+											String ownerBizId) {
+		return CORE.getPersistence().sharedCacheCollection(moduleName, documentName, collectionName, ownerBizId);
+	}
+
+	@Override
+	public boolean sharedCacheCollection(Bean owner, String collectionName) {
+		return CORE.getPersistence().sharedCacheCollection(owner, collectionName);
+	}
+
+	@Override
+	public boolean sharedCacheBean(String moduleName, String documentName, String bizId) {
+		return CORE.getPersistence().sharedCacheBean(moduleName, documentName, bizId);
+	}
+
+	@Override
+	public boolean sharedCacheBean(Bean bean) {
+		return CORE.getPersistence().sharedCacheBean(bean);
+	}
+
+	@Override
+	public void evictAllSharedCache() {
+		CORE.getPersistence().evictAllSharedCache();
+	}
+
+	@Override
+	public void evictSharedCacheCollections() {
+		CORE.getPersistence().evictSharedCacheCollections();
+	}
+
+	@Override
+	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName) {
+		CORE.getPersistence().evictSharedCacheCollections(moduleName, documentName, collectionName);
+	}
+
+	@Override
+	public void evictSharedCacheCollection(String moduleName,
+											String documentName,
+											String collectionName,
+											String ownerBizId) {
+		CORE.getPersistence().evictSharedCacheCollection(moduleName, documentName, collectionName, ownerBizId);
+	}
+
+	@Override
+	public void evictSharedCacheCollection(Bean owner, String collectionName) {
+		CORE.getPersistence().evictSharedCacheCollection(owner, collectionName);
+	}
+
+	@Override
+	public void evictSharedCacheBeans() {
+		CORE.getPersistence().evictSharedCacheBeans();
+	}
+
+	@Override
+	public void evictSharedCacheBeans(String moduleName, String documentName) {
+		CORE.getPersistence().evictSharedCacheBeans(moduleName, documentName);
+	}
+
+	@Override
+	public void evictSharedCachedBean(String moduleName, String documentName, String bizId) {
+		CORE.getPersistence().evictSharedCachedBean(moduleName, documentName, bizId);
+	}
+
+	@Override
+	public void evictSharedCachedBean(Bean bean) {
+		CORE.getPersistence().evictSharedCachedBean(bean);
+	}
+
+	@Override
 	public void preMerge(Document document, Bean beanToSave) {
 		CORE.getPersistence().preMerge(document, beanToSave);
 	}

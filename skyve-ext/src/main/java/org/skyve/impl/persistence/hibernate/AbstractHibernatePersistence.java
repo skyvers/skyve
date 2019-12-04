@@ -45,6 +45,7 @@ import org.hibernate.boot.cfgxml.spi.LoadedConfig;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.boot.spi.MetadataImplementor;
+import org.hibernate.cache.CacheException;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
@@ -210,6 +211,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
 		cfg.put(AvailableSettings.CACHE_REGION_FACTORY, "org.hibernate.cache.jcache.JCacheRegionFactory");
 		cfg.put("hibernate.javax.cache.provider", "org.ehcache.jsr107.EhcacheCachingProvider");
+		cfg.put("hibernate.javax.cache.missing_cache_strategy", "fail");
 		
 		// Allow more than 1 representation of the same detached entity to be merged,
 		// possibly from multiple sessions, multiple caches, or various serializations.
@@ -338,7 +340,12 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		metadata = sources.getMetadataBuilder().build();
 		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
 		
-		sf = sessionFactoryBuilder.build();
+		try {
+			sf = sessionFactoryBuilder.build();
+		}
+		catch (CacheException e) {
+			throw new IllegalStateException("A cache definition is missing from the json that is referenced in a document - see the hibernate exception below for the cache name in []", e);
+		}
 
 		if (UtilImpl.DDL_SYNC) {
 			try {
@@ -424,6 +431,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		return moduleName + documentName;
+	}
+	
+	private String getCollectionRoleName(String moduleName, String documentName, String collectionName) {
+		return getDocumentEntityName(moduleName, documentName) + '.' + collectionName;
 	}
 
 	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) {
@@ -693,9 +704,82 @@ t.printStackTrace();
 
 	@Override
 	public void evictCached(Bean bean) {
-		if (session.contains(getDocumentEntityName(bean.getBizModule(), bean.getBizDocument()), bean)) {
+		if (cached(bean)) {
 			session.evict(bean);
 		}
+	}
+	
+	@Override
+	public boolean cached(Bean bean) {
+		return session.contains(getDocumentEntityName(bean.getBizModule(), bean.getBizDocument()), bean);
+	}
+	
+	@Override
+	public boolean sharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
+		String role = getCollectionRoleName(moduleName, documentName, collectionName);
+		return sf.getCache().containsCollection(role, ownerBizId);
+	}
+	
+	@Override
+	public boolean sharedCacheCollection(Bean owner, String collectionName) {
+		return sharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
+	}
+	
+	@Override
+	public boolean sharedCacheBean(String moduleName, String documentName, String bizId) {
+		return sf.getCache().containsEntity(getDocumentEntityName(moduleName, documentName), bizId);
+	}
+
+	@Override
+	public boolean sharedCacheBean(Bean bean) {
+		return sharedCacheBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
+	}
+	
+	@Override
+	public void evictAllSharedCache() {
+		sf.getCache().evictAllRegions();
+	}
+	
+	@Override
+	public void evictSharedCacheCollections() {
+		sf.getCache().evictCollectionData();
+	}
+	
+	@Override
+	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName) {
+		String role = getCollectionRoleName(moduleName, documentName, collectionName);
+		sf.getCache().evictCollectionData(role);
+	}
+	
+	@Override
+	public void evictSharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
+		String role = getCollectionRoleName(moduleName, documentName, collectionName);
+		sf.getCache().evictCollectionData(role, ownerBizId);
+	}
+	
+	@Override
+	public void evictSharedCacheCollection(Bean owner, String collectionName) {
+		evictSharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
+	}
+	
+	@Override
+	public void evictSharedCacheBeans() {
+		sf.getCache().evictEntityData();
+	}
+	
+	@Override
+	public void evictSharedCacheBeans(String moduleName, String documentName) {
+		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName));
+	}
+	
+	@Override
+	public void evictSharedCachedBean(String moduleName, String documentName, String bizId) {
+		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName), bizId);
+	}
+	
+	@Override
+	public void evictSharedCachedBean(Bean bean) {
+		evictSharedCachedBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
 	/**

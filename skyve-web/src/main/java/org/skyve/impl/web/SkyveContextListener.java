@@ -39,10 +39,70 @@ import org.skyve.persistence.DataStore;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override
-	@SuppressWarnings("unchecked")
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
+		populateUtilImpl(ctx);
 
+		CacheUtil.init();
+		try {
+			CacheUtil.createJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME, 1000, 0, 10, Serializable.class, Serializable.class);
+	
+			DefaultAddInManager.get().start();
+			
+			// ensure that the schema is created before trying to init the job scheduler
+			AbstractPersistence p = null;
+			try {
+				p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
+				p.begin();
+				// If this is not prod and we have a bootstrap stanza
+				if ((UtilImpl.ENVIRONMENT_IDENTIFIER != null) && (UtilImpl.BOOTSTRAP_CUSTOMER != null)) {
+					SuperUser u = new SuperUser();
+					u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
+					u.setContactName(UtilImpl.BOOTSTRAP_USER);
+					u.setName(UtilImpl.BOOTSTRAP_USER);
+					u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
+					p.setUser(u);
+	
+					EXT.bootstrap(p);
+				}
+			}
+			catch (Throwable t) {
+				if (p != null) {
+					p.rollback();
+				}
+				throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", t);
+			}
+			finally {
+				if (p != null) {
+					p.commit(true);
+				}
+			}
+			
+			JobScheduler.init();
+			ConversationUtil.initConversationsCache();
+			
+			// Start a websocket end point
+			// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
+			try {
+				ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
+				ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
+				container.addEndpoint(config);
+				// to stop the <o:socket/> from moaning that the endpoint is not configured
+				ctx.setAttribute(Socket.class.getName(), Boolean.TRUE);
+			}
+			catch (Exception e) {
+				throw new FacesException(e);
+			}
+		}
+		// in case of error, close the caches to relinquish resources and file locks
+		catch (Throwable t) {
+			CacheUtil.dispose();
+			throw t;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static void populateUtilImpl(ServletContext ctx) {
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = ctx.getRealPath("/");
 		
 		// This can be set in web.xml or as a command line -D parameter, but if not set, 
@@ -233,11 +293,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-		CacheUtil.init();
-		CacheUtil.createJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME, 1000, 0, 10, Serializable.class, Serializable.class);
-
-		DefaultAddInManager.get().start();
-		
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
 		UtilImpl.SMTP_PORT = getInt("smtp", "port", smtp);
@@ -327,51 +382,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			UtilImpl.BOOTSTRAP_PASSWORD = getString("bootstrap", "password", bootstrap, true);
 		}
-
-		// ensure that the schema is created before trying to init the job scheduler
-		AbstractPersistence p = null;
-		try {
-			p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
-			p.begin();
-			// If this is not prod and we have a bootstrap stanza
-			if ((UtilImpl.ENVIRONMENT_IDENTIFIER != null) && (bootstrap != null)) {
-				SuperUser u = new SuperUser();
-				u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
-				u.setContactName(UtilImpl.BOOTSTRAP_USER);
-				u.setName(UtilImpl.BOOTSTRAP_USER);
-				u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
-				p.setUser(u);
-
-				EXT.bootstrap(p);
-			}
-		}
-		catch (Exception e) {
-			if (p != null) {
-				p.rollback();
-			}
-			throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
-		}
-		finally {
-			if (p != null) {
-				p.commit(true);
-			}
-		}
-		
-		JobScheduler.init();
-		ConversationUtil.initConversationsCache();
-		
-		// Start a websocket end point
-		// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
-		try {
-			ServerContainer container = (ServerContainer) ctx.getAttribute(ServerContainer.class.getName());
-			ServerEndpointConfig config = ServerEndpointConfig.Builder.create(SkyveSocketEndpoint.class, SocketEndpoint.URI_TEMPLATE).build();
-			container.addEndpoint(config);
-			// to stop the <o:socket/> from moaning that the endpoint is not configured
-			ctx.setAttribute(Socket.class.getName(), Boolean.TRUE);
-		}
-		catch (Exception e) {
-			throw new FacesException(e);
-		}
 	}
 	
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
@@ -438,23 +448,37 @@ public class SkyveContextListener implements ServletContextListener {
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
-		JobScheduler.dispose();
-		ConversationUtil.destroyConversationsCache();
-		CacheUtil.destroyJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME);
-		CacheUtil.dispose();
-		
-		@SuppressWarnings("resource")
-		AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 		try {
-			cm.close();
-			cm.dispose();
+			try {
+				try {
+					JobScheduler.dispose();
+					ConversationUtil.destroyConversationsCache();
+					CacheUtil.destroyJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME);
+				}
+				finally {
+					// Ensure the caches are destroyed even in the event of other failures first
+					// so that resources and file locks are relinquished.
+					CacheUtil.dispose();
+				}
+			}
+			finally {
+				// Ensure the content manager is destroyed so that resources and files locks are relinquished
+				@SuppressWarnings("resource")
+				AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
+				try {
+					cm.close();
+					cm.dispose();
+				}
+				catch (Exception e) {
+					UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
+					e.printStackTrace();
+				}
+			}
 		}
-		catch (Exception e) {
-			UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
-			e.printStackTrace();
+		finally {
+			// Ensure the add-in manager is stopped
+			DefaultAddInManager.get().stop();
 		}
-		
-		DefaultAddInManager.get().stop();
 	}
 
 	/**
