@@ -1,41 +1,25 @@
-package org.skyve.impl.web;
+package org.skyve.cache;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ehcache.Cache;
 import org.ehcache.core.statistics.CacheStatistics;
+import org.ehcache.core.statistics.TierStatistics;
 import org.hibernate.internal.util.SerializationHelper;
 import org.skyve.domain.messages.ConversationEndedException;
-import org.skyve.impl.util.CacheUtil;
-import org.skyve.impl.util.CacheUtil.CacheTier;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 
 public class ConversationUtil {
-	private static final String CONVERSATIONS_CACHE_NAME = "conversations";
-	
 	private ConversationUtil() {
 		// Disallow instantiation.
 	}
 
-	public static void initConversationsCache() {
-		CacheUtil.createEHCache(CONVERSATIONS_CACHE_NAME,
-									UtilImpl.CONVERSATION_HEAP_MAX_ENTRIES,
-									UtilImpl.CONVERSATION_OFF_HEAP_MAX_SIZE_MB,
-									UtilImpl.CONVERSATION_DISK_MAX_SIZE_GB * 1024,
-									UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES,
-									String.class,
-									byte[].class);
-	}
-
 	private static Cache<String, byte[]> getConversations() {
-		return CacheUtil.getEHCache(CONVERSATIONS_CACHE_NAME, String.class, byte[].class);
+		return CacheUtil.getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
-	public static void destroyConversationsCache() {
-		CacheUtil.destroyEHCache(CONVERSATIONS_CACHE_NAME);
-	}
-	
 	public static void cacheConversation(AbstractWebContext webContext)
 	throws Exception {
 		if (webContext != null) {
@@ -73,13 +57,22 @@ public class ConversationUtil {
 	}
 	
 	public static void logConversationsStats() {
-		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(CONVERSATIONS_CACHE_NAME);
+		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(UtilImpl.CONVERSATION_CACHE.getName());
 		if (statistics != null) {
-			UtilImpl.LOGGER.info("Count in heap memory = " + CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap).getMappings());
-			UtilImpl.LOGGER.info("Count in off-heap memory = " + CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap).getMappings());
-			UtilImpl.LOGGER.info("MB in off-heap memory = " + ((int) (CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap).getOccupiedByteSize() / 1024F / 1024F * 10) / 10F));
-			UtilImpl.LOGGER.info("Count on disk = " + CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk).getMappings());
-			UtilImpl.LOGGER.info("MB on disk = " + ((int) (CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk).getOccupiedByteSize() / 1024F / 1024F * 10) / 10F));
+			TierStatistics tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap);
+			if (tier != null) {
+				UtilImpl.LOGGER.info("Count in heap memory = " + tier.getMappings());
+			}
+			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap);
+			if (tier != null) {
+				UtilImpl.LOGGER.info("Count in off-heap memory = " + tier.getMappings());
+				UtilImpl.LOGGER.info("MB in off-heap memory = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
+			}
+			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk);
+			if (tier != null) {
+				UtilImpl.LOGGER.info("Count on disk = " + tier.getMappings());
+				UtilImpl.LOGGER.info("MB on disk = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
+			}
 		}
 		UtilImpl.LOGGER.info("**************************************************************");
 	}

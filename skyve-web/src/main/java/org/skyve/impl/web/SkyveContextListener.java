@@ -21,15 +21,19 @@ import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.addin.DefaultAddInManager;
+import org.skyve.cache.CacheExpiryPolicy;
+import org.skyve.cache.CacheUtil;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.EHCacheConfig;
+import org.skyve.cache.HibernateCacheConfig;
+import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.util.CacheUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
@@ -45,8 +49,6 @@ public class SkyveContextListener implements ServletContextListener {
 
 		CacheUtil.init();
 		try {
-			CacheUtil.createJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME, 1000, 0, 10, Serializable.class, Serializable.class);
-	
 			DefaultAddInManager.get().start();
 			
 			// ensure that the schema is created before trying to init the job scheduler
@@ -79,7 +81,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			
 			JobScheduler.init();
-			ConversationUtil.initConversationsCache();
 			
 			// Start a websocket end point
 			// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
@@ -207,11 +208,67 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
 		Map<String, Object> conversations = getObject(null, "conversations", properties, true);
-		UtilImpl.CONVERSATION_HEAP_MAX_ENTRIES = getInt("conversations", "heapMaxEntries", conversations);
-		UtilImpl.CONVERSATION_OFF_HEAP_MAX_SIZE_MB = getInt("conversations", "offHeapMaxSizeMB", conversations);
-		UtilImpl.CONVERSATION_DISK_MAX_SIZE_GB = getInt("conversations", "diskMaxSizeGB", conversations);
-		UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = getInt("conversations", "evictionTimeMinutes", conversations);
+		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("conversations", "heapSizeEntries", conversations),
+																	getInt("conversations", "offHeapSizeMB", conversations),
+																	getInt("conversations", "diskSizeGB", conversations) * 1024,
+																	getInt("conversations", "expiryTimeMinutes", conversations));
 
+		Map<String, Object> caches = getObject(null, "caches", properties, false);
+		if (caches != null) {
+			// for each cache defined
+			for (String cacheName : caches.keySet()) {
+				Map<String, Object> cache = getObject("caches", cacheName, caches, true);
+				String prefix = String.format("caches.%s", cacheName);
+				String type = getString(prefix, "type", cache, true);
+				
+				int heapSizeEntries = getInt(prefix, "heapSizeEntries", cache);
+				Number offHeapSizeInMB = getNumber(prefix, "offHeapSizeMB", cache, false);
+				Number diskSizeInGB = getNumber(prefix, "diskSizeGB", cache, false);
+				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
+				Number expiryInMinutes = getNumber(prefix, "expiryTimeMinutes", cache, false);
+				ClassLoader ctxClassLoader = Thread.currentThread().getContextClassLoader();
+				String keyClassName = getString(prefix, "keyClass", cache, true);
+				String valueClassName = getString(prefix, "valueClass", cache, true);
+				Class<? extends Serializable> keyClass = null;
+				Class<? extends Serializable> valueClass = null;
+				try {
+					keyClass = (Class<? extends Serializable>) ctxClassLoader.loadClass(keyClassName);
+				}
+				catch (Exception e) {
+					throw new IllegalStateException("Could not load key class " + keyClassName, e);
+				}
+				try {
+					valueClass = (Class<? extends Serializable>) ctxClassLoader.loadClass(valueClassName);
+				}
+				catch (Exception e) {
+					throw new IllegalStateException("Could not load value class " + keyClassName, e);
+				}
+				
+				if ("jcache".equals(type)) {
+					UtilImpl.APP_CACHES.add(new JCacheConfig<>(cacheName,
+																heapSizeEntries,
+																(offHeapSizeInMB == null) ? 0L : offHeapSizeInMB.longValue(),
+																(expiryPolicyString == null) ? CacheExpiryPolicy.eternal : CacheExpiryPolicy.valueOf(expiryPolicyString),
+																(expiryInMinutes == null) ? 0L : expiryInMinutes.longValue(),
+																keyClass,
+																valueClass));
+				}
+				else if ("ehcache".equals(type)) {
+					UtilImpl.APP_CACHES.add(new EHCacheConfig<>(cacheName,
+																	heapSizeEntries,
+																	(offHeapSizeInMB == null) ? 0L : offHeapSizeInMB.longValue(),
+																	(expiryPolicyString == null) ? CacheExpiryPolicy.eternal : CacheExpiryPolicy.valueOf(expiryPolicyString),
+																	(expiryInMinutes == null) ? 0L : expiryInMinutes.longValue(),
+																	keyClass,
+																	valueClass,
+																	(diskSizeInGB == null) ? 0L : diskSizeInGB.longValue() * 1024L));
+				}
+				else {
+					throw new IllegalStateException("Cache type " + type + " is not a known type");
+				}
+			}
+		}
+		
 		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
 		// for each datastore defined
 		for (String dataStoreName : dataStores.keySet()) {
@@ -243,6 +300,24 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SCHEMA = getString("hibernate", "schema", hibernate, false);
 		UtilImpl.PRETTY_SQL_OUTPUT = getBoolean("hibernate", "prettySql", hibernate);
 
+		Map<String, Object> hibernateCaches = getObject("hibernate", "caches", hibernate, false);
+		if (hibernateCaches != null) {
+			// for each cache defined
+			for (String cacheName : hibernateCaches.keySet()) {
+				Map<String, Object> cache = getObject("hibernate.caches", cacheName, hibernateCaches, true);
+				String prefix = String.format("hibernate.caches.%s", cacheName);
+				int heapSizeEntries = getInt(prefix, "heapSizeEntries", cache);
+				Number offHeapSizeInMB = getNumber(prefix, "offHeapSizeMB", cache, false);
+				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
+				Number expiryInMinutes = getNumber(prefix, "expiryTimeMinutes", cache, false);
+				UtilImpl.HIBERNATE_CACHES.add(new HibernateCacheConfig(cacheName,
+																		heapSizeEntries,
+																		(offHeapSizeInMB == null) ? 0L : offHeapSizeInMB.longValue(),
+																		(expiryPolicyString == null) ? CacheExpiryPolicy.eternal : CacheExpiryPolicy.valueOf(expiryPolicyString),
+																		(expiryInMinutes == null) ? 0L : expiryInMinutes.longValue()));
+			}
+		}
+		
 		Map<String, Object> factories = getObject(null, "factories", properties, true);
 
 		// NB Need the repository set before setting persistence
@@ -452,8 +527,6 @@ public class SkyveContextListener implements ServletContextListener {
 			try {
 				try {
 					JobScheduler.dispose();
-					ConversationUtil.destroyConversationsCache();
-					CacheUtil.destroyJCache(AbstractHibernatePersistence.HIBERNATE_CACHE_NAME);
 				}
 				finally {
 					// Ensure the caches are destroyed even in the event of other failures first

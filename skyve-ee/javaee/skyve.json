@@ -63,14 +63,47 @@
 	// Conversation cache settings
 	conversations: {
 		// Max conversations allowed in heap memory before being moved off-heap or to disk
-		heapMaxEntries: 1000,
+		heapSizeEntries: 1000,
 		// Max off-heap memory size - 0 indicates no usage
-		offHeapMaxSizeMB: 512,
+		offHeapSizeMB: 128,
 		// Max disk size - 0 indicates no usage
-		diskMaxSizeGB: 10,
-		// Number of seconds to wait until evicting a conversation from the cache
-		evictionTimeMinutes: 60
+		diskSizeGB: 10,
+		// Number of seconds to wait until expiring a conversation from the cache
+		expiryTimeMinutes: 60
 	},
+	// app cache definitions
+/*
+	caches: {
+		"exampleEHCache": {
+			type: "ehcache", // "jcache"
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 0,
+			// Max disk size - 0 indicates no usage
+			diskSizeGB: 0,
+			// Under what conditions to expire a cache entry
+			expiryPolicy: "timeToLive", // "timeToIdle" or "eternal"
+			// Number of minutes to wait until expiring a conversation from the cache
+			expiryTimeMinutes: 1,
+			keyClass: "java.lang.String",
+			valueClass: "java.lang.String"
+		},
+		"exampleJCache": {
+			type: "jcache", // "ehcache"
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 0,
+			// Under what conditions to expire a cache entry
+			expiryPolicy: "timeToIdle", // "timeToLive" or "eternal"
+			// Number of minutes to wait until expiring a conversation from the cache
+			expiryTimeMinutes: 1,
+			keyClass: "java.lang.String",
+			valueClass: "java.lang.String"
+		}
+	},
+*/
 	// Datastore definitions
 	dataStores: {
 		// Skyve data store
@@ -90,7 +123,18 @@
 		catalog: null,
 		schema: null,
 		// Format the SQL statements when logged
-		prettySql: false
+		prettySql: false,
+		caches: {
+			"hibernate": {
+				// Max conversations allowed in heap memory before being moved off-heap or to disk
+				heapSizeEntries: 1000,
+				// Max off-heap memory size - 0 indicates no usage
+				offHeapSizeMB: 128,
+				expiryPolicy: "timeToIdle", // "timeToLive" or "eternal"
+				// Number of minutes to wait until expiring a hibernate object from the cache
+				expiryTimeMinutes: 60
+			}
+		}
 	},
 	// Factory settings
 	factories: {

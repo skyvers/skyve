@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
+import org.skyve.cache.ConversationUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;

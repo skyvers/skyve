@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
+import org.skyve.cache.ConversationUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -38,7 +39,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.ConversationUtil;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.web.SortParameter;
 import org.skyve.impl.web.WebUtil;

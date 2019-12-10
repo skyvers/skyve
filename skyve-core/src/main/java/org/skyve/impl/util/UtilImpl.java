@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -16,6 +17,9 @@ import java.util.regex.Pattern;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
+import org.skyve.cache.CacheConfig;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -143,11 +147,10 @@ public class UtilImpl {
 
 	public static boolean USING_JPA = false;
 
-	// For conversations cache
-	public static int CONVERSATION_HEAP_MAX_ENTRIES = 1000;
-	public static int CONVERSATION_OFF_HEAP_MAX_SIZE_MB = 512;
-	public static int CONVERSATION_DISK_MAX_SIZE_GB = 10;
-	public static int CONVERSATION_EVICTION_TIME_MINUTES = 60;
+	// For caches
+	public static ConversationCacheConfig CONVERSATION_CACHE;
+	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
+	public static List<CacheConfig<? extends Serializable, ? extends Serializable>> APP_CACHES = new ArrayList<>();
 
 	// For database
 	public static Map<String, DataStore> DATA_STORES = new TreeMap<>();
