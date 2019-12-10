@@ -170,16 +170,6 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 		return String.format("%s (%s)", bizKey, bizId);
 	}
 
-	/**
-	 * @return A url to the edit view for this bean.
-	 */
-	public String getEditUrl() {
-		return Util.getSkyveContextUrl() + "/?a=e&" +
-				"m=" + getBizModule() + "&" +
-				"d=" + getBizDocument() + "&" +
-				"i=" + getBizId();
-	}
-
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@PreRemove
 	private void preRemove() throws Exception {
