@@ -11,7 +11,6 @@ import org.skyve.metadata.SortDirection;
  * 
  */
 public interface Collection extends Reference {
-	
 	/**
 	 * 
 	 */
@@ -74,6 +73,10 @@ public interface Collection extends Reference {
 	 */
 	public Boolean getElementDatabaseIndex();
 
+	/**
+	 * The name of the shared cache and type of caching to use for this collection
+	 */
+	public Cache getCache();
 	/**
 	 * 
 	 * @return

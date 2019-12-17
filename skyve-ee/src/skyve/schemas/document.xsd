@@ -9,6 +9,8 @@
 
   <xs:element name="boolean" type="tns:boolean"/>
 
+  <xs:element name="cache" type="tns:cache"/>
+
   <xs:element name="collection" type="tns:collection"/>
 
   <xs:element name="colour" type="tns:colour"/>
@@ -151,13 +153,21 @@
   <xs:complexType name="persistent">
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element ref="tns:cache" minOccurs="0"/>
+        </xs:sequence>
         <xs:attribute name="schema" type="xs:string"/>
         <xs:attribute name="catalog" type="xs:string"/>
         <xs:attribute name="strategy" type="tns:extensionStrategy"/>
         <xs:attribute name="discriminator" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="cache">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="tns:cacheType" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="parentDocument">
@@ -514,6 +524,7 @@
           <xs:element name="unique" type="tns:CollectionUniqueConstraint" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="ownerDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
           <xs:element name="elementDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:cache" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="type" type="tns:collectionType" use="required"/>
         <xs:attribute name="ordered" type="xs:boolean"/>
@@ -628,6 +639,13 @@
       <xs:enumeration value="single"/>
       <xs:enumeration value="joined"/>
       <xs:enumeration value="mapped"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="cacheType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="readOnly"/>
+      <xs:enumeration value="readWrite"/>
     </xs:restriction>
   </xs:simpleType>
 

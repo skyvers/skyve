@@ -55,6 +55,8 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Cache;
+import org.skyve.metadata.model.document.Cache.CacheType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
@@ -675,6 +677,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
+			Cache cache = persistent.getCache();
+			boolean readOnly = (cache != null) && CacheType.readOnly.equals(cache.getType());
+			
 			// check table name length if required
 			if (identifierIsTooLong(persistent.getName())) {
 				throw new MetaDataException("Persistent name " + persistent.getName() + 
@@ -736,6 +741,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
+				if (readOnly) {
+					fw.append("mutable=\"false\" ");
+				}
 				fw.append("entity-name=\"");
 				StringBuilder entityNameBuilder = new StringBuilder(64);
 				if (customerName != null) {
@@ -749,7 +757,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
 			}
 			else if (baseDocumentName == null) {
-				fw.append(indent).append("\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
+				if (cache != null) {
+					fw.append(indent).append("\t\t<cache usage=\"");
+					fw.append(readOnly ? "read-only" : "read-write");
+					fw.append("\" region=\"").append(cache.getName()).append("\" />\n");
+				}
 				
 				// map inherited properties
 				fw.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
@@ -990,7 +1002,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				if (type == CollectionType.child) {
 					if (mapped) {
-						throw new MetaDataException("Collection " + collectionName + " referencing document " +
+						throw new MetaDataException("Collection " + collectionName + 
+								" in document " + moduleName + '.' + documentName + " referencing document " +
 								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
 								" cannot be a child collection as the target document is a mapped document." +
 								" Use a composed collection instead.");
@@ -1002,8 +1015,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					else if (orderBy != null) {
 						fw.append("\" order-by=\"").append(orderBy);
 					}
+					Cache cache = collection.getCache();
+					if (cache != null) {
+						throw new MetaDataException("Collection " + collectionName + 
+								" in document " + moduleName + '.' + documentName + " referencing document " +
+								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
+								" cannot be cached as it is a child collection. Use a composed collection instead or remove the caching.");
+					}
 					fw.append("\" cascade=\"all-delete-orphan\">\n");
-					fw.append(indentation).append("\t\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
 					fw.append(indentation).append("\t\t\t<key column=\"parent_id\" />\n");
 
 					fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
@@ -1044,6 +1063,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					
 					fw.append("\" table=\"").append(collectionTableName);
 
+					Cache cache = collection.getCache();
+					boolean readOnly = (cache != null) && CacheType.readOnly.equals(cache.getType());
+					if (readOnly) {
+						fw.append("\" mutable=\"false");
+					}
+					
 					if (CollectionType.aggregation.equals(type)) {
 						fw.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
 					}
@@ -1053,7 +1078,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
-					fw.append(indentation).append("\t\t\t<cache usage=\"read-write\" region=\"hibernate\" />\n");
+					if (cache != null) {
+						fw.append(indentation).append("\t\t\t<cache usage=\"");
+						fw.append(readOnly ? "read-only" : "read-write");
+						fw.append("\" region=\"").append(cache.getName()).append("\" />\n");
+					}
+
 					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
 						fw.append(indentation).append("\t\t\t<key foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));

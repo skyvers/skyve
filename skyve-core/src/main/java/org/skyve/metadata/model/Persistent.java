@@ -1,16 +1,18 @@
 package org.skyve.metadata.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.model.document.Cache;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
-			propOrder = {"schema", "catalog", "strategy", "discriminator"}) 
+			propOrder = {"schema", "catalog", "strategy", "discriminator", "cache"}) 
 public class Persistent extends NamedMetaData {
 	private static final long serialVersionUID = -6359398747055206964L;
 
@@ -21,11 +23,12 @@ public class Persistent extends NamedMetaData {
 		mapped
 	}
 	
-    private String schema;
+	private String schema;
     private String catalog;
 	private ExtensionStrategy strategy;
 	private String discriminator;
-
+	private Cache cache;
+	
     public String getSchema() {
         return schema;
     }
@@ -60,6 +63,15 @@ public class Persistent extends NamedMetaData {
     @XmlAttribute
 	public void setDiscriminator(String discriminator) {
 		this.discriminator = UtilImpl.processStringValue(discriminator);
+	}
+
+	public Cache getCache() {
+		return cache;
+	}
+	
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setCache(Cache cache) {
+		this.cache = cache;
 	}
 
     public String getPersistentIdentifier() {
