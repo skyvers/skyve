@@ -39,6 +39,7 @@ public class UserExtension extends User {
 							if (metaDataUser.isInRole(moduleName, roleName)) {
 								UserRole assignedRole = UserRole.newInstance();
 								assignedRole.setRoleName(moduleName + "." + roleName);
+								assignedRole.originalValues().clear();
 								assignedRoles.add(assignedRole);
 							}
 						}
