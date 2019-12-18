@@ -461,31 +461,7 @@ class ViewValidator extends ViewVisitor {
 	 */
 	@Override
 	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-		String binding = component.getBinding();
-		String name = component.getName();
-		String componentIdentifier = "Component";
-		if (name != null) {
-			componentIdentifier += " named " + name;
-		}
-		if (binding != null) {
-			componentIdentifier += " for binding " + binding;
-			validateBinding(null, 
-								binding, 
-								false, 
-								false, 
-								false, 
-								false, 
-								componentIdentifier, 
-								AttributeType.association, 
-								AttributeType.inverseOne);
-		}
-
-		try {
-			component.setContained(uxui, customer, module, document, view.getName());
-		}
-		catch (Exception e) {
-			throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " cannot be resolved.", e);
-		}
+		// Component binding and name is resolved in ViewImpl.resolve() before this method is called
 	}
 	
 	@Override

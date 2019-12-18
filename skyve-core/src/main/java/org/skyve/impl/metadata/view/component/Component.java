@@ -23,6 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.view.Invisible;
@@ -135,10 +136,19 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		ModuleImpl m = null;
 		DocumentImpl d = null;
 		if (binding != null) {
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, binding);
-			Association a = (Association) target.getAttribute();
-			d = (DocumentImpl) owningModule.getDocument(customer, a.getDocumentName());
-			m = (ModuleImpl) customer.getModule(d.getOwningModuleName());
+			try {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, binding);
+				Association a = (Association) target.getAttribute();
+				d = (DocumentImpl) owningModule.getDocument(customer, a.getDocumentName());
+				m = (ModuleImpl) customer.getModule(d.getOwningModuleName());
+			}
+			catch (Exception e) {
+				throw new MetaDataException("Component" + ((name != null) ? " named " + name : "") +
+												" with binding " + binding + " in view " + viewName + " for document " +
+												owningModule.getName() + '.' + owningDocument.getName() +
+												" for uxui " + uxui + " has an invalid binding.",
+												e);
+			}
 		}
 		else {
 			if (moduleName != null) {
@@ -157,6 +167,13 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		View originalView = (name == null) ? 
 								d.getView(uxui, customer, viewName) : 
 								d.getView(uxui, customer, name);
+		if (originalView == null) {
+			throw new MetaDataException("Component named " + name + " in view " + viewName + " for document " +
+											owningModule.getName() + '.' + owningDocument.getName() +
+											" for uxui " + uxui + " does not reference a valid view " +
+											((name == null) ? viewName : name) + " in document " + m.getName() + '.' + d.getName());
+		}
+		
 		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
 
 		ComponentViewVisitor visitor = new ComponentViewVisitor(customer, m, d, view, binding, names, widgetId);

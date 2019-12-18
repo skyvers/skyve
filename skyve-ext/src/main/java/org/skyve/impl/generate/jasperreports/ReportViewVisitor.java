@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -880,7 +881,11 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitComparison(Comparison arg0, boolean arg1, boolean arg2) {
 		// Not supported
+	}
 
+	@Override
+	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
 	}
 
 	@Override
