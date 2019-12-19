@@ -1142,11 +1142,12 @@ public class LocalDesignRepository extends AbstractRepository {
 								try {
 									getMapModel(customer, document, modelName, false);
 								}
-								catch (@SuppressWarnings("unused") Exception e) {
+								catch (Exception e) {
 									throw new MetaDataException("Menu [" + item.getName() + 
 																	"] in module " + module.getName() +
 																	" is for model " + modelName +
-																	" which does not exist.");
+																	" which does not exist.",
+																	e);
 								}
 							}
 						}
@@ -1164,6 +1165,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						}
 						else if (item instanceof MapItem) {
 							if (document != null) {
+								// Check binding is valid
 								String binding = ((MapItem) item).getGeometryBinding();
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -1176,13 +1178,26 @@ public class LocalDesignRepository extends AbstractRepository {
 																		" which is not a geometry.");
 									}
 								}
-								catch (@SuppressWarnings("unused") Exception e) {
+								catch (Exception e) {
 									throw new MetaDataException("Map Menu [" + item.getName() + 
 																	"] in module " + module.getName() + 
 																	" has a geometryBinding of " + binding + 
-																	" which does not exist.");
+																	" which does not exist.",
+																	e);
 								}
 								
+								// If the query is defined and not polymorphic, check that the binding is in the query.
+								if (query != null) {
+									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
+										if (query.getColumns().stream().noneMatch(C -> ((C instanceof MetaDataQueryProjectedColumn) && binding.equals(((MetaDataQueryProjectedColumn) C).getBinding())))) {
+											throw new MetaDataException("Map Menu [" + item.getName() + 
+																			"] in module " + module.getName() + 
+																			" has a geometryBinding of " + binding + 
+																			" which is not a column in the query " + queryName + 
+																			". Either add the column (preferable) to the query or set the query to be polymorphic.");
+										}
+									}
+								}
 							}
 						}
 					}
