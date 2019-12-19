@@ -30,7 +30,6 @@ public class RouterMerger {
 							existingRoute.getProperties().putAll(routeToMerge.getProperties());
 						}
 					}
-					existingUxuiMetadatum.getRoutes().addAll(uxuiMetadatum.getRoutes());
 				}
 			}
 			mergedRouter.getUxUis().addAll(newUxUis);
