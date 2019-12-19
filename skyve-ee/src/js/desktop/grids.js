@@ -1054,7 +1054,7 @@ isc.BizListGrid.addMethods({
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: me._contextMenu,
+			contextMenu: me._config.isRepeater ? null : me._contextMenu,
 			showRollOver: true,
 			canExpandRecords: false,
 			expansionMode: 'details',
@@ -2023,7 +2023,7 @@ isc.BizDataGrid.addMethods({
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: contextMenu,
+			contextMenu: me.isRepeater ? null : contextMenu,
 			showRollOver: true,
 			rowClick: function(record, rowNum, colNum) {
 				if (record && record.bizId) { // not a group by row
