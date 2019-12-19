@@ -1666,14 +1666,16 @@ isc.BizListGrid.addMethods({
 			me.grid.destroy();
 		}
 		me._createGrid(me._config, fields);
-		// Set if the grid can expand based on whether there are detail fields defined
-		me.grid.setCanExpandRecords(hasDetailFields);
 		if (me._config.isTree || me._config.isRepeater) {
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
 			me.addMember(me.grid, me.getMembers().length - 1); // add before the summary row
 		}
+		
+		// Set if the grid can expand based on whether there are detail fields defined
+		// NB need to do this once the grid is added as it can be instantiated/drawn
+		me.grid.setCanExpandRecords(hasDetailFields);
 
 		if (me.rootIdBinding) {
 			me.grid.getDataSource().getField('bizParentId').rootValue = '_' + me._view._vm.getValue(me.rootIdBinding);
