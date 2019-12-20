@@ -154,7 +154,11 @@ class HibernateSQL extends AbstractSQL {
 	private <T> NativeQuery<T> createQueryFromSQL() throws Exception {
 		Session session = persistence.getSession();
 		NativeQuery<T> result = session.createNativeQuery(toQueryString());
-
+		// This ensures that the second level (shared) cache is not invalidated.
+		// It means that first and second level caches have to be managed manually in code.
+		// NB The "" is a table name that cannot exist.
+		result.addSynchronizedQuerySpace("");
+		
 		for (String name : getParameterNames()) {
 			Object value = getParameter(name);
 			
