@@ -8,7 +8,9 @@
 			A proxy version of the admin.User (without roles and groups etc) used for referencing.
 		]]>
 	</documentation>
-	<persistent name="ADM_SecurityUser" />
+	<persistent name="ADM_SecurityUser">
+		<cache name="ten" type="readWrite"/>
+	</persistent>
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>

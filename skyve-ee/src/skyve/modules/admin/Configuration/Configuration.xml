@@ -3,7 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<persistent name="ADM_Configuration" />
+	<persistent name="ADM_Configuration">
+		<cache name="eternal" type="readWrite" />
+	</persistent>
 	<singularAlias>Setup</singularAlias>
 	<pluralAlias>Setup</pluralAlias>
 	<iconStyleClass>fa fa-lock</iconStyleClass>

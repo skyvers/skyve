@@ -3,7 +3,7 @@ package modules.admin.Configuration;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.model.document.SingletonBizlet;
+import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
@@ -16,7 +16,7 @@ import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
-public class ConfigurationBizlet extends SingletonBizlet<ConfigurationExtension> {
+public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
 
 	private static final long serialVersionUID = -1282437688681930236L;
 

@@ -125,14 +125,21 @@
 		// Format the SQL statements when logged
 		prettySql: false,
 		caches: {
-			"hibernate": {
+			"eternal": {
+				// Max conversations allowed in heap memory before being moved off-heap or to disk
+				heapSizeEntries: 10,
+				// Max off-heap memory size - 0 indicates no usage
+				offHeapSizeMB: 0,
+				expiryPolicy: "eternal" // "timeToLive" or "timeToIdle"
+			},
+			"ten": {
 				// Max conversations allowed in heap memory before being moved off-heap or to disk
 				heapSizeEntries: 1000,
 				// Max off-heap memory size - 0 indicates no usage
-				offHeapSizeMB: 128,
+				offHeapSizeMB: 0,
 				expiryPolicy: "timeToIdle", // "timeToLive" or "eternal"
 				// Number of minutes to wait until expiring a hibernate object from the cache
-				expiryTimeMinutes: 60
+				expiryTimeMinutes: 10
 			}
 		}
 	},

@@ -4,11 +4,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 
 /**
  * A Thread-safe cached singleton Bizlet implementation that memoises the super.newInstance() call
@@ -21,15 +19,14 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	private static final long serialVersionUID = -4069583265754912169L;
 
 	/**
-	 * Thread-safe map of module/document keys to singleton instances.
+	 * Thread-safe map of module/document keys to singleton instance bizId.
 	 */
-	private static final ConcurrentMap<String, Bean> INSTANCES = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<String, String> INSTANCES = new ConcurrentHashMap<>();
 	
 	/**
 	 * Gets a memoised version of the singleton instance (if it is customer or global scoped).
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public T newInstance(T bean) throws Exception {
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
@@ -48,28 +45,18 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 			return super.newInstance(bean);
 		}
 
-		Bean result = INSTANCES.get(key);
-		if (result == null) {
+		String bizId = INSTANCES.get(key);
+		T result = null;
+		if (bizId == null) {
 			result = super.newInstance(bean);
-			Util.populateFully(result);
-			INSTANCES.putIfAbsent(key, result);
+			if (result.isPersisted()) {
+				INSTANCES.putIfAbsent(key, result.getBizId());
+			}
 		}
-		return (T) result;
-	}
-	
-	/**
-	 * Evicts the instance after it has been saved.
-	 */
-	@Override
-	public void postSave(T bean) throws Exception {
-		evict(bean);
-	}
-
-	/**
-	 * Evicts the instance from the cache.
-	 * @param bean
-	 */
-	public synchronized void evict(T bean) {
-		INSTANCES.entrySet().removeIf(e -> e.getValue().getBizId().equals(bean.getBizId())); 
+		else {
+			// This is most probably cached
+			result = CORE.getPersistence().retrieve(bizModule, bizDocument, bizId);
+		}
+		return result;
 	}
 }
