@@ -1187,13 +1187,17 @@ public class LocalDesignRepository extends AbstractRepository {
 								}
 								
 								// If the query is defined and not polymorphic, check that the binding is in the query.
+								if ((queryName == null) && (documentName != null)) { // default document query
+									query = module.getDocumentDefaultQuery(customer, documentName);
+								}
 								if (query != null) {
 									if (! Boolean.TRUE.equals(query.getPolymorphic())) {
 										if (query.getColumns().stream().noneMatch(C -> ((C instanceof MetaDataQueryProjectedColumn) && binding.equals(((MetaDataQueryProjectedColumn) C).getBinding())))) {
 											throw new MetaDataException("Map Menu [" + item.getName() + 
 																			"] in module " + module.getName() + 
 																			" has a geometryBinding of " + binding + 
-																			" which is not a column in the query " + queryName + 
+																			" which is not a column in the " + 
+																			((queryName == null) ? "default query" : "query " + queryName) + 
 																			". Either add the column (preferable) to the query or set the query to be polymorphic.");
 										}
 									}

@@ -1054,7 +1054,7 @@ isc.BizListGrid.addMethods({
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: me._contextMenu,
+			contextMenu: me._config.isRepeater ? null : me._contextMenu,
 			showRollOver: true,
 			canExpandRecords: false,
 			expansionMode: 'details',
@@ -1666,14 +1666,16 @@ isc.BizListGrid.addMethods({
 			me.grid.destroy();
 		}
 		me._createGrid(me._config, fields);
-		// Set if the grid can expand based on whether there are detail fields defined
-		me.grid.setCanExpandRecords(hasDetailFields);
 		if (me._config.isTree || me._config.isRepeater) {
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
 			me.addMember(me.grid, me.getMembers().length - 1); // add before the summary row
 		}
+		
+		// Set if the grid can expand based on whether there are detail fields defined
+		// NB need to do this once the grid is added as it can be instantiated/drawn
+		me.grid.setCanExpandRecords(hasDetailFields);
 
 		if (me.rootIdBinding) {
 			me.grid.getDataSource().getField('bizParentId').rootValue = '_' + me._view._vm.getValue(me.rootIdBinding);
@@ -2023,7 +2025,7 @@ isc.BizDataGrid.addMethods({
 			autoSaveEdits: true,
 			modalEditing: true,
 			canFreezeFields: false,
-			contextMenu: contextMenu,
+			contextMenu: me.isRepeater ? null : contextMenu,
 			showRollOver: true,
 			rowClick: function(record, rowNum, colNum) {
 				if (record && record.bizId) { // not a group by row

@@ -71,7 +71,7 @@
 			</row>
 		</form>
 		<vbox visible="showGroupCreator" borderTitle="Create a new group">
-			<component binding="newGroup1" name="_groupCreator" />
+			<component binding="newGroup" name="_groupCreator" />
 		</vbox>
 		<vbox invisible="showGroupCreator">
 			<listMembership binding="groups" candidatesHeading="Available Groups" membersHeading="Assigned Groups"/>
