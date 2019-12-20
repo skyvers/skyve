@@ -125,8 +125,6 @@ import org.skyve.util.Util;
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
-	public static final String HIBERNATE_CACHE_NAME = "hibernate";
-	
 	private static SessionFactory sf = null;
 	private static Metadata metadata = null;
 	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
@@ -381,8 +379,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 	}
 	
-	public static void logSecondLevelCacheStats() {
-		CacheStatisticsMXBean bean = CacheUtil.getJCacheStatisticsMXBean(HIBERNATE_CACHE_NAME);
+	public static void logSecondLevelCacheStats(String cacheName) {
+		CacheStatisticsMXBean bean = CacheUtil.getJCacheStatisticsMXBean(cacheName);
 		if (bean != null) {
 			UtilImpl.LOGGER.info("HIBERNATE 2ND LEVEL CACHE:- " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
 		}
