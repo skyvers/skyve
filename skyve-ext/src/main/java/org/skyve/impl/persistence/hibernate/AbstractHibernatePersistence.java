@@ -382,7 +382,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	public static void logSecondLevelCacheStats(String cacheName) {
 		CacheStatisticsMXBean bean = CacheUtil.getJCacheStatisticsMXBean(cacheName);
 		if (bean != null) {
-			UtilImpl.LOGGER.info("HIBERNATE 2ND LEVEL CACHE:- " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
+			UtilImpl.LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
 		}
 	}
 	
