@@ -53,7 +53,7 @@
 		<association name="publicUser" type="aggregation">
 			<displayName>Anonymous Public User</displayName>
 			<description>The anonymous public user asserted on all public pages.</description>
-			<documentName>User</documentName>
+			<documentName>UserProxy</documentName>
 		</association>
 		
 		<!-- non-persistent configuration attributes -->

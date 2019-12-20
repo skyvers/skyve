@@ -3,7 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<persistent name="ADM_SecurityGroupRole" />
+	<persistent name="ADM_SecurityGroupRole">
+		<cache name="reference" type="readWrite" />
+	</persistent>
 	<singularAlias>Group Role</singularAlias>
 	<pluralAlias>Group Roles</pluralAlias>
 	<parentDocument>Group</parentDocument>

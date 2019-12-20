@@ -12,7 +12,6 @@
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
 	<class name="modules.admin.domain.Audit" table="ADM_Audit" entity-name="adminAudit">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -41,7 +40,6 @@
 	</class>
 
 	<class name="modules.admin.Communication.CommunicationExtension" table="ADM_Communication" entity-name="adminCommunication">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -90,7 +88,6 @@
 	</class>
 
 	<class name="modules.admin.domain.CommunicationTemplate" table="ADM_CommunicationTemplate" entity-name="adminCommunicationTemplate">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -109,7 +106,7 @@
 	</class>
 
 	<class name="modules.admin.Configuration.ConfigurationExtension" table="ADM_Configuration" entity-name="adminConfiguration">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="eternal" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -128,7 +125,7 @@
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
 		<property name="allowUserSelfRegistration" />
-		<many-to-one name="publicUser" entity-name="adminUser" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
+		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminConfigurationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -136,7 +133,7 @@
 	</class>
 
 	<class name="modules.admin.domain.Contact" table="ADM_Contact" entity-name="adminContact">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="reference" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -161,7 +158,6 @@
 	</class>
 
 	<class name="modules.admin.domain.DataGroup" table="ADM_DataGroup" entity-name="adminDataGroup">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -179,7 +175,7 @@
 	</class>
 
 	<class name="modules.admin.DataMaintenance.DataMaintenanceExtension" table="ADM_DataMaintenance" entity-name="adminDataMaintenance">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="eternal" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -228,7 +224,6 @@
 	</class>
 
 	<class name="modules.admin.domain.DocumentNumber" table="ADM_DocumentNumber" entity-name="adminDocumentNumber">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -248,7 +243,7 @@
 	</class>
 
 	<class name="modules.admin.Group.GroupExtension" table="ADM_SecurityGroup" entity-name="adminGroup">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="reference" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -260,7 +255,6 @@
 		<property name="name" length="30" />
 		<property name="description" length="255" />
 		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
-			<cache usage="read-write" region="hibernate" />
 			<key column="parent_id" />
 			<one-to-many entity-name="adminGroupRole" />
 		</bag>
@@ -271,7 +265,7 @@
 	</class>
 
 	<class name="modules.admin.domain.GroupRole" table="ADM_SecurityGroupRole" entity-name="adminGroupRole">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="reference" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -289,7 +283,6 @@
 	</class>
 
 	<class name="modules.admin.ImportExport.ImportExportExtension" table="ADM_ImportExport" entity-name="adminImportExport">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -312,7 +305,6 @@
 		<property name="columnTitlesOnly" />
 		<property name="fileContainsHeaders" />
 		<bag name="importExportColumns" order-by="bizOrdinal" cascade="all-delete-orphan">
-			<cache usage="read-write" region="hibernate" />
 			<key column="parent_id" />
 			<one-to-many entity-name="adminImportExportColumn" />
 		</bag>
@@ -333,7 +325,6 @@
 	</class>
 
 	<class name="modules.admin.domain.ImportExportColumn" table="ADM_ImportExportColumn" entity-name="adminImportExportColumn">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -359,7 +350,6 @@
 	</class>
 
 	<class name="modules.admin.domain.Job" table="ADM_Job" entity-name="adminJob">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -381,7 +371,6 @@
 	</class>
 
 	<class name="modules.admin.domain.JobSchedule" table="ADM_JobSchedule" entity-name="adminJobSchedule">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -403,7 +392,6 @@
 	</class>
 
 	<class name="modules.admin.domain.Snapshot" table="ADM_Snapshot" entity-name="adminSnapshot">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -423,7 +411,6 @@
 	</class>
 
 	<class name="modules.admin.domain.Subscription" table="ADM_Subscription" entity-name="adminSubscription">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -448,7 +435,6 @@
 	</class>
 
 	<class name="modules.admin.domain.Tag" table="ADM_Tag" entity-name="adminTag">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -487,7 +473,6 @@
 	</class>
 
 	<class name="modules.admin.domain.Tagged" table="ADM_Tagged" entity-name="adminTagged">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -507,7 +492,6 @@
 	</class>
 
 	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -530,12 +514,10 @@
 		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact"/>
 		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup"/>
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
-			<cache usage="read-write" region="hibernate" />
 			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
 			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
 		</bag>
 		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
-			<cache usage="read-write" region="hibernate" />
 			<key column="parent_id" />
 			<one-to-many entity-name="adminUserRole" />
 		</bag>
@@ -547,7 +529,6 @@
 	</class>
 
 	<class name="modules.admin.domain.UserLoginRecord" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -565,7 +546,6 @@
 	</class>
 
 	<class name="modules.admin.domain.UserMonthlyHits" table="ADM_UserMonthlyHits" entity-name="adminUserMonthlyHits">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -585,7 +565,7 @@
 	</class>
 
 	<class name="modules.admin.domain.UserProxy" table="ADM_SecurityUser" entity-name="adminUserProxy">
-		<cache usage="read-write" region="hibernate" />
+		<cache usage="read-write" region="reference" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -605,7 +585,6 @@
 	</class>
 
 	<class name="modules.admin.domain.UserRole" table="ADM_SecurityUserRole" entity-name="adminUserRole">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -623,7 +602,6 @@
 	</class>
 
 	<class name="modules.admin.domain.UserToken" table="ADM_UserToken" entity-name="adminUserToken">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

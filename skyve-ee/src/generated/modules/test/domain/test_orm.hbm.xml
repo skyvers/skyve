@@ -12,7 +12,6 @@
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
 	<class name="modules.test.domain.AllAttributesInverseOneToOnePersistent" table="TEST_AllAttributesInverseOneToOnePersistent" entity-name="testAllAttributesInverseOneToOnePersistent">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -24,7 +23,6 @@
 		<many-to-one name="aggAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggAssociation"/>
 		<property name="booleanFlag" />
 		<bag name="aggCollection" table="TEST_AllAttributesInverseOneToOnePersistent_aggCollection" cascade="persist,save-update,refresh,merge">
-			<cache usage="read-write" region="hibernate" />
 			<key column="owner_id" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_owner_id" />
 			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_element_id" column="element_id" />
 		</bag>
@@ -56,7 +54,6 @@
 	</class>
 
 	<class name="modules.test.domain.AllAttributesPersistent" table="TEST_AllAttributesPersistent" entity-name="testAllAttributesPersistent">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -73,7 +70,6 @@
 			<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="embedded_composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation"/>
 			<property name="booleanFlag" column="embedded_booleanFlag" />
 			<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<cache usage="read-write" region="hibernate" />
 				<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
 				<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
 			</bag>
@@ -100,7 +96,6 @@
 		</component>
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<cache usage="read-write" region="hibernate" />
 			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
 			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
@@ -135,7 +130,6 @@
 	</class>
 
 	<class name="modules.test.domain.AllAttributesRequiredPersistent" table="TEST_AllAttributesRequiredPersistent" entity-name="testAllAttributesRequiredPersistent">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -147,7 +141,6 @@
 		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesRequiredPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedAssociation"/>
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesRequiredPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<cache usage="read-write" region="hibernate" />
 			<key column="owner_id" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_owner_id" />
 			<many-to-many entity-name="testAllAttributesRequiredPersistent" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
@@ -182,7 +175,6 @@
 	</class>
 
 		<class name="modules.test.domain.AnyDerived1" table="TEST_AnyDerived1" entity-name="testAnyDerived1">
-			<cache usage="read-write" region="hibernate" />
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -200,7 +192,6 @@
 		</class>
 
 		<class name="modules.test.domain.AnyDerived2" table="TEST_AnyDerived2" entity-name="testAnyDerived2">
-			<cache usage="read-write" region="hibernate" />
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -218,7 +209,6 @@
 		</class>
 
 	<class name="modules.test.domain.ArcOneToMany" table="TEST_ArcOneToMany" entity-name="testArcOneToMany">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -228,7 +218,6 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<bag name="arcs" table="TEST_ArcOneToMany_arcs" cascade="persist,save-update,refresh,merge">
-			<cache usage="read-write" region="hibernate" />
 			<key column="owner_id" foreign-key="FK_TEST_ArcOneToMany_arcs_owner_id" />
 		<many-to-any meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
@@ -244,7 +233,6 @@
 	</class>
 
 	<class name="modules.test.domain.ArcOneToOne" table="TEST_ArcOneToOne" entity-name="testArcOneToOne">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -266,7 +254,6 @@
 	</class>
 
 	<class name="modules.test.domain.Hierarchical" table="TEST_Hierarchical" entity-name="testHierarchical">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -284,7 +271,6 @@
 	</class>
 
 	<class name="modules.test.InjectedDocument.InjectedDocumentExtension" table="TEST_InjectedDocument" entity-name="testInjectedDocument">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -301,7 +287,6 @@
 	</class>
 
 		<class name="modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
-			<cache usage="read-write" region="hibernate" />
 			<id name="bizId" length="36" />
 			<discriminator column="bizDiscriminator" type="string" />
 			<version name="bizVersion" unsaved-value="null" />
@@ -335,12 +320,10 @@
 			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedAssociation"/>
 			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionSingleStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedAssociation"/>
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionSingleStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<cache usage="read-write" region="hibernate" />
 				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_owner_id" />
 				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="composedCollection" table="TEST_MappedExtensionSingleStrategy_composedCollection" cascade="all-delete-orphan">
-				<cache usage="read-write" region="hibernate" />
 				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_owner_id" />
 				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_element_id" column="element_id" />
 			</bag>
@@ -358,7 +341,6 @@
 		</class>
 
 		<class name="modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension" table="TEST_MappedExtensionJoinedStrategy" entity-name="testMappedExtensionJoinedStrategy">
-			<cache usage="read-write" region="hibernate" />
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -391,12 +373,10 @@
 			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedAssociation"/>
 			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionJoinedStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedAssociation"/>
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionJoinedStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<cache usage="read-write" region="hibernate" />
 				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_owner_id" />
 				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="composedCollection" table="TEST_MappedExtensionJoinedStrategy_composedCollection" cascade="all-delete-orphan">
-				<cache usage="read-write" region="hibernate" />
 				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_owner_id" />
 				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_element_id" column="element_id" />
 			</bag>
@@ -415,7 +395,6 @@
 		</class>
 
 	<class name="modules.test.domain.UniqueConstraintNonNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNonNullable">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -438,7 +417,6 @@
 	</class>
 
 	<class name="modules.test.domain.UniqueConstraintNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNullable">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

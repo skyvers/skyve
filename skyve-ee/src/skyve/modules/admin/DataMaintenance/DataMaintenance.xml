@@ -3,7 +3,9 @@
 			xmlns="http://www.skyve.org/xml/document"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<persistent name="ADM_DataMaintenance" />
+	<persistent name="ADM_DataMaintenance">
+		<cache name="eternal" type="readWrite" />
+	</persistent>
 	<singularAlias>Data Maintenance</singularAlias>
 	<pluralAlias>Data Maintenance</pluralAlias>
 	<iconStyleClass>fa fa-wrench</iconStyleClass>

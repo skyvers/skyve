@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.Startup.StartupExtension;
-import modules.admin.User.UserExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -21,7 +20,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Setup
  * 
  * @depend - - - PasswordComplexityModel
- * @navhas n publicUser 0..1 User
+ * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
  * @navhas n userSelfRegistrationGroup 0..1 Group
@@ -192,7 +191,7 @@ public class Configuration extends AbstractPersistentBean {
 	 * <br/>
 	 * The anonymous public user asserted on all public pages.
 	 **/
-	private UserExtension publicUser = null;
+	private UserProxy publicUser = null;
 	/**
 	 * Email From
 	 **/
@@ -373,7 +372,7 @@ public class Configuration extends AbstractPersistentBean {
 	 * {@link #publicUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserExtension getPublicUser() {
+	public UserProxy getPublicUser() {
 		return publicUser;
 	}
 
@@ -382,7 +381,7 @@ public class Configuration extends AbstractPersistentBean {
 	 * @param publicUser	The new value.
 	 **/
 	@XmlElement
-	public void setPublicUser(UserExtension publicUser) {
+	public void setPublicUser(UserProxy publicUser) {
 		preset(publicUserPropertyName, publicUser);
 		this.publicUser = publicUser;
 	}

@@ -7,20 +7,18 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-import modules.admin.Jobs.JobsBizlet;
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
+import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.DataMaintenanceModuleDocument;
 
-public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
+public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance> {
 	private static final long serialVersionUID = -2754093263194272489L;
 
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
@@ -29,12 +27,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
-		Persistence persistence = CORE.getPersistence();
-		DocumentQuery q = persistence.newDocumentQuery(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
-		DataMaintenance result = q.beanResult();
-		if (result == null) {
-			result = bean;
-		}
+		DataMaintenance result = super.newInstance(bean);
 		
 		Customer c = CORE.getUser().getCustomer();
 		for (Module m : c.getModules()) {
@@ -52,7 +45,6 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 		return result;
 	}
-
 
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {

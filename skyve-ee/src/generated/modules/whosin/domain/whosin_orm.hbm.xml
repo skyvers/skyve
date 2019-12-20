@@ -12,7 +12,6 @@
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
 	<class name="modules.whosin.domain.Office" table="WHO_Office" entity-name="whosinOffice">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -37,7 +36,6 @@
 	</class>
 
 	<class name="modules.whosin.domain.Staff" table="WHO_Staff" entity-name="whosinStaff">
-		<cache usage="read-write" region="hibernate" />
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

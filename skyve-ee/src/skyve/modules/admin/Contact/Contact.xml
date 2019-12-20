@@ -3,7 +3,9 @@
 				xmlns="http://www.skyve.org/xml/document"
 				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<persistent name="ADM_Contact" />
+	<persistent name="ADM_Contact">
+		<cache name="reference" type="readWrite"/>
+	</persistent>
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
 	<iconStyleClass>fa fa-address-book</iconStyleClass>
