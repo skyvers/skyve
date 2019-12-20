@@ -9,9 +9,8 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
 /**
- * A Thread-safe cached singleton Bizlet implementation that memoises the super.newInstance() call
+ * A Thread-safe cached singleton Bizlet implementation that memoises the bizId from the super.newInstance() call
  * if the permission is global or customer scoped.
- * evict() evicts the cache instance and postSave() calls evict().
  *
  * @param <T>
  */
