@@ -49,8 +49,6 @@ isc.BizGrid.addMethods({
 		if (config.title) {
 			this.isGroup = true;
 			this.groupTitle = '&nbsp;&nbsp;' + config.title + '&nbsp;&nbsp;';
-			// NB style isnt applied unless I use the config object - makes no sense
-			config.styleName = 'bizhubRoundedBorder';
 			this.groupLabelStyleName = 'bizhubBorderLabel';
 			this.groupBorderCSS = '1px solid #bfbfbf';
 			this.margin = 1;
@@ -59,6 +57,11 @@ isc.BizGrid.addMethods({
 		}
 
 		this.Super("initWidget", config);
+		// NB style isnt applied unless I use the setter here - makes no sense
+		if (config.title) {
+			this.setStyleName('bizhubRoundedBorder');
+		}
+
 		var me = this;
 
 		me.deleteSelectionItem = {

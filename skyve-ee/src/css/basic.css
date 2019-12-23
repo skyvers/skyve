@@ -169,14 +169,6 @@ body {
 /*
     Page and Table Headings.
 */
-.dataGridTitle {
-	font-size: 12px;
-	font-weight: bold;
-	color: steelblue;
-	padding: 5px;
-	margin: 3px;
-}
-
 a {
     text-decoration: underline;
 }
