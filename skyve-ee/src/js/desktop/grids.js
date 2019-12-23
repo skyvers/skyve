@@ -45,8 +45,20 @@ isc.BizGrid.addProperties({
 });
 
 isc.BizGrid.addMethods({
-	initWidget : function(config) {
-		this.Super("initWidget", arguments);
+	initWidget: function(config) {
+		if (config.title) {
+			this.isGroup = true;
+			this.groupTitle = '&nbsp;&nbsp;' + config.title + '&nbsp;&nbsp;';
+			// NB style isnt applied unless I use the config object - makes no sense
+			config.styleName = 'bizhubRoundedBorder';
+			this.groupLabelStyleName = 'bizhubBorderLabel';
+			this.groupBorderCSS = '1px solid #bfbfbf';
+			this.margin = 1;
+			this.padding = 10;
+			this.groupLabelBackgroundColor = 'transparent';
+		}
+
+		this.Super("initWidget", config);
 		var me = this;
 
 		me.deleteSelectionItem = {
@@ -988,9 +1000,6 @@ isc.BizListGrid.addMethods({
 			bodyOverflow: "hidden"
         });
 
-        if (me.title) {
-			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
-		}
         if (me._config.isRepeater) {} else {
             me.addMember(me._toolbar);
         	me.addMember(me._advancedFilter);
@@ -1837,7 +1846,7 @@ isc.BizDataGrid.addProperties({
  */
 isc.BizDataGrid.addMethods({
 	initWidget : function(config) {
-        this.Super("initWidget", arguments);
+		this.Super("initWidget", arguments);
 		var me = this;
 
 		var newItem = {
@@ -1927,10 +1936,6 @@ isc.BizDataGrid.addMethods({
 		}
 		grids[me.getID()] = me;
 		
-		if (me.title) {
-			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
-		}
-		
 		if (config.editable) {
 			if (config.isRepeater) {} else {
 				var toolStripMembers = [];
@@ -1965,6 +1970,10 @@ isc.BizDataGrid.addMethods({
 					}));
 				}
 			}
+		}
+		// Set grid minHeight the same as the VLayout parent coz there is no toolbar
+		if (me.getMembersLength() == 0) {
+			me.grid.setMinHeight(me.minHeight);
 		}
 		me.addMember(me.grid);
 	},
