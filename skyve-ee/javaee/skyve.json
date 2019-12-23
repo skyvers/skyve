@@ -132,7 +132,7 @@
 				offHeapSizeMB: 0,
 				expiryPolicy: "eternal" // "timeToLive" or "timeToIdle"
 			},
-			"ten": {
+			"reference": {
 				// Max conversations allowed in heap memory before being moved off-heap or to disk
 				heapSizeEntries: 1000,
 				// Max off-heap memory size - 0 indicates no usage
