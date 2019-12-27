@@ -740,6 +740,9 @@ public class LocalDesignRepository extends AbstractRepository {
 								put(viewLocation, result);
 							}
 						}
+						catch (MetaDataException e) {
+							throw e;
+						}
 						catch (Exception e) {
 							throw new MetaDataException(e);
 						}

@@ -726,10 +726,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 		else if (widget instanceof Component) {
 			Component component = (Component) widget;
+			// Note that a view will resolve its components outside of this visitor as it may
+			// require a different document and module etc if there is a binding
 			visitComponent(component, parentVisible, parentEnabled);
-			for (MetaData contained : component.getContained()) {
-				visitWidget(contained, parentVisible, parentEnabled);
-			}
 		}
 		else {
 			throw new MetaDataException("Widget " + widget + " not catered for.");
