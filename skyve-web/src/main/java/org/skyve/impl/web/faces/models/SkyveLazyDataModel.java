@@ -17,8 +17,10 @@ import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -231,6 +233,23 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 							AttributeType.text.equals(type)) {
 						if (! DomainType.constant.equals(attribute.getDomainType())) {
 							contains = true;
+						}
+					}
+					else if (value instanceof String) {
+						Converter<?> converter = null;
+						if (attribute instanceof ConvertableField) {
+							converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+						}
+						Class<?> implementingType = type.getImplementingType();
+						if (! String.class.equals(implementingType)) {
+							try {
+								value = BindUtil.fromString(customer, converter, implementingType, (String) value, false);
+							}
+							catch (@SuppressWarnings("unused") Exception e) {
+								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
+														"] for filter paramter [" + key + "] to the required type, so just ignore...");
+								continue;
+							}
 						}
 					}
 				}
