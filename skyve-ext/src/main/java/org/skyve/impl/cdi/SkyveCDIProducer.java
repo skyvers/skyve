@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
+import org.skyve.addin.AddInManager;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
@@ -35,5 +36,10 @@ public class SkyveCDIProducer {
 	@Produces
 	public static Repository getRepository() {
 		return new RepositoryInjectable();
+	}
+	
+	@Produces
+	public static AddInManager getAddInManager() {
+		return new AddInManagerInjectable();
 	}
 }
