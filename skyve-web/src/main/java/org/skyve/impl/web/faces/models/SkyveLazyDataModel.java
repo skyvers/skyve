@@ -216,7 +216,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		Filter modelFilter = model.getFilter();
 		for (String key : filters.keySet()) {
 			Object value = filters.get(key);
-			if ((value == null) || ("".equals(value))) {
+			if ((value == null) || "".equals(value)) {
 				continue;
 			}
 
@@ -235,6 +235,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 							contains = true;
 						}
 					}
+					// if we have a binding to an association use "like" and 
+					// make it to the bizKey since we have no relational stuff in the PF filter line.
+					else if (AttributeType.association.equals(type)) {
+						contains = true;
+						key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
+					}
 					else if (value instanceof String) {
 						Converter<?> converter = null;
 						if (attribute instanceof ConvertableField) {
@@ -247,11 +253,16 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
 								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
-														"] for filter paramter [" + key + "] to the required type, so just ignore...");
+														"] for filter parameter [" + key + "] to the required type, so just ignore...");
 								continue;
 							}
 						}
 					}
+				}
+				// implicit field probably - if biz key implicit field then add as contains
+				// NB All other implicit fields should be exactly equal
+				else if (key.endsWith(Bean.BIZ_KEY)) {
+					contains = true;
 				}
 			}
 			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    FILTER %s %s %s", key, contains ? "contains" : "=", value));
