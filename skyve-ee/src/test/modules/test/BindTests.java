@@ -1,13 +1,19 @@
 package modules.test;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import modules.test.domain.AllAttributesPersistent;
@@ -105,5 +111,104 @@ public class BindTests extends AbstractSkyveTest {
 		User to = User.newInstance();
 		Binder.copy(from, to);
 		Assert.assertEquals(role.getParent(), to);
+	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSimpleMapBeanProperty() {
+		Map<String, Object> map = new TreeMap<>();
+		map.put(User.userNamePropertyName, "mike");
+		MapBean bean = new MapBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		Assert.assertEquals("mike", Binder.get(bean, User.userNamePropertyName)); 
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testCompoundMapBeanProperty() {
+		String binding = Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(binding, "mike");
+		MapBean bean = new MapBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		Assert.assertEquals("mike", Binder.get(bean, binding)); 
+	}
+	
+	@Test
+	public void testSimpleThisProperty() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(DocumentQuery.THIS_ALIAS, aap);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertTrue(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
+	}
+	
+	@Test
+	public void testCompoundThisProperty() throws Exception {
+		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.booleanFlagPropertyName);
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(DocumentQuery.THIS_ALIAS, aap);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
+	}
+
+	@Test
+	public void testSimpleMapPropertyOverThisProperty() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(AllAttributesPersistent.booleanFlagPropertyName, null);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertFalse(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
+	}
+
+	@Test
+	public void testCompoundMapPropertyOverThisProperty() throws Exception {
+		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.booleanFlagPropertyName);
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(binding, null);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertFalse(Binder.get(bean, binding) instanceof Boolean);
+	}
+	
+	@Test
+	public void testCompoundPropertyWithoutMappedProperty2Deep() throws Exception {
+		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.booleanFlagPropertyName);
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(AllAttributesPersistent.aggregatedAssociationPropertyName, aap);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
+	}
+
+	@Test
+	public void testCompoundPropertyWithoutMappedProperty3Deep() throws Exception {
+		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.booleanFlagPropertyName);
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(AllAttributesPersistent.aggregatedAssociationPropertyName, aap);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
+	}
+
+	@Test
+	public void testCompoundPropertyWithoutMappedProperty4Deep() throws Exception {
+		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.aggregatedAssociationPropertyName,
+														AllAttributesPersistent.booleanFlagPropertyName);
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Map<String, Object> map = new TreeMap<>();
+		map.put(Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
+												AllAttributesPersistent.aggregatedAssociationPropertyName),
+					aap);
+		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
 }

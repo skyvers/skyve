@@ -143,14 +143,34 @@ public class MapBean extends LazyDynaMap implements Bean {
 			result = values.get(propertyName);
 		}
 		else {
-			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+			if (bean == null) { // there is no "this" bean
+				// Check if there is any part of the compound binding present as a dyna property (largest binding first)
+				int dotIndex = propertyName.lastIndexOf('.');
+				while (dotIndex > 0) { // compound binding
+					String bindingPart = propertyName.substring(0, dotIndex);
+					if (isDynaProperty(bindingPart)) {
+						try {
+							bean = (Bean) values.get(bindingPart);
+							result = BindUtil.get(bean, propertyName.substring(dotIndex + 1));
+							break;
+						}
+						catch (Exception e) {
+							throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+						}
+					}
+					dotIndex = bindingPart.lastIndexOf('.');
+				}
+				if (dotIndex < 0) { // simple binding
+					throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				}
 			}
-			try {
-				result = BindUtil.get(bean, propertyName);
-			}
-			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+			else { // try getting the property out of the "this" bean
+				try {
+					result = BindUtil.get(bean, propertyName);
+				}
+				catch (Exception e) {
+					throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				}
 			}
 		}
 		
