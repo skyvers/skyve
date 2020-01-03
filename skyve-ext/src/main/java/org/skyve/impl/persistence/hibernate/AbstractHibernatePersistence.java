@@ -209,7 +209,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, "true");
 		cfg.put(AvailableSettings.CACHE_REGION_FACTORY, "org.hibernate.cache.jcache.JCacheRegionFactory");
 		cfg.put("hibernate.javax.cache.provider", "org.ehcache.jsr107.EhcacheCachingProvider");
-		cfg.put("hibernate.javax.cache.missing_cache_strategy", "fail");
+		cfg.put("hibernate.javax.cache.missing_cache_strategy", UtilImpl.HIBERNATE_FAIL_ON_MISSING_CACHE ? "fail" : "create");
 		
 		// Allow more than 1 representation of the same detached entity to be merged,
 		// possibly from multiple sessions, multiple caches, or various serializations.

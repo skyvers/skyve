@@ -59,9 +59,11 @@ public class CacheUtil {
 			jCacheManager = Caching.getCachingProvider().getCacheManager();
 			
 			// Create the conversations cache
-			UtilImpl.LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
-			CacheUtil.createEHCache(UtilImpl.CONVERSATION_CACHE);
-
+			if (UtilImpl.CONVERSATION_CACHE != null) {
+				UtilImpl.LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
+				CacheUtil.createEHCache(UtilImpl.CONVERSATION_CACHE);
+			}
+			
 			// Create the app caches
 			for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
 				UtilImpl.LOGGER.info("Create app cache with config " + config);

@@ -148,8 +148,9 @@ public class UtilImpl {
 	public static boolean USING_JPA = false;
 
 	// For caches
-	public static ConversationCacheConfig CONVERSATION_CACHE;
+	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
+	public static boolean HIBERNATE_FAIL_ON_MISSING_CACHE = false;
 	public static List<CacheConfig<? extends Serializable, ? extends Serializable>> APP_CACHES = new ArrayList<>();
 
 	// For database

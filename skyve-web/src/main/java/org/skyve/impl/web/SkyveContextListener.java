@@ -317,6 +317,9 @@ public class SkyveContextListener implements ServletContextListener {
 																		(expiryInMinutes == null) ? 0L : expiryInMinutes.longValue()));
 			}
 		}
+		// Ensure that deployment fails if a cache is missing 
+		// (but for testing and other stand alone applications, it'll create them on the fly)
+		UtilImpl.HIBERNATE_FAIL_ON_MISSING_CACHE = true;
 		
 		Map<String, Object> factories = getObject(null, "factories", properties, true);
 
