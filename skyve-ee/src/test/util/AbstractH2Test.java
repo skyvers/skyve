@@ -50,6 +50,11 @@ public abstract class AbstractH2Test {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+		// init the cache
+		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
+		CacheUtil.init();
+
+		// init injection
 		weld = new Weld();
 		weld.addPackage(true, SkyveCDIProducer.class);
 		weld.addPackage(true, WeldMarker.class);
@@ -62,6 +67,7 @@ public abstract class AbstractH2Test {
 		if (weld != null) {
 			weld.shutdown();
 		}
+		CacheUtil.dispose();
 	}
 
 	@Before
@@ -74,7 +80,6 @@ public abstract class AbstractH2Test {
 		UtilImpl.DDL_SYNC = true;
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;
-		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
 
 		AbstractRepository.set(new LocalDesignRepository());
 
@@ -90,9 +95,6 @@ public abstract class AbstractH2Test {
 		// create admin user
 		User adminUser = createAdminUser(user);
 		persistence.save(adminUser);
-
-		// init the cache
-		CacheUtil.init();
 	}
 
 	@After
@@ -101,8 +103,7 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
 		persistence.evictAllCached();
-
-		CacheUtil.dispose();
+		persistence.evictAllSharedCache();
 	}
 
 	/**

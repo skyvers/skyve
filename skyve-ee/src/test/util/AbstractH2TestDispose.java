@@ -17,7 +17,6 @@ import org.skyve.persistence.Persistence;
  * performing its own commits, which will not be able to be rolled back.
  */
 public class AbstractH2TestDispose extends AbstractH2Test {
-
 	@After
 	@SuppressWarnings("static-method")
 	public void after() throws Exception {
