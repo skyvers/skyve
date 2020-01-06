@@ -1,10 +1,12 @@
 package sail.admin;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import util.JUnitMultiThreadedRunner;
 
+@Ignore
 @RunWith(JUnitMultiThreadedRunner.class)
 public class AdminPerformanceSail extends AdminSail {
 	@Test

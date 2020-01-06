@@ -50,10 +50,12 @@ public abstract class AbstractH2Test {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		// init the cache
+		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
-		CacheUtil.init();
-
+		if (CacheUtil.getJCacheManager() == null) {
+			CacheUtil.init();
+		}
+		
 		// init injection
 		weld = new Weld();
 		weld.addPackage(true, SkyveCDIProducer.class);
@@ -67,7 +69,6 @@ public abstract class AbstractH2Test {
 		if (weld != null) {
 			weld.shutdown();
 		}
-		CacheUtil.dispose();
 	}
 
 	@Before

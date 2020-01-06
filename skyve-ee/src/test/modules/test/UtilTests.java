@@ -23,7 +23,7 @@ public class UtilTests extends AbstractSkyveTest {
 
 		Util.populateFully(test);
 
-		System.out.println("PF = " + JSON.marshall(c, test));
+		JSON.marshall(c, test);
 
 		test = p.save(test);
 	}

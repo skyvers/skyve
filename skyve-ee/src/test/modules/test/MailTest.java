@@ -12,7 +12,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.skyve.util.Util;
 
-public class MailTest extends AbstractSkyveTest {
+import util.AbstractH2Test;
+
+public class MailTest extends AbstractH2Test {
 	public static final String EMAIL1 = "email1@skyve.org";
 	public static final String EMAIL2 = "email2@skyve.org";
 	public static final String EMAIL3 = "email3@skyve.org";
@@ -23,11 +25,9 @@ public class MailTest extends AbstractSkyveTest {
 	public static final String SUBJECT = "SUBJECT";
 	public static final String BODY = "BODY";
 
-	@Override
 	@Before
+	@SuppressWarnings("static-method")
 	public void before() {
-		super.before();
-
 		UtilImpl.SMTP = "localhost";
 		UtilImpl.SMTP_PORT = 25;
 	}

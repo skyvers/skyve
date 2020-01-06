@@ -1,7 +1,9 @@
 package sail.admin;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class AdminFunctionSail extends TestAdminMenuExternalTabletAsAdmininstrator {
 
 	@Test

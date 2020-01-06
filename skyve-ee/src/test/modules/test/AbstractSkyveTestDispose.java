@@ -24,9 +24,9 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
-import util.AbstractH2TestTruncate;
+import util.AbstractH2TestDispose;
 
-public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
+public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 
 	protected User u;
 	protected Customer c;

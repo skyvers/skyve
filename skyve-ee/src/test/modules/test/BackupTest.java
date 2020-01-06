@@ -17,7 +17,7 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
-public class BackupTest extends AbstractSkyveTest {
+public class BackupTest extends AbstractSkyveTestDispose {
 	private static File backupZip;
 	
 	@Test

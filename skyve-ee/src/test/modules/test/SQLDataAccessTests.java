@@ -23,7 +23,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
-public class SQLDataAccessTests extends AbstractSkyveTest {
+public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testBeanParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
