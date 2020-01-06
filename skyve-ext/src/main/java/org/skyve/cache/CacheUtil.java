@@ -91,12 +91,21 @@ public class CacheUtil {
 		// NB all caches are closed by closing the cache managers
 		if ((ehCacheManager != null) && (! Status.UNINITIALIZED.equals(ehCacheManager.getStatus()))) {
 			ehCacheManager.close();
+			ehCacheManager = null;
 		}
 		if ((jCacheManager != null) && (! jCacheManager.isClosed())) {
 			jCacheManager.close();
+			jCacheManager = null;
 		}
 	}
 
+	public static boolean isUnInitialised() {
+		return ((ehCacheManager == null) || 
+					Status.UNINITIALIZED.equals(ehCacheManager.getStatus()) ||
+					(jCacheManager == null) ||
+					jCacheManager.isClosed());
+	}
+	
 	/**
 	 * Get EHCacheManager.
 	 * @return	EHCacheManager

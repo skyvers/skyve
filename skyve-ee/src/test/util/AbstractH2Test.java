@@ -52,7 +52,7 @@ public abstract class AbstractH2Test {
 	public static void beforeClass() throws Exception {
 		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
-		if (CacheUtil.getJCacheManager() == null) {
+		if (CacheUtil.isUnInitialised()) {
 			CacheUtil.init();
 		}
 		
