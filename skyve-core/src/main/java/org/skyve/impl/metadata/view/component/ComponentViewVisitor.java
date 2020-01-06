@@ -466,12 +466,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 		// nothing to do here
 	}
 
-	
-	@Override
-	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-		// nothing to do here
-	}
-
 	@Override
 	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
 		bound(image);

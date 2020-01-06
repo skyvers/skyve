@@ -184,6 +184,8 @@ public class ViewImpl extends Container implements View {
 	public void resolve(String uxui, Customer customer, Document document) {
 		Module module = customer.getModule(document.getOwningModuleName());
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
+			// Overrides visitComponent standard behaviour to load the component
+			// Note that the component children are not traversed here.
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {

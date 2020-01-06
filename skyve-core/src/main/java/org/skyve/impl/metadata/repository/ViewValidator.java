@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
-import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -454,14 +453,6 @@ class ViewValidator extends ViewVisitor {
 		if ((actionName != null) && (view.getAction(actionName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existent action " + actionName);
 		}
-	}
-	
-	/**
-	 * Override to validate the component instead of resolving and including the edit view structure.
-	 */
-	@Override
-	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-		// Component binding and name is resolved in ViewImpl.resolve() before this method is called
 	}
 	
 	@Override

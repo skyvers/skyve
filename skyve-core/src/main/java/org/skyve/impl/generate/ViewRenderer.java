@@ -18,7 +18,6 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
-import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -1331,11 +1330,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderComparison(Comparison comparison);
 	
-	@Override
-	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-		// nothing to do here
-	}
-
 	private MetaDataQueryDefinition currentLookupQuery;
 	private boolean currentLookupCanCreate;
 	private boolean currentLookupCanUpdate;

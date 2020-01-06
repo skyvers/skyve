@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.view;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -368,12 +367,6 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitComparison(Comparison comparison, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	
-	@Override
-	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

@@ -262,9 +262,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitCombo(Combo combo,
 										boolean parentVisible,
 										boolean parentEnabled);
-	public abstract void visitComponent(Component component,
-											boolean parentVisible,
-											boolean parentEnabled);
 	public abstract void visitedCombo(Combo combo,
 										boolean parentVisible,
 										boolean parentEnabled);
@@ -732,6 +729,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 		else {
 			throw new MetaDataException("Widget " + widget + " not catered for.");
+		}
+	}
+
+	public void visitComponent(Component component,
+								boolean parentVisible,
+								boolean parentEnabled) {
+		for (MetaData widget : component.getContained()) {
+			visitWidget(widget, parentVisible, parentEnabled);
 		}
 	}
 
