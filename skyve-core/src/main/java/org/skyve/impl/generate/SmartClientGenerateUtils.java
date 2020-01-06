@@ -1142,6 +1142,7 @@ public class SmartClientGenerateUtils {
 																	(Relation) attribute,
 																	null,
 																	runtime);
+						onlyEqualsFilterOperators = true;
 					}
 				}
 			}
@@ -1734,6 +1735,14 @@ public class SmartClientGenerateUtils {
 
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {
+				// Add lookup description data source field
+				toAppendTo.append("{name:'");
+				boolean bindingToDataGrid = lookup.isBindingToDataGrid();
+	        	if (! bindingToDataGrid) {
+	        		toAppendTo.append(def.getName()).append('_');
+	        	}
+	        	toAppendTo.append(lookup.getDisplayField()).append("',type:'text',hidden:'true'},");
+
 				StringBuilder childDataSourceDefinition = new StringBuilder(512);
 				String childDataSourceId = appendDataSourceDefinition(user,
 																		customer,
