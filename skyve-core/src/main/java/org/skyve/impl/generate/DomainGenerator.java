@@ -1,7 +1,10 @@
 package org.skyve.impl.generate;
 
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
@@ -188,7 +191,7 @@ public abstract class DomainGenerator {
 
 	protected AbstractRepository repository;
 	
-//	protected Map<File, String> generatedFilesAndDirectories = new TreeMap<>();
+	protected Map<Path, StringBuilder> generation = new TreeMap<>();
 	
 	protected DomainGenerator(AbstractRepository repository,
 								DialectOptions dialectOptions,
@@ -206,20 +209,20 @@ public abstract class DomainGenerator {
 		this.excludedModules = excludedModules;
 	}
 	
-	public void validate(String customerName, boolean pre) throws Exception {
+	public void validate(String customerName) throws Exception {
 		System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
 		System.out.println("Validate customer " + customerName);
-		repository.validateCustomerForGenerateDomain(customer, pre);
+		repository.validateCustomerForGenerateDomain(customer);
 		for (Module module : customer.getModules()) {
 			System.out.println("Validate module " + module.getName());
-			repository.validateModuleForGenerateDomain(customer, module, pre);
+			repository.validateModuleForGenerateDomain(customer, module);
 			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 				String documentName = entry.getKey();
 				System.out.println("Get document " + documentName);
 				Document document = module.getDocument(customer, documentName);
 				System.out.println("Validate document " + documentName);
-				repository.validateDocumentForGenerateDomain(customer, document, pre);
+				repository.validateDocumentForGenerateDomain(customer, document);
 				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
 					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
 				}
@@ -233,11 +236,11 @@ public abstract class DomainGenerator {
 					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
 					System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
-					repository.validateViewForGenerateDomain(customer, document, view, uxuiName, pre);
+					repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
 					view = repository.getView(uxuiName, customer, document, ViewType.create.toString());
 					if (view != null) {
 						System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
-						repository.validateViewForGenerateDomain(customer, document, view, uxuiName, pre);
+						repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
 					}
 				}
 			}
@@ -346,11 +349,8 @@ public abstract class DomainGenerator {
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
-			foo.validate(customerName, true);
+			foo.validate(customerName);
 		}
 		foo.generate();
-		for (String customerName : repository.getAllCustomerNames()) {
-			foo.validate(customerName, false);
-		}
 	}
 }

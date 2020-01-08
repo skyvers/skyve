@@ -336,13 +336,13 @@ public abstract class AbstractRepository implements Repository {
 
 	public abstract Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration);
 
-	public abstract void validateCustomerForGenerateDomain(Customer customer, boolean pre);
+	public abstract void validateCustomerForGenerateDomain(Customer customer);
 
-	public abstract void validateModuleForGenerateDomain(Customer customer, Module module, boolean pre);
+	public abstract void validateModuleForGenerateDomain(Customer customer, Module module);
 
-	public abstract void validateDocumentForGenerateDomain(Customer customer, Document document, boolean pre);
+	public abstract void validateDocumentForGenerateDomain(Customer customer, Document document);
 
-	public abstract void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui, boolean pre);
+	public abstract void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui);
 
 	/**
 	 * @return The global router that is not module specific.

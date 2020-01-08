@@ -1,16 +1,18 @@
 package org.skyve.impl.generate;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -122,9 +124,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	public void generate() throws Exception {
 		populateDataStructures();
 
-		// delete generated and generatedTest directories
-		deleteGeneratedDirectories(repository.getAllVanillaModuleNames());
-
 		// generate the domain classes for vanilla modules
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
 			Module module = repository.getModule(null, moduleName);
@@ -147,6 +146,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			overriddenORMDocumentsPerCustomer.clear();
 			visitedOverriddenORMDocumentsPerCustomer.clear();
 		}
+
+		// delete generated and generatedTest directories
+		replaceGenerated(repository.getAllVanillaModuleNames());
 	}
 
 	@SuppressWarnings("synthetic-access")
@@ -249,14 +251,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			Persistent basePersistent = baseDocument.getPersistent();
 			boolean baseMapped = (basePersistent == null) ? false : ExtensionStrategy.mapped.equals(basePersistent.getStrategy());
 
-			if ((persistent.getName() == null) && (!mapped)) {
-				throw new MetaDataException("Document " + document.getName() + " cannot be transient when it is extending document "
-						+ baseDocument.getName());
+			if ((persistent.getName() == null) && (! mapped)) {
+				throw new MetaDataException("Document " + document.getName() + " cannot be transient when it is extending document " + baseDocument.getName());
 			}
 			if ((basePersistent == null) || (basePersistent.getName() == null)) {
-				if (!baseMapped) {
-					throw new MetaDataException(
-							"Document " + document.getName() + " cannot extend transient document " + baseDocument.getName());
+				if (! baseMapped) {
+					throw new MetaDataException("Document " + document.getName() + " cannot extend transient document " + baseDocument.getName());
 				}
 			}
 
@@ -317,123 +317,116 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private void generateVanilla(final Module module) throws Exception {
 		final String moduleName = module.getName();
 
-		// clear out the domain folder
+		// Determine the domain folder
 		final String packagePath = repository.MODULES_NAMESPACE + moduleName + '/' + repository.DOMAIN_NAME;
-		File domainFolder = new File(generatedSrcPath + packagePath + '/');
-		if (!domainFolder.exists()) {
-			domainFolder.mkdirs();
-		}
 
-		// clear out the generated test folder
+		// Determine the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-		final File domainTestPath = new File(generatedTestPath + packagePath);
+		final Path domainTestPath = Paths.get(generatedTestPath, packagePath);
 
 		// Make a orm.hbm.xml file
-		File mappingFile = new File(generatedSrcPath + packagePath + '/' + moduleName + "_orm.hbm.xml");
+		Path mappingFilePath = Paths.get(generatedSrcPath, packagePath, moduleName + "_orm.hbm.xml");
 		if (UtilImpl.XML_TRACE) {
-			UtilImpl.LOGGER.fine("Mapping file is " + mappingFile);
+			UtilImpl.LOGGER.fine("Mapping file is " + mappingFilePath);
 		}
-		// mappingFile.mkdirs();
-		mappingFile.createNewFile();
+
 		final StringBuilder filterDefinitions = new StringBuilder(1024);
-		try (FileWriter mappingFileWriter = new FileWriter(mappingFile)) {
-			createMappingFileHeader(mappingFileWriter);
+		StringBuilder mappingFileContents = new StringBuilder(4096);
+		generation.put(mappingFilePath, mappingFileContents);
+		createMappingFileHeader(mappingFileContents);
 
-			new ModuleDocumentVisitor() {
-				@Override
-				public void accept(Document document) throws Exception {
-					String documentName = document.getName();
-					TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
-					DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
+		new ModuleDocumentVisitor() {
+			@Override
+			public void accept(Document document) throws Exception {
+				String documentName = document.getName();
+				TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
+				DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 
-					// Generate base
-					File classFile = new File(generatedSrcPath + packagePath + '/' + documentName + ".java");
-					classFile.createNewFile();
+				// Generate base
+				Path javaFilePath = Paths.get(generatedSrcPath, packagePath, documentName + ".java");
+				StringBuilder javaFileContents = new StringBuilder(4096);
+				generation.put(javaFilePath, javaFileContents);
+				Extends inherits = document.getExtends();
+				generateJava(null,
+								module,
+								document,
+								javaFileContents,
+								packagePath.replaceAll("\\\\|\\/", "."),
+								documentName,
+								(inherits != null) ? inherits.getDocumentName() : null,
+								false);
 
-					try (FileWriter fw = new FileWriter(classFile)) {
-						Extends inherits = document.getExtends();
-						generateJava(null,
-										module,
-										document,
-										fw,
-										packagePath.replaceAll("\\\\|\\/", "."),
-										documentName,
-										(inherits != null) ? inherits.getDocumentName() : null,
-										false);
-					}
-
-					if ((domainClass != null) && domainClass.isAbstract) {
-						// Generate extension
-						classFile = new File(generatedSrcPath + packagePath + '/' + documentName + "Ext.java");
-						classFile.createNewFile();
-
-						try (FileWriter fw = new FileWriter(classFile)) {
-							generateJava(null,
-											module,
-											document,
-											fw,
-											packagePath.replaceAll("\\\\|\\/", "."),
-											documentName,
-											documentName,
-											true);
-						}
-					}
-
-					generateORM(mappingFileWriter,
+				if ((domainClass != null) && domainClass.isAbstract) {
+					// Generate extension
+					javaFilePath = Paths.get(generatedSrcPath, packagePath, documentName + "Ext.java");
+					javaFileContents = new StringBuilder(4096);
+					generation.put(javaFilePath, javaFileContents);
+					generateJava(null,
 									module,
 									document,
-									repository.MODULES_NAME + '.',
-									(domainClass != null) && domainClass.isAbstract,
-									null,
-									filterDefinitions);
+									javaFileContents,
+									packagePath.replaceAll("\\\\|\\/", "."),
+									documentName,
+									documentName,
+									true);
+				}
+				
+				generateORM(mappingFileContents,
+								module,
+								document,
+								repository.MODULES_NAME + '.',
+								(domainClass != null) && domainClass.isAbstract,
+								null,
+								filterDefinitions);
 
-					// if this is not an excluded module, generate tests
-					if (excludedModules == null || !Arrays.asList(excludedModules).contains(moduleName.toLowerCase())) {
-						// check if this document is annotated to skip domain tests
-						File factoryFile = new File(getFactoryPath(modulePath, documentName));
-						SkyveFactory annotation = retrieveFactoryAnnotation(factoryFile);
+				// if this is not an excluded module, generate tests
+				if ((excludedModules == null) || 
+						(! Arrays.asList(excludedModules).contains(moduleName.toLowerCase()))) {
+					// check if this document is annotated to skip domain tests
+					File factoryFile = new File(getFactoryPath(modulePath, documentName));
+					SkyveFactory annotation = retrieveFactoryAnnotation(factoryFile);
 
-						// generate domain test for persistent documents that are not mapped, or not children
-						Persistent persistent = document.getPersistent();
-						if (persistent != null && !ExtensionStrategy.mapped.equals(persistent.getStrategy())
-								&& document.getParentDocumentName() == null) {
-							boolean skipGeneration = false;
+					// generate domain test for persistent documents that are not mapped, or not children
+					Persistent persistent = document.getPersistent();
+					if (persistent != null &&
+							(! ExtensionStrategy.mapped.equals(persistent.getStrategy())) &&
+							(document.getParentDocumentName() == null)) {
+						boolean skipGeneration = false;
 
-							if (annotation != null && !annotation.testDomain()) {
-								skipGeneration = true;
-							}
-
-							if (!skipGeneration) {
-								File testFile = new File(
-										domainTestPath.getPath() + File.separator + documentName + "Test.java");
-								// don't generate a test if the developer has created a domain test in this location in the test
-								// directory
-								if (testAlreadyExists(testFile)) {
-									System.out.println(
-											String.format("Skipping domain test generation for %s.%s, file already exists in %s",
-													packagePath.replaceAll("\\\\|\\/", "."), documentName, testPath));
-								} else {
-									// generate the domain test
-									domainTestPath.mkdirs();
-									testFile.createNewFile();
-									try (FileWriter fw = new FileWriter(testFile)) {
-										generateDomainTest(fw, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
-									}
-								}
-							} else {
-								System.out.println(String.format("Skipping domain test generation for %s.%s",
-										packagePath.replaceAll("\\\\|\\/", "."), documentName));
-							}
+						if (annotation != null && !annotation.testDomain()) {
+							skipGeneration = true;
 						}
 
-						// generate action tests
-						generateActionTests(moduleName, packagePath, modulePath, document, documentName, annotation);
+						if (! skipGeneration) {
+							Path testFilePath = Paths.get(domainTestPath.toString(), documentName + "Test.java");
+							// don't generate a test if the developer has created a domain test in this location in the test directory
+							if (testAlreadyExists(testFilePath)) {
+								System.out.println(String.format("Skipping domain test generation for %s.%s, file already exists in %s",
+																	packagePath.replaceAll("\\\\|\\/", "."),
+																	documentName,
+																	testPath));
+							}
+							else {
+								// generate the domain test
+								StringBuilder testFileContents = new StringBuilder(2048);
+								generation.put(testFilePath, testFileContents);
+								generateDomainTest(testFileContents, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
+							}
+						}
+						else {
+							System.out.println(String.format("Skipping domain test generation for %s.%s",
+																packagePath.replaceAll("\\\\|\\/", "."),
+																documentName));
+						}
 					}
-				}
-			}.visit(null, module);
 
-			createMappingFileFooter(mappingFileWriter, filterDefinitions);
-		}
+					// generate action tests
+					generateActionTests(moduleName, packagePath, modulePath, document, documentName, annotation);
+				}
+			}
+		}.visit(null, module);
+
+		createMappingFileFooter(mappingFileContents, filterDefinitions);
 	}
 
 	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
@@ -441,7 +434,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		if (factoryFile.exists()) {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
-					.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
+													.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
 			UtilImpl.LOGGER.fine("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
@@ -452,7 +445,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (c.isAnnotationPresent(SkyveFactory.class)) {
 					annotation = c.getAnnotation(SkyveFactory.class);
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				System.err.println("Could not find factory class for: " + e.getMessage());
 			}
 		}
@@ -461,88 +455,74 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("synthetic-access")
-	private void generateOverridden(final Customer customer,
-			final String modulesPath)
-			throws Exception {
+	private void generateOverridden(final Customer customer, final String modulesPath)
+	throws Exception {
 		// Make the orm.hbm.xml file
-		File mappingFile = new File(modulesPath + "orm.hbm.xml");
-		mappingFile.delete();
-		mappingFile.createNewFile();
-		final StringBuilder filterDefinitions = new StringBuilder(1024);
-		try (FileWriter mappingFileWriter = new FileWriter(mappingFile)) {
-			createMappingFileHeader(mappingFileWriter);
+		Path mappingFilePath = Paths.get(modulesPath + "orm.hbm.xml");
+		StringBuilder mappingFileContents = new StringBuilder(1536);
+		generation.put(mappingFilePath, mappingFileContents);
 
-			for (final Module module : customer.getModules()) {
-				final String moduleName = module.getName();
-				System.out.println("Module " + moduleName);
-				// clear out the domain folder
-				final String packagePath = repository.CUSTOMERS_NAMESPACE +
-						customer.getName() + '/' +
-						repository.MODULES_NAMESPACE +
-						moduleName + '/' + repository.DOMAIN_NAME;
-				final File domainFolder = new File(generatedSrcPath + packagePath + '/');
-				if (domainFolder.exists()) {
-					for (File domainFile : domainFolder.listFiles()) {
-						domainFile.delete();
+		final StringBuilder filterDefinitions = new StringBuilder(1024);
+		createMappingFileHeader(mappingFileContents);
+
+		for (final Module module : customer.getModules()) {
+			final String moduleName = module.getName();
+			System.out.println("Module " + moduleName);
+			// clear out the domain folder
+			final String packagePath = repository.CUSTOMERS_NAMESPACE +
+										customer.getName() + '/' +
+										repository.MODULES_NAMESPACE +
+										moduleName + '/' + repository.DOMAIN_NAME;
+
+			// Get the module's document domain classes
+			final TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(moduleName);
+
+			new ModuleDocumentVisitor() {
+				@Override
+				public void accept(Document document) throws Exception {
+					String documentName = document.getName();
+					String modoc = moduleName + '.' + documentName;
+					String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
+
+					if ((documentClasses != null) && documentPackagePath.startsWith(repository.CUSTOMERS_NAMESPACE)) {
+						// this is either an override or a totally new document.
+						// for an override, baseDocumentName != null
+						// for a new document definition, baseDocumentName == null
+						String vanillaDocumentName = documentClasses.containsKey(documentName) ? documentName : null;
+
+						// bug out if this document is an override but doesn't add any more properties
+						if (vanillaDocumentName != null) { // overridden document
+							TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
+							if (extraProperties.isEmpty()) { // no extra properties in override
+								generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
+								return;
+							}
+						}
+
+						// Generate extension
+						String javaFileName = generatedSrcPath + packagePath + '/' + documentName;
+						if (vanillaDocumentName != null) {
+							javaFileName += "Ext";
+						}
+						Path javaFilePath = Paths.get(javaFileName + ".java");
+						StringBuilder javaFileContents = new StringBuilder(4096);
+						generation.put(javaFilePath, javaFileContents);
+
+						generateJava(customer,
+										module,
+										document,
+										javaFileContents,
+										packagePath.replaceAll("\\\\|\\/", "."),
+										documentName,
+										vanillaDocumentName,
+										true);
+						generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
 					}
 				}
-
-				// Get the module's document domain classes
-				final TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(moduleName);
-
-				new ModuleDocumentVisitor() {
-					@Override
-					public void accept(Document document) throws Exception {
-						String documentName = document.getName();
-						String modoc = moduleName + '.' + documentName;
-						String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
-
-						if ((documentClasses != null) && documentPackagePath.startsWith(repository.CUSTOMERS_NAMESPACE)) {
-							// this is either an override or a totally new document.
-							// for an override, baseDocumentName != null
-							// for a new document definition, baseDocumentName == null
-							String vanillaDocumentName = documentClasses.containsKey(documentName) ? documentName : null;
-
-							// bug out if this document is an override but doesn't add any more properties
-							if (vanillaDocumentName != null) { // overridden document
-								TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
-								if (extraProperties.isEmpty()) { // no extra properties in override
-									generateOverriddenORM(mappingFileWriter, customer, module, document, filterDefinitions);
-									return;
-								}
-							}
-
-							// Make domain folder if it does not exist yet - ie create the folder on demand
-							if (!domainFolder.exists()) {
-								domainFolder.mkdir();
-							}
-
-							// Generate extension
-							String classFileName = generatedSrcPath + packagePath + '/' + documentName;
-							if (vanillaDocumentName != null) {
-								classFileName += "Ext";
-							}
-							File classFile = new File(classFileName + ".java");
-							classFile.createNewFile();
-
-							try (FileWriter fw = new FileWriter(classFile)) {
-								generateJava(customer,
-												module,
-												document,
-												fw,
-												packagePath.replaceAll("\\\\|\\/", "."),
-												documentName,
-												vanillaDocumentName,
-												true);
-							}
-							generateOverriddenORM(mappingFileWriter, customer, module, document, filterDefinitions);
-						}
-					}
-				}.visit(customer, module);
-			}
-
-			createMappingFileFooter(mappingFileWriter, filterDefinitions);
+			}.visit(customer, module);
 		}
+
+		createMappingFileFooter(mappingFileContents, filterDefinitions);
 	}
 
 	private TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(Document overriddenDocument) {
@@ -563,25 +543,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return extraProperties;
 	}
 
-	private static void createMappingFileHeader(FileWriter mappingFileWriter) throws IOException {
-		mappingFileWriter.append("<?xml version=\"1.0\"?>\n");
-		mappingFileWriter.append("<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd\">\n");
-		mappingFileWriter.append("<hibernate-mapping default-access=\"field\">\n\n");
-		mappingFileWriter
-				.append("\t<typedef name=\"OptimisticLock\" class=\"org.skyve.impl.domain.types.OptimisticLockUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Decimal2\" class=\"org.skyve.impl.domain.types.Decimal2UserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Decimal5\" class=\"org.skyve.impl.domain.types.Decimal5UserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Decimal10\" class=\"org.skyve.impl.domain.types.Decimal10UserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"DateOnly\" class=\"org.skyve.impl.domain.types.DateOnlyUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"DateTime\" class=\"org.skyve.impl.domain.types.DateTimeUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"TimeOnly\" class=\"org.skyve.impl.domain.types.TimeOnlyUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Timestamp\" class=\"org.skyve.impl.domain.types.TimestampUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Enum\" class=\"org.skyve.impl.domain.types.EnumUserType\" />\n");
+	private static void createMappingFileHeader(StringBuilder contents) {
+		contents.append("<?xml version=\"1.0\"?>\n");
+		contents.append("<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd\">\n");
+		contents.append("<hibernate-mapping default-access=\"field\">\n\n");
+		contents.append("\t<typedef name=\"OptimisticLock\" class=\"org.skyve.impl.domain.types.OptimisticLockUserType\" />\n");
+		contents.append("\t<typedef name=\"Decimal2\" class=\"org.skyve.impl.domain.types.Decimal2UserType\" />\n");
+		contents.append("\t<typedef name=\"Decimal5\" class=\"org.skyve.impl.domain.types.Decimal5UserType\" />\n");
+		contents.append("\t<typedef name=\"Decimal10\" class=\"org.skyve.impl.domain.types.Decimal10UserType\" />\n");
+		contents.append("\t<typedef name=\"DateOnly\" class=\"org.skyve.impl.domain.types.DateOnlyUserType\" />\n");
+		contents.append("\t<typedef name=\"DateTime\" class=\"org.skyve.impl.domain.types.DateTimeUserType\" />\n");
+		contents.append("\t<typedef name=\"TimeOnly\" class=\"org.skyve.impl.domain.types.TimeOnlyUserType\" />\n");
+		contents.append("\t<typedef name=\"Timestamp\" class=\"org.skyve.impl.domain.types.TimestampUserType\" />\n");
+		contents.append("\t<typedef name=\"Enum\" class=\"org.skyve.impl.domain.types.EnumUserType\" />\n");
 	}
 
-	private static void createMappingFileFooter(FileWriter mappingFileWriter, StringBuilder filterDefinitions) throws IOException {
-		mappingFileWriter.append(filterDefinitions.toString());
-		mappingFileWriter.append("</hibernate-mapping>");
+	private static void createMappingFileFooter(StringBuilder contents, StringBuilder filterDefinitions) {
+		contents.append(filterDefinitions).append("</hibernate-mapping>");
 	}
 
 	/*
@@ -630,7 +608,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			<key column="bizId" />
 		</joined-subclass>
 	*/
-	private void generateORM(FileWriter fw,
+	private void generateORM(StringBuilder contents,
 								Module module,
 								Document document,
 								String packagePathPrefix,
@@ -638,10 +616,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								Customer customer,
 								StringBuilder filterDefinitions)
 	throws Exception {
-		generateORM(fw, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
+		generateORM(contents, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
 	}
 
-	private void generateORM(FileWriter fw,
+	private void generateORM(StringBuilder contents,
 								Module module,
 								Document document,
 								String packagePathPrefix,
@@ -649,8 +627,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								boolean recursive,
 								Customer customer,
 								StringBuilder filterDefinitions,
-								String indentation) // indents subclass definitions within the class definition
-	throws Exception {
+								String indentation) { // indents subclass definitions within the class definition
 		Extends inherits = document.getExtends();
 		if ((!recursive) && // not a recursive call
 				(inherits != null)) { // this is a sub-class
@@ -690,119 +667,118 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
-					fw.append(indent).append("\t<joined-subclass name=\"");
+					contents.append(indent).append("\t<joined-subclass name=\"");
 				}
 				else if (ExtensionStrategy.single.equals(strategy)) {
-					fw.append(indent).append("\t<subclass name=\"");
+					contents.append(indent).append("\t<subclass name=\"");
 				}
 			}
 			else {
-				fw.append(indent).append("\t<class name=\"");
+				contents.append(indent).append("\t<class name=\"");
 			}
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
 				String extensionPath = srcPath + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
 						+ documentName + "Extension.java";
 				if (new File(extensionPath).exists()) {
 					System.out.println("    Generate ORM using " + extensionPath);
-					fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName)
-							.append("Extension");
-				} else {
-					fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.')
-							.append(documentName);
+					contents.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName).append("Extension");
+				}
+				else {
+					contents.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
 					if (forExt) {
-						fw.append("Ext");
+						contents.append("Ext");
 					}
 				}
-				fw.append("\" ");
+				contents.append("\" ");
 			}
 			
 			if ((baseDocumentName == null) || ExtensionStrategy.joined.equals(strategy)) {
-				fw.append("table=\"").append(persistent.getName());
+				contents.append("table=\"").append(persistent.getName());
 				String schemaName = persistent.getSchema();
 				if (schemaName != null) {
-					fw.append("\" schema=\"").append(schemaName);
+					contents.append("\" schema=\"").append(schemaName);
 				}
 				String catalogName = persistent.getCatalog();
 				if (catalogName != null) {
-					fw.append("\" catalog=\"").append(catalogName);
+					contents.append("\" catalog=\"").append(catalogName);
 				}
-				fw.append("\" ");
+				contents.append("\" ");
 			}
 
 			if (ExtensionStrategy.single.equals(strategy)) {
-				fw.append("discriminator-value=\"");
+				contents.append("discriminator-value=\"");
 				String discriminator = persistent.getDiscriminator();
 				if (discriminator == null) {
-					fw.append(moduleName).append(documentName);
-				} else {
-					fw.append(discriminator);
+					contents.append(moduleName).append(documentName);
 				}
-				fw.append("\" ");
+				else {
+					contents.append(discriminator);
+				}
+				contents.append("\" ");
 			}
 
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
 				if (readOnly) {
-					fw.append("mutable=\"false\" ");
+					contents.append("mutable=\"false\" ");
 				}
-				fw.append("entity-name=\"");
+				contents.append("entity-name=\"");
 				StringBuilder entityNameBuilder = new StringBuilder(64);
 				if (customerName != null) {
 					entityNameBuilder.append(customerName);
 				}
 				entityNameBuilder.append(moduleName).append(documentName);
 				entityName = entityNameBuilder.toString();
-				fw.append(entityName).append("\">\n");
+				contents.append(entityName).append("\">\n");
 			}
 			if ((baseDocumentName != null) && ExtensionStrategy.joined.equals(strategy)) {
-				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
+				contents.append(indent).append("\t\t<key column=\"bizId\" />\n");
 			}
 			else if (baseDocumentName == null) {
 				if (cache != null) {
-					fw.append(indent).append("\t\t<cache usage=\"");
-					fw.append(readOnly ? "read-only" : "read-write");
-					fw.append("\" region=\"").append(cache.getName()).append("\" />\n");
+					contents.append(indent).append("\t\t<cache usage=\"");
+					contents.append(readOnly ? "read-only" : "read-write");
+					contents.append("\" region=\"").append(cache.getName()).append("\" />\n");
 				}
 				
 				// map inherited properties
-				fw.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
+				contents.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
 
 				if (ExtensionStrategy.single.equals(strategy)) {
-					fw.append(indent).append("\t\t<discriminator column=\"bizDiscriminator\" type=\"string\" />\n");
+					contents.append(indent).append("\t\t<discriminator column=\"bizDiscriminator\" type=\"string\" />\n");
 				}
 
-				fw.append(indent).append("\t\t<version name=\"bizVersion\" unsaved-value=\"null\" />\n");
+				contents.append(indent).append("\t\t<version name=\"bizVersion\" unsaved-value=\"null\" />\n");
 				// bizLock length of 271 is 17 for the timestamp (yyyyMMddHHmmssSSS) + 254 (email address max length from RFC 5321)
-				fw.append(indent)
-						.append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"271\" not-null=\"true\" />\n");
+				contents.append(indent).append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"271\" not-null=\"true\" />\n");
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
 				if (shouldIndex(null)) {
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
-															Bean.BIZ_KEY, 
-															Integer.valueOf(dialectOptions.getDataStoreBizKeyLength()),
-															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
-															Bean.CUSTOMER_NAME, 
-															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
+																	Bean.BIZ_KEY, 
+																	Integer.valueOf(dialectOptions.getDataStoreBizKeyLength()),
+																	generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
+																	Bean.CUSTOMER_NAME, 
+																	generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
 				}
 				else {
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" not-null=\"true\" />\n",
-															Bean.BIZ_KEY, 
-															Integer.valueOf(dialectOptions.getDataStoreBizKeyLength())));
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" not-null=\"true\" />\n",
-															Bean.CUSTOMER_NAME));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" not-null=\"true\" />\n",
+																	Bean.BIZ_KEY, 
+																	Integer.valueOf(dialectOptions.getDataStoreBizKeyLength())));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" not-null=\"true\" />\n",
+																	Bean.CUSTOMER_NAME));
 				}
-				fw.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
-				fw.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
+				contents.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
+				contents.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
 				if (shouldIndex(null)) {
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
-															Bean.USER_ID,
-															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
+																	Bean.USER_ID,
+																	generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
 				}
 				else {
-					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" not-null=\"true\" />\n",
-															Bean.USER_ID));
+					contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" not-null=\"true\" />\n",
+																	Bean.USER_ID));
 				}
 			}
 
@@ -812,38 +788,38 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Document parentDocument = document.getParentDocument(null);
 				if (parentDocument.getPersistent() != null) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
-						fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\"", HierarchicalBean.PARENT_ID));
+						contents.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\"", HierarchicalBean.PARENT_ID));
 						if (shouldIndex(((DocumentImpl) document).getParentDatabaseIndex())) {
-							fw.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), HierarchicalBean.PARENT_ID)).append('"');
+							contents.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), HierarchicalBean.PARENT_ID)).append('"');
 						}
-						fw.append(" />\n");
+						contents.append(" />\n");
 					}
 					else {
 						// Add bizOrdinal ORM
 						if (document.isOrdered()) {
-							fw.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
+							contents.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
 						}
 
 						// Add parent reference ORM
 						String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
-						fw.append(indent).append("\t\t<many-to-one name=\"").append(ChildBean.PARENT_NAME).append("\" entity-name=\"");
+						contents.append(indent).append("\t\t<many-to-one name=\"").append(ChildBean.PARENT_NAME).append("\" entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(parentModuleName + '.' + parentDocumentName)) {
-							fw.append(customerName);
+							contents.append(customerName);
 						}
-						fw.append(parentModuleName).append(parentDocumentName);
-						fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\"");
+						contents.append(parentModuleName).append(parentDocumentName);
+						contents.append("\" column=\"parent_id\" insert=\"false\" update=\"false\"");
 						if (shouldIndex(((DocumentImpl) document).getParentDatabaseIndex())) {
-							fw.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), ChildBean.PARENT_NAME)).append('"');
+							contents.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), ChildBean.PARENT_NAME)).append('"');
 						}
-						fw.append(" foreign-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), ChildBean.PARENT_NAME));
-						fw.append("\" />\n");
+						contents.append(" foreign-key=\"");
+						contents.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), ChildBean.PARENT_NAME));
+						contents.append("\" />\n");
 					}
 				}
 			}
 
-			generateAttributeMappings(fw, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
+			generateAttributeMappings(contents, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
 		}
 
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);
@@ -854,7 +830,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if (ExtensionStrategy.single.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw,
+					generateORM(contents,
 									derivedModule,
 									derivation,
 									packagePathPrefix,
@@ -871,7 +847,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if (ExtensionStrategy.joined.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw,
+					generateORM(contents,
 									derivedModule,
 									derivation,
 									packagePathPrefix,
@@ -888,15 +864,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if ((derivationStrategy == null) || ExtensionStrategy.mapped.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw,
-							derivedModule,
-							derivation,
-							packagePathPrefix,
-							forExt,
-							true,
-							customer,
-							filterDefinitions,
-							indent + "\t");
+					generateORM(contents,
+									derivedModule,
+									derivation,
+									packagePathPrefix,
+									forExt,
+									true,
+									customer,
+									filterDefinitions,
+									indent + "\t");
 				}
 			}
 		}
@@ -904,20 +880,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
-					fw.append(indent).append("\t</joined-subclass>\n");
+					contents.append(indent).append("\t</joined-subclass>\n");
 				}
 				else if (ExtensionStrategy.single.equals(strategy)) {
-					fw.append(indent).append("\t</subclass>\n");
+					contents.append(indent).append("\t</subclass>\n");
 				}
 			}
 			else {
-				generateFilterStuff(entityName, fw, filterDefinitions, indent);
-				fw.append(indent).append("\t</class>\n\n");
+				generateFilterStuff(entityName, contents, filterDefinitions, indent);
+				contents.append(indent).append("\t</class>\n\n");
 			}
 		}
 	}
 
-	private void generateAttributeMappings(FileWriter fw,
+	private void generateAttributeMappings(StringBuilder contents,
 											Customer customer,
 											Module module,
 											Document document,
@@ -926,15 +902,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 											Set<String> columnNames,
 											String owningDocumentName,
 											boolean forExt,
-											String indentation)
-	throws IOException {
+											String indentation) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
 			Persistent basePersistent = baseDocument.getPersistent();
 			if ((basePersistent != null) && ExtensionStrategy.mapped.equals(basePersistent.getStrategy())) {
 				Module baseModule = repository.getModule(customer, baseDocument.getOwningModuleName());
-				generateAttributeMappings(fw,
+				generateAttributeMappings(contents,
 											customer,
 											baseModule,
 											baseDocument,
@@ -990,7 +965,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						orderBy.append(columnName);
 						if (SortDirection.descending.equals(ordering.getSort())) {
 							orderBy.append(" desc, ");
-						} else {
+						}
+						else {
 							orderBy.append(" asc, ");
 						}
 					}
@@ -1003,51 +979,51 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (type == CollectionType.child) {
 					if (mapped) {
 						throw new MetaDataException("Collection " + collectionName + 
-								" in document " + moduleName + '.' + documentName + " referencing document " +
-								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
-								" cannot be a child collection as the target document is a mapped document." +
-								" Use a composed collection instead.");
+														" in document " + moduleName + '.' + documentName + " referencing document " +
+														referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
+														" cannot be a child collection as the target document is a mapped document." +
+														" Use a composed collection instead.");
 					}
-					fw.append(indentation).append("\t\t<bag name=\"").append(collectionName);
+					contents.append(indentation).append("\t\t<bag name=\"").append(collectionName);
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
+						contents.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
 					} 
 					else if (orderBy != null) {
-						fw.append("\" order-by=\"").append(orderBy);
+						contents.append("\" order-by=\"").append(orderBy);
 					}
 					Cache cache = collection.getCache();
 					if (cache != null) {
 						throw new MetaDataException("Collection " + collectionName + 
-								" in document " + moduleName + '.' + documentName + " referencing document " +
-								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
-								" cannot be cached as it is a child collection. Use a composed collection instead or remove the caching.");
+														" in document " + moduleName + '.' + documentName + " referencing document " +
+														referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
+														" cannot be cached as it is a child collection. Use a composed collection instead or remove the caching.");
 					}
-					fw.append("\" cascade=\"all-delete-orphan\">\n");
-					fw.append(indentation).append("\t\t\t<key column=\"parent_id\" />\n");
+					contents.append("\" cascade=\"all-delete-orphan\">\n");
+					contents.append(indentation).append("\t\t\t<key column=\"parent_id\" />\n");
 
-					fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
+					contents.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
-						fw.append(customerName);
+						contents.append(customerName);
 					}
-					fw.append(referencedModuleName).append(referencedDocumentName).append("\" />\n");
-					fw.append(indentation).append("\t\t</bag>\n");
+					contents.append(referencedModuleName).append(referencedDocumentName).append("\" />\n");
+					contents.append(indentation).append("\t\t</bag>\n");
 				} 
 				else {
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append(indentation).append("\t\t<list name=\"").append(collectionName);
+						contents.append(indentation).append("\t\t<list name=\"").append(collectionName);
 					} 
 					else {
-						fw.append(indentation).append("\t\t<bag name=\"").append(collectionName);
+						contents.append(indentation).append("\t\t<bag name=\"").append(collectionName);
 					}
 
 					String catalog = persistent.getCatalog();
 					if (catalog != null) {
-						fw.append("\" catalog=\"").append(catalog);
+						contents.append("\" catalog=\"").append(catalog);
 					}
 					String schema = persistent.getSchema();
 					if (schema != null) {
-						fw.append("\" schema=\"").append(schema);
+						contents.append("\" schema=\"").append(schema);
 					}
 					String collectionTableName = String.format("%s_%s", persistent.getName(), collectionName);
 
@@ -1061,52 +1037,52 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														dialectOptions.getDataStoreIdentifierCharacterLimit());
 					}
 					
-					fw.append("\" table=\"").append(collectionTableName);
+					contents.append("\" table=\"").append(collectionTableName);
 
 					Cache cache = collection.getCache();
 					boolean readOnly = (cache != null) && CacheType.readOnly.equals(cache.getType());
 					if (readOnly) {
-						fw.append("\" mutable=\"false");
+						contents.append("\" mutable=\"false");
 					}
 					
 					if (CollectionType.aggregation.equals(type)) {
-						fw.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
+						contents.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
 					}
 					else if (CollectionType.composition.equals(type)) {
-						fw.append("\" cascade=\"all-delete-orphan\">\n");
+						contents.append("\" cascade=\"all-delete-orphan\">\n");
 					}
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
 					if (cache != null) {
-						fw.append(indentation).append("\t\t\t<cache usage=\"");
-						fw.append(readOnly ? "read-only" : "read-write");
-						fw.append("\" region=\"").append(cache.getName()).append("\" />\n");
+						contents.append(indentation).append("\t\t\t<cache usage=\"");
+						contents.append(readOnly ? "read-only" : "read-write");
+						contents.append("\" region=\"").append(cache.getName()).append("\" />\n");
 					}
 
 					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
-						fw.append(indentation).append("\t\t\t<key foreign-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
-						fw.append("\">\n");
-						fw.append("\t\t\t\t<column name=\"").append(PersistentBean.OWNER_COLUMN_NAME);
-						fw.append(String.format("\" index=\"%s\" />\n", 
-													generateDataStoreName(DataStoreType.IDX, 
-																			collectionTableName, 
-																			PersistentBean.OWNER_COLUMN_NAME)));
-						fw.append(indentation).append("\t\t\t</key>\n");
+						contents.append(indentation).append("\t\t\t<key foreign-key=\"");
+						contents.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
+						contents.append("\">\n");
+						contents.append("\t\t\t\t<column name=\"").append(PersistentBean.OWNER_COLUMN_NAME);
+						contents.append(String.format("\" index=\"%s\" />\n", 
+														generateDataStoreName(DataStoreType.IDX, 
+																				collectionTableName, 
+																				PersistentBean.OWNER_COLUMN_NAME)));
+						contents.append(indentation).append("\t\t\t</key>\n");
 					} 
 					else {
-						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
-						fw.append("\" foreign-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
-						fw.append("\" />\n");
+						contents.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
+						contents.append("\" foreign-key=\"");
+						contents.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
+						contents.append("\" />\n");
 					}
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
+						contents.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
 					}
 
 					if (mapped) {
-						fw.append(indentation).append("\t\t<many-to-any meta-type=\"string\" id-type=\"string\">\n");
+						contents.append(indentation).append("\t\t<many-to-any meta-type=\"string\" id-type=\"string\">\n");
 						Map<String, Document> arcs = new TreeMap<>();
 						populateArcs(referencedDocument, arcs);
 						for (Entry<String, Document> entry : arcs.entrySet()) {
@@ -1114,13 +1090,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							String derivedModuleName = derivedDocument.getOwningModuleName();
 							String derivedDocumentName = derivedDocument.getName();
 
-							fw.append(indentation).append("\t\t\t<meta-value value=\"").append(entry.getKey());
-							fw.append("\" class=\"");
+							contents.append(indentation).append("\t\t\t<meta-value value=\"").append(entry.getKey());
+							contents.append("\" class=\"");
 							// reference overridden derived document if applicable
 							if (overriddenORMDocumentsPerCustomer.contains(derivedModuleName + '.' + derivedDocumentName)) {
-								fw.append(customerName);
+								contents.append(customerName);
 							}
-							fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
+							contents.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 						}
 
 						// check type column name length if required
@@ -1136,55 +1112,55 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						// This doesn't work - hibernate returns nulls for the association getter call.
 						// So sub-optimal but working if type column is first.
 						// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
-						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collectionName).append("_type\"");
+						contents.append(indentation).append("\t\t\t<column name=\"");
+						contents.append(collectionName).append("_type\"");
 						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
-							fw.append(" index=\"");
-							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
-							fw.append('"');
+							contents.append(" index=\"");
+							contents.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							contents.append('"');
 						}
-						fw.append(" />\n");
-						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collectionName).append("_id\" length=\"36\"");
+						contents.append(" />\n");
+						contents.append(indentation).append("\t\t\t<column name=\"");
+						contents.append(collectionName).append("_id\" length=\"36\"");
 						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
-							fw.append(" index=\"");
-							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
-							fw.append('"');
+							contents.append(" index=\"");
+							contents.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							contents.append('"');
 						}
-						fw.append(" />\n");
-						fw.append(indentation).append("\t\t</many-to-any>\n");
+						contents.append(" />\n");
+						contents.append(indentation).append("\t\t</many-to-any>\n");
 					} 
 					else {
-						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
+						contents.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
-							fw.append(customerName);
+							contents.append(customerName);
 						}
-						fw.append(referencedModuleName).append(referencedDocumentName);
+						contents.append(referencedModuleName).append(referencedDocumentName);
 						if (orderBy != null) {
-							fw.append("\" order-by=\"").append(orderBy);
+							contents.append("\" order-by=\"").append(orderBy);
 						}
-						fw.append("\" foreign-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+						contents.append("\" foreign-key=\"");
+						contents.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
 						if (shouldIndex(collection.getElementDatabaseIndex())) {
-							fw.append("\">\n");
-							fw.append("\t\t\t\t<column name=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
-							fw.append("\" index=\"");
-							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
-							fw.append("\" />\n");
-							fw.append("\t\t\t</many-to-many>\n");
+							contents.append("\">\n");
+							contents.append("\t\t\t\t<column name=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
+							contents.append("\" index=\"");
+							contents.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							contents.append("\" />\n");
+							contents.append("\t\t\t</many-to-many>\n");
 						} 
 						else {
-							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
-							fw.append("\" />\n");
+							contents.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
+							contents.append("\" />\n");
 						}
 					}
 
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append(indentation).append("\t\t</list>\n");
+						contents.append(indentation).append("\t\t</list>\n");
 					}
 					else {
-						fw.append(indentation).append("\t\t</bag>\n");
+						contents.append(indentation).append("\t\t</bag>\n");
 					}
 				}
 			}
@@ -1219,20 +1195,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						
 					}
 					
-					fw.append(indentation).append("\t\t<component name=\"").append(associationName);
+					contents.append(indentation).append("\t\t<component name=\"").append(associationName);
 					// TODO need to add class here for customer overrides
 					// <component class="" /> is required for customer overriding otherwise defaults to return type via reflection
-					fw.append("\">\n");
+					contents.append("\">\n");
 
 					// Add parent link in
 					if (documentName.equals(referencedDocument.getParentDocumentName())) {
-						fw.append(indentation).append("\t\t\t<parent name=\"parent\" />\n");
+						contents.append(indentation).append("\t\t\t<parent name=\"parent\" />\n");
 					}
 					
 					Module referencedModule = repository.getModule(customer, referencedModuleName);
 					
 					// use the enclosing document's persistent object
-					generateAttributeMappings(fw,
+					generateAttributeMappings(contents,
 												customer,
 												referencedModule,
 												referencedDocument,
@@ -1243,11 +1219,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												forExt,
 												indentation + "\t");
 
-					fw.append(indentation).append("\t\t</component>\n");
+					contents.append(indentation).append("\t\t</component>\n");
 				}
 				else if (ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-					fw.append(indentation).append("\t\t<any name=\"").append(associationName);
-					fw.append("\" meta-type=\"string\" id-type=\"string\">\n");
+					contents.append(indentation).append("\t\t<any name=\"").append(associationName);
+					contents.append("\" meta-type=\"string\" id-type=\"string\">\n");
 					Map<String, Document> arcs = new TreeMap<>();
 					populateArcs(referencedDocument, arcs);
 					for (Entry<String, Document> entry : arcs.entrySet()) {
@@ -1255,13 +1231,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						String derivedModuleName = derivedDocument.getOwningModuleName();
 						String derivedDocumentName = derivedDocument.getName();
 
-						fw.append(indentation).append("\t\t\t<meta-value value=\"").append(entry.getKey());
-						fw.append("\" class=\"");
+						contents.append(indentation).append("\t\t\t<meta-value value=\"").append(entry.getKey());
+						contents.append("\" class=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(derivedModuleName + '.' + derivedDocumentName)) {
-							fw.append(customerName);
+							contents.append(customerName);
 						}
-						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
+						contents.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
 
 					// check type column name length if required
@@ -1278,21 +1254,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					// This doesn't work - hibernate returns nulls for the association getter call.
 					// So sub-optimal but working if type column is first.
 					// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
-					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(columnName);
+					contents.append(indentation).append("\t\t\t<column name=\"");
+					contents.append(columnName);
 					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
-						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
+						contents.append("\" index=\"");
+						contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
-					fw.append("\" />\n");
-					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(columnName(moduleName, owningDocumentName, associationName, columnPrefix, "_id", columnNames)).append("\" length=\"36");
+					contents.append("\" />\n");
+					contents.append(indentation).append("\t\t\t<column name=\"");
+					contents.append(columnName(moduleName, owningDocumentName, associationName, columnPrefix, "_id", columnNames)).append("\" length=\"36");
 					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
-						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
+						contents.append("\" index=\"");
+						contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
-					fw.append("\" />\n");
-					fw.append(indentation).append("\t\t</any>\n");
+					contents.append("\" />\n");
+					contents.append(indentation).append("\t\t</any>\n");
 				}
 				else {
 					// check id column name length if required
@@ -1305,32 +1281,32 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														dialectOptions.getDataStoreIdentifierCharacterLimit() + "(" + associationColumnName + ")");
 					}
 
-					fw.append(indentation).append("\t\t<many-to-one name=\"");
-					fw.append(associationName).append("\" entity-name=\"");
+					contents.append(indentation).append("\t\t<many-to-one name=\"");
+					contents.append(associationName).append("\" entity-name=\"");
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
-						fw.append(customerName);
+						contents.append(customerName);
 					}
-					fw.append(referencedModuleName).append(referencedDocumentName);
-					fw.append("\" column=\"").append(associationColumnName);
+					contents.append(referencedModuleName).append(referencedDocumentName);
+					contents.append("\" column=\"").append(associationColumnName);
 					if (AssociationType.composition.equals(type)) {
-						fw.append("\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
-						fw.append("\" unique-key=\"");
-						fw.append(generateDataStoreName(DataStoreType.UK, persistent.getName(), associationName));
+						contents.append("\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
+						contents.append("\" unique-key=\"");
+						contents.append(generateDataStoreName(DataStoreType.UK, persistent.getName(), associationName));
 					}
 					else if (AssociationType.aggregation.equals(type)) {
-						fw.append("\" cascade=\"persist,save-update,refresh,merge");
+						contents.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 					else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
 					}
 					if (shouldIndex(association.getDatabaseIndex())) {
-						fw.append("\" index=\"");
-						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
+						contents.append("\" index=\"");
+						contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), associationName));
 					}
-					fw.append("\" foreign-key=\"");
-					fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), associationName));
-					fw.append("\"/>\n");
+					contents.append("\" foreign-key=\"");
+					contents.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), associationName));
+					contents.append("\"/>\n");
 				}
 			}
 			else if (attribute instanceof Enumeration) {
@@ -1352,27 +1328,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													dialectOptions.getDataStoreIdentifierCharacterLimit());
 				}
 
-				fw.append(indentation).append("\t\t<property name=\"").append(enumerationName);
+				contents.append(indentation).append("\t\t<property name=\"").append(enumerationName);
 
 				Integer fieldLength = persistentPropertyLengths.get(persistent.getPersistentIdentifier()).get(enumerationName);
 				if (fieldLength != null) {
-					fw.append("\" length=\"").append(fieldLength.toString());
+					contents.append("\" length=\"").append(fieldLength.toString());
 				}
 				
 				String enumerationColumnName = columnName(moduleName, owningDocumentName, enumerationName, columnPrefix, null, columnNames);
 				if (! enumerationColumnName.equals(enumerationName)) {
-					fw.append("\" column=\"").append(enumerationColumnName);
+					contents.append("\" column=\"").append(enumerationColumnName);
 				}
 				
 				IndexType index = enumeration.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
-					fw.append("\" index=\"");
-					fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), enumerationName));
+					contents.append("\" index=\"");
+					contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), enumerationName));
 				}
-				fw.append("\">\n");
+				contents.append("\">\n");
 
-				fw.append(indentation).append("\t\t\t<type name=\"Enum\">\n");
-				fw.append(indentation).append("\t\t\t\t<param name=\"enumClass\">");
+				contents.append(indentation).append("\t\t\t<type name=\"Enum\">\n");
+				contents.append(indentation).append("\t\t\t\t<param name=\"enumClass\">");
 
 				// for extension and the enumeration attribute doesn't exist in the vanilla document.
 				// NB - There a 2 scenarios here...
@@ -1383,19 +1359,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Document targetDocument = target.getOwningDocument();
 				@SuppressWarnings("synthetic-access")
 				boolean requiresExtension = forExt &&
-						(!moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName())
-								.get(targetDocument.getName()).attributes.containsKey(target.getName()));
+												(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
 				if (requiresExtension) {
-					fw.append(repository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
+					contents.append(repository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
 				}
-				fw.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
+				contents.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
 				if (requiresExtension) {
-					fw.append("Ext");
+					contents.append("Ext");
 				}
-				fw.append('$').append(enumeration.toJavaIdentifier());
-				fw.append("</param>\n");
-				fw.append(indentation).append("\t\t\t</type>\n");
-				fw.append(indentation).append("\t\t</property>\n");
+				contents.append('$').append(enumeration.toJavaIdentifier());
+				contents.append("</param>\n");
+				contents.append(indentation).append("\t\t\t</type>\n");
+				contents.append(indentation).append("\t\t</property>\n");
 			}
 			else if (attribute instanceof Inverse) {
 				// ignore transient attributes
@@ -1415,67 +1390,69 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Boolean cascade = inverse.getCascade();
 
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
-					fw.append("\t\t<one-to-one name=\"").append(inverse.getName());
+					contents.append("\t\t<one-to-one name=\"").append(inverse.getName());
 
-					fw.append("\" entity-name=\"");
+					contents.append("\" entity-name=\"");
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
-						fw.append(customerName);
+						contents.append(customerName);
 					}
-					fw.append(inverseModuleName).append(inverseDocumentName);
+					contents.append(inverseModuleName).append(inverseDocumentName);
 
-					fw.append("\" property-ref=\"").append(inverseReferenceName);
+					contents.append("\" property-ref=\"").append(inverseReferenceName);
 
 					if (Boolean.TRUE.equals(cascade)) {
-						fw.append("\" cascade=\"persist,save-update,refresh,merge");
+						contents.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 
-					fw.append("\" />\n");
+					contents.append("\" />\n");
 				}
 				else {
-					fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
+					contents.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						String catalog = inversePersistent.getCatalog();
 						if (catalog != null) {
-							fw.append("\" catalog=\"").append(catalog);
+							contents.append("\" catalog=\"").append(catalog);
 						}
 						String schema = inversePersistent.getSchema();
 						if (schema != null) {
-							fw.append("\" schema=\"").append(schema);
+							contents.append("\" schema=\"").append(schema);
 						}
-						fw.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
+						contents.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
 					}
 
 					if (Boolean.TRUE.equals(cascade)) {
-						fw.append("\" cascade=\"persist,save-update,refresh,merge");
+						contents.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 
-					fw.append("\" inverse=\"true\">\n");
+					contents.append("\" inverse=\"true\">\n");
 
-					fw.append(indentation).append("\t\t\t<key column=\"");
+					contents.append(indentation).append("\t\t\t<key column=\"");
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
-						fw.append("element");
-					} else {
-						fw.append(inverseReferenceName);
+						contents.append("element");
 					}
-					fw.append("_id\" />\n");
+					else {
+						contents.append(inverseReferenceName);
+					}
+					contents.append("_id\" />\n");
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
-						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
-					} else {
-						fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
+						contents.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
+					}
+					else {
+						contents.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
 					}
 
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
-						fw.append(customerName);
+						contents.append(customerName);
 					}
-					fw.append(inverseModuleName).append(inverseDocumentName);
+					contents.append(inverseModuleName).append(inverseDocumentName);
 
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
-						fw.append("\" column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
+						contents.append("\" column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 					}
-					fw.append("\" />\n");
-					fw.append(indentation).append("\t\t</bag>\n");
+					contents.append("\" />\n");
+					contents.append(indentation).append("\t\t</bag>\n");
 				}
 			}
 			else {
@@ -1498,40 +1475,40 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													dialectOptions.getDataStoreIdentifierCharacterLimit());
 				}
 
-				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
+				contents.append(indentation).append("\t\t<property name=\"").append(fieldName);
 
 				Integer fieldLength = persistentPropertyLengths.get(persistent.getPersistentIdentifier()).get(fieldName);
 				if (fieldLength != null) {
-					fw.append("\" length=\"").append(fieldLength.toString());
+					contents.append("\" length=\"").append(fieldLength.toString());
 				}
 
 				AttributeType type = attribute.getAttributeType();
 				if (type == AttributeType.decimal2) {
-					fw.append("\" type=\"").append(DECIMAL2).append("\" precision=\"20\" scale=\"2");
+					contents.append("\" type=\"").append(DECIMAL2).append("\" precision=\"20\" scale=\"2");
 				}
 				else if (type == AttributeType.decimal5) {
-					fw.append("\" type=\"").append(DECIMAL5).append("\" precision=\"23\" scale=\"5");
+					contents.append("\" type=\"").append(DECIMAL5).append("\" precision=\"23\" scale=\"5");
 				}
 				else if (type == AttributeType.decimal10) {
-					fw.append("\" type=\"").append(DECIMAL10).append("\" precision=\"28\" scale=\"10");
+					contents.append("\" type=\"").append(DECIMAL10).append("\" precision=\"28\" scale=\"10");
 				}
 				else if (type == AttributeType.date) {
-					fw.append("\" type=\"").append(DATE_ONLY);
+					contents.append("\" type=\"").append(DATE_ONLY);
 				}
 				else if (type == AttributeType.dateTime) {
-					fw.append("\" type=\"").append(DATE_TIME);
+					contents.append("\" type=\"").append(DATE_TIME);
 				}
 				else if (type == AttributeType.time) {
-					fw.append("\" type=\"").append(TIME_ONLY);
+					contents.append("\" type=\"").append(TIME_ONLY);
 				}
 				else if (type == AttributeType.timestamp) {
-					fw.append("\" type=\"").append(TIMESTAMP);
+					contents.append("\" type=\"").append(TIMESTAMP);
 				}
 				else if (type == AttributeType.id) {
-					fw.append("\" length=\"36");
+					contents.append("\" length=\"36");
 				}
 				else if ((type == AttributeType.content) || (type == AttributeType.image)) {
-					fw.append("\" length=\"36");
+					contents.append("\" length=\"36");
 				}
 				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
 				 * I don't think the JDBC recognizes CLOBs correctly as it
@@ -1553,19 +1530,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				 * return sb.toString();
 				 */
 				else if ((type == AttributeType.memo) || (type == AttributeType.markup)) {
-					fw.append("\" type=\"text");
+					contents.append("\" type=\"text");
 				}
 
 				if (! fieldColumnName.equals(fieldName)) {
-					fw.append("\" column=\"").append(fieldColumnName);
+					contents.append("\" column=\"").append(fieldColumnName);
 				}
 				
 				IndexType index = field.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
-					fw.append("\" index=\"");
-					fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), fieldName));
+					contents.append("\" index=\"");
+					contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), fieldName));
 				}
-				fw.append("\" />\n");
+				contents.append("\" />\n");
 			}
 		}
 	}
@@ -1609,8 +1586,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			for (Document derivation : derivations.values()) {
 				Persistent derivationPersistent = derivation.getPersistent();
 				if ((derivationPersistent != null) && (derivationPersistent.getName() != null)) {
-					key = new StringBuilder(32).append(derivation.getOwningModuleName()).append('.').append(derivation.getName())
-							.toString();
+					key = new StringBuilder(32).append(derivation.getOwningModuleName()).append('.').append(derivation.getName()).toString();
 					result.put(key, derivation);
 				}
 				populateArcs(derivation, result);
@@ -1619,17 +1595,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private static void generateFilterStuff(String entityName,
-			FileWriter fw,
-			StringBuilder filterDefinitions,
-			String indentation)
-			throws IOException {
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName).append("NoneFilter\" condition=\"1=0\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
-				.append("CustomerFilter\" condition=\"bizCustomer=:customerParam\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
-				.append("DataGroupIdFilter\" condition=\"bizDataGroupId=:dataGroupIdParam\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
-				.append("UserIdFilter\" condition=\"bizUserId=:userIdParam\"/>\n");
+												StringBuilder contents,
+												StringBuilder filterDefinitions,
+												String indentation) {
+		contents.append(indentation).append("\t\t<filter name=\"").append(entityName).append("NoneFilter\" condition=\"1=0\"/>\n");
+		contents.append(indentation).append("\t\t<filter name=\"").append(entityName).append("CustomerFilter\" condition=\"bizCustomer=:customerParam\"/>\n");
+		contents.append(indentation).append("\t\t<filter name=\"").append(entityName).append("DataGroupIdFilter\" condition=\"bizDataGroupId=:dataGroupIdParam\"/>\n");
+		contents.append(indentation).append("\t\t<filter name=\"").append(entityName).append("UserIdFilter\" condition=\"bizUserId=:userIdParam\"/>\n");
 
 		filterDefinitions.append("\t<filter-def name=\"").append(entityName).append("NoneFilter\" />\n");
 
@@ -1646,7 +1618,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		filterDefinitions.append("\t</filter-def>\n");
 	}
 
-	private void generateOverriddenORM(FileWriter fw,
+	private void generateOverriddenORM(StringBuilder contents,
 										Customer customer,
 										Module module,
 										Document document,
@@ -1667,16 +1639,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (vanillaDocumentName != null) { // overridden document
 				// bug out if this document is an override but doesn't add any more properties
 				TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
-				if (!extraProperties.isEmpty()) { // there exists extra properties in override
+				if (! extraProperties.isEmpty()) { // there exists extra properties in override
 					packagePathPrefix = repository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + packagePathPrefix;
 				}
-			} else { // totally new document defined as a customer override
+			}
+			else { // totally new document defined as a customer override
 				packagePathPrefix = repository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + packagePathPrefix;
 			}
 		}
 		packagePathPrefix = packagePathPrefix.replaceAll("\\\\|\\/", ".");
 
-		if (!visitedOverriddenORMDocumentsPerCustomer.contains(moduleDotDocument)) {
+		if (! visitedOverriddenORMDocumentsPerCustomer.contains(moduleDotDocument)) {
 			visitedOverriddenORMDocumentsPerCustomer.add(moduleDotDocument);
 			overriddenORMDocumentsPerCustomer.add(moduleDotDocument);
 
@@ -1689,7 +1662,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String parentModuleDotDocument = parentModuleName + '.' + parentDocumentName;
 					System.out.println("\t" + parentModuleDotDocument);
 					Module parentModule = customer.getModule(parentModuleName);
-					generateOverriddenORM(fw, customer, parentModule, parentDocument, filterDefinitions);
+					generateOverriddenORM(contents, customer, parentModule, parentDocument, filterDefinitions);
 				}
 			}
 
@@ -1712,12 +1685,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							populateArcs(refDocument, arcs);
 							for (Document derivedDocument : arcs.values()) {
 								Module derivedModule = customer.getModule(derivedDocument.getOwningModuleName());
-								generateOverriddenORM(fw, customer, derivedModule, derivedDocument, filterDefinitions);
+								generateOverriddenORM(contents, customer, derivedModule, derivedDocument, filterDefinitions);
 							}
-						} else {
-							generateOverriddenORM(fw, customer, refModule, refDocument, filterDefinitions);
 						}
-					} else {
+						else {
+							generateOverriddenORM(contents, customer, refModule, refDocument, filterDefinitions);
+						}
+					}
+					else {
 						throw new IllegalStateException("Cannot generate ORM for a transient document");
 					}
 				}
@@ -1730,22 +1705,22 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (CollectionType.child.equals(reference.getType())) {
 					Document refDocument = module.getDocument(customer, reference.getDocumentName());
 					Module refModule = customer.getModule(refDocument.getOwningModuleName());
-					generateOverriddenORM(fw, customer, refModule, refDocument, filterDefinitions);
+					generateOverriddenORM(contents, customer, refModule, refDocument, filterDefinitions);
 				}
 			}
 
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
 			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
-			generateORM(fw,
-					module,
-					document,
-					packagePathPrefix,
-					// extension class in use if this is a customer override of an existing domain class
-					(domainClass != null) && (packagePathPrefix.startsWith(repository.CUSTOMERS_NAME)),
-					true,
-					customer,
-					filterDefinitions,
-					"");
+			generateORM(contents,
+							module,
+							document,
+							packagePathPrefix,
+							// extension class in use if this is a customer override of an existing domain class
+							(domainClass != null) && (packagePathPrefix.startsWith(repository.CUSTOMERS_NAME)),
+							true,
+							customer,
+							filterDefinitions,
+							"");
 		}
 	}
 
@@ -1817,7 +1792,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (derivedPersistentIdentifier != null) {
 					persistentIdentifier = derivedPersistentIdentifier;
 				}
-			} else if (persistent.getName() != null) {
+			}
+			else if (persistent.getName() != null) {
 				persistentIdentifier = persistent.getPersistentIdentifier();
 			}
 
@@ -1845,7 +1821,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				int length = Integer.MIN_VALUE;
 				if (attribute instanceof LengthField) {
 					length = ((LengthField) attribute).getLength();
-				} else if (attribute instanceof Enumeration) {
+				}
+				else if (attribute instanceof Enumeration) {
 					// Find the maximum code length
 					Enumeration enumeration = (Enumeration) attribute;
 					for (EnumeratedValue value : enumeration.getValues()) {
@@ -1983,13 +1960,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private void addReference(Reference reference,
-			boolean overriddenReference,
-			Customer customer,
-			Module module,
-			String packagePath,
-			Set<String> imports,
-			StringBuilder attributes,
-			StringBuilder methods) {
+								boolean overriddenReference,
+								Customer customer,
+								Module module,
+								String packagePath,
+								Set<String> imports,
+								StringBuilder attributes,
+								StringBuilder methods) {
 		String propertyClassName = reference.getDocumentName();
 		Document propertyDocument = module.getDocument(customer, propertyClassName);
 		String propertyPackageName = propertyDocument.getOwningModuleName();
@@ -2235,31 +2212,26 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("boxing")
-	private void generateActionTests(final String moduleName, final String packagePath, final String modulePath,
-			Document document, String documentName, SkyveFactory annotation) throws IOException {
-		final String actionPath = repository.MODULES_NAMESPACE + moduleName + File.separator + documentName
-				+ File.separator + "actions";
-		final File actionTestPath = new File(generatedTestPath + actionPath);
-
-		if (actionTestPath.exists()) {
-			for (File testFile : actionTestPath.listFiles()) {
-				testFile.delete();
-			}
-			actionTestPath.delete();
-		}
+	private void generateActionTests(final String moduleName,
+										final String packagePath,
+										final String modulePath,
+										Document document,
+										String documentName,
+										SkyveFactory annotation) {
+		final String actionPath = repository.MODULES_NAMESPACE + moduleName + File.separator + documentName + File.separator + "actions";
+		final Path actionTestPath = Paths.get(generatedTestPath + actionPath);
 
 		for (String actionName : document.getDefinedActionNames()) {
 			boolean skipGeneration = false, useExtensionDocument = false;
 
 			// check this is a ServerSideAction
-			String className = actionTestPath.getPath().replaceAll("\\\\|\\/", ".")
-					.replace(generatedTestPath.replaceAll("\\\\|\\/", "."), "") + "."
-					+ actionName;
+			String className = actionTestPath.toString().replaceAll("\\\\|\\/", ".")
+					.replace(generatedTestPath.replaceAll("\\\\|\\/", "."), "") + "." + actionName;
 
 			// check if this is a server side action, all other types are ignored
 			try {
 				Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
-				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
+				if (! ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
 					// System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
 					continue;
 				}
@@ -2279,7 +2251,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 					}
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				System.err.println("Could not find action class for: " + e.getMessage());
 			}
 
@@ -2301,34 +2274,42 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 
-			if (!skipGeneration) {
-				File actionFile = new File(actionTestPath + File.separator + actionName + "Test.java");
+			if (! skipGeneration) {
+				Path actionFilePath = actionTestPath.resolve(actionName + "Test.java");
 				// don't generate a test if the developer has created an action test in this location in the test directory
-				if (testAlreadyExists(actionFile)) {
+				if (testAlreadyExists(actionFilePath)) {
 					System.out.println(String.format("Skipping action test generation for %s.%s, file already exists in %s",
 							actionPath.replaceAll("\\\\|\\/", "."), actionName, testPath));
 					continue;
 				}
 
 				// generate the action test
-				actionTestPath.mkdirs();
-				actionFile.createNewFile();
-				try (FileWriter fw = new FileWriter(actionFile)) {
-					generateActionTest(fw, modulePath, actionPath.replaceAll("\\\\|\\/", "."),
-							packagePath.replaceAll("\\\\|\\/", "."),
-							documentName, actionName, useExtensionDocument);
-				}
-			} else {
+				StringBuilder actionFileContents = new StringBuilder(2048);
+				generation.put(actionFilePath, actionFileContents);
+				generateActionTest(actionFileContents,
+									modulePath,
+									actionPath.replaceAll("\\\\|\\/", "."),
+									packagePath.replaceAll("\\\\|\\/", "."),
+									documentName,
+									actionName,
+									useExtensionDocument);
+			}
+			else {
 				System.out.println(String.format("Skipping action test generation for %s.%s",
-						actionPath.replaceAll("\\\\|\\/", "."), actionName));
+													actionPath.replaceAll("\\\\|\\/", "."), actionName));
 			}
 		}
 	}
 
-	private static void generateActionTest(FileWriter fw, String modulePath, String actionPath, String domainPath,
-			String documentName, String actionName, boolean useExtensionDocument) throws IOException {
+	private static void generateActionTest(StringBuilder contents,
+											String modulePath,
+											String actionPath,
+											String domainPath,
+											String documentName,
+											String actionName,
+											boolean useExtensionDocument) {
 		System.out.println("Generate action test class for " + actionPath + '.' + actionName);
-		fw.append("package ").append(actionPath).append(";\n\n");
+		contents.append("package ").append(actionPath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
 
@@ -2346,45 +2327,47 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate imports
 		for (String importClassName : imports) {
-			fw.append("import ").append(importClassName).append(";\n");
+			contents.append("import ").append(importClassName).append(";\n");
 		}
 
 		// generate javadoc
-		fw.append("\n").append("/**");
-		fw.append("\n").append(" * Generated - local changes will be overwritten.");
-		fw.append("\n").append(" * Extend {@link AbstractActionTest} to create your own tests for this action.");
-		fw.append("\n").append(" */");
+		contents.append("\n").append("/**");
+		contents.append("\n").append(" * Generated - local changes will be overwritten.");
+		contents.append("\n").append(" * Extend {@link AbstractActionTest} to create your own tests for this action.");
+		contents.append("\n").append(" */");
 
 		// generate class
-		fw.append("\n").append("public class ").append(actionName).append("Test");
-		fw.append(" extends AbstractActionTest<").append(documentName).append(useExtensionDocument ? "Extension" : "")
+		contents.append("\n").append("public class ").append(actionName).append("Test");
+		contents.append(" extends AbstractActionTest<").append(documentName).append(useExtensionDocument ? "Extension" : "")
 				.append(", ").append(actionName).append("> {");
-		fw.append("\n");
+		contents.append("\n");
 
 		// generate test body
-		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
-		fw.append("\n\t\t").append("return new ").append(actionName).append("();");
-		fw.append("\n\t").append("}");
+		contents.append("\n\t").append("@Override");
+		contents.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
+		contents.append("\n\t\t").append("return new ").append(actionName).append("();");
+		contents.append("\n\t").append("}");
 
-		fw.append("\n");
-		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("protected ").append(documentName).append(useExtensionDocument ? "Extension" : "")
+		contents.append("\n");
+		contents.append("\n\t").append("@Override");
+		contents.append("\n\t").append("protected ").append(documentName).append(useExtensionDocument ? "Extension" : "")
 				.append(" getBean() throws Exception {");
-		fw.append("\n\t\t").append("return new DataBuilder()")
+		contents.append("\n\t\t").append("return new DataBuilder()")
 				.append("\n\t\t\t.fixture(FixtureType.crud)")
 				.append("\n\t\t\t.build(")
 				.append(documentName).append(".MODULE_NAME, ")
 				.append(documentName).append(".DOCUMENT_NAME);");
-		fw.append("\n\t").append("}");
+		contents.append("\n\t").append("}");
 
-		fw.append("\n}");
+		contents.append("\n}");
 	}
 
-	private static void generateDomainTest(FileWriter fw, @SuppressWarnings("unused") String modulePath, String packagePath,
-			String documentName) throws IOException {
+	private static void generateDomainTest(StringBuilder contents,
+											@SuppressWarnings("unused") String modulePath,
+											String packagePath,
+											String documentName) {
 		System.out.println("Generate domain test class for " + packagePath + '.' + documentName);
-		fw.append("package ").append(packagePath).append(";\n\n");
+		contents.append("package ").append(packagePath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
 
@@ -2394,47 +2377,45 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate imports
 		for (String importClassName : imports) {
-			fw.append("import ").append(importClassName).append(";\n");
+			contents.append("import ").append(importClassName).append(";\n");
 		}
 
 		// generate javadoc
-		fw.append("\n").append("/**");
-		fw.append("\n").append(" * Generated - local changes will be overwritten.");
-		fw.append("\n").append(" * Extend {@link AbstractDomainTest} to create your own tests for this document.");
-		fw.append("\n").append(" */");
+		contents.append("\n").append("/**");
+		contents.append("\n").append(" * Generated - local changes will be overwritten.");
+		contents.append("\n").append(" * Extend {@link AbstractDomainTest} to create your own tests for this document.");
+		contents.append("\n").append(" */");
 
 		// generate class
-		fw.append("\n").append("public class ").append(documentName).append("Test");
-		fw.append(" extends AbstractDomainTest<").append(documentName).append("> {");
-		fw.append("\n");
+		contents.append("\n").append("public class ").append(documentName).append("Test");
+		contents.append(" extends AbstractDomainTest<").append(documentName).append("> {");
+		contents.append("\n");
 
 		// generate test body
-
-		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
-		fw.append("\n\t\t").append("return new DataBuilder()")
+		contents.append("\n\t").append("@Override");
+		contents.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		contents.append("\n\t\t").append("return new DataBuilder()")
 				.append("\n\t\t\t.fixture(FixtureType.crud)")
 				.append("\n\t\t\t.build(")
 				.append(documentName).append(".MODULE_NAME, ")
 				.append(documentName).append(".DOCUMENT_NAME);");
-		fw.append("\n\t").append("}");
+		contents.append("\n\t").append("}");
 
-		fw.append("\n}");
+		contents.append("\n}");
 	}
 
 	@SuppressWarnings("synthetic-access")
 	private void generateJava(Customer customer,
 								Module module,
 								Document document,
-								FileWriter fw,
+								StringBuilder contents,
 								String packagePath,
 								String documentName,
 								String baseDocumentName,
-								boolean overridden)
-	throws IOException {
+								boolean overridden) {
 		System.out.println("Generate class for " + packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
-		fw.append("package ").append(packagePath).append(";\n\n");
+		contents.append("package ").append(packagePath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
 		StringBuilder statics = new StringBuilder(1024);
@@ -2518,10 +2499,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// 2) We are creating the vanilla class AND the attribute should be present
 			// OR
 			// 3) Its an extension but the attribute DNE in the vanilla class OR its a customer class that is NOT an override
-			if ((!name.equals(Bean.BIZ_KEY)) &&
-					(((!overridden) && ((documentClass == null) || documentClass.attributes.containsKey(name))) ||
-							(overridden && (((documentClass != null) && (!documentClass.attributes.containsKey(name)))
-									|| (documentClass == null))))) {
+			if ((! name.equals(Bean.BIZ_KEY)) &&
+					(((! overridden) && ((documentClass == null) || documentClass.attributes.containsKey(name))) ||
+						(overridden && (((documentClass != null) && (!documentClass.attributes.containsKey(name))) || (documentClass == null))))) {
 				statics.append("\t/** @hidden */\n");
 				if (deprecated) {
 					statics.append("\t@Deprecated\n");
@@ -2541,12 +2521,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (enumeration.getAttributeRef() != null) { // this is a reference
 						if (enumeration.getDocumentRef() != null) { // references a different document
 							StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
-							fullyQualifiedEnumName
-									.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
+							fullyQualifiedEnumName.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
 							fullyQualifiedEnumName.append('.').append(enumeration.toJavaIdentifier());
 							imports.add(fullyQualifiedEnumName.toString());
 						}
-					} else {
+					}
+					else {
 						imports.add("org.skyve.domain.types.Enumeration");
 						imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
 						imports.add("java.util.List");
@@ -2555,38 +2535,41 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 						appendEnumDefinition(enumeration, propertySimpleClassName, enums);
 					}
-				} else if (attribute instanceof Reference) {
+				}
+				else if (attribute instanceof Reference) {
 					addReference((Reference) attribute,
-							(overridden && // this is an extension class
-							// the reference is defined in the base class
-									(documentClass != null) &&
-									documentClass.attributes.containsKey(attribute.getName())),
-							customer,
-							module,
-							packagePath,
-							imports,
-							attributes,
-							methods);
+									(overridden && // this is an extension class
+										// the reference is defined in the base class
+										(documentClass != null) &&
+										documentClass.attributes.containsKey(attribute.getName())),
+									customer,
+									module,
+									packagePath,
+									imports,
+									attributes,
+									methods);
 					continue;
-				} else if (attribute instanceof Inverse) {
+				}
+				else if (attribute instanceof Inverse) {
 					addInverse((AbstractInverse) attribute,
-							(overridden && // this is an extension class
-							// the reference is defined in the base class
+								(overridden && // this is an extension class
+									// the reference is defined in the base class
 									(documentClass != null) &&
 									documentClass.attributes.containsKey(attribute.getName())),
-							customer,
-							module,
-							packagePath,
-							imports,
-							attributes,
-							methods);
+								customer,
+								module,
+								packagePath,
+								imports,
+								attributes,
+								methods);
 					continue;
-				} else {
+				}
+				else {
 					Class<?> propertyClass = type.getImplementingType();
 					String propertyClassName = propertyClass.getName();
 					propertySimpleClassName = propertyClass.getSimpleName();
 
-					if (!propertyClassName.startsWith("java.lang")) {
+					if (! propertyClassName.startsWith("java.lang")) {
 						imports.add(propertyClassName);
 					}
 				}
@@ -2610,14 +2593,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							AttributeType.longInteger.equals(type)) {
 						attributes.append(" = new ").append(propertySimpleClassName);
 						attributes.append('(').append(defaultValue).append(')');
-					} else if (AttributeType.colour.equals(type) ||
-							AttributeType.markup.equals(type) ||
-							AttributeType.memo.equals(type) ||
-							AttributeType.text.equals(type)) {
+					}
+					else if (AttributeType.colour.equals(type) ||
+								AttributeType.markup.equals(type) ||
+								AttributeType.memo.equals(type) ||
+								AttributeType.text.equals(type)) {
 						attributes.append(" = \"").append(defaultValue).append('"');
-					} else if (AttributeType.enumeration.equals(type)) {
+					}
+					else if (AttributeType.enumeration.equals(type)) {
 						attributes.append(" = ").append(propertySimpleClassName).append('.').append(defaultValue);
-					} else {
+					}
+					else {
 						attributes.append(" = new ").append(propertySimpleClassName);
 						attributes.append("(\"").append(defaultValue).append("\")");
 					}
@@ -2656,37 +2642,44 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					imports.add("org.skyve.impl.domain.types.jaxb.DateOnlyMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"date\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(DateOnlyMapper.class)");
-				} else if (AttributeType.time.equals(type)) {
+				}
+				else if (AttributeType.time.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimeOnlyMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"time\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(TimeOnlyMapper.class)");
-				} else if (AttributeType.dateTime.equals(type)) {
+				}
+				else if (AttributeType.dateTime.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateTimeMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(DateTimeMapper.class)");
-				} else if (AttributeType.timestamp.equals(type)) {
+				}
+				else if (AttributeType.timestamp.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimestampMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(TimestampMapper.class)");
-				} else if (AttributeType.decimal2.equals(type)) {
+				}
+				else if (AttributeType.decimal2.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal2Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal2Mapper.class)");
-				} else if (AttributeType.decimal5.equals(type)) {
+				}
+				else if (AttributeType.decimal5.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal5Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal5Mapper.class)");
-				} else if (AttributeType.decimal10.equals(type)) {
+				}
+				else if (AttributeType.decimal10.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal10Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal10Mapper.class)");
-				} else if (AttributeType.geometry.equals(type)) {
+				}
+				else if (AttributeType.geometry.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.GeometryMapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(GeometryMapper.class)");
@@ -2724,7 +2717,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				imports.add("org.skyve.domain.HierarchicalBean");
 				imports.add("org.skyve.persistence.DocumentQuery");
 				imports.add("org.skyve.persistence.Persistence");
-			} else {
+			}
+			else {
 				imports.add(parentPackagePath + parentClassName);
 				imports.add("org.skyve.domain.ChildBean");
 			}
@@ -2745,16 +2739,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
 			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java",
-					srcPath,
-					repository.MODULES_NAMESPACE,
-					baseDocument.getOwningModuleName(),
-					baseDocumentName,
-					baseDocumentName);
+																srcPath,
+																repository.MODULES_NAMESPACE,
+																baseDocument.getOwningModuleName(),
+																baseDocumentName,
+																baseDocumentName);
 			baseDocumentExtensionClassExists = new File(baseDocumentExtensionPath).exists();
 			if (baseDocumentExtensionClassExists) {
-				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName
-						+ "Extension");
-			} else {
+				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName + "Extension");
+			}
+			else {
 				imports.add("modules." + baseDocument.getOwningModuleName() + ".domain." + baseDocumentName);
 			}
 		}
@@ -2763,7 +2757,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName == null) {
 			if (persistent != null) {
 				imports.add("org.skyve.impl.domain.AbstractPersistentBean");
-			} else {
+			}
+			else {
 				imports.add("org.skyve.impl.domain.AbstractTransientBean");
 			}
 		}
@@ -2774,7 +2769,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			for (String conditionName : conditions.keySet()) {
 				Condition condition = conditions.get(conditionName);
 
-				if ((!overridden) ||
+				if ((! overridden) ||
 						(documentClass == null) ||
 						(!documentClass.attributes.containsKey(conditionName))) {
 					imports.add("javax.xml.bind.annotation.XmlTransient");
@@ -2924,28 +2919,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		for (String importClassName : imports) {
-			fw.append("import ").append(importClassName).append(";\n");
+			contents.append("import ").append(importClassName).append(";\n");
 		}
 
 		// Generate/Include UML doc
-		fw.append("\n/**");
-		fw.append("\n * ").append(document.getSingularAlias());
+		contents.append("\n/**");
+		contents.append("\n * ").append(document.getSingularAlias());
 		String doc = document.getDescription();
 		if (doc != null) {
-			fw.append("\n * <br/>");
-			fw.append("\n * ").append(doc);
+			contents.append("\n * <br/>");
+			contents.append("\n * ").append(doc);
 		}
 		doc = document.getDocumentation();
 		if (doc != null) {
-			fw.append("\n * <br/>");
-			fw.append("\n * ").append(doc);
+			contents.append("\n * <br/>");
+			contents.append("\n * ").append(doc);
 		}
-		fw.append("\n * \n");
+		contents.append("\n * \n");
 
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute instanceof Enumeration) {
 				Enumeration enumeration = (Enumeration) attribute;
-				fw.append(" * @depend - - - ").append(enumeration.toJavaIdentifier()).append('\n');
+				contents.append(" * @depend - - - ").append(enumeration.toJavaIdentifier()).append('\n');
 			}
 		}
 
@@ -2954,80 +2949,86 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			ReferenceType type = reference.getType();
 			boolean required = reference.isRequired();
 			if (AssociationType.aggregation.equals(type)) {
-				fw.append(" * @navhas n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
+				contents.append(" * @navhas n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
 						.append(reference.getDocumentName()).append('\n');
 			}
 			else if (AssociationType.composition.equals(type) || AssociationType.embedded.equals(type)) {
-				fw.append(" * @navcomposed n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
+				contents.append(" * @navcomposed n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
 						.append(reference.getDocumentName()).append('\n');
 			}
 			else {
 				if (CollectionType.aggregation.equals(type)) {
-					fw.append(" * @navhas n ");
-				} else if (CollectionType.composition.equals(type)) {
-					fw.append(" * @navcomposed n ");
-				} else if (CollectionType.child.equals(type)) {
-					fw.append(" * @navcomposed 1 ");
+					contents.append(" * @navhas n ");
 				}
-				fw.append(referenceName);
+				else if (CollectionType.composition.equals(type)) {
+					contents.append(" * @navcomposed n ");
+				}
+				else if (CollectionType.child.equals(type)) {
+					contents.append(" * @navcomposed 1 ");
+				}
+				contents.append(referenceName);
 				Collection collection = (Collection) reference;
 				Integer min = collection.getMinCardinality();
-				fw.append(' ').append(min.toString()).append("..");
+				contents.append(' ').append(min.toString()).append("..");
 				Integer max = collection.getMaxCardinality();
 				if (max == null) {
-					fw.append("n ");
+					contents.append("n ");
 				} else {
-					fw.append(max.toString()).append(' ');
+					contents.append(max.toString()).append(' ');
 				}
-				fw.append(reference.getDocumentName()).append('\n');
+				contents.append(reference.getDocumentName()).append('\n');
 			}
 		}
 		if (persistent == null) {
-			fw.append(" * @stereotype \"transient");
-		} else {
-			fw.append(" * @stereotype \"persistent");
+			contents.append(" * @stereotype \"transient");
+		}
+		else {
+			contents.append(" * @stereotype \"persistent");
 		}
 		if (parentDocumentName != null) {
-			fw.append(" child\"\n");
+			contents.append(" child\"\n");
 			// fw.append(" * @navassoc 1 parent 1 ").append(parentDocumentName).append('\n');
-		} else {
-			fw.append("\"\n");
+		}
+		else {
+			contents.append("\"\n");
 		}
 
-		fw.append(" */\n");
+		contents.append(" */\n");
 
 		// generate class body
-		fw.append("@XmlType");
-		fw.append("\n@XmlRootElement");
+		contents.append("@XmlType");
+		contents.append("\n@XmlRootElement");
 		if (polymorphic) {
-			fw.append("\n@PolymorphicPersistentBean");
+			contents.append("\n@PolymorphicPersistentBean");
 		}
-		fw.append("\npublic ");
+		contents.append("\npublic ");
 		if (baseDocumentName == null) {
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());
 			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 			if (document.isAbstract() || ((domainClass != null) && (domainClass.isAbstract))) {
-				fw.append("abstract ");
+				contents.append("abstract ");
 			}
 		}
 		else {
 			if (document.isAbstract()) {
-				fw.append("abstract ");
+				contents.append("abstract ");
 			}
 		}
-		fw.append("class ").append(documentName);
+		contents.append("class ").append(documentName);
 		if (baseDocumentName != null) { // extension
 			if (overridden) {
-				fw.append("Ext");
+				contents.append("Ext");
 			}
 
 			if (baseDocumentExtensionClassExists) {
-				fw.append(" extends ").append(baseDocumentName).append("Extension");
-			} else {
-				fw.append(" extends ").append(baseDocumentName);
+				contents.append(" extends ").append(baseDocumentName).append("Extension");
 			}
-		} else {
-			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
+			else {
+				contents.append(" extends ").append(baseDocumentName);
+			}
+		}
+		else {
+			contents.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
 
 		final String interfacesCommaSeparated = document.getInterfaces().stream()
@@ -3035,34 +3036,36 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				.collect(Collectors.joining(", "));
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
-				fw.append(" implements HierarchicalBean<").append(parentClassName).append('>');
-			} else {
-				fw.append(" implements ChildBean<").append(parentClassName).append('>');
+				contents.append(" implements HierarchicalBean<").append(parentClassName).append('>');
+			}
+			else {
+				contents.append(" implements ChildBean<").append(parentClassName).append('>');
 			}
 
-			if (!document.getInterfaces().isEmpty()) {
-				fw.append(", ").append(interfacesCommaSeparated);
+			if (! document.getInterfaces().isEmpty()) {
+				contents.append(", ").append(interfacesCommaSeparated);
 			}
-		} else if (!document.getInterfaces().isEmpty()) {
-			fw.append(" implements ").append(interfacesCommaSeparated);
+		}
+		else if (! document.getInterfaces().isEmpty()) {
+			contents.append(" implements ").append(interfacesCommaSeparated);
 		}
 
-		fw.append(" {\n");
+		contents.append(" {\n");
 
-		fw.append("\t/**\n");
-		fw.append("\t * For Serialization\n");
-		fw.append("\t * @hidden\n");
-		fw.append("\t */\n");
-		fw.append("\tprivate static final long serialVersionUID = 1L;\n\n");
+		contents.append("\t/**\n");
+		contents.append("\t * For Serialization\n");
+		contents.append("\t * @hidden\n");
+		contents.append("\t */\n");
+		contents.append("\tprivate static final long serialVersionUID = 1L;\n\n");
 
-		fw.append(statics).append("\n");
+		contents.append(statics).append("\n");
 		if (enums.length() > 0) {
-			fw.append(enums);
+			contents.append(enums);
 		}
-		fw.append(attributes);
-		fw.append(methods);
+		contents.append(attributes);
+		contents.append(methods);
 
-		fw.append("}\n");
+		contents.append("}\n");
 	}
 
 	private boolean testPolymorphic(Document document) {
@@ -3194,10 +3197,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param testToBeCreated The full file path to the test file about to be created
 	 * @return True if developer has already created a file with the name, false otherwise
 	 */
-	private boolean testAlreadyExists(File testToBeCreated) {
-		File testFile = new File(testToBeCreated.getPath().replace("\\", "/").replace(
-				generatedTestPath.replace("\\", "/"),
-				testPath.replace("\\", "/")));
+	private boolean testAlreadyExists(Path testToBeCreated) {
+		File testFile = new File(testToBeCreated.toString().replace("\\", "/").replace(generatedTestPath.replace("\\", "/"),
+									testPath.replace("\\", "/")));
 		return testFile.exists();
 	}
 
@@ -3318,7 +3320,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 
 	 * @throws IOException
 	 */
-	private void deleteGeneratedDirectories(List<String> moduleNames) throws IOException {
+	private void replaceGenerated(List<String> moduleNames) throws IOException {
 		// src/main/java/generated/modules
 		final Path generatedDirectory = Paths.get(generatedSrcPath, repository.MODULES_NAMESPACE);
 
@@ -3332,12 +3334,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						for (File domainFile : packagePath.toFile().listFiles()) {
 							domainFile.delete();
 						}
-					} else {
+					}
+					else {
 						packagePath.toFile().mkdirs();
 					}
-				} else {
-					System.out
-							.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
+				}
+				else {
+					System.out.println(String.format("Deleting unreferenced module source directory %s", child.getPath()));
 					deleteDirectory(child.toPath());
 				}
 			}
@@ -3345,9 +3348,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// delete the generated test directory
 		final Path generatedTestDirectory = Paths.get(generatedTestPath);
-		if (generatedTestDirectory.toFile().exists()) {
+		if (Files.exists(generatedTestDirectory)) {
 			System.out.println(String.format("Deleting generated test directory %s", generatedTestDirectory.toString()));
 			deleteDirectory(generatedTestDirectory);
+		}
+
+		// create files
+		for (Path path : generation.keySet()) {
+			Files.createDirectories(path.getParent());
+			try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
+				StringBuilder contents = generation.get(path);
+				bw.append(contents);
+			}
 		}
 	}
 }
