@@ -421,8 +421,8 @@ public class DataBuilder {
 													boolean allowFactoryRecursion) {
 		T result = null;
 		try {
-			// call the data factory if top level factory recursion is allowed or we have recursed already
-			if (allowFactoryRecursion || (currentDepth > 0)) {
+			// call the data factory if top level factory invocation is on or we have recursed already
+			if ((currentDepth > 0) || allowFactoryRecursion) {
 				result = dataFactory((DocumentImpl) document, currentDepth);
 			}
 
