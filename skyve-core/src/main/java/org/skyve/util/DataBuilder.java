@@ -97,6 +97,7 @@ import org.skyve.util.test.TestUtil;
  * @author mike
  */
 public class DataBuilder {
+	private static boolean trace = false;
 	
 	private static final Random RANDOM = new Random();
 
@@ -317,16 +318,40 @@ public class DataBuilder {
 	}
 
 	/**
+	 * Specify whether to log how the data was built.
+	 * 
+	 * @param trace
+	 * @return
+	 */
+	public static void setTrace(boolean trace) {
+		DataBuilder.trace = trace;
+	}
+	
+	/**
 	 * Build a domain bean.
 	 * @param moduleName
 	 * @param documentName
 	 * @return
 	 */
 	public <T extends Bean> T build(String moduleName, String documentName) {
+		return build(moduleName, documentName, true);
+	}
+	
+	/**
+	 * Build a domain bean within its Factory class. This will stop infinite recursion between the DataBuilder and the factory.
+	 * @param moduleName
+	 * @param documentName
+	 * @return
+	 */
+	public <T extends Bean> T factoryBuild(String moduleName, String documentName) {
+		return build(moduleName, documentName, false);
+	}
+	
+	private <T extends Bean> T build(String moduleName, String documentName, boolean allowFactoryRecursion) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		initialiseCycleTracking();
-		return build(m, d, 0);
+		return build(m, d, "", 0, allowFactoryRecursion);
 	}
 	
 	/**
@@ -336,8 +361,22 @@ public class DataBuilder {
 	 * @return
 	 */
 	public <T extends Bean> T build(Module module, Document document) {
+		return build(module, document, true);
+	}
+
+	/**
+	 * Build a domain bean within its Factory class. This will stop infinite recursion between the DataBuilder and the factory.
+	 * @param module
+	 * @param document
+	 * @return
+	 */
+	public <T extends Bean> T factoryBuild(Module module, Document document) {
+		return build(module, document, false);
+	}
+
+	private <T extends Bean> T build(Module module, Document document, boolean allowFactoryRecursion) {
 		initialiseCycleTracking();
-		return build(module, document, 0);
+		return build(module, document, "", 0, allowFactoryRecursion);
 	}
 	
 	/**
@@ -346,9 +385,22 @@ public class DataBuilder {
 	 * @return
 	 */
 	public <T extends Bean> T build(Document document) {
+		return build(document, true);
+	}
+	
+	/**
+	 * Build a domain bean within its Factory class. This will stop infinite recursion between the DataBuilder and the factory.
+	 * @param document
+	 * @return
+	 */
+	public <T extends Bean> T factoryBuild(Document document) {
+		return build(document, false);
+	}
+
+	private <T extends Bean> T build(Document document, boolean allowFactoryRecursion) {
 		Module m = customer.getModule(document.getOwningModuleName());
 		initialiseCycleTracking();
-		return build(m, document, 0);
+		return build(m, document, "", 0, allowFactoryRecursion);
 	}
 
 	private void initialiseCycleTracking() {
@@ -364,11 +416,21 @@ public class DataBuilder {
 	 */
 	private synchronized <T extends Bean> T build(Module module,
 													Document document,
-													int currentDepth) {
+													String binding,
+													int currentDepth,
+													boolean allowFactoryRecursion) {
 		T result = null;
 		try {
-			result = dataFactory((DocumentImpl) document);
+			// call the data factory if top level factory recursion is allowed or we have recursed already
+			if (allowFactoryRecursion || (currentDepth > 0)) {
+				result = dataFactory((DocumentImpl) document, currentDepth);
+			}
+
+			// create an random bean recursively, if we have none from a factory
 			if (result == null) {
+				if (trace) {
+					trace(new StringBuilder(128).append("Creating a random bean for document ").append(module.getName()).append('.').append(document.getName()), currentDepth);
+				}
 				result = randomBean(module, document);
 
 				String resultBizId = result.getBizId();
@@ -401,9 +463,13 @@ public class DataBuilder {
 								associationModule = customer.getModule(associationModuleRef);
 							}
 							Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
+							String newBinding = binding.isEmpty() ? name : BindUtil.createCompoundBinding(binding, name);
+							if (trace) {
+								trace(new StringBuilder(128).append("Set \"").append(newBinding).append("\" to new data"), currentDepth + 1);
+							}
 							BindUtil.set(result,
 											name,
-											build(associationModule, associationDocument, currentDepth + 1));
+											build(associationModule, associationDocument, newBinding, currentDepth + 1, allowFactoryRecursion));
 						}
 					}
 					else if (AttributeType.collection.equals(type)) {
@@ -444,7 +510,11 @@ public class DataBuilder {
 							}
 		
 							for (int i = 0; i < cardinality; i++) {
-								Bean element = build(collectionModule, collectionDocument, currentDepth + 1);
+								String newBinding = binding.isEmpty() ? name : BindUtil.createIndexedBinding(BindUtil.createCompoundBinding(binding, name), i);
+								if (trace) {
+									trace(new StringBuilder(128).append("Set \"").append(newBinding).append("\" to new data"), currentDepth + 1);
+								}
+								Bean element = build(collectionModule, collectionDocument, newBinding, currentDepth + 1, allowFactoryRecursion);
 								list.add(element);
 								if (childCollection) {
 									@SuppressWarnings("unchecked")
@@ -611,7 +681,7 @@ public class DataBuilder {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends Bean> T dataFactory(DocumentImpl document)
+	private <T extends Bean> T dataFactory(DocumentImpl document, int currentDepth)
 	throws Exception {
 		T result = null;
 		
@@ -660,10 +730,22 @@ public class DataBuilder {
 						methods.add(method);
 					}
 				}
+				if (trace && methods.isEmpty()) {
+					if (fixture == null) {
+						trace(new StringBuilder(128).append("WARNING: ").append(factory.getClass().getName()).append(" found but there were no methods without a fixture"), currentDepth);
+					}
+					else {
+						trace(new StringBuilder(128).append("WARNING: ").append(factory.getClass().getName()).append(" found but there were no methods for fixture ").append(fixture).append(" and no methods without a fixture"), currentDepth);
+					}
+				}
 			}
 			
 			// If there are any valid methods at all
 			if (! methods.isEmpty()) {
+				Method method = methods.get(RANDOM.nextInt(methods.size()));
+				if (trace) { 
+					trace(new StringBuilder(128).append("Invoking method ").append(factory.getClass().getName()).append("::").append(method.getName()).append(" for fixture ").append(fixture), currentDepth);
+				}
 				result = (T) methods.get(RANDOM.nextInt(methods.size())).invoke(factory);
 			}
 		}
@@ -690,5 +772,12 @@ public class DataBuilder {
 		}
 		
 		return result;
+	}
+	
+	private static void trace(StringBuilder trace, int currentDepth) {
+		for (int i = 0; i < currentDepth; i++) {
+			trace.insert(0, "    ");
+		}
+		System.out.println(trace.toString());
 	}
 }
