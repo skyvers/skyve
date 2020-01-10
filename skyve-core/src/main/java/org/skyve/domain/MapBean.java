@@ -151,7 +151,9 @@ public class MapBean extends LazyDynaMap implements Bean {
 					if (isDynaProperty(bindingPart)) {
 						try {
 							bean = (Bean) values.get(bindingPart);
-							result = BindUtil.get(bean, propertyName.substring(dotIndex + 1));
+							if (bean != null) {
+								result = BindUtil.get(bean, propertyName.substring(dotIndex + 1));
+							}
 							break;
 						}
 						catch (Exception e) {
