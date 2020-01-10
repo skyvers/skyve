@@ -138,9 +138,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		return columns;
 	}
 
-	// Used to ensure that the same left outer join isn't added multiple times
-	private Set<String> leftOuterJoinBindings = new TreeSet<>();
-	
 	@Override
 	@SuppressWarnings("incomplete-switch")
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
@@ -185,6 +182,9 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		// OR
 		// If we have any binding with dynamic domain values, then we need to load the bean to get the domain values.
 		boolean anyTransientBindingOrDynamicDomainInQuery = false;
+
+		// Used to ensure that the same left outer join isn't added multiple times
+		Set<String> leftOuterJoinBindings = new TreeSet<>();
 		
 		for (MetaDataQueryColumn column : getColumns()) {
 			MetaDataQueryProjectedColumn projectedColumn = null;
