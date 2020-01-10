@@ -191,7 +191,7 @@ public abstract class DomainGenerator {
 
 	protected AbstractRepository repository;
 	
-	protected Map<Path, StringBuilder> generation = new TreeMap<>();
+	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
 	protected DomainGenerator(AbstractRepository repository,
 								DialectOptions dialectOptions,
