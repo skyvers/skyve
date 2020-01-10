@@ -774,7 +774,7 @@ public class DataBuilder {
 		return result;
 	}
 	
-	private static void trace(StringBuilder trace, int currentDepth) {
+	private static void trace(@SuppressWarnings("hiding") StringBuilder trace, int currentDepth) {
 		for (int i = 0; i < currentDepth; i++) {
 			trace.insert(0, "    ");
 		}
