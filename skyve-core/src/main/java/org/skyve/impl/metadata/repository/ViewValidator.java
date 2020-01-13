@@ -1175,7 +1175,10 @@ class ViewValidator extends ViewVisitor {
 		if (dropDownColumns != null) {
 			testColumns = new LinkedHashSet<>(dropDownColumns.size());
 			for (LookupDescriptionColumn dropDownColumn : dropDownColumns) {
-				testColumns.add(dropDownColumn.getName());
+				String dropDownColumnName = dropDownColumn.getName();
+				if (! Bean.BIZ_KEY.equals(dropDownColumnName)) {
+					testColumns.add(dropDownColumnName);
+				}
 			}
 		}
 		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
