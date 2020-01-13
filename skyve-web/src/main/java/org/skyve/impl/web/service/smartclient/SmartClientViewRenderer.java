@@ -2269,7 +2269,12 @@ pickListFields:[{name:'value'}],
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
 		code.append(visitingOnBlur ? "view.doBlurryAction('" : "view.doAction('");
-		code.append(server.getActionName()).append("',");
+		String name = action.getResourceName();
+		ImplicitActionName implicitName = action.getImplicitName();
+		if (implicitName != null) {
+			name = implicitName.toString();
+		}
+		code.append(name).append("',");
 		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
 
