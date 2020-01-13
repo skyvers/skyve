@@ -2754,7 +2754,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					break;
 				case Report:
 					if (iconStyleClass == null) { 
-						result.setIcon("fa fa-newspaper");
+						result.setIcon("fa fa-newspaper-o");
 					}
 					break;
 				case BizImport:
@@ -2899,7 +2899,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// NB yes this is backwards coz its inserted
 		href.insert(0, '?').insert(0, reportFormat).insert(0, '.').insert(0, reportName).insert(0, "report/");
 
-		return linkButton((iconStyleClass == null) ? "fa fa-newspaper" : iconStyleClass, 
+		return linkButton((iconStyleClass == null) ? "fa fa-newspaper-o" : iconStyleClass, 
 							null,
 							null,
 							title,

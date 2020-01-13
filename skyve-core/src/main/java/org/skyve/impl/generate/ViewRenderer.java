@@ -589,7 +589,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 						relativeIconFileName = "actions/Report.gif";
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-newspaper";
+						actionIconStyleClass = "fa fa-newspaper-o";
 					}
 					actionType = 'P';
 					break;
@@ -620,7 +620,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 						relativeIconFileName = "actions/Report.gif";
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-newspaper";
+						actionIconStyleClass = "fa fa-newspaper-o";
 					}
 					actionType = 'V';
 					break;
