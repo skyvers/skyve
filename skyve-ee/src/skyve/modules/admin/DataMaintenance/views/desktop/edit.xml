@@ -17,7 +17,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="DataMaintenanceExportAction" pixelWidth="200" />
+						<button action="DataMaintenanceExportAction" pixelWidth="200" />
 					</item>
 				</row>
 				<row>
@@ -25,7 +25,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="DataMaintenanceImportAction" pixelWidth="200" />
+						<button action="DataMaintenanceImportAction" pixelWidth="200" />
 					</item>
 				</row>
 			</form>
@@ -90,7 +90,7 @@
 								</combo>
 							</item>
 							<item>
-								<button actionName="Restore" pixelWidth="110" />
+								<button action="Restore" pixelWidth="110" />
 							</item>
 						</row>
 						<row>
@@ -105,10 +105,10 @@
 						</row>
 					</form>
 					<vbox pixelMemberPadding="5">
-						<button actionName="Backup" pixelWidth="150" />
-						<button actionName="DownloadBackup" pixelWidth="150" />
-						<button actionName="UploadBackup" pixelWidth="150" />
-						<button actionName="DeleteBackup" pixelWidth="150" />
+						<button action="Backup" pixelWidth="150" />
+						<button action="DownloadBackup" pixelWidth="150" />
+						<button action="UploadBackup" pixelWidth="150" />
+						<button action="DeleteBackup" pixelWidth="150" />
 					</vbox>
 				</hbox>
 			</vbox>
@@ -134,7 +134,7 @@
 						<password binding="confirmPassword" />
 					</item>
 					<item align="centre">
-						<button actionName="Truncate" pixelWidth="100"/>
+						<button action="Truncate" pixelWidth="100"/>
 					</item>
 				</row>
 			</form>
@@ -152,9 +152,9 @@
 					</row>
 				</form>
 				<hbox horizontalAlignment="right">
-					<button actionName="Create" pixelWidth="200" />
-					<button actionName="Drop" pixelWidth="200" />
-					<button actionName="Sync" pixelWidth="200" />
+					<button action="Create" pixelWidth="200" />
+					<button action="Drop" pixelWidth="200" />
+					<button action="Sync" pixelWidth="200" />
 				</hbox>
 			</vbox>
 		</tab>
@@ -192,22 +192,22 @@
 							<spacer />
 						</item>
 						<item align="right">
-							<button actionName="CheckContent" />
+							<button action="CheckContent" />
 						</item>
 						<item align="right">
-							<button actionName="MigrateContentFiles" />
+							<button action="MigrateContentFiles" />
 						</item>
 						<item align="right">
-							<button actionName="MigrateContent" />
+							<button action="MigrateContent" />
 						</item>
 						<item align="right">
-							<button actionName="ReindexData" pixelWidth="150"/>
+							<button action="ReindexData" pixelWidth="150"/>
 						</item>
 						<item align="right">
-							<button actionName="ReindexContent"  pixelWidth="150"/>
+							<button action="ReindexContent"  pixelWidth="150"/>
 						</item>
 						<item align="right">
-							<button actionName="Reindex"  pixelWidth="150"/>
+							<button action="Reindex"  pixelWidth="150"/>
 						</item>
 					</row>
 				</form>
@@ -266,7 +266,7 @@
 						<textField binding="auditMatchCount" disabled="true" />
 					</item>
 					<item>
-						<button actionName="CheckAuditMatches" pixelWidth="150" />
+						<button action="CheckAuditMatches" pixelWidth="150" />
 					</item>
 				</row>
 			</form>
@@ -278,7 +278,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="TruncateAuditLog" pixelWidth="150" />
+						<button action="TruncateAuditLog" pixelWidth="150" />
 					</item>
 				</row>
 				<row>
@@ -327,7 +327,7 @@
 						<checkBox binding="notification" triState="false" />
 					</item>
 					<item>
-						<button actionName="RefreshDocumentTuples"/>
+						<button action="RefreshDocumentTuples"/>
 					</item>
 				</row>
 			</form>

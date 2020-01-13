@@ -13,10 +13,10 @@
 						<combo binding="designModuleDocumentName" />
 					</item>
 					<item align="centre">
-						<button actionName="GenerateEditView" pixelWidth="90" />
+						<button action="GenerateEditView" pixelWidth="90" />
 					</item>
 					<item align="centre">
-						<button actionName="GenerateQuery" pixelWidth="90" />
+						<button action="GenerateQuery" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -29,7 +29,7 @@
 						<combo binding="customerNameToSwapTo" />
 					</item>
 					<item align="centre">
-						<button actionName="SwapCustomer" pixelWidth="90" />
+						<button action="SwapCustomer" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -42,7 +42,7 @@
 						<textArea binding="query" wrap="true" />
 					</item>
 					<item align="centre">
-						<button actionName="ExecuteQuery" pixelWidth="90" />
+						<button action="ExecuteQuery" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -97,10 +97,10 @@
 						<radio binding="sailTestStrategy" vertical="false" />
 					</item>
 					<item align="right">
-						<button actionName="GenerateMenuSAIL" pixelWidth="90" />
+						<button action="GenerateMenuSAIL" pixelWidth="90" />
 					</item>
 					<item align="right">
-						<button actionName="GenerateModuleSAIL" pixelWidth="90" />
+						<button action="GenerateModuleSAIL" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -129,10 +129,10 @@
 						<combo binding="sailExecutor" />
 					</item>
 					<item align="right">
-						<button actionName="ExecuteSAIL" pixelWidth="90" />
+						<button action="ExecuteSAIL" pixelWidth="90" />
 					</item>
 					<item align="right">
-						<button actionName="DownloadSAIL" pixelWidth="90" />
+						<button action="DownloadSAIL" pixelWidth="90" />
 					</item>
 				</row>
 			</form>
@@ -280,7 +280,7 @@
 					<column />
 					<row>
 						<item>
-							<button actionName="ApplyStartupConfiguration" pixelWidth="150" />
+							<button action="ApplyStartupConfiguration" pixelWidth="150" />
 						</item>
 					</row>
 				</form>
@@ -303,7 +303,7 @@
 							<textField binding="newProperty.text5002" />
 						</item>
 						<item>
-							<button actionName="AddAPIKey" />
+							<button action="AddAPIKey" />
 						</item>
 					</row>
 				</form>

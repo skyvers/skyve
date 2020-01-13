@@ -30,7 +30,7 @@
 		</row>
 		<row>
 			<item colspan="2" align="right">
-				<button actionName="SendMail" pixelWidth="90" />
+				<button action="SendMail" pixelWidth="90" />
 			</item>
 		</row>
 	</form>

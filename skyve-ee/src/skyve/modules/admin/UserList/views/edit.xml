@@ -37,10 +37,10 @@
 					</row>
 					<row>
 						<item>
-							<button actionName="InviteUsers" pixelWidth="250" />
+							<button action="InviteUsers" pixelWidth="250" />
 						</item>
 						<item>
-							<button actionName="CreateUsers" pixelWidth="250" />
+							<button action="CreateUsers" pixelWidth="250" />
 						</item>
 					</row>
 				</form>

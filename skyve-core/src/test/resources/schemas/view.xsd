@@ -1103,7 +1103,7 @@
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute name="actionName" type="xs:string" use="required"/>
+    <xs:attribute name="action" type="xs:string" use="required"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="minPixelHeight" type="xs:int"/>

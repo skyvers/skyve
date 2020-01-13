@@ -57,7 +57,7 @@
 						<column />
 						<row>
 							<item>
-								<button actionName="GetCount" pixelWidth="200">
+								<button action="GetCount" pixelWidth="200">
 									<properties>
 										<c:property key="update">results</c:property>
 									</properties>
@@ -66,7 +66,7 @@
 						</row>
 						<row>
 							<item>
-								<button actionName="GetResults" pixelWidth="200">
+								<button action="GetResults" pixelWidth="200">
 									<properties>
 										<c:property key="update">results</c:property>
 									</properties>
@@ -75,7 +75,7 @@
 						</row>
 						<row>
 							<item>
-								<button actionName="CreateFiles" pixelWidth="200">
+								<button action="CreateFiles" pixelWidth="200">
 									<properties>
 										<c:property key="update">results</c:property>
 									</properties>
@@ -84,7 +84,7 @@
 						</row>
 						<row>
 							<item>
-								<button actionName="SendNow" pixelWidth="200">
+								<button action="SendNow" pixelWidth="200">
 									<properties>
 										<c:property key="update">results</c:property>
 									</properties>
@@ -114,14 +114,14 @@
 					<column />
 					<row>
 						<item>
-							<button actionName="ZipBatch" pixelWidth="200">
+							<button action="ZipBatch" pixelWidth="200">
 								<properties>
 									<c:property key="update">batches</c:property>
 								</properties>
 							</button>
 						</item>
 						<item>
-							<button actionName="DeleteBatch" pixelWidth="200">
+							<button action="DeleteBatch" pixelWidth="200">
 								<properties>
 									<c:property key="update">batches</c:property>
 								</properties>
@@ -148,7 +148,7 @@
 						</combo>
 					</item>
 					<item>
-						<button actionName="TestSend" pixelWidth="200" />
+						<button action="TestSend" pixelWidth="200" />
 					</item>
 				</row>
 				<row>
@@ -226,10 +226,10 @@
 						<checkBox binding="includeCalendar" triState="false" />
 					</item>
 					<item>
-						<button actionName="AddUnsubscribeLink" pixelWidth="200" />
+						<button action="AddUnsubscribeLink" pixelWidth="200" />
 					</item>
 					<item>
-						<button actionName="AddImage" pixelWidth="200" />
+						<button action="AddImage" pixelWidth="200" />
 					</item>
 				</row>
 			</form>

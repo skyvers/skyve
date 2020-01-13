@@ -16,7 +16,7 @@
 						</radio>
 					</item>
 					<item>
-						<button pixelWidth="250" actionName="GetImportTemplate" />
+						<button pixelWidth="250" action="GetImportTemplate" />
 					</item>
 				</row>
 			</form>
@@ -82,7 +82,7 @@
 						<spacer></spacer>
 					</item>
 					<item>
-						<button pixelWidth="150" actionName="ResetColumns" />
+						<button pixelWidth="150" action="ResetColumns" />
 					</item>
 				</row>
 				<row>
@@ -90,7 +90,7 @@
 						<spacer></spacer>
 					</item>
 					<item>
-						<button pixelWidth="150" actionName="RunExport" />
+						<button pixelWidth="150" action="RunExport" />
 					</item>
 				</row>
 			</form>
@@ -111,7 +111,7 @@
 						<spacer></spacer>
 					</item>
 					<item>
-						<button pixelWidth="150" actionName="UploadSimpleImportDataFile" />
+						<button pixelWidth="150" action="UploadSimpleImportDataFile" />
 					</item>
 				</row>
 				<row>
@@ -119,7 +119,7 @@
 						<spacer></spacer>
 					</item>
 					<item>
-						<button pixelWidth="150" actionName="RunImport" />
+						<button pixelWidth="150" action="RunImport" />
 					</item>
 				</row>
 			</form>

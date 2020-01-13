@@ -28,7 +28,7 @@
 				<spacer />
 			</item>
 			<item>
-				<button actionName="MakePasswordChange" pixelWidth="190" />
+				<button action="MakePasswordChange" pixelWidth="190" />
 			</item>
 		</row>
 		<row>

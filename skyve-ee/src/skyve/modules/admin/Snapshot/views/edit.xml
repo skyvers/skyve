@@ -40,7 +40,7 @@
 				<spacer />
 			</item>
 			<item>
-				<button actionName="CopySnapshotToUser" pixelWidth="200" />
+				<button action="CopySnapshotToUser" pixelWidth="200" />
 			</item>
 		</row>
 	</form>

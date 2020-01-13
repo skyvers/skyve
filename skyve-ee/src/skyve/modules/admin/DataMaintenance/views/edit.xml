@@ -74,28 +74,28 @@
 					<column />
 					<row>
 						<item>
-							<button actionName="Backup" pixelWidth="200" >
+							<button action="Backup" pixelWidth="200" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button actionName="DownloadBackup" pixelWidth="200" >
+							<button action="DownloadBackup" pixelWidth="200" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button actionName="UploadBackup" pixelWidth="200" >
+							<button action="UploadBackup" pixelWidth="200" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button actionName="DeleteBackup" pixelWidth="200" >
+							<button action="DeleteBackup" pixelWidth="200" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
@@ -136,7 +136,7 @@
 							<spacer/>
 						</item>
 						<item>
-							<button actionName="Restore" pixelWidth="200" >
+							<button action="Restore" pixelWidth="200" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
@@ -184,7 +184,7 @@
 						<checkBox binding="notification" triState="false" />
 					</item>
 					<item>
-						<button actionName="RefreshDocumentTuples" />
+						<button action="RefreshDocumentTuples" />
 					</item>
 				</row>
 			</form>

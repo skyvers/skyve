@@ -42,7 +42,7 @@
 						<spacer/>
 					</item>
 					<item>
-						<button actionName="UpdateMyDetails" pixelWidth="150" />
+						<button action="UpdateMyDetails" pixelWidth="150" />
 					</item>
 				</row>
 			</form>

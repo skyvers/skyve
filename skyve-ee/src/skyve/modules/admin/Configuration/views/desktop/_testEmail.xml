@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view name="_testEmail" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
-	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
 	<form border="true" borderTitle="Test Email" visible="emailConfigured">
@@ -30,7 +30,7 @@
 		</row>
 		<row>
 			<item colspan="2" align="right">
-				<button actionName="SendMail" pixelWidth="90" />
+				<button action="SendMail" pixelWidth="90" />
 			</item>
 		</row>
 	</form>

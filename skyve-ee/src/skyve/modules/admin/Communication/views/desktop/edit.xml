@@ -37,7 +37,7 @@
 						<default binding="tag" />
 					</item>
 					<item align="right" colspan="2">
-						<button actionName="GetCount" pixelWidth="200" />
+						<button action="GetCount" pixelWidth="200" />
 					</item>
 				</row>
 			</form>
@@ -66,17 +66,17 @@
 					</row>
 					<row>
 						<item colspan="2" align="right">
-							<button actionName="GetResults" pixelWidth="200" />
+							<button action="GetResults" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
 						<item colspan="2" align="right">
-							<button actionName="CreateFiles" pixelWidth="200" />
+							<button action="CreateFiles" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
 						<item colspan="2" align="right">
-							<button actionName="SendNow" pixelWidth="200" />
+							<button action="SendNow" pixelWidth="200" />
 						</item>
 					</row>
 				</form>
@@ -101,8 +101,8 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button actionName="ZipBatch" pixelWidth="100" />
-					<button actionName="DeleteBatch" pixelWidth="100" />
+					<button action="ZipBatch" pixelWidth="100" />
+					<button action="DeleteBatch" pixelWidth="100" />
 				</hbox>
 			</vbox>
 
@@ -124,7 +124,7 @@
 						</combo>
 					</item>
 					<item>
-						<button actionName="TestSend" pixelWidth="200" />
+						<button action="TestSend" pixelWidth="200" />
 					</item>
 				</row>
 				<row>
@@ -204,10 +204,10 @@
 						<checkBox binding="includeCalendar" triState="false" />
 					</item>
 					<item>
-						<button actionName="AddUnsubscribeLink" pixelWidth="200" />
+						<button action="AddUnsubscribeLink" pixelWidth="200" />
 					</item>
 					<item>
-						<button actionName="AddImage" pixelWidth="200" />
+						<button action="AddImage" pixelWidth="200" />
 					</item>
 				</row>
 			</form>

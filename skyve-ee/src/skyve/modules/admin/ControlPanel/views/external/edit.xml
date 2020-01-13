@@ -33,7 +33,7 @@
 				<radio binding="sailTestStrategy" vertical="false" />
 			</item>
 			<item align="right">
-				<button actionName="DownloadClientSAIL" />
+				<button action="DownloadClientSAIL" />
 			</item>
 		</row>
 	</form>

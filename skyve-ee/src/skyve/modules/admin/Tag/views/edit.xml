@@ -37,7 +37,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="CopyTagToUser" pixelWidth="200" />
+						<button action="CopyTagToUser" pixelWidth="200" />
 					</item>
 				</row>
 			</form>
@@ -109,7 +109,7 @@
 							<spacer />
 						</item>
 						<item>
-							<button actionName="PerformCombination" pixelWidth="200" />
+							<button action="PerformCombination" pixelWidth="200" />
 						</item>
 					</row>
 				</form>
@@ -143,7 +143,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="Clear" pixelWidth="150" />
+						<button action="Clear" pixelWidth="150" />
 					</item>
 				</row>
 				<row>
@@ -151,7 +151,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="TagAll" pixelWidth="150" />
+						<button action="TagAll" pixelWidth="150" />
 					</item>
 				</row>
 			</form>
@@ -198,7 +198,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="UploadTagCriteria" />
+						<button action="UploadTagCriteria" />
 					</item>
 				</row>
 				<row>
@@ -286,7 +286,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="BulkDocumentAction" />
+						<button action="BulkDocumentAction" />
 					</item>
 				</row>
 				<row>

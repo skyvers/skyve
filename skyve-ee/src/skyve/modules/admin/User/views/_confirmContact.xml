@@ -57,7 +57,7 @@
 						<spacer />
 					</item>
 					<item>
-						<button actionName="Check" pixelWidth="150" />
+						<button action="Check" pixelWidth="150" />
 					</item>
 				</row>
 			</form>
@@ -106,7 +106,7 @@
 					<spacer />
 				</item>
 				<item>
-					<button actionName="New" pixelWidth="150" />
+					<button action="New" pixelWidth="150" />
 				</item>
 			</row>
 		</form>
