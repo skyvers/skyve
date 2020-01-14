@@ -190,6 +190,9 @@ public class JSONWriter {
 	}
 
 	private void document(Bean bean, Set<String> propertyNames, boolean topLevel) {
+		if (customer == null) {
+			throw new IllegalStateException("Marshalling a Skyve Bean requires a customer");
+		}
 		add("{");
 		try {
 			add(Bean.MODULE_KEY, bean.getBizModule(), propertyNames, topLevel);
