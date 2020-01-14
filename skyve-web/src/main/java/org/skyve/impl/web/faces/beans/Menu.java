@@ -215,7 +215,6 @@ public class Menu extends Harness {
 							itemAbsoluteHref;
 		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass, url);
 		result.setAjax(false);
-		result.setHref(url);
 		return result;
 	}
 
