@@ -67,7 +67,7 @@ public class ZoomInAction extends FacesAction<Void> {
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 			}
 	
-			ActionUtil.redirect(facesView, currentBean);
+			ActionUtil.redirectViewScopedConversation(facesView, currentBean);
 		}
 		
 		return null;

@@ -154,7 +154,7 @@ public class AddAction extends FacesAction<Void> {
 				Util.LOGGER.info("Set ViewBinding " + newViewBinding.toString());
 			}
 
-	    	ActionUtil.redirect(facesView, newBean);
+	    	ActionUtil.redirectViewScopedConversation(facesView, newBean);
 		}
 		
     	return null;

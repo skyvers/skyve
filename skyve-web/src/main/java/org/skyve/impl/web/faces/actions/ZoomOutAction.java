@@ -126,6 +126,6 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 		facesView.setViewBinding(newViewBinding);
 
     	Bean parentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
-		ActionUtil.redirect(facesView, parentBean);
+		ActionUtil.redirectViewScopedConversation(facesView, parentBean);
 	}
 }

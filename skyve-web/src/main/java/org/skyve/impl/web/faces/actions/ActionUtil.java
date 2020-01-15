@@ -67,7 +67,7 @@ public class ActionUtil {
     	}
     }
     
-    static final void redirect(FacesView<? extends Bean> facesView, Bean currentBean)
+    static final void redirectViewScopedConversation(FacesView<? extends Bean> facesView, Bean currentBean)
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
