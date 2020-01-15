@@ -1,5 +1,7 @@
 package org.skyve.impl.cdi;
 
+import java.io.Serializable;
+
 import javax.enterprise.inject.Alternative;
 
 import org.skyve.EXT;
@@ -11,7 +13,8 @@ import org.skyve.addin.AddInManager;
  * @author mike
  */
 @Alternative
-public class AddInManagerInjectable implements AddInManager {
+public class AddInManagerInjectable implements AddInManager, Serializable {
+	private static final long serialVersionUID = 3294370979190313613L;
 
 	@Override
 	public <T extends Object> T getExtension(Class<T> type) {
