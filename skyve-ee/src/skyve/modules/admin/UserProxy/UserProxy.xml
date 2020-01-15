@@ -30,6 +30,7 @@
 			<displayName>Created</displayName>
 			<description>The time and date when this user account was created.</description>
 		</dateTime>
+		<!-- If you change this association to be composed or optional, change it in admin.User document also -->
 		<association name="contact" type="aggregation" required="true">
 			<displayName>Contact</displayName>
 			<description>The contact details for the user.</description>

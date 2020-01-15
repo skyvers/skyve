@@ -88,7 +88,7 @@
 			<displayName>Last Authentication Failure</displayName>
 			<description>Time that last authentication failure occurred</description>
 		</timestamp>
-
+		<!-- If you change this association to be composed, change it in admin.UserProxy document also -->
 		<association name="contact" type="aggregation" required="true">
 			<displayName>Contact</displayName>
 			<description>The contact details for the user.</description>
