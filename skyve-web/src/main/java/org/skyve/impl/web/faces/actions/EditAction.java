@@ -16,7 +16,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.FacesWebContext;
@@ -67,7 +66,6 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				facesView.setViewBinding(sessionView.getViewBinding());
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
-				facesView.getHistory().addAll(sessionView.getHistory());
 				webContext = sessionView.getWebContext();
 				bean = (T) webContext.getCurrentBean();
 			}
@@ -86,12 +84,6 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 															parameters,
 															facesView.getUxUi().getName());
 				
-				// this is for the cancel, ok and delete buttons
-				String referer = WebUtil.getRefererHeader((HttpServletRequest) ec.getRequest());
-				if (referer != null) {
-					facesView.getHistory().push(referer);
-				}
-				if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 				webContext = new FacesWebContext();
 				webContext.setConversation(AbstractPersistence.get());
 				webContext.setCurrentBean(bean);
@@ -127,12 +119,6 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
 			// Its up to the app coder to disable the UI if appropriate.
 
-			// this is for the cancel, ok and delete buttons
-			String referer = WebUtil.getRefererHeader((HttpServletRequest) ec.getRequest());
-			if (referer != null) {
-				facesView.getHistory().push(referer);
-			}
-			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 			webContext = new FacesWebContext();
 			webContext.setConversation(persistence);
 			webContext.setCurrentBean(bean);

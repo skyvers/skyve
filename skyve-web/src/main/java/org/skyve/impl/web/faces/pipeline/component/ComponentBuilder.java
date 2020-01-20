@@ -153,6 +153,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												Button button, 
 												String formDisabledConditionName,
 												Action action);
+	public abstract UIComponent cancelButton(UIComponent component, 
+												String label,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText, 
+												Button button, 
+												String formDisabledConditionName,
+												Action action);
 	
 	public abstract UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image);
 	public abstract UIComponent dynamicImage(UIComponent component, 
@@ -475,6 +483,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											Action action);
 	
 	public abstract UIComponent upload(UIComponent component, Action action);
+
+	public abstract UIComponent cancel(UIComponent component, Action action);
 
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 

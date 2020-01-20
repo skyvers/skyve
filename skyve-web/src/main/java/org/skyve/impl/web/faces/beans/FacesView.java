@@ -1,6 +1,5 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
+import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
@@ -87,8 +87,6 @@ public class FacesView<T extends Bean> extends Harness {
 	private AbstractWebContext webContext;
 	// The bean currently under edit (for the view binding)
 	private BeanMapAdapter<T> currentBean = null;
-	// A stack of referring urls set as we edit beans from a list grid
-	private Stack<String> history = new Stack<>();
 	private Map<String, SkyveLazyDataModel> lazyDataModels = new TreeMap<>();
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
@@ -179,18 +177,7 @@ public class FacesView<T extends Bean> extends Harness {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	
-	public Stack<String> getHistory() {
-		return history;
-	}
-	
-	/**
-	 * Called by "renderer" EL expressions in the generated view components - OK, Cancel & Delete buttons.
-	 */
-	public boolean isHasHistory() {
-		return (! history.isEmpty());
-	}
-	
+
 	// The edited bean
 	@SuppressWarnings("unchecked")
 	public T getBean() {
@@ -227,14 +214,7 @@ public class FacesView<T extends Bean> extends Harness {
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			try {
-				if (! history.isEmpty()) {
-					c.getExternalContext().redirect(history.pop());
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			PrimeFaces.current().executeScript("SKYVE.PF.popHistory()");
 		}
 	}
 
@@ -249,32 +229,13 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 	}
 	
-	public void cancel() {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - cancel");
-		try {
-			if (! history.isEmpty()) {
-				FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
-			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void delete() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - delete");
 		new DeleteAction(this).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			try {
-				if (! history.isEmpty()) {
-					c.getExternalContext().redirect(history.pop());
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			PrimeFaces.current().executeScript("SKYVE.PF.popHistory()");
 		}
 	}
 

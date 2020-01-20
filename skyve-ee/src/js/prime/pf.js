@@ -1,6 +1,17 @@
 SKYVE.PF = function() {
 	// block multiple load attempts of google/leaflet maps JS libs.
 	var loadingMap = false;
+	
+	var getSessionHistory = function() {
+		var result = sessionStorage.sessionHistory;
+		if (result) {
+			result = JSON.parse(result);
+		}
+		else {
+			result = [];
+		}
+		return result;
+	};
 
 	// public
 	return {
@@ -133,6 +144,43 @@ SKYVE.PF = function() {
 			}
 		},
 
+		establishHistory: function() {
+			var sessionHistory = getSessionHistory();
+			if (sessionHistory.length == 0) {
+				var url = window.location.href;
+				if (url.match(/.*a\=e.*/)) {
+					var referrer = document.referrer;
+					if ((! referrer) || (referrer == '') || (referrer == url)) {
+						referrer = SKYVE.Util.CONTEXT_URL;
+					}
+					sessionHistory.push(referrer);
+					sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+				}
+			}
+		},
+		
+		startHistory: function(url) {
+			sessionStorage.sessionHistory = "[]";
+			window.location.assign(url);
+		},
+		
+		pushHistory: function(url) {
+			var sessionHistory = getSessionHistory();
+			sessionHistory.push(window.location.href);
+			sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+			window.location.assign(url);
+		},
+		
+		popHistory: function() {
+			var sessionHistory = getSessionHistory();
+			if (sessionHistory.length > 0) {
+				var url = sessionHistory.pop();
+				sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+				window.location.assign(url);
+			}
+		},
+		
+		
         toggleFilters: function(dataTableId) {
             var hiddenClass = 'hiddenFilter';
             // test for element that ends with the dataTableId as it may be in a naming container

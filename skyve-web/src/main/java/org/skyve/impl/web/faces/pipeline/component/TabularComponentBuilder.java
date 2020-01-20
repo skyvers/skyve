@@ -360,6 +360,30 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent cancelButton(UIComponent component, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										org.skyve.impl.metadata.view.widget.Button button, 
+										String formDisabledConditionName,
+										Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return cancelButton(label, 
+								iconStyleClass,
+								toolTip, 
+								button.getPixelWidth(),
+								button.getPixelHeight(),
+								confirmationText,
+								action.getDisabledConditionName(), 
+								formDisabledConditionName,
+								action.getInvisibleConditionName());
+	}
+
+	@Override
 	public UIComponent blurb(UIComponent component, 
 								String dataWidgetVar,
 								String value,
@@ -1190,8 +1214,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
         
 	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 	        StringBuilder start = new StringBuilder(64);
-	        start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
-			start.append("?a=").append(WebAction.e.toString()).append("'+s;return false;");
+	        start.append("var s=PF('").append(result.getId()).append("').selection[0];SKYVE.PF.pushHistory('");
+			start.append("?a=").append(WebAction.e.toString()).append("'+s);return false;");
 			ajax.setOnstart(start.toString());
 	        result.addClientBehavior("rowSelect", ajax);
     	}
@@ -1572,24 +1596,32 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		columnHeaderChildren.add(filterToggle);
 
 		if (canCreateDocument && createRendered) {
-			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+			CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 			setId(button, null);
 			button.setValue(null);
 			button.setTitle("New record");
 			button.setIcon("fa fa-plus");
+			button.setType("button");
 			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
 			if (disabled != null) {
 				button.setValueExpression("disabled", disabled);
 			}
-			StringBuilder value = new StringBuilder(128);
-			value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
-			value.append("&d=").append(documentName);
 			if (createUrlParams != null) {
+				StringBuilder value = new StringBuilder(128);
+				value.append("SKYVE.PF.pushHistory(\\'./?a=").append(WebAction.e.toString());
+				value.append("&m=").append(moduleName);
+				value.append("&d=").append(documentName);
 				value.append(createUrlParams);
-				button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+				value.append("\\');return false");
+				button.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 			}
 			else {
-				button.setHref(value.toString());
+				StringBuilder value = new StringBuilder(128);
+				value.append("SKYVE.PF.pushHistory('./?a=").append(WebAction.e.toString());
+				value.append("&m=").append(moduleName);
+				value.append("&d=").append(documentName);
+				value.append("');return false");
+				button.setOnclick(value.toString());
 			}
 			columnHeaderChildren.add(button);
 		}
@@ -1605,19 +1637,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
 													@SuppressWarnings("unused") Map<String, String> properties) {
-		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		final CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("View Detail");
 		button.setIcon("fa fa-chevron-right");
+		button.setType("button");
 		if (zoomDisabledConditionName != null) {
 			button.setValueExpression("disabled",
 					createValueExpressionFromCondition(zoomDisabledConditionName, null));
 		}
 		StringBuilder value = new StringBuilder(128);
-		value.append("./?a=").append(WebAction.e.toString());
-		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
-		button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+		value.append("SKYVE.PF.pushHistory(\\'./?a=").append(WebAction.e.toString());
+		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}\\');return false");
+		button.setValueExpression("onclick", ef.createValueExpression(elc, value.toString(), String.class));
 
 		return button;
 	}
@@ -2385,6 +2418,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent cancel(UIComponent component, Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return cancelButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
+								action.getToolTip(), 
+								null,
+								null,
+								action.getConfirmationText(),
+								action.getDisabledConditionName(), 
+								null,
+								action.getInvisibleConditionName());
+	}
+
+	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
@@ -2793,12 +2843,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				ImplicitActionName.Delete.equals(implicitActionName)) {
 			StringBuilder expression = new StringBuilder(128);
 			expression.append("empty ").append(managedBeanName).append(".viewBinding");
-			
-			// Add check for history before showing OK, Cancel or Delete buttons
-			if (! ImplicitActionName.Save.equals(implicitActionName)) {
-				expression.insert(0, "((");
-				expression.append(") and ").append(managedBeanName).append(".hasHistory)");
-			}
+
+/*			
+			// TODO Add check for security privileges
+			expression.insert(0, "((");
+			expression.append(") and ").append(managedBeanName).append(".hasHistory)");
+*/
 			
 			// Add invisible condition to the mix
 			if (invisible == null) {
@@ -3030,7 +3080,31 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		return result;
 	}
+
+	private UIComponent cancelButton(String title,
+										String iconStyleClass,
+										String tooltip,
+										Integer pixelWidth, 
+										Integer pixelHeight,
+										String confirmationText,
+										String disabled,
+										String formDisabled,
+										String invisible) {
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		result.setType("button");
+		result.setIcon((iconStyleClass == null) ? "fa fa-chevron-left" : iconStyleClass);
+		result.setValue((title == null) ? "Cancel" : title);
+		result.setTitle(tooltip);
+		result.setOnclick("SKYVE.PF.popHistory()");
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
+		setInvisible(result, invisible, null);
+		setDisabled(result, disabled, formDisabled);
+		setConfirmation(result, confirmationText);
+		setId(result, null);
 	
+		return result;
+	}
+
 	protected CommandLink downloadLink(String title,
 										String tooltip,
 										String actionName,

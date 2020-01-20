@@ -277,6 +277,30 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent cancelButton(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText, 
+										Button button,
+										String formDisabledConditionName,
+										Action action) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.cancelButton(result,
+											label,
+											iconStyleClass,
+											toolTip,
+											confirmationText,
+											button,
+											formDisabledConditionName,
+											action);
+		}
+		return result;
+	}
+
+
+	@Override
 	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -777,6 +801,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.upload(result, action);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent cancel(UIComponent component, Action action) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.cancel(result, action);
 		}
 		return result;
 	}

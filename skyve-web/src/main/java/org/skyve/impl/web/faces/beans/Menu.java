@@ -210,78 +210,84 @@ public class Menu extends Harness {
 																		Module itemModule,
 																		String itemQueryName,
 																		String itemAbsoluteHref) {
-		String url = (itemAbsoluteHref == null) ?
-						createMenuItemUrl(menuModule, itemModule, item, itemQueryName) :
-							itemAbsoluteHref;
-		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass, url);
+		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass);
 		result.setAjax(false);
+		result.setHref("#");
+		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));
 		return result;
 	}
 
-	public static String createMenuItemUrl(Module menuModule,
-											Module itemModule,
-											MenuItem item,
-											String itemQueryName) {
-		StringBuilder url = new StringBuilder(64);
-		if (item instanceof ListItem) {
+	public static String createMenuItemOnClick(Module menuModule,
+												Module itemModule,
+												MenuItem item,
+												String itemQueryName,
+												String itemAbsoluteHref) {
+		StringBuilder result = new StringBuilder(128);
+		result.append("SKYVE.PF.startHistory('");
+		
+		if (itemAbsoluteHref != null) {
+			result.append(itemAbsoluteHref.replace("'", "\\'"));
+		}
+		else if (item instanceof ListItem) {
 			ListItem listItem = (ListItem) item;
-			url.append(Util.getSkyveContextUrl());
-			url.append("/?a=").append(WebAction.l.toString()).append("&m=").append(menuModule.getName());
+			result.append(Util.getSkyveContextUrl());
+			result.append("/?a=").append(WebAction.l.toString()).append("&m=").append(menuModule.getName());
 			String modelName = listItem.getModelName();
 			if (modelName != null) {
-				url.append("&d=").append(listItem.getDocumentName());
-				url.append("&q=").append(listItem.getModelName());
+				result.append("&d=").append(listItem.getDocumentName());
+				result.append("&q=").append(listItem.getModelName());
 			}
 			else {
-				url.append("&q=").append(itemQueryName);
+				result.append("&q=").append(itemQueryName);
 			}
 		}
 		else if (item instanceof EditItem) {
-			url.append(Util.getSkyveContextUrl());
-			url.append("/?a=").append(WebAction.e.toString()).append("&m=").append(itemModule.getName());
-			url.append("&d=").append(((EditItem) item).getDocumentName());
+			result.append(Util.getSkyveContextUrl());
+			result.append("/?a=").append(WebAction.e.toString()).append("&m=").append(itemModule.getName());
+			result.append("&d=").append(((EditItem) item).getDocumentName());
 		}
 		else if (item instanceof CalendarItem) {
 			CalendarItem calendarItem = (CalendarItem) item;
-    		url.append(Util.getSkyveContextUrl());
-            url.append("/?a=").append(WebAction.c.toString()).append("&m=").append(menuModule.getName());
+    		result.append(Util.getSkyveContextUrl());
+            result.append("/?a=").append(WebAction.c.toString()).append("&m=").append(menuModule.getName());
 			String modelName = calendarItem.getModelName();
 			if (modelName != null) {
-				url.append("&d=").append(calendarItem.getDocumentName());
-				url.append("&q=").append(calendarItem.getModelName());
+				result.append("&d=").append(calendarItem.getDocumentName());
+				result.append("&q=").append(calendarItem.getModelName());
 			}
 			else {
-				url.append("&q=").append(itemQueryName);
+				result.append("&q=").append(itemQueryName);
 			}
         }
         else if (item instanceof TreeItem) {
         	TreeItem treeItem = (TreeItem) item;
-    		url.append(Util.getSkyveContextUrl());
-    		url.append("/?a=").append(WebAction.t.toString()).append("&m=").append(menuModule.getName());
+    		result.append(Util.getSkyveContextUrl());
+    		result.append("/?a=").append(WebAction.t.toString()).append("&m=").append(menuModule.getName());
 			String modelName = treeItem.getModelName();
 			if (modelName != null) {
-				url.append("&d=").append(treeItem.getDocumentName());
-				url.append("&q=").append(treeItem.getModelName());
+				result.append("&d=").append(treeItem.getDocumentName());
+				result.append("&q=").append(treeItem.getModelName());
 			}
 			else {
-				url.append("&q=").append(itemQueryName);
+				result.append("&q=").append(itemQueryName);
 			}
         }
         else if (item instanceof MapItem) {
             MapItem mapItem = (MapItem) item;
-    		url.append(Util.getSkyveContextUrl());
-            url.append("/?a=").append(WebAction.m.toString()).append("&m=").append(menuModule.getName());
+    		result.append(Util.getSkyveContextUrl());
+            result.append("/?a=").append(WebAction.m.toString()).append("&m=").append(menuModule.getName());
             String modelName = mapItem.getModelName();
 			if (modelName != null) {
-				url.append("&d=").append(mapItem.getDocumentName());
-				url.append("&q=").append(mapItem.getModelName());
+				result.append("&d=").append(mapItem.getDocumentName());
+				result.append("&q=").append(mapItem.getModelName());
 			}
 			else {
-				url.append("&q=").append(itemQueryName);
+				result.append("&q=").append(itemQueryName);
 			}
-			url.append("&b=").append(mapItem.getGeometryBinding());
+			result.append("&b=").append(mapItem.getGeometryBinding());
         }
-
-		return url.toString();
+		
+		result.append("');return false");
+		return result.toString();
 	}
 }
