@@ -28,8 +28,6 @@ import org.skyve.util.Binder.TargetMetaData;
 public abstract class ListModel<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -5786617076399299709L;
 
-	public static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
-	
 	public static final String ADMIN_MODULE_NAME = "admin";
 	public static final String GENERIC_DOCUMENT_NAME = "Generic";
 	public static final String MEMO_1_PROPERTY_NAME = "memo1";
@@ -134,7 +132,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 							parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
 						}
 					}
-	    			else if (ChildBean.PARENT_NAME.equals(parameterName) || parameterName.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
+	    			else if (ChildBean.PARENT_NAME.equals(parameterName) || parameterName.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
 						parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
 	    			}
 				}

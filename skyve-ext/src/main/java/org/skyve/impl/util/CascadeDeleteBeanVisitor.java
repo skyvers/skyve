@@ -13,8 +13,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.BeanVisitor;
 
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
-	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
-	
 	public CascadeDeleteBeanVisitor() {
 		super(false, false, true);
 	}
@@ -36,7 +34,7 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 			boolean validate = (owningRelation == null) || owningRelation.isPersistent();
 
 			// check if binding isn't a parent binding - parent beans are not cascaded
-			validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
+			validate = validate && (! binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX));
 
 			// don't check aggregations or embedded documents as they are not cascaded
 			if (validate && (owningRelation != null)) {

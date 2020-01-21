@@ -10,6 +10,8 @@ public interface ChildBean<T extends Bean> extends Bean {
 	 */
 	public static final String PARENT_NAME = "parent";
 	
+	public static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+	
 	/**
 	 * 
 	 * @return

@@ -704,7 +704,7 @@ public class SmartClientListServlet extends HttpServlet {
 								filterOperator = transformWildcardFilterOperator(filterOperator);
 	    					}
 	    				}
-		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ListModel.CHILD_PARENT_NAME_SUFFIX)) {
+		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
 		    				type = String.class;
 		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 		    			}
