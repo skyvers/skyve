@@ -809,7 +809,7 @@ t.printStackTrace();
 	private void setMandatories(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, true, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
@@ -818,6 +818,12 @@ t.printStackTrace();
 										Relation parentRelation,
 										Bean bean) 
 			throws Exception {
+				// Process an inverse if the inverse is specified as cascading.
+				if ((parentRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+					return false;
+				}
+			
 				Persistent persistent = document.getPersistent();
 				if ((persistent != null) && 
 						(persistent.getName() != null)) { // persistent document
@@ -826,9 +832,9 @@ t.printStackTrace();
 					// DataGroup and user are used to create a path
 					// for content and so can not change.
 					// 
-					// Content should be saved in the 1 workspace, this means bizCustomer is not sych a massive security risk.
+					// Content should be saved in the 1 workspace, this means bizCustomer is not syched a massive security risk.
 					// Customer is not the broadest scope - global is, so customer data can be interrelated at the customer level.
-					// ie bizhub could maintain global post codes for all its customers, who may link to it, but when the other
+					// eg bizhub could maintain global post codes for all its customers, who may link to it, but when the other
 					// customers save their data, we do not want them taking ownership of our postcodes.
 //					bean.setBizCustomer(customer.getName());
 
@@ -872,7 +878,7 @@ t.printStackTrace();
 	}
 
 	private static void firePreSaveEvents(final Customer customer, Document document, final Bean beanToSave) {
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -880,6 +886,12 @@ t.printStackTrace();
 										Relation parentRelation,
 										Bean bean)
 			throws Exception {
+				// Process an inverse if the inverse is specified as cascading.
+				if ((parentRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+					return false;
+				}
+				
 				// NOTE:- We only check if the document is a persistent document here,
 				// not if the reference (if any) is persistent.
 				// We could have a transient reference to a persistent document and 
@@ -917,15 +929,21 @@ t.printStackTrace();
 	}
 	
 	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, true, false) {
 			@Override
-			@SuppressWarnings( {"synthetic-access"})
+			@SuppressWarnings({"synthetic-access"})
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
 										Bean bean)
 			throws Exception {
+				// Process an inverse if the inverse is specified as cascading.
+				if ((parentRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+					return false;
+				}
+				
 				// NOTE:- We only check if the document is a persistent document here,
 				// not if the reference (if any) is persistent.
 				// We could have a transient reference to a persistent document and 
@@ -1118,7 +1136,7 @@ t.printStackTrace();
 	public void postMerge(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -1126,6 +1144,12 @@ t.printStackTrace();
 										Relation parentRelation,
 										Bean bean) 
 			throws Exception {
+				// Process an inverse if the inverse is specified as cascading.
+				if ((parentRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+					return false;
+				}
+				
 				Persistent persistent = document.getPersistent();
 				String persistentName = (persistent == null) ? null : persistent.getName();
 				
@@ -1165,13 +1189,19 @@ t.printStackTrace();
 	public void replaceTransientProperties(Document document, final Bean savedBean, final Bean unmergedBean) {
 		Customer customer = user.getCustomer();
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
 										Bean bean) {
+				// Process an inverse if the inverse is specified as cascading.
+				if ((parentRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+					return false;
+				}
+				
 				String attributeBinding = null;
 
 				try {

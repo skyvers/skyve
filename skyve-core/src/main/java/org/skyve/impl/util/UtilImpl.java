@@ -30,6 +30,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -336,16 +337,22 @@ public class UtilImpl {
 		private boolean changed = false;
 
 		private ChangedBeanVisitor() {
-			// Don't check inverses as they aren't cascaded anyway
-			super(false, false, false);
+			// Check inverses for the cascade attribute
+			super(false, true, false);
 		}
 
 		@Override
 		protected boolean accept(String binding,
-				Document documentAccepted,
-				Document owningDocument,
-				Relation owningRelation,
-				Bean beanAccepted) {
+									Document documentAccepted,
+									Document owningDocument,
+									Relation owningRelation,
+									Bean beanAccepted) {
+			// Process an inverse if the inverse is specified as cascading.
+			if ((owningRelation instanceof Inverse) && 
+					(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
+				return false;
+			}
+
 			if (beanAccepted.isChanged()) {
 				changed = true;
 				if (UtilImpl.DIRTY_TRACE)
