@@ -140,18 +140,6 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent cancelButton(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										Button button,
-										String formDisabledConditionName,
-										Action action) {
-		return component;
-	}
-
-	@Override
 	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
 		return component;
 	}
@@ -450,11 +438,6 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent upload(UIComponent component, Action action) {
-		return component;
-	}
-
-	@Override
-	public UIComponent cancel(UIComponent component, Action action) {
 		return component;
 	}
 

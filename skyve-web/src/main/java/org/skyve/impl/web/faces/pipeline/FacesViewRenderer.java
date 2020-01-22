@@ -619,17 +619,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String formDisabledConditionName) {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
-		if (ImplicitActionName.Cancel.equals(name)) {
-			c = cb.cancelButton(null,
-									label,
-									iconStyleClass,
-									toolTip,
-									confirmationText,
-									button,
-									formDisabledConditionName,
-									action);
-		}
-		else if (ImplicitActionName.Report.equals(name)) {
+		if (ImplicitActionName.Report.equals(name)) {
 			c = cb.reportButton(null,
 									label,
 									iconStyleClass,
@@ -2240,10 +2230,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
-					if (ImplicitActionName.Cancel.equals(name)) {
-						toolbarLayout.getChildren().add(cb.cancel(null, action));
-					}
-					else if (ImplicitActionName.Report.equals(name)) {
+					if (ImplicitActionName.Report.equals(name)) {
 						toolbarLayout.getChildren().add(cb.report(null, action));
 					}
 					else if (ImplicitActionName.Download.equals(name)) {

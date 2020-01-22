@@ -360,30 +360,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent cancelButton(UIComponent component, 
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										org.skyve.impl.metadata.view.widget.Button button, 
-										String formDisabledConditionName,
-										Action action) {
-		if (component != null) {
-			return component;
-		}
-
-		return cancelButton(label, 
-								iconStyleClass,
-								toolTip, 
-								button.getPixelWidth(),
-								button.getPixelHeight(),
-								confirmationText,
-								action.getDisabledConditionName(), 
-								formDisabledConditionName,
-								action.getInvisibleConditionName());
-	}
-
-	@Override
 	public UIComponent blurb(UIComponent component, 
 								String dataWidgetVar,
 								String value,
@@ -2418,23 +2394,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent cancel(UIComponent component, Action action) {
-		if (component != null) {
-			return component;
-		}
-
-		return cancelButton(action.getDisplayName(), 
-								action.getIconStyleClass(),
-								action.getToolTip(), 
-								null,
-								null,
-								action.getConfirmationText(),
-								action.getDisabledConditionName(), 
-								null,
-								action.getInvisibleConditionName());
-	}
-
-	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
@@ -2784,8 +2743,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					if (iconStyleClass == null) { 
 						result.setIcon("fa fa-chevron-left");
 					}
-					result.setImmediate(true); // no validation
-					result.setAjax(false); // normal request - which is slightly faster
+					result.setType("button"); // stop the post
+					result.setOnclick("SKYVE.PF.popHistory()");
 					break;
 				case Remove:
 					if (iconStyleClass == null) { 
@@ -3078,30 +3037,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(iframe, null);
 		overlay.getChildren().add(iframe);
 
-		return result;
-	}
-
-	private UIComponent cancelButton(String title,
-										String iconStyleClass,
-										String tooltip,
-										Integer pixelWidth, 
-										Integer pixelHeight,
-										String confirmationText,
-										String disabled,
-										String formDisabled,
-										String invisible) {
-		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		result.setType("button");
-		result.setIcon((iconStyleClass == null) ? "fa fa-chevron-left" : iconStyleClass);
-		result.setValue((title == null) ? "Cancel" : title);
-		result.setTitle(tooltip);
-		result.setOnclick("SKYVE.PF.popHistory()");
-		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
-		setInvisible(result, invisible, null);
-		setDisabled(result, disabled, formDisabled);
-		setConfirmation(result, confirmationText);
-		setId(result, null);
-	
 		return result;
 	}
 
