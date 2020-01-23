@@ -102,6 +102,7 @@
         	<param-value>
         		<![CDATA[
 					/javax.faces.resource/
+					/device.xhtml
         		]]>
         	</param-value>
         </init-param>
@@ -277,6 +278,7 @@
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
+<!--
 	<filter>
 		<filter-name>HSTSHeaderFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
@@ -305,7 +307,7 @@
 		<filter-name>HSTSHeaderFilter</filter-name>
 		<url-pattern>/login</url-pattern>
 	</filter-mapping>
-
+-->
     <filter>
         <display-name>RestFilter</display-name>
         <filter-name>RestFilter</filter-name>
@@ -315,7 +317,7 @@
         <filter-name>RestFilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
     </filter-mapping>
-    
+
     <!-- API documentation servlet -->
 	<!-- <servlet>
 		<servlet-name>DocsServlet</servlet-name>

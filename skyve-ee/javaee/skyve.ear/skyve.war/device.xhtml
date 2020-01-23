@@ -197,7 +197,6 @@
 					position: relative;
 					width: 100%;
 					height: 100%;
-					margin: auto;
 					border: none;
 				}
 
@@ -232,7 +231,7 @@
 			<p:commandLink rendered="false" /> <!-- to bring in jquery lib -->
 			<div id="device" class="smartphone">
 			  <div class="content">
-			    <iframe id="iframe" src="/skyve/" style="width:100%;border:none;height:100%"></iframe>
+			    <iframe id="iframe" src="#{skyve.baseHref}" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
 			<div style="position:fixed;bottom:0;right:0;width:230px;height:70px;">
