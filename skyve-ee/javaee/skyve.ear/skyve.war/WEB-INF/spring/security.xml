@@ -203,4 +203,21 @@
 		<b:property name="roleFormat" value="both" />
 	</b:bean>
 -->
+	<!-- Single Customer Basic Auth -->
+<!--
+	<authentication-manager id="authenticationManager">
+		...
+	</authentication-manager>
+
+	<http auto-config="false" use-expressions="true" entry-point-ref="skyveEntryPoint">
+ 		<custom-filter ref="skyveFilter" before="BASIC_AUTH_FILTER" />
+ 		...
+ 	</http>
+	<b:bean id="skyveEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+ 		<b:property name="realmName" value="Skyve" />
+ 	</b:bean>
+ 	<b:bean id="skyveFilter" class="org.skyve.impl.web.SpringSingleCustomerBasicAuthenticationFilter">
+ 		<b:constructor-arg name="authenticationManager" ref="authenticationManager" />
+ 	</b:bean>
+ -->
 </b:beans>
