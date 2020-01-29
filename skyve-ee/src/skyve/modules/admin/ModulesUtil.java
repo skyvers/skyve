@@ -780,7 +780,22 @@ public class ModulesUtil {
 		return newNumber;
 	}
 
-	/** returns a fomatted string representing the condition */
+	private static final long PRIME = 4294967291L;
+	private static final long HALF_PRIME = PRIME / 2L;
+
+	/**
+	 * Taking in a incrementing integer this function will create a fairly uniformly distributed,
+	 * sparse and unique set of numbers for inputs less than the prime (4,294,967,291).
+	 * See https://en.wikipedia.org/wiki/Quadratic_residue
+	 * @param incrementingNumber	The number to generate a unique pseudo random number for
+	 * @return	The quadratic residue.
+	 */
+	public static long getUniqueQuadraticResidue(long incrementingNumber) {
+	    long residue = (incrementingNumber * incrementingNumber) % PRIME;
+	    return (incrementingNumber <= HALF_PRIME) ? residue : (PRIME - residue);
+	}
+
+	/** returns a formatted string representing the condition */
 	public static String getConditionName(String conditionCode) {
 		String result = "is";
 
