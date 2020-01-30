@@ -103,6 +103,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param e
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void validate(T bean, ValidationException e) throws Exception {
 		// do nothing
 	}
@@ -117,7 +118,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "unused"})
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		return null;
 	}
@@ -131,7 +132,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
-	@SuppressWarnings({"static-method"})
+	@SuppressWarnings({"static-method", "unused"})
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		return null;
 	}	
@@ -146,6 +147,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	This bean to use to derive the values.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
+	@SuppressWarnings("unused")
 	public List<DomainValue> getDynamicDomainValues(String attributeName, T bean) throws Exception {
 		return null;
 	}
@@ -162,6 +164,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @return	The bean or null if it can't be resolved.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public T resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		return null;
 	}
@@ -174,6 +177,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be saved (persisted/updated)
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void preSave(T bean) throws Exception {
 		// do nothing
 	}
@@ -185,6 +189,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be saved (persisted/updated)
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void postSave(T bean) throws Exception {
 		// do nothing
 	}
@@ -197,6 +202,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be deleted.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void preDelete(T bean) throws Exception {
 		// do nothing
 	}
@@ -210,6 +216,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean that was loaded.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void postLoad(T bean) throws Exception {
 		// do nothing
 	}
@@ -222,6 +229,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param webContext	The web context.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public T preExecute(ImplicitActionName actionName, T bean, Bean parentBean, WebContext webContext) throws Exception {
 		return bean;
 	}
@@ -234,6 +242,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param webContext	The web context.
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unused")
 	public void preRerender(String source, T bean, WebContext webContext) throws Exception {
 		// do nothing
 	}
