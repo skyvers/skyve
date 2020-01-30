@@ -73,6 +73,7 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LoadingType;
@@ -121,6 +122,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -1142,8 +1144,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		Document drivingDocument =  model.getDrivingDocument();
+		Document drivingDocument = model.getDrivingDocument();
 		String owningModuleName = drivingDocument.getOwningModuleName();
+		Customer customer = CORE.getUser().getCustomer();
+		Module owningModule = customer.getModule(drivingDocument.getOwningModuleName());
 		String drivingDocumentName = drivingDocument.getName();
 
 		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
@@ -1224,7 +1228,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					modelExpression.append("['").append(name).append("','");
 					modelExpression.append(param.getOperator()).append("','");
 					if (binding != null) {
-						createUrlParams.append('{').append(binding).append("}']}");
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
+						Attribute targetAttribute = target.getAttribute();
+						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
+							createUrlParams.append(binding).append(".bizId']}");
+						}
+						else {
+							createUrlParams.append('{').append(binding).append("}']}");
+						}
 						modelExpression.append('{').append(binding).append("}'],");
 					}
 					else {
@@ -1242,7 +1253,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
 					modelExpression.append("['").append(name).append("','");
 					if (binding != null) {
-						createUrlParams.append('{').append(binding).append("}']}");
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
+						Attribute targetAttribute = target.getAttribute();
+						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
+							createUrlParams.append(binding).append(".bizId']}");
+						}
+						else {
+							createUrlParams.append('{').append(binding).append("}']}");
+						}
 						modelExpression.append('{').append(binding).append("}'],");
 					}
 					else {
