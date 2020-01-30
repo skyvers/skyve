@@ -791,8 +791,9 @@ public class ModulesUtil {
 	 * @return	The quadratic residue.
 	 */
 	public static long getUniqueQuadraticResidue(long incrementingNumber) {
-	    long residue = (incrementingNumber * incrementingNumber) % PRIME;
-	    return (incrementingNumber <= HALF_PRIME) ? residue : (PRIME - residue);
+		long x = incrementingNumber + 1001; // for sufficient entropy
+		long residue = (x * x) % PRIME;
+	    return (x <= HALF_PRIME) ? residue : (PRIME - residue);
 	}
 
 	/** returns a formatted string representing the condition */
