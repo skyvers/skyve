@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.actions;
 
 import java.util.logging.Level;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -18,6 +17,9 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -34,22 +36,30 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
 
-		if (FacesAction.validateRequiredFields()) {
-			AbstractPersistence persistence = AbstractPersistence.get();
-			PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
-	
-			// Run the bizlet
-			User user = CORE.getUser();
-			Customer customer = user.getCustomer();
-			Module module = customer.getModule(targetBean.getBizModule());
-			Document document = module.getDocument(customer, targetBean.getBizDocument());
+		AbstractPersistence persistence = AbstractPersistence.get();
+		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+    	User user = persistence.getUser();
+    	Customer customer = user.getCustomer();
+    	Module targetModule = customer.getModule(targetBean.getBizModule());
+		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
+		View view = targetDocument.getView(facesView.getUxUi().getName(), 
+											customer, 
+											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
+		ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
+		Boolean clientValidation = null;
+		Action action = view.getAction(ian.toString());
+    	if (action != null) { // could be Defaults action
+    		clientValidation = action.getClientValidation();
+    	}
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SaveAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
 
-			ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
+		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
+			// Run the bizlet
 			WebContext webContext = facesView.getWebContext();
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
 			if (! vetoed) {
-				Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				Bizlet<PersistentBean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + webContext);
 					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
@@ -58,14 +68,14 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 			}
 	
-			if (targetBean.isNotPersisted() && (! user.canCreateDocument(document))) {
+			if (targetBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
 				throw new SecurityException("create this data", user.getName());
 			}
-			else if (targetBean.isPersisted() && (! user.canUpdateDocument(document))) {
+			else if (targetBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
 				throw new SecurityException("update this data", user.getName());
 			}
 	
-			targetBean = persistence.save(targetBean);
+			targetBean = persistence.save(targetDocument, targetBean);
 			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 		}
 		
