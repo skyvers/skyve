@@ -167,7 +167,7 @@ public abstract class AbstractFacesBuilder {
 																	boolean map,
 																	String extraELConditionToAnd, 
 																	Class<?> typeReturned) {
-		return createValueExpressionFromFragment(String.format("%s.currentBean", managedBeanName), 
+		return createValueExpressionFromFragment(managedBeanName + ".currentBean",
 													false,
 													fragment, 
 													map, 

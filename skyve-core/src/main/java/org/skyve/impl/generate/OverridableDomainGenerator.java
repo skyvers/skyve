@@ -2243,8 +2243,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		methods.append("\t\treturn ").append(name).append(";\n");
 		methods.append("\t}\n");
 
-		// Mapped Accessor method
 		if (many) {
+			// Mapped Accessor method
 			accessorJavadoc(inverse, methods, true);
 			if (overriddenInverse) { // method in base class
 				methods.append("\n\t@Override");
@@ -2254,6 +2254,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
+			methods.append("\t}\n");
+
+			// Mapped Mutator method
+			mutatorJavadoc(inverse, methods, true);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void set").append(methodName);
+			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
 		}
 		// Mutator method

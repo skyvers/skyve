@@ -204,6 +204,15 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	}
 
 	/**
+	 * {@link #inverseAggregatedAssociation} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setInverseAggregatedAssociationElementById(String bizId, MappedExtensionJoinedStrategyExtension element) {
+		 setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
 	 * {@link #derivedInteger} accessor.
 	 * @return	The value.
 	 **/

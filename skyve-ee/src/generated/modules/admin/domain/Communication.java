@@ -1205,6 +1205,15 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #subscriptions} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setSubscriptionsElementById(String bizId, Subscription element) {
+		 setElementById(subscriptions, element);
+	}
+
+	/**
 	 * Batch Selected
 	 *
 	 * @return The condition

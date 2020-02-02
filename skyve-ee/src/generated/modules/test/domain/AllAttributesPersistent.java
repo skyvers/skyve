@@ -619,6 +619,15 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #inverseAggregatedAssociation} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setInverseAggregatedAssociationElementById(String bizId, AllAttributesPersistent element) {
+		 setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
 	 * {@link #longInteger} accessor.
 	 * @return	The value.
 	 **/
