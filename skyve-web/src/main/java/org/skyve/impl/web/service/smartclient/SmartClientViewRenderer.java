@@ -892,6 +892,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderLabel(String value, Label label) {
+		// does the value have binding expressions in them? - (?s) means mutliline match
+		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
+		if (dynamic) {
+			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
+											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
+		}
+
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({");
 
@@ -905,22 +912,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
 		}
 		
-		String binding = label.getBinding();
+		invisible(label.getInvisibleConditionName(), code);
 
-		// does the value have binding expressions in them? - (?s) means mutliline match
-		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
-		if (dynamic) {
-			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
-											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
-		}
-		
+		String binding = label.getBinding();
 		if (binding == null) {
 			code.append("value:'").append(SmartClientGenerateUtils.processString(value, false, false));
 		}
 		else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
 		}
-		
 		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
