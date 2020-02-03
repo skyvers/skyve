@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
@@ -210,5 +211,28 @@ public class BindTests extends AbstractSkyveTest {
 					aap);
 		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
+	}
+	
+	@Test
+	public void testFormatMessage() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		aap.setText("Test");
+		Assert.assertEquals("Test", Binder.formatMessage(c, "Test", aap));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{text}", aap));
+		Assert.assertEquals("TestTest", Binder.formatMessage(c, "{text}{text}", aap));
+		// Test escapes
+		Assert.assertEquals("{text}Test", Binder.formatMessage(c, "\\{text\\}{text}", aap));
+		Assert.assertEquals("{textTest", Binder.formatMessage(c, "\\{text{text}", aap));
+		Assert.assertEquals("text}Test", Binder.formatMessage(c, "text\\}{text}", aap));
+		Assert.assertEquals("{text", Binder.formatMessage(c, "\\{text", aap));
+		aap.setText("{text}");
+		// Test '{' and '}' are left in tact when they are part of the value substituted
+		Assert.assertEquals("{text}{text}", Binder.formatMessage(c, "{text}{text}", aap));
+	}
+	
+	@Test(expected = MetaDataException.class)
+	public void testDanglingMessageFormat() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		Assert.assertEquals("{text", Binder.formatMessage(c, "{text", aap));
 	}
 }

@@ -81,6 +81,9 @@ public final class BindUtil {
 					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
 
 				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+				if (closedCurlyBraceIndex < openCurlyBraceIndex) {
+					throw new MetaDataException('[' + message + "] does not have a matching '}' for the '{' at position " + (openCurlyBraceIndex + 1));
+				}
 				String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
 				boolean found = false;
 				Exception cause = null;
@@ -93,7 +96,11 @@ public final class BindUtil {
 							// property, it could be a condition or an implicit property.
 							String displayValue = BindUtil.getDisplay(customer, bean, binding);
 							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+							// move the openCurlyBraceIndex along by the display value length so that
+							// any '{' occurrences replaced in as literals above are skipped.
+							openCurlyBraceIndex += displayValue.length();
+							// find the next occurrence
+							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
 							found = true;
 							
 							break;
