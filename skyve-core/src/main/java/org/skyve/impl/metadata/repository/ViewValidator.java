@@ -947,7 +947,7 @@ class ViewValidator extends ViewVisitor {
 		if (markup == null) {
 			throw new MetaDataException(blurbIdentifier + " in " + viewIdentifier + " has no markup specified.");
 		}
-		validateMessageBindings(blurb.getMarkup(), blurbIdentifier, "markup");
+		validateMessageBindings(markup, blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 	}
 
