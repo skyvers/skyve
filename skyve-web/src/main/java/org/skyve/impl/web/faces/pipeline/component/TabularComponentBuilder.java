@@ -118,6 +118,7 @@ import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -192,10 +193,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setOnTabChange("SKYVE.PF.tabChange()");
 		}
 		else {
+			result.setStyle("display:none");
 			result.setWidgetVar(id);
 			result.setOnTabChange(String.format("SKYVE.PF.tabChange();sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));			
 
-			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){PF('%s').select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
+			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){var t=PF('%s');t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
 													id,
 													moduleName, documentName, id,
 													moduleName, documentName, id,
@@ -1228,8 +1230,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					modelExpression.append("['").append(name).append("','");
 					modelExpression.append(param.getOperator()).append("','");
 					if (binding != null) {
-						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-						Attribute targetAttribute = target.getAttribute();
+						Attribute targetAttribute = null;
+						try {
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
+							targetAttribute = (target != null) ? target.getAttribute() : null;
+						}
+						catch (@SuppressWarnings("unused") MetaDataException e) {
+							// binding is not an attribute
+						}
 						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
 							createUrlParams.append(binding).append(".bizId']}");
 						}
@@ -1253,8 +1261,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
 					modelExpression.append("['").append(name).append("','");
 					if (binding != null) {
-						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-						Attribute targetAttribute = target.getAttribute();
+						Attribute targetAttribute = null;
+						try {
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
+							targetAttribute = (target != null) ? target.getAttribute() : null;
+						}
+						catch (@SuppressWarnings("unused") MetaDataException e) {
+							// binding is not an attribute
+						}
 						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
 							createUrlParams.append(binding).append(".bizId']}");
 						}
