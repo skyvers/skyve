@@ -1,9 +1,10 @@
 package org.skyve.impl.cdi;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
 
 import org.skyve.addin.AddInManager;
 import org.skyve.metadata.customer.Customer;
@@ -11,8 +12,10 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
-@Singleton
-public class SkyveCDIProducer {
+@ApplicationScoped
+public class SkyveCDIProducer implements Serializable {
+	private static final long serialVersionUID = -2629541397565705456L;
+
 	@Produces
 	public static Persistence getPersistence() {
 		return new PersistenceInjectable();
