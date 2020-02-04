@@ -24,10 +24,14 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
 		ConfigurationExtension result = super.newInstance(bean);
 
-		// Set the user name and email to the logged in user
-		UserProxy user = ModulesUtil.currentAdminUserProxy();
-		Contact contact = user.getContact();
-		bean.setEmailFrom(contact.getEmail1());
+		// Set the user name and email to the logged in user (if logged in)
+		if (result.getEmailFrom() == null) {
+			UserProxy user = ModulesUtil.currentAdminUserProxy();
+			if (user != null) {
+				Contact contact = user.getContact();
+				result.setEmailFrom(contact.getEmail1());
+			}
+		}
 
 		if (result.getPasswordComplexityModel() == null) {
 			result.setPasswordComplexityModel(ComplexityModel.DEFAULT_COMPLEXITY_MODEL);
@@ -49,11 +53,12 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		}
 
 		// initialise the startup bean
-		StartupExtension startup = Startup.newInstance();
-		startup.loadProperties();
-		bean.setStartup(startup);
+		if (result.getStartup() == null) {
+			StartupExtension startup = Startup.newInstance();
+			result.setStartup(startup);
+		}
 
-		return result;
+		return super.newInstance(result);
 	}
 
 	@Override
