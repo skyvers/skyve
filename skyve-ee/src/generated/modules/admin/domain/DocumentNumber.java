@@ -93,7 +93,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 														"{moduleName}.{documentName}.{sequenceName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

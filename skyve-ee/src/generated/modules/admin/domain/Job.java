@@ -101,7 +101,7 @@ public class Job extends AbstractPersistentBean {
 														"Job {displayName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

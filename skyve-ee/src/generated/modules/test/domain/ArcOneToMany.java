@@ -72,7 +72,7 @@ public class ArcOneToMany extends AbstractPersistentBean {
 														"ArcOneToMany",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -107,6 +107,6 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setArcsElementById(String bizId, AnyBase element) {
-		 setElementById(arcs, element);
+		setElementById(arcs, element);
 	}
 }

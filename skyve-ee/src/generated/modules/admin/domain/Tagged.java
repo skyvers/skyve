@@ -88,7 +88,7 @@ public class Tagged extends AbstractPersistentBean {
 														"Tagged Item",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

@@ -70,7 +70,7 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

@@ -26,7 +26,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class ImportExport extends AbstractPersistentBean {
+public abstract class ImportExport extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -397,7 +397,7 @@ public class ImportExport extends AbstractPersistentBean {
 														"{moduleName}.{documentName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -615,7 +615,8 @@ public class ImportExport extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setImportExportColumnsElementById(String bizId, ImportExportColumn element) {
-		 setElementById(importExportColumns, element);
+		setElementById(importExportColumns, element);
+		element.setParent((ImportExportExtension) this);
 	}
 
 	/**

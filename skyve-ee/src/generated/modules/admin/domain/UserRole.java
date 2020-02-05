@@ -74,7 +74,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 														"{roleName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

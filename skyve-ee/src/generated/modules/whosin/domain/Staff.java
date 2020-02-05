@@ -240,7 +240,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 														"{contact.name} ({contact.mobile})",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

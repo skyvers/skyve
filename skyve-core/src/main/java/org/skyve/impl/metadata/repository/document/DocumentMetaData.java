@@ -372,7 +372,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(bizKeyExpression).append("\",\n");
 			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
 			sb.append("\t\t}\n");
-			sb.append("\t\tcatch (Exception e) {\n");
+			sb.append("\t\tcatch (@SuppressWarnings(\"unused\") Exception e) {\n");
 			sb.append("\t\t\treturn \"Unknown\";\n");
 			sb.append("\t\t}");
 			result.setBizKeyMethodCode(sb.toString());

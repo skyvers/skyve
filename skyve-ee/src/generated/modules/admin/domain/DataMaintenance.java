@@ -35,7 +35,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class DataMaintenance extends AbstractPersistentBean {
+public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -664,7 +664,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 														"Data Maintenance",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -770,7 +770,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRefreshDocumentsElementById(String bizId, DataMaintenanceModuleDocument element) {
-		 setElementById(refreshDocuments, element);
+		setElementById(refreshDocuments, element);
 	}
 
 	/**

@@ -28,7 +28,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class Startup extends AbstractTransientBean {
+public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden

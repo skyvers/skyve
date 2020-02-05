@@ -26,7 +26,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 @XmlType
 @XmlRootElement
 @PolymorphicPersistentBean
-public class MappedExtensionSingleStrategy extends MappedBase {
+public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -102,7 +102,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -155,7 +155,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAggregatedCollectionElementById(String bizId, MappedExtensionSingleStrategyExtension element) {
-		 setElementById(aggregatedCollection, element);
+		setElementById(aggregatedCollection, element);
 	}
 
 	/**
@@ -182,7 +182,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setComposedCollectionElementById(String bizId, MappedExtensionSingleStrategyExtension element) {
-		 setElementById(composedCollection, element);
+		setElementById(composedCollection, element);
 	}
 
 	/**

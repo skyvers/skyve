@@ -488,7 +488,7 @@ public class Tag extends AbstractPersistentBean {
 														"Tag {name}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

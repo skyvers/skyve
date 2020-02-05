@@ -90,7 +90,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 														"Contact {contact.bizKey}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

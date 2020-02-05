@@ -85,7 +85,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 														"{userName} - {year}/{month} = {numberOfHits}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

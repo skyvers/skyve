@@ -74,7 +74,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 														"{roleName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

@@ -69,7 +69,7 @@ public class AnyDerived2 extends AnyBase {
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

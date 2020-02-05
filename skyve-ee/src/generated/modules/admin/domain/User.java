@@ -38,7 +38,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class User extends AbstractPersistentBean {
+public abstract class User extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -796,7 +796,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setGroupsElementById(String bizId, GroupExtension element) {
-		 setElementById(groups, element);
+		setElementById(groups, element);
 	}
 
 	/**
@@ -823,7 +823,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRolesElementById(String bizId, UserRole element) {
-		 setElementById(roles, element);
+		setElementById(roles, element);
+		element.setParent((UserExtension) this);
 	}
 
 	/**
@@ -904,7 +905,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
-		 setElementById(candidateContacts, element);
+		setElementById(candidateContacts, element);
+		element.setParent((UserExtension) this);
 	}
 
 	/**
@@ -1018,7 +1020,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAssignedRolesElementById(String bizId, UserRole element) {
-		 setElementById(assignedRoles, element);
+		setElementById(assignedRoles, element);
 	}
 
 	/**

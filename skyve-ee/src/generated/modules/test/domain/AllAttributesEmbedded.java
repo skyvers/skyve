@@ -296,7 +296,7 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -385,7 +385,7 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAggregatedCollectionElementById(String bizId, AllAttributesPersistent element) {
-		 setElementById(aggregatedCollection, element);
+		setElementById(aggregatedCollection, element);
 	}
 
 	/**

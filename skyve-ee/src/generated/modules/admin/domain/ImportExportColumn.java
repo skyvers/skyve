@@ -182,7 +182,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 														"Column {columnName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

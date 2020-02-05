@@ -124,7 +124,7 @@ public class Office extends AbstractPersistentBean {
 														"{buildingName} {streetAddress} {suburb}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

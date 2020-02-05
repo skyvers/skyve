@@ -165,7 +165,7 @@ public class UniqueConstraintNullable extends AbstractPersistentBean {
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

@@ -76,7 +76,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

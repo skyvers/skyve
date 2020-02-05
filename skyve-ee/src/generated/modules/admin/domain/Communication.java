@@ -29,7 +29,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class Communication extends AbstractPersistentBean {
+public abstract class Communication extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -517,7 +517,7 @@ public class Communication extends AbstractPersistentBean {
 														"{description}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

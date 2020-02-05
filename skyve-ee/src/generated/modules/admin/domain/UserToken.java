@@ -91,7 +91,7 @@ public class UserToken extends AbstractPersistentBean {
 														"{userName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

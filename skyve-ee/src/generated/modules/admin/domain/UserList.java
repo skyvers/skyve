@@ -120,7 +120,7 @@ public class UserList extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setUserInvitationGroupsElementById(String bizId, GroupExtension element) {
-		 setElementById(userInvitationGroups, element);
+		setElementById(userInvitationGroups, element);
 	}
 
 	/**
@@ -166,9 +166,7 @@ public class UserList extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isEmailConfigured() {
-		return ((
-					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
-						.validSMTPHost()));
+		return (modules.admin.Configuration.ConfigurationExtension.validSMTPHost());
 	}
 
 	/**

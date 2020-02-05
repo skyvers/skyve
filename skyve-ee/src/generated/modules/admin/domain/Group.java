@@ -21,7 +21,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  */
 @XmlType
 @XmlRootElement
-public class Group extends AbstractPersistentBean {
+public abstract class Group extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -93,7 +93,7 @@ public class Group extends AbstractPersistentBean {
 														"{name}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -164,7 +164,8 @@ public class Group extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRolesElementById(String bizId, GroupRole element) {
-		 setElementById(roles, element);
+		setElementById(roles, element);
+		element.setParent((GroupExtension) this);
 	}
 
 	/**
@@ -191,6 +192,7 @@ public class Group extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setCandidateRolesElementById(String bizId, GroupRole element) {
-		 setElementById(candidateRoles, element);
+		setElementById(candidateRoles, element);
+		element.setParent((GroupExtension) this);
 	}
 }

@@ -36,7 +36,7 @@ public class BackupTest extends AbstractSkyveTestDispose {
 		p.save(mejse);
 		p.commit(false);
 		BackupJob job = new BackupJob();
-		job.setBean(new DataMaintenance());
+		job.setBean(DataMaintenance.newInstance());
 		job.execute();
 		backupZip = job.getBackupZip();
 	}

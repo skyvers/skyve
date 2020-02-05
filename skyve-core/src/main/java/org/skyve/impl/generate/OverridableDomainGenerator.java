@@ -2010,13 +2010,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private void addReference(Reference reference,
 								boolean overriddenReference,
 								Customer customer,
-								Module module,
+								Module owningModule,
+								String owningDocumentName,
+								boolean owningDomainExtensionClassExists,
 								String packagePath,
 								Set<String> imports,
 								StringBuilder attributes,
 								StringBuilder methods) {
 		String propertyClassName = reference.getDocumentName();
-		Document propertyDocument = module.getDocument(customer, propertyClassName);
+		Document propertyDocument = owningModule.getDocument(customer, propertyClassName);
 		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
@@ -2111,7 +2113,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
-			methods.append("\t\t setElementById(").append(name).append(", element);\n");
+			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
+			// set the parent for a child collection
+			Collection collection = (Collection) reference;
+			if (CollectionType.child.equals(collection.getType())) {
+				methods.append("\t\telement.setParent(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
 			methods.append("\t}\n");
 		}
 		else { // this is an association Attribute
@@ -2519,6 +2530,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(module.getName());
 		DomainClass documentClass = (documentClasses == null) ? null : documentClasses.get(documentName);
 
+		// Determine if there is an Extension class defined in the document package
+		String modulePath = repository.MODULES_NAMESPACE + module.getName();
+		boolean domainExtensionClassExists = domainExtensionClassExists(modulePath, documentName);
+
 		// Document and module names
 
 		if ((! overridden) || (baseDocumentName == null)) { // not an extension
@@ -2544,8 +2559,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t}\n");
 
 			// Check for Extension class defined and alter the class returned accordingly
-			String modulePath = repository.MODULES_NAMESPACE + module.getName();
-			if (domainExtensionClassExists(modulePath, documentName)) {
+			if (domainExtensionClassExists) {
 				imports.add(new StringBuilder(256).append("modules.")
 													.append(module.getName())
 													.append('.')
@@ -2643,6 +2657,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										documentClass.attributes.containsKey(attribute.getName())),
 									customer,
 									module,
+									documentName,
+									domainExtensionClassExists,
 									packagePath,
 									imports,
 									attributes,
@@ -2804,8 +2820,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														.append(parentPackageName)
 														.append(".domain.").toString();
 			parentClassName = parentDocumentName;
-			String modulePath = repository.MODULES_NAMESPACE + parentPackageName;
-			if (domainExtensionClassExists(modulePath, parentDocumentName)) {
+			String parentDocumentModulePath = repository.MODULES_NAMESPACE + parentPackageName;
+			if (domainExtensionClassExists(parentDocumentModulePath, parentDocumentName)) {
 				parentPackagePath = new StringBuilder(128).append("modules.")
 															.append(parentPackageName)
 															.append('.')
@@ -3114,7 +3130,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			contents.append("\n@PolymorphicPersistentBean");
 		}
 		contents.append("\npublic ");
-		if (baseDocumentName == null) {
+		if (domainExtensionClassExists) {
+			contents.append("abstract ");
+		}
+		else if (baseDocumentName == null) {
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());
 			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 			if (document.isAbstract() || ((domainClass != null) && (domainClass.isAbstract))) {

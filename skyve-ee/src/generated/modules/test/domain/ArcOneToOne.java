@@ -70,7 +70,7 @@ public class ArcOneToOne extends AbstractPersistentBean {
 														"ArcOneToOne",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

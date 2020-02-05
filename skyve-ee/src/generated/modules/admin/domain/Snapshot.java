@@ -98,7 +98,7 @@ public class Snapshot extends AbstractPersistentBean {
 														"{name} for {queryName} in module {moduleName}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

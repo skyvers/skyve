@@ -100,7 +100,7 @@ public class UserProxy extends AbstractPersistentBean {
 														"{userName} - {contact.bizKey}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

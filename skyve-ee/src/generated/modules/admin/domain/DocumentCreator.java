@@ -105,7 +105,7 @@ public class DocumentCreator extends AbstractTransientBean {
 														"Document Creator",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

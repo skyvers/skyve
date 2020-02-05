@@ -18,7 +18,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class InjectedDocument extends AbstractPersistentBean {
+public abstract class InjectedDocument extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -70,7 +70,7 @@ public class InjectedDocument extends AbstractPersistentBean {
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

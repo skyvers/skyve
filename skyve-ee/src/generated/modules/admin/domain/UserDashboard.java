@@ -21,7 +21,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  */
 @XmlType
 @XmlRootElement
-public class UserDashboard extends AbstractTransientBean {
+public abstract class UserDashboard extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -79,7 +79,7 @@ public class UserDashboard extends AbstractTransientBean {
 														"User Dashboard",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -132,6 +132,6 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setFavouritesElementById(String bizId, Generic element) {
-		 setElementById(favourites, element);
+		setElementById(favourites, element);
 	}
 }

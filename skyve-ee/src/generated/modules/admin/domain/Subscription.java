@@ -111,7 +111,7 @@ public class Subscription extends AbstractPersistentBean {
 														"{communication.description} for {receiverIdentifier}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

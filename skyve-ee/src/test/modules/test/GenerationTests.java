@@ -21,8 +21,8 @@ public class GenerationTests extends AbstractSkyveTest {
 	@SuppressWarnings({ "cast", "static-method" })
 	public void testGenerateExtensionHierarchy() {
 		MappedBase mb = new MappedBase();
-		MappedExtensionSingleStrategy mess = new MappedExtensionSingleStrategy();
-		MappedExtensionJoinedStrategy mejs = new MappedExtensionJoinedStrategy();
+		MappedExtensionSingleStrategy mess = MappedExtensionSingleStrategy.newInstance();
+		MappedExtensionJoinedStrategy mejs = MappedExtensionJoinedStrategy.newInstance();
 		MappedSubclassedSingleStrategy msss = new MappedSubclassedSingleStrategy();
 		MappedSubclassedJoinedStrategy msjs = new MappedSubclassedJoinedStrategy();
 		Assert.assertTrue(new AllAttributesPersistent() instanceof PersistentBean);

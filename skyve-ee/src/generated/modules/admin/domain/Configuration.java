@@ -28,7 +28,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class Configuration extends AbstractPersistentBean {
+public abstract class Configuration extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -249,7 +249,7 @@ public class Configuration extends AbstractPersistentBean {
 														"Admin Setup",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

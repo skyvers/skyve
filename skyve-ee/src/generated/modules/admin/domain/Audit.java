@@ -224,7 +224,7 @@ public class Audit extends AbstractPersistentBean {
 														"{operation} by {userName} at {timestamp}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

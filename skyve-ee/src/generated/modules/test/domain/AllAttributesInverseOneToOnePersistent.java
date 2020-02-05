@@ -288,7 +288,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -359,7 +359,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAggCollectionElementById(String bizId, AllAttributesInverseOneToOnePersistent element) {
-		 setElementById(aggCollection, element);
+		setElementById(aggCollection, element);
 	}
 
 	/**

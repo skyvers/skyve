@@ -99,6 +99,6 @@ public class SystemDashboard extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setStatusElementById(String bizId, Generic element) {
-		 setElementById(status, element);
+		setElementById(status, element);
 	}
 }

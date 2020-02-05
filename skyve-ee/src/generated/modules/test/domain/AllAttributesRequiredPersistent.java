@@ -288,7 +288,7 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 														"{text}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}
@@ -359,7 +359,7 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAggregatedCollectionElementById(String bizId, AllAttributesRequiredPersistent element) {
-		 setElementById(aggregatedCollection, element);
+		setElementById(aggregatedCollection, element);
 	}
 
 	/**

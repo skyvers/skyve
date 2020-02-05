@@ -77,7 +77,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 														"{userName} @ {loginDateTime}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

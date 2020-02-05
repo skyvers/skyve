@@ -29,7 +29,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class ControlPanel extends AbstractTransientBean {
+public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -1018,7 +1018,7 @@ public class ControlPanel extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setStartupPropertiesElementById(String bizId, Generic element) {
-		 setElementById(startupProperties, element);
+		setElementById(startupProperties, element);
 	}
 
 	/**
@@ -1045,7 +1045,7 @@ public class ControlPanel extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setOriginalStartupPropertiesElementById(String bizId, Generic element) {
-		 setElementById(originalStartupProperties, element);
+		setElementById(originalStartupProperties, element);
 	}
 
 	/**

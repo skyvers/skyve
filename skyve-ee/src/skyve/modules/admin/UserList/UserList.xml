@@ -42,9 +42,8 @@
 	<conditions>
 		<condition name="emailConfigured">
 			<expression>
-				<![CDATA[(
-					((modules.admin.Configuration.ConfigurationExtension) (modules.admin.domain.Configuration.newInstance()))
-						.validSMTPHost())
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
 				]]>
 			</expression>
 		</condition>

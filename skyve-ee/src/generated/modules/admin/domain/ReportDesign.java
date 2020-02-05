@@ -838,7 +838,7 @@ public class ReportDesign extends AbstractTransientBean {
 														"{name}",
 														this);
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
 		}
 	}

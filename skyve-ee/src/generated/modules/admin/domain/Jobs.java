@@ -99,6 +99,6 @@ public class Jobs extends AbstractTransientBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRunningJobsElementById(String bizId, Job element) {
-		 setElementById(runningJobs, element);
+		setElementById(runningJobs, element);
 	}
 }
