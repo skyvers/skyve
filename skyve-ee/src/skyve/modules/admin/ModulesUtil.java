@@ -720,13 +720,14 @@ public class ModulesUtil {
 	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
 	 * 
-	 * @param prefix
+	 * @param suppliedPrefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
-	 * @param numberLength
-	 *        - the minimum length of the number when specified as a string
 	 * @param lastNumber
 	 *        - the number to increment
+	 * @param numberLength
+	 *        - the minimum length of the number when specified as a string
+	 *        
 	 * @return - the next number
 	 */
 	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {

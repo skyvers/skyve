@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
@@ -152,6 +154,16 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		}
 		
 		return super.getDynamicDomainValues(attributeName, bean);
+	}
+
+	@Override
+	public DataMaintenance preExecute(ImplicitActionName actionName, DataMaintenance bean, Bean parentBean, WebContext webContext) throws Exception {
+
+		if(ImplicitActionName.Edit.equals(actionName) || ImplicitActionName.New.equals(actionName)) {
+			bean.setRestorePreProcess(RestorePreProcess.deleteExistingTableDataUsingMetadata);
+		}
+		
+		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
 
