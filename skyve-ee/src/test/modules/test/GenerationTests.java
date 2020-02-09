@@ -28,14 +28,14 @@ public class GenerationTests extends AbstractSkyveTest {
 		Assert.assertTrue(new AllAttributesPersistent() instanceof PersistentBean);
 		Assert.assertTrue(new Hierarchical() instanceof HierarchicalBean<?>);
 		Assert.assertTrue(mb instanceof PersistentBean);
-		Assert.assertFalse(mb.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // mapped bean
+		Assert.assertFalse(MappedBase.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // mapped bean
 		Assert.assertTrue(mejs instanceof MappedBase);
-		Assert.assertTrue(mejs.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // joined strategy
+		Assert.assertTrue(MappedExtensionJoinedStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // joined strategy
 		Assert.assertTrue(mess instanceof MappedBase);
-		Assert.assertTrue(mess.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // single strategy
+		Assert.assertTrue(MappedExtensionSingleStrategy.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // single strategy
 		Assert.assertTrue(msjs instanceof MappedExtensionJoinedStrategyExtension);
-		Assert.assertFalse(msjs.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
+		Assert.assertFalse(MappedExtensionJoinedStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
 		Assert.assertTrue(msss instanceof MappedExtensionSingleStrategyExtension);
-		Assert.assertFalse(msss.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
+		Assert.assertFalse(MappedExtensionSingleStrategyExtension.class.isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
 	}
 }
