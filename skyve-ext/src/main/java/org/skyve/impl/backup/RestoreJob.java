@@ -1,8 +1,11 @@
 package org.skyve.impl.backup;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -252,8 +255,8 @@ public class RestoreJob extends CancellableJob {
 
 				long rowCount = 0;
 
-				try (FileReader fr = new FileReader(backupFile)) {
-					try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
+				try (InputStreamReader in = new InputStreamReader(new FileInputStream(backupFile), StandardCharsets.UTF_8)) {
+					try (CsvMapReader reader = new CsvMapReader(in, CsvPreference.STANDARD_PREFERENCE)) {
 						String[] headers = reader.getHeader(true);
 
 						StringBuilder sql = new StringBuilder(128);

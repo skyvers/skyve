@@ -1,10 +1,14 @@
 package org.skyve.impl.backup;
  
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -117,10 +121,9 @@ final class BackupUtil {
 		return result.values();
 	}
 	
-	static void writeTables(Collection<Table> tables, File toWriteTo)
-	throws Exception {
-		try (FileWriter fw = new FileWriter(toWriteTo)) {
-			try (BufferedWriter bw = new BufferedWriter(fw)) {
+	static void writeTables(Collection<Table> tables, File toWriteTo) throws Exception {
+		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(toWriteTo), UTF_8)) {
+			try (BufferedWriter bw = new BufferedWriter(out)) {
 				for (Table table : tables) {
 					bw.write(table.toJSON());
 					bw.newLine();
@@ -129,11 +132,10 @@ final class BackupUtil {
 		}
 	}
 	
-	static Collection<Table> readTables(File toReadFrom) 
-	throws Exception {
+	static Collection<Table> readTables(File toReadFrom) throws Exception {
 		Collection<Table> result = new ArrayList<>();
-		try (FileReader fr = new FileReader(toReadFrom)) {
-			try (BufferedReader br = new BufferedReader(fr)) {
+		try (InputStreamReader in = new InputStreamReader(new FileInputStream(toReadFrom), UTF_8)) {
+			try (BufferedReader br = new BufferedReader(in)) {
 				String table = br.readLine();
 				while (table != null) {
 					result.add(Table.fromJSON(table));
@@ -144,10 +146,9 @@ final class BackupUtil {
 		return result;
 	}
 	
-	static void writeScript(List<String> commands, File toWriteTo) 
-	throws Exception {
-		try (FileWriter fw = new FileWriter(toWriteTo)) {
-			try (BufferedWriter bw = new BufferedWriter(fw)) {
+	static void writeScript(List<String> commands, File toWriteTo) throws Exception {
+		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(toWriteTo), UTF_8)) {
+			try (BufferedWriter bw = new BufferedWriter(out)) {
 				for (String command : commands) {
 					bw.write(command);
 					bw.write(';');
@@ -157,11 +158,10 @@ final class BackupUtil {
 		}
 	}
 
-	static List<String> readScript(File toReadFrom) 
-	throws Exception {
+	static List<String> readScript(File toReadFrom) throws Exception {
 		List<String> result = new ArrayList<>();
-		try (FileReader fr = new FileReader(toReadFrom)) {
-			try (BufferedReader br = new BufferedReader(fr)) {
+		try (InputStreamReader in = new InputStreamReader(new FileInputStream(toReadFrom), UTF_8)) {
+			try (BufferedReader br = new BufferedReader(in)) {
 				String command = br.readLine();
 				while (command != null) {
 					if (command.endsWith(";")) {

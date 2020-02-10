@@ -1,9 +1,13 @@
 package org.skyve.impl.backup;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -103,9 +107,9 @@ public class BackupJob extends CancellableJob {
 										trace = "Backup " + table.name;
 										log.add(trace);
 										UtilImpl.LOGGER.info(trace);
-										try (FileWriter csv = new FileWriter(backupDir + File.separator + table.name + ".csv",
-																				false)) {
-											try (CsvMapWriter writer = new CsvMapWriter(csv, CsvPreference.STANDARD_PREFERENCE)) {
+										try (OutputStreamWriter out = new OutputStreamWriter(
+												new FileOutputStream(backupDir + File.separator + table.name + ".csv"), UTF_8)) {
+											try (CsvMapWriter writer = new CsvMapWriter(out, CsvPreference.STANDARD_PREFERENCE)) {
 												Map<String, Object> values = new TreeMap<>();
 												String[] headers = new String[table.fields.size()];
 												headers = table.fields.keySet().toArray(headers);
