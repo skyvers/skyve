@@ -101,4 +101,37 @@ public class Jobs extends AbstractTransientBean {
 	public void setRunningJobsElementById(String bizId, Job element) {
 		setElementById(runningJobs, element);
 	}
+
+	/**
+	 * {@link #runningJobs} add.
+	 * @param element	The element to add.
+	 **/
+	public void addRunningJobsElement(Job element) {
+		runningJobs.add(element);
+	}
+
+	/**
+	 * {@link #runningJobs} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addRunningJobsElement(int index, Job element) {
+		runningJobs.add(index, element);
+	}
+
+	/**
+	 * {@link #runningJobs} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeRunningJobsElement(Job element) {
+		return runningJobs.remove(element);
+	}
+
+	/**
+	 * {@link #runningJobs} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Job removeRunningJobsElement(int index) {
+		return runningJobs.remove(index);
+	}
 }

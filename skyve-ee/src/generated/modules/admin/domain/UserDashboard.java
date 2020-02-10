@@ -134,4 +134,37 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	public void setFavouritesElementById(String bizId, Generic element) {
 		setElementById(favourites, element);
 	}
+
+	/**
+	 * {@link #favourites} add.
+	 * @param element	The element to add.
+	 **/
+	public void addFavouritesElement(Generic element) {
+		favourites.add(element);
+	}
+
+	/**
+	 * {@link #favourites} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addFavouritesElement(int index, Generic element) {
+		favourites.add(index, element);
+	}
+
+	/**
+	 * {@link #favourites} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeFavouritesElement(Generic element) {
+		return favourites.remove(element);
+	}
+
+	/**
+	 * {@link #favourites} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeFavouritesElement(int index) {
+		return favourites.remove(index);
+	}
 }

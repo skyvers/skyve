@@ -363,6 +363,39 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
+		aggregatedCollection.add(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(int index, AllAttributesRequiredPersistent element) {
+		aggregatedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
+		return aggregatedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesRequiredPersistent removeAggregatedCollectionElement(int index) {
+		return aggregatedCollection.remove(index);
+	}
+
+	/**
 	 * {@link #colour} accessor.
 	 * @return	The value.
 	 **/

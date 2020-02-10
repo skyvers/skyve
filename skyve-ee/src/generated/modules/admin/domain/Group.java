@@ -169,6 +169,44 @@ public abstract class Group extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #roles} add.
+	 * @param element	The element to add.
+	 **/
+	public void addRolesElement(GroupRole element) {
+		roles.add(element);
+		element.setParent((GroupExtension) this);
+	}
+
+	/**
+	 * {@link #roles} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addRolesElement(int index, GroupRole element) {
+		roles.add(index, element);
+		element.setParent((GroupExtension) this);
+	}
+
+	/**
+	 * {@link #roles} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeRolesElement(GroupRole element) {
+		element.setParent(null);
+		return roles.remove(element);
+	}
+
+	/**
+	 * {@link #roles} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public GroupRole removeRolesElement(int index) {
+		GroupRole result = roles.remove(index);
+		result.setParent(null);
+		return result;
+	}
+
+	/**
 	 * {@link #candidateRoles} accessor.
 	 * @return	The value.
 	 **/
@@ -194,5 +232,43 @@ public abstract class Group extends AbstractPersistentBean {
 	public void setCandidateRolesElementById(String bizId, GroupRole element) {
 		setElementById(candidateRoles, element);
 		element.setParent((GroupExtension) this);
+	}
+
+	/**
+	 * {@link #candidateRoles} add.
+	 * @param element	The element to add.
+	 **/
+	public void addCandidateRolesElement(GroupRole element) {
+		candidateRoles.add(element);
+		element.setParent((GroupExtension) this);
+	}
+
+	/**
+	 * {@link #candidateRoles} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addCandidateRolesElement(int index, GroupRole element) {
+		candidateRoles.add(index, element);
+		element.setParent((GroupExtension) this);
+	}
+
+	/**
+	 * {@link #candidateRoles} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeCandidateRolesElement(GroupRole element) {
+		element.setParent(null);
+		return candidateRoles.remove(element);
+	}
+
+	/**
+	 * {@link #candidateRoles} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public GroupRole removeCandidateRolesElement(int index) {
+		GroupRole result = candidateRoles.remove(index);
+		result.setParent(null);
+		return result;
 	}
 }

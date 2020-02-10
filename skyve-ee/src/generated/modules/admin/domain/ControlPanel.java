@@ -1022,6 +1022,39 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #startupProperties} add.
+	 * @param element	The element to add.
+	 **/
+	public void addStartupPropertiesElement(Generic element) {
+		startupProperties.add(element);
+	}
+
+	/**
+	 * {@link #startupProperties} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addStartupPropertiesElement(int index, Generic element) {
+		startupProperties.add(index, element);
+	}
+
+	/**
+	 * {@link #startupProperties} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeStartupPropertiesElement(Generic element) {
+		return startupProperties.remove(element);
+	}
+
+	/**
+	 * {@link #startupProperties} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeStartupPropertiesElement(int index) {
+		return startupProperties.remove(index);
+	}
+
+	/**
 	 * {@link #originalStartupProperties} accessor.
 	 * @return	The value.
 	 **/
@@ -1046,6 +1079,39 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	public void setOriginalStartupPropertiesElementById(String bizId, Generic element) {
 		setElementById(originalStartupProperties, element);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} add.
+	 * @param element	The element to add.
+	 **/
+	public void addOriginalStartupPropertiesElement(Generic element) {
+		originalStartupProperties.add(element);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addOriginalStartupPropertiesElement(int index, Generic element) {
+		originalStartupProperties.add(index, element);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeOriginalStartupPropertiesElement(Generic element) {
+		return originalStartupProperties.remove(element);
+	}
+
+	/**
+	 * {@link #originalStartupProperties} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeOriginalStartupPropertiesElement(int index) {
+		return originalStartupProperties.remove(index);
 	}
 
 	/**

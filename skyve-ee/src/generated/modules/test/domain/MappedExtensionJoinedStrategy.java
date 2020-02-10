@@ -159,6 +159,39 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	}
 
 	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		aggregatedCollection.add(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(int index, MappedExtensionJoinedStrategyExtension element) {
+		aggregatedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return aggregatedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionJoinedStrategyExtension removeAggregatedCollectionElement(int index) {
+		return aggregatedCollection.remove(index);
+	}
+
+	/**
 	 * {@link #composedCollection} accessor.
 	 * @return	The value.
 	 **/
@@ -183,6 +216,39 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 **/
 	public void setComposedCollectionElementById(String bizId, MappedExtensionJoinedStrategyExtension element) {
 		setElementById(composedCollection, element);
+	}
+
+	/**
+	 * {@link #composedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public void addComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		composedCollection.add(element);
+	}
+
+	/**
+	 * {@link #composedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addComposedCollectionElement(int index, MappedExtensionJoinedStrategyExtension element) {
+		composedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return composedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionJoinedStrategyExtension removeComposedCollectionElement(int index) {
+		return composedCollection.remove(index);
 	}
 
 	/**

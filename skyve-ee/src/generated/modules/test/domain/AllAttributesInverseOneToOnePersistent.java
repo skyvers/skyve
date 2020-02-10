@@ -363,6 +363,39 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
+	 * {@link #aggCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public void addAggCollectionElement(AllAttributesInverseOneToOnePersistent element) {
+		aggCollection.add(element);
+	}
+
+	/**
+	 * {@link #aggCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggCollectionElement(int index, AllAttributesInverseOneToOnePersistent element) {
+		aggCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #aggCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggCollectionElement(AllAttributesInverseOneToOnePersistent element) {
+		return aggCollection.remove(element);
+	}
+
+	/**
+	 * {@link #aggCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesInverseOneToOnePersistent removeAggCollectionElement(int index) {
+		return aggCollection.remove(index);
+	}
+
+	/**
 	 * {@link #colour} accessor.
 	 * @return	The value.
 	 **/

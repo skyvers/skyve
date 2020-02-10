@@ -2114,6 +2114,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
+
 			// set the parent for a child collection
 			Collection collection = (Collection) reference;
 			if (CollectionType.child.equals(collection.getType())) {
@@ -2122,6 +2123,82 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+			}
+			methods.append("\t}\n");
+			
+			// collection add
+			collectionJavadoc(name, methods, true, false);
+			if (overriddenReference) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t").append(name).append(".add(element);\n");
+			if (CollectionType.child.equals(collection.getType())) {
+				methods.append("\t\telement.setParent(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			methods.append("\t}\n");
+			
+			// collection indexed add
+			collectionJavadoc(name, methods, true, true);
+			if (overriddenReference) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t").append(name).append(".add(index, element);\n");
+			if (CollectionType.child.equals(collection.getType())) {
+				methods.append("\t\telement.setParent(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			methods.append("\t}\n");
+			
+			// collection remove
+			collectionJavadoc(name, methods, false, false);
+			if (overriddenReference) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic boolean remove").append(methodName);
+			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			if (CollectionType.child.equals(collection.getType())) {
+				methods.append("\t\telement.setParent(null);\n");
+			}
+			methods.append("\t\treturn ").append(name).append(".remove(element);\n");
+			methods.append("\t}\n");
+			
+			// collection indexed remove
+			collectionJavadoc(name, methods, false, true);
+			if (overriddenReference) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic ").append(propertyClassName).append(" remove").append(methodName);
+			methods.append("Element(int index) {\n");
+			if (CollectionType.child.equals(collection.getType())) {
+				methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
+				methods.append("\t\tresult.setParent(null);\n");
+				methods.append("\t\treturn result;\n");
+			}
+			else {
+				methods.append("\t\treturn ").append(name).append(".remove(index);\n");
 			}
 			methods.append("\t}\n");
 		}
@@ -2280,8 +2357,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
 		}
-		// Mutator method
 		else {
+			// Mutator method
 			mutatorJavadoc(inverse, methods, false);
 			if (overriddenInverse) { // method in base class
 				methods.append("\n\t@Override");
@@ -2989,8 +3066,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				// Traversal method
 				methods.append("\n\t@Override\n");
-				methods.append("\tpublic ").append(documentName).append(" getParent() {\n");
-				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
+				methods.append("\tpublic ").append(documentName);
+				if (domainExtensionClassExists) {
+					methods.append("Extension");
+				}
+				methods.append(" getParent() {\n");
+				methods.append("\t\t").append(documentName);
+				if (domainExtensionClassExists) {
+					methods.append("Extension");
+				}
+				methods.append(" result = null;\n\n");
 				methods.append("\t\tif (bizParentId != null) {\n");
 				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
 				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
@@ -3003,7 +3088,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Traversal method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlTransient\n");
-				methods.append("\tpublic List<").append(documentName).append("> getChildren() {\n");
+				methods.append("\tpublic List<").append(documentName);
+				if (domainExtensionClassExists) {
+					methods.append("Extension");
+				}
+				methods.append("> getChildren() {\n");
 				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
 				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
@@ -3270,6 +3359,22 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		else {
 			toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value.\n");
+		}
+		toAppendTo.append("\t **/");
+	}
+
+	private static void collectionJavadoc(String attributeName, StringBuilder toAppendTo, boolean add, boolean indexed) {
+		toAppendTo.append("\n\t/**\n");
+		toAppendTo.append("\t * {@link #").append(attributeName).append(add ? "} add.\n" : "} remove.\n");
+		if (indexed) {
+			toAppendTo.append("\t * @param index\tThe index in the list to ").append(add ? "add" : "remove");
+			toAppendTo.append(" the element ").append(add ? "to.\n" : "from.\n");
+		}
+		if (add) {
+			toAppendTo.append("\t * @param element\tThe element to add.\n");
+		}
+		else if (! indexed) {
+			toAppendTo.append("\t * @param element\tThe element to remove.\n");
 		}
 		toAppendTo.append("\t **/");
 	}
