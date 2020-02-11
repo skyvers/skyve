@@ -601,6 +601,31 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
+	 * {@link #invAggAssociation} mutator.
+	 * @param invAggAssociation	The new value.
+	 **/
+	public void addInvAggAssociation(AllAttributesInverseOneToOnePersistent invAggAssociation) {
+		if (this.invAggAssociation != null) {
+			this.invAggAssociation.setAggAssociation(null);
+		}
+		setInvAggAssociation(invAggAssociation);
+		if (invAggAssociation != null) {
+			invAggAssociation.setAggAssociation(this);
+		}
+	}
+
+	/**
+	 * {@link #invAggAssociation} mutator.
+	 * @param invAggAssociation	The new value.
+	 **/
+	public void removeInvAggAssociation() {
+		if (invAggAssociation != null) {
+			invAggAssociation.setAggAssociation(null);
+			setInvAggAssociation(invAggAssociation);
+		}
+	}
+
+	/**
 	 * {@link #longInteger} accessor.
 	 * @return	The value.
 	 **/

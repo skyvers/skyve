@@ -2482,6 +2482,67 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
 			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			methods.append("\t}\n");
+
+			// Add method
+			mutatorJavadoc(inverse, methods, false);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void add").append(methodName).append("(");
+			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
+			methods.append("\t\tif (this.").append(name).append(" != null) {\n");
+			if (many) {
+				methods.append("\t\t\tthis.").append(name).append(".get").append(inverseMethodName).append("().remove(");
+				if (owningDomainExtensionClassExists) {
+					methods.append('(').append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			else {
+				methods.append("\t\t\tthis.").append(name).append(".set").append(inverseMethodName).append("(null);\n");
+			}
+			methods.append("\t\t}\n");
+			methods.append("\t\tset").append(methodName).append('(').append(name).append(");\n");
+			methods.append("\t\tif (").append(name).append(" != null) {\n");
+			if (many) {
+				methods.append("\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
+			}
+			else {
+				methods.append("\t\t\t").append(name).append(".set").append(inverseMethodName).append("(");
+			}
+			if (owningDomainExtensionClassExists) {
+				methods.append('(').append(owningDocumentName).append("Extension) ");
+			}
+			methods.append("this);\n");
+			methods.append("\t\t}\n");
+			methods.append("\t}\n");
+
+			// Remove method
+			mutatorJavadoc(inverse, methods, false);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void remove").append(methodName).append("() {\n");
+			methods.append("\t\tif (").append(name).append(" != null) {\n");
+			if (many) {
+				methods.append("\t\t\t").append(name).append(".get").append(inverseMethodName).append("().remove(");
+				if (owningDomainExtensionClassExists) {
+					methods.append('(').append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			else {
+				methods.append("\t\t\t").append(name).append(".set").append(inverseMethodName).append("(null);\n");
+			}
+			methods.append("\t\t\tset").append(methodName).append('(').append(name).append(");\n");
+			methods.append("\t\t}\n");
+			methods.append("\t}\n");
 		}
 	}
 
