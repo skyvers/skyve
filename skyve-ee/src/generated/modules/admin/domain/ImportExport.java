@@ -616,7 +616,6 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	public void setImportExportColumnsElementById(String bizId, ImportExportColumn element) {
 		setElementById(importExportColumns, element);
-		element.setParent((ImportExportExtension) this);
 	}
 
 	/**

@@ -364,7 +364,11 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	@XmlElement
 	public void setEmbeddedAssociation(AllAttributesEmbedded embeddedAssociation) {
 		preset(embeddedAssociationPropertyName, embeddedAssociation);
+		if (this.embeddedAssociation != null) {
+			this.embeddedAssociation.setParent(null);
+		}
 		this.embeddedAssociation = embeddedAssociation;
+		embeddedAssociation.setParent(this);
 	}
 
 	/**
@@ -657,7 +661,48 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setInverseAggregatedAssociationElementById(String bizId, AllAttributesPersistent element) {
-		 setElementById(inverseAggregatedAssociation, element);
+		setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(AllAttributesPersistent element) {
+		inverseAggregatedAssociation.add(element);
+		element.setAggregatedAssociation(this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(int index, AllAttributesPersistent element) {
+		inverseAggregatedAssociation.add(index, element);
+		element.setAggregatedAssociation(this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInverseAggregatedAssociationElement(AllAttributesPersistent element) {
+		boolean result = inverseAggregatedAssociation.remove(element);
+		if (result) {
+			element.setAggregatedAssociation(null);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesPersistent removeInverseAggregatedAssociationElement(int index) {
+		AllAttributesPersistent result = inverseAggregatedAssociation.remove(index);
+		result.setAggregatedAssociation(null);
+		return result;
 	}
 
 	/**

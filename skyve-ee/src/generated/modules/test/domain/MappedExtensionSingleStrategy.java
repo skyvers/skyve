@@ -275,7 +275,48 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	 * @param element	The new value of the element in the list.
 	 **/
 	public void setInverseAggregatedAssociationElementById(String bizId, MappedExtensionSingleStrategyExtension element) {
-		 setElementById(inverseAggregatedAssociation, element);
+		setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(MappedExtensionSingleStrategyExtension element) {
+		inverseAggregatedAssociation.add(element);
+		element.setAggregatedAssociation((MappedExtensionSingleStrategyExtension) this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(int index, MappedExtensionSingleStrategyExtension element) {
+		inverseAggregatedAssociation.add(index, element);
+		element.setAggregatedAssociation((MappedExtensionSingleStrategyExtension) this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInverseAggregatedAssociationElement(MappedExtensionSingleStrategyExtension element) {
+		boolean result = inverseAggregatedAssociation.remove(element);
+		if (result) {
+			element.setAggregatedAssociation(null);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionSingleStrategyExtension removeInverseAggregatedAssociationElement(int index) {
+		MappedExtensionSingleStrategyExtension result = inverseAggregatedAssociation.remove(index);
+		result.setAggregatedAssociation(null);
+		return result;
 	}
 
 	/**

@@ -2023,6 +2023,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
 		boolean tranzient = reference.isTransient();
+		ReferenceType type = reference.getType();
 
 		if (overriddenReference) { // overridden reference to concrete implementation
 			return; // this already exists on the base class - don't override it.
@@ -2114,18 +2115,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
-
-			// set the parent for a child collection
-			Collection collection = (Collection) reference;
-			if (CollectionType.child.equals(collection.getType())) {
-				methods.append("\t\telement.setParent(");
-				if (owningDomainExtensionClassExists) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
-				}
-				methods.append("this);\n");
-			}
+			// NB no need to set the parent here as this method does not add any elements ever
 			methods.append("\t}\n");
-			
+
 			// collection add
 			collectionJavadoc(name, methods, true, false);
 			if (overriddenReference) { // method in base class
@@ -2137,7 +2129,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void add").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(element);\n");
-			if (CollectionType.child.equals(collection.getType())) {
+			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
@@ -2157,7 +2149,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void add").append(methodName);
 			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
-			if (CollectionType.child.equals(collection.getType())) {
+			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
@@ -2176,7 +2168,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic boolean remove").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
-			if (CollectionType.child.equals(collection.getType())) {
+			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(null);\n");
 			}
 			methods.append("\t\treturn ").append(name).append(".remove(element);\n");
@@ -2192,7 +2184,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic ").append(propertyClassName).append(" remove").append(methodName);
 			methods.append("Element(int index) {\n");
-			if (CollectionType.child.equals(collection.getType())) {
+			if (CollectionType.child.equals(type)) {
 				methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
 				methods.append("\t\tresult.setParent(null);\n");
 				methods.append("\t\treturn result;\n");
@@ -2240,7 +2232,22 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (reference.isTrackChanges()) {
 				methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
 			}
-			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+			
+			// Embedded child reference - set the parent
+			if (AssociationType.embedded.equals(type) && (owningDocumentName.equals(propertyDocument.getParentDocumentName()))) {
+				methods.append("\t\tif (this.").append(name).append(" != null) {\n");
+				methods.append("\t\t\tthis.").append(name).append(".setParent(null);\n");
+				methods.append("\t\t}\n");
+				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+				methods.append("\t\t").append(name).append(".setParent(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			else {
+				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+			}
 			methods.append("\t}\n");
 		}
 	}
@@ -2248,15 +2255,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private void addInverse(AbstractInverse inverse,
 								boolean overriddenInverse,
 								Customer customer,
-								Module module,
+								Module owningModule,
+								String owningDocumentName,
+								boolean owningDomainExtensionClassExists,
 								String packagePath,
 								Set<String> imports,
 								StringBuilder attributes,
 								StringBuilder methods) {
 		String propertyClassName = inverse.getDocumentName();
-		String propertyPackageName = module.getDocument(customer, propertyClassName).getOwningModuleName();
+		String inverseReferenceName = inverse.getReferenceName();
+		String propertyPackageName = owningModule.getDocument(customer, propertyClassName).getOwningModuleName();
 		String name = inverse.getName();
-		boolean many = (!InverseRelationship.oneToOne.equals(inverse.getRelationship()));
+		InverseRelationship relationship = inverse.getRelationship();
+		boolean toMany = (! InverseRelationship.oneToOne.equals(relationship));
+		boolean many = InverseRelationship.manyToMany.equals(relationship);
 		boolean deprecated = inverse.isDeprecated();
 		boolean tranzient = inverse.isTransient();
 
@@ -2274,7 +2286,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		
 		// Check for Extension class defined and alter the class name accordingly
 		String modulePath = repository.MODULES_NAMESPACE + propertyPackageName;
-		if (domainExtensionClassExists(modulePath, propertyClassName)) {
+		boolean targetDomainExtensionClassExists = domainExtensionClassExists(modulePath, propertyClassName);
+		if (targetDomainExtensionClassExists) {
 			propertyPackagePath = new StringBuilder(128).append("modules.")
 															.append(propertyPackageName)
 															.append('.')
@@ -2288,7 +2301,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		String methodName = Character.toUpperCase(name.charAt(0)) + name.substring(1);
 
-		if (many) {
+		if (toMany) {
 			imports.add("java.util.List");
 			imports.add("java.util.ArrayList");
 		}
@@ -2297,7 +2310,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (deprecated) {
 			attributes.append("\t@Deprecated\n");
 		}
-		if (many) {
+		if (toMany) {
 			attributes.append("\tprivate ");
 			if (tranzient) {
 				attributes.append("transient ");
@@ -2322,7 +2335,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\t@Deprecated");
 		}
 		methods.append("\n\t@XmlElement");
-		if (many) {
+		if (toMany) {
 			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
 		}
 		else {
@@ -2331,7 +2344,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		methods.append("\t\treturn ").append(name).append(";\n");
 		methods.append("\t}\n");
 
-		if (many) {
+		String inverseMethodName = Character.toUpperCase(inverseReferenceName.charAt(0)) + inverseReferenceName.substring(1);
+
+		if (toMany) {
 			// Mapped Accessor method
 			accessorJavadoc(inverse, methods, true);
 			if (overriddenInverse) { // method in base class
@@ -2354,7 +2369,104 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
-			methods.append("\t\t setElementById(").append(name).append(", element);\n");
+			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
+			// NB no need to set the parent here as this method does not add any elements ever
+			methods.append("\t}\n");
+
+			// collection add
+			collectionJavadoc(name, methods, true, false);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t").append(name).append(".add(element);\n");
+			if (many) {
+				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
+			}
+			else {
+				methods.append("\t\telement.set").append(inverseMethodName).append("(");
+			}
+			if (owningDomainExtensionClassExists) {
+				methods.append('(').append(owningDocumentName).append("Extension) ");
+			}
+			methods.append("this);\n");
+			methods.append("\t}\n");
+			
+			// collection indexed add
+			collectionJavadoc(name, methods, true, true);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t").append(name).append(".add(index, element);\n");
+			if (many) {
+				methods.append("\t\telement.get").append(inverseMethodName).append("().add(index, ");
+			}
+			else {
+				methods.append("\t\telement.set").append(inverseMethodName).append("(");
+			}
+			if (owningDomainExtensionClassExists) {
+				methods.append('(').append(owningDocumentName).append("Extension) ");
+			}
+			methods.append("this);\n");
+			methods.append("\t}\n");
+			
+			// collection remove
+			collectionJavadoc(name, methods, false, false);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic boolean remove").append(methodName);
+			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
+			methods.append("\t\tif (result) {\n");
+			if (many) {
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(");
+				if (owningDomainExtensionClassExists) {
+					methods.append('(').append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			else {
+				methods.append("\t\t\telement.set").append(inverseMethodName).append("(null);\n");
+			}
+			methods.append("\t\t}\n");
+			methods.append("\t\treturn result;\n");
+			methods.append("\t}\n");
+			
+			// collection indexed remove
+			collectionJavadoc(name, methods, false, true);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic ").append(propertyClassName).append(" remove").append(methodName);
+			methods.append("Element(int index) {\n");
+			methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
+			if (many) {
+				methods.append("\t\tresult.get").append(inverseMethodName).append("().remove(");
+				if (owningDomainExtensionClassExists) {
+					methods.append('(').append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+			}
+			else {
+				methods.append("\t\tresult.set").append(inverseMethodName).append("(null);\n");
+			}
+			methods.append("\t\treturn result;\n");
 			methods.append("\t}\n");
 		}
 		else {
@@ -2750,6 +2862,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									documentClass.attributes.containsKey(attribute.getName())),
 								customer,
 								module,
+								documentName,
+								domainExtensionClassExists,
 								packagePath,
 								imports,
 								attributes,

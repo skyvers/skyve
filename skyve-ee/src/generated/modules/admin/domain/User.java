@@ -857,7 +857,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public void setRolesElementById(String bizId, UserRole element) {
 		setElementById(roles, element);
-		element.setParent((UserExtension) this);
 	}
 
 	/**
@@ -977,7 +976,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
 		setElementById(candidateContacts, element);
-		element.setParent((UserExtension) this);
 	}
 
 	/**

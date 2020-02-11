@@ -165,7 +165,6 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public void setRolesElementById(String bizId, GroupRole element) {
 		setElementById(roles, element);
-		element.setParent((GroupExtension) this);
 	}
 
 	/**
@@ -231,7 +230,6 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public void setCandidateRolesElementById(String bizId, GroupRole element) {
 		setElementById(candidateRoles, element);
-		element.setParent((GroupExtension) this);
 	}
 
 	/**
