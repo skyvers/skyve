@@ -1177,8 +1177,10 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setAuditUser(UserProxy auditUser) {
-		preset(auditUserPropertyName, auditUser);
-		this.auditUser = auditUser;
+		if (this.auditUser != auditUser) {
+			preset(auditUserPropertyName, auditUser);
+			this.auditUser = auditUser;
+		}
 	}
 
 	/**

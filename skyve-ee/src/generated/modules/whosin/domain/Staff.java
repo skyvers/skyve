@@ -265,8 +265,10 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
-		preset(contactPropertyName, contact);
-		this.contact = contact;
+		if (this.contact != contact) {
+			preset(contactPropertyName, contact);
+			this.contact = contact;
+		}
 	}
 
 	/**
@@ -339,8 +341,10 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	@XmlElement
 	public void setBaseOffice(Office baseOffice) {
-		preset(baseOfficePropertyName, baseOffice);
-		this.baseOffice = baseOffice;
+		if (this.baseOffice != baseOffice) {
+			preset(baseOfficePropertyName, baseOffice);
+			this.baseOffice = baseOffice;
+		}
 	}
 
 	/**
@@ -432,8 +436,10 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	@XmlElement
 	public void setReportsTo(Staff reportsTo) {
-		preset(reportsToPropertyName, reportsTo);
-		this.reportsTo = reportsTo;
+		if (this.reportsTo != reportsTo) {
+			preset(reportsToPropertyName, reportsTo);
+			this.reportsTo = reportsTo;
+		}
 	}
 
 	@Override

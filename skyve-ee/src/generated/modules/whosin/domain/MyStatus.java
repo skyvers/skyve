@@ -86,8 +86,10 @@ return "My Status";
 	 **/
 	@XmlElement
 	public void setMyStaff(Staff myStaff) {
-		preset(myStaffPropertyName, myStaff);
-		this.myStaff = myStaff;
+		if (this.myStaff != myStaff) {
+			preset(myStaffPropertyName, myStaff);
+			this.myStaff = myStaff;
+		}
 	}
 
 	/**

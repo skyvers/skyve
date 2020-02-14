@@ -95,7 +95,9 @@ public class ArcOneToOne extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setArc(AnyBase arc) {
-		preset(arcPropertyName, arc);
-		this.arc = arc;
+		if (this.arc != arc) {
+			preset(arcPropertyName, arc);
+			this.arc = arc;
+		}
 	}
 }

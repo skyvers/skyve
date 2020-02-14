@@ -7,7 +7,6 @@
 		<document ref="AllAttributesPersistent" />
 		<document ref="AllAttributesEmbedded" />
 		<document ref="AllAttributesRequiredPersistent" />
-		<document ref="AllAttributesInverseOneToOnePersistent" />
 		<document ref="AnyBase" />
 		<document ref="AnyDerived1" />
 		<document ref="AnyDerived2" />
@@ -15,6 +14,9 @@
 		<document ref="ArcOneToOne" />
 		<document ref="Hierarchical" />
 		<document ref="InjectedDocument" />
+		<document ref="InverseManyToManyPersistent" />
+		<document ref="InverseOneToManyPersistent" />
+		<document ref="InverseOneToOnePersistent" />
 		<document ref="MappedBase" />
 		<document ref="MappedExtensionJoinedStrategy" />
 		<document ref="MappedExtensionSingleStrategy" />

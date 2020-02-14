@@ -167,7 +167,9 @@ public class Tagged extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setTag(Tag tag) {
-		preset(tagPropertyName, tag);
-		this.tag = tag;
+		if (this.tag != tag) {
+			preset(tagPropertyName, tag);
+			this.tag = tag;
+		}
 	}
 }

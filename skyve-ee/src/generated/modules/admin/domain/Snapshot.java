@@ -195,7 +195,9 @@ public class Snapshot extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setCopyToUser(UserProxy copyToUser) {
-		this.copyToUser = copyToUser;
+		if (this.copyToUser != copyToUser) {
+			this.copyToUser = copyToUser;
+		}
 	}
 
 	/**

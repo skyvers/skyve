@@ -15,8 +15,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 import modules.admin.domain.ImportExport;
-import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.InverseOneToOnePersistent;
 
 public class BeanVisitorTests extends AbstractSkyveTest {
 	@Test
@@ -183,22 +183,17 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 	@Test
 	public void testOneToOneInverses() throws Exception {
-		AllAttributesInverseOneToOnePersistent test = Util.constructRandomInstance(u, m, aai121pd, 2);
+		InverseOneToOnePersistent test = Util.constructRandomInstance(u, m, io2opd, 2);
 		// Load inverses
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(aai121pd, test.getBizId());
+		test = p.retrieve(io2opd, test.getBizId());
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
 		// inverse
-		String expectedBinding = AllAttributesInverseOneToOnePersistent.invAggAssociationPropertyName;
+		String expectedBinding = InverseOneToOnePersistent.invAggAssociationPropertyName;
 		expectedBindings.add(expectedBinding);
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesInverseOneToOnePersistent.aggCollectionPropertyName);
-		// inverse.aggregatedCollection[0]
-		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
-		// inverse.aggregatedCollection[1]
-		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 1));
 
 		final Set<String> actualBindings = new TreeSet<>();
 
@@ -214,7 +209,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 				return true;
 			}
 
-		}.visit(aai121pd, test.getAggAssociation(), c);
+		}.visit(io2opd, test.getAggAssociation(), c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}

@@ -756,8 +756,10 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlElement
 	public void setSailUser(UserProxy sailUser) {
-		preset(sailUserPropertyName, sailUser);
-		this.sailUser = sailUser;
+		if (this.sailUser != sailUser) {
+			preset(sailUserPropertyName, sailUser);
+			this.sailUser = sailUser;
+		}
 	}
 
 	/**
@@ -1128,8 +1130,10 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlElement
 	public void setNewProperty(Generic newProperty) {
-		preset(newPropertyPropertyName, newProperty);
-		this.newProperty = newProperty;
+		if (this.newProperty != newProperty) {
+			preset(newPropertyPropertyName, newProperty);
+			this.newProperty = newProperty;
+		}
 	}
 
 	/**

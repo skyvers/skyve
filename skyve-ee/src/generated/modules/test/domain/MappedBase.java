@@ -641,7 +641,9 @@ public class MappedBase extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setComposedAssociation(MappedExtensionSingleStrategyExtension composedAssociation) {
-		preset(composedAssociationPropertyName, composedAssociation);
-		this.composedAssociation = composedAssociation;
+		if (this.composedAssociation != composedAssociation) {
+			preset(composedAssociationPropertyName, composedAssociation);
+			this.composedAssociation = composedAssociation;
+		}
 	}
 }

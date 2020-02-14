@@ -327,8 +327,17 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setAggregatedAssociation(AllAttributesPersistent aggregatedAssociation) {
-		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-		this.aggregatedAssociation = aggregatedAssociation;
+		if (this.aggregatedAssociation != aggregatedAssociation) {
+			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			AllAttributesPersistent oldAggregatedAssociation = this.aggregatedAssociation;
+			this.aggregatedAssociation = aggregatedAssociation;
+			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
+				aggregatedAssociation.getInverseAggregatedAssociation().add(this);
+			}
+			if (oldAggregatedAssociation != null) {
+				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
+			}
+		}
 	}
 
 	/**
@@ -345,8 +354,10 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
-		preset(composedAssociationPropertyName, composedAssociation);
-		this.composedAssociation = composedAssociation;
+		if (this.composedAssociation != composedAssociation) {
+			preset(composedAssociationPropertyName, composedAssociation);
+			this.composedAssociation = composedAssociation;
+		}
 	}
 
 	/**
@@ -363,12 +374,13 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setEmbeddedAssociation(AllAttributesEmbedded embeddedAssociation) {
-		preset(embeddedAssociationPropertyName, embeddedAssociation);
-		if (this.embeddedAssociation != null) {
-			this.embeddedAssociation.setParent(null);
+		if (this.embeddedAssociation != embeddedAssociation) {
+			preset(embeddedAssociationPropertyName, embeddedAssociation);
+			this.embeddedAssociation = embeddedAssociation;
+			if (embeddedAssociation != null) {
+				embeddedAssociation.setParent(this);
+			}
 		}
-		this.embeddedAssociation = embeddedAssociation;
-		embeddedAssociation.setParent(this);
 	}
 
 	/**

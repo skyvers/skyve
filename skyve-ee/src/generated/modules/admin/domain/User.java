@@ -750,8 +750,10 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
-		preset(contactPropertyName, contact);
-		this.contact = contact;
+		if (this.contact != contact) {
+			preset(contactPropertyName, contact);
+			this.contact = contact;
+		}
 	}
 
 	/**
@@ -768,8 +770,10 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	@XmlElement
 	public void setDataGroup(DataGroup dataGroup) {
-		preset(dataGroupPropertyName, dataGroup);
-		this.dataGroup = dataGroup;
+		if (this.dataGroup != dataGroup) {
+			preset(dataGroupPropertyName, dataGroup);
+			this.dataGroup = dataGroup;
+		}
 	}
 
 	/**
@@ -883,8 +887,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The element to remove.
 	 **/
 	public boolean removeRolesElement(UserRole element) {
+		boolean result = roles.remove(element);
 		element.setParent(null);
-		return roles.remove(element);
+		return result;
 	}
 
 	/**
@@ -1002,8 +1007,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param element	The element to remove.
 	 **/
 	public boolean removeCandidateContactsElement(UserCandidateContact element) {
+		boolean result = candidateContacts.remove(element);
 		element.setParent(null);
-		return candidateContacts.remove(element);
+		return result;
 	}
 
 	/**
@@ -1100,7 +1106,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	@XmlElement
 	public void setNewGroup(GroupExtension newGroup) {
-		this.newGroup = newGroup;
+		if (this.newGroup != newGroup) {
+			this.newGroup = newGroup;
+		}
 	}
 
 	/**

@@ -600,7 +600,9 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setCopyToUser(UserProxy copyToUser) {
-		this.copyToUser = copyToUser;
+		if (this.copyToUser != copyToUser) {
+			this.copyToUser = copyToUser;
+		}
 	}
 
 	/**
@@ -883,7 +885,9 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setOperandTag(Tag operandTag) {
-		this.operandTag = operandTag;
+		if (this.operandTag != operandTag) {
+			this.operandTag = operandTag;
+		}
 	}
 
 	/**

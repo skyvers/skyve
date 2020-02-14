@@ -2017,9 +2017,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								Set<String> imports,
 								StringBuilder attributes,
 								StringBuilder methods) {
-		String propertyClassName = reference.getDocumentName();
-		Document propertyDocument = owningModule.getDocument(customer, propertyClassName);
-		String propertyPackageName = propertyDocument.getOwningModuleName();
+		String referenceClassName = reference.getDocumentName();
+		Document referenceDocument = owningModule.getDocument(customer, referenceClassName);
+		String referencePackageName = referenceDocument.getOwningModuleName();
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
 		boolean tranzient = reference.isTransient();
@@ -2029,33 +2029,55 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			return; // this already exists on the base class - don't override it.
 		}
 
-		String propertyPackagePath = new StringBuilder(128).append("modules.")
-															.append(propertyPackageName)
+		String referencePackagePath = new StringBuilder(128).append("modules.")
+															.append(referencePackageName)
 															.append(".domain").toString();
 		// Check for overridden only in customer folder (ie no vanilla document) and change package path accordingly
-		Map<String, DomainClass> documentVanillaClasses = moduleDocumentVanillaClasses.get(propertyPackageName);
-		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(propertyClassName) == null)) {
-			propertyPackagePath = new StringBuilder(192).append("customers.")
+		Map<String, DomainClass> documentVanillaClasses = moduleDocumentVanillaClasses.get(referencePackageName);
+		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(referenceClassName) == null)) {
+			referencePackagePath = new StringBuilder(192).append("customers.")
 															.append(customer.getName())
 															.append('.')
-															.append(propertyPackagePath).toString();
+															.append(referencePackagePath).toString();
 		}
 		
 		// Check for Extension class defined and alter the class name accordingly
-		String modulePath = repository.MODULES_NAMESPACE + propertyPackageName;
-		if (domainExtensionClassExists(modulePath, propertyClassName)) {
-			propertyPackagePath = new StringBuilder(128).append("modules.")
-															.append(propertyPackageName)
+		String modulePath = repository.MODULES_NAMESPACE + referencePackageName;
+		boolean referenceDomainExtensionClassExists = domainExtensionClassExists(modulePath, referenceClassName);
+		if (referenceDomainExtensionClassExists) {
+			referencePackagePath = new StringBuilder(128).append("modules.")
+															.append(referencePackageName)
 															.append('.')
-															.append(propertyClassName).toString();
-			propertyClassName += "Extension";
+															.append(referenceClassName).toString();
+			referenceClassName += "Extension";
 		}
 
-		if (! propertyPackagePath.equals(packagePath)) {
-			imports.add(new StringBuilder(256).append(propertyPackagePath).append('.').append(propertyClassName).toString());
+		if (! referencePackagePath.equals(packagePath)) {
+			imports.add(new StringBuilder(256).append(referencePackagePath).append('.').append(referenceClassName).toString());
 		}
 
 		String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
+
+		// Determine the corresponding inverse if any
+		// Could have an inverse if not a child collection and not an embedded association
+		AbstractInverse inverse = null;
+		String inverseMethodName = null;
+		if ((! CollectionType.child.equals(type)) &&
+				(! AssociationType.embedded.equals(type))) {
+			for (Attribute a : getAllAttributes(referenceDocument)) {
+				if (a instanceof AbstractInverse) {
+					AbstractInverse i = (AbstractInverse) a;
+					if (owningDocumentName.equals(i.getDocumentName()) && 
+							name.equals(i.getReferenceName())) {
+						inverse = i;
+						inverseMethodName = i.getName();
+						inverseMethodName = Character.toUpperCase(inverseMethodName.charAt(0)) + 
+												inverseMethodName.substring(1);
+						break;
+					}
+				}
+			}
+		}
 
 		if (reference instanceof Collection) {
 			imports.add("java.util.List");
@@ -2068,7 +2090,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (tranzient) {
 				attributes.append("transient ");
 			}
-			attributes.append("List<").append(propertyClassName).append("> ").append(name);
+			attributes.append("List<").append(referenceClassName).append("> ").append(name);
 			if (reference.isTrackChanges()) {
 				imports.add("org.skyve.impl.domain.ChangeTrackingArrayList");
 				attributes.append(" = new ChangeTrackingArrayList<>(\"");
@@ -2088,7 +2110,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\t@XmlElement");
-			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
+			methods.append("\n\tpublic List<").append(referenceClassName).append("> get").append(methodName).append("() {\n");
 			methods.append("\t\treturn ").append(name).append(";\n");
 			methods.append("\t}\n");
 
@@ -2100,7 +2122,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\n\tpublic ").append(referenceClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
 			methods.append("\t}\n");
 
@@ -2113,7 +2135,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void set").append(methodName);
-			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
+			methods.append("ElementById(String bizId, ").append(referenceClassName).append(" element) {\n");
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
 			// NB no need to set the parent here as this method does not add any elements ever
 			methods.append("\t}\n");
@@ -2127,7 +2149,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void add").append(methodName);
-			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(element);\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
@@ -2135,6 +2157,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+			}
+			else if (inverse != null) {
+				methods.append("\t\tif (element.get").append(inverseMethodName).append("ElementById(getBizId()) == null) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+				methods.append("\t\t}\n");
 			}
 			methods.append("\t}\n");
 			
@@ -2147,7 +2178,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void add").append(methodName);
-			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
+			methods.append("Element(int index, ").append(referenceClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
@@ -2155,6 +2186,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+			}
+			else if (inverse != null) {
+				methods.append("\t\tif (element.get").append(inverseMethodName).append("ElementById(getBizId()) == null) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
+				if (owningDomainExtensionClassExists) {
+					methods.append("(").append(owningDocumentName).append("Extension) ");
+				}
+				methods.append("this);\n");
+				methods.append("\t\t}\n");
 			}
 			methods.append("\t}\n");
 			
@@ -2167,11 +2207,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic boolean remove").append(methodName);
-			methods.append("Element(").append(propertyClassName).append(" element) {\n");
+			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
+				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
 				methods.append("\t\telement.setParent(null);\n");
+				methods.append("\t\treturn result;\n");
 			}
-			methods.append("\t\treturn ").append(name).append(".remove(element);\n");
+			else if (inverse != null) {
+				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
+				methods.append("\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
+				methods.append("\t\treturn result;\n");
+			}
+			else {
+				methods.append("\t\treturn ").append(name).append(".remove(element);\n");
+			}
 			methods.append("\t}\n");
 			
 			// collection indexed remove
@@ -2182,11 +2231,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" remove").append(methodName);
+			methods.append("\n\tpublic ").append(referenceClassName).append(" remove").append(methodName);
 			methods.append("Element(int index) {\n");
 			if (CollectionType.child.equals(type)) {
-				methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
+				methods.append("\t\t").append(referenceClassName).append(" result = ").append(name).append(".remove(index);\n");
 				methods.append("\t\tresult.setParent(null);\n");
+				methods.append("\t\treturn result;\n");
+			}
+			else if (inverse != null) {
+				methods.append("\t\t").append(referenceClassName).append(" result = ").append(name).append(".remove(index);\n");
+				methods.append("\t\tresult.get").append(inverseMethodName).append("().remove(this);\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else {
@@ -2203,7 +2257,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (tranzient) {
 				attributes.append("transient ");
 			}
-			attributes.append(propertyClassName).append(" ").append(name);
+			attributes.append(referenceClassName).append(" ").append(name);
 			attributes.append(" = null;\n");
 
 			// Accessor method
@@ -2214,7 +2268,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
+			methods.append("\n\tpublic ").append(referenceClassName).append(" get").append(methodName).append("() {\n");
 			methods.append("\t\treturn ").append(name).append(";\n");
 			methods.append("\t}\n");
 
@@ -2228,26 +2282,55 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\t@XmlElement");
 			methods.append("\n\tpublic void set").append(methodName).append('(');
-			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
+			methods.append(referenceClassName).append(' ').append(name).append(") {\n");
+			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
 			if (reference.isTrackChanges()) {
-				methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
+				methods.append("\t\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
 			}
 			
 			// Embedded child reference - set the parent
-			if (AssociationType.embedded.equals(type) && (owningDocumentName.equals(propertyDocument.getParentDocumentName()))) {
-				methods.append("\t\tif (this.").append(name).append(" != null) {\n");
-				methods.append("\t\t\tthis.").append(name).append(".setParent(null);\n");
-				methods.append("\t\t}\n");
-				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
-				methods.append("\t\t").append(name).append(".setParent(");
+			// NB Don't null the parent of the old reference here as it screws hibernate
+			if (AssociationType.embedded.equals(type) && (owningDocumentName.equals(referenceDocument.getParentDocumentName()))) {
+				methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+				methods.append("\t\t\tif (").append(name).append(" != null) {\n");
+				methods.append("\t\t\t\t").append(name).append(".setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\t\t}\n");
+			}
+			else if (inverse != null) {
+				// NB Don't null the other side of the old reference here as it screws hibernate
+				if (InverseRelationship.oneToOne.equals(inverse.getRelationship())) {
+					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
+					methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append('(');
+					if (owningDomainExtensionClassExists) {
+						methods.append("(").append(owningDocumentName).append("Extension) ");
+					}
+					methods.append("this);\n");
+					methods.append("\t\t\t}\n");
+				}
+				else {
+					methods.append("\t\t\t").append(referenceClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
+					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+					methods.append("\t\t\tif ((").append(name).append(" != null) && (").append(name).append(".get").append(inverseMethodName).append("ElementById(getBizId()) == null)) {\n");
+					methods.append("\t\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
+					if (owningDomainExtensionClassExists) {
+						methods.append("(").append(owningDocumentName).append("Extension) ");
+					}
+					methods.append("this);\n");
+					methods.append("\t\t\t}\n");
+					methods.append("\t\t\tif (old").append(methodName).append(" != null) {\n");
+					methods.append("\t\t\t\told").append(methodName).append(".get").append(inverseMethodName).append("().remove(this);\n");
+					methods.append("\t\t\t}\n");
+				}
 			}
 			else {
-				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+				methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			}
+			methods.append("\t\t}\n");
 			methods.append("\t}\n");
 		}
 	}
@@ -2408,7 +2491,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
 			if (many) {
-				methods.append("\t\telement.get").append(inverseMethodName).append("().add(index, ");
+				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 			}
 			else {
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
@@ -2432,11 +2515,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
 			methods.append("\t\tif (result) {\n");
 			if (many) {
-				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(");
-				if (owningDomainExtensionClassExists) {
-					methods.append('(').append(owningDocumentName).append("Extension) ");
-				}
-				methods.append("this);\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
 				methods.append("\t\t\telement.set").append(inverseMethodName).append("(null);\n");
@@ -2457,11 +2536,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("Element(int index) {\n");
 			methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
 			if (many) {
-				methods.append("\t\tresult.get").append(inverseMethodName).append("().remove(");
-				if (owningDomainExtensionClassExists) {
-					methods.append('(').append(owningDocumentName).append("Extension) ");
-				}
-				methods.append("this);\n");
+				methods.append("\t\tresult.get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
 				methods.append("\t\tresult.set").append(inverseMethodName).append("(null);\n");
@@ -2480,67 +2555,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic void set").append(methodName).append("(");
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
-			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
-			methods.append("\t}\n");
-
-			// Add method
-			mutatorJavadoc(inverse, methods, false);
-			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
-			}
-			if (deprecated) {
-				methods.append("\n\t@Deprecated");
-			}
-			methods.append("\n\tpublic void add").append(methodName).append("(");
-			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
-			methods.append("\t\tif (this.").append(name).append(" != null) {\n");
+			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
+			methods.append("\t\t\tif (this.").append(name).append(" != null) {\n");
 			if (many) {
-				methods.append("\t\t\tthis.").append(name).append(".get").append(inverseMethodName).append("().remove(");
-				if (owningDomainExtensionClassExists) {
-					methods.append('(').append(owningDocumentName).append("Extension) ");
-				}
-				methods.append("this);\n");
+				methods.append("\t\t\t\tthis.").append(name).append(".get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
-				methods.append("\t\t\tthis.").append(name).append(".set").append(inverseMethodName).append("(null);\n");
+				methods.append("\t\t\t\tthis.").append(name).append(".set").append(inverseMethodName).append("(null);\n");
 			}
-			methods.append("\t\t}\n");
-			methods.append("\t\tset").append(methodName).append('(').append(name).append(");\n");
-			methods.append("\t\tif (").append(name).append(" != null) {\n");
+			methods.append("\t\t\t}\n");
+			methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+			methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 			if (many) {
-				methods.append("\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
+				methods.append("\t\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
 			}
 			else {
-				methods.append("\t\t\t").append(name).append(".set").append(inverseMethodName).append("(");
+				methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append("(");
 			}
 			if (owningDomainExtensionClassExists) {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
-			methods.append("\t\t}\n");
-			methods.append("\t}\n");
-
-			// Remove method
-			mutatorJavadoc(inverse, methods, false);
-			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
-			}
-			if (deprecated) {
-				methods.append("\n\t@Deprecated");
-			}
-			methods.append("\n\tpublic void remove").append(methodName).append("() {\n");
-			methods.append("\t\tif (").append(name).append(" != null) {\n");
-			if (many) {
-				methods.append("\t\t\t").append(name).append(".get").append(inverseMethodName).append("().remove(");
-				if (owningDomainExtensionClassExists) {
-					methods.append('(').append(owningDocumentName).append("Extension) ");
-				}
-				methods.append("this);\n");
-			}
-			else {
-				methods.append("\t\t\t").append(name).append(".set").append(inverseMethodName).append("(null);\n");
-			}
-			methods.append("\t\t\tset").append(methodName).append('(').append(name).append(");\n");
+			methods.append("\t\t\t}\n");
 			methods.append("\t\t}\n");
 			methods.append("\t}\n");
 		}
@@ -3063,11 +3099,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		String parentDocumentName = document.getParentDocumentName();
+		Document parentDocument = null;
 		String parentPackagePath = null;
 		String parentClassName = null;
 
 		if (parentDocumentName != null) {
-			String parentPackageName = module.getDocument(customer, parentDocumentName).getOwningModuleName();
+			parentDocument = module.getDocument(customer, parentDocumentName);
+			String parentPackageName = parentDocument.getOwningModuleName();
 			parentPackagePath = new StringBuilder(128).append("modules.")
 														.append(parentPackageName)
 														.append(".domain.").toString();
@@ -3283,13 +3321,71 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\treturn parent;\n");
 				methods.append("\t}\n");
 
+				// Determine the corresponding child collection
+				String childCollectionMethodName = null;
+				String embeddedAssociationMethodName = null;
+				if (parentDocument != null) {
+					for (Attribute a : getAllAttributes(parentDocument)) {
+						if (a instanceof Collection) {
+							Collection col = (Collection) a;
+							if (CollectionType.child.equals(col.getType()) && 
+									documentName.equals(col.getDocumentName())) {
+								childCollectionMethodName = col.getName();
+								childCollectionMethodName = Character.toUpperCase(childCollectionMethodName.charAt(0)) + 
+																childCollectionMethodName.substring(1);
+								break;
+							}
+						}
+						else if (a instanceof Association) {
+							Association ass = (Association) a;
+							if (AssociationType.embedded.equals(ass.getType()) &&
+									documentName.equals(ass.getDocumentName())) {
+								embeddedAssociationMethodName = ass.getName();
+								embeddedAssociationMethodName = Character.toUpperCase(embeddedAssociationMethodName.charAt(0)) + 
+																	embeddedAssociationMethodName.substring(1);
+								break;
+							}
+						}
+					}
+				}
+				
 				// Mutator method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
 				methods.append("\tpublic void setParent(");
 				methods.append(parentClassName).append(" parent) {\n");
-				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
-				methods.append("\t\tthis.parent = ").append(" parent;\n");
+				methods.append("\t\tif (this.parent != parent) {\n");
+				if ((childCollectionMethodName != null) || (embeddedAssociationMethodName != null)) {
+					methods.append("\t\t\t").append(parentClassName).append(" old = this.parent;\n");
+					methods.append("\t\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
+					methods.append("\t\t\tthis.parent = parent;\n");
+					if (childCollectionMethodName != null) {
+						methods.append("\t\t\tif ((parent != null) && (parent.get").append(childCollectionMethodName).append("ElementById(getBizId()) == null)) {\n");
+						methods.append("\t\t\t\tparent.get").append(childCollectionMethodName).append("().add(");
+					}
+					else {
+						methods.append("\t\t\tif (parent != null) {\n");
+						methods.append("\t\t\t\tparent.set").append(embeddedAssociationMethodName).append('(');
+					}
+					if (domainExtensionClassExists) {
+						methods.append('(').append(documentName).append("Extension) ");
+					}
+					methods.append("this);\n");
+					methods.append("\t\t\t}\n");
+					methods.append("\t\t\tif (old != null) {\n");
+					if (childCollectionMethodName != null) {
+						methods.append("\t\t\t\told.get").append(childCollectionMethodName).append("().remove(this);\n");
+					}
+					else {
+						methods.append("\t\t\t\told.set").append(embeddedAssociationMethodName).append("(null);\n");
+					}
+					methods.append("\t\t\t}\n");
+					methods.append("\t\t}\n");
+				}
+				else {
+					methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
+					methods.append("\t\tthis.parent = parent;\n");
+				}
 				methods.append("\t}\n");
 
 				// BizOrdinal property
@@ -3573,7 +3669,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	/**
 	 * Return all vanilla attributes for the specified document.
 	 */
-	@SuppressWarnings("unused")
 	private List<? extends Attribute> getAllAttributes(Document document) {
 		List<Attribute> result = new ArrayList<>(document.getAttributes());
 		Extends currentInherits = document.getExtends();

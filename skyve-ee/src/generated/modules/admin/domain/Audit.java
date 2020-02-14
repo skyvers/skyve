@@ -413,8 +413,10 @@ public class Audit extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setSourceVersion(Audit sourceVersion) {
-		preset(sourceVersionPropertyName, sourceVersion);
-		this.sourceVersion = sourceVersion;
+		if (this.sourceVersion != sourceVersion) {
+			preset(sourceVersionPropertyName, sourceVersion);
+			this.sourceVersion = sourceVersion;
+		}
 	}
 
 	/**
@@ -431,8 +433,10 @@ public class Audit extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setComparisonVersion(Audit comparisonVersion) {
-		preset(comparisonVersionPropertyName, comparisonVersion);
-		this.comparisonVersion = comparisonVersion;
+		if (this.comparisonVersion != comparisonVersion) {
+			preset(comparisonVersionPropertyName, comparisonVersion);
+			this.comparisonVersion = comparisonVersion;
+		}
 	}
 
 	/**
@@ -449,7 +453,9 @@ public class Audit extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setMe(Audit me) {
-		preset(mePropertyName, me);
-		this.me = me;
+		if (this.me != me) {
+			preset(mePropertyName, me);
+			this.me = me;
+		}
 	}
 }

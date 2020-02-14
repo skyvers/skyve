@@ -127,8 +127,17 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	 **/
 	@XmlElement
 	public void setAggregatedAssociation(MappedExtensionSingleStrategyExtension aggregatedAssociation) {
-		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-		this.aggregatedAssociation = aggregatedAssociation;
+		if (this.aggregatedAssociation != aggregatedAssociation) {
+			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			MappedExtensionSingleStrategyExtension oldAggregatedAssociation = this.aggregatedAssociation;
+			this.aggregatedAssociation = aggregatedAssociation;
+			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
+				aggregatedAssociation.getInverseAggregatedAssociation().add((MappedExtensionSingleStrategyExtension) this);
+			}
+			if (oldAggregatedAssociation != null) {
+				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
+			}
+		}
 	}
 
 	/**

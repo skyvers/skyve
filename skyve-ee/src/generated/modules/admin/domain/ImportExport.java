@@ -642,8 +642,9 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * @param element	The element to remove.
 	 **/
 	public boolean removeImportExportColumnsElement(ImportExportColumn element) {
+		boolean result = importExportColumns.remove(element);
 		element.setParent(null);
-		return importExportColumns.remove(element);
+		return result;
 	}
 
 	/**

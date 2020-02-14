@@ -346,8 +346,10 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setUserSelfRegistrationGroup(GroupExtension userSelfRegistrationGroup) {
-		preset(userSelfRegistrationGroupPropertyName, userSelfRegistrationGroup);
-		this.userSelfRegistrationGroup = userSelfRegistrationGroup;
+		if (this.userSelfRegistrationGroup != userSelfRegistrationGroup) {
+			preset(userSelfRegistrationGroupPropertyName, userSelfRegistrationGroup);
+			this.userSelfRegistrationGroup = userSelfRegistrationGroup;
+		}
 	}
 
 	/**
@@ -382,8 +384,10 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setPublicUser(UserProxy publicUser) {
-		preset(publicUserPropertyName, publicUser);
-		this.publicUser = publicUser;
+		if (this.publicUser != publicUser) {
+			preset(publicUserPropertyName, publicUser);
+			this.publicUser = publicUser;
+		}
 	}
 
 	/**
@@ -472,8 +476,10 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setEmailToContact(Contact emailToContact) {
-		preset(emailToContactPropertyName, emailToContact);
-		this.emailToContact = emailToContact;
+		if (this.emailToContact != emailToContact) {
+			preset(emailToContactPropertyName, emailToContact);
+			this.emailToContact = emailToContact;
+		}
 	}
 
 	/**
@@ -490,8 +496,10 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setStartup(StartupExtension startup) {
-		preset(startupPropertyName, startup);
-		this.startup = startup;
+		if (this.startup != startup) {
+			preset(startupPropertyName, startup);
+			this.startup = startup;
+		}
 	}
 
 	/**

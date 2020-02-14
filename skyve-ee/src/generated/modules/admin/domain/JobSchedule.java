@@ -3548,8 +3548,10 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 **/
 	@XmlElement
 	public void setRunAs(UserProxy runAs) {
-		preset(runAsPropertyName, runAs);
-		this.runAs = runAs;
+		if (this.runAs != runAs) {
+			preset(runAsPropertyName, runAs);
+			this.runAs = runAs;
+		}
 	}
 
 	/**

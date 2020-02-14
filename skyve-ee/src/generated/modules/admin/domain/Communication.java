@@ -596,7 +596,9 @@ public abstract class Communication extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setTag(Tag tag) {
-		this.tag = tag;
+		if (this.tag != tag) {
+			this.tag = tag;
+		}
 	}
 
 	/**
@@ -1148,8 +1150,10 @@ public abstract class Communication extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setTemplate(CommunicationTemplate template) {
-		preset(templatePropertyName, template);
-		this.template = template;
+		if (this.template != template) {
+			preset(templatePropertyName, template);
+			this.template = template;
+		}
 	}
 
 	/**

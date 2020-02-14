@@ -191,8 +191,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 * @param element	The element to remove.
 	 **/
 	public boolean removeRolesElement(GroupRole element) {
+		boolean result = roles.remove(element);
 		element.setParent(null);
-		return roles.remove(element);
+		return result;
 	}
 
 	/**
@@ -256,8 +257,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 * @param element	The element to remove.
 	 **/
 	public boolean removeCandidateRolesElement(GroupRole element) {
+		boolean result = candidateRoles.remove(element);
 		element.setParent(null);
-		return candidateRoles.remove(element);
+		return result;
 	}
 
 	/**

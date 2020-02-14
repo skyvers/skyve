@@ -115,8 +115,10 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
-		preset(contactPropertyName, contact);
-		this.contact = contact;
+		if (this.contact != contact) {
+			preset(contactPropertyName, contact);
+			this.contact = contact;
+		}
 	}
 
 	/**
@@ -145,8 +147,17 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	@Override
 	@XmlElement
 	public void setParent(UserExtension parent) {
-		preset(ChildBean.PARENT_NAME, parent);
-		this.parent =  parent;
+		if (this.parent != parent) {
+			UserExtension old = this.parent;
+			preset(ChildBean.PARENT_NAME, parent);
+			this.parent = parent;
+			if ((parent != null) && (parent.getCandidateContactsElementById(getBizId()) == null)) {
+				parent.getCandidateContacts().add(this);
+			}
+			if (old != null) {
+				old.getCandidateContacts().remove(this);
+			}
+		}
 	}
 
 	@Override

@@ -321,8 +321,10 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 **/
 	@XmlElement
 	public void setAggregatedAssociation(AllAttributesPersistent aggregatedAssociation) {
-		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-		this.aggregatedAssociation = aggregatedAssociation;
+		if (this.aggregatedAssociation != aggregatedAssociation) {
+			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			this.aggregatedAssociation = aggregatedAssociation;
+		}
 	}
 
 	/**
@@ -339,8 +341,10 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 **/
 	@XmlElement
 	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
-		preset(composedAssociationPropertyName, composedAssociation);
-		this.composedAssociation = composedAssociation;
+		if (this.composedAssociation != composedAssociation) {
+			preset(composedAssociationPropertyName, composedAssociation);
+			this.composedAssociation = composedAssociation;
+		}
 	}
 
 	/**
@@ -729,8 +733,17 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	@Override
 	@XmlElement
 	public void setParent(AllAttributesPersistent parent) {
-		preset(ChildBean.PARENT_NAME, parent);
-		this.parent =  parent;
+		if (this.parent != parent) {
+			AllAttributesPersistent old = this.parent;
+			preset(ChildBean.PARENT_NAME, parent);
+			this.parent = parent;
+			if (parent != null) {
+				parent.setEmbeddedAssociation(this);
+			}
+			if (old != null) {
+				old.setEmbeddedAssociation(null);
+			}
+		}
 	}
 
 	@Override

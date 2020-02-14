@@ -104,8 +104,10 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 **/
 	@XmlElement
 	public void setCurrentUser(UserExtension currentUser) {
-		preset(currentUserPropertyName, currentUser);
-		this.currentUser = currentUser;
+		if (this.currentUser != currentUser) {
+			preset(currentUserPropertyName, currentUser);
+			this.currentUser = currentUser;
+		}
 	}
 
 	/**

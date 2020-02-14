@@ -313,8 +313,17 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setAggregatedAssociation(AllAttributesRequiredPersistent aggregatedAssociation) {
-		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-		this.aggregatedAssociation = aggregatedAssociation;
+		if (this.aggregatedAssociation != aggregatedAssociation) {
+			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			AllAttributesRequiredPersistent oldAggregatedAssociation = this.aggregatedAssociation;
+			this.aggregatedAssociation = aggregatedAssociation;
+			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
+				aggregatedAssociation.getInverseAggregatedAssociation().add(this);
+			}
+			if (oldAggregatedAssociation != null) {
+				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
+			}
+		}
 	}
 
 	/**

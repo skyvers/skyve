@@ -11,48 +11,6 @@
 	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
-	<class name="modules.test.domain.AllAttributesInverseOneToOnePersistent" table="TEST_AllAttributesInverseOneToOnePersistent" entity-name="testAllAttributesInverseOneToOnePersistent">
-		<id name="bizId" length="36" />
-		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" not-null="true" />
-		<property name="bizCustomer" length="50" not-null="true" />
-		<property name="bizFlagComment" length="1024" />
-		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" not-null="true" />
-		<many-to-one name="aggAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggAssociation"/>
-		<property name="booleanFlag" />
-		<bag name="aggCollection" table="TEST_AllAttributesInverseOneToOnePersistent_aggCollection" cascade="persist,save-update,refresh,merge">
-			<key column="owner_id" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_owner_id" />
-			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggCollection_element_id" column="element_id" />
-		</bag>
-		<property name="colour" />
-		<property name="date" type="DateOnly" />
-		<property name="dateTime" type="DateTime" />
-		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
-		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
-		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
-		<property name="enum3" length="5">
-			<type name="Enum">
-				<param name="enumClass">modules.test.domain.AllAttributesInverseOneToOnePersistent$Enum3</param>
-			</type>
-		</property>
-		<property name="geometry" />
-		<property name="id" length="36" />
-		<property name="normalInteger" />
-		<one-to-one name="invAggAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggAssociation" />
-		<property name="longInteger" />
-		<property name="markup" type="text" />
-		<property name="memo" type="text" />
-		<property name="text" length="255" />
-		<property name="time" type="TimeOnly" />
-		<property name="timestamp" type="Timestamp" />
-		<filter name="testAllAttributesInverseOneToOnePersistentNoneFilter" condition="1=0"/>
-		<filter name="testAllAttributesInverseOneToOnePersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
-		<filter name="testAllAttributesInverseOneToOnePersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-		<filter name="testAllAttributesInverseOneToOnePersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
-	</class>
-
 	<class name="modules.test.domain.AllAttributesPersistent" table="TEST_AllAttributesPersistent" entity-name="testAllAttributesPersistent">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -286,6 +244,66 @@
 		<filter name="testInjectedDocumentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.InverseManyToManyPersistent" table="TEST_InverseManyToManyPersistent" entity-name="testInverseManyToManyPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<bag name="aggCollection" table="TEST_InverseManyToManyPersistent_aggCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_InverseManyToManyPersistent_aggCollection_owner_id" />
+			<many-to-many entity-name="testInverseManyToManyPersistent" foreign-key="FK_TEST_InverseManyToManyPersistent_aggCollection_element_id" column="element_id" />
+		</bag>
+		<bag name="invAggCollection" table="TEST_InverseManyToManyPersistent_aggCollection" inverse="true">
+			<key column="element_id" />
+			<many-to-many entity-name="testInverseManyToManyPersistent" column="owner_id" />
+		</bag>
+		<filter name="testInverseManyToManyPersistentNoneFilter" condition="1=0"/>
+		<filter name="testInverseManyToManyPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testInverseManyToManyPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testInverseManyToManyPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.InverseOneToManyPersistent" table="TEST_InverseOneToManyPersistent" entity-name="testInverseOneToManyPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggAssociation" entity-name="testInverseOneToManyPersistent" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_InverseOneToManyPersistent_aggAssociation"/>
+		<bag name="invAggAssociation" inverse="true">
+			<key column="aggAssociation_id" />
+			<one-to-many entity-name="testInverseOneToManyPersistent" />
+		</bag>
+		<filter name="testInverseOneToManyPersistentNoneFilter" condition="1=0"/>
+		<filter name="testInverseOneToManyPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testInverseOneToManyPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testInverseOneToManyPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.InverseOneToOnePersistent" table="TEST_InverseOneToOnePersistent" entity-name="testInverseOneToOnePersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggAssociation" entity-name="testInverseOneToOnePersistent" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_InverseOneToOnePersistent_aggAssociation"/>
+		<one-to-one name="invAggAssociation" entity-name="testInverseOneToOnePersistent" property-ref="aggAssociation" />
+		<filter name="testInverseOneToOnePersistentNoneFilter" condition="1=0"/>
+		<filter name="testInverseOneToOnePersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testInverseOneToOnePersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testInverseOneToOnePersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 		<class name="modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
 			<id name="bizId" length="36" />
 			<discriminator column="bizDiscriminator" type="string" />
@@ -438,16 +456,6 @@
 		<filter name="testUniqueConstraintNullableUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<filter-def name="testAllAttributesInverseOneToOnePersistentNoneFilter" />
-	<filter-def name="testAllAttributesInverseOneToOnePersistentCustomerFilter">
-		<filter-param name="customerParam" type="string"/>
-	</filter-def>
-	<filter-def name="testAllAttributesInverseOneToOnePersistentDataGroupIdFilter">
-		<filter-param name="dataGroupIdParam" type="string"/>
-	</filter-def>
-	<filter-def name="testAllAttributesInverseOneToOnePersistentUserIdFilter">
-		<filter-param name="userIdParam" type="string"/>
-	</filter-def>
 	<filter-def name="testAllAttributesPersistentNoneFilter" />
 	<filter-def name="testAllAttributesPersistentCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -526,6 +534,36 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testInjectedDocumentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseManyToManyPersistentNoneFilter" />
+	<filter-def name="testInverseManyToManyPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseManyToManyPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseManyToManyPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToManyPersistentNoneFilter" />
+	<filter-def name="testInverseOneToManyPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToManyPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToManyPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToOnePersistentNoneFilter" />
+	<filter-def name="testInverseOneToOnePersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToOnePersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInverseOneToOnePersistentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionSingleStrategyNoneFilter" />

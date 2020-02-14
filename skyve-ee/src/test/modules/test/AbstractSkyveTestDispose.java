@@ -8,7 +8,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
-import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.AnyDerived1;
@@ -17,6 +16,9 @@ import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
 import modules.test.domain.Hierarchical;
 import modules.test.domain.InjectedDocument;
+import modules.test.domain.InverseManyToManyPersistent;
+import modules.test.domain.InverseOneToManyPersistent;
+import modules.test.domain.InverseOneToOnePersistent;
 import modules.test.domain.MappedBase;
 import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
@@ -32,7 +34,6 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Customer c;
 	protected Module m;
 	protected Document aapd;
-	protected Document aai121pd;
 	protected Document aarpd;
 	protected Document ad1;
 	protected Document ad2;
@@ -40,6 +41,9 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Document ao2o;
 	protected Document hd;
 	protected Document id;
+	protected Document im2mpd;
+	protected Document io2mpd;
+	protected Document io2opd;
 	protected Document mbd;
 	protected Document mejsd;
 	protected Document messd;
@@ -57,7 +61,6 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		c = u.getCustomer();
 		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
 		aapd = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
-		aai121pd = m.getDocument(c, AllAttributesInverseOneToOnePersistent.DOCUMENT_NAME);
 		aarpd = m.getDocument(c, AllAttributesRequiredPersistent.DOCUMENT_NAME);
 		ad1 = m.getDocument(c, AnyDerived1.DOCUMENT_NAME);
 		ad2 = m.getDocument(c, AnyDerived2.DOCUMENT_NAME);
@@ -65,6 +68,9 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		ao2o = m.getDocument(c, ArcOneToOne.DOCUMENT_NAME);
 		hd = m.getDocument(c, Hierarchical.DOCUMENT_NAME);
 		id = m.getDocument(c, InjectedDocument.DOCUMENT_NAME);
+		im2mpd = m.getDocument(c, InverseManyToManyPersistent.DOCUMENT_NAME);
+		io2mpd = m.getDocument(c, InverseOneToManyPersistent.DOCUMENT_NAME);
+		io2opd = m.getDocument(c, InverseOneToOnePersistent.DOCUMENT_NAME);
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
 		mejsd = m.getDocument(c, MappedExtensionJoinedStrategy.DOCUMENT_NAME);
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);

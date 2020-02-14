@@ -293,8 +293,17 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	@Override
 	@XmlElement
 	public void setParent(ImportExportExtension parent) {
-		preset(ChildBean.PARENT_NAME, parent);
-		this.parent =  parent;
+		if (this.parent != parent) {
+			ImportExportExtension old = this.parent;
+			preset(ChildBean.PARENT_NAME, parent);
+			this.parent = parent;
+			if ((parent != null) && (parent.getImportExportColumnsElementById(getBizId()) == null)) {
+				parent.getImportExportColumns().add(this);
+			}
+			if (old != null) {
+				old.getImportExportColumns().remove(this);
+			}
+		}
 	}
 
 	@Override

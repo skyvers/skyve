@@ -163,8 +163,10 @@ public class UserProxy extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
-		preset(contactPropertyName, contact);
-		this.contact = contact;
+		if (this.contact != contact) {
+			preset(contactPropertyName, contact);
+			this.contact = contact;
+		}
 	}
 
 	/**
