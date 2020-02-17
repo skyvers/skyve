@@ -396,8 +396,8 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 * {@link #aggregatedCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addAggregatedCollectionElement(AllAttributesPersistent element) {
-		aggregatedCollection.add(element);
+	public boolean addAggregatedCollectionElement(AllAttributesPersistent element) {
+		return aggregatedCollection.add(element);
 	}
 
 	/**

@@ -114,8 +114,8 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	 * {@link #arcs} add.
 	 * @param element	The element to add.
 	 **/
-	public void addArcsElement(AnyBase element) {
-		arcs.add(element);
+	public boolean addArcsElement(AnyBase element) {
+		return arcs.add(element);
 	}
 
 	/**

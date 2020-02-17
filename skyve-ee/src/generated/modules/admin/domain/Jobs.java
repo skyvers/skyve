@@ -106,8 +106,8 @@ public class Jobs extends AbstractTransientBean {
 	 * {@link #runningJobs} add.
 	 * @param element	The element to add.
 	 **/
-	public void addRunningJobsElement(Job element) {
-		runningJobs.add(element);
+	public boolean addRunningJobsElement(Job element) {
+		return runningJobs.add(element);
 	}
 
 	/**

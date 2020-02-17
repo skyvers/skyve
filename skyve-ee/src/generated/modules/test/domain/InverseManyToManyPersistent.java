@@ -121,11 +121,10 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 * {@link #aggCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addAggCollectionElement(InverseManyToManyPersistent element) {
-		aggCollection.add(element);
-		if (element.getInvAggCollectionElementById(getBizId()) == null) {
-			element.getInvAggCollection().add(this);
-		}
+	public boolean addAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = aggCollection.add(element);
+		element.getInvAggCollection().add(this);
+		return result;
 	}
 
 	/**
@@ -135,9 +134,7 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public void addAggCollectionElement(int index, InverseManyToManyPersistent element) {
 		aggCollection.add(index, element);
-		if (element.getInvAggCollectionElementById(getBizId()) == null) {
-			element.getInvAggCollection().add(this);
-		}
+		element.getInvAggCollection().add(this);
 	}
 
 	/**
@@ -191,9 +188,10 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 * {@link #invAggCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addInvAggCollectionElement(InverseManyToManyPersistent element) {
-		invAggCollection.add(element);
+	public boolean addInvAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = invAggCollection.add(element);
 		element.getAggCollection().add(this);
+		return result;
 	}
 
 	/**

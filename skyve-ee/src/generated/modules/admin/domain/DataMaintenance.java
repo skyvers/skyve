@@ -777,8 +777,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #refreshDocuments} add.
 	 * @param element	The element to add.
 	 **/
-	public void addRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
-		refreshDocuments.add(element);
+	public boolean addRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
+		return refreshDocuments.add(element);
 	}
 
 	/**

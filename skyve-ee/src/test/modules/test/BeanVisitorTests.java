@@ -257,14 +257,21 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add("");
 		// aggregatedAssociation
 		expectedBindings.add(AllAttributesPersistent.aggregatedAssociationPropertyName);
-		// aggregatedCollection[0]
-		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
-		// aggregatedCollection[1]
-		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
 		// composedAssociation
 		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
 		// embeddedAssociation
 		expectedBindings.add(AllAttributesPersistent.embeddedAssociationPropertyName);
+		// embeddedAssociation.parent
+		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
+															ChildBean.PARENT_NAME));
+		// embeddedAssociation.parent.aggregatedCollection[0]
+		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
+															ChildBean.PARENT_NAME,
+															Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0)));
+		// embeddedAssociation.parentaggregatedCollection[1]
+		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
+															ChildBean.PARENT_NAME,
+															Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1)));
 
 		final Set<String> actualBindings = new TreeSet<>();
 

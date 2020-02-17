@@ -375,8 +375,8 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 * {@link #aggregatedCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
-		aggregatedCollection.add(element);
+	public boolean addAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
+		return aggregatedCollection.add(element);
 	}
 
 	/**
@@ -623,9 +623,10 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 * {@link #inverseAggregatedAssociation} add.
 	 * @param element	The element to add.
 	 **/
-	public void addInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
-		inverseAggregatedAssociation.add(element);
+	public boolean addInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
+		boolean result = inverseAggregatedAssociation.add(element);
 		element.setAggregatedAssociation(this);
+		return result;
 	}
 
 	/**

@@ -4,8 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.skyve.EXT;
 import org.skyve.impl.util.UtilImpl;
@@ -25,11 +26,23 @@ public class MailTest extends AbstractH2Test {
 	public static final String SUBJECT = "SUBJECT";
 	public static final String BODY = "BODY";
 
-	@Before
-	@SuppressWarnings("static-method")
-	public void before() {
+	private static boolean bogusSend = false;
+	private static String testRecipient = null;
+
+	@BeforeClass
+	public static void beforeClass() {
 		UtilImpl.SMTP = "localhost";
 		UtilImpl.SMTP_PORT = 25;
+		bogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+		UtilImpl.SMTP_TEST_BOGUS_SEND = false;
+		testRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
+		UtilImpl.SMTP_TEST_RECIPIENT = null;
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		UtilImpl.SMTP_TEST_BOGUS_SEND = bogusSend;
+		UtilImpl.SMTP_TEST_RECIPIENT = testRecipient;
 	}
 	
 	@Test

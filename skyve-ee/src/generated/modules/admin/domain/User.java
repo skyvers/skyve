@@ -807,8 +807,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #groups} add.
 	 * @param element	The element to add.
 	 **/
-	public void addGroupsElement(GroupExtension element) {
-		groups.add(element);
+	public boolean addGroupsElement(GroupExtension element) {
+		return groups.add(element);
 	}
 
 	/**
@@ -867,9 +867,10 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #roles} add.
 	 * @param element	The element to add.
 	 **/
-	public void addRolesElement(UserRole element) {
-		roles.add(element);
+	public boolean addRolesElement(UserRole element) {
+		boolean result = roles.add(element);
 		element.setParent((UserExtension) this);
+		return result;
 	}
 
 	/**
@@ -987,9 +988,10 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #candidateContacts} add.
 	 * @param element	The element to add.
 	 **/
-	public void addCandidateContactsElement(UserCandidateContact element) {
-		candidateContacts.add(element);
+	public boolean addCandidateContactsElement(UserCandidateContact element) {
+		boolean result = candidateContacts.add(element);
 		element.setParent((UserExtension) this);
+		return result;
 	}
 
 	/**
@@ -1142,8 +1144,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #assignedRoles} add.
 	 * @param element	The element to add.
 	 **/
-	public void addAssignedRolesElement(UserRole element) {
-		assignedRoles.add(element);
+	public boolean addAssignedRolesElement(UserRole element) {
+		return assignedRoles.add(element);
 	}
 
 	/**

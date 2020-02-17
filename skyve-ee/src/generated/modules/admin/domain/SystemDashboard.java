@@ -106,8 +106,8 @@ public class SystemDashboard extends AbstractTransientBean {
 	 * {@link #status} add.
 	 * @param element	The element to add.
 	 **/
-	public void addStatusElement(Generic element) {
-		status.add(element);
+	public boolean addStatusElement(Generic element) {
+		return status.add(element);
 	}
 
 	/**

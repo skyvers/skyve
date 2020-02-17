@@ -1221,9 +1221,10 @@ public abstract class Communication extends AbstractPersistentBean {
 	 * {@link #subscriptions} add.
 	 * @param element	The element to add.
 	 **/
-	public void addSubscriptionsElement(Subscription element) {
-		subscriptions.add(element);
+	public boolean addSubscriptionsElement(Subscription element) {
+		boolean result = subscriptions.add(element);
 		element.setCommunication((CommunicationExtension) this);
+		return result;
 	}
 
 	/**

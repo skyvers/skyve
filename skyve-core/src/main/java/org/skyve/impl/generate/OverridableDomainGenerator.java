@@ -2148,24 +2148,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("\n\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
-			methods.append("\t\t").append(name).append(".add(element);\n");
 			if (CollectionType.child.equals(type)) {
+				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 				methods.append("\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\treturn result;\n");
 			}
 			else if (inverse != null) {
-				methods.append("\t\tif (element.get").append(inverseMethodName).append("ElementById(getBizId()) == null) {\n");
-				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
+				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
+				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
-				methods.append("\t\t}\n");
+				methods.append("\t\treturn result;\n");
+			}
+			else {
+				methods.append("\t\treturn ").append(name).append(".add(element);\n");
 			}
 			methods.append("\t}\n");
 			
@@ -2188,13 +2192,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("this);\n");
 			}
 			else if (inverse != null) {
-				methods.append("\t\tif (element.get").append(inverseMethodName).append("ElementById(getBizId()) == null) {\n");
-				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
+				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
-				methods.append("\t\t}\n");
 			}
 			methods.append("\t}\n");
 			
@@ -2303,6 +2305,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else if (inverse != null) {
 				// NB Don't null the other side of the old reference here as it screws hibernate
 				if (InverseRelationship.oneToOne.equals(inverse.getRelationship())) {
+					methods.append("\t\t\t").append(referenceClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 					methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append('(');
@@ -2310,6 +2313,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						methods.append("(").append(owningDocumentName).append("Extension) ");
 					}
 					methods.append("this);\n");
+					methods.append("\t\t\t}\n");
+					methods.append("\t\t\tif (old").append(methodName).append(" != null) {\n");
+					methods.append("\t\t\t\told").append(methodName).append(".set").append(inverseMethodName).append("(null);\n");
 					methods.append("\t\t\t}\n");
 				}
 				else {
@@ -2464,9 +2470,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("\n\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
-			methods.append("\t\t").append(name).append(".add(element);\n");
+			methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 			if (many) {
 				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 			}
@@ -2477,6 +2483,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
+			methods.append("\t\treturn result;\n");
 			methods.append("\t}\n");
 			
 			// collection indexed add
@@ -2556,14 +2563,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void set").append(methodName).append("(");
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
 			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
-			methods.append("\t\t\tif (this.").append(name).append(" != null) {\n");
-			if (many) {
-				methods.append("\t\t\t\tthis.").append(name).append(".get").append(inverseMethodName).append("().remove(this);\n");
-			}
-			else {
-				methods.append("\t\t\t\tthis.").append(name).append(".set").append(inverseMethodName).append("(null);\n");
-			}
-			methods.append("\t\t\t}\n");
+			methods.append("\t\t\t").append(propertyClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 			methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 			if (many) {
@@ -2576,6 +2576,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
+			methods.append("\t\t\t}\n");
+			methods.append("\t\t\tif (old").append(methodName).append(" != null) {\n");
+			if (many) {
+				methods.append("\t\t\t\told").append(methodName).append(".get").append(inverseMethodName).append("().remove(this);\n");
+			}
+			else {
+				methods.append("\t\t\t\told").append(methodName).append(".set").append(inverseMethodName).append("(null);\n");
+			}
 			methods.append("\t\t\t}\n");
 			methods.append("\t\t}\n");
 			methods.append("\t}\n");

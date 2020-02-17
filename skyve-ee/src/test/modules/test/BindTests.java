@@ -98,8 +98,13 @@ public class BindTests extends AbstractSkyveTest {
 		Binder.copy(from, to);
 		for (Attribute a: aapd.getAttributes()) {
 			String name = a.getName();
-			Assert.assertEquals(Binder.get(from, name), Binder.get(to, name));
+			if (! AllAttributesPersistent.embeddedAssociationPropertyName.equals(name)) {
+				Assert.assertEquals("Property Name " + name, Binder.get(from, name), Binder.get(to, name));
+			}
+			
 		}
+		Assert.assertEquals("Embedded association should have been moved", from.getEmbeddedAssociation(), null);
+		Assert.assertTrue("Embedded association should have been moved", (to.getEmbeddedAssociation() != null));
 	}
 	
 	@Test

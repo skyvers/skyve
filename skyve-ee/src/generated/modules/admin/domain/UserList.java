@@ -127,8 +127,8 @@ public class UserList extends AbstractTransientBean {
 	 * {@link #userInvitationGroups} add.
 	 * @param element	The element to add.
 	 **/
-	public void addUserInvitationGroupsElement(GroupExtension element) {
-		userInvitationGroups.add(element);
+	public boolean addUserInvitationGroupsElement(GroupExtension element) {
+		return userInvitationGroups.add(element);
 	}
 
 	/**

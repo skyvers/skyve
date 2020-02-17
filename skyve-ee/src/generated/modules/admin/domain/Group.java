@@ -171,9 +171,10 @@ public abstract class Group extends AbstractPersistentBean {
 	 * {@link #roles} add.
 	 * @param element	The element to add.
 	 **/
-	public void addRolesElement(GroupRole element) {
-		roles.add(element);
+	public boolean addRolesElement(GroupRole element) {
+		boolean result = roles.add(element);
 		element.setParent((GroupExtension) this);
+		return result;
 	}
 
 	/**
@@ -237,9 +238,10 @@ public abstract class Group extends AbstractPersistentBean {
 	 * {@link #candidateRoles} add.
 	 * @param element	The element to add.
 	 **/
-	public void addCandidateRolesElement(GroupRole element) {
-		candidateRoles.add(element);
+	public boolean addCandidateRolesElement(GroupRole element) {
+		boolean result = candidateRoles.add(element);
 		element.setParent((GroupExtension) this);
+		return result;
 	}
 
 	/**

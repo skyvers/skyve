@@ -147,9 +147,10 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	 * {@link #invAggAssociation} add.
 	 * @param element	The element to add.
 	 **/
-	public void addInvAggAssociationElement(InverseOneToManyPersistent element) {
-		invAggAssociation.add(element);
+	public boolean addInvAggAssociationElement(InverseOneToManyPersistent element) {
+		boolean result = invAggAssociation.add(element);
 		element.setAggAssociation(this);
+		return result;
 	}
 
 	/**

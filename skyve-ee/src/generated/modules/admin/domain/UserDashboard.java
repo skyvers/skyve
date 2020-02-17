@@ -141,8 +141,8 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 * {@link #favourites} add.
 	 * @param element	The element to add.
 	 **/
-	public void addFavouritesElement(Generic element) {
-		favourites.add(element);
+	public boolean addFavouritesElement(Generic element) {
+		return favourites.add(element);
 	}
 
 	/**

@@ -622,9 +622,10 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * {@link #importExportColumns} add.
 	 * @param element	The element to add.
 	 **/
-	public void addImportExportColumnsElement(ImportExportColumn element) {
-		importExportColumns.add(element);
+	public boolean addImportExportColumnsElement(ImportExportColumn element) {
+		boolean result = importExportColumns.add(element);
 		element.setParent((ImportExportExtension) this);
+		return result;
 	}
 
 	/**

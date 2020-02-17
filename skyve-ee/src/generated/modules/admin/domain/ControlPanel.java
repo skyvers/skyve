@@ -1027,8 +1027,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #startupProperties} add.
 	 * @param element	The element to add.
 	 **/
-	public void addStartupPropertiesElement(Generic element) {
-		startupProperties.add(element);
+	public boolean addStartupPropertiesElement(Generic element) {
+		return startupProperties.add(element);
 	}
 
 	/**
@@ -1087,8 +1087,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #originalStartupProperties} add.
 	 * @param element	The element to add.
 	 **/
-	public void addOriginalStartupPropertiesElement(Generic element) {
-		originalStartupProperties.add(element);
+	public boolean addOriginalStartupPropertiesElement(Generic element) {
+		return originalStartupProperties.add(element);
 	}
 
 	/**

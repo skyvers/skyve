@@ -171,8 +171,8 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 * {@link #aggregatedCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
-		aggregatedCollection.add(element);
+	public boolean addAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return aggregatedCollection.add(element);
 	}
 
 	/**
@@ -231,8 +231,8 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 * {@link #composedCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public void addComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
-		composedCollection.add(element);
+	public boolean addComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return composedCollection.add(element);
 	}
 
 	/**
@@ -291,9 +291,10 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 * {@link #inverseAggregatedAssociation} add.
 	 * @param element	The element to add.
 	 **/
-	public void addInverseAggregatedAssociationElement(MappedExtensionJoinedStrategyExtension element) {
-		inverseAggregatedAssociation.add(element);
+	public boolean addInverseAggregatedAssociationElement(MappedExtensionJoinedStrategyExtension element) {
+		boolean result = inverseAggregatedAssociation.add(element);
 		element.setAggregatedAssociation((MappedExtensionJoinedStrategyExtension) this);
+		return result;
 	}
 
 	/**
