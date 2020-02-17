@@ -70,11 +70,16 @@ public class ControlPanelExtension extends ControlPanel {
 	 */
 	@Override
 	public void setResults(String results) {
+		setResults(results, true);
+	}
+	
+	public void setResults(String results, boolean escape) {
 		unescapedResults = results;
-		if (results == null) {
-			super.setResults(null);
-		} else {
+		if ((escape) && (results != null)) {
 			super.setResults('\n' + results.replace("{", "\\{").replace("<", "&lt;").replace(">", "&gt;"));
+		}
+		else {
+			super.setResults(results);
 		}
 	}
 

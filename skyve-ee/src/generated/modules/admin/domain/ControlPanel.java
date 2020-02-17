@@ -101,6 +101,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public static final String newPropertyPropertyName = "newProperty";
 	/** @hidden */
 	public static final String addKeyNotSupportedPropertyName = "addKeyNotSupported";
+	/** @hidden */
+	public static final String selectedCachePropertyName = "selectedCache";
 
 	/**
 	 * User Agent Type
@@ -488,6 +490,10 @@ public abstract class ControlPanel extends AbstractTransientBean {
 			API stanzas with substanzas is not yet implemented.
 	 **/
 	private Boolean addKeyNotSupported;
+	/**
+	 * Cache
+	 **/
+	private String selectedCache;
 
 	@Override
 	@XmlTransient
@@ -1152,6 +1158,23 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public void setAddKeyNotSupported(Boolean addKeyNotSupported) {
 		preset(addKeyNotSupportedPropertyName, addKeyNotSupported);
 		this.addKeyNotSupported = addKeyNotSupported;
+	}
+
+	/**
+	 * {@link #selectedCache} accessor.
+	 * @return	The value.
+	 **/
+	public String getSelectedCache() {
+		return selectedCache;
+	}
+
+	/**
+	 * {@link #selectedCache} mutator.
+	 * @param selectedCache	The new value.
+	 **/
+	@XmlElement
+	public void setSelectedCache(String selectedCache) {
+		this.selectedCache = selectedCache;
 	}
 
 	/**

@@ -6,43 +6,60 @@
 			<form border="true" borderTitle="Generate">
 				<column pixelWidth="175" />
 				<column />
-				<column pixelWidth="100" />
-				<column pixelWidth="100" />
+				<column pixelWidth="140" />
+				<column pixelWidth="140" />
 				<row>
 					<item>
 						<combo binding="designModuleDocumentName" />
 					</item>
 					<item align="centre">
-						<button action="GenerateEditView" pixelWidth="90" />
+						<button action="GenerateEditView" pixelWidth="130" />
 					</item>
 					<item align="centre">
-						<button action="GenerateQuery" pixelWidth="90" />
+						<button action="GenerateQuery" pixelWidth="130" />
 					</item>
 				</row>
 			</form>
 			<form border="true" borderTitle="Swap Customer">
 				<column pixelWidth="175" />
 				<column />
-				<column pixelWidth="100" />
+				<column pixelWidth="140" />
 				<row>
 					<item>
 						<combo binding="customerNameToSwapTo" />
 					</item>
 					<item align="centre">
-						<button action="SwapCustomer" pixelWidth="90" />
+						<button action="SwapCustomer" pixelWidth="130" />
 					</item>
 				</row>
 			</form>
 			<form border="true" borderTitle="Query">
 				<column pixelWidth="175" />
 				<column />
-				<column pixelWidth="100" />
+				<column pixelWidth="140" />
 				<row>
 					<item>
 						<textArea binding="query" wrap="true" />
 					</item>
 					<item align="centre">
-						<button action="ExecuteQuery" pixelWidth="90" />
+						<button action="ExecuteQuery" pixelWidth="130" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Caches">
+				<column pixelWidth="175" />
+				<column />
+				<column pixelWidth="140" />
+				<column pixelWidth="140" />
+				<row>
+					<item>
+						<default binding="selectedCache" />
+					</item>
+					<item align="centre">
+						<button action="EvictSelectedCache" pixelWidth="130" />
+					</item>
+					<item align="centre">
+						<button action="CacheStats" pixelWidth="130" />
 					</item>
 				</row>
 			</form>
@@ -75,8 +92,8 @@
 			<form border="true" borderTitle="Generate">
 				<column pixelWidth="120" />
 				<column />
-				<column pixelWidth="100" />
-				<column pixelWidth="100" />
+				<column pixelWidth="130" />
+				<column pixelWidth="130" />
 				<row>
 					<item>
 						<combo binding="sailModuleName" />
@@ -97,18 +114,18 @@
 						<radio binding="sailTestStrategy" vertical="false" />
 					</item>
 					<item align="right">
-						<button action="GenerateMenuSAIL" pixelWidth="90" />
+						<button action="GenerateMenuSAIL" pixelWidth="120" />
 					</item>
 					<item align="right">
-						<button action="GenerateModuleSAIL" pixelWidth="90" />
+						<button action="GenerateModuleSAIL" pixelWidth="120" />
 					</item>
 				</row>
 			</form>
 			<form border="true" borderTitle="Execute">
 				<column pixelWidth="120" />
 				<column />
-				<column pixelWidth="100" />
-				<column pixelWidth="100" />
+				<column pixelWidth="130" />
+				<column pixelWidth="130" />
 				<row>
 					<item colspan="3">
 						<textField binding="sailComponentBuilder" />
@@ -129,10 +146,10 @@
 						<combo binding="sailExecutor" />
 					</item>
 					<item align="right">
-						<button action="ExecuteSAIL" pixelWidth="90" />
+						<button action="ExecuteSAIL" pixelWidth="120" />
 					</item>
 					<item align="right">
-						<button action="DownloadSAIL" pixelWidth="90" />
+						<button action="DownloadSAIL" pixelWidth="120" />
 					</item>
 				</row>
 			</form>
@@ -320,6 +337,8 @@
 		</tab>
 	</tabPane>
 	<actions>
+		<action className="CacheStats" displayName="Cache Stats" clientValidation="false" inActionPanel="false" />
+		<action className="EvictSelectedCache" displayName="Evict Selected Cache" clientValidation="false" inActionPanel="false" />
 		<action className="EvictFromCache" displayName="Evict All Cached Metadata" />
 		<action className="SwapCustomer" displayName="Swap Customer" inActionPanel="false" />
 		<action className="GenerateEditView" displayName="Edit View" inActionPanel="false" />

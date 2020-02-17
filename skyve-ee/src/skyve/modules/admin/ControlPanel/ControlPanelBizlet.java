@@ -1,13 +1,17 @@
 package modules.admin.ControlPanel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.cache.CacheConfig;
+import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
@@ -43,6 +47,26 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return bean;
 	}
 
+	@Override
+	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+		List<DomainValue> result = new ArrayList<>();
+		
+		if (ControlPanel.selectedCachePropertyName.equals(attributeName)) {
+			String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
+			result.add(new DomainValue(cacheName, "Conversations"));
+			for (HibernateCacheConfig c : UtilImpl.HIBERNATE_CACHES) {
+				cacheName = c.getName();
+				result.add(new DomainValue(cacheName, cacheName + " (Hibernate)"));
+			}
+			for (CacheConfig<? extends Serializable, ? extends Serializable> c : UtilImpl.APP_CACHES) {
+				cacheName = c.getName();
+				result.add(new DomainValue(cacheName, cacheName + " (Application)"));
+			}
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		List<DomainValue> result = new ArrayList<>();

@@ -185,7 +185,9 @@
 					<action name="MakePasswordChange" />
 				</document>			
 				<document name="ControlPanel" permission="_____">
+					<action name="CacheStats" />
 					<action name="EvictFromCache" />
+					<action name="EvictSelectedCache" />
 					<action name="ExecuteQuery" />
 					<action name="GenerateEditView" />
 					<action name="GenerateQuery" />
