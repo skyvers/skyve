@@ -49,9 +49,9 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
-		List<DomainValue> result = new ArrayList<>();
-		
 		if (ControlPanel.selectedCachePropertyName.equals(attributeName)) {
+			List<DomainValue> result = new ArrayList<>();
+
 			String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 			result.add(new DomainValue(cacheName, "Conversations"));
 			for (HibernateCacheConfig c : UtilImpl.HIBERNATE_CACHES) {
@@ -62,17 +62,18 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				cacheName = c.getName();
 				result.add(new DomainValue(cacheName, cacheName + " (Application)"));
 			}
+			
+			return result;
 		}
 		
-		return result;
+		return null;
 	}
 	
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-		List<DomainValue> result = new ArrayList<>();
-
 		if (ControlPanel.designModuleDocumentNamePropertyName.equals(attributeName)) {
 			Customer c = CORE.getUser().getCustomer();
+			List<DomainValue> result = new ArrayList<>();
 			for (Module m : c.getModules()) {
 				for (String d : m.getDocumentRefs().keySet()) {
 					result.add(new DomainValue(m.getName() + '.' + d));
@@ -82,25 +83,31 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			return result;
 		}
 		else if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
+			List<DomainValue> result = new ArrayList<>();
 			AbstractRepository rep = AbstractRepository.get();
 			for (String cus : rep.getAllCustomerNames()) {
 				result.add(new DomainValue(cus));
 			}
 			Collections.sort(result, new ModulesUtil.DomainValueSortByDescription());
+			return result;
 		}
 		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
+			List<DomainValue> result = new ArrayList<>();
 			AbstractRepository r = AbstractRepository.get();
 			for (String moduleName : r.getAllVanillaModuleNames()) {
 					result.add(new DomainValue(moduleName));
 			}
+			return result;
 		}
 		else if (ControlPanel.sailUxUiPropertyName.equals(attributeName)) {
+			List<DomainValue> result = new ArrayList<>();
 			Router r = CORE.getRepository().getRouter();
 			for (UxUiMetadata uxui : r.getUxUis()) {
 				result.add(new DomainValue(uxui.getName()));
 			}
+			return result;
 		}
 
-		return result;
+		return null;
 	}
 }
