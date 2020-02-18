@@ -88,6 +88,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
@@ -1812,6 +1813,9 @@ class ViewValidator extends ViewVisitor {
 	
 	// validate the resource name which represents the class to load for ClassActions
 	private void validateClassAction(String resourceName) {
+		if (ImplicitActionName.Print.toString().equals(resourceName)) {
+			throw new MetaDataException("Name clash: Action " + resourceName + " is an implicit action name and cannot be used.");
+		}
 		String fullyQualifiedJavaCodeName = String.format("%s.%s.actions.%s", 
 															document.getOwningModuleName(),
 															document.getName(),
