@@ -173,6 +173,48 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding);
 
 	/**
+	 * Inner join an association or collection.
+	 * @param referenceBinding
+	 * @param alias	The join alias
+	 */
+	public DocumentQuery addInnerJoin(String referenceBinding, String alias);
+	
+	/**
+	 * Left Outer join an association or collection.
+	 * @param referenceBinding
+	 * @param alias	The join alias
+	 */
+	public DocumentQuery addLeftOuterJoin(String referenceBinding, String alias);
+	
+	/**
+	 * Right Outer join an association or collection.
+	 * @param referenceBinding
+	 * @param alias	The join alias
+	 */
+	public DocumentQuery addRightOuterJoin(String referenceBinding, String alias);
+
+	/**
+	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param referenceBinding
+	 * @param alias	The join alias
+	 */
+	public DocumentQuery addFetchedInnerJoin(String referenceBinding, String alias);
+	
+	/**
+	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param referenceBinding
+	 * @param alias	The join alias
+	 */
+	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding, String alias);
+	
+	/**
+	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param alias	The join alias
+	 * @param referenceBinding
+	 */
+	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding, String alias);
+
+	/**
 	 * 
 	 * @return
 	 */
