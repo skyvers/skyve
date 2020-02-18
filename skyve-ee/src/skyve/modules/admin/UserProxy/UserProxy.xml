@@ -9,7 +9,7 @@
 		]]>
 	</documentation>
 	<persistent name="ADM_SecurityUser">
-		<cache name="reference" type="readWrite"/>
+		<cache>reference</cache>
 	</persistent>
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>

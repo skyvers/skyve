@@ -14,14 +14,13 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.model.document.Cache;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "collection")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
-			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex", "cache"})
+			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex", "cacheName"})
 public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
@@ -73,7 +72,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	private Integer maxCardinality;
 	private Boolean ownerDatabaseIndex;
 	private Boolean elementDatabaseIndex;
-	private Cache cache;
+	private String cacheName;
 	private List<org.skyve.metadata.model.document.Collection.Ordering> ordering = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
@@ -128,13 +127,13 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	}
 
 	@Override
-	public Cache getCache() {
-		return cache;
+	public String getCacheName() {
+		return cacheName;
 	}
 
-	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setCache(Cache cache) {
-		this.cache = cache;
+	@XmlElement(name = "cache", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setCacheName(String cacheName) {
+		this.cacheName = cacheName;
 	}
 
 	@Override

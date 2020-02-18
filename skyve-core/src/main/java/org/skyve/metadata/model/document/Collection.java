@@ -74,9 +74,9 @@ public interface Collection extends Reference {
 	public Boolean getElementDatabaseIndex();
 
 	/**
-	 * The name of the shared cache and type of caching to use for this collection
+	 * The name of the shared cache to use for this collection
 	 */
-	public Cache getCache();
+	public String getCacheName();
 	/**
 	 * 
 	 * @return

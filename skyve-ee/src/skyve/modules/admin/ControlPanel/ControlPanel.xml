@@ -176,6 +176,13 @@
 			API stanzas with substanzas is not yet implemented.
 			]]></description>
 		</boolean>
+		
+		<!-- Cache selection -->
+		<text name="selectedCache" usage="view" audited="false" trackChanges="false">
+			<displayName>Cache</displayName>
+			<domain>constant</domain>
+			<length>1024</length>
+		</text>
 	</attributes>
 	<conditions>
 		<condition name="fixedCustomer" usage="view">

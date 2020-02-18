@@ -57,8 +57,6 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
-import org.skyve.metadata.model.document.Cache;
-import org.skyve.metadata.model.document.Cache.CacheType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
@@ -690,9 +688,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
-			Cache cache = persistent.getCache();
-			boolean readOnly = (cache != null) && CacheType.readOnly.equals(cache.getType());
-			
 			// check table name length if required
 			if (identifierIsTooLong(persistent.getName())) {
 				throw new MetaDataException("Persistent name " + persistent.getName() + 
@@ -760,9 +755,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
-				if (readOnly) {
-					contents.append("mutable=\"false\" ");
-				}
 				contents.append("entity-name=\"");
 				StringBuilder entityNameBuilder = new StringBuilder(64);
 				if (customerName != null) {
@@ -776,10 +768,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				contents.append(indent).append("\t\t<key column=\"bizId\" />\n");
 			}
 			else if (baseDocumentName == null) {
-				if (cache != null) {
-					contents.append(indent).append("\t\t<cache usage=\"");
-					contents.append(readOnly ? "read-only" : "read-write");
-					contents.append("\" region=\"").append(cache.getName()).append("\" />\n");
+				String cacheName = persistent.getCacheName();
+				if (cacheName != null) {
+					contents.append(indent).append("\t\t<cache usage=\"read-write\" region=\"");
+					contents.append(cacheName).append("\" />\n");
 				}
 				
 				// map inherited properties
@@ -1031,8 +1023,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					else if (orderBy != null) {
 						contents.append("\" order-by=\"").append(orderBy);
 					}
-					Cache cache = collection.getCache();
-					if (cache != null) {
+					String cacheName = collection.getCacheName();
+					if (cacheName != null) {
 						throw new MetaDataException("Collection " + collectionName + 
 														" in document " + moduleName + '.' + documentName + " referencing document " +
 														referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
@@ -1081,12 +1073,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					
 					contents.append("\" table=\"").append(collectionTableName);
 
-					Cache cache = collection.getCache();
-					boolean readOnly = (cache != null) && CacheType.readOnly.equals(cache.getType());
-					if (readOnly) {
-						contents.append("\" mutable=\"false");
-					}
-					
 					if (CollectionType.aggregation.equals(type)) {
 						contents.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
 					}
@@ -1096,10 +1082,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
-					if (cache != null) {
-						contents.append(indentation).append("\t\t\t<cache usage=\"");
-						contents.append(readOnly ? "read-only" : "read-write");
-						contents.append("\" region=\"").append(cache.getName()).append("\" />\n");
+					String cacheName = collection.getCacheName();
+					if (cacheName != null) {
+						contents.append(indentation).append("\t\t\t<cache usage=\"read-write\" region=\"");
+						contents.append(cacheName).append("\" />\n");
 					}
 
 					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
