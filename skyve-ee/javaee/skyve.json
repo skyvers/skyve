@@ -82,6 +82,8 @@
 			offHeapSizeMB: 0,
 			// Max disk size - 0 indicates no usage
 			diskSizeGB: 0,
+			// Whether the cache is persistent - false indicates the cache does not survive JVM restarts
+			persistent: false,
 			// Under what conditions to expire a cache entry
 			expiryPolicy: "timeToLive", // "timeToIdle" or "eternal"
 			// Number of minutes to wait until expiring a conversation from the cache

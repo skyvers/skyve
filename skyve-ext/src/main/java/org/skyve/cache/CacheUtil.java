@@ -138,7 +138,7 @@ public class CacheUtil {
 		}
 		long diskSizeInMB = config.getDiskSizeInMB();
 		if (diskSizeInMB > 0) {
-			rpb = rpb.disk(diskSizeInMB, MemoryUnit.MB);
+			rpb = rpb.disk(diskSizeInMB, MemoryUnit.MB, config.isPersistent());
 		}
 		CacheConfigurationBuilder<K, V> ccb = CacheConfigurationBuilder.newCacheConfigurationBuilder(config.getKeyClass(), config.getValueClass(), rpb);
 		CacheExpiryPolicy expiryPolicy = config.getExpiryPolicy();

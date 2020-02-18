@@ -224,6 +224,7 @@ public class SkyveContextListener implements ServletContextListener {
 				int heapSizeEntries = getInt(prefix, "heapSizeEntries", cache);
 				Number offHeapSizeInMB = getNumber(prefix, "offHeapSizeMB", cache, false);
 				Number diskSizeInGB = getNumber(prefix, "diskSizeGB", cache, false);
+				Boolean persistent = (Boolean) get(prefix, "persistent", cache, false);
 				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
 				Number expiryInMinutes = getNumber(prefix, "expiryTimeMinutes", cache, false);
 				ClassLoader ctxClassLoader = Thread.currentThread().getContextClassLoader();
@@ -261,7 +262,8 @@ public class SkyveContextListener implements ServletContextListener {
 																	(expiryInMinutes == null) ? 0L : expiryInMinutes.longValue(),
 																	keyClass,
 																	valueClass,
-																	(diskSizeInGB == null) ? 0L : diskSizeInGB.longValue() * 1024L));
+																	(diskSizeInGB == null) ? 0L : diskSizeInGB.longValue() * 1024L,
+																	Boolean.TRUE.equals(persistent)));
 				}
 				else {
 					throw new IllegalStateException("Cache type " + type + " is not a known type");
