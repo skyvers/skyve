@@ -44,6 +44,7 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.defaultcommand.DefaultCommand;
+import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
@@ -117,6 +118,9 @@ public class MockApplication extends Application {
 		}
 		else if (DefaultCommand.COMPONENT_TYPE.equals(componentType)) {
 			return new DefaultCommand();
+		}
+		else if (Dialog.COMPONENT_TYPE.equals(componentType)) {
+			return new Dialog();
 		}
 		else if (Editor.COMPONENT_TYPE.equals(componentType)) {
 			return new Editor();
