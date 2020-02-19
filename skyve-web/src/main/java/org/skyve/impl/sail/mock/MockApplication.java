@@ -13,9 +13,12 @@ import javax.faces.application.ViewHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIForm;
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIParameter;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.behavior.Behavior;
+import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlInputHidden;
+import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
@@ -34,6 +37,7 @@ import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
@@ -45,11 +49,15 @@ import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.defaultcommand.DefaultCommand;
 import org.primefaces.component.dialog.Dialog;
+import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.editor.Editor;
+import org.primefaces.component.fieldset.Fieldset;
+import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.linechart.LineChart;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -59,18 +67,29 @@ import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.piechart.PieChart;
+import org.primefaces.component.polarareachart.PolarAreaChart;
+import org.primefaces.component.progressbar.ProgressBar;
+import org.primefaces.component.radarchart.RadarChart;
 import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
+import org.primefaces.component.selectmanycheckbox.SelectManyCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
+import org.primefaces.component.sticky.Sticky;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
+import org.skyve.impl.web.faces.components.Conversation;
+import org.skyve.impl.web.faces.components.ListGrid;
+import org.skyve.impl.web.faces.components.Map;
+import org.skyve.impl.web.faces.components.SetUxUi;
+import org.skyve.impl.web.faces.components.View;
 
 @SuppressWarnings("deprecation") // This super class has a whole bunch of deprecated shit in it
 public class MockApplication extends Application {
@@ -88,6 +107,9 @@ public class MockApplication extends Application {
 		}
 		else if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
 			return new AccordionPanel();
+		}
+		else if (BarChart.COMPONENT_TYPE.equals(componentType)) {
+			return new BarChart();
 		}
 		else if (BreadCrumb.COMPONENT_TYPE.equals(componentType)) {
 			return new BreadCrumb();
@@ -110,6 +132,9 @@ public class MockApplication extends Application {
 		else if (CommandLink.COMPONENT_TYPE.equals(componentType)) {
 			return new CommandLink();
 		}
+		else if (Conversation.COMPONENT_TYPE.equals(componentType)) {
+			return new Conversation();
+		}
 		else if (DataList.COMPONENT_TYPE.equals(componentType)) {
 			return new DataList();
 		}
@@ -122,14 +147,29 @@ public class MockApplication extends Application {
 		else if (Dialog.COMPONENT_TYPE.equals(componentType)) {
 			return new Dialog();
 		}
+		else if (DonutChart.COMPONENT_TYPE.equals(componentType)) {
+			return new DonutChart();
+		}
 		else if (Editor.COMPONENT_TYPE.equals(componentType)) {
 			return new Editor();
+		}
+		else if (Fieldset.COMPONENT_TYPE.equals(componentType)) {
+			return new Fieldset();
+		}
+		else if (FileUpload.COMPONENT_TYPE.equals(componentType)) {
+			return new FileUpload();
 		}
 		else if (GraphicImage.COMPONENT_TYPE.equals(componentType)) {
 			return new GraphicImage();
 		}
+		else if (HtmlForm.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlForm();
+		}
 		else if (HtmlInputHidden.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlInputHidden();
+		}
+		else if (HtmlInputText.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlInputText();
 		}
 		else if (HtmlOutputLink.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlOutputLink();
@@ -151,6 +191,15 @@ public class MockApplication extends Application {
 		}
 		else if (InputTextarea.COMPONENT_TYPE.equals(componentType)) {
 			return new InputTextarea();
+		}
+		else if (LineChart.COMPONENT_TYPE.equals(componentType)) {
+			return new LineChart();
+		}
+		else if (ListGrid.COMPONENT_TYPE.equals(componentType)) {
+			return new ListGrid();
+		}
+		else if (Map.COMPONENT_TYPE.equals(componentType)) {
+			return new Map();
 		}
 		else if (Message.COMPONENT_TYPE.equals(componentType)) {
 			return new Message();
@@ -176,6 +225,18 @@ public class MockApplication extends Application {
 		else if (PickList.COMPONENT_TYPE.equals(componentType)) {
 			return new PickList();
 		}
+		else if (PieChart.COMPONENT_TYPE.equals(componentType)) {
+			return new PieChart();
+		}
+		else if (PolarAreaChart.COMPONENT_TYPE.equals(componentType)) {
+			return new PolarAreaChart();
+		}
+		else if (ProgressBar.COMPONENT_TYPE.equals(componentType)) {
+			return new ProgressBar();
+		}
+		else if (RadarChart.COMPONENT_TYPE.equals(componentType)) {
+			return new RadarChart();
+		}
 		else if (RemoteCommand.COMPONENT_TYPE.equals(componentType)) {
 			return new RemoteCommand();
 		}
@@ -191,6 +252,12 @@ public class MockApplication extends Application {
 		else if (SelectBooleanCheckbox.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectBooleanCheckbox();
 		}
+		else if (SelectManyCheckbox.COMPONENT_TYPE.equals(componentType)) {
+			return new SelectManyCheckbox();
+		}
+		else if (SetUxUi.COMPONENT_TYPE.equals(componentType)) {
+			return new SetUxUi();
+		}
 		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
 			return new Spacer();
 		}
@@ -199,6 +266,9 @@ public class MockApplication extends Application {
 		}
 		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
 			return new Steps();
+		}
+		else if (Sticky.COMPONENT_TYPE.equals(componentType)) {
+			return new Sticky();
 		}
 		else if (Tab.COMPONENT_TYPE.equals(componentType)) {
 			return new Tab();
@@ -221,8 +291,14 @@ public class MockApplication extends Application {
 		else if (UIOutput.COMPONENT_TYPE.equals(componentType)) {
 			return new UIOutput();
 		}
+		else if (UIParameter.COMPONENT_TYPE.equals(componentType)) {
+			return new UIParameter();
+		}
 		else if (UISelectItems.COMPONENT_TYPE.equals(componentType)) {
 			return new UISelectItems();
+		}
+		else if (View.COMPONENT_TYPE.equals(componentType)) {
+			return new View();
 		}
 		throw new FacesException("MockApplication.createComponent() does not cater for componentType " + componentType);
 	}
