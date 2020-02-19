@@ -12,10 +12,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.skyve.cache.ConversationUtil;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
-import org.skyve.impl.web.SkyveSessionListener;
 import org.skyve.web.WebContext;
 
 public class SkyveFilter implements Filter {
@@ -88,7 +88,7 @@ public class SkyveFilter implements Filter {
 				UtilImpl.LOGGER.info(headerName + "=" + httpRequest.getHeader(headerName));
 			}
 			UtilImpl.LOGGER.info("******************** SESSION/CONVERSATION ********************");
-			SkyveSessionListener.logSessionAndConversationsStats();
+			ConversationUtil.logSessionAndConversationsStats();
 		}
 
 		UserImpl user = (UserImpl) ((HttpServletRequest) request).getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);

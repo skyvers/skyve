@@ -103,6 +103,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public static final String addKeyNotSupportedPropertyName = "addKeyNotSupported";
 	/** @hidden */
 	public static final String selectedCachePropertyName = "selectedCache";
+	/** @hidden */
+	public static final String sessionCountPropertyName = "sessionCount";
 
 	/**
 	 * User Agent Type
@@ -494,6 +496,10 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Cache
 	 **/
 	private String selectedCache;
+	/**
+	 * Session Count
+	 **/
+	private Integer sessionCount;
 
 	@Override
 	@XmlTransient
@@ -1175,6 +1181,23 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	@XmlElement
 	public void setSelectedCache(String selectedCache) {
 		this.selectedCache = selectedCache;
+	}
+
+	/**
+	 * {@link #sessionCount} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getSessionCount() {
+		return sessionCount;
+	}
+
+	/**
+	 * {@link #sessionCount} mutator.
+	 * @param sessionCount	The new value.
+	 **/
+	@XmlElement
+	public void setSessionCount(Integer sessionCount) {
+		this.sessionCount = sessionCount;
 	}
 
 	/**

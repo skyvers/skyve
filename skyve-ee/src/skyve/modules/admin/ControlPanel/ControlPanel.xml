@@ -177,12 +177,15 @@
 			]]></description>
 		</boolean>
 		
-		<!-- Cache selection -->
+		<!-- Cache and session -->
 		<text name="selectedCache" usage="view" audited="false" trackChanges="false">
 			<displayName>Cache</displayName>
 			<domain>constant</domain>
 			<length>1024</length>
 		</text>
+		<integer name="sessionCount" usage="view" audited="false" trackChanges="false">
+			<displayName>Session Count</displayName>
+		</integer>
 	</attributes>
 	<conditions>
 		<condition name="fixedCustomer" usage="view">

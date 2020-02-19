@@ -63,6 +63,22 @@
 					</item>
 				</row>
 			</form>
+			<form border="true" borderTitle="Sessions">
+				<column pixelWidth="175" />
+				<column />
+				<row>
+					<item align="right">
+						<label value="Count:" />
+					</item>
+					<item>
+						<blurb>
+							<![CDATA[
+								{sessionCount}
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
 		</tab>
 		<tab title="SAIL">
 			<form border="true" borderTitle="User">
