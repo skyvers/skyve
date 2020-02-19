@@ -7,6 +7,9 @@
 	<listener>
 		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
 	</listener>
+	<listener>
+		<listener-class>org.skyve.impl.web.SkyveSessionListener</listener-class>
+	</listener>
 
 	<!-- Spring Security Configuration -->
 	<context-param>

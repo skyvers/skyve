@@ -4,8 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ehcache.Cache;
-import org.ehcache.core.statistics.CacheStatistics;
-import org.ehcache.core.statistics.TierStatistics;
 import org.hibernate.internal.util.SerializationHelper;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.impl.util.UtilImpl;
@@ -54,26 +52,5 @@ public class ConversationUtil {
 		}
 		
 		return result;
-	}
-	
-	public static void logConversationsStats() {
-		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(UtilImpl.CONVERSATION_CACHE.getName());
-		if (statistics != null) {
-			TierStatistics tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap);
-			if (tier != null) {
-				UtilImpl.LOGGER.info("Count in heap memory = " + tier.getMappings());
-			}
-			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap);
-			if (tier != null) {
-				UtilImpl.LOGGER.info("Count in off-heap memory = " + tier.getMappings());
-				UtilImpl.LOGGER.info("MB in off-heap memory = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
-			}
-			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk);
-			if (tier != null) {
-				UtilImpl.LOGGER.info("Count on disk = " + tier.getMappings());
-				UtilImpl.LOGGER.info("MB on disk = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
-			}
-		}
-		UtilImpl.LOGGER.info("**************************************************************");
 	}
 }
