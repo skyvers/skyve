@@ -4,7 +4,7 @@
 	
 	<vbox border="true" borderTitle="Environment Settings">
 	    <form responsiveWidth="12" widgetId="formEnvironment">
-	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="4"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -22,7 +22,7 @@
 	
 	<vbox border="true" borderTitle="Mail Settings">
 		<form responsiveWidth="12" widgetId="formMail">
-	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="1"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -121,7 +121,7 @@
 	
 	<vbox border="true" borderTitle="Security Settings">
 		<form responsiveWidth="12" widgetId="formSecurity">
-	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="4"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -171,8 +171,7 @@
     
     <actions widgetId="actionPanel">
         <!-- <defaults/> -->
-        
-        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa fa-floppy-o" />
         <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fa fa-angle-left" />
+        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa fa-floppy-o" inActionPanel="true"/>
     </actions>
 </view>
