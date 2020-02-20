@@ -3377,8 +3377,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t}\n");
 				}
 				else {
-					methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
-					methods.append("\t\tthis.parent = parent;\n");
+					methods.append("\t\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
+					methods.append("\t\t\tthis.parent = parent;\n");
+					methods.append("\t\t}\n");
 				}
 				methods.append("\t}\n");
 
