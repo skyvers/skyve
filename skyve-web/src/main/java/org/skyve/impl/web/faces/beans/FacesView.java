@@ -189,7 +189,7 @@ public class FacesView<T extends Bean> extends Harness {
 		if (webContext != null) {
 			webContext.setCurrentBean(bean);
 		}
-		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForViewAndCollectionBinding(this, null, null));
+		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForViewAndCollectionBinding(this, null, null), webContext);
 	}
 
 	public BeanMapAdapter<T> getCurrentBean() {

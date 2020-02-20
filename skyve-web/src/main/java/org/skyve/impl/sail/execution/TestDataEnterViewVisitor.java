@@ -30,6 +30,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
+import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -180,7 +181,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 					value = "0";
 				}
 				else {
-					GetSelectItemsAction get = new GetSelectItemsAction(bean, binding, true);
+					GetSelectItemsAction get = new GetSelectItemsAction(bean, new MockWebContext(), binding, true);
 					boolean found = false;
 					int index = 0;
 					try {

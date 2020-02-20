@@ -157,7 +157,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		List<Bean> beans = page.getRows();
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
-			result.add(new BeanMapAdapter<>(bean));
+			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));
 		}
 		return result;
 	}
@@ -191,7 +191,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(Bean.DOCUMENT_ID, rowKey);
 		MapBean bean = new MapBean(moduleName, documentName, properties);
-		return new BeanMapAdapter<>(bean);
+		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
 	}
 	
 	private static void sort(List<SortMeta> multiSortMeta, ListModel<Bean> model) {
