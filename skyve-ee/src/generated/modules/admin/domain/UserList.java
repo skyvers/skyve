@@ -124,39 +124,6 @@ public class UserList extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #userInvitationGroups} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addUserInvitationGroupsElement(GroupExtension element) {
-		return userInvitationGroups.add(element);
-	}
-
-	/**
-	 * {@link #userInvitationGroups} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addUserInvitationGroupsElement(int index, GroupExtension element) {
-		userInvitationGroups.add(index, element);
-	}
-
-	/**
-	 * {@link #userInvitationGroups} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeUserInvitationGroupsElement(GroupExtension element) {
-		return userInvitationGroups.remove(element);
-	}
-
-	/**
-	 * {@link #userInvitationGroups} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public GroupExtension removeUserInvitationGroupsElement(int index) {
-		return userInvitationGroups.remove(index);
-	}
-
-	/**
 	 * {@link #userInvitiationEmailList} accessor.
 	 * @return	The value.
 	 **/

@@ -393,39 +393,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	}
 
 	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.add(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addAggregatedCollectionElement(int index, AllAttributesPersistent element) {
-		aggregatedCollection.add(index, element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.remove(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public AllAttributesPersistent removeAggregatedCollectionElement(int index) {
-		return aggregatedCollection.remove(index);
-	}
-
-	/**
 	 * {@link #colour} accessor.
 	 * @return	The value.
 	 **/
@@ -734,15 +701,8 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	@XmlElement
 	public void setParent(AllAttributesPersistent parent) {
 		if (this.parent != parent) {
-			AllAttributesPersistent old = this.parent;
 			preset(ChildBean.PARENT_NAME, parent);
 			this.parent = parent;
-			if (parent != null) {
-				parent.setEmbeddedAssociation(this);
-			}
-			if (old != null) {
-				old.setEmbeddedAssociation(null);
-			}
 		}
 	}
 

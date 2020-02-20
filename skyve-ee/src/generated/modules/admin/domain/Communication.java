@@ -1218,48 +1218,6 @@ public abstract class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #subscriptions} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addSubscriptionsElement(Subscription element) {
-		boolean result = subscriptions.add(element);
-		element.setCommunication((CommunicationExtension) this);
-		return result;
-	}
-
-	/**
-	 * {@link #subscriptions} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addSubscriptionsElement(int index, Subscription element) {
-		subscriptions.add(index, element);
-		element.setCommunication((CommunicationExtension) this);
-	}
-
-	/**
-	 * {@link #subscriptions} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeSubscriptionsElement(Subscription element) {
-		boolean result = subscriptions.remove(element);
-		if (result) {
-			element.setCommunication(null);
-		}
-		return result;
-	}
-
-	/**
-	 * {@link #subscriptions} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Subscription removeSubscriptionsElement(int index) {
-		Subscription result = subscriptions.remove(index);
-		result.setCommunication(null);
-		return result;
-	}
-
-	/**
 	 * Batch Selected
 	 *
 	 * @return The condition

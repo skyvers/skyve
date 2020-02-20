@@ -329,14 +329,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public void setAggregatedAssociation(AllAttributesPersistent aggregatedAssociation) {
 		if (this.aggregatedAssociation != aggregatedAssociation) {
 			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-			AllAttributesPersistent oldAggregatedAssociation = this.aggregatedAssociation;
 			this.aggregatedAssociation = aggregatedAssociation;
-			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
-				aggregatedAssociation.getInverseAggregatedAssociation().add(this);
-			}
-			if (oldAggregatedAssociation != null) {
-				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
-			}
 		}
 	}
 
@@ -377,9 +370,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 		if (this.embeddedAssociation != embeddedAssociation) {
 			preset(embeddedAssociationPropertyName, embeddedAssociation);
 			this.embeddedAssociation = embeddedAssociation;
-			if (embeddedAssociation != null) {
-				embeddedAssociation.setParent(this);
-			}
 		}
 	}
 
@@ -426,39 +416,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	public void setAggregatedCollectionElementById(String bizId, AllAttributesPersistent element) {
 		setElementById(aggregatedCollection, element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.add(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addAggregatedCollectionElement(int index, AllAttributesPersistent element) {
-		aggregatedCollection.add(index, element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.remove(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public AllAttributesPersistent removeAggregatedCollectionElement(int index) {
-		return aggregatedCollection.remove(index);
 	}
 
 	/**
@@ -674,48 +631,6 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	public void setInverseAggregatedAssociationElementById(String bizId, AllAttributesPersistent element) {
 		setElementById(inverseAggregatedAssociation, element);
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addInverseAggregatedAssociationElement(AllAttributesPersistent element) {
-		boolean result = inverseAggregatedAssociation.add(element);
-		element.setAggregatedAssociation(this);
-		return result;
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addInverseAggregatedAssociationElement(int index, AllAttributesPersistent element) {
-		inverseAggregatedAssociation.add(index, element);
-		element.setAggregatedAssociation(this);
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeInverseAggregatedAssociationElement(AllAttributesPersistent element) {
-		boolean result = inverseAggregatedAssociation.remove(element);
-		if (result) {
-			element.setAggregatedAssociation(null);
-		}
-		return result;
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public AllAttributesPersistent removeInverseAggregatedAssociationElement(int index) {
-		AllAttributesPersistent result = inverseAggregatedAssociation.remove(index);
-		result.setAggregatedAssociation(null);
-		return result;
 	}
 
 	/**
