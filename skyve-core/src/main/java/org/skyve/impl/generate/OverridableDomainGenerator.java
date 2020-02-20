@@ -3377,9 +3377,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t}\n");
 				}
 				else {
-					methods.append("\t\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
-					methods.append("\t\t\tthis.parent = parent;\n");
-					methods.append("\t\t}\n");
+					throw new MetaDataException("Child Document " + module.getName() + '.' + documentName + " defines a parent document of " + 
+													parentDocumentName + " but " + parentDocumentName + " has no child collection or embedded association to its child document");
 				}
 				methods.append("\t}\n");
 
