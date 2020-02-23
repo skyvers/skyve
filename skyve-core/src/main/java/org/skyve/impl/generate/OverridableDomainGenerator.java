@@ -2137,6 +2137,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
+				String referenceParentDocumentName = referenceDocument.getParentDocumentName();
+				if (! owningDocumentName.equals(referenceParentDocumentName)) {
+					throw new MetaDataException("Document " + owningModule.getName() + '.' + owningDocumentName + " has a child collection named [" + reference.getName() + "] of document " + 
+													referenceDocument.getName() + " that has" + 
+													((referenceParentDocumentName == null) ? " no parent document (not a child document)" : " a parent document of " + referenceParentDocumentName));
+				}
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 				methods.append("\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
@@ -2289,7 +2295,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t}\n");
 			}
 			else if (inverse != null) {
-				// NB Don't null the other side of the old reference here as it screws hibernate
 				if (InverseRelationship.oneToOne.equals(inverse.getRelationship())) {
 					methods.append("\t\t\t").append(referenceClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
