@@ -112,15 +112,8 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	@XmlElement
 	public void setParent(GroupExtension parent) {
 		if (this.parent != parent) {
-			GroupExtension old = this.parent;
 			preset(ChildBean.PARENT_NAME, parent);
 			this.parent = parent;
-			if ((parent != null) && (parent.getRolesElementById(getBizId()) == null)) {
-				parent.getRoles().add(this);
-			}
-			if (old != null) {
-				old.getRoles().remove(this);
-			}
 		}
 	}
 

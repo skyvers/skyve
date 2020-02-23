@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -19,12 +20,15 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private Bean bean;
+	private WebContext webContext;
 	private String binding;
 	private boolean includeEmptyItem;
 	private String moduleName;
@@ -33,11 +37,13 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	/**
 	 * Constructor used for input components in forms and grids.
 	 * @param bean
+	 * @param webContext
 	 * @param binding
 	 * @param includeEmptyItem
 	 */
-	public GetSelectItemsAction(Bean bean, String binding, boolean includeEmptyItem) {
+	public GetSelectItemsAction(Bean bean, WebContext webContext, String binding, boolean includeEmptyItem) {
 		this.bean = bean;
+		this.webContext = webContext;
 		this.binding = binding;
 		this.includeEmptyItem = includeEmptyItem;
 		this.moduleName = bean.getBizModule();
@@ -115,9 +121,11 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             		}
 	            	else if (targetAttribute instanceof AssociationImpl) {
                    		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
-                   	 	value = CORE.getPersistence().retrieve(targetDocument.getOwningModuleName(), 
-	                											targetAssociation.getDocumentName(),
-	                											code);
+                   		Persistence p = CORE.getPersistence();
+                   		Customer c = p.getUser().getCustomer();
+                   		Module m = c.getModule(targetDocument.getOwningModuleName());
+                   		Document d = m.getDocument(c, targetAssociation.getDocumentName());
+                   	 	value = WebUtil.findReferencedBean(d, code, p, bean, webContext);
 	            	}
 	            	else {
 	            		if (type == null) {

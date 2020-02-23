@@ -804,39 +804,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * {@link #groups} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addGroupsElement(GroupExtension element) {
-		return groups.add(element);
-	}
-
-	/**
-	 * {@link #groups} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addGroupsElement(int index, GroupExtension element) {
-		groups.add(index, element);
-	}
-
-	/**
-	 * {@link #groups} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeGroupsElement(GroupExtension element) {
-		return groups.remove(element);
-	}
-
-	/**
-	 * {@link #groups} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public GroupExtension removeGroupsElement(int index) {
-		return groups.remove(index);
-	}
-
-	/**
 	 * {@link #roles} accessor.
 	 * @return	The value.
 	 **/
@@ -861,46 +828,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public void setRolesElementById(String bizId, UserRole element) {
 		setElementById(roles, element);
-	}
-
-	/**
-	 * {@link #roles} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addRolesElement(UserRole element) {
-		boolean result = roles.add(element);
-		element.setParent((UserExtension) this);
-		return result;
-	}
-
-	/**
-	 * {@link #roles} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addRolesElement(int index, UserRole element) {
-		roles.add(index, element);
-		element.setParent((UserExtension) this);
-	}
-
-	/**
-	 * {@link #roles} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeRolesElement(UserRole element) {
-		boolean result = roles.remove(element);
-		element.setParent(null);
-		return result;
-	}
-
-	/**
-	 * {@link #roles} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public UserRole removeRolesElement(int index) {
-		UserRole result = roles.remove(index);
-		result.setParent(null);
-		return result;
 	}
 
 	/**
@@ -982,46 +909,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
 		setElementById(candidateContacts, element);
-	}
-
-	/**
-	 * {@link #candidateContacts} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addCandidateContactsElement(UserCandidateContact element) {
-		boolean result = candidateContacts.add(element);
-		element.setParent((UserExtension) this);
-		return result;
-	}
-
-	/**
-	 * {@link #candidateContacts} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addCandidateContactsElement(int index, UserCandidateContact element) {
-		candidateContacts.add(index, element);
-		element.setParent((UserExtension) this);
-	}
-
-	/**
-	 * {@link #candidateContacts} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeCandidateContactsElement(UserCandidateContact element) {
-		boolean result = candidateContacts.remove(element);
-		element.setParent(null);
-		return result;
-	}
-
-	/**
-	 * {@link #candidateContacts} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public UserCandidateContact removeCandidateContactsElement(int index) {
-		UserCandidateContact result = candidateContacts.remove(index);
-		result.setParent(null);
-		return result;
 	}
 
 	/**
@@ -1138,39 +1025,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public void setAssignedRolesElementById(String bizId, UserRole element) {
 		setElementById(assignedRoles, element);
-	}
-
-	/**
-	 * {@link #assignedRoles} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addAssignedRolesElement(UserRole element) {
-		return assignedRoles.add(element);
-	}
-
-	/**
-	 * {@link #assignedRoles} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addAssignedRolesElement(int index, UserRole element) {
-		assignedRoles.add(index, element);
-	}
-
-	/**
-	 * {@link #assignedRoles} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeAssignedRolesElement(UserRole element) {
-		return assignedRoles.remove(element);
-	}
-
-	/**
-	 * {@link #assignedRoles} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public UserRole removeAssignedRolesElement(int index) {
-		return assignedRoles.remove(index);
 	}
 
 	/**

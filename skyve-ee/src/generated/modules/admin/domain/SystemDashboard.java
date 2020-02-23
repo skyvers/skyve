@@ -101,37 +101,4 @@ public class SystemDashboard extends AbstractTransientBean {
 	public void setStatusElementById(String bizId, Generic element) {
 		setElementById(status, element);
 	}
-
-	/**
-	 * {@link #status} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addStatusElement(Generic element) {
-		return status.add(element);
-	}
-
-	/**
-	 * {@link #status} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addStatusElement(int index, Generic element) {
-		status.add(index, element);
-	}
-
-	/**
-	 * {@link #status} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeStatusElement(Generic element) {
-		return status.remove(element);
-	}
-
-	/**
-	 * {@link #status} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeStatusElement(int index) {
-		return status.remove(index);
-	}
 }

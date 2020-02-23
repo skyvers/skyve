@@ -112,15 +112,8 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 	@XmlElement
 	public void setParent(UserExtension parent) {
 		if (this.parent != parent) {
-			UserExtension old = this.parent;
 			preset(ChildBean.PARENT_NAME, parent);
 			this.parent = parent;
-			if ((parent != null) && (parent.getRolesElementById(getBizId()) == null)) {
-				parent.getRoles().add(this);
-			}
-			if (old != null) {
-				old.getRoles().remove(this);
-			}
 		}
 	}
 

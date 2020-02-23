@@ -2126,6 +2126,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// NB no need to set the parent here as this method does not add any elements ever
 			methods.append("\t}\n");
 
+/*
 			// collection add
 			collectionJavadoc(name, methods, true, false);
 			if (overriddenReference) { // method in base class
@@ -2241,6 +2242,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\treturn ").append(name).append(".remove(index);\n");
 			}
 			methods.append("\t}\n");
+*/
 		}
 		else { // this is an association Attribute
 			attributeJavadoc(reference, attributes);
@@ -2281,7 +2283,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (reference.isTrackChanges()) {
 				methods.append("\t\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
 			}
-			
+/*			
 			// Embedded child reference - set the parent
 			// NB Don't null the parent of the old reference here as it screws hibernate
 			if (AssociationType.embedded.equals(type) && (owningDocumentName.equals(referenceDocument.getParentDocumentName()))) {
@@ -2325,8 +2327,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 			else {
+*/
 				methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
-			}
+//			}
 			methods.append("\t\t}\n");
 			methods.append("\t}\n");
 		}
@@ -2452,7 +2455,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
 			// NB no need to set the parent here as this method does not add any elements ever
 			methods.append("\t}\n");
-
+/*
 			// collection add
 			collectionJavadoc(name, methods, true, false);
 			if (overriddenInverse) { // method in base class
@@ -2541,6 +2544,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\t\treturn result;\n");
 			methods.append("\t}\n");
+*/
 		}
 		else {
 			// Mutator method
@@ -2554,8 +2558,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\n\tpublic void set").append(methodName).append("(");
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
 			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
-			methods.append("\t\t\t").append(propertyClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
+//			methods.append("\t\t\t").append(propertyClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 			methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
+/*
 			methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 			if (many) {
 				methods.append("\t\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
@@ -2576,6 +2581,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t\told").append(methodName).append(".set").append(inverseMethodName).append("(null);\n");
 			}
 			methods.append("\t\t\t}\n");
+*/
 			methods.append("\t\t}\n");
 			methods.append("\t}\n");
 		}
@@ -3355,9 +3361,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append(parentClassName).append(" parent) {\n");
 				methods.append("\t\tif (this.parent != parent) {\n");
 				if ((childCollectionMethodName != null) || (embeddedAssociationMethodName != null)) {
-					methods.append("\t\t\t").append(parentClassName).append(" old = this.parent;\n");
+//					methods.append("\t\t\t").append(parentClassName).append(" old = this.parent;\n");
 					methods.append("\t\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
 					methods.append("\t\t\tthis.parent = parent;\n");
+/*
 					if (childCollectionMethodName != null) {
 						methods.append("\t\t\tif ((parent != null) && (parent.get").append(childCollectionMethodName).append("ElementById(getBizId()) == null)) {\n");
 						methods.append("\t\t\t\tparent.get").append(childCollectionMethodName).append("().add(");
@@ -3379,6 +3386,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						methods.append("\t\t\t\told.set").append(embeddedAssociationMethodName).append("(null);\n");
 					}
 					methods.append("\t\t\t}\n");
+*/
 					methods.append("\t\t}\n");
 				}
 				else {
@@ -3632,6 +3640,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		toAppendTo.append("\t **/");
 	}
+
 
 	private static void collectionJavadoc(String attributeName, StringBuilder toAppendTo, boolean add, boolean indexed) {
 		toAppendTo.append("\n\t/**\n");

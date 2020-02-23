@@ -1,6 +1,7 @@
 package org.skyve.impl.bind;
 
 import java.beans.Introspector;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -774,6 +775,96 @@ public final class BindUtil {
 		}
 	}
 	
+	/**
+	 * Call the addElement method on a Bean's collection.
+	 * @param owner	The owning bean.
+	 * @param collectionName	The name of the collection.
+	 * @param element	The element.
+	 */
+	public static boolean addElement(Bean owner, String collectionName, Bean element) {
+		try {
+			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
+			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			Method m = owner.getClass().getMethod(methodName.toString(), element.getClass());
+			Object result = m.invoke(owner, element);
+			return Boolean.TRUE.equals(result);
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			throw new DomainException(e);
+		}
+	}
+
+	/**
+	 * Call the addElement method on a Bean's collection.
+	 * @param owner	The owning bean.
+	 * @param collectionName	The name of the collection.
+	 * @param index	The index to add the element at.
+	 * @param element	The element.
+	 */
+	public static void addElement(Bean owner, String collectionName, int index, Bean element) {
+		try {
+			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
+			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			Method m = owner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
+			m.invoke(owner, Integer.valueOf(index), element);
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			throw new DomainException(e);
+		}
+	}
+
+	/**
+	 * Call the removeElement method on a Bean's collection.
+	 * @param owner	The owning bean.
+	 * @param collectionName	The name of the collection.
+	 * @param element	The element.
+	 */
+	public static boolean removeElement(Bean owner, String collectionName, Bean element) {
+		try {
+			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
+			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			Method m = owner.getClass().getMethod(methodName.toString(), element.getClass());
+			Object result = m.invoke(owner, element);
+			return Boolean.TRUE.equals(result);
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			throw new DomainException(e);
+		}
+	}
+
+	/**
+	 * Call the removeElement method on a Bean's collection.
+	 * @param owner	The owning bean.
+	 * @param collectionName	The name of the collection.
+	 * @param index	The index to add the element at.
+	 * @return	The removed element.
+	 */
+	public static <T extends Bean> T removeElement(Bean owner, String collectionName, int index, T element) {
+		try {
+			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
+			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			Method m = owner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
+			@SuppressWarnings("unchecked")
+			T result = (T) m.invoke(owner, Integer.valueOf(index), element);
+			return result;
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			throw new DomainException(e);
+		}
+	}
+
 	/**
 	 * Sort a collection by its order metadata.
 	 * 

@@ -16,15 +16,18 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.util.Binder;
+import org.skyve.web.WebContext;
 
 public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 3398758718683866619L;
 
 	private T bean;
+	private WebContext webContext;
 	private Map<String, Object> delegate = new TreeMap<>();
 	
-	public BeanMapAdapter(T bean) {
+	public BeanMapAdapter(T bean, WebContext webContext) {
 		setBean(bean);
+		this.webContext = webContext;
 	}
 	
 	public T getBean() {
@@ -146,21 +149,21 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 		String bizDocument = bean.getBizDocument();
 		final String key = String.format("%s.%s.%s", bizModule, bizDocument, binding);
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
-		return new GetSelectItemsAction(bean, binding, includeEmptyItem).execute();
+		return new GetSelectItemsAction(bean, webContext, binding, includeEmptyItem).execute();
 	}
 	
 	private Object get(final String binding) throws Exception {
 		Object result = Binder.get(bean, binding);
 		
 		if (result instanceof Bean) {
-			result = new BeanMapAdapter<>((Bean) result);
+			result = new BeanMapAdapter<>((Bean) result, webContext);
 		}
 		else if (result instanceof List<?>) {
 			@SuppressWarnings("unchecked")
 			List<Bean> childBeans = (List<Bean>) result;
 			List<BeanMapAdapter<Bean>> adaptedChildBeans = new ArrayList<>();
 			for (Bean childBean : childBeans) {
-				adaptedChildBeans.add(new BeanMapAdapter<>(childBean));
+				adaptedChildBeans.add(new BeanMapAdapter<>(childBean, webContext));
 			}
 			result = adaptedChildBeans;
 		}

@@ -148,15 +148,8 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	@XmlElement
 	public void setParent(UserExtension parent) {
 		if (this.parent != parent) {
-			UserExtension old = this.parent;
 			preset(ChildBean.PARENT_NAME, parent);
 			this.parent = parent;
-			if ((parent != null) && (parent.getCandidateContactsElementById(getBizId()) == null)) {
-				parent.getCandidateContacts().add(this);
-			}
-			if (old != null) {
-				old.getCandidateContacts().remove(this);
-			}
 		}
 	}
 
