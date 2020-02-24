@@ -80,17 +80,17 @@ public class ConversationUtil {
 		if (statistics != null) {
 			TierStatistics tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Count in heap memory = " + tier.getMappings());
+				UtilImpl.LOGGER.info("Conversation count in heap memory = " + tier.getMappings());
 			}
 			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Count in off-heap memory = " + tier.getMappings());
-				UtilImpl.LOGGER.info("MB in off-heap memory = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
+				UtilImpl.LOGGER.info("Conversation count in off-heap memory = " + tier.getMappings());
+				UtilImpl.LOGGER.info("Conversation MB in off-heap memory = " + ((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0));
 			}
 			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Count on disk = " + tier.getMappings());
-				UtilImpl.LOGGER.info("MB on disk = " + ((int) (tier.getOccupiedByteSize() / 1024F / 1024F * 10F) / 10F));
+				UtilImpl.LOGGER.info("Conversation count on disk = " + tier.getMappings());
+				UtilImpl.LOGGER.info("Conversation MB on disk = " + ((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0));
 			}
 		}
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
