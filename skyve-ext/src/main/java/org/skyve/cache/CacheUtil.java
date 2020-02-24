@@ -5,6 +5,7 @@ import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.util.Set;
 
+import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.management.CacheStatisticsMXBean;
 import javax.management.JMX;
@@ -13,7 +14,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.ehcache.Cache;
-import org.ehcache.CacheManager;
+import org.ehcache.CachePersistenceException;
+import org.ehcache.PersistentCacheManager;
 import org.ehcache.Status;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -39,9 +41,9 @@ import org.skyve.impl.util.UtilImpl;
  * @author mike
  */
 public class CacheUtil {
-	private static CacheManager ehCacheManager;
+	private static PersistentCacheManager ehCacheManager;
 	private static StatisticsService statisticsService = new DefaultStatisticsService();
-	private static javax.cache.CacheManager jCacheManager;
+	private static CacheManager jCacheManager;
 	
 	private CacheUtil() {
 		// disallow instantiation
@@ -110,7 +112,7 @@ public class CacheUtil {
 	 * Get EHCacheManager.
 	 * @return	EHCacheManager
 	 */
-	public static CacheManager getEHCacheManager() {
+	public static PersistentCacheManager getEHCacheManager() {
 		return ehCacheManager;
 	}
 
@@ -118,12 +120,12 @@ public class CacheUtil {
 	 * Get JCacheManager.
 	 * @return	JCacheManager
 	 */
-	public static javax.cache.CacheManager getJCacheManager() {
+	public static CacheManager getJCacheManager() {
 		return jCacheManager;
 	}
 
 	/**
-	 * Create a new EHCache with the given parameters in Skyve's cache manger
+	 * Create a new EHCache with the given parameters
 	 * @param <K>	Key type
 	 * @param <V>	Value Type
 	 * @param config	A cache configuration
@@ -159,7 +161,7 @@ public class CacheUtil {
 	}
 
 	/**
-	 * Create a new JCache with the given parameters in Skyve's cache manger
+	 * Create a new JCache with the given parameters
 	 * @param <K>	Key type
 	 * @param <V>	Value Type
 	 * @param config	A cache configuration.
@@ -189,28 +191,35 @@ public class CacheUtil {
 	}
 
 	/**
-	 * Destroy an existing EHCache by name in Skyve's cache manger
+	 * Remove an existing EHCache by name
 	 */
-	public static final void destroyEHCache(String name) {
+	public static final void removeEHCache(String name) {
 		ehCacheManager.removeCache(name);
 	}
-	
+
 	/**
-	 * Destroy an existing JCache by name in Skyve's cache manger
+	 * Destroy an existing persisted EHCache by name
+	 */
+	public static final void destroyEHCache(String name) throws CachePersistenceException {
+		ehCacheManager.destroyCache(name);
+	}
+
+	/**
+	 * Remove an existing JCache by name
 	 */
 	public static final void destroyJCache(String name) {
 		jCacheManager.destroyCache(name);
 	}
 
 	/**
-	 * Get an existing EHCache by name in Skyve's cache manger
+	 * Get an existing EHCache by name
 	 */
 	public static <K extends Object, V extends Object> Cache<K, V> getEHCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return ehCacheManager.getCache(name, keyClass, valueClass);
 	}
 	
 	/**
-	 * Get an existing JCache by name in Skyve's cache manger
+	 * Get an existing JCache by name
 	 */
 	public static <K extends Object, V extends Object> javax.cache.Cache<K, V> getJCache(String name, Class<K> keyClass, Class<V> valueClass) {
 		return jCacheManager.getCache(name, keyClass, valueClass);
