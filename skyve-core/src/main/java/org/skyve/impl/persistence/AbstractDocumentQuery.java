@@ -29,9 +29,9 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
 	private DocumentFilter filter;
-	// projection (bean.<binding> or alias) -> order
+	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
-	// projection (bean.<binding> or alias) -> order
+	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> appendedOrderings = new LinkedHashMap<>();
 	private StringBuilder groupClause = new StringBuilder(32);
 
@@ -124,31 +124,40 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
 	@Override
 	public DocumentQuery addBoundProjection(String binding) {
-		addBoundProjection(binding, binding);
-		return this;
+		return addBoundProjection(binding, binding);
 	}
 
 	@Override
-	public DocumentQuery addBoundProjection(String binding, String alias) {
+	public DocumentQuery addBoundProjection(String binding, String projectedAlias) {
+		return addBoundProjection(THIS_ALIAS, binding, projectedAlias);
+	}
+
+	@Override
+	public DocumentQuery addBoundProjection(String entityAlias, String binding, String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(THIS_ALIAS).append('.').append(binding);
-		projectionClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+		projectionClause.append(entityAlias).append('.').append(binding);
+		projectionClause.append(" as ").append(BindUtil.sanitiseBinding(projectedAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addExpressionProjection(String expression, String alias) {
+	public DocumentQuery addExpressionProjection(String expression, String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(expression).append(" as ").append(BindUtil.sanitiseBinding(alias));
+		projectionClause.append(expression).append(" as ").append(BindUtil.sanitiseBinding(projectedAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String alias) {
+	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String projectedAlias) {
+		return addAggregateProjection(function, THIS_ALIAS, binding, projectedAlias);
+	}
+	
+	@Override
+	public DocumentQuery addAggregateProjection(AggregateFunction function, String entityAlias, String binding, String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -157,12 +166,12 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if ((AggregateFunction.Avg.equals(function) || 
 					AggregateFunction.Sum.equals(function)) && 
 				UtilImpl.DATA_STORE.getDialectClassName().contains("SQLServer")) {
-			projectionClause.append("cast(").append(THIS_ALIAS).append('.').append(binding).append(" as big_decimal)");
+			projectionClause.append("cast(").append(entityAlias).append('.').append(binding).append(" as big_decimal)");
 		}
 		else {
-			projectionClause.append(THIS_ALIAS).append('.').append(binding);
+			projectionClause.append(entityAlias).append('.').append(binding);
 		}
-		projectionClause.append(") as ").append(BindUtil.sanitiseBinding(alias));
+		projectionClause.append(") as ").append(BindUtil.sanitiseBinding(projectedAlias));
 		return this;
 	}
 
@@ -186,35 +195,53 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
 	@Override
 	public DocumentQuery addBoundOrdering(String binding) {
-		appendedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), SortDirection.ascending);
-		return this;
+		return addBoundOrdering(THIS_ALIAS, binding);
+	}
+	
+	@Override
+	public DocumentQuery addBoundOrdering(String entityAlias, String binding) {
+		return addBoundOrdering(entityAlias, binding, SortDirection.ascending);
 	}
 
 	@Override
 	public DocumentQuery addBoundOrdering(String binding, SortDirection order) {
-		appendedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), order);
+		return addBoundOrdering(THIS_ALIAS, binding, order);
+	}
+	
+	@Override
+	public DocumentQuery addBoundOrdering(String entityAlias, String binding, SortDirection order) {
+		appendedOrderings.put(String.format("%s.%s", entityAlias, binding), order);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery insertBoundOrdering(String binding, SortDirection order) {
-		insertedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), order);
+		return insertBoundOrdering(THIS_ALIAS, binding, order);
+	}
+	
+	@Override
+	public DocumentQuery insertBoundOrdering(String entityAlias, String binding, SortDirection order) {
+		insertedOrderings.put(String.format("%s.%s", entityAlias, binding), order);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addBoundGrouping(String binding) {
+		return addBoundGrouping(THIS_ALIAS, binding);
+	}
+	
+	@Override
+	public DocumentQuery addBoundGrouping(String entityAlias, String binding) {
 		if (groupClause.length() > 0) {
 			groupClause.append(", ");
 		}
-		groupClause.append(THIS_ALIAS).append('.').append(binding);
+		groupClause.append(entityAlias).append('.').append(binding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addExpressionOrdering(String expression) {
-		appendedOrderings.put(expression, SortDirection.ascending);
-		return this;
+		return addExpressionOrdering(expression, SortDirection.ascending);
 	}
 
 	@Override
@@ -240,79 +267,139 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
 	@Override
 	public DocumentQuery addInnerJoin(String referenceBinding) {
-		fromClause.append(" INNER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addInnerJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+
+	@Override
+	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" INNER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addLeftOuterJoin(String referenceBinding) {
-		fromClause.append(" LEFT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+	
+	@Override
+	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addRightOuterJoin(String referenceBinding) {
-		fromClause.append(" RIGHT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+	
+	@Override
+	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" RIGHT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addFetchedInnerJoin(String referenceBinding) {
-		fromClause.append(" INNER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addFetchedInnerJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" INNER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding) {
-		fromClause.append(" LEFT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addFetchedLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" LEFT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
 	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding) {
-		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return addFetchedRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addInnerJoin(String referenceBinding, String alias) {
-		fromClause.append(" INNER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addInnerJoin(String referenceBinding, String joinAlias) {
+		return addInnerJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" INNER JOIN ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addLeftOuterJoin(String referenceBinding, String alias) {
-		fromClause.append(" LEFT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addLeftOuterJoin(String referenceBinding, String joinAlias) {
+		return addLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addRightOuterJoin(String referenceBinding, String alias) {
-		fromClause.append(" RIGHT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addRightOuterJoin(String referenceBinding, String joinAlias) {
+		return addRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" RIGHT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addFetchedInnerJoin(String referenceBinding, String alias) {
-		fromClause.append(" INNER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addFetchedInnerJoin(String referenceBinding, String joinAlias) {
+		return addFetchedInnerJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" INNER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding, String alias) {
-		fromClause.append(" LEFT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding, String joinAlias) {
+		return addFetchedLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" LEFT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding, String alias) {
-		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
-		fromClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
+	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding, String joinAlias) {
+		return addFetchedRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
+	}
+	
+	@Override
+	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
+		fromClause.append(" as ").append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
 	}
 

@@ -41,25 +41,40 @@ public class DocumentFilterImpl implements DocumentFilter {
 	}
 
 	@Override
-	public void addEquals(String binding, Object operand) {
-		appendRestriction(binding, " = ", operand, false, false, null, null);
+	public DocumentFilter addEquals(String binding, Object operand) {
+		return addEquals(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addEquals(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " = ", operand, false, false, null, null);
 	}
 
 	@Override
-	public void addIn(String binding, Object...operands) {
-		addIn(binding, false, operands);
+	public DocumentFilter addIn(String binding, Object...operands) {
+		return addIn(DocumentQuery.THIS_ALIAS, binding, false, operands);
 	}
-	
+
 	@Override
-	public void addNotIn(String binding, Object... operands) {
-		addIn(binding, true, operands);
+	public DocumentFilter addIn(String entityAlias, String binding, Object...operands) {
+		return addIn(entityAlias, binding, false, operands);
+	}
+
+	@Override
+	public DocumentFilter addNotIn(String binding, Object... operands) {
+		return addIn(DocumentQuery.THIS_ALIAS, binding, true, operands);
+	}
+
+	@Override
+	public DocumentFilter addNotIn(String entityAlias, String binding, Object... operands) {
+		return addIn(entityAlias, binding, true, operands);
 	}
 	
-	private void addIn(String binding, boolean not, Object... operands) {
+	private DocumentFilter addIn(String entityAlias, String binding, boolean not, Object... operands) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
+		filterClause.append(entityAlias).append('.').append(binding);
 		if (not) {
 			filterClause.append(" not");
 		}
@@ -72,181 +87,354 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 		filterClause.setLength(filterClause.length() - 1); // remove last comma
 		filterClause.append(')');
+		return this;
 	}
 	
 	@Override
-	public void addNotEquals(String binding, Object operand) {
-		appendRestriction(binding, " != ", operand, false, false, null, null);
-	}
-
-	@Override
-	public void addGreaterThan(String binding, Object operand) {
-		appendRestriction(binding, " > ", operand, false, false, null, null);
-	}
-
-	@Override
-	public void addGreaterThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " >= ", operand, false, false, null, null);
-	}
-
-	@Override
-	public void addLessThan(String binding, Object operand) {
-		appendRestriction(binding, " < ", operand, false, false, null, null);
-	}
-
-	@Override
-	public void addLessThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " <= ", operand, false, false, null, null);
-	}
-
-	@Override
-	public void addLike(String binding, String operand) {
-		appendRestriction(binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null);
-	}
-
-	@Override
-	public void addNotLike(String binding, String operand) {
-		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null);
-	}
-
-	@Override
-	public void addEquals(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "equals(", ") = true");
-	}
-
-	@Override
-	public void addDisjoint(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "disjoint(", ") = true");
+	public DocumentFilter addNotEquals(String binding, Object operand) {
+		return addNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addIntersects(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "intersects(", ") = true");
+	public DocumentFilter addNotEquals(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " != ", operand, false, false, null, null);
 	}
 
 	@Override
-	public void addTouches(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "touches(", ") = true");
-	}
-
-	@Override
-	public void addCrosses(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "crosses(", ") = true");
-	}
-
-	@Override
-	public void addWithin(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "within(", ") = true");
+	public DocumentFilter addGreaterThan(String binding, Object operand) {
+		return addGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addContains(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "contains(", ") = true");
+	public DocumentFilter addGreaterThan(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " > ", operand, false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addGreaterThanOrEqualTo(String binding, Object operand) {
+		return addGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addOverlaps(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, false, "overlaps(", ") = true");
+	public DocumentFilter addGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " >= ", operand, false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addLessThan(String binding, Object operand) {
+		return addLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addNullOrEquals(String binding, Object operand) {
-		appendRestriction(binding, " = ", operand, true, false, null, null);
+	public DocumentFilter addLessThan(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " < ", operand, false, false, null, null);
 	}
 
 	@Override
-	public void addNullOrNotEquals(String binding, Object operand) {
-		appendRestriction(binding, " != ", operand, true, false, null, null);
-	}
-
-	@Override
-	public void addNullOrGreaterThan(String binding, Object operand) {
-		appendRestriction(binding, " > ", operand, true, false, null, null);
-	}
-
-	@Override
-	public void addNullOrGreaterThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " >= ", operand, true, false, null, null);
-	}
-
-	@Override
-	public void addNullOrLessThan(String binding, Object operand) {
-		appendRestriction(binding, " < ", operand, true, false, null, null);
-	}
-
-	@Override
-	public void addNullOrLessThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " <= ", operand, true, false, null, null);
-	}
-
-	@Override
-	public void addNullOrLike(String binding, String operand) {
-		appendRestriction(binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null);
-	}
-
-	@Override
-	public void addNullOrNotLike(String binding, String operand) {
-		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null);
-	}
-
-	@Override
-	public void addNullOrEquals(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "equals(", ") = true");
-	}
-
-	@Override
-	public void addNullOrDisjoint(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "disjoint(", ") = true");
+	public DocumentFilter addLessThanOrEqualTo(String binding, Object operand) {
+		return addLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addNullOrIntersects(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "intersects(", ") = true");
+	public DocumentFilter addLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " <= ", operand, false, false, null, null);
 	}
 
 	@Override
-	public void addNullOrTouches(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "touches(", ") = true");
+	public DocumentFilter addLike(String binding, String operand) {
+		return addLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 
 	@Override
-	public void addNullOrCrosses(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "crosses(", ") = true");
+	public DocumentFilter addLike(String entityAlias, String binding, String operand) {
+		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null);
 	}
 
 	@Override
-	public void addNullOrWithin(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "within(", ") = true");
+	public DocumentFilter addNotLike(String binding, String operand) {
+		return addNotLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
 	@Override
-	public void addNullOrContains(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "contains(", ") = true");
+	public DocumentFilter addNotLike(String entityAlias, String binding, String operand) {
+		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null);
+	}
+
+	@Override
+	public DocumentFilter addEquals(String binding, Geometry geometry) {
+		return addEquals(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
 	@Override
-	public void addNullOrOverlaps(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, false, "overlaps(", ") = true");
+	public DocumentFilter addEquals(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addDisjoint(String binding, Geometry geometry) {
+		return addDisjoint(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
 	@Override
-	public void addNull(String binding) {
+	public DocumentFilter addDisjoint(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addIntersects(String binding, Geometry geometry) {
+		return addIntersects(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addIntersects(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addTouches(String binding, Geometry geometry) {
+		return addTouches(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addTouches(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addCrosses(String binding, Geometry geometry) {
+		return addCrosses(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addCrosses(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addWithin(String binding, Geometry geometry) {
+		return addWithin(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addWithin(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addContains(String binding, Geometry geometry) {
+		return addContains(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addContains(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addOverlaps(String binding, Geometry geometry) {
+		return addOverlaps(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addOverlaps(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addNullOrEquals(String binding, Object operand) {
+		return addNullOrEquals(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrEquals(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " = ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrNotEquals(String binding, Object operand) {
+		return addNullOrNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrNotEquals(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " != ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrGreaterThan(String binding, Object operand) {
+		return addNullOrGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrGreaterThan(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " > ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrGreaterThanOrEqualTo(String binding, Object operand) {
+		return addNullOrGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " >= ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrLessThan(String binding, Object operand) {
+		return addNullOrLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrLessThan(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " < ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrLessThanOrEqualTo(String binding, Object operand) {
+		return addNullOrLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
+		return appendRestriction(entityAlias, binding, " <= ", operand, true, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrLike(String binding, String operand) {
+		return addNullOrLike(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrLike(String entityAlias, String binding, String operand) {
+		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrNotLike(String binding, String operand) {
+		return addNullOrNotLike(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrNotLike(String entityAlias, String binding, String operand) {
+		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null);
+	}
+
+	@Override
+	public DocumentFilter addNullOrEquals(String binding, Geometry geometry) {
+		return addNullOrEquals(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrEquals(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addNullOrDisjoint(String binding, Geometry geometry) {
+		return addNullOrDisjoint(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrDisjoint(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addNullOrIntersects(String binding, Geometry geometry) {
+		return addNullOrIntersects(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrIntersects(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addNullOrTouches(String binding, Geometry geometry) {
+		return addNullOrTouches(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrTouches(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addNullOrCrosses(String binding, Geometry geometry) {
+		return addNullOrCrosses(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrCrosses(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", ") = true");
+	}
+
+	@Override
+	public DocumentFilter addNullOrWithin(String binding, Geometry geometry) {
+		return addNullOrWithin(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrWithin(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addNullOrContains(String binding, Geometry geometry) {
+		return addNullOrContains(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrContains(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addNullOrOverlaps(String binding, Geometry geometry) {
+		return addNullOrOverlaps(DocumentQuery.THIS_ALIAS, binding, geometry);
+	}
+	
+	@Override
+	public DocumentFilter addNullOrOverlaps(String entityAlias, String binding, Geometry geometry) {
+		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", ") = true");
+	}
+	
+	@Override
+	public DocumentFilter addNull(String binding) {
+		return addNull(DocumentQuery.THIS_ALIAS, binding);
+	}
+	
+	@Override
+	public DocumentFilter addNull(String entityAlias, String binding) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NULL");
+		filterClause.append(entityAlias).append('.').append(binding).append(" IS NULL");
+		return this;
 	}
 
 	@Override
-	public void addNotNull(String binding) {
+	public DocumentFilter addNotNull(String binding) {
+		return addNotNull(DocumentQuery.THIS_ALIAS, binding);
+	}
+	
+	@Override
+	public DocumentFilter addNotNull(String entityAlias, String binding) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NOT NULL");
+		filterClause.append(entityAlias).append('.').append(binding).append(" IS NOT NULL");
+		return this;
 	}
 
 	@Override
-	public void addBetween(String binding, Object minOperand, Object maxOperand) {
+	public DocumentFilter addBetween(String binding, Object minOperand, Object maxOperand) {
+		return addBetween(DocumentQuery.THIS_ALIAS, binding, minOperand, maxOperand);
+	}
+	
+	@Override
+	public DocumentFilter addBetween(String entityAlias, String binding, Object minOperand, Object maxOperand) {
 		String minParameterName = "param" + owningQuery.parameterNumber++;
 		String maxParameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(minParameterName, minOperand);
@@ -255,47 +443,79 @@ public class DocumentFilterImpl implements DocumentFilter {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" BETWEEN ");
+		filterClause.append(entityAlias).append('.').append(binding).append(" BETWEEN ");
 		filterClause.append(':').append(minParameterName).append(" and :").append(maxParameterName);
+		return this;
 	}
 
 	@Override
-	public void addCollectionSizeEquals(String binding, int operand) {
-		appendRestriction(binding, ".size = ", new Integer(operand), false, false, null, null);
-	}
-
-	@Override
-	public void addCollectionSizeNotEquals(String binding, int operand) {
-		appendRestriction(binding, ".size != ", new Integer(operand), false, false, null, null);
-	}
-
-	@Override
-	public void addCollectionSizeGreaterThan(String binding, int operand) {
-		appendRestriction(binding, ".size > ", new Integer(operand), false, false, null, null);
-	}
-
-	@Override
-	public void addCollectionSizeGreaterThanOrEqualTo(String binding, int operand) {
-		appendRestriction(binding, ".size >= ", new Integer(operand), false, false, null, null);
-	}
-
-	@Override
-	public void addCollectionSizeLessThan(String binding, int operand) {
-		appendRestriction(binding, ".size < ", new Integer(operand), false, false, null, null);
-	}
-
-	@Override
-	public void addCollectionSizeLessThanOrEqualTo(String binding, int operand) {
-		appendRestriction(binding, ".size <= ", new Integer(operand), false, false, null, null);
+	public DocumentFilter addCollectionSizeEquals(String binding, int operand) {
+		return addCollectionSizeEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
-	private void appendRestriction(String binding,
-									String operator,
-									Object operand,
-									boolean addNullTest,
-									boolean useStr,
-									String functionPrefix,
-									String functionSuffix) {
+	@Override
+	public DocumentFilter addCollectionSizeEquals(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size = ", new Integer(operand), false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeNotEquals(String binding, int operand) {
+		return addCollectionSizeNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addCollectionSizeNotEquals(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size != ", new Integer(operand), false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeGreaterThan(String binding, int operand) {
+		return addCollectionSizeGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addCollectionSizeGreaterThan(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size > ", new Integer(operand), false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeGreaterThanOrEqualTo(String binding, int operand) {
+		return addCollectionSizeGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size >= ", new Integer(operand), false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeLessThan(String binding, int operand) {
+		return addCollectionSizeLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addCollectionSizeLessThan(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size < ", new Integer(operand), false, false, null, null);
+	}
+
+	@Override
+	public DocumentFilter addCollectionSizeLessThanOrEqualTo(String binding, int operand) {
+		return addCollectionSizeLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
+	}
+	
+	@Override
+	public DocumentFilter addCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand) {
+		return appendRestriction(entityAlias, binding, ".size <= ", new Integer(operand), false, false, null, null);
+	}
+	
+	private DocumentFilter appendRestriction(String entityAlias,
+												String binding,
+												String operator,
+												Object operand,
+												boolean addNullTest,
+												boolean useStr,
+												String functionPrefix,
+												String functionSuffix) {
 		String parameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
@@ -304,21 +524,21 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 		
 		if (addNullTest) {
-			filterClause.append('(').append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append('(').append(entityAlias).append('.').append(binding);
 			filterClause.append(" IS NULL OR ");
 		}
 
 		if (operator == null) {
 			filterClause.append(functionPrefix);
-			filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append(entityAlias).append('.').append(binding);
 			filterClause.append(", :").append(parameterName).append(functionSuffix);
 		}
 		else {
 			if (useStr) {
-				filterClause.append("str(").append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(')');
+				filterClause.append("str(").append(entityAlias).append('.').append(binding).append(')');
 			}
 			else {
-				filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
+				filterClause.append(entityAlias).append('.').append(binding);
 			}
 			filterClause.append(operator).append(':').append(parameterName);
 		}
@@ -338,21 +558,21 @@ public class DocumentFilterImpl implements DocumentFilter {
 		}
 		
 		if (addNullTest) {
-			filterClause.append('(').append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append('(').append(entityAlias).append('.').append(binding);
 			filterClause.append(" IS NULL OR ");
 		}
 		if (isALikeOperator) {
-			filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append(entityAlias).append('.').append(binding);
 			filterClause.append(operator).append('\'').append(operand).append('\'');
 		}
 		else {
 			if (operator == null) {
 				filterClause.append(functionPrefix);
-				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+				filterClause.append(entityAlias).append('.').append(binding);
 				filterClause.append(", :").append(parameterName).append(functionSuffix);
 			}
 			else {
-				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+				filterClause.append(entityAlias).append('.').append(binding);
 				filterClause.append(operator).append(':').append(parameterName);
 			}
 		}
@@ -360,31 +580,35 @@ public class DocumentFilterImpl implements DocumentFilter {
 			filterClause.append(')');
 		}
 */
+		return this;
 	}
 
 	@Override
-	public void addAnd(DocumentFilter filter) {
+	public DocumentFilter addAnd(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
 		filterClause.append('(').append(filter).append(')');
+		return this;
 	}
 
 	@Override
-	public void addOr(DocumentFilter filter) {
+	public DocumentFilter addOr(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
 			filterClause.insert(0, '(');
 			filterClause.append(") OR ");
 		}
 		filterClause.append('(').append(filter).append(')');
+		return this;
 	}
 
 	@Override
-	public void addExpression(String expression) {
+	public DocumentFilter addExpression(String expression) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
 		filterClause.append(expression);
+		return this;
 	}
 	
 	@Override
