@@ -181,6 +181,7 @@ public abstract class DomainGenerator {
 		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
 	}
 	
+	protected boolean debug;
 	protected String srcPath;
 	protected String generatedSrcPath;
 	protected String testPath;
@@ -193,13 +194,15 @@ public abstract class DomainGenerator {
 	
 	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
-	protected DomainGenerator(AbstractRepository repository,
+	protected DomainGenerator(boolean debug,
+								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
+		this.debug = debug;
 		this.repository = repository;
 		this.dialectOptions = dialectOptions;
 		this.srcPath = srcPath;
@@ -210,18 +213,18 @@ public abstract class DomainGenerator {
 	}
 	
 	public void validate(String customerName) throws Exception {
-		System.out.println("Get customer " + customerName);
+		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
-		System.out.println("Validate customer " + customerName);
+		if (debug) System.out.println("Validate customer " + customerName);
 		repository.validateCustomerForGenerateDomain(customer);
 		for (Module module : customer.getModules()) {
-			System.out.println("Validate module " + module.getName());
+			if (debug) System.out.println("Validate module " + module.getName());
 			repository.validateModuleForGenerateDomain(customer, module);
 			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 				String documentName = entry.getKey();
-				System.out.println("Get document " + documentName);
+				if (debug) System.out.println("Get document " + documentName);
 				Document document = module.getDocument(customer, documentName);
-				System.out.println("Validate document " + documentName);
+				if (debug) System.out.println("Validate document " + documentName);
 				repository.validateDocumentForGenerateDomain(customer, document);
 				if (repository.getGlobalRouter().getUxuiSelectorClassName() == null) {
 					throw new MetaDataException("uxuiSelectorClassName attribute must be defined in the global router.");
@@ -233,13 +236,13 @@ public abstract class DomainGenerator {
 				}
 				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
 					String uxuiName = uxui.getName();
-					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
+					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
-					System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
+					if (debug) System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
 					repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
 					view = repository.getView(uxuiName, customer, document, ViewType.create.toString());
 					if (view != null) {
-						System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
+						if (debug) System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
 						repository.validateViewForGenerateDomain(customer, document, view, uxuiName);
 					}
 				}
@@ -296,10 +299,11 @@ public abstract class DomainGenerator {
 		String generatedSrcPath = args[1];// "src/generated/";
 		String testPath = args[2];// "src/test/";
 		String generatedTestPath = args[3];// "src/generatedTest/";
-
+		boolean debug = false;
 		if (args.length >= 5) { // allow for debug mode if there are 4 arguments
 			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
 				if (Boolean.parseBoolean(args[4])) {
+					debug = true;
 					UtilImpl.COMMAND_TRACE = true;
 					UtilImpl.CONTENT_TRACE = true;
 					UtilImpl.HTTP_TRACE = true;
@@ -344,8 +348,8 @@ public abstract class DomainGenerator {
 
 		AbstractRepository repository = new LocalDesignRepository();
 		DomainGenerator foo = UtilImpl.USING_JPA ? 
-								new JPADomainGenerator(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-								new OverridableDomainGenerator(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+								new JPADomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
+								new OverridableDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {

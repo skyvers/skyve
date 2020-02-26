@@ -28,14 +28,15 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 public final class JPADomainGenerator extends DomainGenerator {
-	JPADomainGenerator(AbstractRepository repository,
+	JPADomainGenerator(boolean debug,
+						AbstractRepository repository,
 						DialectOptions dialectOptions,
 						String srcPath,
 						String generatedSrcPath,
 						String testPath,
 						String generatedTestPath,
 						String[] excludedModules) {
-		super(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -83,14 +84,14 @@ public final class JPADomainGenerator extends DomainGenerator {
 	 * @param packagePath
 	 * @param className
 	 */
-	public static void generateJavaFile(Customer customer,
-											Module module,
-											Document document,
-											FileWriter fw,
-											String packagePath,
-											String documentName) 
+	public void generateJavaFile(Customer customer,
+									Module module,
+									Document document,
+									FileWriter fw,
+									String packagePath,
+									String documentName) 
 	throws IOException {
-		UtilImpl.LOGGER.info(packagePath + '.' + documentName);
+		if (debug) UtilImpl.LOGGER.info(packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
 

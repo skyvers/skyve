@@ -108,14 +108,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
 
-	OverridableDomainGenerator(AbstractRepository repository,
+	OverridableDomainGenerator(boolean debug,
+								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
-		super(repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -336,7 +337,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Make a orm.hbm.xml file
 		Path mappingFilePath = Paths.get(generatedSrcPath, packagePath, moduleName + "_orm.hbm.xml");
-		if (UtilImpl.XML_TRACE) {
+		if (debug) {
 			UtilImpl.LOGGER.fine("Mapping file is " + mappingFilePath);
 		}
 
@@ -418,12 +419,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							Path testFilePath = Paths.get(domainTestPath.toString(), documentName + "Test.java");
 							// don't generate a test if the developer has created a domain test in this location in the test directory
 							if (testAlreadyExists(testFilePath)) {
-								System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
-																			.append(packagePath.replaceAll("\\\\|\\/", "."))
-																			.append('.')
-																			.append(documentName)
-																			.append(", file already exists in ")
-																			.append(testPath));
+								if (debug) {
+									System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
+																				.append(packagePath.replaceAll("\\\\|\\/", "."))
+																				.append('.')
+																				.append(documentName)
+																				.append(", file already exists in ")
+																				.append(testPath));
+								}
 							}
 							else {
 								// generate the domain test
@@ -434,10 +437,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 						}
 						else {
-							System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
-																		.append(packagePath.replaceAll("\\\\|\\/", "."))
-																		.append('.')
-																		.append(documentName).toString());
+							if (debug) {
+								System.out.println(new StringBuilder(256).append("Skipping domain test generation for ")
+																			.append(packagePath.replaceAll("\\\\|\\/", "."))
+																			.append('.')
+																			.append(documentName).toString());
+							}
 						}
 					}
 
@@ -459,7 +464,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 													.replace(srcPath.replaceAll("\\\\|\\/", "."), "");
 
-			UtilImpl.LOGGER.fine("Found factory " + className);
+			if (debug) UtilImpl.LOGGER.fine("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -489,7 +494,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		for (final Module module : customer.getModules()) {
 			final String moduleName = module.getName();
-			System.out.println("Module " + moduleName);
+			if (debug) System.out.println("Module " + moduleName);
 			// clear out the domain folder
 			final String packagePath = new StringBuilder(256).append(repository.CUSTOMERS_NAMESPACE)
 																.append(customer.getName())
@@ -678,13 +683,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		String entityName = null;
 
-		System.out.println(new StringBuilder(256).append("Generate ORM for ")
-													.append(packagePathPrefix)
-													.append(moduleName)
-													.append('.')
-													.append(repository.DOMAIN_NAME)
-													.append('.')
-													.append(documentName).toString());
+		if (debug) {
+			System.out.println(new StringBuilder(256).append("Generate ORM for ")
+														.append(packagePathPrefix)
+														.append(moduleName)
+														.append('.')
+														.append(repository.DOMAIN_NAME)
+														.append('.')
+														.append(documentName).toString());
+		}
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
@@ -717,7 +724,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																.append(documentName)
 																.append("Extension.java").toString();
 				if (new File(extensionPath).exists()) {
-					System.out.println("    Generate ORM using " + extensionPath);
+					if (debug) System.out.println("    Generate ORM using " + extensionPath);
 					contents.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName).append("Extension");
 				}
 				else {
@@ -2632,7 +2639,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 			catch (Exception e) {
-				System.err.println("Could not find action class for: " + e.getMessage());
+				if (debug) System.err.println("Could not find action class for: " + e.getMessage());
 			}
 
 			// check if there is a factory extension annotation which skips this test
@@ -2657,12 +2664,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Path actionFilePath = actionTestPath.resolve(actionName + "Test.java");
 				// don't generate a test if the developer has created an action test in this location in the test directory
 				if (testAlreadyExists(actionFilePath)) {
-					System.out.println(new StringBuilder(256).append("Skipping action test generation for ")
-																.append(actionPath.replaceAll("\\\\|\\/", "."))
-																.append('.')
-																.append(actionName)
-																.append(", file already exists in ")
-																.append(testPath).toString());
+					if (debug) {
+						System.out.println(new StringBuilder(256).append("Skipping action test generation for ")
+																	.append(actionPath.replaceAll("\\\\|\\/", "."))
+																	.append('.')
+																	.append(actionName)
+																	.append(", file already exists in ")
+																	.append(testPath).toString());
+					}
 					continue;
 				}
 
@@ -2679,25 +2688,29 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				generation.put(actionFilePath, actionFileContents);
 			}
 			else {
-				System.out.println(new StringBuilder(128).append("Skipping action test generation for ")
-															.append(actionPath.replaceAll("\\\\|\\/", "."))
-															.append('.')
-															.append(actionName).toString());
+				if (debug) {
+					System.out.println(new StringBuilder(128).append("Skipping action test generation for ")
+																.append(actionPath.replaceAll("\\\\|\\/", "."))
+																.append('.')
+																.append(actionName).toString());
+				}
 			}
 		}
 	}
 
-	private static void generateActionTest(StringBuilder contents,
-											String modulePath,
-											String actionPath,
-											String domainPath,
-											String documentName,
-											String actionName,
-											boolean useExtensionDocument) {
-		System.out.println(new StringBuilder(256).append("Generate action test class for ")
-													.append(actionPath)
-													.append('.')
-													.append(actionName).toString());
+	private void generateActionTest(StringBuilder contents,
+										String modulePath,
+										String actionPath,
+										String domainPath,
+										String documentName,
+										String actionName,
+										boolean useExtensionDocument) {
+		if (debug) {
+			System.out.println(new StringBuilder(256).append("Generate action test class for ")
+														.append(actionPath)
+														.append('.')
+														.append(actionName).toString());
+		}
 		contents.append("package ").append(actionPath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
@@ -2754,14 +2767,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n}");
 	}
 
-	private static void generateDomainTest(StringBuilder contents,
-											@SuppressWarnings("unused") String modulePath,
-											String packagePath,
-											String documentName) {
-		System.out.println(new StringBuilder(256).append("Generate domain test class for ")
-													.append(packagePath)
-													.append('.')
-													.append(documentName).toString());
+	private void generateDomainTest(StringBuilder contents,
+										@SuppressWarnings("unused") String modulePath,
+										String packagePath,
+										String documentName) {
+		if (debug) {
+			System.out.println(new StringBuilder(256).append("Generate domain test class for ")
+														.append(packagePath)
+														.append('.')
+														.append(documentName).toString());
+		}
 		contents.append("package ").append(packagePath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
@@ -2805,10 +2820,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								String documentName,
 								String baseDocumentName,
 								boolean overridden) {
-		System.out.println(new StringBuilder(256).append("Generate class for ")
-													.append(packagePath)
-													.append('.')
-													.append(documentName).toString());
+		if (debug) {
+			System.out.println(new StringBuilder(256).append("Generate class for ")
+														.append(packagePath)
+														.append('.')
+														.append(documentName).toString());
+		}
 		Persistent persistent = document.getPersistent();
 		contents.append("package ").append(packagePath).append(";\n\n");
 
@@ -3729,10 +3746,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {
 					// return, attribute is transient
-					UtilImpl.LOGGER.fine(new StringBuilder(128).append("Ignoring transient attribute ")
-																.append(attribute.getName())
-																.append(" for document ")
-																.append(document.getName()).toString());
+					if (debug) {
+						UtilImpl.LOGGER.fine(new StringBuilder(128).append("Ignoring transient attribute ")
+																	.append(attribute.getName())
+																	.append(" for document ")
+																	.append(document.getName()).toString());
+					}
 					continue;
 				}
 
@@ -3851,7 +3870,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 				}
 				else {
-					System.out.println("Deleting unreferenced module source directory " + child.getPath());
+					if (debug) System.out.println("Deleting unreferenced module source directory " + child.getPath());
 					deleteDirectory(child.toPath());
 				}
 			}
@@ -3860,7 +3879,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// delete the generated test directory
 		final Path generatedTestDirectory = Paths.get(generatedTestPath);
 		if (Files.exists(generatedTestDirectory)) {
-			System.out.println("Deleting generated test directory " + generatedTestDirectory.toString());
+			if (debug) System.out.println("Deleting generated test directory " + generatedTestDirectory.toString());
 			deleteDirectory(generatedTestDirectory);
 		}
 
