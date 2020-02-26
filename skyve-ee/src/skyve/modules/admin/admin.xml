@@ -188,6 +188,7 @@
 					<action name="CacheStats" />
 					<action name="EvictFromCache" />
 					<action name="EvictSelectedCache" />
+					<action name="StopOrStartSelectedCache" />
 					<action name="ExecuteQuery" />
 					<action name="GenerateEditView" />
 					<action name="GenerateQuery" />

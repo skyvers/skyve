@@ -21,6 +21,8 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
+		bean.setTabIndex(null);
+
 		String cacheName = bean.getSelectedCache();
 		if (cacheName != null) {
 			if (UtilImpl.CONVERSATION_CACHE.getName().equals(cacheName)) {

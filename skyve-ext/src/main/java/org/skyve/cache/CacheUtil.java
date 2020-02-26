@@ -231,7 +231,14 @@ public class CacheUtil {
 	 * @return	The statistics
 	 */
 	public static CacheStatistics getEHCacheStatistics(String name) {
-		return statisticsService.getCacheStatistics(name);
+		CacheStatistics result = null;
+		try {
+			result = statisticsService.getCacheStatistics(name);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			UtilImpl.LOGGER.warning("Cache Stats requested on EHCache " + name + "that does not exist");
+		}
+		return result;
 	}
 	
 	/**

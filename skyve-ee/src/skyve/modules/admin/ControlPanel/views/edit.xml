@@ -34,7 +34,7 @@
 				</row>
 			</form>
 			<form border="true" borderTitle="Query">
-				<column pixelWidth="175" />
+				<column pixelWidth="50" />
 				<column />
 				<column pixelWidth="140" />
 				<row>
@@ -47,8 +47,9 @@
 				</row>
 			</form>
 			<form border="true" borderTitle="Caches">
-				<column pixelWidth="175" />
+				<column pixelWidth="50" />
 				<column />
+				<column pixelWidth="140" />
 				<column pixelWidth="140" />
 				<column pixelWidth="140" />
 				<row>
@@ -59,12 +60,15 @@
 						<button action="EvictSelectedCache" pixelWidth="130" />
 					</item>
 					<item align="centre">
+						<button action="StopOrStartSelectedCache" pixelWidth="130" />
+					</item>
+					<item align="centre">
 						<button action="CacheStats" pixelWidth="130" />
 					</item>
 				</row>
 			</form>
 			<form border="true" borderTitle="Sessions">
-				<column pixelWidth="175" />
+				<column pixelWidth="50" />
 				<column />
 				<row>
 					<item align="right">
@@ -353,8 +357,9 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="CacheStats" displayName="Cache Stats" clientValidation="false" inActionPanel="false" />
-		<action className="EvictSelectedCache" displayName="Evict Selected Cache" clientValidation="false" inActionPanel="false" />
+		<action className="CacheStats" displayName="All Cache Stats" clientValidation="false" inActionPanel="false" />
+		<action className="EvictSelectedCache" displayName="Evict Cache" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
+		<action className="StopOrStartSelectedCache" displayName="Stop/Start Cache" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
 		<action className="EvictFromCache" displayName="Evict All Cached Metadata" />
 		<action className="SwapCustomer" displayName="Swap Customer" inActionPanel="false" />
 		<action className="GenerateEditView" displayName="Edit View" inActionPanel="false" />
