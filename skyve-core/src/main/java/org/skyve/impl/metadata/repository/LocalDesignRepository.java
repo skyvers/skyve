@@ -84,7 +84,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	/**
 	 * The cache. MetaData File Location -> MetaData
 	 */
-	private static Map<String, MetaData> cache = new HashMap<>();
+	private Map<String, MetaData> cache = new HashMap<>();
 
 	@Override
 	@SuppressWarnings("unchecked")

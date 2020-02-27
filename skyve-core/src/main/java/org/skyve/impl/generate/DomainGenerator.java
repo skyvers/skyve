@@ -3,9 +3,9 @@ package org.skyve.impl.generate;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -252,6 +252,19 @@ public abstract class DomainGenerator {
 
 	public abstract void generate() throws Exception;
 
+	public static final DomainGenerator newDomainGenerator(boolean debug,
+															AbstractRepository repository,
+															DialectOptions dialectOptions,
+															String srcPath,
+															String generatedSrcPath,
+															String testPath,
+															String generatedTestPath,
+															String... excludedModules) {
+		return (UtilImpl.USING_JPA ? 
+					new JPADomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
+					new OverridableDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+	}
+	
 	/**
 	 * Usage :-
 	 * <dl>
@@ -347,14 +360,12 @@ public abstract class DomainGenerator {
 		System.out.println("EXCLUDED MODULES=" + (args.length == 7 ? args[6] : ""));
 
 		AbstractRepository repository = new LocalDesignRepository();
-		DomainGenerator foo = UtilImpl.USING_JPA ? 
-								new JPADomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-								new OverridableDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		DomainGenerator jenny = newDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
-			foo.validate(customerName);
+			jenny.validate(customerName);
 		}
-		foo.generate();
+		jenny.generate();
 	}
 }
