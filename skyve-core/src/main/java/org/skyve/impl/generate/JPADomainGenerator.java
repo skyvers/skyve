@@ -36,7 +36,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 						String testPath,
 						String generatedTestPath,
 						String[] excludedModules) {
-		super(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(true, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override

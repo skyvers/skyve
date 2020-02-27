@@ -108,7 +108,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
 
-	OverridableDomainGenerator(boolean debug,
+	OverridableDomainGenerator(boolean write,
+								boolean debug,
 								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
@@ -116,7 +117,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
-		super(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(write, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -151,7 +152,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		// delete generated and generatedTest directories
-		replaceGenerated(repository.getAllVanillaModuleNames());
+		if (write) {
+			replaceGenerated(repository.getAllVanillaModuleNames());
+		}
 	}
 
 	@SuppressWarnings("synthetic-access")
@@ -365,7 +368,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								(inherits != null) ? inherits.getDocumentName() : null,
 								false);
 				javaFileContents.trimToSize();
-				generation.put(javaFilePath, javaFileContents);
+				if (write) {
+					generation.put(javaFilePath, javaFileContents);
+				}
 
 				if ((domainClass != null) && domainClass.isAbstract) {
 					// Generate extension
@@ -380,7 +385,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									documentName,
 									true);
 					javaFileContents.trimToSize();
-					generation.put(javaFilePath, javaFileContents);
+					if (write) {
+						generation.put(javaFilePath, javaFileContents);
+					}
 				}
 				
 				generateORM(mappingFileContents,
@@ -433,7 +440,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								StringBuilder testFileContents = new StringBuilder(2048);
 								generateDomainTest(testFileContents, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
 								testFileContents.trimToSize();
-								generation.put(testFilePath, testFileContents);
+								if (write) {
+									generation.put(testFilePath, testFileContents);
+								}
 							}
 						}
 						else {
@@ -454,7 +463,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		createMappingFileFooter(mappingFileContents, filterDefinitions);
 		mappingFileContents.trimToSize();
-		generation.put(mappingFilePath, mappingFileContents);
+		if (write) {
+			generation.put(mappingFilePath, mappingFileContents);
+		}
 	}
 
 	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
@@ -547,7 +558,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										vanillaDocumentName,
 										true);
 						javaFileContents.trimToSize();
-						generation.put(javaFilePath, javaFileContents);
+						if (write) {
+							generation.put(javaFilePath, javaFileContents);
+						}
 						generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
 					}
 				}
@@ -556,7 +569,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		createMappingFileFooter(mappingFileContents, filterDefinitions);
 		mappingFileContents.trimToSize();
-		generation.put(mappingFilePath, mappingFileContents);
+		if (write) {
+			generation.put(mappingFilePath, mappingFileContents);
+		}
 	}
 
 	private TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(Document overriddenDocument) {
@@ -2685,7 +2700,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									actionName,
 									useExtensionDocument);
 				actionFileContents.trimToSize();
-				generation.put(actionFilePath, actionFileContents);
+				if (write) {
+					generation.put(actionFilePath, actionFileContents);
+				}
 			}
 			else {
 				if (debug) {

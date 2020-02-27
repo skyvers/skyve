@@ -181,6 +181,7 @@ public abstract class DomainGenerator {
 		POSTGRESQL_RESERVED_WORDS = new TreeSet<>(Arrays.asList(postgreSQLReserved));
 	}
 	
+	protected boolean write;
 	protected boolean debug;
 	protected String srcPath;
 	protected String generatedSrcPath;
@@ -194,7 +195,8 @@ public abstract class DomainGenerator {
 	
 	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
-	protected DomainGenerator(boolean debug,
+	protected DomainGenerator(boolean write,
+								boolean debug,
 								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
@@ -202,6 +204,7 @@ public abstract class DomainGenerator {
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
+		this.write = write;
 		this.debug = debug;
 		this.repository = repository;
 		this.dialectOptions = dialectOptions;
@@ -252,7 +255,8 @@ public abstract class DomainGenerator {
 
 	public abstract void generate() throws Exception;
 
-	public static final DomainGenerator newDomainGenerator(boolean debug,
+	public static final DomainGenerator newDomainGenerator(boolean write,
+															boolean debug,
 															AbstractRepository repository,
 															DialectOptions dialectOptions,
 															String srcPath,
@@ -262,7 +266,7 @@ public abstract class DomainGenerator {
 															String... excludedModules) {
 		return (UtilImpl.USING_JPA ? 
 					new JPADomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-					new OverridableDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+					new OverridableDomainGenerator(write, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
 	}
 	
 	/**
@@ -360,7 +364,7 @@ public abstract class DomainGenerator {
 		System.out.println("EXCLUDED MODULES=" + (args.length == 7 ? args[6] : ""));
 
 		AbstractRepository repository = new LocalDesignRepository();
-		DomainGenerator jenny = newDomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		DomainGenerator jenny = newDomainGenerator(debug, true, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
