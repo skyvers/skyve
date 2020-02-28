@@ -3,13 +3,19 @@ package org.skyve.metadata.view.model.list;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
+import org.skyve.domain.PersistentBean;
+import org.skyve.domain.TransientBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 
 /**
@@ -75,18 +81,34 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 		if (bean != null) {
 			Object value = Binder.get(bean, referenceBinding);
 			if (value instanceof List) {
-				// Make a defensive copy of the actual list here as it will be mutated by the model
 				@SuppressWarnings("unchecked")
-				List<Bean> beans = new ArrayList<>((List<Bean>) value);
-				return beans;
+				List<Bean> values = (List<Bean>) value;
+				// Make a defensive copy of the actual list here as it will be mutated by the model
+				List<Bean> result = new ArrayList<>(values.size());
+				for (Bean element : values) {
+					result.add(defendTransientBean(element));
+				}
+				return result;
 			}
 
 			if (value instanceof Bean) {
-				return Collections.singletonList((Bean) value);
+				return Collections.singletonList(defendTransientBean((Bean) value));
 			}
 		}
 
 		return Collections.emptyList();
+	}
+	
+	private static Bean defendTransientBean(Bean bean) {
+		if (bean instanceof TransientBean) {
+			Map<String, Object> properties = new TreeMap<>();
+			properties.put(DocumentQuery.THIS_ALIAS, bean);
+			properties.put(PersistentBean.LOCK_NAME, null);
+			properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
+			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+			return new MapBean(bean.getBizModule(), bean.getBizDocument(), properties);
+		}
+		return bean;
 	}
 	
 	/**
