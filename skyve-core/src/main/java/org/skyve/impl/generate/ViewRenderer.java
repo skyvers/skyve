@@ -667,6 +667,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 								button);
 			}
 		}
+		else if (currentForm != null) { // no access to the action but we're in a form
+			renderFormSpacer(new Spacer());
+		}
 	}
 
 	public abstract void renderFormButton(Action action,

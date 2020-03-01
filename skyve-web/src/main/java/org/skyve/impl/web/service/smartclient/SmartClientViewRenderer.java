@@ -556,15 +556,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
 											button);
-		if (buttonCode != null) { // we have access
-			code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
-			code.append(buttonCode).append("]}),");
-			disabled(action.getDisabledConditionName(), code);
-			invisible(action.getInvisibleConditionName(), code);
-		}
-		else {
-			code.append("type:'spacer',");
-		}
+		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
+		code.append(buttonCode).append("]}),");
+		disabled(action.getDisabledConditionName(), code);
+		invisible(action.getInvisibleConditionName(), code);
 	}
 
 	@Override
@@ -589,11 +584,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
 											button);
-		if (buttonCode != null) { // we have access
-			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
-			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-		}
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
 	@Override
@@ -859,7 +852,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title == null) {
 			title = value;
 		}
-		code.append("endRow:false,title:'").append(SmartClientGenerateUtils.processString(title)).append("',type:'blurb',");
+		title = SmartClientGenerateUtils.processString(title);
+		code.append("endRow:false");
+		if (title != null) {
+			code.append(",title:'").append(title).append('\'');
+		}
+		code.append(",type:'blurb',");
 
 		String binding = label.getBinding();
 
@@ -2719,19 +2717,16 @@ pickListFields:[{name:'value'}],
 												disabledConditionName,
 												invisibleConditionName,
 												null);
-			if (buttonCode != null) { // we have access
-				// use double quote string delimiter to allow &quot; HTML character entity
-				code.append("view.add");
-				if (! noCreateView) {
-					code.append(ViewType.edit.toString().equals(view.getName()) ? "Edit" : "Create");
-				}
-				code.append("Action(");
-				code.append(buttonCode).append(");");
+			// use double quote string delimiter to allow &quot; HTML character entity
+			code.append("view.add");
+			if (! noCreateView) {
+				code.append(ViewType.edit.toString().equals(view.getName()) ? "Edit" : "Create");
 			}
+			code.append("Action(");
+			code.append(buttonCode).append(");");
 		}
 	}
 
-	// return null if the button should NOT be added
 	private String generateButton(String resourceName,
 									ImplicitActionName implicitName,
 									String label,
