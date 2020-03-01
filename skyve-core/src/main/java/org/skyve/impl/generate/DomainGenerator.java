@@ -364,7 +364,7 @@ public abstract class DomainGenerator {
 		System.out.println("EXCLUDED MODULES=" + (args.length == 7 ? args[6] : ""));
 
 		AbstractRepository repository = new LocalDesignRepository();
-		DomainGenerator jenny = newDomainGenerator(debug, true, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		DomainGenerator jenny = newDomainGenerator(true, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers
 		for (String customerName : repository.getAllCustomerNames()) {
