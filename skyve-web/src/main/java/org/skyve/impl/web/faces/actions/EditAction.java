@@ -60,83 +60,90 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		String bizId = facesView.getBizIdParameter();
 		T bean = null;
 		AbstractWebContext webContext = null;
-		if (bizId == null) {
-			Map<String, Object> session = ec.getSessionMap();
-			if (session.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
-				FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
-				facesView.setViewBinding(sessionView.getViewBinding());
-				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
-				webContext = sessionView.getWebContext();
-				bean = (T) webContext.getCurrentBean();
+		
+		try {
+			if (bizId == null) {
+				Map<String, Object> session = ec.getSessionMap();
+				if (session.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
+					FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
+					facesView.setViewBinding(sessionView.getViewBinding());
+					facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
+					webContext = sessionView.getWebContext();
+					bean = (T) webContext.getCurrentBean();
+				}
+				else {
+					// No security check is required as we are at the top of the conversation
+					// If the user doesn't have create privilege, it will be stopped in SaveAction.
+					bean = document.newInstance(user);
+					
+					SortedMap<String, Object> parameters = SmartClientEditServlet.collectRequestParameters((HttpServletRequest) ec.getRequest());
+					SmartClientEditServlet.applyNewParameters(customer,
+																user,
+																AbstractPersistence.get(), 
+																module, 
+																document, 
+																bean, 
+																parameters,
+																facesView.getUxUi().getName());
+					
+					webContext = new FacesWebContext();
+					webContext.setConversation(AbstractPersistence.get());
+					webContext.setCurrentBean(bean);
+	
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, bean, null, webContext);
+					if (! vetoed) {
+						Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+						if (bizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
+			    			bean = (T) bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
+						}
+						internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
+					}
+				}
 			}
 			else {
-				// No security check is required as we are at the top of the conversation
-				// If the user doesn't have create privilege, it will be stopped in SaveAction.
-				bean = document.newInstance(user);
+				AbstractPersistence persistence = AbstractPersistence.get();
+				bean = persistence.retrieve(document, bizId);
+				// NB bean can be null if it wasn't found in the retrieve above
+				if (bean != null) {
+		    		if (! user.canReadBean(bean.getBizId(), 
+											bean.getBizModule(), 
+											bean.getBizDocument(), 
+											bean.getBizCustomer(), 
+											bean.getBizDataGroupId(), 
+											bean.getBizUserId())) {
+		    			throw new SecurityException("this data", user.getName());
+		    		}
+				}
 				
-				SortedMap<String, Object> parameters = SmartClientEditServlet.collectRequestParameters((HttpServletRequest) ec.getRequest());
-				SmartClientEditServlet.applyNewParameters(customer,
-															user,
-															AbstractPersistence.get(), 
-															module, 
-															document, 
-															bean, 
-															parameters,
-															facesView.getUxUi().getName());
-				
+				// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
+				// Its up to the app coder to disable the UI if appropriate.
+	
 				webContext = new FacesWebContext();
-				webContext.setConversation(AbstractPersistence.get());
+				webContext.setConversation(persistence);
 				webContext.setCurrentBean(bean);
-
+	
 				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, bean, null, webContext);
+				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, bean, null, webContext);
 				if (! vetoed) {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
-		    			bean = (T) bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
+		    			bean = (T) bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
 						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 					}
-					internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
-				}
-			}
-		}
-		else {
-			AbstractPersistence persistence = AbstractPersistence.get();
-			bean = persistence.retrieve(document, bizId);
-			// NB bean can be null if it wasn't found in the retrieve above
-			if (bean != null) {
-	    		if (! user.canReadBean(bean.getBizId(), 
-										bean.getBizModule(), 
-										bean.getBizDocument(), 
-										bean.getBizCustomer(), 
-										bean.getBizDataGroupId(), 
-										bean.getBizUserId())) {
-	    			throw new SecurityException("this data", user.getName());
+					internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
 	    		}
 			}
-			
-			// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
-			// Its up to the app coder to disable the UI if appropriate.
-
-			webContext = new FacesWebContext();
-			webContext.setConversation(persistence);
-			webContext.setCurrentBean(bean);
-
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, bean, null, webContext);
-			if (! vetoed) {
-				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
-	    			bean = (T) bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
-				}
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
-    		}
 		}
-		facesView.setWebContext(webContext);
-		facesView.setBean(bean);
+		// ensure that we always do this stuff even if an exception occurs 
+		// so that faces has a chance to render the current page and error off the FaceView.
+		finally {
+			facesView.setWebContext(webContext);
+			facesView.setBean(bean);
+		}
 		
 		return null;
 	}
