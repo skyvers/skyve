@@ -1610,10 +1610,16 @@ t.printStackTrace();
 	
 			NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 //			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
+			if (UtilImpl.QUERY_TRACE) {
+				UtilImpl.LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
+			}
 			query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
 			if (theseBeansToBeCascaded != null) {
 				int i = 0;
 				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
+					if (UtilImpl.QUERY_TRACE) {
+						UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + bean.getBizId());
+					}
 					query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 				}
 			}

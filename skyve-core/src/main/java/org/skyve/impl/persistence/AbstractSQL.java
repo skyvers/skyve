@@ -17,6 +17,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.persistence.AbstractSQL;
+import org.skyve.impl.util.UtilImpl;
 
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	private String query = null;
@@ -108,6 +109,9 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	public AbstractSQL putParameter(String name, Object value, AttributeType type) {
 		parameters.put(name, value);
 		parametersTypes.put(name, type);
+		if (UtilImpl.QUERY_TRACE) {
+			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
+		}
 		return this;
 	}
 	
