@@ -6,7 +6,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
-import org.skyve.util.Util;
 import org.skyve.impl.persistence.AbstractBizQL;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.AbstractQuery;
@@ -24,7 +23,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	public AbstractBizQL putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
-			Util.LOGGER.info("    SET PARAM " + name + " = " + value);
+			UtilImpl.LOGGER.info("    SET PARAM " + name + " = " + value);
 		}
 		return this;
 	}

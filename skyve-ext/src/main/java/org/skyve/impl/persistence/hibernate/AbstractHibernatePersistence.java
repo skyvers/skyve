@@ -1618,7 +1618,7 @@ t.printStackTrace();
 				int i = 0;
 				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 					if (UtilImpl.QUERY_TRACE) {
-						UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + bean.getBizId());
+						UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
 					}
 					query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 				}
