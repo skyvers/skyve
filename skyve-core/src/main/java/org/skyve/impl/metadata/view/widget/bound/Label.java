@@ -136,7 +136,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
-	public Boolean isFormatted() {
+	public Boolean getFormatted() {
 		return formatted;
 	}
 
