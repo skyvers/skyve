@@ -16,6 +16,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -123,10 +124,23 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 					newCol.setColumnName(columnName);
 					
 					// and guess a binding
+					//prefer a like match on Display Name
+					boolean bindingFound = false;
 					for (Attribute a : document.getAttributes()) {
-						if (a.getDisplayName().toLowerCase().equals(columnName.toLowerCase())) {
+						if (a.getDisplayName().equalsIgnoreCase(columnName)) {
 							newCol.setBindingName(a.getName());
+							bindingFound = true;
 							break;
+						}
+					}
+					if(!bindingFound) {
+						//attempt a close match on binding name
+						for (Attribute a : document.getAttributes()) {
+							String cleanColName = Binder.toJavaInstanceIdentifier(columnName);
+							if (a.getName().equalsIgnoreCase(cleanColName)) {
+								newCol.setBindingName(a.getName());
+								break;
+							}
 						}
 					}
 				} else {
