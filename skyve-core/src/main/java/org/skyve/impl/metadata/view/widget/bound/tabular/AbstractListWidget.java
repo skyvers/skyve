@@ -9,13 +9,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
-import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,

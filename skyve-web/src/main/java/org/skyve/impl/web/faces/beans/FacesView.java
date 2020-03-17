@@ -22,8 +22,8 @@ import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
-import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -56,7 +56,7 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 

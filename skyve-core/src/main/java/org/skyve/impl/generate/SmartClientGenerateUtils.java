@@ -80,7 +80,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;

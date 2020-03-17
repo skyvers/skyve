@@ -101,8 +101,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
@@ -1562,7 +1562,6 @@ class ViewValidator extends ViewVisitor {
 													reference.getDocumentName(),
 													"an edit view");
 				}
-				validateReferenceBinding(reference.getBinding(), "an edit view");
 			}
 			
 			@Override

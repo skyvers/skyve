@@ -6,7 +6,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;

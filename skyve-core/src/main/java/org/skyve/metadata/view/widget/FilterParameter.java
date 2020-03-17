@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.widget.bound;
+package org.skyve.metadata.view.widget;
 
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaData;

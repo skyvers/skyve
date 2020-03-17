@@ -125,7 +125,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;

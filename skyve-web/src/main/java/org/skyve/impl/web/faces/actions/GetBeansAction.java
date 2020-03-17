@@ -8,7 +8,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 
