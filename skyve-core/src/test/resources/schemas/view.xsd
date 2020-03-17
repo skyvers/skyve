@@ -1261,13 +1261,9 @@
   </xs:complexType>
 
   <xs:complexType name="defaultListViewReference">
-    <xs:complexContent>
-      <xs:extension base="tns:abstractBound">
-        <xs:sequence/>
-        <xs:attribute name="documentName" type="xs:string" use="required"/>
-        <xs:attribute name="moduleName" type="xs:string" use="required"/>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:sequence/>
+    <xs:attribute name="documentName" type="xs:string" use="required"/>
+    <xs:attribute name="moduleName" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="editViewReference">
