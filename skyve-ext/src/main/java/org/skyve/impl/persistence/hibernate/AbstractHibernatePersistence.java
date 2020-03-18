@@ -442,7 +442,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (@SuppressWarnings("unused") MappingException | IllegalArgumentException e) {
+				catch (@SuppressWarnings("unused") Exception e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
@@ -454,7 +454,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (@SuppressWarnings("unused") MappingException | IllegalArgumentException e) {
+				catch (@SuppressWarnings("unused") Exception e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
