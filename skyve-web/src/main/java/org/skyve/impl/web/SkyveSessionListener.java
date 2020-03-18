@@ -20,6 +20,6 @@ public class SkyveSessionListener implements HttpSessionListener {
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		ConversationUtil.incrementSessionCount();
+		ConversationUtil.decrementSessionCount();
 	}
 }
