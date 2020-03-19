@@ -19,7 +19,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addEquals(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -34,7 +34,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operands
 	 */
-	public DocumentFilter addIn(String entityAlias, String binding, Object...operands);
+	public DocumentFilter addAliasedIn(String entityAlias, String binding, Object...operands);
 
 	/**
 	 * 
@@ -49,7 +49,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operands
 	 */
-	public DocumentFilter addNotIn(String entityAlias, String binding, Object... operands);
+	public DocumentFilter addAliasedNotIn(String entityAlias, String binding, Object... operands);
 
 	/**
 	 * 
@@ -64,7 +64,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNotEquals(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNotEquals(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -79,7 +79,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addGreaterThan(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedGreaterThan(String entityAlias, String binding, Object operand);
 	
 	/**
 	 * 
@@ -94,7 +94,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addGreaterThanOrEqualTo(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedGreaterThanOrEqualTo(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -109,7 +109,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addLessThan(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedLessThan(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -124,7 +124,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addLessThanOrEqualTo(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedLessThanOrEqualTo(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -139,7 +139,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addLike(String entityAlias, String binding, String operand);
+	public DocumentFilter addAliasedLike(String entityAlias, String binding, String operand);
 
 	/**
 	 * 
@@ -154,7 +154,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNotLike(String entityAlias, String binding, String operand);
+	public DocumentFilter addAliasedNotLike(String entityAlias, String binding, String operand);
 
 	/**
 	 * 
@@ -169,7 +169,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addEquals(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -184,7 +184,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addDisjoint(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedDisjoint(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -199,7 +199,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addIntersects(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedIntersects(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -214,7 +214,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addTouches(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedTouches(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -229,7 +229,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addCrosses(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedCrosses(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -244,7 +244,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addWithin(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedWithin(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -259,7 +259,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addContains(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedContains(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -274,7 +274,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addOverlaps(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedOverlaps(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -289,7 +289,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrEquals(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -304,7 +304,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrNotEquals(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrNotEquals(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -319,7 +319,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrGreaterThan(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrGreaterThan(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -334,7 +334,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrGreaterThanOrEqualTo(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrGreaterThanOrEqualTo(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -349,7 +349,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrLessThan(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrLessThan(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -364,7 +364,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrLessThanOrEqualTo(String entityAlias, String binding, Object operand);
+	public DocumentFilter addAliasedNullOrLessThanOrEqualTo(String entityAlias, String binding, Object operand);
 
 	/**
 	 * 
@@ -379,7 +379,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrLike(String entityAlias, String binding, String operand);
+	public DocumentFilter addAliasedNullOrLike(String entityAlias, String binding, String operand);
 
 	/**
 	 * 
@@ -394,7 +394,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addNullOrNotLike(String entityAlias, String binding, String operand);
+	public DocumentFilter addAliasedNullOrNotLike(String entityAlias, String binding, String operand);
 
 	/**
 	 * 
@@ -409,7 +409,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrEquals(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -424,7 +424,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrDisjoint(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrDisjoint(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -439,7 +439,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrIntersects(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrIntersects(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -454,7 +454,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrTouches(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrTouches(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -469,7 +469,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrCrosses(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrCrosses(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -484,7 +484,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrWithin(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrWithin(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -499,7 +499,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrContains(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrContains(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -514,7 +514,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param geometry
 	 */
-	public DocumentFilter addNullOrOverlaps(String entityAlias, String binding, Geometry geometry);
+	public DocumentFilter addAliasedNullOrOverlaps(String entityAlias, String binding, Geometry geometry);
 
 	/**
 	 * 
@@ -527,7 +527,7 @@ public interface DocumentFilter {
 	 * @param entityAlias
 	 * @param binding
 	 */
-	public DocumentFilter addNull(String entityAlias, String binding);
+	public DocumentFilter addAliasedNull(String entityAlias, String binding);
 
 	/**
 	 * 
@@ -540,7 +540,7 @@ public interface DocumentFilter {
 	 * @param entityAlias
 	 * @param binding
 	 */
-	public DocumentFilter addNotNull(String entityAlias, String binding);
+	public DocumentFilter addAliasedNotNull(String entityAlias, String binding);
 
 	/**
 	 * 
@@ -557,7 +557,7 @@ public interface DocumentFilter {
 	 * @param minOperand
 	 * @param maxOperand
 	 */
-	public DocumentFilter addBetween(String entityAlias, String binding, Object minOperand, Object maxOperand);
+	public DocumentFilter addAliasedBetween(String entityAlias, String binding, Object minOperand, Object maxOperand);
 
 	/**
 	 * 
@@ -572,7 +572,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeEquals(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeEquals(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
@@ -587,7 +587,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeNotEquals(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeNotEquals(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
@@ -602,7 +602,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeGreaterThan(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeGreaterThan(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
@@ -617,7 +617,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
@@ -632,7 +632,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeLessThan(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeLessThan(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
@@ -647,7 +647,7 @@ public interface DocumentFilter {
 	 * @param binding
 	 * @param operand
 	 */
-	public DocumentFilter addCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand);
+	public DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand);
 
 	/**
 	 * 
