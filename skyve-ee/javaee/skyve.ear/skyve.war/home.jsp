@@ -96,12 +96,19 @@
 			userName = customerName + "/" + userName;
 		}
 		else {
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "login"));
+			String queryString = request.getQueryString();
+			if (queryString == null) {
+				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "login"));
+			}
+			else {
+				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "loggedIn.jsp?" + queryString));
+			}
 			return;
 		}
 	}
 	else if (customerName != null) {
 		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl()));
+		return;
 	}
 	else {
 		userName = userPrincipal.getName();

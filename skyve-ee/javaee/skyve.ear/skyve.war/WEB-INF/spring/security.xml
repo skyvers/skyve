@@ -50,6 +50,9 @@
 		<!-- Permit home.jsp as it controls access to public and private pages itself -->
 		<intercept-url pattern="/home.jsp" access="permitAll" />
 
+		<!-- Secure the loggedIn.jsp so that redirect occurs after login -->
+		<intercept-url pattern="/loggedIn.jsp" access="authenticated" />
+
 		<!-- Secure the system JSPs and HTMLs -->
 		<intercept-url pattern="/pages/changePassword.jsp" access="authenticated" />
 		<intercept-url pattern="/pages/htmlEdit/browseImages.jsp" access="authenticated" />
