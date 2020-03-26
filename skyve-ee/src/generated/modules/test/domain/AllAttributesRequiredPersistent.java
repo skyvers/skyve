@@ -315,7 +315,14 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	public void setAggregatedAssociation(AllAttributesRequiredPersistent aggregatedAssociation) {
 		if (this.aggregatedAssociation != aggregatedAssociation) {
 			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			AllAttributesRequiredPersistent oldAggregatedAssociation = this.aggregatedAssociation;
 			this.aggregatedAssociation = aggregatedAssociation;
+			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
+				aggregatedAssociation.getInverseAggregatedAssociation().add(this);
+			}
+			if (oldAggregatedAssociation != null) {
+				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
+			}
 		}
 	}
 
@@ -362,6 +369,39 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 **/
 	public void setAggregatedCollectionElementById(String bizId, AllAttributesRequiredPersistent element) {
 		setElementById(aggregatedCollection, element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
+		return aggregatedCollection.add(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(int index, AllAttributesRequiredPersistent element) {
+		aggregatedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggregatedCollectionElement(AllAttributesRequiredPersistent element) {
+		return aggregatedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesRequiredPersistent removeAggregatedCollectionElement(int index) {
+		return aggregatedCollection.remove(index);
 	}
 
 	/**
@@ -577,6 +617,48 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 **/
 	public void setInverseAggregatedAssociationElementById(String bizId, AllAttributesRequiredPersistent element) {
 		setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
+		boolean result = inverseAggregatedAssociation.add(element);
+		element.setAggregatedAssociation(this);
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(int index, AllAttributesRequiredPersistent element) {
+		inverseAggregatedAssociation.add(index, element);
+		element.setAggregatedAssociation(this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
+		boolean result = inverseAggregatedAssociation.remove(element);
+		if (result) {
+			element.setAggregatedAssociation(null);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesRequiredPersistent removeInverseAggregatedAssociationElement(int index) {
+		AllAttributesRequiredPersistent result = inverseAggregatedAssociation.remove(index);
+		result.setAggregatedAssociation(null);
+		return result;
 	}
 
 	/**

@@ -619,6 +619,46 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #importExportColumns} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addImportExportColumnsElement(ImportExportColumn element) {
+		boolean result = importExportColumns.add(element);
+		element.setParent((ImportExportExtension) this);
+		return result;
+	}
+
+	/**
+	 * {@link #importExportColumns} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addImportExportColumnsElement(int index, ImportExportColumn element) {
+		importExportColumns.add(index, element);
+		element.setParent((ImportExportExtension) this);
+	}
+
+	/**
+	 * {@link #importExportColumns} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeImportExportColumnsElement(ImportExportColumn element) {
+		boolean result = importExportColumns.remove(element);
+		element.setParent(null);
+		return result;
+	}
+
+	/**
+	 * {@link #importExportColumns} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public ImportExportColumn removeImportExportColumnsElement(int index) {
+		ImportExportColumn result = importExportColumns.remove(index);
+		result.setParent(null);
+		return result;
+	}
+
+	/**
 	 * {@link #rollbackErrors} accessor.
 	 * @return	The value.
 	 **/

@@ -138,7 +138,14 @@ public class Subscription extends AbstractPersistentBean {
 	public void setCommunication(CommunicationExtension communication) {
 		if (this.communication != communication) {
 			preset(communicationPropertyName, communication);
+			CommunicationExtension oldCommunication = this.communication;
 			this.communication = communication;
+			if ((communication != null) && (communication.getSubscriptionsElementById(getBizId()) == null)) {
+				communication.getSubscriptions().add(this);
+			}
+			if (oldCommunication != null) {
+				oldCommunication.getSubscriptions().remove(this);
+			}
 		}
 	}
 

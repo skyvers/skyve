@@ -105,7 +105,14 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	public void setAggAssociation(InverseOneToManyPersistent aggAssociation) {
 		if (this.aggAssociation != aggAssociation) {
 			preset(aggAssociationPropertyName, aggAssociation);
+			InverseOneToManyPersistent oldAggAssociation = this.aggAssociation;
 			this.aggAssociation = aggAssociation;
+			if ((aggAssociation != null) && (aggAssociation.getInvAggAssociationElementById(getBizId()) == null)) {
+				aggAssociation.getInvAggAssociation().add(this);
+			}
+			if (oldAggAssociation != null) {
+				oldAggAssociation.getInvAggAssociation().remove(this);
+			}
 		}
 	}
 
@@ -134,5 +141,47 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public void setInvAggAssociationElementById(String bizId, InverseOneToManyPersistent element) {
 		setElementById(invAggAssociation, element);
+	}
+
+	/**
+	 * {@link #invAggAssociation} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addInvAggAssociationElement(InverseOneToManyPersistent element) {
+		boolean result = invAggAssociation.add(element);
+		element.setAggAssociation(this);
+		return result;
+	}
+
+	/**
+	 * {@link #invAggAssociation} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInvAggAssociationElement(int index, InverseOneToManyPersistent element) {
+		invAggAssociation.add(index, element);
+		element.setAggAssociation(this);
+	}
+
+	/**
+	 * {@link #invAggAssociation} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInvAggAssociationElement(InverseOneToManyPersistent element) {
+		boolean result = invAggAssociation.remove(element);
+		if (result) {
+			element.setAggAssociation(null);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #invAggAssociation} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public InverseOneToManyPersistent removeInvAggAssociationElement(int index) {
+		InverseOneToManyPersistent result = invAggAssociation.remove(index);
+		result.setAggAssociation(null);
+		return result;
 	}
 }

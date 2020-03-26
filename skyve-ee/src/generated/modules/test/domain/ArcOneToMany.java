@@ -109,4 +109,37 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	public void setArcsElementById(String bizId, AnyBase element) {
 		setElementById(arcs, element);
 	}
+
+	/**
+	 * {@link #arcs} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addArcsElement(AnyBase element) {
+		return arcs.add(element);
+	}
+
+	/**
+	 * {@link #arcs} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addArcsElement(int index, AnyBase element) {
+		arcs.add(index, element);
+	}
+
+	/**
+	 * {@link #arcs} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeArcsElement(AnyBase element) {
+		return arcs.remove(element);
+	}
+
+	/**
+	 * {@link #arcs} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AnyBase removeArcsElement(int index) {
+		return arcs.remove(index);
+	}
 }

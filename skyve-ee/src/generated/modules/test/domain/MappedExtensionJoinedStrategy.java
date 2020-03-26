@@ -129,7 +129,14 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	public void setAggregatedAssociation(MappedExtensionJoinedStrategyExtension aggregatedAssociation) {
 		if (this.aggregatedAssociation != aggregatedAssociation) {
 			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
+			MappedExtensionJoinedStrategyExtension oldAggregatedAssociation = this.aggregatedAssociation;
 			this.aggregatedAssociation = aggregatedAssociation;
+			if ((aggregatedAssociation != null) && (aggregatedAssociation.getInverseAggregatedAssociationElementById(getBizId()) == null)) {
+				aggregatedAssociation.getInverseAggregatedAssociation().add((MappedExtensionJoinedStrategyExtension) this);
+			}
+			if (oldAggregatedAssociation != null) {
+				oldAggregatedAssociation.getInverseAggregatedAssociation().remove(this);
+			}
 		}
 	}
 
@@ -161,6 +168,39 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	}
 
 	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return aggregatedCollection.add(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggregatedCollectionElement(int index, MappedExtensionJoinedStrategyExtension element) {
+		aggregatedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggregatedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return aggregatedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #aggregatedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionJoinedStrategyExtension removeAggregatedCollectionElement(int index) {
+		return aggregatedCollection.remove(index);
+	}
+
+	/**
 	 * {@link #composedCollection} accessor.
 	 * @return	The value.
 	 **/
@@ -188,6 +228,39 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	}
 
 	/**
+	 * {@link #composedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return composedCollection.add(element);
+	}
+
+	/**
+	 * {@link #composedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addComposedCollectionElement(int index, MappedExtensionJoinedStrategyExtension element) {
+		composedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeComposedCollectionElement(MappedExtensionJoinedStrategyExtension element) {
+		return composedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionJoinedStrategyExtension removeComposedCollectionElement(int index) {
+		return composedCollection.remove(index);
+	}
+
+	/**
 	 * {@link #inverseAggregatedAssociation} accessor.
 	 * @return	The value.
 	 **/
@@ -212,6 +285,48 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 **/
 	public void setInverseAggregatedAssociationElementById(String bizId, MappedExtensionJoinedStrategyExtension element) {
 		setElementById(inverseAggregatedAssociation, element);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addInverseAggregatedAssociationElement(MappedExtensionJoinedStrategyExtension element) {
+		boolean result = inverseAggregatedAssociation.add(element);
+		element.setAggregatedAssociation((MappedExtensionJoinedStrategyExtension) this);
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInverseAggregatedAssociationElement(int index, MappedExtensionJoinedStrategyExtension element) {
+		inverseAggregatedAssociation.add(index, element);
+		element.setAggregatedAssociation((MappedExtensionJoinedStrategyExtension) this);
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInverseAggregatedAssociationElement(MappedExtensionJoinedStrategyExtension element) {
+		boolean result = inverseAggregatedAssociation.remove(element);
+		if (result) {
+			element.setAggregatedAssociation(null);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #inverseAggregatedAssociation} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public MappedExtensionJoinedStrategyExtension removeInverseAggregatedAssociationElement(int index) {
+		MappedExtensionJoinedStrategyExtension result = inverseAggregatedAssociation.remove(index);
+		result.setAggregatedAssociation(null);
+		return result;
 	}
 
 	/**

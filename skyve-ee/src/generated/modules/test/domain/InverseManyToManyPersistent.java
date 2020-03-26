@@ -118,6 +118,46 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #aggCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = aggCollection.add(element);
+		element.getInvAggCollection().add(this);
+		return result;
+	}
+
+	/**
+	 * {@link #aggCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addAggCollectionElement(int index, InverseManyToManyPersistent element) {
+		aggCollection.add(index, element);
+		element.getInvAggCollection().add(this);
+	}
+
+	/**
+	 * {@link #aggCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = aggCollection.remove(element);
+		element.getInvAggCollection().remove(this);
+		return result;
+	}
+
+	/**
+	 * {@link #aggCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public InverseManyToManyPersistent removeAggCollectionElement(int index) {
+		InverseManyToManyPersistent result = aggCollection.remove(index);
+		result.getInvAggCollection().remove(this);
+		return result;
+	}
+
+	/**
 	 * {@link #invAggCollection} accessor.
 	 * @return	The value.
 	 **/
@@ -142,5 +182,47 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public void setInvAggCollectionElementById(String bizId, InverseManyToManyPersistent element) {
 		setElementById(invAggCollection, element);
+	}
+
+	/**
+	 * {@link #invAggCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addInvAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = invAggCollection.add(element);
+		element.getAggCollection().add(this);
+		return result;
+	}
+
+	/**
+	 * {@link #invAggCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addInvAggCollectionElement(int index, InverseManyToManyPersistent element) {
+		invAggCollection.add(index, element);
+		element.getAggCollection().add(this);
+	}
+
+	/**
+	 * {@link #invAggCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeInvAggCollectionElement(InverseManyToManyPersistent element) {
+		boolean result = invAggCollection.remove(element);
+		if (result) {
+			element.getAggCollection().remove(this);
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #invAggCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public InverseManyToManyPersistent removeInvAggCollectionElement(int index) {
+		InverseManyToManyPersistent result = invAggCollection.remove(index);
+		result.getAggCollection().remove(this);
+		return result;
 	}
 }

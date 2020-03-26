@@ -774,6 +774,39 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #refreshDocuments} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
+		return refreshDocuments.add(element);
+	}
+
+	/**
+	 * {@link #refreshDocuments} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addRefreshDocumentsElement(int index, DataMaintenanceModuleDocument element) {
+		refreshDocuments.add(index, element);
+	}
+
+	/**
+	 * {@link #refreshDocuments} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
+		return refreshDocuments.remove(element);
+	}
+
+	/**
+	 * {@link #refreshDocuments} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public DataMaintenanceModuleDocument removeRefreshDocumentsElement(int index) {
+		return refreshDocuments.remove(index);
+	}
+
+	/**
 	 * {@link #notification} accessor.
 	 * @return	The value.
 	 **/
