@@ -65,9 +65,9 @@ public class ZoomInAction extends FacesAction<Void> {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
+
+				ActionUtil.redirectViewScopedConversation(facesView, currentBean);
 			}
-	
-			ActionUtil.redirectViewScopedConversation(facesView, currentBean);
 		}
 		
 		return null;

@@ -138,6 +138,52 @@ public class Binder {
 		return null;
 	}
 	
+	public static <T extends Bean> void setElementInCollection(List<T> list, T element) {
+		BindUtil.setElementInCollection(list, element);
+	}
+
+	/**
+	 * Call the addElement method on a Bean's collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
+	 * @param element	The element.
+	 */
+	public static boolean addElement(Bean bean, String collectionBinding, Bean element) {
+		return BindUtil.addElement(bean, collectionBinding, element);
+	}
+	
+	/**
+	 * Call the addElement method on a Bean's collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
+	 * @param index	The index to add the element at.
+	 * @param element	The element.
+	 */
+	public static void addElement(Bean bean, String collectionBinding, int index, Bean element) {
+		BindUtil.addElement(bean, collectionBinding, index, element);
+	}
+	
+	/**
+	 * Call the removeElement method on a Bean's collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
+	 * @param element	The element.
+	 */
+	public static boolean removeElement(Bean bean, String collectionBinding, Bean element) {
+		return BindUtil.removeElement(bean, collectionBinding, element);
+	}
+
+	/**
+	 * Call the removeElement method on a Bean's collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
+	 * @param index	The index to add the element at.
+	 * @return	The removed element.
+	 */
+	public static <T extends Bean> T removeElement(Bean bean, String collectionBinding, int index) {
+		return BindUtil.removeElement(bean, collectionBinding, index);
+	}
+	
 	/**
 	 * Sort a collection by its order metadata.
 	 * 

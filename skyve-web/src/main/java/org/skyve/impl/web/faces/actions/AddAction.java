@@ -5,7 +5,6 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -83,47 +82,13 @@ public class AddAction extends FacesAction<Void> {
 
     	// Create the new bean
     	Bean newBean = relationDocument.newInstance(user);
-		// Get the list (collection or inverse many)
-		@SuppressWarnings("unchecked")
-		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 
-		// Set the parent of a child bean, if applicable
-		if (newBean instanceof ChildBean<?>) {
-			Document parentDocument = relationDocument.getParentDocument(customer);
-			String parentModuleName = parentDocument.getOwningModuleName();
-			String parentDocumentName = parentDocument.getName();
-
-			// Check if processBean.setParent() can be called or not.
-			// The processBean may be a child of some other bean and just being added to another collection here.
-			// Or it could be a derived document, so need to check inheritance as well.
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			Document parentBeanDocument = customer.getModule(parentBean.getBizModule()).getDocument(customer, parentBean.getBizDocument());
-			while (parentBeanDocument != null) {
-				if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
-						parentDocumentName.equals(parentBeanDocument.getName())) {
-					@SuppressWarnings("unchecked")
-					ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) newBean;
-					uncheckedNewBean.setParent(parentBean);
-					parentBeanDocument = null;
-				}
-				else {
-					String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
-    				if (baseDocumentName == null) {
-    					parentBeanDocument = null;
-    				}
-    				else {
-        				int dotIndex = baseDocumentName.indexOf('.');
-        				Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
-        				parentBeanDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-    				}
-				}
-			}
-
-			// set bizOrdinal if this is an ordered child collection
-			if ((targetRelation instanceof Collection) &&
-					Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
-				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
-			}
+    	// set bizOrdinal if this is an ordered child collection
+		if ((targetRelation instanceof Collection) &&
+				Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
+			@SuppressWarnings("unchecked")
+			List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
+			Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
 		}
 
 		// Call the bizlet and interceptors
@@ -138,23 +103,23 @@ public class AddAction extends FacesAction<Void> {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
-		}
 
-		// Add the new element to the collection
-		beans.add(newBean);
+			// Add the new element to the collection after preExecute
+			Binder.addElement(bean, newViewBinding.toString(), newBean);
 
-		if (! inline) {
-			newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');
-			zoomInBinding.append("ElementById(").append(newBean.getBizId()).append(')');
-			
-	    	facesView.setViewBinding(newViewBinding.toString());
-	    	facesView.getZoomInBindings().push(zoomInBinding.toString());
-			if (UtilImpl.FACES_TRACE) { 
-				Util.LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
-				Util.LOGGER.info("Set ViewBinding " + newViewBinding.toString());
+			if (! inline) {
+				newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+				zoomInBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+				
+		    	facesView.setViewBinding(newViewBinding.toString());
+		    	facesView.getZoomInBindings().push(zoomInBinding.toString());
+				if (UtilImpl.FACES_TRACE) { 
+					Util.LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());
+					Util.LOGGER.info("Set ViewBinding " + newViewBinding.toString());
+				}
+
+		    	ActionUtil.redirectViewScopedConversation(facesView, newBean);
 			}
-
-	    	ActionUtil.redirectViewScopedConversation(facesView, newBean);
 		}
 		
     	return null;

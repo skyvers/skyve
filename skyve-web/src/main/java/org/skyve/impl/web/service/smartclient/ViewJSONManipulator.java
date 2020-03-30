@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -112,7 +111,6 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -551,35 +549,7 @@ class ViewJSONManipulator extends ViewVisitor {
 											persistence,
 											webContext);
 							}
-	
-							// Determine whether link the bean in as the parent
-							String parentDocumentName = relatedDocument.getParentDocumentName();
-							if ((parentDocumentName != null) && // is a child document
-									parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
-								((ChildBean<Bean>) thisBean).setParent(appliedTo);
-							}
-							// Determine whether to set the other side of an inverse
-							if (AttributeType.inverseMany.equals(relationType)) {
-								Inverse inverse = (Inverse) relation;
-								if (Boolean.TRUE.equals(inverse.getCascade())) {
-									String referenceName = inverse.getReferenceName();
-									// Get the reference target metadata - NB could be inherited
-									target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
-									Attribute reference = target.getAttribute();
-									AttributeType referenceType = reference.getAttributeType();
-									if (AttributeType.association.equals(referenceType)) { // association
-										BindUtil.set(thisBean, referenceName, appliedTo);
-									}
-									else { // collection
-										List<Bean> referenceList = (List<Bean>) BindUtil.get(thisBean, referenceName);
-										if (! referenceList.contains(thisBean)) {
-											referenceList.add(appliedTo);
-										}
-									}
-								}
-							}
-							
-							beanList.add(newIndex, thisBean);
+							BindUtil.addElement(appliedTo, childBindingPrefix, newIndex, thisBean);
 						}
 						else { // found
 							// Only move the bean in the collection if required
@@ -604,28 +574,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 					// delete any left over beans in the list as these were not present in the requestList
 					while (beanList.size() > newIndex) {
-						Bean removed = beanList.remove(newIndex);
-
-						// Determine whether to null the other side of an inverse
-						if (AttributeType.inverseMany.equals(relationType)) {
-							Inverse inverse = (Inverse) relation;
-							if (Boolean.TRUE.equals(inverse.getCascade())) {
-								String referenceName = inverse.getReferenceName();
-								// Get the reference target metadata - NB could be inherited
-								target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
-								Attribute reference = target.getAttribute();
-								AttributeType referenceType = reference.getAttributeType();
-								if (AttributeType.association.equals(referenceType)) { // association
-									BindUtil.set(removed, referenceName, null);
-								}
-								else { // collection
-									List<Bean> referenceList = (List<Bean>) BindUtil.get(removed, referenceName);
-									while (referenceList.contains(removed)) {
-										referenceList.remove(appliedTo);
-									}
-								}
-							}
-						}
+						BindUtil.removeElement(appliedTo, childBindingPrefix, newIndex);
 					}
 					
 					if (relation instanceof Collection) { // NB it could be an inverse
@@ -640,27 +589,6 @@ class ViewJSONManipulator extends ViewVisitor {
 				if (requestObject == null) {
 					if (referencedBean != null) {
 						BindUtil.set(appliedTo, childBindingPrefix, null);
-						
-						// Determine whether to null the other side of an inverse
-						if (AttributeType.inverseOne.equals(relationType)) {
-							Inverse inverse = (Inverse) relation;
-							if (Boolean.TRUE.equals(inverse.getCascade())) {
-								String referenceName = inverse.getReferenceName();
-								// Get the reference target metadata - NB could be inherited
-								target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
-								Attribute reference = target.getAttribute();
-								AttributeType referenceType = reference.getAttributeType();
-								if (AttributeType.association.equals(referenceType)) { // association
-									BindUtil.set(referencedBean, referenceName, null);
-								}
-								else { // collection
-									List<Bean> referenceList = (List<Bean>) BindUtil.get(referencedBean, referenceName);
-									while (referenceList.contains(appliedTo)) {
-										referenceList.remove(appliedTo);
-									}
-								}
-							}
-						}
 					}
 				}
 				else {
@@ -668,42 +596,8 @@ class ViewJSONManipulator extends ViewVisitor {
 						String requestBizId = (String) requestObject;
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
-							Bean oldReferencedBean = referencedBean;
 							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence, bean, webContext);
 							BindUtil.set(appliedTo, childBindingPrefix, referencedBean);
-
-							// Determine whether to set the other side of an inverse
-							if (AttributeType.inverseOne.equals(relationType)) {
-								Inverse inverse = (Inverse) relation;
-								if (Boolean.TRUE.equals(inverse.getCascade())) {
-									String referenceName = inverse.getReferenceName();
-									// Get the reference target metadata - NB could be inherited
-									target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
-									Attribute reference = target.getAttribute();
-									AttributeType referenceType = reference.getAttributeType();
-									if (AttributeType.association.equals(referenceType)) { // association
-										// Null out the other side of the inverse for the old inverse value
-										if (oldReferencedBean != null) {
-											BindUtil.set(oldReferencedBean, referenceName, null);
-										}
-										// Set the other side of the inverse for the new inverse value
-										BindUtil.set(referencedBean, referenceName, appliedTo);
-									}
-									else { // collection
-										// Remove elements that contain the other side of the inverse for the old inverse value
-										if (oldReferencedBean != null) {
-											List<Bean> referenceList = (List<Bean>) BindUtil.get(oldReferencedBean, referenceName);
-											while (referenceList.contains(appliedTo)) {
-												referenceList.remove(appliedTo);
-											}
-										}
-										List<Bean> referenceList = (List<Bean>) BindUtil.get(referencedBean, referenceName);
-										if (! referenceList.contains(appliedTo)) {
-											referenceList.add(appliedTo);
-										}
-									}
-								}
-							}
 						}
 					}
 					else { // a JSON object
@@ -780,27 +674,6 @@ class ViewJSONManipulator extends ViewVisitor {
 				
 				if (dirty) {
 					BindUtil.populateProperty(user, targetBean, binding, newRelatedBean, true);
-
-					// if this is a cascaded inverse, set the other side
-					if (attribute instanceof Inverse) {
-						Inverse inverse = (Inverse) attribute;
-						if (Boolean.TRUE.equals(inverse.getCascade())) {
-							// clear out the old relation
-							if (oldRelatedBean != null) {
-								BindUtil.set(oldRelatedBean, inverse.getReferenceName(), null);
-							}
-							// Set the new relation
-							if (newRelatedBean != null) {
-								BindUtil.set(newRelatedBean, inverse.getReferenceName(), targetBean);
-							}
-						}
-						else {
-							UtilImpl.LOGGER.warning(String.format("A new value <%s> was set on binding '%s' but [cascading] " + 
-																		"is not enabled on the inverseOne attribute, so it will not be persisted.",
-																	relatedValue,
-																	binding));
-						}
-					}
 				}
 			}
 			// We have a binding to a document attribute OR
@@ -1137,7 +1010,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
-			// TODO - should make the URL dependant on the image format
+			// TODO - should make the URL dependent on the image format
 			htmlGuts.append("<img src=\"dynamic.png?_n=").append(image.getName());
 			htmlGuts.append("&_doc={bizModule}.{bizDocument}");
 			

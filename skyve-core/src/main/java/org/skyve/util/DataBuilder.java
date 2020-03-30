@@ -15,7 +15,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -27,7 +26,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
@@ -489,12 +487,6 @@ public class DataBuilder {
 							if (collectionModuleRef != null) {
 								collectionModule = customer.getModule(collectionModuleRef);
 							}
-							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
-							boolean childCollection = CollectionType.child.equals(collection.getType()) &&
-														document.getName().equals(collectionDocument.getParentDocumentName());
-							@SuppressWarnings("unchecked")
-							List<Bean> list = (List<Bean>) BindUtil.get(result, name);
-							
 							int cardinality = 1; // default to a single element
 							// Set min cardinality if it is set on the met-data and is greater than 2
 							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
@@ -509,18 +501,14 @@ public class DataBuilder {
 								}
 							}
 		
+							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
 							for (int i = 0; i < cardinality; i++) {
 								String newBinding = binding.isEmpty() ? name : BindUtil.createIndexedBinding(BindUtil.createCompoundBinding(binding, name), i);
 								if (trace) {
 									trace(new StringBuilder(128).append("Set \"").append(newBinding).append("\" to new data"), currentDepth + 1);
 								}
 								Bean element = build(collectionModule, collectionDocument, newBinding, currentDepth + 1, allowFactoryRecursion);
-								list.add(element);
-								if (childCollection) {
-									@SuppressWarnings("unchecked")
-									ChildBean<Bean> child = (ChildBean<Bean>) element;
-									child.setParent(result);
-								}
+								BindUtil.addElement(result, name, element);
 							}
 						}
 					}

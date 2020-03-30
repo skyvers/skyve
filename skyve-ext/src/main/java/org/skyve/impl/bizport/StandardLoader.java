@@ -370,7 +370,6 @@ public class StandardLoader {
 		}
 
 		BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
-		childBean.setParent(parentBean);
 	}
 	
 	/**

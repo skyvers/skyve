@@ -66,17 +66,17 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
+
+				if (targetBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
+					throw new SecurityException("create this data", user.getName());
+				}
+				else if (targetBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
+					throw new SecurityException("update this data", user.getName());
+				}
+		
+				targetBean = persistence.save(targetDocument, targetBean);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 			}
-	
-			if (targetBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
-				throw new SecurityException("create this data", user.getName());
-			}
-			else if (targetBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
-				throw new SecurityException("update this data", user.getName());
-			}
-	
-			targetBean = persistence.save(targetDocument, targetBean);
-			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 		}
 		
 		return null;

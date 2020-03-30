@@ -81,9 +81,9 @@ public class DeleteAction extends FacesAction<Void> {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
-		}
 
-		persistence.delete(document, persistentBeanToDelete);
+			persistence.delete(document, persistentBeanToDelete);
+		}
 		
 		return null;
 	}

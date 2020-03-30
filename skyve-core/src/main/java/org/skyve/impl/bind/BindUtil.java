@@ -736,7 +736,7 @@ public final class BindUtil {
 			}
 		}
 
-		list.add(element);
+		BindUtil.addElement(owner, binding, element);
 		return element;
 	}
 
@@ -775,18 +775,33 @@ public final class BindUtil {
 		}
 	}
 	
+	private static Object[] collectionArguments(Bean bean, String collectionBinding) {
+		Bean collectionOwner = bean;
+		String collectionName = collectionBinding;
+		int dotIndex = collectionName.lastIndexOf('.');
+		if (dotIndex > -1) {
+			collectionName = collectionName.substring(dotIndex + 1);
+			collectionOwner = (Bean) BindUtil.get(bean, collectionBinding.substring(0, dotIndex));
+		}
+		return new Object[] {collectionOwner, collectionName};
+	}
+	
 	/**
 	 * Call the addElement method on a Bean's collection.
-	 * @param owner	The owning bean.
-	 * @param collectionName	The name of the collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean addElement(Bean owner, String collectionName, Bean element) {
+	public static boolean addElement(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Object[] args = collectionArguments(bean, collectionBinding);
+			Bean collectionOwner = (Bean) args[0];
+			String collectionName = (String) args[1];
+
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
 			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = owner.getClass().getMethod(methodName.toString(), element.getClass());
-			Object result = m.invoke(owner, element);
+			Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
+			Object result = m.invoke(collectionOwner, element);
 			return Boolean.TRUE.equals(result);
 		}
 		catch (Exception e) {
@@ -799,17 +814,21 @@ public final class BindUtil {
 
 	/**
 	 * Call the addElement method on a Bean's collection.
-	 * @param owner	The owning bean.
-	 * @param collectionName	The name of the collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
 	 * @param index	The index to add the element at.
 	 * @param element	The element.
 	 */
-	public static void addElement(Bean owner, String collectionName, int index, Bean element) {
+	public static void addElement(Bean bean, String collectionBinding, int index, Bean element) {
 		try {
+			Object[] args = collectionArguments(bean, collectionBinding);
+			Bean collectionOwner = (Bean) args[0];
+			String collectionName = (String) args[1];
+
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
 			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = owner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
-			m.invoke(owner, Integer.valueOf(index), element);
+			Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
+			m.invoke(collectionOwner, Integer.valueOf(index), element);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -821,16 +840,20 @@ public final class BindUtil {
 
 	/**
 	 * Call the removeElement method on a Bean's collection.
-	 * @param owner	The owning bean.
-	 * @param collectionName	The name of the collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean removeElement(Bean owner, String collectionName, Bean element) {
+	public static boolean removeElement(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Object[] args = collectionArguments(bean, collectionBinding);
+			Bean collectionOwner = (Bean) args[0];
+			String collectionName = (String) args[1];
+
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
 			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = owner.getClass().getMethod(methodName.toString(), element.getClass());
-			Object result = m.invoke(owner, element);
+			Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
+			Object result = m.invoke(collectionOwner, element);
 			return Boolean.TRUE.equals(result);
 		}
 		catch (Exception e) {
@@ -843,18 +866,22 @@ public final class BindUtil {
 
 	/**
 	 * Call the removeElement method on a Bean's collection.
-	 * @param owner	The owning bean.
-	 * @param collectionName	The name of the collection.
+	 * @param bean	The owning bean.
+	 * @param collectionBinding	The binding to the collection.
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> T removeElement(Bean owner, String collectionName, int index, T element) {
+	public static <T extends Bean> T removeElement(Bean bean, String collectionBinding, int index) {
 		try {
+			Object[] args = collectionArguments(bean, collectionBinding);
+			Bean collectionOwner = (Bean) args[0];
+			String collectionName = (String) args[1];
+
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
 			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = owner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
+			Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE);
 			@SuppressWarnings("unchecked")
-			T result = (T) m.invoke(owner, Integer.valueOf(index), element);
+			T result = (T) m.invoke(collectionOwner, Integer.valueOf(index));
 			return result;
 		}
 		catch (Exception e) {
@@ -1556,6 +1583,8 @@ public final class BindUtil {
 						// but they may not be contiguous (some are deleted)
 						while (collection.size() <= collectionIndex) {
 							Bean fillerElement = collectionDocument.newInstance(user);
+							BindUtil.addElement((Bean) owner, collectionBinding, fillerElement);
+/*
 							if (fillerElement instanceof ChildBean) {
 								try {
 									((ChildBean<Bean>) fillerElement).setParent((Bean) owner);
@@ -1568,6 +1597,7 @@ public final class BindUtil {
 								}
 							}
 							collection.add(fillerElement);
+*/
 						}
 	
 						value = collection.get(collectionIndex);

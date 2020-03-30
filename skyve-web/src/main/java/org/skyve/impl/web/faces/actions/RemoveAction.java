@@ -5,7 +5,6 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -53,13 +52,7 @@ public class RemoveAction extends FacesAction<Void> {
 				collectionBinding.append(viewBinding).append('.');
 			}
 			collectionBinding.append(collectionName);
-			@SuppressWarnings("unchecked")
-			List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding.toString());
-
-			list.remove(beanToRemove);
-			if (beanToRemove instanceof ChildBean<?>) {
-				((ChildBean<?>) beanToRemove).setParent(null);
-			}
+			BindUtil.removeElement(bean, collectionBinding.toString(), beanToRemove);
 			
 			// fire onRemovedHandlers after removal
 			if (removedHandlerActionNames != null) {
@@ -84,8 +77,6 @@ public class RemoveAction extends FacesAction<Void> {
 		}
 		else { // Remove on zoomed view
 			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
-			@SuppressWarnings("unchecked")
-			List<Bean> list = (List<Bean>) BindUtil.get(bean, viewBinding.substring(0, lastCollectionindex));
 			Bean beanToRemove = (Bean) BindUtil.get(bean, viewBinding);
 			
 			// Run preExecute after the copy is taken, in case we rollback
@@ -102,14 +93,10 @@ public class RemoveAction extends FacesAction<Void> {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + beanToRemove);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, beanToRemove, null, webContext);
-			}
 
-			list.remove(beanToRemove);
-			if (beanToRemove instanceof ChildBean<?>) {
-				((ChildBean<?>) beanToRemove).setParent(null);
+				BindUtil.removeElement(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
+				ZoomOutAction.zoomOut(facesView);
 			}
-			
-			ZoomOutAction.zoomOut(facesView);
 		}
 
 	    return null;

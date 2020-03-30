@@ -59,29 +59,29 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + elementBean);
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
-			}
-	
-			ValidationUtil.validateBeanAgainstDocument(elementDocument, elementBean);
-			if (bizlet != null) {
-				ValidationUtil.validateBeanAgainstBizlet(bizlet, elementBean);
-			}
-			// Set the current bean back in the collection
-			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) elementBean);
 
-			// Sort the owning collection
-			String viewBinding = facesView.getViewBinding();
-			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
-			String collectionBinding = viewBinding.substring(0, lastCollectionindex);
-			Bean currentBean = facesView.getWebContext().getCurrentBean();
-			Module currentModule = customer.getModule(currentBean.getBizModule());
-			Binder.sortCollectionByMetaData(currentBean,
-												customer,
-												currentModule,
-												currentModule.getDocument(customer, currentBean.getBizDocument()),
-												collectionBinding);
+				ValidationUtil.validateBeanAgainstDocument(elementDocument, elementBean);
+				if (bizlet != null) {
+					ValidationUtil.validateBeanAgainstBizlet(bizlet, elementBean);
+				}
+				// Set the current bean back in the collection
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) elementBean);
 
-			// now zoom out to owning view
-			zoomOut(facesView);
+				// Sort the owning collection
+				String viewBinding = facesView.getViewBinding();
+				int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
+				String collectionBinding = viewBinding.substring(0, lastCollectionindex);
+				Bean currentBean = facesView.getWebContext().getCurrentBean();
+				Module currentModule = customer.getModule(currentBean.getBizModule());
+				Binder.sortCollectionByMetaData(currentBean,
+													customer,
+													currentModule,
+													currentModule.getDocument(customer, currentBean.getBizDocument()),
+													collectionBinding);
+
+				// now zoom out to owning view
+				zoomOut(facesView);
+			}
 		}
 		
 		return null;

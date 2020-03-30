@@ -20,7 +20,6 @@ import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
@@ -414,7 +413,6 @@ public class SmartClientEditServlet extends HttpServlet {
     }
     
 
-    @SuppressWarnings("unchecked")
 	private static void fetch(AbstractWebContext webContext,
 			                    User user,
 		    					Customer customer,
@@ -566,37 +564,6 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							parameters,
 	    							uxui);
 
-	    		// Set the parent of a child bean, if applicable
-	    		if (processBean instanceof ChildBean<?>) {
-    				Document parentDocument = processDocument.getParentDocument(customer);
-    				String parentModuleName = parentDocument.getOwningModuleName();
-    				String parentDocumentName = parentDocument.getName();
-
-    				// Check if processBean.setParent() can be called or not.
-    				// The processBean may be a child of some other bean and just being added to another collection here.
-    				// Or it could be a derived document, so need to check inheritance as well.
-    				CustomerImpl internalCustomer = (CustomerImpl) customer;
-    				Document parentBeanDocument = customer.getModule(parentBean.getBizModule()).getDocument(customer, parentBean.getBizDocument());
-    				while (parentBeanDocument != null) {
-        				if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
-        						parentDocumentName.equals(parentBeanDocument.getName())) {
-        					((ChildBean<Bean>) processBean).setParent(parentBean);
-        					parentBeanDocument = null;
-        				}
-        				else {
-        					String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
-	        				if (baseDocumentName == null) {
-	        					parentBeanDocument = null;
-	        				}
-	        				else {
-		        				int dotIndex = baseDocumentName.indexOf('.');
-		        				Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
-		        				parentBeanDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-	        				}
-        				}
-    				}
-    			}
-
 	    		// call preExecute()
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
@@ -608,13 +575,29 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
+
+			    		// add the newInstance to the context bean after preExecute
+			    		if (referenceValue instanceof List<?>) {
+			    			BindUtil.addElement(contextBean, formBinding, processBean);
+			    		}
+			    		else {
+			    			BindUtil.set(contextBean, formBinding, processBean);
+			    		}
 					}
 	    		}
 	    		else if (source != null) { // rerender event
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
+		    		CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
-						if (processBizlet != null) {
+			    		// add the newInstance to the context bean before preRerender
+			    		if (referenceValue instanceof List<?>) {
+			    			BindUtil.addElement(contextBean, formBinding, processBean);
+			    		}
+			    		else {
+			    			BindUtil.set(contextBean, formBinding, processBean);
+			    		}
+
+			    		if (processBizlet != null) {
 							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
 			    			processBizlet.preRerender(source, processBean, webContext);
 			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
@@ -622,13 +605,14 @@ public class SmartClientEditServlet extends HttpServlet {
 						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
 	    		}
-	    		
-	    		// add the newInstance to the context bean
-	    		if (referenceValue instanceof List<?>) {
-	    			((List<Bean>) referenceValue).add(processBean);
-	    		}
 	    		else {
-	    			BindUtil.set(contextBean, formBinding, processBean);
+		    		// add the newInstance to the context bean
+		    		if (referenceValue instanceof List<?>) {
+		    			BindUtil.addElement(contextBean, formBinding, processBean);
+		    		}
+		    		else {
+		    			BindUtil.set(contextBean, formBinding, processBean);
+		    		}
 	    		}
     		}
     		else {
@@ -641,6 +625,7 @@ public class SmartClientEditServlet extends HttpServlet {
     			else {
     				processBean = (Bean) referenceValue;
     			}
+    			
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
