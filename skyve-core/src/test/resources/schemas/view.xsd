@@ -630,6 +630,7 @@
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="keyboardType" type="tns:keyboardType"/>
         <xs:attribute name="previousValues" type="xs:boolean"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
       </xs:extension>
@@ -644,6 +645,7 @@
         </xs:sequence>
         <xs:attribute name="wrap" type="xs:boolean"/>
         <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="keyboardType" type="tns:keyboardType"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="minPixelHeight" type="xs:int"/>
@@ -1900,6 +1902,17 @@
       <xs:enumeration value="pointAndLine"/>
       <xs:enumeration value="pointAndPolygon"/>
       <xs:enumeration value="lineAndPolygon"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="keyboardType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="numeric"/>
+      <xs:enumeration value="tel"/>
+      <xs:enumeration value="decimal"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="search"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -99,6 +99,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -899,6 +900,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											false,
 											geometry.getDisabledConditionName(),
 											formDisabledConditionName,
+											null,
 											null,
 											null,
 											null,
@@ -2198,7 +2200,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Spinner result = spinner(dataWidgetVar, 
 									spinner.getBinding(), 
 									title, 
-									required, 
+									required,
+									spinner.getKeyboardType(),
+									spinner.getMin(),
+									spinner.getMax(),
+									spinner.getStep(),
 									spinner.getDisabledConditionName(),
 									formDisabledConditionName,
 									spinner.getPixelWidth());
@@ -2228,6 +2234,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											text.getPixelWidth(),
 											text.getPixelHeight(),
 											true);
+		KeyboardType keyboardType = text.getKeyboardType();
+		if (keyboardType != null) {
+			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+			passThroughAttributes.put("inputmode", keyboardType.toString());
+		}
 		return new EventSourceComponent(result, result);
 	}
 	
@@ -2282,6 +2293,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								length,
 								mutableFormat,
 								facesConverter,
+								text.getKeyboardType(),
 								text.getPixelWidth(),
 								true);
         }
@@ -2293,6 +2305,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			        					text.getDisabledConditionName(),
 			        					length,
 			        					formDisabledConditionName,
+			        					text.getKeyboardType(),
 			        					text.getPixelWidth());
         }
         else {
@@ -2306,6 +2319,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								length,
 								(mutableFormat == null) ? null : mutableFormat.getTextCase(),
 								facesConverter,
+								text.getKeyboardType(),
 								text.getPixelWidth(),
 								true);
         }
@@ -2489,6 +2503,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer maxLength, 
 									TextCase textCase,
 									Converter converter, 
+									KeyboardType keyboardType,
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE, 
@@ -2507,6 +2522,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
+		if (keyboardType != null) {
+			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+			passThroughAttributes.put("inputmode", keyboardType.toString());
+		}
 		String existingStyle = determineTextTransformStyle(textCase);
 		setSize(result, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
@@ -2514,14 +2533,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	private InputMask maskField(String dataWidgetVar,
 									String binding, 
-									String title, 
+									String title,
 									boolean required, 
 									boolean readonly,
 									String disabled,
 									String formDisabled,
 									Integer maxLength, 
 									Format<?> format, 
-									Converter converter, 
+									Converter converter,
+									KeyboardType keyboardType,
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE, 
@@ -2541,6 +2561,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String existingStyle = determineTextTransformStyle(format.getTextCase());
 		if (converter != null) {
 			result.setConverter(converter);
+		}
+		if (keyboardType != null) {
+			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
 		setSize(result, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
@@ -2606,11 +2630,29 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private Spinner spinner(String dataWidgetVar, 
 								String binding, 
 								String title, 
-								boolean required, 
+								boolean required,
+								KeyboardType keyboardType,
+								Double min,
+								Double max,
+								Double step,
 								String disabled,
 								String formDisabled,
 								Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
+
+		if (keyboardType != null) {
+			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+			passThroughAttributes.put("inputmode", keyboardType.toString());
+		}
+		if (min != null) {
+			result.setMin(min.doubleValue());
+		}
+		if (max != null) {
+			result.setMax(max.doubleValue());
+		}
+		if (step != null) {
+			result.setStepFactor(step.doubleValue());
+		}
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		return result;
 	}
@@ -3471,6 +3513,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String disabled,
 											Integer length,
 											String formDisabled,
+											KeyboardType keyboardType,
 											Integer pixelWidth) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
 													dataWidgetVar, 
@@ -3495,6 +3538,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		Map<String, Object> attributes = result.getAttributes();
 		attributes.put("binding", binding);
+
+		if (keyboardType != null) {
+			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+			passThroughAttributes.put("inputmode", keyboardType.toString());
+		}
 
 		// NB width cannot be set correctly on this component when laid out in a table
 		setSize(result, null, pixelWidth, null, null, null, null, null);

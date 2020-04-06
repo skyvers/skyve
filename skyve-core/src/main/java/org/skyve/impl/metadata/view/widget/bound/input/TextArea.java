@@ -19,7 +19,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"wordWrap", "editable", "pixelWidth", "pixelHeight", "minPixelHeight", "properties"})
+			propOrder = {"wordWrap", "editable", "keyboardType", "pixelWidth", "pixelHeight", "minPixelHeight", "properties"})
 public class TextArea extends ChangeableInputWidget implements Editable, AbsoluteSize, MinimumHeight, FormItemWidget {
 	private static final long serialVersionUID = 7376326511023184723L;
 
@@ -28,6 +28,7 @@ public class TextArea extends ChangeableInputWidget implements Editable, Absolut
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
+	private KeyboardType keyboardType;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -56,6 +57,15 @@ public class TextArea extends ChangeableInputWidget implements Editable, Absolut
 	@XmlAttribute(name = "editable", required = false)
 	public void setEditable(Boolean editable) {
 		this.editable = editable;
+	}
+
+	public KeyboardType getKeyboardType() {
+		return keyboardType;
+	}
+
+	@XmlAttribute(name = "keyboardType", required = false)
+	public void setKeyboardType(KeyboardType keyboardType) {
+		this.keyboardType = keyboardType;
 	}
 
 	@Override

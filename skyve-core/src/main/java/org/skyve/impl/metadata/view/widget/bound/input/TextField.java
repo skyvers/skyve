@@ -17,12 +17,13 @@ import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"editable", "previousValues", "pixelWidth", "properties"})
+			propOrder = {"editable", "keyboardType", "previousValues", "pixelWidth", "properties"})
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class TextField extends ChangeableInputWidget implements Editable, AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = -5061565177091806441L;
 
 	private Boolean editable;
+	private KeyboardType keyboardType;
 	private Boolean previousValues;
 	private Integer pixelWidth;
 	
@@ -46,15 +47,13 @@ public class TextField extends ChangeableInputWidget implements Editable, Absolu
 		this.editable = editable;
 	}
 
-	@Override
-	public Integer getPixelWidth() {
-		return pixelWidth;
+	public KeyboardType getKeyboardType() {
+		return keyboardType;
 	}
 
-	@Override
-	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
-		this.pixelWidth = pixelWidth;
+	@XmlAttribute(name = "keyboardType", required = false)
+	public void setKeyboardType(KeyboardType keyboardType) {
+		this.keyboardType = keyboardType;
 	}
 
 	public Boolean getPreviousValues() {
@@ -64,6 +63,17 @@ public class TextField extends ChangeableInputWidget implements Editable, Absolu
 	@XmlAttribute(required = false)
 	public void setPreviousValues(Boolean previousValues) {
 		this.previousValues = previousValues;
+	}
+
+	@Override
+	public Integer getPixelWidth() {
+		return pixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setPixelWidth(Integer pixelWidth) {
+		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
