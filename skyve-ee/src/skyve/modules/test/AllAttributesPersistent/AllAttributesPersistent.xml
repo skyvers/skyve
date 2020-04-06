@@ -82,7 +82,7 @@
 		<memo name="memo">
 			<displayName>Memo</displayName>
 		</memo>
-		<text name="text">
+		<text name="text" required="true">
 			<displayName>Text</displayName>
 			<length>255</length>
 		</text>

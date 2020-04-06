@@ -370,13 +370,15 @@ class ViewJSONManipulator extends ViewVisitor {
 			else {
 				if (value == null) {
 					UtilImpl.LOGGER.warning(String.format("Careful - the value of binding %s for %s yields null",
-														bindingPrefix, 
-														bean));
+															bindingPrefix, 
+															bean));
 				}
-				Bean currentBean = (Bean) value;
-				Map<String, Object> beanValues = new TreeMap<>();
-				addBindingsAndFormatValues(bindings, currentBean, beanValues, webId);
-				json.put(BindUtil.sanitiseBinding(bindingPrefix), beanValues);
+				else {
+					Bean currentBean = (Bean) value;
+					Map<String, Object> beanValues = new TreeMap<>();
+					addBindingsAndFormatValues(bindings, currentBean, beanValues, webId);
+					json.put(BindUtil.sanitiseBinding(bindingPrefix), beanValues);
+				}
 			}
 		}
 	}
