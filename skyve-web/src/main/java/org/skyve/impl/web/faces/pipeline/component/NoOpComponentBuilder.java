@@ -387,7 +387,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											Spinner spinner,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											javax.faces.convert.Converter facesConverter) {
 		return component;
 	}
 

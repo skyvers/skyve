@@ -368,7 +368,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											Spinner spinner,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											javax.faces.convert.Converter facesConverter) {
 		return putByBinding(spinner, component);
 	}
 	

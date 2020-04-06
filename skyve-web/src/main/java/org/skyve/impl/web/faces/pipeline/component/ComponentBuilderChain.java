@@ -687,10 +687,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Spinner spinner,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											javax.faces.convert.Converter facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, facesConverter);
 		}
 		return result;
 	}

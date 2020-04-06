@@ -2192,7 +2192,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
 											String formDisabledConditionName,
 											String title, 
-											boolean required) {
+											boolean required,
+											Converter facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -2207,6 +2208,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									spinner.getStep(),
 									spinner.getDisabledConditionName(),
 									formDisabledConditionName,
+									facesConverter,
 									spinner.getPixelWidth());
 		return new EventSourceComponent(result, result);
 	}
@@ -2637,6 +2639,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								Double step,
 								String disabled,
 								String formDisabled,
+								Converter converter,
 								Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 
@@ -2652,6 +2655,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		if (step != null) {
 			result.setStepFactor(step.doubleValue());
+		}
+		if (converter != null) {
+			result.setConverter(converter);
 		}
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		return result;

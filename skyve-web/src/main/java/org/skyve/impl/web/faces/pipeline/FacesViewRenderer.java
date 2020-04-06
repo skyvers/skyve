@@ -1703,6 +1703,14 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormSpinner(Spinner spinner) {
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
+		Converter<?> converter = null;
+        if (attribute instanceof ConvertableField) {
+            converter = ((ConvertableField) attribute).getConverter();
+        }
+
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1711,7 +1719,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												spinner,
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
-												required);
+												required,
+												convertConverter(converter, type));
         eventSource = c.getEventSource();
         addComponent(title, 
         				required, 
