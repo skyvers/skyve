@@ -1425,7 +1425,9 @@ t.printStackTrace();
 			}
 			finally {
 				beansToDelete.clear();
-				deleteContext.pop();
+				if (!deleteContext.isEmpty()) { // Stack won't have any elements if an exception was thrown earlier.
+					deleteContext.pop();
+				}
 			}
 		}
 	}
