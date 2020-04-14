@@ -1359,7 +1359,7 @@ t.printStackTrace();
 	 * The beanToDelete is put into the Map under the key of "" with a singleton set.
 	 * The beanToDelete is used to detect the same event in preRemove.
 	 * 
-	 * Other beans that will base cascaded are put using 
+	 * Other beans that will be cascaded are put using 
 	 * entity name -> set of beans that are being deleted during the delete operation.
 	 * This attribute holds all beans being deleted during the delete operation, by entity name,
 	 * so that when we check referential integrity, we can ensure that we do not include links to these beans
@@ -1382,6 +1382,7 @@ t.printStackTrace();
 		T beanToDelete = bean;
 		
 		if (isPersisted(beanToDelete)) {
+			boolean deleteContextPushed = false;
 			try {
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 				boolean vetoed = internalCustomer.interceptBeforeDelete(document, beanToDelete);
@@ -1396,6 +1397,7 @@ t.printStackTrace();
 					// Push a new delete context on
 					beansToDelete.put("", Collections.singleton(beanToDelete));
 					deleteContext.push(beansToDelete);
+					deleteContextPushed = true;
 					
 					// Call preDelete()
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
@@ -1425,7 +1427,7 @@ t.printStackTrace();
 			}
 			finally {
 				beansToDelete.clear();
-				if (!deleteContext.isEmpty()) { // Stack won't have any elements if an exception was thrown earlier.
+				if (deleteContextPushed) {
 					deleteContext.pop();
 				}
 			}
