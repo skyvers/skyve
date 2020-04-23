@@ -83,10 +83,10 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 			if (first) {
 				first = false;
 				if (assertSingle && (tuple.length != 1)) {
-					throw new IllegalStateException("There should be only 1 projected value in the query");
+					throw new IllegalStateException("There should be only 1 projected value in the query when using scalarIterable() or beanIterable()");
 				}
 				else if (assertMultiple && (tuple.length <= 1)) {
-					throw new IllegalStateException("There should be more than 1 projected value in the query");
+					throw new IllegalStateException("There should be more than 1 projected value in the query when using tupleIterable()");
 				}
 			}
 			

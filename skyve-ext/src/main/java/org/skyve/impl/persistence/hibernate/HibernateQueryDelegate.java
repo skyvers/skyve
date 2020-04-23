@@ -84,10 +84,10 @@ class HibernateQueryDelegate {
 
 			if (asIs) {
 				if (assertSingle && (returnAliases.length != 1)) {
-					throw new DomainException("There should be only 1 projected value in the query");
+					throw new DomainException("There should be only 1 projected value in the query when using beanResults() or scalarResults()");
 				}
 				else if (assertMultiple && (returnAliases.length <= 1)) {
-					throw new DomainException("There should be more than 1 projected value in the query");
+					throw new DomainException("There should be more than 1 projected value in the query when using tupleResults()");
 				}
 				return query.list();
 			}
@@ -139,10 +139,10 @@ class HibernateQueryDelegate {
 
 			if (asIs) {
 				if (assertSingle && (returnAliases.length != 1)) {
-					throw new DomainException("There should be only 1 projected value in the query");
+					throw new DomainException("There should be only 1 projected value in the query when using scalarIterable() or beanIterable()");
 				}
 				else if (assertMultiple && (returnAliases.length <= 1)) {
-					throw new DomainException("There should be more than 1 projected value in the query");
+					throw new DomainException("There should be more than 1 projected value in the query when using tupleIterable()");
 				}
 				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 				return new HibernateAutoClosingIterable<>(results, false, false);

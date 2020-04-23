@@ -120,7 +120,7 @@ class HibernateSQL extends AbstractSQL {
 		try {
 			List<?> results = createQueryFromSQL().list();
 			if ((! results.isEmpty()) && (! (results.get(0) instanceof Object[]))) {
-				throw new DomainException("There should be more than 1 projected value in the query");
+				throw new DomainException("There should be more than 1 projected value in the query when using tupleResults()");
 			}
 			return (List<Object[]>) results;
 		}
