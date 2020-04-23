@@ -3,9 +3,6 @@ package org.skyve.domain.types;
 import java.math.BigDecimal;
 
 public abstract class Decimal extends Number implements Comparable<Number> {
-	/**
-	 * For Serialization.
-	 */
 	private static final long serialVersionUID = 2036844906920454892L;
 
 	/**
@@ -165,6 +162,14 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 
 	public boolean greaterThan(Number o) {
 		return (compareTo(o) > 0);
+	}
+
+	public boolean lessThanOrEqual(Number o) {
+		return (compareTo(o) <= 0);
+	}
+
+	public boolean greaterThanOrEqual(Number o) {
+		return (compareTo(o) >= 0);
 	}
 
 	/**
