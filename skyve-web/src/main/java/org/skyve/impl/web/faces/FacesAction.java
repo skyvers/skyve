@@ -24,6 +24,7 @@ import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
 /**
@@ -314,7 +315,13 @@ public abstract class FacesAction<T> {
 						// only dataGrids have Message components in their columns.
 						if (parent instanceof DataTable) {
 							// Work out how many rows are in the data grid and set update strings appropriately
-							gridSize = ((List<?>) ((DataTable) parent).getValue()).size();
+							List<?> value = (List<?>) ((DataTable) parent).getValue();
+							if (value != null) {
+								gridSize = value.size();
+							}
+							else {
+				            	UtilImpl.LOGGER.warning("FacesAction.findAllMessageComponentClientIds: ClientID " + clientId + " points to a data grid that has a data table value of null");
+							}
 							break;
 						}
 						parent = parent.getParent();

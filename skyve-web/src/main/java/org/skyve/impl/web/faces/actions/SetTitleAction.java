@@ -35,6 +35,9 @@ public class SetTitleAction extends FacesAction<Void> {
 													ViewType.create.toString());
 			facesView.setTitle(Binder.formatMessage(customer, view.getTitle(), targetBean));
 	    }
+		else {
+        	UtilImpl.LOGGER.warning("SetTitleAction: FacesView.getBean() yields null");
+		}
 		
 		return null;
 	}

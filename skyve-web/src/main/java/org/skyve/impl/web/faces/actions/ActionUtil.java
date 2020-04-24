@@ -6,6 +6,7 @@ import javax.faces.context.FacesContext;
 import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -38,6 +39,9 @@ public class ActionUtil {
 				result = Binder.getElementInCollection(result, collectionName, elementBizId);
 			}
     	}
+    	else {
+    		UtilImpl.LOGGER.warning("ActionUtil.getTargetBeanForViewAndCollectionBinding: FacesView.getBean() yields null");
+    	}
     	
     	return result;
     }
@@ -64,6 +68,9 @@ public class ActionUtil {
 		    		Binder.set(bean, viewBinding, newValue);
 		    	}
 	    	}
+    	}
+    	else {
+    		UtilImpl.LOGGER.warning("ActionUtil.setTargetBeanForViewAndCollectionBinding: FacesView.getBean() yields null");
     	}
     }
     

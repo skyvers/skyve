@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.actions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.faces.model.SelectItem;
@@ -87,11 +88,18 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            }
             }
             
-            List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
-																	                            domainType,
-																	                            targetAttribute,
-																	                            owningBean,
-																	                            true);
+            List<DomainValue> domainValues = null;
+            if ((domainType == DomainType.dynamic) && (owningBean == null)) {
+            	UtilImpl.LOGGER.warning("GetSelectItemsAction: Dynamic domain values called on binding " + binding + " but this binding evaluates to null");
+            	domainValues = Collections.emptyList();
+            }
+            else {
+            	domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
+													                            domainType,
+													                            targetAttribute,
+													                            owningBean,
+													                            true);
+            }
             if (includeEmptyItem) {
 	            result = new ArrayList<>(domainValues.size() + 1);
 	        	// add an empty select item so that a null value 

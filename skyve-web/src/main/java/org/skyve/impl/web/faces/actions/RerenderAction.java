@@ -57,6 +57,10 @@ public class RerenderAction<T extends Bean> extends FacesAction<Void> {
 				}
 		    }
 		}
+		else {
+        	UtilImpl.LOGGER.warning("RerenderAction: Target Bean is null");
+		}
+		
 	    return null;
 	}
 }
