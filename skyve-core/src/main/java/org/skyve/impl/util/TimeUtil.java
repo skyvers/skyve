@@ -1,15 +1,22 @@
 package org.skyve.impl.util;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
+import org.skyve.util.Time;
 
 public class TimeUtil {
 	private TimeUtil() {
@@ -17,7 +24,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Sets the time component of the calendar to 12 midnight.
+	 * See {@link Time#clearTimeComponent}
 	 */
 	public static final void clearTimeComponent(Date date) {
 		Calendar calendar = new GregorianCalendar();
@@ -31,7 +38,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Clears the millisecond component of the calendar.
+	 * See {@link Time#clearMillisecondComponent}
 	 */
 	public static final void clearMillisecondComponent(Date date) {
 		Calendar calendar = new GregorianCalendar();
@@ -42,8 +49,7 @@ public class TimeUtil {
 	} // clearTimeComponent
 
 	/**
-	 * Clears the date component to epoch - 1/1/1970.
-	 * @param date	The date to clear
+	 * See {@link Time#clearDateComponent}
 	 */
 	public static void clearDateComponent(Date date) {
 		Calendar calendar = new GregorianCalendar();
@@ -55,6 +61,9 @@ public class TimeUtil {
 		date.setTime(calendar.getTime().getTime());
 	}
 	
+	/**
+	 * See {@link Time#setTime}
+	 */
 	public static final void setTime(Date date, int hours24, int minutes, int seconds) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -66,6 +75,9 @@ public class TimeUtil {
 		date.setTime(calendar.getTime().getTime());
 	}
 
+	/**
+	 * See {@link Time#setTime}
+	 */
 	public static final void setTime(Date date, TimeOnly time) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(time);
@@ -77,6 +89,9 @@ public class TimeUtil {
 		setTime(date, hours, minutes, seconds);
 	}
 	
+	/**
+	 * See {@link Time#setDate}
+	 */
 	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -86,6 +101,9 @@ public class TimeUtil {
 		date.setTime(calendar.getTime().getTime());
 	}
 
+	/**
+	 * See {@link Time#getYear}
+	 */
 	public static final int getYear(Date date) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -93,6 +111,9 @@ public class TimeUtil {
 		return calendar.get(Calendar.YEAR);
 	}
 
+	/**
+	 * See {@link Time#getMonthStartingFrom1}
+	 */
 	public static final int getMonthStartingFrom1(Date date) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -100,6 +121,9 @@ public class TimeUtil {
 		return calendar.get(Calendar.MONTH) + 1;
 	}
 
+	/**
+	 * See {@link Time#getMonthStartingFrom0}
+	 */
 	public static final int getMonthStartingFrom0(Date date) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -107,6 +131,9 @@ public class TimeUtil {
 		return calendar.get(Calendar.MONTH);
 	}
 
+	/**
+	 * See {@link Time#getDay}
+	 */
 	public static final int getDay(Date date) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
@@ -114,19 +141,22 @@ public class TimeUtil {
 		return calendar.get(Calendar.DAY_OF_MONTH);
 	}
 
+	/**
+	 * See {@link Time#isLeapYear}
+	 */
 	public static final boolean isLeapYear(int year) {
 		return new GregorianCalendar().isLeapYear(year);
 	}
 	
+	/**
+	 * See {@link Time#getDaysInYear}
+	 */
 	public static final int getDaysInYear(int year) {
 		return isLeapYear(year) ? 366 : 365;
 	}
 	
 	/**
-	 * Returns a date with a number of hours added to it.
-	 * 
-	 * @param date	The date to add to.
-	 * @param numberOfHours The number of hours to add (This can be negative).
+	 * See {@link Time#addHours}
 	 */
 	public static final void addHours(Date date, int numberOfHours) {
 		Calendar calendar = new GregorianCalendar();
@@ -140,10 +170,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns a date with a number of days added to it.
-	 * 
-	 * @param date	The date to add to.
-	 * @param numberOfDays The number of days to add (This can be negative).
+	 * See {@link Time#addDays}
 	 */
 	public static final void addDays(Date date, int numberOfDays) {
 		Calendar calendar = new GregorianCalendar();
@@ -161,10 +188,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns a date with a number of months added to it.
-	 * 
-	 * @param date	The date to add months to.
-	 * @param numberOfMonths The number of months to add (This can be negative).
+	 * See {@link Time#addMonths}
 	 */
 	public static final void addMonths(Date date, int numberOfMonths) {
 		Calendar calendar = new GregorianCalendar();
@@ -182,7 +206,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns the Financial Year in which this date exists.
+	 * See {@link Time#getFinancialYear}
 	 */
 	public static final int getFinancialYear(Date date) {
 		Calendar calendar = new GregorianCalendar();
@@ -198,7 +222,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns the Financial Year String in which this date exists.
+	 * See {@link Time#getFinancialYearString}
 	 */
 	public static final String getFinancialYearString(Date date) {
 		int financialYear = getFinancialYear(date);
@@ -206,6 +230,9 @@ public class TimeUtil {
 		return financialYear + "/" + (financialYear + 1);
 	}
 
+	/**
+	 * See {@link Time#numberOfHoursBetween}
+	 */
 	public static final Decimal5 numberOfHoursBetween(TimeOnly start, TimeOnly end) {
 		long minutesBetween = (end.getTime() - start.getTime()) / 60000;
 		Decimal5 result = new Decimal5(minutesBetween);
@@ -214,13 +241,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns the number of days between 2 dates. 
-	 * If startDate.after(endDate) then the result is negative.
-	 * Note: The number of days between 1/7/2002 and 2/7/2002 is 1.
-	 * 
-	 * @param startDate First date in date range
-	 * @param endDate Second date in date range
-	 * @return The number of days between startDate and endDate (negative if startDate.after(endDate).
+	 * See {@link Time#numberOfDaysBetween}
 	 */
 	public static final int numberOfDaysBetween(Date startDate, Date endDate) {
 		Calendar startDateCalendar = new GregorianCalendar();
@@ -260,13 +281,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Returns the number of days in a range defined by 2 dates. 
-	 * If startDate.after(endDate) then the result is negative.
-	 * Note: The number of days in the range 1/7/2002 and 2/7/2002 is 2.
-	 * 
-	 * @param startDate First date in date range
-	 * @param endDate Second date in date range
-	 * @return The number of days in the range between startDate and endDate (negative if startDate.after(endDate).
+	 * See {@link Time#numberOfDaysInRange}
 	 */
 	public static final int numberOfDaysInRange(Date startDate, Date endDate) {
 		int numberOfDays = numberOfDaysBetween(startDate, endDate);
@@ -285,11 +300,7 @@ public class TimeUtil {
 	}
 
 	/**
-	 * Find the next day of the week.
-	 * 
-	 * @param date The existing date to roll.
-	 * @param dayOfWeek The int representing the day of the week - from {@link Calendar}. eg Calendar.MONDAY
-	 * @return	The date passed in to allow method chaining.
+	 * See {@link Time#findNextDayOfWeek}
 	 */
 	public static final Date findNextDayOfWeek(Date date, int dayOfWeek) {
 		Calendar calendar = new GregorianCalendar();
@@ -304,11 +315,7 @@ public class TimeUtil {
 	}
 	
 	/**
-	 * Find the next day of the week.
-	 * 
-	 * @param date The existing date to roll.
-	 * @param dayOfWeek The int representing the day of the week - from {@link Calendar}. eg Calendar.MONDAY
-	 * @return	The date passed in to allow method chaining.
+	 * See {@link Time#ensureWorkDay}
 	 */
 	public static final Date ensureWorkDay(Date date) {
 		Calendar calendar = new GregorianCalendar();
@@ -327,10 +334,7 @@ public class TimeUtil {
 	}
 	
 	/**
-	 * Output a description of the days between 2 dates
-	 * @param now	The reference date to compare.
-	 * @param agoOrUntil	When to compare the now date to.
-	 * @return	"Today", "Yesterday", "Tomorrow" or "? days ago" or "? days time".
+	 * See {@link Time#daysBetweenDescription}
 	 */
 	public static final String daysBetweenDescription(Date now, Date agoOrUntil) {
 		int daysBetween = numberOfDaysBetween(now, agoOrUntil);
@@ -373,5 +377,100 @@ public class TimeUtil {
 			return DateFormatUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSZZ", TimeZone.getTimeZone("UTC"));
 		}
 		return DateFormatUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+	}
+	
+	/**
+	 * See {@link Time#addDaysToNew}
+	 */
+	public static DateOnly addDaysToNew(final Date date, final int numberOfDays) {
+
+		if (date == null) {
+			throw new IllegalArgumentException("The date must not be null");
+		}
+
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setLenient(false);
+		calendar.setTime(date);
+		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link Time#addMonthsToNew}
+	 */
+	public static DateOnly addMonthsToNew(final Date date, final int numberOfMonths) {
+
+		if (date == null) {
+			throw new IllegalArgumentException("The date must not be null");
+		}
+
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setLenient(false);
+		calendar.setTime(date);
+		calendar.add(Calendar.MONTH, numberOfMonths);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link Time#addYearsToNew}
+	 */
+	public static DateOnly addYearsToNew(final Date date, final int numberOfYears) {
+
+		if (date == null) {
+			throw new IllegalArgumentException("The date must not be null");
+		}
+
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setLenient(false);
+		calendar.setTime(date);
+		calendar.add(Calendar.YEAR, numberOfYears);
+		return new DateOnly(calendar.getTime());
+	}
+
+	/**
+	 * See {@link Time#asDateOnly}
+	 */
+	public static DateOnly asDateOnly(LocalDate localDate) {
+		return new DateOnly(Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+	}
+
+	/**
+	 * See {@link Time#coalesce}
+	 */
+	public static DateOnly coalesce(DateOnly val, DateOnly ifNullValue) {
+		return (val == null ? ifNullValue : val);
+	}
+
+	/**
+	 * See {@link Time#min}
+	 */
+	public static DateOnly min(final DateOnly... dates) {
+		if (dates == null || dates.length == 0) {
+			throw new IllegalArgumentException("At least one date must be supplied");
+		}
+
+		List<DateOnly> dateList = Arrays.asList(dates);
+		return Collections.min(dateList);
+	}
+
+	/**
+	 * See {@link Time#max}
+	 */
+	public static DateOnly max(final DateOnly... dates) {
+		if (dates == null || dates.length == 0) {
+			throw new IllegalArgumentException("At least one date must be supplied");
+		}
+
+		List<DateOnly> dateList = Arrays.asList(dates);
+		return Collections.max(dateList);
+	}
+
+	/**
+	 * See {@link Time#withDate}
+	 */
+	public static DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
+		DateOnly date = new DateOnly();
+		TimeUtil.setDate(date, dayOfMonth, monthStartingAt1, year);
+		return date;
 	}
 }
