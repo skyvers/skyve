@@ -365,10 +365,15 @@ public class RestService {
 				result = content.getContentBytes();
 				
 				// Set headers
-				response.setContentType(content.getMimeType().toString());
+				MimeType mimeType = content.getMimeType();
+				response.setContentType(mimeType.toString());
 				response.setCharacterEncoding(Util.UTF8);
+				String fileName = content.getFileName();
+				if (fileName == null) {
+					fileName = "content." + mimeType.getStandardFileSuffix();
+				}
 				response.setHeader("Content-Disposition", 
-									String.format("attachment; filename=\"%s\"", content.getFileName()));
+									String.format("attachment; filename=\"%s\"", fileName));
 				// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 				response.setHeader("Accept-Ranges", "bytes");
 				UtilImpl.LOGGER.info(request.getRequestURI() + " served as binary");
