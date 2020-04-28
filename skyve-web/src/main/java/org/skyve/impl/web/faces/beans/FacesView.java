@@ -306,13 +306,19 @@ public class FacesView<T extends Bean> extends Harness {
 		String selectedIdBinding = (String) attributes.get("selectedIdBinding");
 		String actionName = (String) attributes.get("actionName");
 
-		@SuppressWarnings("unchecked")
-		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - SET "+ selectedIdBinding + " to " + bizId);
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
+				@SuppressWarnings("unchecked")
+				BeanMapAdapter<Bean> adapter = (BeanMapAdapter<Bean>) evt.getObject();
+				if (adapter != null) {
+					Bean bean = adapter.getBean();
+					if (bean != null) {
+						String bizId = bean.getBizId();
+						if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - SET "+ selectedIdBinding + " to " + bizId);
+						BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
+					}
+				}
 				return null;
 			}
 		}.execute();
