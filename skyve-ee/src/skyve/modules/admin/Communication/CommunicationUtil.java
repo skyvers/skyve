@@ -633,8 +633,11 @@ public class CommunicationUtil {
 
 		// default url binding to first bean
 		if (beans != null && beans.length > 0 && expression != null) {
-			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
-			result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
+			Bean bean = beans[0];
+			if(bean!=null) {
+				result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+				result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
+			}
 			result = Binder.formatMessage(customer, result, beans);
 		}
 		return result;
