@@ -29,7 +29,7 @@
 		<document ref="DataMaintenance" />
 		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
-		<document ref="DocumentNumber" />
+		<document ref="DocumentNumber" defaultQueryName="qDocumentNumbers"/>
 		<document ref="DownloadFolder" />
 		<document ref="Generic" />
 		<document ref="Group" />
@@ -697,5 +697,14 @@
 				<column binding="documentName"/>
 			</columns>
 		</query>
+		<query documentName="DocumentNumber" name="qDocumentNumbers">
+            <description><![CDATA[All Document Numbers]]></description>
+            <columns>
+                <column binding="moduleName" sortOrder="ascending"/>
+                <column binding="documentName" sortOrder="ascending"/>
+                <column binding="sequenceName" sortOrder="ascending"/>
+                <column binding="documentNumber" />
+            </columns>
+        </query>
 	</queries>
 </module>
