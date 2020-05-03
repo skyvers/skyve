@@ -18,6 +18,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
@@ -815,24 +816,14 @@ public class ModulesUtil {
 		return result;
 	}
 
-	/** returns null if zero - for reports or data import/export */
-	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
-		return (val == null ? ifNullValue : val);
+	/** type-specific coalesce */
+	public static String coalesce(Object val, String ifNullValue) {
+		return (val == null ? ifNullValue : val.toString());
 	}
 
 	/** type-specific coalesce */
 	public static String coalesce(String val, String ifNullValue) {
 		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static Decimal2 coalesce(Decimal2 val, Decimal2 ifNullValue) {
-		return (val == null ? ifNullValue : val);
-	}
-
-	/** type-specific coalesce */
-	public static String coalesce(Object val, String ifNullValue) {
-		return (val == null ? ifNullValue : val.toString());
 	}
 
 	/** type-specific coalesce */
@@ -844,6 +835,21 @@ public class ModulesUtil {
 	public static Integer coalesce(Integer val, Integer ifNullValue) {
 		return (val == null ? ifNullValue : val);
 	}
+
+	/** type-specific coalesce */
+	public static Decimal2 coalesce(Decimal2 val, Decimal2 ifNullValue) {
+		return (val == null ? ifNullValue : val);
+	}
+
+	/** returns null if zero - for reports or data import/export */
+	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
+		return (val == null ? ifNullValue : val);
+	}
+	
+	/** returns null if zero - for reports or data import/export */
+	public static Decimal10 coalesce(Decimal10 val, Decimal10 ifNullValue) {
+		return (val == null ? ifNullValue : val);
+	}	
 
 	/**
 	 * Replaces the value found in the bean for the binding string provided,
