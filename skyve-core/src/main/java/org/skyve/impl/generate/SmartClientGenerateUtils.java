@@ -1103,11 +1103,17 @@ public class SmartClientGenerateUtils {
 			if (attribute != null) {
 				DomainType domainType = attribute.getDomainType();
 				if (domainType != null) {
+					// Constant domains have a drop down as a filter
+					if (DomainType.constant.equals(domainType)) {
 						onlyEqualsFilterOperators = true;
-					
-					if (DomainType.variant.equals(domainType) || 
-							DomainType.dynamic.equals(domainType)) {
-						canSave = false;
+					}
+					// Variant and Dynamic domains use a text field
+					else {
+						canSave = false; // can't edit as it is the code anyway
+						// reset to a text field as it was set to enum in SmartClientAttribute super constructor call
+						valueMap = null; 
+						type = "text";
+						hasTextFilterOperators = true;
 					}
 				}
 				else {
@@ -1126,23 +1132,26 @@ public class SmartClientGenerateUtils {
 					if (pixelWidth == null) {
 						pixelWidth = determineDefaultColumnWidth(attributeType);
 					}
-				}
-				if (attribute instanceof Association) {
-					String targetDocumentName = ((Association) attribute).getDocumentName();
-					Document targetDocument = module.getDocument(customer, targetDocumentName);
-					Persistent targetPersistent = targetDocument.getPersistent();
-					if (targetPersistent.getName() != null) { // this is a persistent target document - not a mapped document
-						type = "text";
-						editorType = "comboBox";
-						lookup = new SmartClientLookupDefinition(false,
-																	user,
-																	customer,
-																	module,
-																	document,
-																	(Relation) attribute,
-																	null,
-																	runtime);
-						onlyEqualsFilterOperators = true;
+	
+					// Bindings directly to an association with no domain values
+					// work similarly to a lookupDescription with editable="false"
+					if (attribute instanceof Association) {
+						String targetDocumentName = ((Association) attribute).getDocumentName();
+						Document targetDocument = module.getDocument(customer, targetDocumentName);
+						Persistent targetPersistent = targetDocument.getPersistent();
+						if (targetPersistent.getName() != null) { // this is a persistent target document - not a mapped document
+							type = "text";
+							editorType = "comboBox";
+							lookup = new SmartClientLookupDefinition(false,
+																		user,
+																		customer,
+																		module,
+																		document,
+																		(Relation) attribute,
+																		null,
+																		runtime);
+							onlyEqualsFilterOperators = true;
+						}
 					}
 				}
 			}

@@ -48,6 +48,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
@@ -526,7 +527,7 @@ public class SmartClientListServlet extends HttpServlet {
 					else {
 						type = attribute.getAttributeType().getImplementingType();
 					}
-					if (attribute.getDomainType() != null) {
+					if (DomainType.constant.equals(attribute.getDomainType())) {
 						equalsOperatorRequired = true;
 					}
 					if (attribute instanceof ConvertableField) {
