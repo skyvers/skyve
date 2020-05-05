@@ -185,14 +185,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
-		// Stopped putting the TabView ID on child components (TabView is a naming container)
-		// because for some reason when a ValidationExrror was tripped, and after render response
-		// (so completely in faces territory) UIData would blow up trying to select a row index
-		// in a DataTable inside a TabView.
-		// {Trying to extract rowIndex from clientId 's310:s336:s338' For input string: "s336"}
-		// at line 1021 of javax.faces.component.UIData. (It thinks s336 should be a row index)
-		// I couldn't work out why it was tripped in the offending use case.
-		result.setPrependId(false);
+		// NB We can't turn prependId off as PF doesn't work.
+		// result.setPrependId(false);
 		setInvisible(result, tabPane.getInvisibleConditionName(), null);
 		setId(result, tabPane.getWidgetId());
 		String id = result.getId();
