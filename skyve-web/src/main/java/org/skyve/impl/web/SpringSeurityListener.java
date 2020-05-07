@@ -20,34 +20,50 @@ public class SpringSeurityListener {
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
+		String bizCustomer = "";
 		String username = (String) evt.getAuthentication().getPrincipal();
+		if (username != null) {
+			int slashIndex = username.indexOf('/');
+			if (slashIndex > 0) {
+				bizCustomer = username.substring(0, slashIndex);
+				username = username.substring(slashIndex + 1);
+			}
+		}
 		UtilImpl.LOGGER.warning("Login Attempt failed for user " + username);
-		recordLoginFailure(username);
+		recordLoginFailure(bizCustomer, username);
 	}
 	
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
+		String bizCustomer = "";
 		String username = ((User) evt.getAuthentication().getPrincipal()).getUsername();
+		if (username != null) {
+			int slashIndex = username.indexOf('/');
+			if (slashIndex > 0) {
+				bizCustomer = username.substring(0, slashIndex);
+				username = username.substring(slashIndex + 1);
+			}
+		}
 		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
-		resetLoginFailure(username);
+		resetLoginFailure(bizCustomer, username);
 	}
 	
-	private static void recordLoginFailure(String username) {
+	private static void recordLoginFailure(String bizCustomer, String username) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
 		String sql = null;
 		if (RDBMS.h2.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = ifNull(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer || '/' || userName = ?";
+			sql = "update ADM_SecurityUser set authenticationFailures = ifNull(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer = ? and userName = ?";
 		}
 		else if (RDBMS.mysql.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = ifNull(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where concat(bizCustomer, '/', userName) = ?";
+			sql = "update ADM_SecurityUser set authenticationFailures = ifNull(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer = ? and userName = ?";
 		}
 		else if (RDBMS.sqlserver.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer + '/' + userName = ?";
+			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer = ? and userName = ?";
 		}
 		else if (RDBMS.postgresql.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer || '/' || userName = ?";
+			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizCustomer = ? and userName = ?";
 		}
 		else {
 			UtilImpl.LOGGER.warning("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SpringSecurityListener");
@@ -57,7 +73,8 @@ public class SpringSeurityListener {
 		try (Connection c = EXT.getDataStoreConnection()) {
 			try (PreparedStatement ps = c.prepareStatement(sql)) {
 				ps.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
-				ps.setString(2, username);
+				ps.setString(2, bizCustomer);
+				ps.setString(3, username);
 				ps.executeUpdate();
 				c.commit();
 			}
@@ -71,30 +88,13 @@ public class SpringSeurityListener {
 		}
 	}
 
-	private static void resetLoginFailure(String username) {
-		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
-		RDBMS rdbms = dialect.getRDBMS();
-		String sql = null;
-		if (RDBMS.h2.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizCustomer || '/' || userName = ?";
-		}
-		else if (RDBMS.mysql.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where concat(bizCustomer, '/', userName) = ?";
-		}
-		else if (RDBMS.sqlserver.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizCustomer + '/' + userName = ?";
-		}
-		else if (RDBMS.postgresql.equals(rdbms)) {
-			sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizCustomer || '/' || userName = ?";
-		}
-		else {
-			UtilImpl.LOGGER.warning("Reset Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SpringSecurityListener");
-			return;
-		}
+	private static void resetLoginFailure(String bizCustomer, String username) {
+		String sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizCustomer = ? and userName = ?";
 
 		try (Connection c = EXT.getDataStoreConnection()) {
 			try (PreparedStatement ps = c.prepareStatement(sql)) {
-				ps.setString(1, username);
+				ps.setString(1, bizCustomer);
+				ps.setString(2, username);
 				ps.executeUpdate();
 				c.commit();
 			}
