@@ -1091,6 +1091,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				}
 			}
 			addCondition(image.getInvisibleConditionName());
+			addCondition(image.getDisabledConditionName());
 			addBinding(Bean.MODULE_KEY, false);
 			addBinding(Bean.DOCUMENT_KEY, false);
 			addBinding(Bean.DATA_GROUP_ID, false);
@@ -1282,6 +1283,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			}
 		}
 		addCondition(link.getInvisibleConditionName());
+		addCondition(link.getDisabledConditionName());
 		addBinding(Bean.MODULE_KEY, false);
 		addBinding(Bean.DOCUMENT_KEY, false);
 		addBinding(Bean.DATA_GROUP_ID, false);
