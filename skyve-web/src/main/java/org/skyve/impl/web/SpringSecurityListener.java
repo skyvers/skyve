@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpringSeurityListener {
+public class SpringSecurityListener {
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
