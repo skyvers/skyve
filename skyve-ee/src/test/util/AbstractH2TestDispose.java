@@ -1,7 +1,9 @@
 package util;
 
 import org.junit.After;
+import org.junit.Before;
 import org.skyve.CORE;
+import org.skyve.cache.CacheUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.persistence.Persistence;
 
@@ -17,6 +19,15 @@ import org.skyve.persistence.Persistence;
  * performing its own commits, which will not be able to be rolled back.
  */
 public class AbstractH2TestDispose extends AbstractH2Test {
+
+	@Before
+	@SuppressWarnings("static-method")
+	public void before() throws Exception {
+		if (CacheUtil.isUnInitialised()) {
+			CacheUtil.init();
+		}
+	}
+
 	@After
 	@SuppressWarnings("static-method")
 	public void after() throws Exception {

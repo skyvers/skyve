@@ -28,5 +28,6 @@ public class AbstractH2TestTruncate extends AbstractH2Test {
 		// relinquish transaction resources and start another
 		p.commit(false);
 		p.evictAllCached();
+		p.evictAllSharedCache();
 	}
 }
