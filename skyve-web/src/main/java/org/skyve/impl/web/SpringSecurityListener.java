@@ -58,7 +58,7 @@ public class SpringSecurityListener {
 
 		// NB select and then update by bizId to ensure row lock across all databases.
 		try (Connection c = EXT.getDataStoreConnection()) {
-			String bizId = getBizId(username, c);
+			String bizId = getBizId(username, c, false);
 			if (bizId != null) {
 				try (PreparedStatement ps = c.prepareStatement(sql)) {
 					ps.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
@@ -82,7 +82,7 @@ public class SpringSecurityListener {
 
 		// NB select and then update by bizId to ensure row lock across all databases.
 		try (Connection c = EXT.getDataStoreConnection()) {
-			String bizId = getBizId(username, c);
+			String bizId = getBizId(username, c, true);
 			if (bizId != null) {
 				try (PreparedStatement ps = c.prepareStatement(sql)) {
 					ps.setString(1, bizId);
@@ -100,24 +100,40 @@ public class SpringSecurityListener {
 		}
 	}
 	
-	private static String getBizId(String principalName, Connection c) throws SQLException {
+	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		
 		String bizCustomer = null;
-		String username = null;
-		if (principalName != null) {
-			int slashIndex = principalName.indexOf('/');
+		String username = fullUsername;
+		if (username != null) {
+			int slashIndex = username.indexOf('/');
 			if (slashIndex > 0) {
-				bizCustomer = principalName.substring(0, slashIndex);
-				username = principalName.substring(slashIndex + 1);
+				bizCustomer = username.substring(0, slashIndex);
+				username = username.substring(slashIndex + 1);
 			}
 		}
-		try (PreparedStatement ps = c.prepareStatement("select bizId from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
+		try (PreparedStatement ps = c.prepareStatement("select bizId, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
 			ps.setString(1, bizCustomer);
 			ps.setString(2, username);
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
-					result = rs.getString(1);
+					// NB only return the bizId for resetLoginFailure if authenticationFailures is not 0 or lastAuthenticationFailure is not null
+					if (forReset) {
+						int authenticationFailures = rs.getInt(2);
+						if (rs.wasNull() || (authenticationFailures != 0)) {
+							result = rs.getString(1);
+						}
+						else {
+							rs.getObject(3);
+							if (! rs.wasNull()) {
+								result = rs.getString(1);
+							}
+						}
+					}
+					// always return the bizId for recordLoginFailure
+					else {
+						result = rs.getString(1);
+					}
 				}
 			}
 		}
