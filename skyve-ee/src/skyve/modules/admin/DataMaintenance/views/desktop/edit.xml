@@ -301,7 +301,7 @@
 				<filterParameter filterBinding="userName" operator="equal" valueBinding="auditUser.userName"/>
 			</listGrid>
 		</tab>
-		<tab title="Refresh">
+		<tab title="Data Refresh">
 			<dataGrid binding="refreshDocuments" inline="true" 
 				showZoom="false" showAdd="false" showDeselect="false" showEdit="false" showRemove="false">
 				<boundColumn binding="include" editable="true"/>
