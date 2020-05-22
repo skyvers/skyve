@@ -68,10 +68,6 @@ public class SkyveFacesFilter implements Filter {
     throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		
-        StringBuilder absoluteContextURL = new StringBuilder(64);
-        absoluteContextURL.append(request.getScheme()).append("://").append(request.getServerName());
-        absoluteContextURL.append(':').append(request.getServerPort()).append(request.getContextPath());
-    
     	try {
 	        String pathToTest = request.getServletPath();
 
@@ -106,7 +102,7 @@ public class SkyveFacesFilter implements Filter {
                 // the URL does not represent all of the state required to perform a get and redisplay the page.
                 // This is because part of the state is temporarily saved in the session.
                 // String redirect = WebUtil.getRefererHeader(request);
-                String redirect = absoluteContextURL.toString() + forwardURI;
+                String redirect = Util.getSkyveContextUrl() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
                 if (FacesUtil.isAjax(request)) {
                 	response.getWriter().print(FacesUtil.xmlPartialRedirect(redirect));
@@ -139,7 +135,7 @@ public class SkyveFacesFilter implements Filter {
             }
             
             if (FacesUtil.isAjax(request)) {
-                response.getWriter().print(FacesUtil.xmlPartialRedirect(absoluteContextURL.toString() + uri));
+                response.getWriter().print(FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl() + uri));
                 response.flushBuffer();
             }
             else {
