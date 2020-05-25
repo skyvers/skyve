@@ -16,7 +16,7 @@
 			<listGrid query="qCompletedJobs" title="Completed Jobs" continueConversation="false" showAdd="false" />
 		</tab>
 		<tab title="Schedule">
-			<listGrid query="qAllSchedules" title="Job Schedule" continueConversation="false" />
+			<listGrid query="qAllSchedules" title="Job Schedule" continueConversation="false" enabled="jobScheduler" />
 		</tab>
 	</tabPane>
 	<actions>

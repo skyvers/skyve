@@ -144,14 +144,12 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user)
 	throws Exception {
-		if (UtilImpl.JOB_SCHEDULER) {
-			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-			trigger.setGroup(user.getCustomer().getName());
-			trigger.setJobGroup(job.getOwningModuleName());
-			trigger.setJobName(job.getName());
-	
-			scheduleJob(job, parameter, user, trigger, null);
-		}
+		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+		trigger.setGroup(user.getCustomer().getName());
+		trigger.setJobGroup(job.getOwningModuleName());
+		trigger.setJobName(job.getName());
+
+		scheduleJob(job, parameter, user, trigger, null);
 	}
 
 	/**
@@ -165,14 +163,12 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds)
 	throws Exception {
-		if (UtilImpl.JOB_SCHEDULER) {
-			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-			trigger.setGroup(user.getCustomer().getName());
-			trigger.setJobGroup(job.getOwningModuleName());
-			trigger.setJobName(job.getName());
-	
-			scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
-		}
+		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+		trigger.setGroup(user.getCustomer().getName());
+		trigger.setJobGroup(job.getOwningModuleName());
+		trigger.setJobName(job.getName());
+
+		scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
 	}
 	
 	/**
@@ -185,19 +181,17 @@ public class JobScheduler {
 	 */
 	public static <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId)
 	throws Exception {
-		if (UtilImpl.JOB_SCHEDULER) {
-			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-			trigger.setVolatility(true);
-			JobDataMap map = trigger.getJobDataMap();
-			map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
-			map.put(AbstractWebContext.CONTEXT_NAME, webId);
-			
-			JobDetail jd = new JobDetail(UUID.randomUUID().toString(), taskClass);
-			jd.setVolatility(true);
-			jd.setDurability(false);
-			
-			JOB_SCHEDULER.scheduleJob(jd, trigger);
-		}
+		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+		trigger.setVolatility(true);
+		JobDataMap map = trigger.getJobDataMap();
+		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+		map.put(AbstractWebContext.CONTEXT_NAME, webId);
+		
+		JobDetail jd = new JobDetail(UUID.randomUUID().toString(), taskClass);
+		jd.setVolatility(true);
+		jd.setDurability(false);
+		
+		JOB_SCHEDULER.scheduleJob(jd, trigger);
 	}
 	
 	/**
@@ -214,21 +208,15 @@ public class JobScheduler {
 	 */
 	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
 	throws Exception {
-		if (UtilImpl.JOB_SCHEDULER) {
-			SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
-			trigger.setJobGroup(job.getOwningModuleName());
-			trigger.setJobName(job.getName());
-	
-			scheduleJob(job, parameter, user, trigger, null);
-		}
+		SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
+		trigger.setJobGroup(job.getOwningModuleName());
+		trigger.setJobName(job.getName());
+
+		scheduleJob(job, parameter, user, trigger, null);
 	}
 	
 	public static void scheduleJob(Bean jobSchedule, User user)
 	throws Exception {
-		if (! UtilImpl.JOB_SCHEDULER) {
-			return;
-		}
-		
 		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
 		String jobName = (String) BindUtil.get(jobSchedule, "jobName");
 		
@@ -323,9 +311,7 @@ public class JobScheduler {
 
 	public static void unscheduleJob(Bean jobSchedule, Customer customer)
 	throws Exception {
-		if (UtilImpl.JOB_SCHEDULER) {
-			JOB_SCHEDULER.unscheduleJob(jobSchedule.getBizId(), customer.getName());
-		}
+		JOB_SCHEDULER.unscheduleJob(jobSchedule.getBizId(), customer.getName());
 	}
 
 	public static List<JobDescription> getCustomerRunningJobs()

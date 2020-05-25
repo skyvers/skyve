@@ -134,4 +134,23 @@ public class Jobs extends AbstractTransientBean {
 	public Job removeRunningJobsElement(int index) {
 		return runningJobs.remove(index);
 	}
+
+	/**
+	 * Whether this instance is configured to run schedule jobs
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isJobScheduler() {
+		return (org.skyve.impl.util.UtilImpl.JOB_SCHEDULER);
+	}
+
+	/**
+	 * {@link #isJobScheduler} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotJobScheduler() {
+		return (! isJobScheduler());
+	}
 }

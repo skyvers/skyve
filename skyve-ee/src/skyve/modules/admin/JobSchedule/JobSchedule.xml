@@ -483,5 +483,13 @@
 				<![CDATA[Boolean.TRUE.equals(getJobScheduledImmediately())]]>
 			</expression>
 		</condition>
+		<condition name="jobScheduler">
+			<description>Whether this instance is configured to run schedule jobs</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.JOB_SCHEDULER
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>

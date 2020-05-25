@@ -13,4 +13,14 @@
 			<minCardinality>0</minCardinality>
 		</collection>
 	</attributes>
+	<conditions>
+		<condition name="jobScheduler">
+			<description>Whether this instance is configured to run schedule jobs</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.JOB_SCHEDULER
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

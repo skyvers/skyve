@@ -3591,6 +3591,25 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	}
 
 	/**
+	 * Whether this instance is configured to run schedule jobs
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isJobScheduler() {
+		return (org.skyve.impl.util.UtilImpl.JOB_SCHEDULER);
+	}
+
+	/**
+	 * {@link #isJobScheduler} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotJobScheduler() {
+		return (! isJobScheduler());
+	}
+
+	/**
 	 * scheduledImmediately
 	 *
 	 * @return The condition
