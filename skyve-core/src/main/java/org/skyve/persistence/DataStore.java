@@ -8,26 +8,60 @@ public class DataStore {
 	private String jdbcUrl;
 	private String userName;
 	private String password;
+	// Timeout for data store connections employed in general UI/forms processing 
+	private int oltpConnectionTimeoutInSeconds = 0;
+	// Timeout for data store connections employed when running jobs and background tasks 
+	private int asyncConnectionTimeoutInSeconds = 0;
 	
-	public DataStore(String jndiDataSourceName, String dialectClassName) {
+	public DataStore(String jndiDataSourceName,
+						String dialectClassName) {
+		this(jndiDataSourceName, dialectClassName, 0, 0);
+	}
+
+	public DataStore(String jndiDataSourceName,
+						String dialectClassName,
+						int oltpConnectionTimeoutInSeconds,
+						int asyncConnectionTimeoutInSeconds) {
 		this.jndiDataSourceName = jndiDataSourceName;
 		this.dialectClassName = dialectClassName;
+		this.oltpConnectionTimeoutInSeconds = oltpConnectionTimeoutInSeconds;
+		this.asyncConnectionTimeoutInSeconds = asyncConnectionTimeoutInSeconds;
 	}
 
 	public DataStore(String jdbcDriverClassName, String jdbcUrl, String dialectClassName) {
-		this(jdbcDriverClassName, jdbcUrl, null, null, dialectClassName);
+		this(jdbcDriverClassName, jdbcUrl, dialectClassName, 0, 0);
 	}
-	
+
+	public DataStore(String jdbcDriverClassName,
+						String jdbcUrl,
+						String dialectClassName,
+						int oltpConnectionTimeoutInSeconds,
+						int asyncConnectionTimeoutInSeconds) {
+		this(jdbcDriverClassName, jdbcUrl, null, null, dialectClassName, oltpConnectionTimeoutInSeconds, asyncConnectionTimeoutInSeconds);
+	}
+
 	public DataStore(String jdbcDriverClassName, 
 						String jdbcUrl,
 						String userName,
 						String password,
 						String dialectClassName) {
+		this(jdbcDriverClassName, jdbcUrl, userName, password, dialectClassName, 0, 0);
+	}
+
+	public DataStore(String jdbcDriverClassName, 
+						String jdbcUrl,
+						String userName,
+						String password,
+						String dialectClassName,
+						int oltpConnectionTimeoutInSeconds,
+						int asyncConnectionTimeoutInSeconds) {
 		this.jdbcDriverClassName = jdbcDriverClassName;
 		this.jdbcUrl = jdbcUrl;
 		this.userName = userName;
 		this.password = password;
 		this.dialectClassName = dialectClassName;
+		this.oltpConnectionTimeoutInSeconds = oltpConnectionTimeoutInSeconds;
+		this.asyncConnectionTimeoutInSeconds = asyncConnectionTimeoutInSeconds;
 	}
 
 	public String getDialectClassName() {
@@ -52,5 +86,13 @@ public class DataStore {
 
 	public String getPassword() {
 		return password;
+	}
+
+	public int getOltpConnectionTimeoutInSeconds() {
+		return oltpConnectionTimeoutInSeconds;
+	}
+
+	public int getAsyncConnectionTimeoutInSeconds() {
+		return asyncConnectionTimeoutInSeconds;
 	}
 }

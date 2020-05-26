@@ -27,4 +27,7 @@ public interface SQL extends BeanQuery, ScalarQuery, TupleQuery, DMLQuery {
 	public SQL putParameter(String name, Boolean value);
 	public SQL putParameter(String name, Enumeration value);
 	public SQL putParameter(String name, Object value, AttributeType type);
+	
+	public int getTimeoutInSeconds();
+	public void setTimeoutInSeconds(int timeoutInSeconds);
 }

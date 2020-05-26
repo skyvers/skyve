@@ -19,14 +19,14 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
 
 class HibernateQueryDelegate {
-	private Session session;
+	private AbstractHibernatePersistence persistence;
 	private int firstResult = Integer.MIN_VALUE;
 	private int maxResults = Integer.MIN_VALUE;
 	private String drivingModuleName;
 	private String drivingDocumentName;
 	
 	HibernateQueryDelegate(AbstractHibernatePersistence persistence) {
-		this.session = persistence.getSession();
+		this.persistence = persistence;
 	}
 	
 	void setFirstResult(int first) {
@@ -47,14 +47,16 @@ class HibernateQueryDelegate {
 		drivingDocumentName = query.getDrivingDocumentName();
 		
 
-		Query<T> result = session.createQuery(queryString);
+		Query<T> result = persistence.getSession().createQuery(queryString);
 		if (firstResult >= 0) {
 			result.setFirstResult(firstResult);
 		}
 		if (maxResults > 0) {
 			result.setMaxResults(maxResults);
 		}
-
+		
+		timeoutQuery(result, query.getTimeoutInSeconds(), persistence.isAsyncThread());
+		
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
 			if (value instanceof Collection) {
@@ -168,7 +170,10 @@ class HibernateQueryDelegate {
 	}
 	
 	int execute(AbstractQuery query) {
-		Query<?> hibernateQuery = session.createQuery(query.toQueryString());
+		Query<?> hibernateQuery = persistence.getSession().createQuery(query.toQueryString());
+
+		timeoutQuery(hibernateQuery, query.getTimeoutInSeconds(), persistence.isAsyncThread());
+		
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
 			if (value instanceof Collection) {
@@ -186,5 +191,25 @@ class HibernateQueryDelegate {
 		}
 
 		return hibernateQuery.executeUpdate();
+	}
+	
+	static void timeoutQuery(Query<?> query, int timeoutInSeconds, boolean asyncThread) {
+		if (timeoutInSeconds > 0) {
+			query.setTimeout(timeoutInSeconds);
+		}
+		else {
+			if (asyncThread) {
+				int timeout = UtilImpl.DATA_STORE.getAsyncConnectionTimeoutInSeconds();
+				if (timeout > 0) {
+					query.setTimeout(timeout);
+				}
+			}
+			else {
+				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+				if (timeout > 0) {
+					query.setTimeout(timeout);
+				}
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
 
 public class SQLDataAccessImpl implements SQLDataAccess {
-	private DataStore dataStore; // to get a connection and construct SQL from
+	protected DataStore dataStore; // to get a connection and construct SQL from
 	private SkyveDialect dialect = null; // this is only created when we come across a geometry
 
 	private Connection connection;

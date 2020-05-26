@@ -592,12 +592,15 @@ t.printStackTrace();
 		if (DocumentPermissionScope.none.equals(scope)) {
 			session.enableFilter(noneFilterName);
 		}
-		if (DocumentPermissionScope.customer.equals(scope) ||
-				DocumentPermissionScope.dataGroup.equals(scope) ||
-				DocumentPermissionScope.user.equals(scope)) {
-			Filter filter = session.enableFilter(customerFilterName);
-			filter.setParameter("customerParam", customer.getName());
-		}
+//		// Only apply the customer filter if we are in multi-tennant mode
+//		if (UtilImpl.CUSTOMER == null) {
+			if (DocumentPermissionScope.customer.equals(scope) ||
+					DocumentPermissionScope.dataGroup.equals(scope) ||
+					DocumentPermissionScope.user.equals(scope)) {
+				Filter filter = session.enableFilter(customerFilterName);
+				filter.setParameter("customerParam", customer.getName());
+			}
+//		}
 		if ((userDataGroupId != null) && 
 				(DocumentPermissionScope.dataGroup.equals(scope) ||
 					DocumentPermissionScope.user.equals(scope))) {
@@ -1314,6 +1317,13 @@ t.printStackTrace();
 					Util.LOGGER.info(log.toString());
 				}
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
+				
+				// Set timeout if applicable
+				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+				if (timeout > 0) {
+					query.setTimeout(timeout);
+				}
+
 				int index = 1;
 				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
 					Object value = constraintFieldValues.get(index - 1);
@@ -1546,6 +1556,13 @@ t.printStackTrace();
 	
 				Query<?> query = session.createQuery(queryString.toString());
 				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
+
+				// Set timeout if applicable
+				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+				if (timeout > 0) {
+					query.setTimeout(timeout);
+				}
+
 				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
 				query.setParameter("referencedBeanId", bean.getBizId(), StringType.INSTANCE);
 				if (theseBeansToBeCascaded != null) {
@@ -1614,6 +1631,13 @@ t.printStackTrace();
 	
 			NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 //			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
+
+			// Set timeout if applicable
+			int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+			if (timeout > 0) {
+				query.setTimeout(timeout);
+			}
+
 			if (UtilImpl.QUERY_TRACE) {
 				UtilImpl.LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
 			}

@@ -362,4 +362,7 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * @return
 	 */
 	public DocumentFilter newDocumentFilter();
+	
+	public int getTimeoutInSeconds();
+	public void setTimeoutInSeconds(int timeoutInSeconds);
 }

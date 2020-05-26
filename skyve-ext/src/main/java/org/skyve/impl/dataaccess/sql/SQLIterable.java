@@ -18,6 +18,7 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -31,12 +32,36 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	private NamedParameterPreparedStatement ps = null;
 	private ResultSet rs = null;
 	
-	SQLIterable(Document document, SQLDataAccessImpl dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) {
+	SQLIterable(Document document,
+					SQLDataAccessImpl dataAccess,
+					SQLDataAccessSQL sql,
+					Class<T> scalarType,
+					int timeoutInSeconds) {
 		this.document = document;
 		this.dataAccess = dataAccess;
 		this.scalarType = scalarType;
 		try {
 			ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), sql.toQueryString());
+
+			if (timeoutInSeconds > 0) {
+				ps.setQueryTimeout(timeoutInSeconds);
+			}
+			else {
+				AbstractPersistence p = AbstractPersistence.get();
+				if (p.isAsyncThread()) {
+					int timeout = dataAccess.dataStore.getAsyncConnectionTimeoutInSeconds();
+					if (timeout > 0) {
+						ps.setQueryTimeout(timeout);
+					}
+				}
+				else {
+					int timeout = dataAccess.dataStore.getOltpConnectionTimeoutInSeconds();
+					if (timeout > 0) {
+						ps.setQueryTimeout(timeout);
+					}
+				}
+			}
+			
 			for (String name : sql.getParameterNames()) {
 				Object value = sql.getParameter(name);
 				AttributeType type = sql.getParameterType(name);

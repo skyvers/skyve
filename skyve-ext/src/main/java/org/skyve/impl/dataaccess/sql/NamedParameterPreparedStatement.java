@@ -349,4 +349,8 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	public int[] executeBatch() throws SQLException {
 		return statement.executeBatch();
 	}
+	
+	public void setQueryTimeout(int seconds) throws SQLException {
+		statement.setQueryTimeout(seconds);
+	}
 }

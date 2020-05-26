@@ -285,10 +285,15 @@ public class SkyveContextListener implements ServletContextListener {
 															getString(prefix, "url", dataStore, true), 
 															getString(prefix, "user", dataStore, false),
 															getString(prefix, "password", dataStore, false), 
-															dialect));
+															dialect,
+															getInt(prefix, "oltpConnectionTimeoutInSeconds", dataStore),
+															getInt(prefix, "asyncConnectionTimeoutInSeconds", dataStore)));
 			}
 			else {
-				UtilImpl.DATA_STORES.put(dataStoreName, new DataStore(jndi, dialect));
+				UtilImpl.DATA_STORES.put(dataStoreName, new DataStore(jndi,
+																		dialect,
+																		getInt(prefix, "oltpConnectionTimeoutInSeconds", dataStore),
+																		getInt(prefix, "asyncConnectionTimeoutInSeconds", dataStore)));
 			}
 		}
 		

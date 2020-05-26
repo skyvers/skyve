@@ -39,6 +39,15 @@ public abstract class AbstractPersistence implements Persistence {
 	// NB We can never keep a reference to the customer as the app coder could change the customer name on their user at any time.
 	//protected transient Customer customer;
 
+	// indicates if this persistence is running in a job or background task thread 
+	protected transient boolean asyncThread = false;
+	public boolean isAsyncThread() {
+		return asyncThread;
+	}
+	public void setAsyncThread(boolean asyncThread) {
+		this.asyncThread = asyncThread;
+	}
+
 	/*
 	 * A place (thread-local as it's on persistence), where state can be placed for the duration of the conversation.
 	 * Bear in mind that this map is serialised and cached in the conversation.

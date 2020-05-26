@@ -16,6 +16,8 @@ public abstract class AbstractQuery {
 	protected String drivingModuleName;
 	protected String drivingDocumentName;
 
+	protected int timeoutInSeconds = 0;
+
 	public final Set<String> getParameterNames() {
 		return parameters.keySet();
 	}
@@ -51,5 +53,12 @@ public abstract class AbstractQuery {
 			return null;
 		}
 		return results.get(0);
+	}
+	
+	public int getTimeoutInSeconds() {
+		return timeoutInSeconds;
+	}
+	public void setTimeoutInSeconds(int timeoutInSeconds) {
+		this.timeoutInSeconds = timeoutInSeconds;
 	}
 }

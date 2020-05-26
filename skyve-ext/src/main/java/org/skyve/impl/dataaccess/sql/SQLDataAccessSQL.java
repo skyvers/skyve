@@ -42,7 +42,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 		}
 		
 		List<T> results = new ArrayList<>(100);
-		try (SQLIterable<T> iterable = new SQLIterable<>(document, dataAccess, this, null)) {
+		try (SQLIterable<T> iterable = new SQLIterable<>(document, dataAccess, this, null, timeoutInSeconds)) {
 			for (T result : iterable) {
 				results.add(result);
 			}
@@ -57,7 +57,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
 		
-		return new SQLIterable<>(document, dataAccess, this, null);
+		return new SQLIterable<>(document, dataAccess, this, null, timeoutInSeconds);
 	}
 
 	@Override
@@ -87,7 +87,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) {
 		List<T> results = new ArrayList<>(100);
-		try (SQLIterable<T> iterable = new SQLIterable<>(null, dataAccess, this, type)) {
+		try (SQLIterable<T> iterable = new SQLIterable<>(null, dataAccess, this, type, timeoutInSeconds)) {
 			for (T result : iterable) {
 				results.add(result);
 			}
@@ -98,13 +98,13 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 
 	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
-		return new SQLIterable<>(null, dataAccess, this, type);
+		return new SQLIterable<>(null, dataAccess, this, type, timeoutInSeconds);
 	}
 
 	@Override
 	public List<Object[]> tupleResults() {
 		List<Object[]> results = new ArrayList<>(100);
-		try (SQLIterable<Object[]> iterable = new SQLIterable<>(null, dataAccess, this, null)) {
+		try (SQLIterable<Object[]> iterable = new SQLIterable<>(null, dataAccess, this, null, timeoutInSeconds)) {
 			for (Object[] result : iterable) {
 				results.add(result);
 			}
@@ -115,7 +115,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 
 	@Override
 	public AutoClosingIterable<Object[]> tupleIterable() {
-		return new SQLIterable<>(null, dataAccess, this, null);
+		return new SQLIterable<>(null, dataAccess, this, null, timeoutInSeconds);
 	}
 
 	@Override

@@ -65,6 +65,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
         	
 			persistence = webContext.getConversation();
             persistence.setForThread();
+            persistence.setAsyncThread(true);
 			persistence.begin();
 			persistence.setUser(user);
 			BeanProvider.injectFields(this);

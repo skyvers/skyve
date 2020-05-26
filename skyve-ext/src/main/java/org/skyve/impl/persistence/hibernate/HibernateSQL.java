@@ -159,6 +159,8 @@ class HibernateSQL extends AbstractSQL {
 		// NB The "" is a table name that cannot exist.
 		result.addSynchronizedQuerySpace("");
 		
+		HibernateQueryDelegate.timeoutQuery(result, timeoutInSeconds, persistence.isAsyncThread());
+		
 		for (String name : getParameterNames()) {
 			Object value = getParameter(name);
 			

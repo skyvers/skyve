@@ -134,6 +134,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			user = (User) context.getMergedJobDataMap().get(USER_JOB_PARAMETER_KEY);
 			customer = user.getCustomer();
 			persistence.setUser(user);
+			persistence.setAsyncThread(true);
 			persistence.begin();
 			BeanProvider.injectFields(this);
 			execute();
@@ -164,6 +165,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.evictAllCached();
 			persistence.commit(false);
 
+			persistence.setAsyncThread(false);
 			persistence.begin();
 
 			if (persistJobExecutionOnSuccess()) {
