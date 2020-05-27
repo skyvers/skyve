@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.persistence.QueryTimeoutException;
+
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
+import org.skyve.domain.messages.TimeoutException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
@@ -126,6 +129,12 @@ class HibernateQueryDelegate {
 
 			return beans;
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new DomainException(e);
 		}
@@ -164,33 +173,50 @@ class HibernateQueryDelegate {
 														false,
 														false);
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new DomainException(e);
 		}
 	}
 	
 	int execute(AbstractQuery query) {
-		Query<?> hibernateQuery = persistence.getSession().createQuery(query.toQueryString());
+		try {
+			Query<?> hibernateQuery = persistence.getSession().createQuery(query.toQueryString());
+	
+			timeoutQuery(hibernateQuery, query.getTimeoutInSeconds(), persistence.isAsyncThread());
+			
+			for (String parameterName : query.getParameterNames()) {
+				Object value = query.getParameter(parameterName);
+				if (value instanceof Collection) {
+					hibernateQuery.setParameterList(parameterName, (Collection<?>) value);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					hibernateQuery.setParameterList(parameterName, (Object[]) value);
+				}
+				if (value instanceof Geometry) {
+					hibernateQuery.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
+				}
+				else {
+					hibernateQuery.setParameter(parameterName, value);
+				}
+			}
 
-		timeoutQuery(hibernateQuery, query.getTimeoutInSeconds(), persistence.isAsyncThread());
-		
-		for (String parameterName : query.getParameterNames()) {
-			Object value = query.getParameter(parameterName);
-			if (value instanceof Collection) {
-				hibernateQuery.setParameterList(parameterName, (Collection<?>) value);
-			}
-			else if ((value != null) && value.getClass().isArray()) {
-				hibernateQuery.setParameterList(parameterName, (Object[]) value);
-			}
-			if (value instanceof Geometry) {
-				hibernateQuery.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
-			}
-			else {
-				hibernateQuery.setParameter(parameterName, value);
-			}
+			return hibernateQuery.executeUpdate();
 		}
-
-		return hibernateQuery.executeUpdate();
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 	
 	static void timeoutQuery(Query<?> query, int timeoutInSeconds, boolean asyncThread) {

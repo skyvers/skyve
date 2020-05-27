@@ -1,9 +1,12 @@
 package org.skyve.impl.persistence.hibernate;
 
+import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.QueryTimeoutException;
 
 import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
@@ -18,6 +21,8 @@ import org.hibernate.type.TimeType;
 import org.hibernate.type.TimestampType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
+import org.skyve.domain.messages.TimeoutException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Enumeration;
@@ -67,6 +72,12 @@ class HibernateSQL extends AbstractSQL {
 			NativeQuery<T> query = createQueryFromSQL();
 			return query.addEntity(entityName).list();
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
@@ -84,6 +95,12 @@ class HibernateSQL extends AbstractSQL {
 			String entityName = persistence.getDocumentEntityName(moduleName, documentName);
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().addEntity(entityName).scroll(), false, false);
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
@@ -99,6 +116,12 @@ class HibernateSQL extends AbstractSQL {
 			}
 			return results;
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
@@ -108,6 +131,12 @@ class HibernateSQL extends AbstractSQL {
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
+		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -124,6 +153,12 @@ class HibernateSQL extends AbstractSQL {
 			}
 			return (List<Object[]>) results;
 		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
@@ -133,6 +168,12 @@ class HibernateSQL extends AbstractSQL {
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
+		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -144,6 +185,12 @@ class HibernateSQL extends AbstractSQL {
 		try {
 			NativeQuery<?> query = createQueryFromSQL();
 			return query.executeUpdate();
+		}
+		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException | SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);

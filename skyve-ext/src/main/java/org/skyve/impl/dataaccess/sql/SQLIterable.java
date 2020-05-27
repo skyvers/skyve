@@ -3,6 +3,7 @@ package org.skyve.impl.dataaccess.sql;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Time;
 import java.sql.Types;
 import java.util.Date;
@@ -12,6 +13,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
+import org.skyve.domain.messages.TimeoutException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
@@ -191,6 +194,12 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			}
 			rs = ps.executeQuery();
 		}
+		catch (SQLTimeoutException e) {
+			throw new TimeoutException(e);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new DomainException("Cannot setup an SQLIterable", e);
 		}
@@ -241,8 +250,11 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 					}
 				}
 			}
+			catch (SQLTimeoutException e) {
+				throw new TimeoutException(e);
+			}
 			catch (SQLException e) {
-				throw new RuntimeException(e);
+				throw new DomainException(e);
 			}
 			
 			return hasNext;
@@ -350,7 +362,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 				return result;
 			}
 			catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new DomainException(e);
 			}
 		}
 		
@@ -360,7 +372,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 				return (Z) BindUtil.convert(scalarType, rs.getObject(1));
 			}
 			catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new DomainException(e);
 			}
 		}
 		
@@ -375,7 +387,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 				return (Z) result;
 			}
 			catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new DomainException(e);
 			}
 		}
 	}
