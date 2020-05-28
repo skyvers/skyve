@@ -2161,7 +2161,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                                title,
 				                                required,
 				                                radio.getDisabledConditionName(),
-				                                formDisabledConditionName);
+				                                formDisabledConditionName,
+				                                Boolean.FALSE.equals(radio.getVertical()) ? "lineDirection" : "pageDirection");
         result.getAttributes().put("binding", radio.getBinding());
         UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
 		result.getChildren().add(i);
@@ -3444,7 +3445,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String title, 
 											boolean required,
 											String disabled,
-											String formDisabled) {
+											String formDisabled,
+											String layout) {
 		SelectOneRadio result = (SelectOneRadio) input(SelectOneRadio.COMPONENT_TYPE, 
 														dataWidgetVar, 
 														binding, 
@@ -3453,6 +3455,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 														disabled,
 														formDisabled);
 		result.setConverter(new SelectItemsBeanConverter());
+		result.setLayout(layout);
 		return result;
 	}
 
