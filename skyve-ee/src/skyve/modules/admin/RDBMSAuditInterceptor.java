@@ -13,6 +13,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Interceptor;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -73,7 +74,10 @@ public class RDBMSAuditInterceptor extends Interceptor {
 			// Check if there exists an insert audit record.
 			Module m = c.getModule(Audit.MODULE_NAME);
 			String persistentIdentifier = m.getDocument(c, Audit.DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
-			SQL q = p.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s and %s = :%s", 
+
+			// Cater for multi-tenancy
+			String sql = (UtilImpl.CUSTOMER == null) ?
+							String.format("select %s from %s where %s = :%s and %s = :%s and %s = :%s", 
 											Bean.DOCUMENT_ID, 
 											persistentIdentifier,
 											Audit.auditBizIdPropertyName,
@@ -81,9 +85,20 @@ public class RDBMSAuditInterceptor extends Interceptor {
 											Bean.CUSTOMER_NAME,
 											Bean.CUSTOMER_NAME,
 											Audit.operationPropertyName,
-											Audit.operationPropertyName));
+											Audit.operationPropertyName) :
+							String.format("select %s from %s where %s = :%s and %s = :%s", 
+											Bean.DOCUMENT_ID, 
+											persistentIdentifier,
+											Audit.auditBizIdPropertyName,
+											Audit.auditBizIdPropertyName,
+											Audit.operationPropertyName,
+											Audit.operationPropertyName);
+												
+			SQL q = p.newSQL(sql);
 			q.putParameter(Audit.auditBizIdPropertyName, bean.getBizId(), false);
-			q.putParameter(Bean.CUSTOMER_NAME, c.getName(), false);
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				q.putParameter(Bean.CUSTOMER_NAME, c.getName(), false);
+			}
 			q.putParameter(Audit.operationPropertyName, Operation.insert);
 	
 	

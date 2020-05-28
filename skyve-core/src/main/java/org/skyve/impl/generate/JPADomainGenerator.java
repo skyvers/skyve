@@ -29,6 +29,7 @@ import org.skyve.metadata.module.Module.DocumentRef;
 
 public final class JPADomainGenerator extends DomainGenerator {
 	JPADomainGenerator(boolean debug,
+						boolean multiTenant,
 						AbstractRepository repository,
 						DialectOptions dialectOptions,
 						String srcPath,
@@ -36,7 +37,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 						String testPath,
 						String generatedTestPath,
 						String[] excludedModules) {
-		super(true, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(true, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override

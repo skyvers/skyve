@@ -65,12 +65,16 @@ public class WebStatsUtil {
 			query.append(" where month = :month ");
 			query.append("and year = :year ");
 			query.append("and userName = :userName ");
-			query.append("and bizCustomer = :customer");
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				query.append("and bizCustomer = :customer");
+			}
 			SQL sql = persistence.newSQL(query.toString());
 			sql.putParameter("month", month);
 			sql.putParameter("year", year);
 			sql.putParameter("userName", user.getName(), false);
-			sql.putParameter("customer", user.getCustomer().getName(), false);
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				sql.putParameter("customer", user.getCustomer().getName(), false);
+			}
 			List<String> results = sql.scalarResults(String.class);
 			if (results.isEmpty()) {
 				query.setLength(0);

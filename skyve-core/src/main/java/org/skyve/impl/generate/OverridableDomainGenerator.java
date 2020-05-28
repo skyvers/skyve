@@ -110,6 +110,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	OverridableDomainGenerator(boolean write,
 								boolean debug,
+								boolean multiTenant,
 								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
@@ -117,7 +118,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								String testPath,
 								String generatedTestPath,
 								String[] excludedModules) {
-		super(write, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		super(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 
 	@Override
@@ -819,7 +820,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				contents.append("\" not-null=\"true\" />\n");
 
 				contents.append(indent).append("\t\t<property name=\"").append(Bean.CUSTOMER_NAME).append("\" length=\"50");
-				if (shouldIndex) {
+				if (multiTenant && shouldIndex) {
 					contents.append("\" index=\"");
 					contents.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME));
 				}

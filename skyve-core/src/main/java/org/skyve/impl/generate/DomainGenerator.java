@@ -183,6 +183,7 @@ public abstract class DomainGenerator {
 	
 	protected boolean write;
 	protected boolean debug;
+	protected boolean multiTenant;
 	protected String srcPath;
 	protected String generatedSrcPath;
 	protected String testPath;
@@ -197,6 +198,7 @@ public abstract class DomainGenerator {
 	
 	protected DomainGenerator(boolean write,
 								boolean debug,
+								boolean multiTenant,
 								AbstractRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
@@ -206,6 +208,7 @@ public abstract class DomainGenerator {
 								String[] excludedModules) {
 		this.write = write;
 		this.debug = debug;
+		this.multiTenant = multiTenant;
 		this.repository = repository;
 		this.dialectOptions = dialectOptions;
 		this.srcPath = srcPath;
@@ -257,6 +260,7 @@ public abstract class DomainGenerator {
 
 	public static final DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
+															boolean multiTenant,
 															AbstractRepository repository,
 															DialectOptions dialectOptions,
 															String srcPath,
@@ -265,8 +269,56 @@ public abstract class DomainGenerator {
 															String generatedTestPath,
 															String... excludedModules) {
 		return (UtilImpl.USING_JPA ? 
-					new JPADomainGenerator(debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
-					new OverridableDomainGenerator(write, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+					new JPADomainGenerator(debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules) : 
+					new OverridableDomainGenerator(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
+	}
+	
+	public static void generate(boolean debug,
+									boolean multiTenant,
+									DialectOptions dialectOptions,
+									String srcPath,
+									String generatedSrcPath,
+									String testPath,
+									String generatedTestPath,
+									String... excludedModules)
+	throws Exception {
+		System.out.println("SRC PATH=" + srcPath);
+		System.out.println("GENERATED SRC PATH=" + generatedSrcPath);
+		System.out.println("TEST PATH=" + testPath);
+		System.out.println("GENERATED TEST PATH=" + generatedTestPath);
+		System.out.println("DIALECT OPTIONS=" + dialectOptions.toString());
+		System.out.println("MULTI-TENANT=" + multiTenant);
+		System.out.println("DEBUG=" + debug);
+		System.out.println("EXCLUDED MODULES=" + ((excludedModules.length > 0) ? StringUtils.join(excludedModules, ", ") : ""));
+
+		UtilImpl.COMMAND_TRACE = false;
+		UtilImpl.CONTENT_TRACE = false;
+		UtilImpl.HTTP_TRACE = false;
+		UtilImpl.QUERY_TRACE = false;
+		UtilImpl.SECURITY_TRACE = false;
+		UtilImpl.BIZLET_TRACE = false;
+		UtilImpl.SQL_TRACE = false;
+		UtilImpl.XML_TRACE = false;
+		
+		if (debug) {
+			UtilImpl.COMMAND_TRACE = true;
+			UtilImpl.CONTENT_TRACE = true;
+			UtilImpl.HTTP_TRACE = true;
+			UtilImpl.QUERY_TRACE = true;
+			UtilImpl.SECURITY_TRACE = true;
+			UtilImpl.BIZLET_TRACE = true;
+			UtilImpl.SQL_TRACE = true;
+			UtilImpl.XML_TRACE = true;
+		}
+		
+		AbstractRepository repository = new LocalDesignRepository();
+		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+
+		// generate for all customers
+		for (String customerName : repository.getAllCustomerNames()) {
+			jenny.validate(customerName);
+		}
+		jenny.generate();
 	}
 	
 	/**
@@ -303,73 +355,51 @@ public abstract class DomainGenerator {
 			System.exit(1);
 		}
 
-		UtilImpl.COMMAND_TRACE = false;
-		UtilImpl.CONTENT_TRACE = false;
-		UtilImpl.HTTP_TRACE = false;
-		UtilImpl.QUERY_TRACE = false;
-		UtilImpl.SECURITY_TRACE = false;
-		UtilImpl.BIZLET_TRACE = false;
-		UtilImpl.SQL_TRACE = false;
-		UtilImpl.XML_TRACE = false;
-
 		String srcPath = args[0];
 		String generatedSrcPath = args[1];// "src/generated/";
 		String testPath = args[2];// "src/test/";
 		String generatedTestPath = args[3];// "src/generatedTest/";
-		boolean debug = false;
-		if (args.length >= 5) { // allow for debug mode if there are 4 arguments
-			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
-				if (Boolean.parseBoolean(args[4])) {
-					debug = true;
-					UtilImpl.COMMAND_TRACE = true;
-					UtilImpl.CONTENT_TRACE = true;
-					UtilImpl.HTTP_TRACE = true;
-					UtilImpl.QUERY_TRACE = true;
-					UtilImpl.SECURITY_TRACE = true;
-					UtilImpl.BIZLET_TRACE = true;
-					UtilImpl.SQL_TRACE = true;
-					UtilImpl.XML_TRACE = true;
-				}
-			} else {
-				System.err.println("The fifth argument DEBUG should be true or false");
-				System.exit(1);
-			}
-		}
 
 		DialectOptions dialectOptions = DialectOptions.H2_NO_INDEXES;
-		if (args.length >= 6) {
+		if (args.length >= 5) {
 			try {
-				dialectOptions = DialectOptions.valueOf(args[5]);
+				dialectOptions = DialectOptions.valueOf(args[4]);
 			}
 			catch (@SuppressWarnings("unused") IllegalArgumentException e) {
-				System.err.println("The sixth argument DIALECT_OPTIONS should be one of the following "
+				System.err.println("The fifth argument DIALECT_OPTIONS should be one of the following "
 						+ StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);
 			}
 		}
 
-		String[] excludedModules = null;
-		if (args.length == 7) {
-			if ((args[6] != null) && (!args[6].isEmpty())) {
-				excludedModules = args[6].toLowerCase().split(",");
+		boolean multiTenant = false;
+		if (args.length >= 6) { // allow for multi-tenant mode if there are 6 arguments
+			if ("true".equalsIgnoreCase(args[5]) || "false".equalsIgnoreCase(args[5])) {
+				multiTenant = Boolean.parseBoolean(args[5]);
+			}
+			else {
+				System.err.println("The sixth argument MULTI-TENANT should be true or false");
+				System.exit(1);
 			}
 		}
 
-		System.out.println("SRC PATH=" + srcPath);
-		System.out.println("GENERATED SRC PATH=" + generatedSrcPath);
-		System.out.println("TEST PATH=" + testPath);
-		System.out.println("GENERATED TEST PATH=" + generatedTestPath);
-		System.out.println("DEBUG=" + (args.length >= 5 ? args[4] : "false"));
-		System.out.println("DIALECT OPTIONS=" + dialectOptions.toString());
-		System.out.println("EXCLUDED MODULES=" + (args.length == 7 ? args[6] : ""));
-
-		AbstractRepository repository = new LocalDesignRepository();
-		DomainGenerator jenny = newDomainGenerator(true, debug, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
-
-		// generate for all customers
-		for (String customerName : repository.getAllCustomerNames()) {
-			jenny.validate(customerName);
+		boolean debug = false;
+		if (args.length >= 7) { // allow for debug mode if there are 4 arguments
+			if ("true".equalsIgnoreCase(args[6]) || "false".equalsIgnoreCase(args[6])) {
+				debug = Boolean.parseBoolean(args[6]);
+			}
+			else {
+				System.err.println("The seventh argument DEBUG should be true or false");
+				System.exit(1);
+			}
 		}
-		jenny.generate();
+
+		String[] excludedModules = null;
+		if (args.length == 8) {
+			if ((args[7] != null) && (! args[7].isEmpty())) {
+				excludedModules = args[7].split(",");
+			}
+		}
+		DomainGenerator.generate(debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 	}
 }

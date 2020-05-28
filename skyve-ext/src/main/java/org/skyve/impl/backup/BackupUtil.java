@@ -313,10 +313,13 @@ final class BackupUtil {
 			JoinTable joinTable = (JoinTable) table;
 			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerTableName);
-			sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append("')");
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
+			}
+			sql.append(')');
 		}
 		else {
-			if (hasBizCustomer(table)) {
+			if ((UtilImpl.CUSTOMER == null) && hasBizCustomer(table)) {
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}

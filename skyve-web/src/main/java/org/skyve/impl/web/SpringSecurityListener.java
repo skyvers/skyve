@@ -112,9 +112,18 @@ public class SpringSecurityListener {
 				username = username.substring(slashIndex + 1);
 			}
 		}
-		try (PreparedStatement ps = c.prepareStatement("select bizId, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer = ? and userName = ?")) {
-			ps.setString(1, bizCustomer);
-			ps.setString(2, username);
+		// Cater for multi-tenancy
+		String sql = (UtilImpl.CUSTOMER == null) ? 
+						"select bizId, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer = ? and userName = ?":
+							"select bizId, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where userName = ?";
+		try (PreparedStatement ps = c.prepareStatement(sql)) {
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				ps.setString(1, bizCustomer);
+				ps.setString(2, username);
+			}
+			else {
+				ps.setString(1, username);
+			}
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					// NB only return the bizId for resetLoginFailure if authenticationFailures is not 0 or lastAuthenticationFailure is not null

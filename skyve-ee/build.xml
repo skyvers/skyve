@@ -18,8 +18,9 @@
 			<arg value="src/generated/" /> <!-- generated path -->
 			<arg value="src/test/" /> <!-- test path -->
 			<arg value="src/generatedTest/" /> <!-- generated test path -->
-			<arg value="true" /> <!-- debug -->
 			<arg value="H2_NO_INDEXES" /> <!-- Dialect options -->
+			<arg value="true" /> <!-- multi-tenant -->
+			<arg value="true" /> <!-- debug -->
 			<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
 		</java>
 	</target>

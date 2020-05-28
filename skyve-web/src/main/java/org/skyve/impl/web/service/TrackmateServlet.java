@@ -497,8 +497,13 @@ public class TrackmateServlet extends HttpServlet {
 	}
 
 	private static void assertLoggedIn(AbstractPersistence persistence, User user, String hashedPassword) throws Exception {
-		BizQL bizQL = persistence.newBizQL("select bean from {admin.User} as bean " + "where bean.bizCustomer = :customer " + "and bean.userName = :username " + "and bean.password = :password");
-		bizQL.putParameter(CUSTOMER_REQUEST_PARAMETER, user.getCustomer().getName());
+		// NB Cater for multi-tenancy
+		BizQL bizQL = (UtilImpl.CUSTOMER == null) ?
+						persistence.newBizQL("select bean from {admin.User} as bean where bean.bizCustomer = :customer and bean.userName = :username and bean.password = :password") :
+						persistence.newBizQL("select bean from {admin.User} as bean where bean.userName = :username and bean.password = :password");
+		if (UtilImpl.CUSTOMER == null) {
+			bizQL.putParameter(CUSTOMER_REQUEST_PARAMETER, user.getCustomer().getName());
+		}
 		bizQL.putParameter(USERNAME_REQUEST_PARAMETER, user.getName());
 		bizQL.putParameter(PASSWORD_REQUEST_PARAMETER, hashedPassword);
 		List<Bean> beans = bizQL.projectedResults();

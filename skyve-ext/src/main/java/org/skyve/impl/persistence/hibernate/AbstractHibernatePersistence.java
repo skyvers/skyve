@@ -592,15 +592,15 @@ t.printStackTrace();
 		if (DocumentPermissionScope.none.equals(scope)) {
 			session.enableFilter(noneFilterName);
 		}
-//		// Only apply the customer filter if we are in multi-tennant mode
-//		if (UtilImpl.CUSTOMER == null) {
+		// Only apply the customer filter if we are in multi-tenant mode
+		if (UtilImpl.CUSTOMER == null) {
 			if (DocumentPermissionScope.customer.equals(scope) ||
 					DocumentPermissionScope.dataGroup.equals(scope) ||
 					DocumentPermissionScope.user.equals(scope)) {
 				Filter filter = session.enableFilter(customerFilterName);
 				filter.setParameter("customerParam", customer.getName());
 			}
-//		}
+		}
 		if ((userDataGroupId != null) && 
 				(DocumentPermissionScope.dataGroup.equals(scope) ||
 					DocumentPermissionScope.user.equals(scope))) {

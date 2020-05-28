@@ -105,14 +105,15 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		DocumentFilter f = q.getFilter();
 		final String[] customerAndUser = username.split("/");
 		if (customerAndUser.length == 1) {
-			if (UtilImpl.CUSTOMER == null) {
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				throw new SecurityException("Invalid username/password");
 			}
-			f.addEquals(Bean.CUSTOMER_NAME, UtilImpl.CUSTOMER);
 			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, username);
 		}
 		else {
-			f.addEquals(Bean.CUSTOMER_NAME, customerAndUser[0]);
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				f.addEquals(Bean.CUSTOMER_NAME, customerAndUser[0]);
+			}
 			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[1]);
 		}
 		Bean user = q.beanResult();

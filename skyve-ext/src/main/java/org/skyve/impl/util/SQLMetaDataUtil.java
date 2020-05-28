@@ -24,6 +24,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.SQL;
 
 public class SQLMetaDataUtil {
 	/**
@@ -95,14 +96,15 @@ public class SQLMetaDataUtil {
 						"r.roleName ");
 			sql.append("from ").append(ADM_SecurityUser).append(" u ");
 			sql.append("inner join ").append(ADM_SecurityUserRole).append(" r ");
-			sql.append("on r.parent_id = u.bizId " +
-						"and r.bizCustomer = u.bizCustomer ");
+			sql.append("on r.parent_id = u.bizId ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
 			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
 			sql.append("on u.bizId = p.publicUser_id ");
 			sql.append("where u.userName = ? ");
-			sql.append("and u.bizCustomer = ? ");
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				sql.append("and u.bizCustomer = ? ");
+			}
 			sql.append("union " +
 						"select u.bizId, " +
 						"u.password, " +
@@ -121,22 +123,29 @@ public class SQLMetaDataUtil {
 			sql.append("inner join ").append(ADM_SecurityGroup).append(" g ");
 			sql.append("on g.bizId = gs.element_id ");
 			sql.append("inner join ").append(ADM_SecurityGroupRole).append(" r ");
-			sql.append("on r.parent_id = g.bizId " +
-						"and r.bizCustomer = g.bizCustomer ");
+			sql.append("on r.parent_id = g.bizId ");
 			sql.append("inner join ").append(ADM_Contact).append(" c ");
 			sql.append("on u.contact_id = c.bizId ");
 			sql.append("left outer join ").append(ADM_Configuration).append(" p ");
 			sql.append("on u.bizId = p.publicUser_id ");
 			sql.append("where u.userName = ? ");
-			sql.append("and u.bizCustomer = ?");
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				sql.append("and u.bizCustomer = ?");
+			}
 
 			String query = sql.toString();
 			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(query + " executed on thread " + Thread.currentThread() + ", connection = " + connection);
 			try (PreparedStatement s = connection.prepareStatement(query)) {
 				s.setString(1, user.getName());
-				s.setString(2, customer.getName());
-				s.setString(3, user.getName());
-				s.setString(4, customer.getName());
+				if (UtilImpl.CUSTOMER == null) { // multi-tenant
+					s.setString(2, customer.getName());
+					s.setString(3, user.getName());
+					s.setString(4, customer.getName());
+				}
+				else {
+					s.setString(2, user.getName());
+				}
+				
 				try (ResultSet rs = s.executeQuery()) {
 					boolean firstRow = true;
 					while (rs.next()) {
@@ -253,10 +262,16 @@ public class SQLMetaDataUtil {
 		String result = null;
 		
 		String sql = "select u.userName from ADM_Configuration c " +
-						"inner join ADM_SecurityUser u on u.bizId = c.publicUser_id " +
-						"where c.bizCustomer = :bizCustomer";
+						"inner join ADM_SecurityUser u on u.bizId = c.publicUser_id ";
+		if (UtilImpl.CUSTOMER == null) { // multi-tenant
+			sql += "where c.bizCustomer = :bizCustomer";
+		}
 		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
-			result = da.newSQL(sql).putParameter(Bean.CUSTOMER_NAME, customerName, false).retrieveScalar(String.class);
+			SQL s = da.newSQL(sql);
+			if (UtilImpl.CUSTOMER == null) { // multi-tenant
+				s.putParameter(Bean.CUSTOMER_NAME, customerName, false);
+			}
+			result = s.retrieveScalar(String.class);
 		}
 		catch (Exception e) {
 			UtilImpl.LOGGER.warning("Could not retrieve public user for customer " + customerName);
