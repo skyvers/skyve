@@ -302,7 +302,7 @@ isc.BizListGrid.addMethods({
 			title: "Zoom", 
 			icon: "../images/icons/zoom.gif",
 			enableIf: function(target, menu, item) {
-				return (me.canZoom && me.grid.anySelected());
+				return (me.canZoom && (! me.aggregate) && me.grid.anySelected());
 			},
 			click: function() {
 				if (config && config.contConv) {
@@ -1050,7 +1050,7 @@ isc.BizListGrid.addMethods({
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me._dataSource.aggregate) && (! me._advancedFilter.toggleButton.selected)),
+			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me.aggregate) && (! me._advancedFilter.toggleButton.selected)),
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,
@@ -1108,7 +1108,7 @@ isc.BizListGrid.addMethods({
 							me.pick(me._lookup);
 						}
 						else {
-							if (me.showZoom && me.canZoom) {
+							if (me.showZoom && me.canZoom && (! me.aggregate)) {
 								me._zoomItem.click();
 							}
 						}
@@ -1125,7 +1125,7 @@ isc.BizListGrid.addMethods({
 			},
 			selectionChanged: function(record, state) { // state is true for selected or false for deselected
 				if (this.anySelected()) {
-					me._zoomButton.setDisabled(! me.canZoom);
+					me._zoomButton.setDisabled(me.aggregate || (! me.canZoom));
 					me._editButton.setDisabled(me._disabled || (! me.canUpdate) || (! me.canEdit));
 					me._pickButton.setDisabled(me._disabled);
 					me.deleteSelectionButton.setDisabled(me._disabled || (! me.canDelete) || (! me.canRemove));
@@ -1153,7 +1153,7 @@ isc.BizListGrid.addMethods({
 					}
 				}
 				if (me.bizSelected) {
-					if (me.showZoom && me.canZoom) {
+					if (me.showZoom && me.canZoom && (! me.aggregate)) {
 						me.delayCall('bizSelected', [], this.doubleClickDelay);
 					}
 					else {
@@ -1468,7 +1468,8 @@ isc.BizListGrid.addMethods({
 		me.canCreate = me._dataSource.canCreate;
 		me.canUpdate = me._dataSource.canUpdate;
 		me.canDelete = me._dataSource.canDelete;
-		if (me._dataSource.aggregate) {
+		me.aggregate = me._dataSource.aggregate;
+		if (me.aggregate) {
 			if (me._config.isRepeater) {} else {
 				me.hideMember(me._toolbar);
 				if (me._config.isTree) {} else {
@@ -1478,7 +1479,6 @@ isc.BizListGrid.addMethods({
 			me.canCreate = false;
 			me.canUpdate = false;
 			me.canDelete = false;
-			me.canZoom = false;
 		}
 		else {
 			if (! me._config.isRepeater) {
@@ -1491,7 +1491,6 @@ isc.BizListGrid.addMethods({
 					me.showMember(me._summaryGrid);
 				}
 			}
-			me.canZoom = true;
 		}
 		
 		if (menuConfig) {
@@ -1511,7 +1510,7 @@ isc.BizListGrid.addMethods({
 		}
 
 		var fields = [];
-		if (me.isRepeater || me._dataSource.aggregate) {
+		if (me.isRepeater || me.aggregate) {
 			fields.add({name: "bizTagged", hidden: true, canHide: false});
 		}
 		else if (me.showTag) {
@@ -1560,13 +1559,13 @@ isc.BizListGrid.addMethods({
 		else {
 			fields.add({name: "bizTagged", hidden: true, canHide: false});
 		}
-		if (me.isRepeater || me._dataSource.aggregate) {
+		if (me.isRepeater || me.aggregate) {
 			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
 		}
 		else {
 			fields.add(
 				{name: "bizFlagComment", 
-					// extend the width of the flag column to allow the sumary grid dropdown to display nicely
+					// extend the width of the flag column to allow the summary grid dropdown to display nicely
 					// if we are not showing the tag column and we have the summary row showing
 					width: ((! me.showTag) && me.showSummary) ? 60 : 40, 
 					align: 'center',
