@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
@@ -111,8 +112,21 @@ public class Router implements PersistentMetaData<Router> {
 	
 	@Override
 	public Router convert(String metaDataName, AbstractRepository repository) {
+		// populate the UX/UI map
 		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);
+		}
+		
+		// trim the unsecured URL prefixes if required
+		for (String unsecuredUrlPrefix : unsecuredUrlPrefixes) {
+			String trimmed = Util.processStringValue(unsecuredUrlPrefix);
+			if (trimmed == null) {
+				unsecuredUrlPrefixes.remove(unsecuredUrlPrefix);
+			}
+			else if (trimmed.length() < unsecuredUrlPrefix.length()) {
+				unsecuredUrlPrefixes.remove(unsecuredUrlPrefix);
+				unsecuredUrlPrefixes.add(trimmed);
+			}
 		}
 		
 		return this;

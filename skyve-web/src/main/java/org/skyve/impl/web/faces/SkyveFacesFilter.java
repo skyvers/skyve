@@ -37,10 +37,10 @@ public class SkyveFacesFilter implements Filter {
     
     @Override
     public void init(FilterConfig config) throws ServletException {
-    	forwardURI = config.getInitParameter("forward");
-    	errorURI = config.getInitParameter("error");
-    	expiredURI = config.getInitParameter("expired");
-    	String urls = config.getInitParameter("unsecured");
+    	forwardURI = Util.processStringValue(config.getInitParameter("forward"));
+    	errorURI = Util.processStringValue(config.getInitParameter("error"));
+    	expiredURI = Util.processStringValue(config.getInitParameter("expired"));
+    	String urls = Util.processStringValue(config.getInitParameter("unsecured"));
     	if (urls != null) {
     		unsecuredURLPrefixes = urls.split("\n");
 			for (int i = 0, l = unsecuredURLPrefixes.length; i < l; i++) {
@@ -80,7 +80,7 @@ public class SkyveFacesFilter implements Filter {
 	        // NB can't use queryString here as there could be AJAX posts etc in faces so not good practice
 	        if (unsecuredURLPrefixes != null) {
 		        for (String unsecuredURLPrefix : unsecuredURLPrefixes) {
-		        	if (pathToTest.startsWith(unsecuredURLPrefix)) {
+		        	if ((unsecuredURLPrefix != null) && pathToTest.startsWith(unsecuredURLPrefix)) {
 	        			chain.doFilter(req, resp);
 		        		return;
 		        	}
