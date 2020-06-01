@@ -146,7 +146,7 @@
         </repository>
         <repository>
             <id>boundlessgeo</id>
-            <url>https://repo.boundlessgeo.com/main</url>
+            <url>https://repo.osgeo.org/repository/release/</url>
         </repository>
 		<repository>
 			<id>skyve</id>
