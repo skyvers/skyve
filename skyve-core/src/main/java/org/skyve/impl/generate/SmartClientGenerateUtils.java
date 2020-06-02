@@ -265,7 +265,8 @@ public class SmartClientGenerateUtils {
 													Locale locale,
 													String binding,
 													String name,
-													boolean runtime) {
+													boolean runtime,
+													boolean isQueryColumn) {
 			this.locale = locale;
 			this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 			title = this.name;
@@ -304,9 +305,15 @@ public class SmartClientGenerateUtils {
 						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale, runtime);
 					}
 					else { // variant or dynamic
+						// if this is an enumeration on a query column defn, ensure the filter has all values
+						if (isQueryColumn && bindingAttribute.getAttributeType() == AttributeType.enumeration) {
+							valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale, runtime);
+						}
 						// this valueMap will be replaced in client logic but this defn ensures that the
 						// select widget doesn't try to use the form's data source to get values when opened
-						valueMap = "[' ']"; 
+						else {
+							valueMap = "[' ']";
+						}
 					}
 					type = "enum";
 				}
@@ -824,7 +831,8 @@ public class SmartClientGenerateUtils {
                     user.getLocale(),
                     (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
             		null,
-            		runtime);
+            		runtime,
+            		false);
             // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 			if ("enum".equals(type)) {
 				type = "text";
@@ -1091,7 +1099,8 @@ public class SmartClientGenerateUtils {
 					(user == null) ? null : user.getLocale(),
 					column.getBinding(),
 					column.getName(),
-					runtime);
+					runtime,
+					true);
 			String displayName = column.getDisplayName();
 			if (displayName != null) {
 				title = displayName;
@@ -1104,7 +1113,8 @@ public class SmartClientGenerateUtils {
 				DomainType domainType = attribute.getDomainType();
 				if (domainType != null) {
 					// Constant domains have a drop down as a filter
-					if (DomainType.constant.equals(domainType)) {
+					if ((attribute.getAttributeType() == AttributeType.enumeration) ||
+							DomainType.constant.equals(domainType)) {
 						onlyEqualsFilterOperators = true;
 					}
 					// Variant and Dynamic domains use a text field
