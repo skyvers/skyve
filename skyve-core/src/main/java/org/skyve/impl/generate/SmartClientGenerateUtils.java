@@ -1113,6 +1113,7 @@ public class SmartClientGenerateUtils {
 						// reset to a text field as it was set to enum in SmartClientAttribute super constructor call
 						valueMap = null; 
 						type = "text";
+						filterEditorType = "text";
 						hasTextFilterOperators = true;
 					}
 				}
