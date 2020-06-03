@@ -557,6 +557,12 @@
 		<property name="userName" length="254" />
 		<property name="year" />
 		<property name="month" />
+		<property name="userAgentHeader" length="400" />
+		<property name="device" length="1">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.UserMonthlyHits$Device</param>
+			</type>
+		</property>
 		<property name="numberOfHits" />
 		<filter name="adminUserMonthlyHitsNoneFilter" condition="1=0"/>
 		<filter name="adminUserMonthlyHitsCustomerFilter" condition="bizCustomer=:customerParam"/>

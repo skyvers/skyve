@@ -19,6 +19,19 @@
 		<integer name="month" required="true">
 			<displayName>Month</displayName>
 		</integer>
+		<text name="userAgentHeader">
+			<displayName>User-Agent Header</displayName>
+			<length>400</length>
+		</text>
+		<enum name="device">
+			<displayName>Device</displayName>
+			<values>
+				<value name="phone" code="P" description="Phone" />
+				<value name="tablet" code="T" description="Tablet" />
+				<value name="desktop" code="D" description="Desktop" />
+				<value name="other" code="O" description="Other" />
+			</values>
+		</enum>
 		<integer name="numberOfHits" required="true">
 			<displayName>Number Of Hits</displayName>
 		</integer>

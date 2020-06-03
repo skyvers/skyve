@@ -1,16 +1,22 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * User Monthly Hits
  * 
+ * @depend - - - Device
  * @stereotype "persistent"
  */
 @XmlType
@@ -34,7 +40,90 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String monthPropertyName = "month";
 	/** @hidden */
+	public static final String userAgentHeaderPropertyName = "userAgentHeader";
+	/** @hidden */
+	public static final String devicePropertyName = "device";
+	/** @hidden */
 	public static final String numberOfHitsPropertyName = "numberOfHits";
+
+	/**
+	 * Device
+	 **/
+	@XmlEnum
+	public static enum Device implements Enumeration {
+		phone("P", "Phone"),
+		tablet("T", "Tablet"),
+		desktop("D", "Desktop"),
+		other("O", "Other");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private Device(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static Device fromCode(String code) {
+			Device result = null;
+
+			for (Device value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Device fromDescription(String description) {
+			Device result = null;
+
+			for (Device value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				Device[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (Device value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * User Name
@@ -48,6 +137,14 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	 * Month
 	 **/
 	private Integer month;
+	/**
+	 * User-Agent Header
+	 **/
+	private String userAgentHeader;
+	/**
+	 * Device
+	 **/
+	private Device device;
 	/**
 	 * Number Of Hits
 	 **/
@@ -148,6 +245,42 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	public void setMonth(Integer month) {
 		preset(monthPropertyName, month);
 		this.month = month;
+	}
+
+	/**
+	 * {@link #userAgentHeader} accessor.
+	 * @return	The value.
+	 **/
+	public String getUserAgentHeader() {
+		return userAgentHeader;
+	}
+
+	/**
+	 * {@link #userAgentHeader} mutator.
+	 * @param userAgentHeader	The new value.
+	 **/
+	@XmlElement
+	public void setUserAgentHeader(String userAgentHeader) {
+		preset(userAgentHeaderPropertyName, userAgentHeader);
+		this.userAgentHeader = userAgentHeader;
+	}
+
+	/**
+	 * {@link #device} accessor.
+	 * @return	The value.
+	 **/
+	public Device getDevice() {
+		return device;
+	}
+
+	/**
+	 * {@link #device} mutator.
+	 * @param device	The new value.
+	 **/
+	@XmlElement
+	public void setDevice(Device device) {
+		preset(devicePropertyName, device);
+		this.device = device;
 	}
 
 	/**

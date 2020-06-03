@@ -16,6 +16,8 @@ import org.skyve.cache.ConversationUtil;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 public class SkyveFilter implements Filter {
@@ -91,14 +93,16 @@ public class SkyveFilter implements Filter {
 			ConversationUtil.logSessionAndConversationsStats();
 		}
 
-		UserImpl user = (UserImpl) ((HttpServletRequest) request).getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		UserImpl user = (UserImpl) httpRequest.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 
 		try {
 			// It is possible that the user has not been determined for
 			// this web request yet, so ignore this stat as these
 			// types of requests are few and far between.
 			if (user != null) {
-				WebStatsUtil.recordHit(user);
+				String userAgentHeader = httpRequest.getHeader("User-Agent");
+				UserAgentType userAgentType = UserAgent.getType(httpRequest);
+				WebStatsUtil.recordHit(user, userAgentHeader, userAgentType);
 			}
 			else {
 				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("DIDNT RECORD HIT AS WE ARE NOT LOGGED IN");

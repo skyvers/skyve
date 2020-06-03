@@ -241,6 +241,7 @@
 					<action name="GenerateDefault" />
 					<action name="Preview" />
 				</document>
+				<document name="UserMonthlyHits" permission="_R__C" />
 				<document name="UserToken" permission="CRUDC" />
 			</privileges>
 		</role>
@@ -423,6 +424,10 @@
 				<uxui name="desktop" />
 				<role name="DevOps" />
 			</edit>
+			<list document="UserMonthlyHits" name="User Hits" autoPopulate="false">
+				<uxui name="desktop" />
+				<role name="DevOps" />
+			</list>
 		</group>
 		<list name="Snapshots" document="Snapshot">
 			<uxui name="desktop" />
