@@ -55,6 +55,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -216,6 +217,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model,
+											Document owningDocument,
 											String title,
 											ListGrid listGrid,
 											boolean canCreateDocument,

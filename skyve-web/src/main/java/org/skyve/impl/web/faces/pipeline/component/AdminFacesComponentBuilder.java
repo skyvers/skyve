@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 
@@ -117,6 +118,7 @@ public class AdminFacesComponentBuilder extends NoOpComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									Document owningDocument,
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,

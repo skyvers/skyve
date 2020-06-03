@@ -43,6 +43,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -469,6 +470,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									Document owningDocument,
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
@@ -480,6 +482,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										modelDocumentName,
 										modelName,
 										model,
+										owningDocument,
 										title,
 										listGrid,
 										canCreateDocument,

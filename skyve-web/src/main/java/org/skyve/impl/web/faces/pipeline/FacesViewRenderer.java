@@ -1025,6 +1025,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
 										getCurrentListWidgetModel(),
+										document,
 										title,
 										grid,
 										user.canCreateDocument(getCurrentListWidgetDrivingDocument()),

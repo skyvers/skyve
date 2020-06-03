@@ -5,6 +5,7 @@ import javax.faces.component.UIComponent;
 import org.primefaces.component.column.Column;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
 
 public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
@@ -14,6 +15,7 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									Document owningDocument,
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,

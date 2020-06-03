@@ -1142,6 +1142,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									Document owningDocument,
 									String title,
 									ListGrid grid,
 									boolean canCreateDocument,
@@ -1236,8 +1237,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					if (binding != null) {
 						Attribute targetAttribute = null;
 						try {
-							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-							targetAttribute = (target != null) ? target.getAttribute() : null;
+							if (owningDocument != null) {
+								Module m = customer.getModule(owningDocument.getOwningModuleName());
+								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, m, owningDocument, binding);
+								targetAttribute = (target != null) ? target.getAttribute() : null;
+							}
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
 							// binding is not an attribute
@@ -2162,7 +2166,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                                required,
 				                                radio.getDisabledConditionName(),
 				                                formDisabledConditionName,
-				                                Boolean.FALSE.equals(radio.getVertical()) ? "lineDirection" : "pageDirection");
+				                                Boolean.FALSE.equals(radio.getVertical()));
         result.getAttributes().put("binding", radio.getBinding());
         UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
 		result.getChildren().add(i);
@@ -3446,7 +3450,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											boolean required,
 											String disabled,
 											String formDisabled,
-											String layout) {
+											boolean horizontal) {
 		SelectOneRadio result = (SelectOneRadio) input(SelectOneRadio.COMPONENT_TYPE, 
 														dataWidgetVar, 
 														binding, 
@@ -3455,7 +3459,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 														disabled,
 														formDisabled);
 		result.setConverter(new SelectItemsBeanConverter());
-		result.setLayout(layout);
+		if (horizontal) {
+			 result.setLayout("lineDirection");
+		}
+		else {
+			 result.setLayout("pageDirection");
+		}
 		return result;
 	}
 
