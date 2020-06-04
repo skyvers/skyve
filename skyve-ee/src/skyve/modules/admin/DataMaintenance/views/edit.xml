@@ -72,7 +72,15 @@
 					<column />
 					<column />
 					<column />
+					<column />
 					<row>
+						<item>
+							<button action="RefreshBackupList" pixelWidth="200" >
+								<properties>
+									<c:property key="update">backups</c:property>
+								</properties>							
+							</button> 
+						</item>
 						<item>
 							<button action="Backup" pixelWidth="200" >
 								<properties>
@@ -227,6 +235,7 @@
 		<action className="Sync" displayName="Script Synchronise DB" inActionPanel="false" toolTip="Generate a script to synchronise the SQL DB with metadata definitions"
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh" />
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
+		<action className="RefreshBackupList" inActionPanel="false" displayName="Refresh List" toolTip="Refresh the list of backups" iconStyleClass="fa fa-refresh"/>
 		
 		<!-- Only required for migration from legacy versions -->
 		<action className="CheckContent" displayName="Check Content" inActionPanel="false" visible="false" />

@@ -211,6 +211,7 @@
 					<action name="DeleteBackup" />
 					<action name="MigrateContent" />
 					<action name="MigrateContentFiles" />
+					<action name="RefreshBackupList" />
 					<action name="Reindex" />
 					<action name="ReindexData" />
 					<action name="ReindexContent" />
@@ -598,9 +599,9 @@
 			<description>The list of all job schedule entries</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending" />
-				<column binding="startTime" sortOrder="ascending" />
-				<column binding="endTime" />
-				<column binding="disabled"/>
+				<column binding="startTime" sortOrder="ascending" pixelWidth="150" />
+				<column binding="endTime" pixelWidth="150"/>
+				<column binding="disabled" pixelWidth="150"/>
 			</columns>
 		</query>
 		<query name="qExistingHits" documentName="UserMonthlyHits">
