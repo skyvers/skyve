@@ -54,6 +54,11 @@
 			<displayName>Column Headers</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
+		<boolean name="detailedLogging" >
+			<displayName>Detailed logging</displayName>
+			<description>Include all import details row by row to server log</description>
+			<defaultValue><![CDATA[true]]></defaultValue>
+		</boolean>		
 		<collection type="child" name="importExportColumns" ordered="true">
 			<displayName>Columns</displayName>
 			<documentName>ImportExportColumn</documentName>

@@ -61,6 +61,8 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String fileContainsHeadersPropertyName = "fileContainsHeaders";
 	/** @hidden */
+	public static final String detailedLoggingPropertyName = "detailedLogging";
+	/** @hidden */
 	public static final String importExportColumnsPropertyName = "importExportColumns";
 	/** @hidden */
 	public static final String rollbackErrorsPropertyName = "rollbackErrors";
@@ -347,6 +349,12 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	private Boolean fileContainsHeaders = new Boolean(true);
 	/**
+	 * Detailed logging
+	 * <br/>
+	 * Include all import details row by row to server log
+	 **/
+	private Boolean detailedLogging = new Boolean(true);
+	/**
 	 * Columns
 	 **/
 	private List<ImportExportColumn> importExportColumns = new ChangeTrackingArrayList<>("importExportColumns", this);
@@ -589,6 +597,24 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	public void setFileContainsHeaders(Boolean fileContainsHeaders) {
 		preset(fileContainsHeadersPropertyName, fileContainsHeaders);
 		this.fileContainsHeaders = fileContainsHeaders;
+	}
+
+	/**
+	 * {@link #detailedLogging} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getDetailedLogging() {
+		return detailedLogging;
+	}
+
+	/**
+	 * {@link #detailedLogging} mutator.
+	 * @param detailedLogging	The new value.
+	 **/
+	@XmlElement
+	public void setDetailedLogging(Boolean detailedLogging) {
+		preset(detailedLoggingPropertyName, detailedLogging);
+		this.detailedLogging = detailedLogging;
 	}
 
 	/**

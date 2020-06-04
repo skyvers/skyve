@@ -25,10 +25,12 @@
 			<hbox>
 				<vbox responsiveWidth="6" border="true" borderTitle="Configure Options">
 					<form>
-						<column responsiveWidth="4" />
+						<column responsiveWidth="3" />
+						<column />
+						<column responsiveWidth="3" />
 						<column />
 						<row>
-							<item>
+							<item colspan="3">
 								<combo binding="moduleName">
 									<onChangedHandlers>
 										<rerender clientValidation="false" />
@@ -37,7 +39,7 @@
 							</item>
 						</row>
 						<row>
-							<item>
+							<item colspan="3">
 								<combo binding="documentName">
 									<onChangedHandlers>
 										<rerender clientValidation="false" />
@@ -47,12 +49,15 @@
 						</row>
 						<row>
 							<item>
-								<checkBox binding="fileContainsHeaders" />
+								<checkBox triState="false" binding="fileContainsHeaders" />
+							</item>
+							<item>
+								<checkBox triState="false " binding="detailedLogging" />
 							</item>
 						</row>
 					</form>
 					<form visible="notShowExport">
-						<column responsiveWidth="4" />
+						<column responsiveWidth="3" />
 						<column />
 						<row>
 							<item>

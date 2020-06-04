@@ -45,21 +45,21 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 			int loadedRows = 0;
 			int created = 0;
-			
+
 			Persistence persistence = CORE.getPersistence();
 			Customer customer = CORE.getCustomer();
 			Module module = customer.getModule(bean.getModuleName());
-			Document document = module.getDocument(customer, bean.getDocumentName());			
-			
+			Document document = module.getDocument(customer, bean.getDocumentName());
+
 			try (InputStream poiStream = new FileInputStream(importFile)) {
 
 				POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
-				loader.setDebugMode(true);
-				if(LoadType.createAll.equals(bean.getLoadType())) {
+				loader.setDebugMode(Boolean.TRUE.equals(bean.getDetailedLogging()));
+				if (LoadType.createAll.equals(bean.getLoadType())) {
 					loader.setActivityType(LoaderActivityType.CREATE_ALL);
 				} else {
 					loader.setActivityType(LoaderActivityType.CREATE_FIND);
-				}				loader.setDebugMode(true);
+				}
 
 				// include headers
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
@@ -68,12 +68,12 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 				// and field bindings to loader
 				for (ImportExportColumn col : bean.getImportExportColumns()) {
-					
+
 					String resolvedBinding = col.getBindingName();
-					if(ImportExportColumnBizlet.EXPRESSION.equals(col.getBindingName())){
-						if(col.getBindingExpression()!=null ) {
-							if(col.getBindingExpression().indexOf("{")>-1) {
-								resolvedBinding = col.getBindingExpression().substring(col.getBindingExpression().indexOf("{")+1,col.getBindingExpression().lastIndexOf("}"));
+					if (ImportExportColumnBizlet.EXPRESSION.equals(col.getBindingName())) {
+						if (col.getBindingExpression() != null) {
+							if (col.getBindingExpression().indexOf("{") > -1) {
+								resolvedBinding = col.getBindingExpression().substring(col.getBindingExpression().indexOf("{") + 1, col.getBindingExpression().lastIndexOf("}"));
 							} else {
 								resolvedBinding = col.getBindingExpression();
 							}
@@ -86,12 +86,12 @@ public class RunImport implements ServerSideAction<ImportExport> {
 					}
 					StringBuilder sb = new StringBuilder();
 					sb.append("Adding field with binding ").append(resolvedBinding);
-										
-					//add field to loader configuration
+
+					// add field to loader configuration
 					DataFileField f = new DataFileField(resolvedBinding);
-					f.setLoadAction(null);  //default behaviour
-					if(col.getLoadAction()!=null) {
-						switch(col.getLoadAction()) {
+					f.setLoadAction(null); // default behaviour
+					if (col.getLoadAction() != null) {
+						switch (col.getLoadAction()) {
 						case confirmValue:
 							f.setLoadAction(LoadAction.CONFIRM_VALUE);
 							break;
@@ -112,28 +112,27 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 						sb.append(" using load action ").append(col.getLoadAction().toDescription());
 					}
-					
-					if(loader.isDebugMode()) {
+
+					if (loader.isDebugMode()) {
 						Util.LOGGER.info(sb.toString());
 					}
 					loader.addField(f);
-					Util.LOGGER.info("Field added at position " + f.getIndex().toString());
+					if (loader.isDebugMode()) {
+						Util.LOGGER.info("Field added at position " + f.getIndex().toString());
+					}
 				}
 
 				// save uploaded rows
 				while (loader.hasNextData()) {
 					loader.nextData();
-					
-					//stop at empty row
+
+					// stop at empty row
 					if (loader.isNoData()) {
 						Util.LOGGER.info("End of import found at " + loader.getWhere());
 						break;
 					}
 
-					Util.LOGGER.info("------TRANSFORMING ------");
-
 					PersistentBean b = loader.beanResult();
-					Util.LOGGER.info("------LOAD RESULT ------");
 
 					if (loader.isDebugMode()) {
 						if (b == null) {
@@ -148,17 +147,16 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;
 						}
-						//Testing
-						Util.LOGGER.info("------ATTEMPTING TO SAVE------");
-						
+						// Testing
+
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
 							Util.LOGGER.info(b.getBizKey() + " - Saved successfully");
 						}
 						persistence.evictCached(b);
 
-						//commit and start a new transaction if selected
-						if(RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
+						// commit and start a new transaction if selected
+						if (RollbackErrors.noRollbackErrors.equals(bean.getRollbackErrors())) {
 							persistence.commit(false);
 							persistence.begin();
 						}
