@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view name="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<component name="_emailNotConfiguredBanner" document="Configuration"/>
+	<component name="_emailNotConfiguredBanner" document="Configuration" />
 	<tabPane>
-		<tab title="Manage">
-			<form border="true" borderTitle="Configuration">
+		<tab title="Contents">
+			<form border="true">
 				<column percentageWidth="20" />
 				<column />
 				<column />
-				<column percentageWidth="5" />
 				<column />
 				<row>
 					<item>
@@ -17,97 +16,8 @@
 					<item>
 						<checkBox binding="systemUse" triState="false" />
 					</item>
-				</row>
-				<row>
-					<item colspan="3">
-						<combo binding="moduleName" disabled="locked">
-							<onChangedHandlers>
-								<rerender clientValidation="false" />
-							</onChangedHandlers>
-						</combo>
-					</item>
-				</row>
-				<row>
-					<item colspan="3">
-						<combo binding="documentName" disabled="locked" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<default binding="tag" />
-					</item>
-					<item align="right" colspan="2">
-						<button action="GetCount" pixelWidth="200" />
-					</item>
-				</row>
+				</row>			
 			</form>
-			<hbox border="true" borderTitle="Results" shrinkWrap="height">
-				<form percentageWidth="80">
-					<column percentageWidth="20" />
-					<column />
-					<row>
-						<item>
-							<textArea binding="results" pixelHeight="100" disabled="true" />
-						</item>
-					</row>
-				</form>
-				<form>
-					<column />
-					<column responsiveWidth="1"/>
-					<row>
-						<item>
-							<checkBox binding="unTagSuccessful" triState="false" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="notification" triState="false" />
-						</item>
-					</row>
-					<row>
-						<item colspan="2" align="right">
-							<button action="GetResults" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item colspan="2" align="right">
-							<button action="CreateFiles" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item colspan="2" align="right">
-							<button action="SendNow" pixelWidth="200" />
-						</item>
-					</row>
-				</form>
-			</hbox>
-			<vbox border="true" borderTitle="Batches">
-				<listGrid visible="showBatches" 
-					model="BatchesModel" 
-					selectedIdBinding="selectedBatchTimestampFolderName" 
-					continueConversation="false" 
-					showAdd="false" 
-					showEdit="false" 
-					showExport="false" 
-					showFilter="false" 
-					showRemove="false" 
-					showSnap="false" 
-					showSummary="false" 
-					showTag="false" 
-					showZoom="false" 
-					postRefresh="batchesRefreshRequired">
-					<onSelectedHandlers>
-						<server action="BatchSelected" />
-					</onSelectedHandlers>
-				</listGrid>
-				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button action="ZipBatch" pixelWidth="100" />
-					<button action="DeleteBatch" pixelWidth="100" />
-				</hbox>
-			</vbox>
-
-		</tab>
-		<tab title="Contents">
 			<form border="true" borderTitle="Email">
 				<column percentageWidth="20" />
 				<column />
@@ -122,9 +32,6 @@
 								<rerender />
 							</onChangedHandlers>
 						</combo>
-					</item>
-					<item>
-						<button action="TestSend" pixelWidth="200" />
 					</item>
 				</row>
 				<row>
@@ -212,7 +119,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Options">
+		<tab title="Attachments">
 			<form border="true" borderTitle="Attachments">
 				<column percentageWidth="20" />
 				<column />
@@ -271,7 +178,99 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Subscriptions">
+		<tab title="Manage">
+			<form border="true" borderTitle="Configuration">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column percentageWidth="5" />
+				<column />
+				<row>
+					<item colspan="3">
+						<combo binding="moduleName" disabled="locked">
+							<onChangedHandlers>
+								<rerender clientValidation="false" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<combo binding="documentName" disabled="locked" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="tag" />
+					</item>
+					<item align="right" colspan="2">
+						<button action="GetCount" pixelWidth="200" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<button action="TestSend" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+			<hbox border="true" borderTitle="Results" shrinkWrap="height">
+				<form percentageWidth="80">
+					<column percentageWidth="20" />
+					<column />
+					<row>
+						<item>
+							<textArea binding="results" pixelHeight="100" disabled="true" />
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column responsiveWidth="1" />
+					<row>
+						<item>
+							<checkBox binding="unTagSuccessful" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="notification" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button action="GetResults" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button action="CreateFiles" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item colspan="2" align="right">
+							<button action="SendNow" pixelWidth="200" />
+						</item>
+					</row>
+				</form>
+			</hbox>
+			<vbox border="true" borderTitle="Batches">
+				<listGrid visible="showBatches" model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
+					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
+					<onSelectedHandlers>
+						<server action="BatchSelected" />
+					</onSelectedHandlers>
+				</listGrid>
+				<hbox horizontalAlignment="right" shrinkWrap="height">
+					<button action="ZipBatch" pixelWidth="100" />
+					<button action="DeleteBatch" pixelWidth="100" />
+				</hbox>
+			</vbox>
+
+		</tab>
+		<tab title="Subscriptions" visible="persisted">
 			<listGrid continueConversation="true" query="qSubscriptions">
 				<filterParameter filterBinding="communication" operator="equal" valueBinding="bizId" />
 			</listGrid>
@@ -283,13 +282,11 @@
 
 		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fa fa-calculator" />
 
-		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa fa-cogs"
-			confirm="OK to create email files?" />
+		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa fa-cogs" confirm="OK to create email files?" />
 
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
 
-		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa fa-envelope-square"
-			confirm="Send test email to yourself?" />
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa fa-envelope-square" confirm="Send test email to yourself?" />
 
 		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fa fa-link" inActionPanel="false" />
 
@@ -297,8 +294,8 @@
 
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
 
-		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to delete this batch folder from the server filesystem?" iconStyleClass="fa fa-trash" />
+		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?"
+			iconStyleClass="fa fa-trash" />
 
 		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected"
 			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
