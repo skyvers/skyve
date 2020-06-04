@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
-	xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
 		<vbox border="true" borderTitle="Select Mode">
 			<form>
@@ -11,7 +11,7 @@
 					<item>
 						<radio binding="mode" vertical="false">
 							<onChangedHandlers>
-								<rerender clientValidation="false"/>
+								<rerender clientValidation="false" />
 							</onChangedHandlers>
 						</radio>
 					</item>
@@ -64,7 +64,7 @@
 						<column />
 						<row>
 							<item>
-								<combo binding="loadType"/>
+								<combo binding="loadType" />
 							</item>
 						</row>
 					</form>
@@ -111,25 +111,25 @@
 				</vbox>
 			</hbox>
 			<form invisible="showExport">
-				<column/>
+				<column />
 				<row>
 					<item>
-						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
+						<blurb visible="fileExists"><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
 					</item>
 				</row>
 			</form>
 		</vbox>
 	</vbox>
-	<form>
-		<column />
-		<row>
-			<item>
-				<blurb visible="showResults"><![CDATA[{results}]]></blurb>
-			</item>
-		</row>
-	</form>
 	<vbox widgetId="columns">
 		<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
+			<form>
+				<column />
+				<row>
+					<item>
+						<blurb visible="showResults"><![CDATA[{results}]]></blurb>
+					</item>
+				</row>
+			</form>
 			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />

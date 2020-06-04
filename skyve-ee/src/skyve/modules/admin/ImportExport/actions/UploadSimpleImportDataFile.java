@@ -79,7 +79,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				sb.append("Successfully loaded definitions for ").append(i).append(" column")
 						.append(i != 1 ? "s" : "")
 						.append(". Configure each column title you wish to import with an appropriate "
-								+ "binding then click the Import Data button.");
+								+ "binding then click the `Import data from file` button.");
 			} else {
 				sb.append("No rows uploaded, try again.");
 			}

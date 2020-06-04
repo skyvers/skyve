@@ -11,7 +11,7 @@
 					<item>
 						<radio binding="mode" vertical="false">
 							<onChangedHandlers>
-								<rerender clientValidation="false"/>
+								<rerender clientValidation="false" />
 							</onChangedHandlers>
 						</radio>
 					</item>
@@ -21,49 +21,38 @@
 				</row>
 			</form>
 		</vbox>
-		<vbox border="true" borderTitle="Configure Options">
+		<vbox>
 			<hbox>
-				<form responsiveWidth="6">
-					<column responsiveWidth="2" />
-					<column />
-					<row>
-						<item>
-							<combo binding="moduleName">
-								<onChangedHandlers>
-									<rerender clientValidation="false"/>
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item>
-							<combo binding="documentName">
-								<onChangedHandlers>
-									<rerender clientValidation="false"/>
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="fileContainsHeaders" />
-						</item>
-					</row>
-				</form>
-				<vbox border="true" borderTitle="Advanced" visible="showExport">
-					<form >
-						<column responsiveWidth="4"/>
+				<vbox responsiveWidth="6" border="true" borderTitle="Configure Options">
+					<form>
+						<column responsiveWidth="4" />
 						<column />
 						<row>
 							<item>
-								<spacer />
+								<combo binding="moduleName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="documentName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="fileContainsHeaders" />
 							</item>
 						</row>
 					</form>
-				</vbox>
-				<vbox border="true" borderTitle="Advanced" invisible="showExport">
-					<form >
-						<column responsiveWidth="4"/>
+					<form visible="notShowExport">
+						<column responsiveWidth="4" />
 						<column />
 						<row>
 							<item>
@@ -72,68 +61,60 @@
 						</row>
 					</form>
 				</vbox>
+				<vbox border="true" borderTitle="Actions" responsiveWidth="6">
+					<form visible="showExport">
+						<column responsiveWidth="2" />
+						<column />
+						<column />
+						<row>
+							<item>
+								<spacer></spacer>
+							</item>
+							<item>
+								<button pixelWidth="150" action="ResetColumns" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<spacer></spacer>
+							</item>
+							<item>
+								<button pixelWidth="150" action="RunExport" />
+							</item>
+						</row>
+					</form>
+					<form invisible="showExport">
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<blurb visible="fileExists"><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button pixelWidth="150" action="UploadSimpleImportDataFile" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<button pixelWidth="150" action="RunImport" />
+							</item>
+						</row>
+					</form>
+				</vbox>
 			</hbox>
-			<form visible="showExport">
-				<column responsiveWidth="2" />
-				<column />
-				<column />
-				<row>
-					<item>
-						<spacer></spacer>
-					</item>
-					<item>
-						<button pixelWidth="150" action="ResetColumns" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer></spacer>
-					</item>
-					<item>
-						<button pixelWidth="150" action="RunExport" />
-					</item>
-				</row>
-			</form>
-			<form invisible="showExport">
-				<column responsiveWidth="2" />
-				<column />
-				<column />
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<blurb visible="fileExists"><![CDATA[The file <i>{importFileName}</i> has already been uploaded for this import - import from this file or upload a new file.]]></blurb>
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer></spacer>
-					</item>
-					<item>
-						<button pixelWidth="150" action="UploadSimpleImportDataFile" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer></spacer>
-					</item>
-					<item>
-						<button pixelWidth="150" action="RunImport" />
-					</item>
-				</row>
-			</form>
 		</vbox>
 	</vbox>
-	<form>
-		<column />
-		<row>
-			<item>
-				<blurb visible="showResults"><![CDATA[{results}]]></blurb>
-			</item>
-		</row>
-	</form>
 	<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
+		<form>
+			<column />
+			<row>
+				<item>
+					<blurb visible="showResults"><![CDATA[{results}]]></blurb>
+				</item>
+			</row>
+		</form>
 		<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 			<boundColumn binding="columnName" />
 			<boundColumn binding="bindingName" />
@@ -161,6 +142,6 @@
 			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
 		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" />
 		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" />
-		<download className="GetImportTemplate" displayName="Get Template for Import"  invisible="showExport" inActionPanel="false" />
+		<download className="GetImportTemplate" displayName="Get Template for Import" invisible="showExport" inActionPanel="false" />
 	</actions>
 </view>
