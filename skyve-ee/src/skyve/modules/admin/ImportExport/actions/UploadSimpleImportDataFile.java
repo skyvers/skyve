@@ -24,91 +24,97 @@ import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
-public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
+public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -8154709480999519405L;
 
 	@Override
-	public ImportExport upload(ImportExport importExport,
+	public ImportExportExtension upload(ImportExportExtension importExport,
 			UploadedFile file,
 			UploadException exception,
 			WebContext webContext)
 			throws Exception {
 
-		ImportExport bean = importExport;
-		
+		ImportExportExtension bean = importExport;
+
 		if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 
-			if(!bean.isPersisted()) {
-				bean =CORE.getPersistence().save(bean);
-			}
-			
-			// create the import upload file
-			File importFile = new File(String.format("%simportExport_%s%s%s",
-					Util.getContentDirectory(),
-					CORE.getUser().getCustomerName(),
-					File.separator,
-					file.getFileName()));
+			// remove any previous import file
+			bean.cleanupImportFile();
 
-			// and save temporary copy of file
-			File import_directory = new File(String.format("%simportExport_%s",
-					Util.getContentDirectory(),
-					CORE.getUser().getCustomerName()));
-						
-			if (!import_directory.exists()) {
-				import_directory.mkdir();
-			}
+			try {
+				// create the import upload file
+				File importFile = new File(String.format("%simportExport_%s%s%s",
+						Util.getContentDirectory(),
+						CORE.getUser().getCustomerName(),
+						File.separator,
+						file.getFileName()));
 
-			//replace file if it exists
-			if (importFile.exists()) {
-				if (!importFile.delete()) {
-					throw new Exception("The previous upload of this file can't be removed.");
+				// and save temporary copy of file
+				File import_directory = new File(String.format("%simportExport_%s",
+						Util.getContentDirectory(),
+						CORE.getUser().getCustomerName()));
+
+				if (!import_directory.exists()) {
+					import_directory.mkdir();
 				}
-			} 
-			Files.copy(file.getInputStream(), Paths.get(importFile.getAbsolutePath()));
-			bean.setImportFileName(file.getFileName());
-			bean.setImportFileAbsolutePath(importFile.getAbsolutePath());				
-			
-			int i = loadColumnsFromFile(bean, exception);
-			
-			//construct a result message
-			StringBuilder sb = new StringBuilder();
-			if(i>0) {
-				sb.append("Successfully loaded definitions for ").append(i).append(" column")
-						.append(i != 1 ? "s" : "")
-						.append(". Configure each column title you wish to import with an appropriate "
-								+ "binding then click the `Import data from file` button.");
-			} else {
-				sb.append("No rows uploaded, try again.");
-			}
-			bean.setResults(sb.toString());
-			webContext.growl(MessageSeverity.info, bean.getResults());
 
+				// replace file if it exists
+				if (importFile.exists()) {
+					if (!importFile.delete()) {
+						throw new Exception("The previous upload of this file can't be removed.");
+					}
+				}
+				Files.copy(file.getInputStream(), Paths.get(importFile.getAbsolutePath()));
+				bean.setImportFileName(file.getFileName());
+				bean.setImportFileAbsolutePath(importFile.getAbsolutePath());
+
+				int i = loadColumnsFromFile(bean, exception);
+
+				// construct a result message
+				StringBuilder sb = new StringBuilder();
+				if (i > 0) {
+					sb.append("Successfully loaded definitions for ").append(i).append(" column")
+							.append(i != 1 ? "s" : "")
+							.append(". Configure each column title you wish to import with an appropriate "
+									+ "binding then click the `Import data from file` button.");
+				} else {
+					sb.append("No rows uploaded, try again.");
+				}
+				bean.setResults(sb.toString());
+				webContext.growl(MessageSeverity.info, bean.getResults());
+			} catch (Exception e) {
+				// clean up any uploaded file
+				bean.cleanupImportFile();
+			}
 		}
-		
+
+		// bean must be saved to enable import and export actions
+		bean = CORE.getPersistence().save(bean);
+
 		return bean;
 	}
-	
-	public static int loadColumnsFromFile(ImportExport bean, UploadException exception) throws Exception{
+
+	public static int loadColumnsFromFile(ImportExport bean, UploadException exception) throws Exception {
 
 		File importFile = new File(bean.getImportFileAbsolutePath());
 		User user = CORE.getPersistence().getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getModuleName());
 		Document document = module.getDocument(customer, bean.getDocumentName());
-				
+
 		// load the columns from the file
 		int i = 0;
-		bean.getImportExportColumns().clear();			
-		
+		bean.getImportExportColumns().clear();
+
 		try (InputStream poiStream = new FileInputStream(importFile)) {
 			POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 			boolean moreCells = true;
 			while (moreCells) {
-				
-				//load until an empty column is found
+
+				// load until an empty column is found
 				String columnName = loader.getStringFieldValue(i, true);
 				if (columnName == null || "".equals(columnName.trim())) {
 					moreCells = false;
@@ -118,13 +124,13 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				// create a new import export column config row for each column in the spreadsheet
 				ImportExportColumn newCol = ImportExportColumn.newInstance();
 				newCol.setParent((ImportExportExtension) bean);
-				newCol.setBizOrdinal(new Integer(i)); //preserve load order
+				newCol.setBizOrdinal(new Integer(i)); // preserve load order
 				bean.getImportExportColumns().add(newCol);
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
 					newCol.setColumnName(columnName);
-					
+
 					// and guess a binding
-					//prefer a like match on Display Name
+					// prefer a like match on Display Name
 					boolean bindingFound = false;
 					for (Attribute a : document.getAttributes()) {
 						if (a.getDisplayName().equalsIgnoreCase(columnName)) {
@@ -133,8 +139,8 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 							break;
 						}
 					}
-					if(!bindingFound) {
-						//attempt a close match on binding name
+					if (!bindingFound) {
+						// attempt a close match on binding name
 						for (Attribute a : document.getAttributes()) {
 							String cleanColName = Binder.toJavaInstanceIdentifier(columnName);
 							if (a.getName().equalsIgnoreCase(cleanColName)) {
@@ -150,7 +156,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExport> {
 				i++;
 			}
 		}
-		
+
 		return i;
 	}
 }

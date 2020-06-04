@@ -721,6 +721,25 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
+	 * contextSet
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isContextSet() {
+		return (getModuleName()!=null && getDocumentName()!=null);
+	}
+
+	/**
+	 * {@link #isContextSet} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotContextSet() {
+		return (! isContextSet());
+	}
+
+	/**
 	 * Whether the upload file exists
 	 *
 	 * @return The condition

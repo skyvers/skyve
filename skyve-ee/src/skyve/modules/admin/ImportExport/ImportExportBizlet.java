@@ -20,7 +20,7 @@ import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
-public class ImportExportBizlet extends Bizlet<ImportExport> {
+public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 
 	/**
 	 * 
@@ -44,7 +44,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 	}
 
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExport bean) throws Exception {
+	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExportExtension bean) throws Exception {
 
 		// list documents within modules
 		if (ImportExport.documentNamePropertyName.equals(attributeName)) {
@@ -64,14 +64,14 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 	}
 
 	@Override
-	public void preRerender(String source, ImportExport bean, WebContext webContext) throws Exception {
+	public void preRerender(String source, ImportExportExtension bean, WebContext webContext) throws Exception {
 
 		updateColumns(source, bean);
 
 		super.preRerender(source, bean, webContext);
 	}
 
-	public static void updateColumns(String source, ImportExport bean) throws Exception {
+	public static void updateColumns(String source, ImportExportExtension bean) throws Exception {
 		switch (source) {
 		case ImportExport.documentNamePropertyName:
 			// if changing document name, recreate default import export column config
@@ -81,7 +81,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 			if (Mode.importData.equals(bean.getMode()) && bean.getImportFileAbsolutePath() != null) {
 				bean.getImportExportColumns().clear();
 				UploadSimpleImportDataFile.loadColumnsFromFile(bean, new UploadException());
-				if(bean.getLoadType()==null) {
+				if (bean.getLoadType() == null) {
 					bean.setLoadType(LoadType.createFind);
 				}
 			}
@@ -89,7 +89,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 				if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 					List<ImportExportColumn> columns = generateColumns(bean);
 					for (ImportExportColumn c : columns) {
-						c.setParent((ImportExportExtension) bean);
+						c.setParent(bean);
 						bean.getImportExportColumns().add(c);
 					}
 				}
@@ -103,7 +103,7 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 	/**
 	 * Generate column configs from scalar attributes
 	 */
-	public static List<ImportExportColumn> generateColumns(ImportExport bean) {
+	public static List<ImportExportColumn> generateColumns(ImportExportExtension bean) {
 
 		List<ImportExportColumn> columns = new ArrayList<>();
 		Persistence pers = CORE.getPersistence();
@@ -133,6 +133,25 @@ public class ImportExportBizlet extends Bizlet<ImportExport> {
 		}
 
 		return columns;
+	}
+
+	@Override
+	public void preDelete(ImportExportExtension bean) throws Exception {
+
+		bean.cleanupImportFile();
+
+		super.preDelete(bean);
+	}
+
+	@Override
+	public void preSave(ImportExportExtension bean) throws Exception {
+
+		// if user has changed mode - clean up any unused import file
+		if (bean.originalValues().containsKey(ImportExport.modePropertyName) && Mode.exportData.equals(bean.getMode())) {
+			bean.cleanupImportFile();
+		}
+
+		super.preSave(bean);
 	}
 
 }

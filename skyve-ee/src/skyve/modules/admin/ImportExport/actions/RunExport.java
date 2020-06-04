@@ -2,7 +2,6 @@ package modules.admin.ImportExport.actions;
 
 import java.util.List;
 
-import org.skyve.CORE;
 import org.skyve.impl.bizport.POISheetGenerator;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.web.WebContext;
@@ -19,9 +18,8 @@ public class RunExport extends DownloadAction<ImportExport> {
 
 	@Override
 	public void prepare(ImportExport bean, WebContext webContext) throws Exception {
-		if (!bean.isPersisted()) {
-			CORE.getPersistence().save(bean);
-		}
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -68,4 +66,5 @@ public class RunExport extends DownloadAction<ImportExport> {
 
 		return generator.getDownload();
 	}
+
 }

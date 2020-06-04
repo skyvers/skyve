@@ -304,6 +304,7 @@
 		<property name="advancedMode" />
 		<property name="columnTitlesOnly" />
 		<property name="fileContainsHeaders" />
+		<property name="detailedLogging" />
 		<bag name="importExportColumns" order-by="bizOrdinal" cascade="all-delete-orphan">
 			<key column="parent_id" />
 			<one-to-many entity-name="adminImportExportColumn" />

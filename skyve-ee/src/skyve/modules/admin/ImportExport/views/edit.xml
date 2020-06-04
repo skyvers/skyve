@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
 		<vbox border="true" borderTitle="Select Mode">
@@ -60,7 +60,7 @@
 								<checkBox triState="false" binding="fileContainsHeaders" />
 							</item>
 							<item>
-								<checkBox triState="false" binding="detailedLogging" />
+								<checkBox triState="false " binding="detailedLogging" />
 							</item>
 						</row>
 					</form>
@@ -81,6 +81,13 @@
 						<column />
 						<row>
 							<item>
+								<blurb invisible="contextSet" textAlignment="left">
+									<![CDATA[<em>Select a module and document...</em>]]>
+								</blurb>
+							</item>
+						</row>
+						<row>
+							<item>
 								<button pixelWidth="200" action="ResetColumns">
 									<properties>
 										<c:property key="update">columns</c:property>
@@ -96,6 +103,18 @@
 					</form>
 					<form invisible="showExport">
 						<column />
+						<row>
+							<item>
+								<blurb invisible="contextSet" textAlignment="left">
+									<![CDATA[<em>Select a module and document...</em>]]>
+								</blurb>
+							</item>
+						</row>
+						<row>
+							<item>
+								<blurb visible="fileExists"><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
+							</item>
+						</row>
 						<row>
 							<item>
 								<button pixelWidth="200" action="UploadSimpleImportDataFile">
@@ -117,14 +136,6 @@
 					</form>
 				</vbox>
 			</hbox>
-			<form invisible="showExport">
-				<column />
-				<row>
-					<item>
-						<blurb visible="fileExists"><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
-					</item>
-				</row>
-			</form>
 		</vbox>
 	</vbox>
 	<vbox widgetId="columns">
@@ -160,11 +171,11 @@
 	</vbox>
 	<actions>
 		<defaults />
-		<upload className="UploadSimpleImportDataFile" displayName="Upload file" invisible="showExport" inActionPanel="false" />
-		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" inActionPanel="false"
+		<upload className="UploadSimpleImportDataFile" displayName="Upload file" invisible="showExport" inActionPanel="false" enabled="contextSet" />
+		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
 			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
-		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" />
-		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" />
+		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />
+		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" enabled="contextSet" />
 		<download className="GetImportTemplate" displayName="Get Template for Import" invisible="showExport" inActionPanel="false" />
 	</actions>
 </view>
