@@ -10,14 +10,11 @@ import modules.admin.domain.JobSchedule;
 
 public class ConfigurationExtension extends Configuration {
 
+	private static final String BACKUP_JOB_NAME = ".jBackup";
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5669557826609528645L;
-	
-	private static Boolean backupsConfigured;
-	
-	private static Boolean backupsScheduled;
 
 	/**
 	 * Check whether a valid SMTP host has been configured
@@ -27,32 +24,48 @@ public class ConfigurationExtension extends Configuration {
 	public static boolean validSMTPHost() {
 		return !"localhost".equals(UtilImpl.SMTP);
 	}
-	
-	public static String  defaultSMTPSender() {
+
+	public static String defaultSMTPSender() {
 		return UtilImpl.SMTP_SENDER;
 	}
-	
+
 	public static boolean validBackupConfiguration() {
-		if(backupsConfigured==null) {
-			DataMaintenance dm = DataMaintenance.newInstance();
-			if(dm!=null 
-					&& (dm.getDailyBackupRetention()!=null || dm.getWeeklyBackupRetention()!=null || dm.getMonthlyBackupRetention()!=null || dm.getYearlyBackupRetention()!=null)) {
-				backupsConfigured = Boolean.TRUE;
-			}
+		boolean result = false;
+		DataMaintenance dm = DataMaintenance.newInstance();
+		if (dm != null
+				&& (dm.getDailyBackupRetention() != null || dm.getWeeklyBackupRetention() != null || dm.getMonthlyBackupRetention() != null
+						|| dm.getYearlyBackupRetention() != null)) {
+			result = true;
 		}
-		return Boolean.TRUE.equals(backupsConfigured);
-	}
-	
-	public static boolean validBackupSchedule() {
-		if(backupsScheduled==null) {
-			DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
-			q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
-			q.getFilter().addEquals(JobSchedule.jobNamePropertyName, JobSchedule.MODULE_NAME + ".jBackup");
-			if(q.beanResult()!=null) {
-				backupsScheduled = Boolean.TRUE;
-			}
-		}
-		return Boolean.TRUE.equals(backupsScheduled);
+		return result;
 	}
 
+	public static boolean validBackupSchedule() {
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
+		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, JobSchedule.MODULE_NAME + BACKUP_JOB_NAME);
+		
+		return  (q.beanResult() != null);
+	}
+
+	/**
+	 * Self registration is validly configured if:
+	 * - userSelfRegistrationGroup has been assigned, and
+	 * - allowUserSelfRegistration is true.
+	 * 
+	 * @return
+	 */
+	public boolean validSelfRegistration() {
+		return (getUserSelfRegistrationGroup() != null && Boolean.TRUE.equals(getAllowUserSelfRegistration()));
+	}
+
+	/**
+	 * Anonymous public user (e.g. for public forms) is validly configured if:
+	 * - publicUser has been assigned.
+	 * 
+	 * @return
+	 */
+	public boolean validAnonymousPublicUser() {
+		return (getPublicUser() != null);
+	}
 }

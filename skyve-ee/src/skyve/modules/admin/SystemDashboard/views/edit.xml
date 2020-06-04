@@ -20,8 +20,8 @@
 		<vbox border="true" borderTitle="System Status" percentageHeight="100">
 			<dataRepeater binding="status">
 				<boundColumn binding="memo1" title="Item" editable="false"/>
-				<containerColumn title="Status">
-					<blurb>{text5001}</blurb>
+				<containerColumn title="Status" >
+					<blurb textAlignment="left">{text5001}</blurb>
 				</containerColumn>				
 			</dataRepeater>
 		</vbox>
