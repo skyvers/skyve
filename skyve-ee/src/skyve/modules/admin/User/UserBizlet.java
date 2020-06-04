@@ -40,7 +40,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 */
 	@Override
 	public UserExtension newInstance(UserExtension bean) throws Exception {
-		
+
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		String myDataGroupId = user.getDataGroupId();
@@ -58,13 +58,13 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		// set defaults
 		bean.setCreatedDateTime(new DateTime());
 		bean.setWizardState(WizardState.confirmContact);
-		
+
 		// check whether creating a new security group will be mandatory when creating a user
 		// this occurs if there are no security groups yet defined
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		bean.setGroupSelection((q.beanResults().isEmpty()?GroupSelection.newGroup:GroupSelection.existingGroups));
-		bean.setGroupsExist((q.beanResults().isEmpty()?Boolean.FALSE:Boolean.TRUE));
-		
+		bean.setGroupSelection((q.beanResults().isEmpty() ? GroupSelection.newGroup : GroupSelection.existingGroups));
+		bean.setGroupsExist((q.beanResults().isEmpty() ? Boolean.FALSE : Boolean.TRUE));
+
 		return bean;
 	}
 
@@ -87,28 +87,28 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 	@Override
 	public void preRerender(String source, UserExtension bean, WebContext webContext) throws Exception {
-		
-		if(User.groupSelectionPropertyName.equals(source)) {
-			if(GroupSelection.newGroup.equals(bean.getGroupSelection())) {
+
+		if (User.groupSelectionPropertyName.equals(source)) {
+			if (GroupSelection.newGroup.equals(bean.getGroupSelection())) {
 				bean.setNewGroup(Group.newInstance());
 			} else {
 				bean.setNewGroup(null);
 			}
 		}
-		
+
 		super.preRerender(source, bean, webContext);
 	}
 
 	@Override
 	public UserExtension preExecute(ImplicitActionName actionName,
-										UserExtension bean,
-										Bean parentBean,
-										WebContext webContext)
-	throws Exception {
-		if(ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			
-			//if a new group was created, assign the user to the group membership
-			if(bean.getNewGroup()!=null) {
+			UserExtension bean,
+			Bean parentBean,
+			WebContext webContext)
+			throws Exception {
+		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
+
+			// if a new group was created, assign the user to the group membership
+			if (bean.getNewGroup() != null) {
 				bean.getGroups().add(bean.getNewGroup());
 			}
 		}
@@ -184,10 +184,10 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		if (customer.isAllowModuleRoles()) {
 			for (Module module : customer.getModules()) {
 				for (Role role : module.getRoles()) {
-					
+
 					String roleName = role.getName();
 					String roleDescription = role.getDescription();
-					
+
 					if (roleDescription != null) {
 						if (roleDescription.length() > 50) {
 							roleDescription = roleDescription.substring(0, 47) + "...";
@@ -195,7 +195,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
 								String.format("%s - %s (%s)", module.getTitle(), roleName, roleDescription)));
 					} else {
-						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName), 
+						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
 								String.format("%s - %s", module.getTitle(), roleName)));
 					}
 				}
@@ -207,7 +207,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 	@Override
 	public void preSave(UserExtension bean) throws Exception {
-		
+
 		if (bean.getGeneratedPassword() != null) {
 			bean.setPasswordExpired(Boolean.TRUE);
 		}
@@ -228,8 +228,10 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	@Override
 	public void postSave(UserExtension bean) throws Exception {
 		bean.clearAssignedRoles();
+		bean.setNewGroup(null);
+		bean.setNewPassword(null);
 	}
-	
+
 	public static void validateUserContact(UserExtension bean, ValidationException e) {
 		if (bean.getContact() == null) {
 			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
