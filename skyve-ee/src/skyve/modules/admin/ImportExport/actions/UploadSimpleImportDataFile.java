@@ -16,12 +16,12 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExport.ImportExportExtension;
-import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
 public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
@@ -71,7 +71,8 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				bean.setImportFileName(file.getFileName());
 				bean.setImportFileAbsolutePath(importFile.getAbsolutePath());
 
-				int i = loadColumnsFromFile(bean, exception);
+				loadColumnsFromFile(bean, exception);
+				int i = bean.getImportExportColumns().size();
 
 				// construct a result message
 				StringBuilder sb = new StringBuilder();
@@ -97,18 +98,20 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 		return bean;
 	}
 
-	public static int loadColumnsFromFile(ImportExport bean, UploadException exception) throws Exception {
+	public static void loadColumnsFromFile(ImportExportExtension bean, UploadException exception) throws Exception {
 
+		// clear previous columns
+		bean.getImportExportColumns().clear();
+
+		Persistence pers = CORE.getPersistence();
 		File importFile = new File(bean.getImportFileAbsolutePath());
-		User user = CORE.getPersistence().getUser();
+		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getModuleName());
 		Document document = module.getDocument(customer, bean.getDocumentName());
 
 		// load the columns from the file
 		int i = 0;
-		bean.getImportExportColumns().clear();
-
 		try (InputStream poiStream = new FileInputStream(importFile)) {
 			POISheetLoader loader = new POISheetLoader(poiStream, 0, bean.getModuleName(), bean.getDocumentName(), exception);
 			boolean moreCells = true;
@@ -123,7 +126,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 
 				// create a new import export column config row for each column in the spreadsheet
 				ImportExportColumn newCol = ImportExportColumn.newInstance();
-				newCol.setParent((ImportExportExtension) bean);
+				newCol.setParent(bean);
 				newCol.setBizOrdinal(new Integer(i)); // preserve load order
 				bean.getImportExportColumns().add(newCol);
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
@@ -157,6 +160,5 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 			}
 		}
 
-		return i;
 	}
 }

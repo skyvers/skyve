@@ -21,6 +21,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -39,7 +40,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 			throws Exception {
 
 		if (bean.getImportFileAbsolutePath() != null) {
-
+			
 			File importFile = new File(bean.getImportFileAbsolutePath());
 			UploadException exception = new UploadException();
 
@@ -64,6 +65,26 @@ public class RunImport implements ServerSideAction<ImportExport> {
 				// include headers
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
 					loader.setDataIndex(1);
+
+					// verify columns match
+					int i = 0;
+					boolean moreCells = true;
+					while (moreCells) {
+						// load until an empty column is found
+						String columnName = loader.getStringFieldValue(i, true);
+						if (columnName == null || "".equals(columnName.trim()) || i > bean.getImportExportColumns().size()) {
+							moreCells = false;
+							break;
+						}
+						if (!columnName.equals(bean.getImportExportColumns().get(i).getColumnName())) {
+							StringBuilder sb = new StringBuilder();
+							sb.append("The column title ").append(bean.getImportExportColumns().get(i).getColumnName());
+							sb.append(" doesn't match the title of the column in the file (").append(columnName).append(")");
+							throw new ValidationException(new Message(Binder.createIndexedBinding(ImportExport.importExportColumnsPropertyName, i), sb.toString()));
+						}
+						i++;
+					}
+
 				}
 
 				// and field bindings to loader
@@ -147,7 +168,6 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;
 						}
-						// Testing
 
 						b = persistence.save(b);
 						if (loader.isDebugMode()) {
@@ -163,6 +183,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						created++;
 
 					} catch (ValidationException ve) {
+						ve.printStackTrace();
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the imported record could not be saved because imported values were not valid:");
 						msg.append("\nCheck upload values and try again.");
@@ -173,12 +194,14 @@ public class RunImport implements ServerSideAction<ImportExport> {
 
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (OptimisticLockException ole) {
+						ole.printStackTrace();
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but the save failed.");
 						msg.append(
 								"\nCheck that you don't have duplicates in your file, or multiple rows in your file are finding the same related record, or that other users are not changing related data.");
 						throw new ValidationException(new Message(msg.toString()));
 					} catch (Exception e) {
+						e.printStackTrace();
 						StringBuilder msg = new StringBuilder();
 						msg.append("The import succeeded but saving the records failed.");
 						msg.append("\nCheck that you are uploading to the correct binding and that you have supplied enough information for the results to be saved.");
