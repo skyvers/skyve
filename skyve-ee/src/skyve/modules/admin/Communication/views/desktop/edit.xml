@@ -64,17 +64,17 @@
 				</row>
 				<row>
 					<item>
-						<spacer />
+						<spacer visible="emailType" />
 					</item>
 					<item colspan="3">
-						<blurb>	
+						<blurb visible="emailType">	
 							<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
 						</blurb>
 					</item>
 				</row>
 				<row>
 					<item colspan="4">
-						<textField binding="subject" invisible="notEmailType" />
+						<textField binding="subject" visible="emailType" />
 					</item>
 				</row>
 				<row>
@@ -264,7 +264,7 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button action="ZipBatch" pixelWidth="100" />
+					<button action="ZipBatch" pixelWidth="130" />
 					<button action="DeleteBatch" pixelWidth="100" />
 				</hbox>
 			</vbox>
