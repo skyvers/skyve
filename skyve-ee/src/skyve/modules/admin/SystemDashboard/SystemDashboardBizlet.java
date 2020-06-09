@@ -84,7 +84,7 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		anonymousUserConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured", locale)));
 		anonymousUserConfigured.setText5001((config.validAnonymousPublicUser() ? formatBooleanHTML(true, valTrue, valFalse, "")
 				: formatStringValueHTML(valNo,
-						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion", locale))));
+						Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured.suggestion", locale))));
 		bean.getStatus().add(anonymousUserConfigured);
 
 		// Password self-reset configured
