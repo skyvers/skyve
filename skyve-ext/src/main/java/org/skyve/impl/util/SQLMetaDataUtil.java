@@ -56,6 +56,7 @@ public class SQLMetaDataUtil {
 	public static final String ROLE_NAME_PROPERTY_NAME = "roleName";
 	public static final String ROLES_PROPERTY_NAME = "roles";
 	public static final String USER_NAME_PROPERTY_NAME = "userName";
+	public static final String PASSWORD_LAST_CHANGED_PROPERTY_NAME = "passwordLastChanged";
 	
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	
@@ -165,9 +166,14 @@ public class SQLMetaDataUtil {
 							}
 							else {
 								if (UtilImpl.PASSWORD_EXPIRY_IN_DAYS > 0) {
-									long passwordExpiryInMillis = passwordLastChanged.getTime() + (UtilImpl.PASSWORD_EXPIRY_IN_DAYS * 86400000);
-									if (System.currentTimeMillis() >= passwordExpiryInMillis) {
+									if (passwordLastChanged == null) {
 										passwordChangeRequired = true;
+									}
+									else {
+										long passwordExpiryInMillis = passwordLastChanged.getTime() + (UtilImpl.PASSWORD_EXPIRY_IN_DAYS * 86400000);
+										if (System.currentTimeMillis() >= passwordExpiryInMillis) {
+											passwordChangeRequired = true;
+										}
 									}
 								}
 							}

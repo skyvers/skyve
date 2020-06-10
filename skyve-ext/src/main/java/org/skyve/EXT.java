@@ -32,6 +32,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
@@ -754,6 +755,7 @@ public class EXT {
 			user.setBizUserId(u.getId());
 			BindUtil.set(user, SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
 			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
+			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_LAST_CHANGED_PROPERTY_NAME, new DateTime());
 
 			// Create contact
 			Bean contact = contactDoc.newInstance(u);
