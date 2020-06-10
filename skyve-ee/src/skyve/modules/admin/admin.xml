@@ -668,7 +668,6 @@
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />
 				<column binding="declined" />
-				<column binding="formatType"/>
 			</columns>
 		</query>
 		<query name="qUserSubscriptions" documentName="Subscription">
@@ -676,7 +675,6 @@
 			<columns>
 				<column binding="communication.bizKey" sortOrder="ascending" />
 				<column binding="declined" />
-				<column binding="formatType"/>
 				<column binding="preferredReceiverIdentifier"/>
 			</columns>
 		</query>
