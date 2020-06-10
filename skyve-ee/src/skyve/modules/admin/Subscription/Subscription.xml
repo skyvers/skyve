@@ -36,7 +36,8 @@
 		<boolean name="declined">
 			<displayName>Declined</displayName>
 		</boolean>
-		<enum name="formatType" documentRef="Communication" attributeRef="formatType">
+		<enum name="formatType" documentRef="Communication" attributeRef="formatType" deprecated="true">
+			<documentation>This feature has been deprecated</documentation>
 			<displayName>Format</displayName>
 		</enum>
 		<text name="preferredReceiverIdentifier">

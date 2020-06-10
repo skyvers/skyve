@@ -42,6 +42,7 @@ import modules.admin.domain.Subscription;
 
 public class CommunicationUtil {
 
+	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
@@ -80,11 +81,12 @@ public class CommunicationUtil {
 	 * @param responseMode
 	 * @param beans
 	 * 
-	 * returns the filePath of the written email file (if this option is chosen and write is successful)
+	 *            returns the filePath of the written email file (if this option is chosen and write is successful)
 	 * 
 	 * @throws Exception
 	 */
-	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
+			MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 
 		String resultingFilePath = null;
 
@@ -92,100 +94,46 @@ public class CommunicationUtil {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(Communication.MODULE_NAME);
-		Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
-		Document subDoc = module.getDocument(customer, Subscription.DOCUMENT_NAME);
+		Document communicationDocument = module.getDocument(customer, Communication.DOCUMENT_NAME);
+		Document subscriptionDocument = module.getDocument(customer, Subscription.DOCUMENT_NAME);
 
 		// augment communication specific beans to always include the
 		// communication itself, and the current admin user
 		modules.admin.domain.User adminUser = ModulesUtil.currentAdminUser();
 		List<Bean> beanList = new ArrayList<>();
-		if (specificBeans!=null && specificBeans.length > 0) {
+		if (specificBeans != null && specificBeans.length > 0) {
 			Collections.addAll(beanList, specificBeans);
 		}
 		Collections.addAll(beanList, communication, adminUser);
 		Bean[] beans = beanList.toArray(new Bean[beanList.size()]);
-		
+
 		String sendFromExpression = communication.getSendFrom();
 		String sendFrom = null;
-		if(sendFromExpression==null){
+		if (sendFromExpression == null) {
 			sendFrom = ConfigurationExtension.defaultSMTPSender();
 		} else {
-			//resolve biding expression
-			sendFrom =  Binder.formatMessage(customer, sendFromExpression, specificBeans);
+			// resolve biding expression
+			sendFrom = Binder.formatMessage(customer, sendFromExpression, specificBeans);
 		}
-
-		FormatType format = communication.getFormatType();
 
 		// handle addressee with optional override
-		String resolvedSendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
+		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
 		if (communication.getSendToOverride() != null) {
-			resolvedSendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
-		} else {
-			// handle Subscriptions
-			try {
-				pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-				
-				DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-				q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, resolvedSendTo);
-				Subscription subscription = q.beanResult();
-	
-				if (subscription != null) {
-					// check for declined
-					if (Boolean.TRUE.equals(subscription.getDeclined())) {
-						StringBuilder msg = new StringBuilder(128);
-						if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
-							msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
-							msg.append(resolvedSendTo).append(" has a ").append(subDoc.getSingularAlias());
-							msg.append(" set ").append(Subscription.declinedPropertyName);
-							if (subscription.getFormatType() != null) {
-								msg.append(" for ").append(subscription.getFormatType().toDescription());
-							}
-	
-							// block the communication if explicit mode
-							if (ResponseMode.EXPLICIT.equals(responseMode)) {
-								throw new Exception(msg.toString());
-							}
-						}
-					} else {
-						format = subscription.getFormatType();
-						resolvedSendTo = subscription.getPreferredReceiverIdentifier();
-					}
-				}
-			} finally {
-			pers.resetDocumentPermissionScopes();
-			}
+			sendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
 		}
+		List<String> sendToAddresses = resolveAndValidateEmailAddressList(communication, sendTo, responseMode, communicationDocument, subscriptionDocument);
 
-		// Validate resolved email address
-		if(resolvedSendTo==null || resolvedSendTo.trim().length()<1) {
-			throw new IllegalArgumentException(INVALID_RESOLVED_EMAIL_ADDRESS); 
-		}
-		ValidationException ve = new ValidationException();
-		TextValidator v = new TextValidator();
-        v.setType(ValidatorType.email);
-        v.validate(user, resolvedSendTo, "email1", "Email", null, ve);
-        if(!ve.getMessages().isEmpty()) {
-        	if (ResponseMode.SILENT.equals(responseMode)) {
-				Util.LOGGER.log(Level.ALL, "The resolved email sendTo address " + resolvedSendTo + " could not be validated.");
-			} else {
-				throw ve;
-			}  
-        }
-        
-       //Resolve email message contents
+		// Resolve email message contents
 		String ccTo = formatCommunicationMessage(customer, communication.getCcTo(), beans);
-		if(communication.getCcToOverride()!=null){
+		if (communication.getCcToOverride() != null) {
 			ccTo = formatCommunicationMessage(customer, communication.getCcToOverride(), beans);
 		}
-		String[] cc = null;
-		if(ccTo!=null){
-			cc = new String[] {ccTo};
-		}
-		
-		//add myself to bcc if monitoring outgoing email
+		List<String> ccToAddresses = resolveAndValidateEmailAddressList(communication, ccTo, responseMode, communicationDocument, subscriptionDocument);
+
+		// add the current admin user to bcc if monitoring outgoing email
 		String[] bcc = null;
-		if(Boolean.TRUE.equals(communication.getMonitorBcc())){
-			bcc = new String[] {adminUser.getContact().getEmail1()};
+		if (Boolean.TRUE.equals(communication.getMonitorBcc())) {
+			bcc = new String[] { adminUser.getContact().getEmail1() };
 		}
 
 		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
@@ -208,7 +156,7 @@ public class CommunicationUtil {
 
 		// prioritise additional attachments first, then the usual
 		List<MailAttachment> attachmentList = new ArrayList<>();
-		if (additionalAttachments!=null && additionalAttachments.length > 0) {
+		if (additionalAttachments != null && additionalAttachments.length > 0) {
 			Collections.addAll(attachmentList, additionalAttachments);
 		}
 		Collections.addAll(attachmentList, getDefinedAttachments(communication));
@@ -235,18 +183,21 @@ public class CommunicationUtil {
 
 		switch (actionType) {
 		case FILE:
-		
-			String fileName = resolvedSendTo.replace("@", "_").replace(".", "_");
+
+			String fileName = sendTo.replace("@", "_").replace(".", "_");
 			String filePath = FileUtil.constructSafeFilePath(communication.getBasePath(), fileName, ".eml", true, communication.getBatch());
-			
+
 			try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
 				// add attachments
 
 				if (RunMode.ACTION.equals(runMode)) {
-					switch (format) {
+					switch (communication.getFormatType()) {
 					case email:
-						EXT.writeMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString())).attach(attachments), fos);
+						EXT.writeMail(
+								new Mail().addTo(sendToAddresses).addCC(ccToAddresses).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString()))
+										.attach(attachments),
+								fos);
 						resultingFilePath = filePath;
 						break;
 					default:
@@ -265,11 +216,12 @@ public class CommunicationUtil {
 			break;
 		default:
 			if (RunMode.ACTION.equals(runMode)) {
-				switch (format) {
+				switch (communication.getFormatType()) {
 				case email:
-					EXT.sendMail(new Mail().addTo(resolvedSendTo).addCC(cc).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
-					
-					if(webContext!=null) {
+					EXT.sendMail(
+							new Mail().addTo(sendToAddresses).addCC(ccToAddresses).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
+
+					if (webContext != null) {
 						webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
 					}
 					break;
@@ -279,11 +231,90 @@ public class CommunicationUtil {
 			}
 			break;
 		}
-		
+
 		return resultingFilePath;
 	}
 
-	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	/**
+	 * Create a list of address Strings which have been validated and resolved via the subscription facility
+	 * 
+	 * @param addressList
+	 * @return
+	 */
+	private static List<String> resolveAndValidateEmailAddressList(Communication c, String addressList, ResponseMode responseMode, Document communicationDoc,
+			Document subscriptionDoc) throws Exception {
+
+		List<String> resolvedAndValidatedAddresses = new ArrayList<>();
+
+		if (addressList != null) {
+			String[] addresses = addressList.split(EMAIL_ADDRESS_DELIMETERS);
+
+			for (int i = 0; i < addresses.length; i++) {
+
+				String address = addresses[i].trim();
+
+				try {
+					// handle Subscription redirect for messages of the same format
+					CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
+					DocumentQuery q = CORE.getPersistence().newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+					q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, address);
+					q.getFilter().addEquals(Subscription.formatTypePropertyName, c.getFormatType());
+					Subscription subscription = q.beanResult();
+
+					if (subscription != null) {
+						// check for declined
+						if (Boolean.TRUE.equals(subscription.getDeclined())) {
+							StringBuilder msg = new StringBuilder(128);
+							if (subscription.getFormatType() == null || c.getFormatType().equals(subscription.getFormatType())) {
+								msg.append(communicationDoc.getSingularAlias()).append(" prevented because the recipient ");
+								msg.append(address).append(" has a ").append(subscriptionDoc.getSingularAlias());
+								msg.append(" set ").append(Subscription.declinedPropertyName);
+								if (subscription.getFormatType() != null) {
+									msg.append(" for ").append(subscription.getFormatType().toDescription());
+								}
+
+								// block the communication if explicit mode
+								if (ResponseMode.EXPLICIT.equals(responseMode)) {
+									throw new Exception(msg.toString());
+								}
+							}
+						} else {
+							// format = subscription.getFormatType();
+							address = subscription.getPreferredReceiverIdentifier();
+						}
+					}
+				} finally {
+					CORE.getPersistence().resetDocumentPermissionScopes();
+				}
+
+				// validate the resulting email address
+				ValidationException ve = new ValidationException();
+				TextValidator v = new TextValidator();
+				v.setType(ValidatorType.email);
+				v.validate(CORE.getUser(), address, "email1", "Email", null, ve);
+				if (!ve.getMessages().isEmpty()) {
+					if (ResponseMode.SILENT.equals(responseMode)) {
+						Util.LOGGER.log(Level.ALL, "The resolved email address " + address + " could not be validated.");
+					} else {
+						throw ve;
+					}
+				}
+
+				// Validate resolved email address
+				if (address == null || address.trim().length() < 1) {
+					throw new IllegalArgumentException(INVALID_RESOLVED_EMAIL_ADDRESS);
+				}
+
+				resolvedAndValidatedAddresses.add(address);
+			}
+		}
+
+		return resolvedAndValidatedAddresses;
+
+	}
+
+	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
+			MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
@@ -297,7 +328,8 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void send(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	public static void send(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
+			throws Exception {
 		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
@@ -311,7 +343,8 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void send(WebContext webContext, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	public static void send(WebContext webContext, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments,
+			Bean... specificBeans) throws Exception {
 		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
 		if (RunMode.ACTION.equals(runMode) && ResponseMode.EXPLICIT.equals(responseMode) && webContext != null) {
 			webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
@@ -328,7 +361,8 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
+			throws Exception {
 		return actionCommunicationRequest(ActionType.FILE, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
@@ -388,7 +422,8 @@ public class CommunicationUtil {
 	 * 
 	 * @return
 	 */
-	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody) throws Exception {
+	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody)
+			throws Exception {
 
 		// create a default communication
 		Communication result = getSystemCommunicationByDescription(description);
@@ -426,7 +461,8 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
+			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 
 		String sendTo = "{contact.email1}"; // user contact email address
 		String ccTo = null;
@@ -434,7 +470,8 @@ public class CommunicationUtil {
 		sendFailSafeSystemCommunication(webContext, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
-	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
+			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
@@ -450,12 +487,14 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody,
+			ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
 		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
 
-	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode,
+			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
@@ -634,7 +673,7 @@ public class CommunicationUtil {
 		// default url binding to first bean
 		if (beans != null && beans.length > 0 && expression != null) {
 			Bean bean = beans[0];
-			if(bean!=null) {
+			if (bean != null) {
 				result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
 				result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
 			}

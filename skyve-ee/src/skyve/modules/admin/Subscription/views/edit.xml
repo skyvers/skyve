@@ -22,11 +22,6 @@
 		</row>
 		<row>
 			<item>
-				<default binding="formatType" />
-			</item>
-		</row>
-		<row>
-			<item>
 				<default binding="preferredReceiverIdentifier" />
 			</item>
 		</row>
