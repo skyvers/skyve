@@ -158,13 +158,11 @@ public class SQLMetaDataUtil {
 							boolean passwordChangeRequired = rs.getBoolean(3); // passwordExpired
 							Timestamp passwordLastChanged = rs.getTimestamp(4);
 							String publicUserId = rs.getString(5);
-							if (passwordChangeRequired) {
-								// the public user never requires a password change
-								if (publicUserId != null) {
-									passwordChangeRequired = false;
-								}
+							// the public user never requires a password change
+							if (publicUserId != null) {
+								passwordChangeRequired = false;
 							}
-							else {
+							else if (! passwordChangeRequired) {
 								if (UtilImpl.PASSWORD_EXPIRY_IN_DAYS > 0) {
 									if (passwordLastChanged == null) {
 										passwordChangeRequired = true;
