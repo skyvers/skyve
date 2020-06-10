@@ -168,7 +168,7 @@ public class SQLMetaDataUtil {
 										passwordChangeRequired = true;
 									}
 									else {
-										long passwordExpiryInMillis = passwordLastChanged.getTime() + (UtilImpl.PASSWORD_EXPIRY_IN_DAYS * 86400000);
+										long passwordExpiryInMillis = passwordLastChanged.getTime() + (UtilImpl.PASSWORD_EXPIRY_IN_DAYS * 86400000L);
 										if (System.currentTimeMillis() >= passwordExpiryInMillis) {
 											passwordChangeRequired = true;
 										}
