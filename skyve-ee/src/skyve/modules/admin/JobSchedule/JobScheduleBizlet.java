@@ -14,7 +14,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 
 import modules.admin.domain.JobSchedule;
@@ -297,22 +296,22 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		}
 
 		bean.setCronExpression(expression.toString());
-		
-		Customer customer = CORE.getUser().getCustomer();
-		
-		// Determine the job schedule user
-		StringBuilder userPrincipal = new StringBuilder(128);
-		userPrincipal.append(customer.getName());
-		userPrincipal.append('/').append(bean.getRunAs().getUserName());
-		User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
-
-		// Re-schedule the job
-		JobScheduler.unscheduleJob(bean, customer);
-		if (!Boolean.TRUE.equals(bean.getDisabled())) {
-			JobScheduler.scheduleJob(bean, user);
-		}
 	}
 
+	/**
+	 * Reschedule this job after any runAs user name change has been flushed.
+	 */
+	@Override
+	public void postSave(JobSchedule bean) throws Exception {
+		Customer customer = CORE.getUser().getCustomer();
+		
+		// Re-schedule the job
+		JobScheduler.unscheduleJob(bean, customer);
+		if (! Boolean.TRUE.equals(bean.getDisabled())) {
+			JobScheduler.scheduleJob(bean, bean.getRunAs().toMetaDataUser());
+		}
+	}
+	
 	@Override
 	public void preDelete(JobSchedule bean) throws Exception {
 		JobScheduler.unscheduleJob(bean, CORE.getUser().getCustomer());

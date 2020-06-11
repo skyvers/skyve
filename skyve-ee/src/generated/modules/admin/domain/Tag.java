@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -350,7 +351,7 @@ public class Tag extends AbstractPersistentBean {
 	/**
 	 * Copy to user
 	 **/
-	private UserProxy copyToUser = null;
+	private UserProxyExtension copyToUser = null;
 	/**
 	 * Tag Name
 	 **/
@@ -590,7 +591,7 @@ public class Tag extends AbstractPersistentBean {
 	 * {@link #copyToUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getCopyToUser() {
+	public UserProxyExtension getCopyToUser() {
 		return copyToUser;
 	}
 
@@ -599,7 +600,7 @@ public class Tag extends AbstractPersistentBean {
 	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
-	public void setCopyToUser(UserProxy copyToUser) {
+	public void setCopyToUser(UserProxyExtension copyToUser) {
 		if (this.copyToUser != copyToUser) {
 			this.copyToUser = copyToUser;
 		}

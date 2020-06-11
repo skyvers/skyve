@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.Startup.StartupExtension;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -191,7 +192,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * <br/>
 	 * The anonymous public user asserted on all public pages.
 	 **/
-	private UserProxy publicUser = null;
+	private UserProxyExtension publicUser = null;
 	/**
 	 * Email From
 	 **/
@@ -374,7 +375,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * {@link #publicUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getPublicUser() {
+	public UserProxyExtension getPublicUser() {
 		return publicUser;
 	}
 
@@ -383,7 +384,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * @param publicUser	The new value.
 	 **/
 	@XmlElement
-	public void setPublicUser(UserProxy publicUser) {
+	public void setPublicUser(UserProxyExtension publicUser) {
 		if (this.publicUser != publicUser) {
 			preset(publicUserPropertyName, publicUser);
 			this.publicUser = publicUser;

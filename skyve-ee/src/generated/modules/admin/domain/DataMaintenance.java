@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.DataMaintenance.DataMaintenanceExtension;
+import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Audit.Operation;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -610,7 +611,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * User
 	 **/
-	private UserProxy auditUser = null;
+	private UserProxyExtension auditUser = null;
 	/**
 	 * Found
 	 **/
@@ -1167,7 +1168,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #auditUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getAuditUser() {
+	public UserProxyExtension getAuditUser() {
 		return auditUser;
 	}
 
@@ -1176,7 +1177,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @param auditUser	The new value.
 	 **/
 	@XmlElement
-	public void setAuditUser(UserProxy auditUser) {
+	public void setAuditUser(UserProxyExtension auditUser) {
 		if (this.auditUser != auditUser) {
 			preset(auditUserPropertyName, auditUser);
 			this.auditUser = auditUser;

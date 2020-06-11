@@ -38,6 +38,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Time;
 
 import modules.admin.User.UserExtension;
+import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
 import modules.admin.domain.UserProxy;
@@ -568,8 +569,8 @@ public class ModulesUtil {
 	 * 
 	 * @return The current {@link modules.admin.domain.UserProxy}
 	 */
-	public static UserProxy currentAdminUserProxy() {
-		UserProxy result = null;
+	public static UserProxyExtension currentAdminUserProxy() {
+		UserProxyExtension result = null;
 		try {
 			Persistence p = CORE.getPersistence();
 			result = p.retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, p.getUser().getId());

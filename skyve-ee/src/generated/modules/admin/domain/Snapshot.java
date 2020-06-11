@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -60,7 +61,7 @@ public class Snapshot extends AbstractPersistentBean {
 	/**
 	 * Copy to user
 	 **/
-	private UserProxy copyToUser = null;
+	private UserProxyExtension copyToUser = null;
 	/**
 	 * Snapshot Name for Copy
 	 **/
@@ -185,7 +186,7 @@ public class Snapshot extends AbstractPersistentBean {
 	 * {@link #copyToUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getCopyToUser() {
+	public UserProxyExtension getCopyToUser() {
 		return copyToUser;
 	}
 
@@ -194,7 +195,7 @@ public class Snapshot extends AbstractPersistentBean {
 	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
-	public void setCopyToUser(UserProxy copyToUser) {
+	public void setCopyToUser(UserProxyExtension copyToUser) {
 		if (this.copyToUser != copyToUser) {
 			this.copyToUser = copyToUser;
 		}

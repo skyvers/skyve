@@ -50,6 +50,7 @@ public class Subscription extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String declinedPropertyName = "declined";
 	/** @hidden */
+	@Deprecated
 	public static final String formatTypePropertyName = "formatType";
 	/** @hidden */
 	public static final String preferredReceiverIdentifierPropertyName = "preferredReceiverIdentifier";
@@ -70,7 +71,10 @@ public class Subscription extends AbstractPersistentBean {
 	private Boolean declined;
 	/**
 	 * Format
+	 * <br/>
+	 * This feature has been deprecated
 	 **/
+	@Deprecated
 	private FormatType formatType;
 	/**
 	 * Redirect to
@@ -189,6 +193,7 @@ public class Subscription extends AbstractPersistentBean {
 	 * {@link #formatType} accessor.
 	 * @return	The value.
 	 **/
+	@Deprecated
 	public FormatType getFormatType() {
 		return formatType;
 	}
@@ -197,6 +202,7 @@ public class Subscription extends AbstractPersistentBean {
 	 * {@link #formatType} mutator.
 	 * @param formatType	The new value.
 	 **/
+	@Deprecated
 	@XmlElement
 	public void setFormatType(FormatType formatType) {
 		preset(formatTypePropertyName, formatType);

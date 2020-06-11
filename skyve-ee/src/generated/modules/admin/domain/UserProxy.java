@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -22,7 +23,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
-public class UserProxy extends AbstractPersistentBean {
+public abstract class UserProxy extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -80,7 +81,7 @@ public class UserProxy extends AbstractPersistentBean {
 		return UserProxy.DOCUMENT_NAME;
 	}
 
-	public static UserProxy newInstance() {
+	public static UserProxyExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}

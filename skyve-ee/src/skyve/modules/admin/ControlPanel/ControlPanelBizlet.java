@@ -20,9 +20,9 @@ import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
 import modules.admin.ModulesUtil.DomainValueSortByCode;
+import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
-import modules.admin.domain.UserProxy;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	private static final long serialVersionUID = -6033906392152210002L;
@@ -30,7 +30,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
 		// Set the user name to the logged in user
-		UserProxy user = ModulesUtil.currentAdminUserProxy();
+		UserProxyExtension user = ModulesUtil.currentAdminUserProxy();
 		bean.setSailUser(user);
 		bean.setSailBaseUrl(Util.getSkyveContextUrl() + '/');
 		bean.setSailTestStrategy(SailTestStrategy.None);

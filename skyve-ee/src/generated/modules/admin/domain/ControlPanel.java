@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -411,7 +412,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * User
 	 **/
-	private UserProxy sailUser = null;
+	private UserProxyExtension sailUser = null;
 	/**
 	 * Module Name
 	 **/
@@ -758,7 +759,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #sailUser} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getSailUser() {
+	public UserProxyExtension getSailUser() {
 		return sailUser;
 	}
 
@@ -767,7 +768,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * @param sailUser	The new value.
 	 **/
 	@XmlElement
-	public void setSailUser(UserProxy sailUser) {
+	public void setSailUser(UserProxyExtension sailUser) {
 		if (this.sailUser != sailUser) {
 			preset(sailUserPropertyName, sailUser);
 			this.sailUser = sailUser;

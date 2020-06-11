@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -906,7 +907,7 @@ public class JobSchedule extends AbstractPersistentBean {
 	 * <br/>
 	 * The user to run the job
 	 **/
-	private UserProxy runAs = null;
+	private UserProxyExtension runAs = null;
 	/**
 	 * Job Scheduled Immediately
 	 * <br/>
@@ -3538,7 +3539,7 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * {@link #runAs} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxy getRunAs() {
+	public UserProxyExtension getRunAs() {
 		return runAs;
 	}
 
@@ -3547,7 +3548,7 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * @param runAs	The new value.
 	 **/
 	@XmlElement
-	public void setRunAs(UserProxy runAs) {
+	public void setRunAs(UserProxyExtension runAs) {
 		if (this.runAs != runAs) {
 			preset(runAsPropertyName, runAs);
 			this.runAs = runAs;
