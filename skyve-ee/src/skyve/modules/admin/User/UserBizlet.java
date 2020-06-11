@@ -31,6 +31,7 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
+import modules.admin.domain.UserProxy;
 
 public class UserBizlet extends Bizlet<UserExtension> {
 	private static final long serialVersionUID = 5947293714061984815L;
@@ -230,8 +231,23 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		bean.clearAssignedRoles();
 		bean.setNewGroup(null);
 		bean.setNewPassword(null);
+		evictUserProxy(bean);
+	}
+	
+	@Override
+	public void preDelete(UserExtension bean) throws Exception {
+		evictUserProxy(bean);
 	}
 
+	// Evict UserProxy bean if its been cached
+	private static void evictUserProxy(UserExtension bean) {
+		Persistence p = CORE.getPersistence();
+		String bizId = bean.getBizId();
+		if (p.sharedCacheBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId)) {
+			p.evictSharedCachedBean(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, bizId);
+		}
+	}
+	
 	public static void validateUserContact(UserExtension bean, ValidationException e) {
 		if (bean.getContact() == null) {
 			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
