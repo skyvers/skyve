@@ -59,8 +59,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "21";
-	public static final String SKYVE_VERSION = "4.1.0";
+	public static final String WEB_RESOURCE_FILE_VERSION = "22";
+	public static final String SKYVE_VERSION = "4.1.1-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
