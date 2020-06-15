@@ -367,7 +367,7 @@ public class WebUtil {
 		if (result != null) {
 			if (! result.startsWith(Util.getSkyveContextUrl())) {
 				Util.LOGGER.warning("referer header " + result +
-										" looks tamplered with because it does not start with " + Util.getSkyveContextUrl() + 
+										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
 										". This looks like a doctored request because Referrer-Policy should be same-origin!");
 				result = null;
 			}
