@@ -12,7 +12,7 @@ import org.skyve.content.SearchResults;
  * <code>
  * <pre>
  *	@Stateless
- *	public class EJBRemoteContentManagerServerBean extends org.skyve.impl.content.ejb.EJBRemoteContentManagerServerBean {
+ *	public class EJBRemoteContentManagerServerBean extends org.skyve.impl.content.ejb.AbstractEJBRemoteContentManagerServerBean {
  *		// nothing to do here
  *	}
  * </pre>

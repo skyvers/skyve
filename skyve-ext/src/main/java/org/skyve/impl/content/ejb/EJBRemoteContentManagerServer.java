@@ -40,6 +40,14 @@ import org.skyve.content.SearchResults;
  *		<outbound-socket-binding name="remote-ejb">
  *			<remote-destination host="localhost" port="8080"/>
  *		</outbound-socket-binding>
+ * Add /WEB-INF/jboss-ejb-client.xml to your project with the following contents...
+ * <jboss-ejb-client xmlns="urn:jboss:ejb-client:1.0">
+ *     <client-context>
+ *         <ejb-receivers>
+ *             <remoting-ejb-receiver outbound-connection-ref="remote-ejb-connection"/>
+ *         </ejb-receivers>
+ *     </client-context>
+ * </jboss-ejb-client>
  *
  * @author mike
  */
