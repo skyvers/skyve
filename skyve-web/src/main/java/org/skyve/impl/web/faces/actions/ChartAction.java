@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.weld.exceptions.IllegalArgumentException;
 import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.ChartModel;
 import org.primefaces.model.charts.bar.BarChartDataSet;
