@@ -449,7 +449,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 						if (!documentNames.contains(value)) {
 							String message = String.format(
 									"%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. "
-											+ "Excepted %2$s to be defined in the <documents> section of %4$s.xml",
+											+ "Expected %2$s to be defined in the <documents> section of %4$s.xml",
 									metaDataName, value, role.getName(), result.getName());
 							throw new MetaDataException(message);
 						}
