@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.converters.date;
+package org.skyve.impl.web.faces.converters.datetime;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -6,10 +6,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 
-public class DD_MM_YYYY extends org.skyve.domain.types.converters.date.DD_MM_YYYY implements Converter {
+public class MM_DD_YYYY extends org.skyve.domain.types.converters.datetime.MM_DD_YYYY implements Converter {
+
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -18,8 +19,8 @@ public class DD_MM_YYYY extends org.skyve.domain.types.converters.date.DD_MM_YYY
 				return fromDisplayValue(processedValue);
 			}
 			catch (Exception e) {
-				String message = String.format("Invalid date (use %s format)",
-						org.skyve.domain.types.converters.date.DD_MM_YYYY.PATTERN);
+				String message = String.format("Invalid date/time (use %s format)",
+						org.skyve.domain.types.converters.datetime.MM_DD_YYYY.PATTERN);
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
 		}
@@ -29,7 +30,7 @@ public class DD_MM_YYYY extends org.skyve.domain.types.converters.date.DD_MM_YYY
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Object value) {
 		try {
-			return toDisplayValue((DateOnly) value);
+			return toDisplayValue((DateTime) value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return null;

@@ -7,8 +7,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class DD_MMM_YYYY_HH_MI implements Converter<DateTime> {
-	private static final String PATTERN = "dd-MMM-yyyy hh:mm a";
+public class MM_DD_YYYY_HH_MI implements Converter<DateTime> {
+
+	public static final String PATTERN = "MM/dd/yyyy hh:mm a";
 
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws Exception {

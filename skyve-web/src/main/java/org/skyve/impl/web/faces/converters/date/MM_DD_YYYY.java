@@ -9,7 +9,8 @@ import javax.faces.convert.ConverterException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.util.UtilImpl;
 
-public class DD_MM_YYYY extends org.skyve.domain.types.converters.date.DD_MM_YYYY implements Converter {
+public class MM_DD_YYYY extends org.skyve.domain.types.converters.date.MM_DD_YYYY implements Converter {
+
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -19,7 +20,7 @@ public class DD_MM_YYYY extends org.skyve.domain.types.converters.date.DD_MM_YYY
 			}
 			catch (Exception e) {
 				String message = String.format("Invalid date (use %s format)",
-						org.skyve.domain.types.converters.date.DD_MM_YYYY.PATTERN);
+						org.skyve.domain.types.converters.date.MM_DD_YYYY.PATTERN);
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
 		}
