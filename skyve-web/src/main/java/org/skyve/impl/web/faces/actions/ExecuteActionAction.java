@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
+import org.primefaces.PrimeFaces;
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -16,6 +17,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
@@ -62,6 +64,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	    if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
+			boolean notPersistedBefore = targetBean.isNotPersisted();
 			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
 																				resourceName,
 																				targetBean,
@@ -69,7 +72,11 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 			if (! vetoed) {
 				ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
 				internalCustomer.interceptAfterServerSideAction(targetDocument, resourceName, result, webContext);
-				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+				Bean resultBean = result.getBean();
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) resultBean);
+				if (notPersistedBefore && resultBean.isPersisted()) {
+					PrimeFaces.current().executeScript("SKYVE.PF.saveHistory('" + Util.getDocumentUrl(result.getBean()) + "')");
+				}
 			}
 		}
 

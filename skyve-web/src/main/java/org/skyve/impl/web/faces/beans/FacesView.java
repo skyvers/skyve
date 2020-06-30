@@ -225,6 +225,9 @@ public class FacesView<T extends Bean> extends Harness {
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
+			PrimeFaces.current().executeScript("SKYVE.PF.saveHistory('" +
+												Util.getDocumentUrl(getCurrentBean().getBean()) +
+												"')");
 			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
 		}
 	}

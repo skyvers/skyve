@@ -180,6 +180,30 @@ SKYVE.PF = function() {
 			}
 		},
 		
+		saveHistory: function(url) {
+			var sessionHistory = getSessionHistory();
+			if (sessionHistory.length > 0) {
+				sessionHistory.pop();
+			}
+			sessionHistory.push(url);
+			sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+			if (window.history) {
+				if (history.replaceState) {
+					history.replaceState({}, '', url);
+				}
+			}
+		},
+		
+		restoreHistory: function() {
+			var sessionHistory = getSessionHistory();
+			if (sessionHistory.length > 0) {
+				if (window.history) {
+					if (history.replaceState) {
+						history.replaceState({}, '', sessionHistory[sessionHistory.length - 1]);
+					}
+				}
+			}
+		},
 		
         toggleFilters: function(dataTableId) {
             var hiddenClass = 'hiddenFilter';

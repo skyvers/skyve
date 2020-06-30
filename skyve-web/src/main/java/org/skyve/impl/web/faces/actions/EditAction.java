@@ -8,6 +8,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -64,12 +65,17 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		try {
 			if (bizId == null) {
 				Map<String, Object> session = ec.getSessionMap();
+				// This is executed from a redirect from a data grid add or zoom in, or from a subsequent zoom out or remove.
+				// See ActionUtil.redirectViewScopedConversation().
 				if (session.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
 					FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 					facesView.setViewBinding(sessionView.getViewBinding());
 					facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 					webContext = sessionView.getWebContext();
 					bean = (T) webContext.getCurrentBean();
+					if (bean.isPersisted()) {
+						PrimeFaces.current().executeScript("SKYVE.PF.restoreHistory()");
+					}
 				}
 				else {
 					// No security check is required as we are at the top of the conversation
