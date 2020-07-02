@@ -43,161 +43,96 @@ isc.addMethods(Date.prototype, {
 	},
 	toMMM_DD_YYYY_HH_MI_SS: function() {
 		return this.toMMM_DD_YYYY_HH_MI() + ':' + this.getSeconds().stringify();
-	},
-});
-
-// Ensure that DateItem calendar picker works in UTC
-/*
-isc.DateTimeItem.addProperties({
-	pickerDataChanged : function (picker) {
-        var date = picker.getData();
-
-        // avoid firing 'updateValue' while setting the values of sub items
-        this._suppressUpdates = true;
-
-        if (this.useTextField) {
-//            date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
-            this.dateTextField.setValue(date.toShortDate(this.displayFormat));
-        } else {
-            var year = date.getUTCFullYear(),
-	            month = date.getUTCMonth(),
-	            day = date.getUTCDate();
-            if (this.yearSelector) this.yearSelector.setValue(year);
-            if (this.monthSelector) this.monthSelector.setValue(month);
-            if (this.daySelector) this.daySelector.setValue(day);
-        }
-        this._suppressUpdates = false;
-        
-        // Explicitly call 'updateValue' to save the new date 
-        // (handles firing change handlers, etc. too)
-        this.updateValue();
-        
-        // Ensure we have focus
-        if (! this.hasFocus) this.focusInItem();
 	}
 });
-*/
+
 // Define our type editors here
 
 isc.ClassFactory.defineClass("BizDateItem", "DateItem");
 isc.BizDateItem.addClassMethods({
+	_replaceMonthWithOrdinal: function(value, month) {
+		var lowerMonth = month.toLowerCase();
+		if (lowerMonth.startsWith('jan')) {
+			value = value.replaceAll(month, '1');
+		}
+		else if (lowerMonth.startsWith('feb')) {
+			value = value.replaceAll(month, '2');
+		}
+		else if (lowerMonth.startsWith('mar')) {
+			value = value.replaceAll(month, '3');
+		}
+		else if (lowerMonth.startsWith('apr')) {
+			value = value.replaceAll(month, '4');
+		}
+		else if (lowerMonth.startsWith('may')) {
+			value = value.replaceAll(month, '5');
+		}
+		else if (lowerMonth.startsWith('jun')) {
+			value = value.replaceAll(month, '6');
+		}
+		else if (lowerMonth.startsWith('jul')) {
+			value = value.replaceAll(month, '7');
+		}
+		else if (lowerMonth.startsWith('aug')) {
+			value = value.replaceAll(month, '8');
+		}
+		else if (lowerMonth.startsWith('sep')) {
+			value = value.replaceAll(month, '9');
+		}
+		else if (lowerMonth.startsWith('oct')) {
+			value = value.replaceAll(month, '10');
+		}
+		else if (lowerMonth.startsWith('nov')) {
+			value = value.replaceAll(month, '11');
+		}
+		else if (lowerMonth.startsWith('dec')) {
+			value = value.replaceAll(month, '12');
+		}
+		return value;
+	},
+
 	parseInput: function(value, datePattern) { // value is not only a string		
 		if (isc.isA.Date(value)) {
 			return value;
 		}
 		
-// console.log("datePattern:", datePattern);
-		
 		if (value) { // must be a string
 			value = value.trim();
 			
 			// US date format
-			if(datePattern && datePattern.startsWith("toMMM")) {
+			if (datePattern && datePattern.startsWith("toMMM")) {
 				// look for a string month match
 				var match = /^([A-Za-z]+)[^A-Za-z0-9]\d?\d.*$/.exec(value); // month word, 1 or 2 digits, anything 
 				if (match) {
-					var month = match[1];
-// console.log("found US month match:", month);
-					var lowerMonth = month.toLowerCase();
-					if (lowerMonth.startsWith('jan')) {
-						value = value.replaceAll(month, '1');
-					}
-					else if (lowerMonth.startsWith('feb')) {
-						value = value.replaceAll(month, '2');
-					}
-					else if (lowerMonth.startsWith('mar')) {
-						value = value.replaceAll(month, '3');
-					}
-					else if (lowerMonth.startsWith('apr')) {
-						value = value.replaceAll(month, '4');
-					}
-					else if (lowerMonth.startsWith('may')) {
-						value = value.replaceAll(month, '5');
-					}
-					else if (lowerMonth.startsWith('jun')) {
-						value = value.replaceAll(month, '6');
-					}
-					else if (lowerMonth.startsWith('jul')) {
-						value = value.replaceAll(month, '7');
-					}
-					else if (lowerMonth.startsWith('aug')) {
-						value = value.replaceAll(month, '8');
-					}
-					else if (lowerMonth.startsWith('sep')) {
-						value = value.replaceAll(month, '9');
-					}
-					else if (lowerMonth.startsWith('oct')) {
-						value = value.replaceAll(month, '10');
-					}
-					else if (lowerMonth.startsWith('nov')) {
-						value = value.replaceAll(month, '11');
-					}
-					else if (lowerMonth.startsWith('dec')) {
-						value = value.replaceAll(month, '12');
-					}
+					value = this._replaceMonthWithOrdinal(value, match[1]);
 				}
-			} else {
+			}
+			else {
 				// look for a string month match
 				var match = /^\d?\d[^A-Za-z0-9]([A-Za-z]+).*$/.exec(value); // 1 or 2 digits, anything, month word
 				if (match) {
-					var month = match[1];
-// console.log("found non-US month match:", month);
-					var lowerMonth = month.toLowerCase();
-					if (lowerMonth.startsWith('jan')) {
-						value = value.replaceAll(month, '1');
-					}
-					else if (lowerMonth.startsWith('feb')) {
-						value = value.replaceAll(month, '2');
-					}
-					else if (lowerMonth.startsWith('mar')) {
-						value = value.replaceAll(month, '3');
-					}
-					else if (lowerMonth.startsWith('apr')) {
-						value = value.replaceAll(month, '4');
-					}
-					else if (lowerMonth.startsWith('may')) {
-						value = value.replaceAll(month, '5');
-					}
-					else if (lowerMonth.startsWith('jun')) {
-						value = value.replaceAll(month, '6');
-					}
-					else if (lowerMonth.startsWith('jul')) {
-						value = value.replaceAll(month, '7');
-					}
-					else if (lowerMonth.startsWith('aug')) {
-						value = value.replaceAll(month, '8');
-					}
-					else if (lowerMonth.startsWith('sep')) {
-						value = value.replaceAll(month, '9');
-					}
-					else if (lowerMonth.startsWith('oct')) {
-						value = value.replaceAll(month, '10');
-					}
-					else if (lowerMonth.startsWith('nov')) {
-						value = value.replaceAll(month, '11');
-					}
-					else if (lowerMonth.startsWith('dec')) {
-						value = value.replaceAll(month, '12');
-					}
+					value = this._replaceMonthWithOrdinal(value, match[1]);
 				}
 			}
 			
 			var result = isc.DateUtil.parseSchemaDate(value);
 			if (! result) {
 				// any non-matches returns null
-				if(datePattern && datePattern.startsWith("toMM")) {
-					result = Date.parseInput(value, 'MDY', 50, true);
-				} else {
-					result = Date.parseInput(value, 'DMY', 50, true);
+				if (datePattern && datePattern.startsWith("toMM")) {
+					result = isc.DateUtil.parseInput(value, 'MDY', 50, true);
+				}
+				else {
+					result = isc.DateUtil.parseInput(value, 'DMY', 50, true);
 				}
 				// check if we have just a day and month, no year or time etc
 				if (! result) {
 					if (/^\d?\d[^A-Za-z0-9]\d?\d$/.test(value)) { // 1 or 2 digits, anything, 1 or 2 digits
 						// try adding the current year on the end - any non-matches returns null
-						if(datePattern && datePattern.startsWith("toMM")) {
-							result = Date.parseInput(value + ' ' + Date.create().getFullYear(), 'MDY', 50, true);
-						} else {
-							result = Date.parseInput(value + ' ' + Date.create().getFullYear(), 'DMY', 50, true);
+						if (datePattern && datePattern.startsWith("toMM")) {
+							result = isc.DateUtil.parseInput(value + ' ' + Date.create().getFullYear(), 'MDY', 50, true);
+						}
+						else {
+							result = isc.DateUtil.parseInput(value + ' ' + Date.create().getFullYear(), 'DMY', 50, true);
 						}
 					}
 				}
@@ -229,7 +164,7 @@ isc.BizDateItem.addProperties({
    	textFieldProperties: {selectOnFocus: true},
    	showPickerTimeItem: false,
    	dateFormatter: 'toDD_MM_YYYY',
-	inputFormat: function(value) {
+	parseDate: function(value) {
 		return isc.BizDateItem.parseInput(value, this.dateFormatter);
 	}
 });
@@ -306,6 +241,7 @@ isc.SimpleType.create({
 // register mm-dd-yyyy
 isc.ClassFactory.defineClass("MM_DD_YYYY_Item", "BizDateItem");
 isc.MM_DD_YYYY_Item.addProperties({
+   	hint: 'MM(M) DD YY(YY)',
 	dateFormatter: 'toMM_DD_YYYY'
 });
 isc.SimpleType.create({
@@ -320,6 +256,7 @@ isc.SimpleType.create({
 // register mmm-dd-yyyy
 isc.ClassFactory.defineClass("MMM_DD_YYYY_Item", "BizDateItem");
 isc.MMM_DD_YYYY_Item.addProperties({
+   	hint: 'MM(M) DD YY(YY)',
 	dateFormatter: 'toMMM_DD_YYYY'
 });
 isc.SimpleType.create({
@@ -517,6 +454,7 @@ isc.SimpleType.create({
 // register MM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_Item.addProperties({
+   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMM_DD_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -532,6 +470,7 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy hh:mm a
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH_MI_Item.addProperties({
+   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
@@ -547,6 +486,7 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_Item.addProperties({
+   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -562,8 +502,8 @@ isc.SimpleType.create({
 // register MM-dd-yyyy hh:mm:ss a
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
-	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -578,8 +518,8 @@ isc.SimpleType.create({
 // register MM-dd-yyyy HH:mm:ss
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_SS_Item.addProperties({
-	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -594,8 +534,8 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy hh:mm:ss a 
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH_MI_SS_Item.addProperties({
-	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -610,8 +550,8 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy HH:mm:ss
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_SS_Item.addProperties({
-	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
 isc.SimpleType.create({
