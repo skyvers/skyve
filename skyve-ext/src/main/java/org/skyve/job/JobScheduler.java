@@ -25,6 +25,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.job.ContentGarbageCollectionJob;
 import org.skyve.impl.job.ContentInitJob;
+import org.skyve.impl.job.EvictConversationsJob;
 import org.skyve.impl.job.SkyveTriggerListener;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -115,11 +116,12 @@ public class JobScheduler {
 								Scheduler.DEFAULT_GROUP,
 								ContentGarbageCollectionJob.class);
 		detail.setDurability(true);
+		Date in5Minutes = new Date(System.currentTimeMillis() + 300000);
 		trigger = new CronTrigger("CMS Garbage Collection Trigger",
 									Scheduler.DEFAULT_GROUP,
 									"CMS Garbage Collection",
 									Scheduler.DEFAULT_GROUP,
-									new Date(new Date().getTime() + 300000), // start in 5 minutes once the CMS has settled down
+									in5Minutes, // start in 5 minutes once the CMS has settled down
 									null,
 									UtilImpl.CONTENT_GC_CRON);
 		try {
@@ -128,6 +130,31 @@ public class JobScheduler {
 		}
 		catch (SchedulerException e) {
 			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
+		}
+
+		// Do expired conversation cache eviction as schedule in the CRON expression in the application properties file
+		if (UtilImpl.CONVERSATION_EVICT_CRON != null) {
+			detail = new JobDetail("Evict Expired Conversations",
+									Scheduler.DEFAULT_GROUP,
+									EvictConversationsJob.class);
+			detail.setDurability(true);
+			trigger = new CronTrigger("Evict Expired Conversations Trigger",
+										Scheduler.DEFAULT_GROUP,
+										"Evict Expired Conversations",
+										Scheduler.DEFAULT_GROUP,
+										in5Minutes, // start in 5 minutes once everything has settled down
+										null,
+										UtilImpl.CONVERSATION_EVICT_CRON);
+			try {
+				JOB_SCHEDULER.scheduleJob(detail, trigger);
+				Util.LOGGER.info("Evict Expired Conversations Job scheduled for " +trigger.getNextFireTime());
+			}
+			catch (SchedulerException e) {
+				Util.LOGGER.severe("Evict Expired Conversations Job was not scheduled because - " + e.getLocalizedMessage());
+			}
+		}
+		else {
+			Util.LOGGER.info("Evict Expired Conversations Job was not scheduled because there was no conversations.evictCron in the json.");
 		}
 	}
 

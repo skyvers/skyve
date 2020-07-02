@@ -1,11 +1,13 @@
 package org.skyve.cache;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.ehcache.Cache;
+import org.ehcache.Cache.Entry;
 import org.ehcache.core.statistics.CacheStatistics;
 import org.ehcache.core.statistics.TierStatistics;
 import org.hibernate.internal.util.SerializationHelper;
@@ -95,5 +97,18 @@ public class ConversationUtil {
 		}
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
 		UtilImpl.LOGGER.info("**************************************************************");
+	}
+	
+	public static void evictExpiredConversations() {
+		Cache<String, byte[]> conversations = getConversations();
+		Iterator<Entry<String, byte[]>> i = conversations.iterator();
+		while (i.hasNext()) {
+			// accessing an entry is meant to evict the entry if it has expired.
+			// iterating isn't enough but containsKey() does the trick
+			Entry<String, byte[]> entry = i.next();
+			if (entry != null) {
+				conversations.containsKey(entry.getKey());
+			}
+		}
 	}
 }

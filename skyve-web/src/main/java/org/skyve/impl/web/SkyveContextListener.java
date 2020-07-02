@@ -212,7 +212,8 @@ public class SkyveContextListener implements ServletContextListener {
 																	getInt("conversations", "offHeapSizeMB", conversations),
 																	getInt("conversations", "diskSizeGB", conversations) * 1024,
 																	getInt("conversations", "expiryTimeMinutes", conversations));
-
+		UtilImpl.CONVERSATION_EVICT_CRON = getString("conversations", "evictCron", conversations, false);
+	
 		Map<String, Object> caches = getObject(null, "caches", properties, false);
 		if (caches != null) {
 			// for each cache defined

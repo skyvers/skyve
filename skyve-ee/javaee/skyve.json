@@ -69,7 +69,9 @@
 		// Max disk size - 0 indicates no usage
 		diskSizeGB: 10,
 		// Number of seconds to wait until expiring a conversation from the cache
-		expiryTimeMinutes: 60
+		expiryTimeMinutes: 60,
+		// CRON Expression for Evicting Expired Conversations job - run at 12:37 - null indictes no eviction
+		evictCron: "0 37 0 1/1 * ? *"
 	},
 	// app cache definitions
 /*

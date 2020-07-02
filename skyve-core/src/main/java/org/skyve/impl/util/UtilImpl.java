@@ -87,6 +87,10 @@ public class UtilImpl {
 	// Defaults to run at 7 past the hour every hour.
 	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
 
+	// The cron expression to use to fire off the evict expired conversations job
+	// Defaults to run at 37 past midnight every day.
+	public static String CONVERSATION_EVICT_CRON = "0 37 0 1/1 * ? *";
+
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
 
