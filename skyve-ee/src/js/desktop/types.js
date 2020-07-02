@@ -281,7 +281,7 @@ isc.BizDateTimeItem.addProperties({
    	textFieldProperties: {selectOnFocus: true},
 	showPickerTimeItem: true,
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false},
-	inputFormat: function(value) {
+	parseDate: function(value) {
 		return isc.BizDateItem.parseInput(value, this.dateFormatter);
 	},
 	dateFormatter: 'toDD_MM_YYYY_HH_MI'
@@ -453,10 +453,25 @@ isc.SimpleType.create({
 	}
 });
 
+//register MM-dd-yyyy hh:mm a
+isc.ClassFactory.defineClass("MM_DD_YYYY_HH_MI_Item", "BizDateTimeItem");
+isc.MM_DD_YYYY_HH_MI_Item.addProperties({
+	dateFormatter: 'toMM_DD_YYYY_HH_MI',
+	hint: 'MM(M) DD YY(YY) HH:MI AM/PM',
+	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
+});
+isc.SimpleType.create({
+	name: "MM_DD_YYYY_HH_MI",
+	inheritsFrom: "bizDateTime",
+	editorType: 'MM_DD_YYYY_HH_MI_Item',
+	shortDisplayFormatter: function(internalValue, field, component, record) {
+		return isc.BizDateItem.format(internalValue, 'toMM_DD_YYYY_HH_MI');
+	}
+});
+
 // register MM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_Item.addProperties({
-   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMM_DD_YYYY_HH_MI',
 	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
@@ -473,7 +488,6 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy hh:mm a
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH_MI_Item.addProperties({
-   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
 	hint: 'MM(M) DD YY(YY) HH:MI AM/PM',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
@@ -490,7 +504,6 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_Item.addProperties({
-   	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
 	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
