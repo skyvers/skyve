@@ -18,10 +18,8 @@ public class DD_MM_YYYY extends org.skyve.domain.types.converters.timestamp.DD_M
 				return fromDisplayValue(value);
 			}
 			catch (Exception e) {
-				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid date/time (use DD-MM-YYYY HH:MI:SS format)",
-																"Invalid date/time (use DD-MM-YYYY HH:MI:SS format)"),
-												e);
+				String message = "Invalid date/time (use DD-MM-YYYY format)";
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
     	}
     	return null;

@@ -8,7 +8,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class DD_MMM_YYYY_HH_MI_SS implements Converter<Timestamp> {
-	private static final String PATTERN = "dd-MMM-yyyy HH:mm:ss a";
+	private static final String PATTERN = "dd-MMM-yyyy hh:mm:ss a";
 
 	@Override
 	public Timestamp fromDisplayValue(String displayValue) throws Exception {

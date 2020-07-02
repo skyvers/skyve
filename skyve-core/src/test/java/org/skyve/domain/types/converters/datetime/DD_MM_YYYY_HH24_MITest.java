@@ -38,12 +38,22 @@ public class DD_MM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testToDisplayValue() throws Exception {
+	public void testToDisplayValueAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
-		Time.setTime(testDate, 12, 30, 0);
+		Time.setTime(testDate, 02, 30, 0);
 
 		// call the method under test
-		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020 12:30"));
+		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020 02:30"));
+	}
+
+	@Test
+	public void testToDisplayValuePM() throws Exception {
+		// setup the test data
+		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
+		Time.setTime(testDate, 14, 30, 0);
+
+		// call the method under test
+		assertThat(formatter.toDisplayValue(testDate), is("01/03/2020 14:30"));
 	}
 }

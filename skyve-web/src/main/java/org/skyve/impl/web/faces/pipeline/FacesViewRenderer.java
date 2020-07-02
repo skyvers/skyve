@@ -99,6 +99,10 @@ import org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI;
 import org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH_MI;
 import org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH24_MI;
 import org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH_MI;
+import org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH24_MI;
+import org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH_MI;
+import org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH24_MI;
+import org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace;
@@ -123,6 +127,10 @@ import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
+import org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
+import org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
+import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
+import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -1901,6 +1909,31 @@ public class FacesViewRenderer extends ViewRenderer {
 	        else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 	            result = new DD_MMM_YYYY_HH24_MI();
 	        }
+			else if ("MM_DD_YYYY".equals(converterName)) {
+				if (AttributeType.date.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.date.MM_DD_YYYY();
+				} else if (AttributeType.dateTime.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY();
+				} else if (AttributeType.timestamp.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY();
+				}
+			} else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
+				result = new MM_DD_YYYY_HH_MI();
+			} else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
+				result = new MM_DD_YYYY_HH24_MI();
+			} else if ("MMM_DD_YYYY".equals(converterName)) {
+				if (AttributeType.date.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.date.MMM_DD_YYYY();
+				} else if (AttributeType.dateTime.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY();
+				} else if (AttributeType.timestamp.equals(type)) {
+					result = new org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY();
+				}
+			} else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
+				result = new MMM_DD_YYYY_HH_MI();
+			} else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
+				result = new MMM_DD_YYYY_HH24_MI();
+			}
 	        else if ("Decimal2DollarsAndCents".equals(converterName)) {
 	            result = new Decimal2DollarsAndCents();
 	        }
@@ -1964,6 +1997,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	        else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 	            result = new DD_MMM_YYYY_HH24_MI_SS();
 	        }
+			else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+				result = new MM_DD_YYYY_HH_MI_SS();
+			} else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+				result = new MM_DD_YYYY_HH24_MI_SS();
+			} else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+				result = new MMM_DD_YYYY_HH_MI_SS();
+			} else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+				result = new MMM_DD_YYYY_HH24_MI_SS();
+			}
 	    }
 	    else {
 	    	// Set default faces numeric converters if none is set

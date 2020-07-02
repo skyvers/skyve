@@ -8,7 +8,8 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class DD_MM_YYYY implements Converter<DateTime> {
-	private static final String PATTERN = "dd/MM/yyyy";
+
+	public static final String PATTERN = "dd/MM/yyyy";
 
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws Exception {

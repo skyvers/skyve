@@ -48,12 +48,22 @@ public class DD_MMM_YYYY_HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsString() throws Exception {
+	public void testGetAsStringAM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 0);
 
 		// call the method under test
 		assertThat(formatter.getAsString(null, null, testDate), is("01-Mar-2020 02:30"));
+	}
+
+	@Test
+	public void testGetAsStringPM() throws Exception {
+		// setup the test data
+		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
+		Time.setTime(testDate, 14, 30, 0);
+
+		// call the method under test
+		assertThat(formatter.getAsString(null, null, testDate), is("01-Mar-2020 14:30"));
 	}
 }

@@ -25,15 +25,19 @@
       <xs:enumeration value="DD_MM_YYYY"/>
       <xs:enumeration value="DD_MMM_YYYY"/>
       <xs:enumeration value="MM_DD_YYYY"/>
+      <xs:enumeration value="MMM_DD_YYYY"/>
       <xs:enumeration value="DD_MM_YYYY_HH_MI"/>
       <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MM_YYYY_DateTime"/>
       <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
       <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_DateTime"/>
       <xs:enumeration value="MM_DD_YYYY_HH_MI"/>
       <xs:enumeration value="MM_DD_YYYY_HH24_MI"/>
-      <xs:enumeration value="DD_MM_YYYY_DateTime"/>
-      <xs:enumeration value="DD_MMM_YYYY_DateTime"/>
       <xs:enumeration value="MM_DD_YYYY_DateTime"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_DateTime"/>
       <xs:enumeration value="Decimal2DollarsAndCents"/>
       <xs:enumeration value="Decimal2DollarsAndCentsAbsolute"/>
       <xs:enumeration value="Decimal2Integer"/>
@@ -56,10 +60,16 @@
       <xs:enumeration value="HH24_MI_SS"/>
       <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
       <xs:enumeration value="DD_MM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_Timestamp"/>
       <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
       <xs:enumeration value="DD_MMM_YYYY_HH24_MI_SS"/>
-      <xs:enumeration value="DD_MM_YYYY_Timestamp"/>
       <xs:enumeration value="DD_MMM_YYYY_Timestamp"/>
+      <xs:enumeration value="MM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_Timestamp"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_Timestamp"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -9,7 +9,8 @@ import javax.faces.convert.ConverterException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 
-public class DD_MMM_YYYY_HH24_MI_SS extends org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY implements Converter {
+public class DD_MMM_YYYY_HH24_MI_SS extends org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS
+		implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -18,10 +19,8 @@ public class DD_MMM_YYYY_HH24_MI_SS extends org.skyve.domain.types.converters.ti
 				return fromDisplayValue(value);
 			}
 			catch (Exception e) {
-				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid date/time (use DD-MON-YYYY format)",
-																"Invalid date/time (use DD-MON-YYYY format)"),
-												e);
+				String message = "Invalid date/time (use DD-MON-YYYY HH24:MI:SS format)";
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
     	}
     	return null;
