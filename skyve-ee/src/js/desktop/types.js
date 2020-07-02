@@ -424,6 +424,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_Item.addProperties({
 	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
+	hint: 'DD MM(M) YY(YY) HH:MI AM/PM',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -439,6 +440,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_Item.addProperties({
 	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
+	hint: 'DD MM(M) YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -454,7 +456,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
 	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
-   	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
+   	hint: 'DD MM(M) YY(YY) HH:MI(:SS) AM/PM',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -486,7 +488,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH_MI_SS_Item.addProperties({
 	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
-   	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
+   	hint: 'DD MM(M) YY(YY) HH:MI(:SS) AM/PM',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -518,6 +520,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_Item.addProperties({
 	dateFormatter: 'toMM_DD_YYYY_HH_MI',
+	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -533,6 +536,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH_MI_Item.addProperties({
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
+	hint: 'MM(M) DD YY(YY) HH:MI AM/PM',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -548,6 +552,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_Item.addProperties({
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
+	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -563,7 +568,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
 	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
-   	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+   	hint: 'MM(M) DD YY(YY) HH:MI(:SS) AM/PM',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
@@ -595,7 +600,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH_MI_SS_Item.addProperties({
 	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
-   	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
+   	hint: 'MM(M) DD YY(YY) HH(:MI(:SS) AM/PM',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
 });
 isc.SimpleType.create({
