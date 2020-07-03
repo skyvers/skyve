@@ -19,8 +19,8 @@ public class DD_MM_YYYY_HH_MI_SS extends org.skyve.domain.types.converters.times
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid date/time (use DD-MM-YYYY HH:MI:SS format)",
-																"Invalid date/time (use DD-MM-YYYY HH:MI:SS format)"),
+						"Invalid date/time (use DD/MM/YYYY HH:MI:SS format)",
+						"Invalid date/time (use DD/MM/YYYY HH:MI:SS format)"),
 												e);
 			}
     	}

@@ -2707,32 +2707,32 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setMask("99-aaa-9999");
 		} 
 		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy hh:mm");
-			result.setMask("99/99/9999 99:99");
+			result.setPattern("dd/MM/yyyy hh:mm a");
+			result.setMask("99/99/9999 99:99 aa");
 		} 
 		else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm");
 			result.setMask("99/99/9999 99:99");
 		} 
 		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy hh:mm");
-			result.setMask("99-aaa-9999 99:99");
+			result.setPattern("dd-MMM-yyyy hh:mm a");
+			result.setMask("99-aaa-9999 99:99 aa");
 		} 
 		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm");
 			result.setMask("99-aaa-9999 99:99");
 		} 
 		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy hh:mm:ss");
-			result.setMask("99/99/9999 99:99:99");
+			result.setPattern("dd/MM/yyyy hh:mm:ss a");
+			result.setMask("99/99/9999 99:99:99 aa");
 		} 
 		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm:ss");
 			result.setMask("99/99/9999 99:99:99");
 		} 
 		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy hh:mm:ss");
-			result.setMask("99-aaa-9999 99:99:99");
+			result.setPattern("dd-MMM-yyyy hh:mm:ss a");
+			result.setMask("99-aaa-9999 99:99:99 aa");
 		} 
 		else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm:ss");
@@ -2743,31 +2743,31 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setMask("99/99/9999");
 		} else if ("MMM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY.PATTERN);
-			result.setMask("99-aaa-9999");
+			result.setMask("aaa-99-9999");
 		} else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI.PATTERN);
-			result.setMask("99/99/9999 99:99");
+			result.setMask("99/99/9999 99:99 aa");
 		} else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI.PATTERN);
 			result.setMask("99/99/9999 99:99");
 		} else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
-			result.setMask("99-aaa-9999 99:99");
+			result.setMask("aaa-99-9999 99:99 aa");
 		} else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
-			result.setMask("99-aaa-9999 99:99");
+			result.setMask("aaa-99-9999 99:99");
 		} else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI_SS.PATTERN);
-			result.setMask("99/99/9999 99:99:99");
+			result.setMask("99/99/9999 99:99:99 aa");
 		} else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI_SS.PATTERN);
 			result.setMask("99/99/9999 99:99:99");
 		} else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI_SS.PATTERN);
-			result.setMask("99-aaa-9999 99:99:99");
+			result.setMask("aaa-99-9999 99:99:99 aa");
 		} else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI_SS.PATTERN);
-			result.setMask("99-aaa-9999 99:99:99");
+			result.setMask("aaa-99-9999 99:99:99");
 		}
 
 		result.setConverter(converter);

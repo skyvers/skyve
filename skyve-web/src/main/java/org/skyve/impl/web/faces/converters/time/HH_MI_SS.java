@@ -9,7 +9,7 @@ import javax.faces.convert.ConverterException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.util.UtilImpl;
 
-public class HH_MI extends org.skyve.domain.types.converters.time.HH_MI implements Converter {
+public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
@@ -19,8 +19,8 @@ public class HH_MI extends org.skyve.domain.types.converters.time.HH_MI implemen
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-						"Invalid time (use HH:MI AM/PM format)",
-						"Invalid time (use HH:MI AM/PM format)"),
+						"Invalid time (use HH:MI:SS AM/PM format)",
+						"Invalid time (use HH:MI:SS AM/PM format)"),
 												e);
 			}
     	}

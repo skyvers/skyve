@@ -122,7 +122,9 @@ import org.skyve.impl.web.faces.converters.lang.Decimal10;
 import org.skyve.impl.web.faces.converters.lang.Decimal2;
 import org.skyve.impl.web.faces.converters.lang.Decimal5;
 import org.skyve.impl.web.faces.converters.time.HH24_MI;
+import org.skyve.impl.web.faces.converters.time.HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.time.HH_MI;
+import org.skyve.impl.web.faces.converters.time.HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
@@ -1982,9 +1984,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	        else if ("HH_MI".equals(converterName)) {
 	            result = new HH_MI();
 	        }
+			else if ("HH_MI_SS".equals(converterName)) {
+				result = new HH_MI_SS();
+			}
 	        else if ("HH24_MI".equals(converterName)) {
 	            result = new HH24_MI();
 	        }
+			else if ("HH24_MI_SS".equals(converterName)) {
+				result = new HH24_MI_SS();
+			}
 	        else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
 	            result = new DD_MM_YYYY_HH_MI_SS();
 	        }
