@@ -3,46 +3,99 @@
 
 // Define our extra date and time formats
 isc.addMethods(Date.prototype, {
+	toHH24_MI: function() {
+		return this.getHours().stringify() + ':' + this.getMinutes().stringify();
+	},
+	toHH_MI: function() {
+		var hours = this.getHours();
+		var hoursString = hours.stringify();
+		var ampm = ' AM';
+		if (hours == 0) {
+			hoursString = '12';
+		}
+		else if (hours == 12) {
+			ampm = ' PM';
+		}
+		else if (hours > 12) {
+			ampm = ' PM';
+			hours -= 12;
+			hoursString = hours.stringify();
+		}
+		
+		return hoursString + ":" + this.getMinutes().stringify() + ampm;
+	},
+	toHH24_MI_SS: function() {
+		return this.toHH24_MI() + ':' + this.getSeconds().stringify();
+	},
+	toHH_MI_SS: function() {
+		var result = this.toHH_MI();
+		return result.substring(0, result.length - 3) + ':' + this.getSeconds().stringify() + result.substring(result.length - 3);
+	},
+	
 	toDD_MM_YYYY: function() {
 		return this.getDate().stringify() + '/' + (this.getMonth() + 1).stringify() + '/' + this.getFullYear();
 	},
+	toDD_MM_YYYY_HH24_MI: function() {
+		return this.toDD_MM_YYYY() + ' ' + this.toHH24_MI();
+	},
 	toDD_MM_YYYY_HH_MI: function() {
-		return this.toDD_MM_YYYY() + ' ' + this.getHours().stringify() + ":" + this.getMinutes().stringify();
+		return this.toDD_MM_YYYY() + ' ' + this.toHH_MI();
+	},
+	toDD_MM_YYYY_HH24_MI_SS: function() {
+		return this.toDD_MM_YYYY() + ' ' + this.toHH24_MI_SS();
 	},
 	toDD_MM_YYYY_HH_MI_SS: function() {
-		return this.toDD_MM_YYYY_HH_MI() + ':' + this.getSeconds().stringify();
+		return this.toDD_MM_YYYY() + ' ' + this.toHH_MI_SS();
 	},
 	
 	toDD_MMM_YYYY: function() {
 		var shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 		return this.getDate().stringify() + '-' + shortMonthNames[this.getMonth()] + '-' + this.getFullYear();
 	},
+	toDD_MMM_YYYY_HH24_MI: function() {
+		return this.toDD_MMM_YYYY() + ' ' + this.toHH24_MI();
+	},
 	toDD_MMM_YYYY_HH_MI: function() {
-		return this.toDD_MMM_YYYY() + ' ' + this.getHours().stringify() + ":" + this.getMinutes().stringify();
+		return this.toDD_MMM_YYYY() + ' ' + this.toHH_MI();
+	},
+	toDD_MMM_YYYY_HH24_MI_SS: function() {
+		return this.toDD_MMM_YYYY() + ' ' + this.toHH24_MI_SS();
 	},
 	toDD_MMM_YYYY_HH_MI_SS: function() {
-		return this.toDD_MMM_YYYY_HH_MI() + ':' + this.getSeconds().stringify();
+		return this.toDD_MMM_YYYY() + ' ' + this.toHH_MI_SS();
 	},
 	
 	toMM_DD_YYYY: function() {
 		return (this.getMonth() + 1).stringify() + '/' + this.getDate().stringify() + '/' + this.getFullYear();
 	},
+	toMM_DD_YYYY_HH24_MI: function() {
+		return this.toMM_DD_YYYY() + ' ' + this.toHH24_MI();
+	},
 	toMM_DD_YYYY_HH_MI: function() {
-		return this.toMM_DD_YYYY() + ' ' + this.getHours().stringify() + ":" + this.getMinutes().stringify();
+		return this.toMM_DD_YYYY() + ' ' + this.toHH_MI();
+	},
+	toMM_DD_YYYY_HH24_MI_SS: function() {
+		return this.toMM_DD_YYYY() + ' ' + this.toHH24_MI_SS();
 	},
 	toMM_DD_YYYY_HH_MI_SS: function() {
-		return this.toMM_DD_YYYY_HH_MI() + ':' + this.getSeconds().stringify();
+		return this.toMM_DD_YYYY() + ' ' + this.toHH_MI_SS();
 	},
 	
 	toMMM_DD_YYYY: function() {
 		var shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 		return shortMonthNames[this.getMonth()]+ '-' + this.getDate().stringify() + '-' + this.getFullYear();
 	},
+	toMMM_DD_YYYY_HH24_MI: function() {
+		return this.toMMM_DD_YYYY() + ' ' + this.HH24_MI();
+	},
 	toMMM_DD_YYYY_HH_MI: function() {
-		return this.toMMM_DD_YYYY() + ' ' + this.getHours().stringify() + ":" + this.getMinutes().stringify();
+		return this.toMMM_DD_YYYY() + ' ' + this.HH_MI();
+	},
+	toMMM_DD_YYYY_HH24_MI_SS: function() {
+		return this.toMMM_DD_YYYY() + ' ' + this.HH24_MI_SS();
 	},
 	toMMM_DD_YYYY_HH_MI_SS: function() {
-		return this.toMMM_DD_YYYY_HH_MI() + ':' + this.getSeconds().stringify();
+		return this.toMMM_DD_YYYY() + ' ' + this.HH_MI_SS();
 	}
 });
 
@@ -277,7 +330,7 @@ isc.BizDateTimeItem.addProperties({
 	useTextField: true,
     showHint: true,
     showHintInField: true,
-   	hint: 'DD MM(M) YY(YY) HH(24):MI',
+   	hint: 'DD MM(M) YY(YY) HH:MI AM/PM',
    	textFieldProperties: {selectOnFocus: true},
 	showPickerTimeItem: true,
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false},
@@ -345,7 +398,8 @@ isc.SimpleType.create({
 // register dd-MM-yyyy HH:mm
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_Item.addProperties({
-	dateFormatter: 'toDD_MM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MM_YYYY_HH24_MI',
+	hint: 'DD MM(M) YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -353,7 +407,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MM_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH24_MI');
 	}
 });
 
@@ -376,7 +430,7 @@ isc.SimpleType.create({
 // register dd-MMM-yyyy HH:mm
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_Item.addProperties({
-	dateFormatter: 'toDD_MMM_YYYY_HH_MI',
+	dateFormatter: 'toDD_MMM_YYYY_HH24_MI',
 	hint: 'DD MM(M) YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -385,7 +439,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH24_MI');
 	}
 });
 
@@ -408,7 +462,7 @@ isc.SimpleType.create({
 // register dd-MM-yyyy HH:mm:ss
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MM_YYYY_HH24_MI_SS_Item.addProperties({
-	dateFormatter: 'toDD_MM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MM_YYYY_HH24_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -417,7 +471,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MM_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH24_MI_SS');
 	}
 });
 
@@ -440,7 +494,7 @@ isc.SimpleType.create({
 // register dd-MMM-yyyy HH:mm:ss
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
-	dateFormatter: 'toDD_MMM_YYYY_HH_MI_SS',
+	dateFormatter: 'toDD_MMM_YYYY_HH24_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
@@ -449,7 +503,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH24_MI_SS');
 	}
 });
 
@@ -472,7 +526,7 @@ isc.SimpleType.create({
 // register MM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_Item.addProperties({
-	dateFormatter: 'toMM_DD_YYYY_HH_MI',
+	dateFormatter: 'toMM_DD_YYYY_HH24_MI',
 	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -481,7 +535,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'MM_DD_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toMM_DD_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toMM_DD_YYYY_HH24_MI');
 	}
 });
 
@@ -504,7 +558,7 @@ isc.SimpleType.create({
 // register MMM-dd-yyyy HH:mm
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_Item.addProperties({
-	dateFormatter: 'toMMM_DD_YYYY_HH_MI',
+	dateFormatter: 'toMMM_DD_YYYY_HH24_MI',
 	hint: 'MM(M) DD YY(YY) HH(24):MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -513,7 +567,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'MMM_DD_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toMMM_DD_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toMMM_DD_YYYY_HH24_MI');
 	}
 });
 
@@ -537,7 +591,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MM_DD_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.MM_DD_YYYY_HH24_MI_SS_Item.addProperties({
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
-	dateFormatter: 'toMM_DD_YYYY_HH_MI_SS',
+	dateFormatter: 'toMM_DD_YYYY_HH24_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -545,7 +599,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'MM_DD_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toMM_DD_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toMM_DD_YYYY_HH24_MI_SS');
 	}
 });
 
@@ -569,7 +623,7 @@ isc.SimpleType.create({
 isc.ClassFactory.defineClass("MMM_DD_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
 isc.MMM_DD_YYYY_HH24_MI_SS_Item.addProperties({
    	hint: 'MM(M) DD YY(YY) HH(24):MI(:SS)',
-	dateFormatter: 'toMMM_DD_YYYY_HH_MI_SS',
+	dateFormatter: 'toMMM_DD_YYYY_HH24_MI_SS',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
 });
 isc.SimpleType.create({
@@ -577,7 +631,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'MMM_DD_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return isc.BizDateItem.format(internalValue, 'toMMM_DD_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toMMM_DD_YYYY_HH24_MI_SS');
 	}
 });
 
