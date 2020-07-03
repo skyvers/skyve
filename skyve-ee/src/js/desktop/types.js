@@ -86,16 +86,16 @@ isc.addMethods(Date.prototype, {
 		return shortMonthNames[this.getMonth()]+ '-' + this.getDate().stringify() + '-' + this.getFullYear();
 	},
 	toMMM_DD_YYYY_HH24_MI: function() {
-		return this.toMMM_DD_YYYY() + ' ' + this.HH24_MI();
+		return this.toMMM_DD_YYYY() + ' ' + this.toHH24_MI();
 	},
 	toMMM_DD_YYYY_HH_MI: function() {
-		return this.toMMM_DD_YYYY() + ' ' + this.HH_MI();
+		return this.toMMM_DD_YYYY() + ' ' + this.toHH_MI();
 	},
 	toMMM_DD_YYYY_HH24_MI_SS: function() {
-		return this.toMMM_DD_YYYY() + ' ' + this.HH24_MI_SS();
+		return this.toMMM_DD_YYYY() + ' ' + this.toHH24_MI_SS();
 	},
 	toMMM_DD_YYYY_HH_MI_SS: function() {
-		return this.toMMM_DD_YYYY() + ' ' + this.HH_MI_SS();
+		return this.toMMM_DD_YYYY() + ' ' + this.toHH_MI_SS();
 	}
 });
 
