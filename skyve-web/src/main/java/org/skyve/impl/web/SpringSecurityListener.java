@@ -4,11 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import org.skyve.EXT;
+import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
+import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.springframework.context.event.EventListener;
@@ -30,7 +33,14 @@ public class SpringSecurityListener {
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
-		String username = ((User) evt.getAuthentication().getPrincipal()).getUsername();
+		Object principal = evt.getAuthentication().getPrincipal();
+		String username = null;
+		if (principal instanceof String) {
+			username = (String) principal;
+		}
+		else {
+			username = ((User) principal).getUsername();
+		}
 		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
 		resetLoginFailure(username);
 	}
@@ -64,13 +74,48 @@ public class SpringSecurityListener {
 					ps.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
 					ps.setString(2, bizId);
 					ps.executeUpdate();
-					c.commit();
 				}
 				catch (Exception e) {
 					c.rollback();
 					throw e;
 				}
 			}
+			
+			sql = "insert into ADM_UserLoginRecord (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, loginDateTime, failed) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			try (PreparedStatement ps = c.prepareStatement(sql)) {
+				String bizCustomer = UtilImpl.CUSTOMER;
+				String userName = username;
+				int slashIndex = username.indexOf('/');
+				if (slashIndex > 0) {
+					userName = UtilImpl.processStringValue(userName.substring(slashIndex + 1));
+					if (bizCustomer == null) {
+						bizCustomer = UtilImpl.processStringValue(username.substring(0, slashIndex));
+					}
+					if (userName == null) {
+						userName = "unknown";
+					}
+					if (bizCustomer == null) {
+						bizCustomer = "unknown";
+					}
+				}
+				java.sql.Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+				ps.setString(1, UUID.randomUUID().toString());
+				ps.setInt(2, 0);
+				ps.setString(3, new OptimisticLock("unknown", now).toString());
+				ps.setString(4, "Failed Login attempt: " + userName + " @ " + TimeUtil.formatISODate(now, false));
+				ps.setString(5, bizCustomer);
+				ps.setString(6, "unknown");
+				ps.setString(7, userName);
+				ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+				ps.setBoolean(9, true);
+				ps.executeUpdate();
+			}
+			catch (Exception e) {
+				c.rollback();
+				throw e;
+			}
+
+			c.commit();
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);

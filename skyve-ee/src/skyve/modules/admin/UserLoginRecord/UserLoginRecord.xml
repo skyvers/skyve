@@ -9,12 +9,15 @@
 	<audited>false</audited>
 	<bizKey expression="{userName} @ {loginDateTime}"/>
 	<attributes>
-		<text name="userName" required="true">
+		<text name="userName" required="true" usage="domain">
 			<displayName>User Name</displayName>
 			<length>254</length>
 		</text>
-		<dateTime name="loginDateTime" required="true">
+		<dateTime name="loginDateTime" required="true" usage="domain">
 			<displayName>Login Date/Time</displayName>
 		</dateTime>
+		<boolean name="failed" required="true" usage="domain">
+			<displayName>Failed</displayName>
+		</boolean>
 	</attributes>
 </document>

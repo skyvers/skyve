@@ -264,6 +264,7 @@ CREATE TABLE `adm_userloginrecord` (
   `bizKey` varchar(1024) NOT NULL,
   `userName` varchar(30) default NULL,
   `loginDateTime` datetime default NULL,
+  `failed` bit(1) default NULL,
   PRIMARY KEY  (`bizId`),
   KEY `bizUserIdIndex` (`bizUserId`),
   KEY `bizCustomerIndex` (`bizCustomer`)

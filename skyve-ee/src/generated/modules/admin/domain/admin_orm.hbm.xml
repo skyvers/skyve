@@ -529,7 +529,7 @@
 		<filter name="adminUserUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.UserLoginRecord" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
+	<class name="modules.admin.UserLoginRecord.UserLoginRecordExtension" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -540,6 +540,7 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
 		<property name="loginDateTime" type="DateTime" />
+		<property name="failed" />
 		<filter name="adminUserLoginRecordNoneFilter" condition="1=0"/>
 		<filter name="adminUserLoginRecordCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserLoginRecordDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

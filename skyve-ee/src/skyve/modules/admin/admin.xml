@@ -50,7 +50,7 @@
 		<document ref="UserCandidateContact" />
 		<document ref="UserDashboard" />
 		<document ref="UserList" />
-		<document ref="UserLoginRecord" />
+		<document ref="UserLoginRecord" defaultQueryName="qLoginHistory" />
 		<document ref="UserMonthlyHits" />
 		<document ref="UserProxy" defaultQueryName="qUserProxies" />
 		<document ref="UserRole" />
@@ -317,11 +317,12 @@
 					<action name="Next" />
 					<action name="Back" />
 				</document>
-				<document name="UserCandidateContact" permission="_____"/>
+				<document name="UserCandidateContact" permission="_____" />
 				<document name="UserList" permission="_____">
 					<action name="CreateUsers"/>
 					<action name="InviteUsers"/>
 				</document>
+				<document name="UserLoginRecord" permission="_R__C" />
 				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
@@ -396,6 +397,9 @@
 			<edit document="Configuration" name="Configuration">
 				<role name="SecurityAdministrator" />
 			</edit>
+			<list document="UserLoginRecord" name="Login History">
+				<role name="SecurityAdministrator" />
+			</list>
 		</group>
 		<!-- <edit document="Startup" name="Startup">
 			<uxui name="startup" />
@@ -572,6 +576,14 @@
 						]]>
 					</expression>
 				</column>
+			</columns>
+		</query>
+		<query name="qLoginHistory" documentName="UserLoginRecord">
+			<description>Login History</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="loginDateTime" sortOrder="descending" />
+				<column binding="failed" />
 			</columns>
 		</query>
 		

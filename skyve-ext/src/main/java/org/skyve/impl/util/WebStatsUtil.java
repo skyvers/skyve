@@ -37,6 +37,7 @@ public class WebStatsUtil {
 		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
 		BindUtil.set(loginRecord, "userName", user.getName());
 		BindUtil.set(loginRecord, "loginDateTime", new DateTime(System.currentTimeMillis()));
+		BindUtil.set(loginRecord, "failed", Boolean.FALSE);
 
 		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
 // NO COMMIT

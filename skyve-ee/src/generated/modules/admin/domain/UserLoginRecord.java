@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.UserLoginRecord.UserLoginRecordExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -19,7 +20,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
-public class UserLoginRecord extends AbstractPersistentBean {
+public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -35,6 +36,8 @@ public class UserLoginRecord extends AbstractPersistentBean {
 	public static final String userNamePropertyName = "userName";
 	/** @hidden */
 	public static final String loginDateTimePropertyName = "loginDateTime";
+	/** @hidden */
+	public static final String failedPropertyName = "failed";
 
 	/**
 	 * User Name
@@ -44,6 +47,10 @@ public class UserLoginRecord extends AbstractPersistentBean {
 	 * Login Date/Time
 	 **/
 	private DateTime loginDateTime;
+	/**
+	 * Failed
+	 **/
+	private Boolean failed;
 
 	@Override
 	@XmlTransient
@@ -57,7 +64,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 		return UserLoginRecord.DOCUMENT_NAME;
 	}
 
-	public static UserLoginRecord newInstance() {
+	public static UserLoginRecordExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -124,5 +131,23 @@ public class UserLoginRecord extends AbstractPersistentBean {
 	public void setLoginDateTime(DateTime loginDateTime) {
 		preset(loginDateTimePropertyName, loginDateTime);
 		this.loginDateTime = loginDateTime;
+	}
+
+	/**
+	 * {@link #failed} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getFailed() {
+		return failed;
+	}
+
+	/**
+	 * {@link #failed} mutator.
+	 * @param failed	The new value.
+	 **/
+	@XmlElement
+	public void setFailed(Boolean failed) {
+		preset(failedPropertyName, failed);
+		this.failed = failed;
 	}
 }
