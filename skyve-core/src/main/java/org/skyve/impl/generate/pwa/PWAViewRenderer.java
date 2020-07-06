@@ -721,10 +721,12 @@ public class PWAViewRenderer extends ViewRenderer {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				Action action = obtainActionForActionReference(reference, customer, module, document, value, cr.userAgentType);
+/* TODO we need the dataWidget binding to make this call
+				Action action = obtainActionForActionReference(reference, customer, module, document, dataWidgetBinding, cr.userAgentType);
 				if (action != null) {
 					c.set(cr.actionLink(null, dataWidgetBinding, dataWidgetVar, link, action));
 				}
+*/
 			}
 		}.process(outerReference);
 

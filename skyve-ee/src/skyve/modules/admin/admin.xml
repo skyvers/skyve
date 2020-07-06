@@ -397,7 +397,7 @@
 			<edit document="Configuration" name="Configuration">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list document="UserLoginRecord" name="Login History">
+			<list query="qLoginHistory" name="Login History">
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
