@@ -64,6 +64,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
+import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -95,7 +96,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
@@ -1773,44 +1773,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormTextField(TextField text) {
-		if (Boolean.TRUE.equals(text.getPreviousValues())) {
-		    preProcessFormItem(text, "comboBox");
-		    String binding = text.getBinding();
-            TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-            Document targetDocument = target.getDocument();
-            String attributeName = binding;
-            Attribute attribute = target.getAttribute();
-            if (attribute != null) {
-            	attributeName = attribute.getName();
-            }
-            else { // implicit attribute
-            	int lastDotIndex = binding.lastIndexOf('.');
-            	if (lastDotIndex >= 0) {
-            		attributeName = binding.substring(lastDotIndex + 1);
-            	}
-            }
-            // have the options of 
-			// 1) pickListCriteria:{}
-			// 2) optionCriteria:{}
-			// 3) optionFilterContext:{params{}}
-			// 4) getPickListFilterCriteria: function() {}
-			code.append("optionDataSource:isc.BizUtil.PREVIOUS_VALUES_DATA_SOURCE,");
-			code.append("optionFilterContext:{params:{").append(AbstractWebContext.MODULE_NAME).append(":'");
-			code.append(targetDocument.getOwningModuleName());
-			code.append("',").append(AbstractWebContext.DOCUMENT_NAME).append(":'").append(targetDocument.getName());
-			code.append("',").append(AbstractWebContext.BINDING_NAME).append(":'").append(attributeName);
-			// Use the home-grown previous values style override in basec.css and don't show the picker icon
-			code.append("'}},textBoxStyle:'bizhubPreviousValuesText',showPickerIcon:false,");
-			// Set the dropdown selection field mapping
-			code.append("valueField:'value',");
-			code.append("displayField:'value',");
-			code.append("fetchMissingValues:false,");
-			code.append("selectOnFocus:true,completeOnTab:true,");
-			
-//do I need these ones also?
-/*
-pickListFields:[{name:'value'}],
-*/
+		CompleteType complete = text.getComplete();
+		if (complete != null) {
+		    preProcessFormItem(text, "bizComplete");
+			code.append(AbstractWebContext.ACTION_NAME).append(":'").append(complete).append("',");
+			code.append(AbstractWebContext.BINDING_NAME).append(":'").append(BindUtil.sanitiseBinding(text.getBinding())).append("',");
 		}
 		else {
 			preProcessFormItem(text, null);

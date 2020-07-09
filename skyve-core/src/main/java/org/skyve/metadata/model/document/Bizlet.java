@@ -25,6 +25,7 @@ import org.skyve.web.WebContext;
  * Form level -
  * 
  * getDomainValues() - called when rendering the pertinent field (including in list view).
+ * complete() - called when rendering view widgets with complete mechanisms.
  * resolve() - called when we have a bizId from a view (combo or list membership) and we need a bean
  * preExecute() - called before an implicit action is executed.
  * 					parentBean parameter is not null when adding or editing (zooming) in a grid or lookup
@@ -103,7 +104,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param e
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void validate(T bean, ValidationException e) throws Exception {
 		// do nothing
 	}
@@ -118,7 +118,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
-	@SuppressWarnings({"static-method", "unused"})
+	@SuppressWarnings("static-method")
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 		return null;
 	}
@@ -132,7 +132,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
-	@SuppressWarnings({"static-method", "unused"})
+	@SuppressWarnings("static-method")
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		return null;
 	}	
@@ -147,8 +147,20 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	This bean to use to derive the values.
 	 * @return An empty List of {@link DomainValue}s.
 	 */
-	@SuppressWarnings("unused")
 	public List<DomainValue> getDynamicDomainValues(String attributeName, T bean) throws Exception {
+		return null;
+	}
+
+	/**
+	 * This method is called when auto-complete values are required from a view widget.
+	 * They can be based on values from within the containing bean.
+	 * 
+	 * @param attributeName	The name of the attribute to get the domain for.
+	 * @param value The value typed into the view widget used to complete upon.
+	 * @param bean	This bean to use to derive the values.
+	 * @return null.
+	 */
+	public List<String> complete(String attributeName, String value, T bean) throws Exception {
 		return null;
 	}
 
@@ -164,7 +176,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @return	The bean or null if it can't be resolved.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public T resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		return null;
 	}
@@ -177,7 +188,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be saved (persisted/updated)
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void preSave(T bean) throws Exception {
 		// do nothing
 	}
@@ -189,7 +199,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be saved (persisted/updated)
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void postSave(T bean) throws Exception {
 		// do nothing
 	}
@@ -202,7 +211,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean to be deleted.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void preDelete(T bean) throws Exception {
 		// do nothing
 	}
@@ -216,7 +224,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param bean	The bean that was loaded.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void postLoad(T bean) throws Exception {
 		// do nothing
 	}
@@ -229,7 +236,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param webContext	The web context.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public T preExecute(ImplicitActionName actionName, T bean, Bean parentBean, WebContext webContext) throws Exception {
 		return bean;
 	}
@@ -242,7 +248,6 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param webContext	The web context.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unused")
 	public void preRerender(String source, T bean, WebContext webContext) throws Exception {
 		// do nothing
 	}

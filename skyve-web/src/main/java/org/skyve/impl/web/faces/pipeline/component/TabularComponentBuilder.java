@@ -103,6 +103,7 @@ import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -2121,18 +2122,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		AutoComplete result = autoComplete(dataWidgetVar,
-											lookup.getBinding(),
-											title,
-											required,
-											lookup.getDisabledConditionName(),
-											formDisabledConditionName,
-											displayBinding,
-											query,
-											lookup.getFilterParameters(),
-											lookup.getParameters(),
-											lookup.getPixelWidth(),
-											false);
+		AutoComplete result = lookupDescription(dataWidgetVar,
+													lookup.getBinding(),
+													title,
+													required,
+													lookup.getDisabledConditionName(),
+													formDisabledConditionName,
+													displayBinding,
+													query,
+													lookup.getFilterParameters(),
+													lookup.getParameters(),
+													lookup.getPixelWidth(),
+													false);
 		return new EventSourceComponent(result, result);
 	}
 
@@ -2290,6 +2291,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        }
 		}
 		
+		CompleteType complete = text.getComplete();
         UIComponentBase result = null;
         if (useCalendar) {
             result = calendar(dataWidgetVar,
@@ -2316,16 +2318,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								text.getPixelWidth(),
 								true);
         }
-        else if (Boolean.TRUE.equals(text.getPreviousValues())) {
-        	result = previousValues(dataWidgetVar,
-			        					text.getBinding(),
-			        					title,
-			        					required,
-			        					text.getDisabledConditionName(),
-			        					length,
-			        					formDisabledConditionName,
-			        					text.getKeyboardType(),
-			        					text.getPixelWidth());
+        else if (complete != null) {
+        	result = complete(dataWidgetVar,
+	        					text.getBinding(),
+	        					title,
+	        					required,
+	        					text.getDisabledConditionName(),
+	        					length,
+	        					formDisabledConditionName,
+	        					complete,
+	        					text.getKeyboardType(),
+	        					text.getPixelWidth());
         }
         else {
         	result = textField(dataWidgetVar,
@@ -3510,18 +3513,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected AutoComplete autoComplete(String dataWidgetVar, 
-											String binding, 
-											String title, 
-											boolean required,
-											String disabled,
-											String formDisabled,
-											String displayBinding, 
-											QueryDefinition query, 
-											List<FilterParameter> filterParameters,
-											List<Parameter> parameters,
-											Integer pixelWidth,
-											boolean dontDisplay) {
+	protected AutoComplete lookupDescription(String dataWidgetVar, 
+												String binding, 
+												String title, 
+												boolean required,
+												String disabled,
+												String formDisabled,
+												String displayBinding, 
+												QueryDefinition query, 
+												List<FilterParameter> filterParameters,
+												List<Parameter> parameters,
+												Integer pixelWidth,
+												boolean dontDisplay) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
 													dataWidgetVar, 
 													binding, 
@@ -3542,7 +3545,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setScrollHeight(200);
 
 		expression.setLength(0);
-		expression.append("#{").append(managedBeanName).append(".complete}");
+		expression.append("#{").append(managedBeanName).append(".lookup}");
 		result.setCompleteMethod(ef.createMethodExpression(elc, 
 															expression.toString(), 
 															List.class, 
@@ -3568,15 +3571,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected AutoComplete previousValues(String dataWidgetVar, 
-											String binding, 
-											String title, 
-											boolean required,
-											String disabled,
-											Integer length,
-											String formDisabled,
-											KeyboardType keyboardType,
-											Integer pixelWidth) {
+	protected AutoComplete complete(String dataWidgetVar, 
+										String binding, 
+										String title, 
+										boolean required,
+										String disabled,
+										Integer length,
+										String formDisabled,
+										CompleteType complete,
+										KeyboardType keyboardType,
+										Integer pixelWidth) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
 													dataWidgetVar, 
 													binding, 
@@ -3584,15 +3588,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
-		result.setForceSelection(false);
-		result.setDropdown(false);
+		result.setForceSelection(complete == CompleteType.constrain);
+		result.setDropdown(true);
 		if (length != null) {
 			result.setMaxlength(length.intValue());
 		}
 		result.setScrollHeight(200);
 
 		StringBuilder expression = new StringBuilder(32);
-		expression.append("#{").append(managedBeanName).append(".previousValues}");
+		expression.append("#{").append(managedBeanName).append(".complete}");
 		result.setCompleteMethod(ef.createMethodExpression(elc, 
 															expression.toString(), 
 															List.class, 
@@ -3600,6 +3604,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		Map<String, Object> attributes = result.getAttributes();
 		attributes.put("binding", binding);
+		attributes.put("complete", complete);
 
 		if (keyboardType != null) {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();

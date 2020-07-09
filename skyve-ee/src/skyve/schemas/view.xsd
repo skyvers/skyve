@@ -631,7 +631,7 @@
         </xs:sequence>
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="keyboardType" type="tns:keyboardType"/>
-        <xs:attribute name="previousValues" type="xs:boolean"/>
+        <xs:attribute name="complete" type="tns:completeType"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
@@ -1913,6 +1913,14 @@
       <xs:enumeration value="email"/>
       <xs:enumeration value="url"/>
       <xs:enumeration value="search"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="completeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="previous"/>
+      <xs:enumeration value="suggest"/>
+      <xs:enumeration value="constrain"/>
     </xs:restriction>
   </xs:simpleType>
 

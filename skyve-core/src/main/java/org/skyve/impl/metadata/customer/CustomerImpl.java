@@ -551,6 +551,23 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
+	public boolean interceptBeforeComplete(String attributeName, String value, Bean bean)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeComplete(attributeName, value, bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterComplete(String attributeName, String value, Bean bean, List<String> result)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterComplete(attributeName, value, bean, result);
+		}
+	}
+
 	public boolean interceptBeforeSave(Document document, PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor(this).beforeSave(document, bean)) {

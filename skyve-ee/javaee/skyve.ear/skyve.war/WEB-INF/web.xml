@@ -158,7 +158,7 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientPrevServlet</servlet-name>
+		<servlet-name>SmartClientCompleteServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
@@ -478,12 +478,12 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>SmartClientPrevServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientPrevServlet</servlet-class>
+		<servlet-name>SmartClientCompleteServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientCompleteServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>SmartClientPrevServlet</servlet-name>
-		<url-pattern>/smartprev</url-pattern>
+		<servlet-name>SmartClientCompleteServlet</servlet-name>
+		<url-pattern>/smartcomplete</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

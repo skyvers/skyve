@@ -205,11 +205,11 @@ isc.BizUtil.addClassProperties({
 	_unusedPickLists: [],
 	
 	// Data source for the "previous values" mechanism on text fields.
-	PREVIOUS_VALUES_DATA_SOURCE: isc.RestDataSource.create({
+	COMPLETE_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: 'json',
 		jsonPrefix: '',
 		jsonSuffix: '',
-		dataURL: "smartprev",
+		dataURL: "smartcomplete",
 		fields: [{name: 'value', type: 'text'}]
 	})
 });

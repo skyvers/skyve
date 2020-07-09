@@ -1215,7 +1215,7 @@ isc.EditView.addMethods({
 							// if this item has an option data source, set the value map
 							if (item.optionDataSource) {
 								// is a previous values
-								if (item.optionDataSource == isc.BizUtil.PREVIOUS_VALUES_DATA_SOURCE) {
+								if (item.optionDataSource == isc.BizUtil.COMPLETE_DATA_SOURCE) {
 									var valueMap = {};
 									valueMap[values[item.name]] = values[item.name];
 									item.setValueMap(valueMap);

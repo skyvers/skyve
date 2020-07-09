@@ -25,6 +25,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -42,7 +43,7 @@ import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
-import org.skyve.impl.web.faces.actions.PreviousValuesAction;
+import org.skyve.impl.web.faces.actions.CompleteAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -555,15 +556,16 @@ public class FacesView<T extends Bean> extends Harness {
 		return new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
 	}
 
-	public List<String> previousValues(String query) {
+	public List<String> complete(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String binding = (String) attributes.get("binding");
+		CompleteType complete = (CompleteType) attributes.get("complete");
 
-		return new PreviousValuesAction<>(this, query, binding).execute();
+		return new CompleteAction<>(this, query, binding, complete).execute();
 	}
 	
- 	public List<BeanMapAdapter<Bean>> complete(String query) {
+ 	public List<BeanMapAdapter<Bean>> lookup(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");

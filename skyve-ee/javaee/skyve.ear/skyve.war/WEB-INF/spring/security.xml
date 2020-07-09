@@ -91,8 +91,8 @@
 		<intercept-url pattern="/smartsnap" access="authenticated" />
 		<!-- Secure SC tag servlet -->
 		<intercept-url pattern="/smarttag" access="authenticated" />
-		<!-- Secure SC previous values servlet -->
-		<intercept-url pattern="/smartprev" access="authenticated" />
+		<!-- Secure SC complete servlet -->
+		<intercept-url pattern="/smartcomplete" access="authenticated" />
 		<!-- Secure SC text search servlet -->
 		<intercept-url pattern="/smartsearch" access="authenticated" />
 		

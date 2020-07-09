@@ -83,6 +83,18 @@ public abstract class Interceptor implements MetaData {
 	}
 
 	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforeComplete(String attributeName, String value, Bean bean)
+	throws Exception {
+		return false;
+	}
+
+	@SuppressWarnings("unused")
+	public void afterComplete(String attributeName, String value, Bean bean, List<String> result)
+	throws Exception {
+		// no-op
+	}
+
+	@SuppressWarnings({"unused", "static-method"})
 	public boolean beforeSave(Document document, PersistentBean bean)
 	throws Exception {
 		return false;

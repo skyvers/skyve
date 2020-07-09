@@ -17,14 +17,14 @@ import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"editable", "keyboardType", "previousValues", "pixelWidth", "properties"})
+			propOrder = {"editable", "keyboardType", "complete", "pixelWidth", "properties"})
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class TextField extends ChangeableInputWidget implements Editable, AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = -5061565177091806441L;
 
 	private Boolean editable;
 	private KeyboardType keyboardType;
-	private Boolean previousValues;
+	private CompleteType complete;
 	private Integer pixelWidth;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -56,13 +56,13 @@ public class TextField extends ChangeableInputWidget implements Editable, Absolu
 		this.keyboardType = keyboardType;
 	}
 
-	public Boolean getPreviousValues() {
-		return previousValues;
+	public CompleteType getComplete() {
+		return complete;
 	}
 
 	@XmlAttribute(required = false)
-	public void setPreviousValues(Boolean previousValues) {
-		this.previousValues = previousValues;
+	public void setComplete(CompleteType complete) {
+		this.complete = complete;
 	}
 
 	@Override

@@ -1614,7 +1614,7 @@ isc.BizLookupDescriptionItem.addMethods({
 			fetchMissingValues: false,
 //			addUnknownValues: false, This triggers a fetch on blur
 			autoFetchData: false,
-			useClientSideFiltering: false,
+			useClientFiltering: false,
 			cachePickListResults: false,
 			allowEmptyValue: config.allowEmptyValue,
 			optionDataSource: config.optionDataSource,
@@ -1922,6 +1922,66 @@ isc.SimpleType.create({
 	inheritsFrom: "comboBox",
 	name: "bizLookupDescription",
 	editorType: "BizLookupDescriptionItem"
+});
+
+isc.ClassFactory.defineClass("BizCompleteItem", isc.ComboBoxItem);
+//instance properties and methods
+isc.BizCompleteItem.addProperties({
+	optionDataSource: isc.BizUtil.COMPLETE_DATA_SOURCE,
+	showPickerIcon: true, // NB false wrecks the style sheet for the picker - no borders etc
+	fetchMissingValues: false,
+	autoFetchData: false,
+	useClientFiltering: false,
+	cachePickListResults: false,
+	textMatchStyle: 'substring',
+	valueField: 'value',
+	displayField:'value',
+	selectOnFocus: true,
+	completeOnTab: true
+});
+
+// Parameters are :-
+// _b - binding
+// _a - complete type - 'previous', 'suggest', 'constrain'
+isc.BizCompleteItem.addMethods({
+	init: function(config) {
+		var me = this;
+		if (config._a == 'constrain') {
+			me.addUnknownValues = false;
+		}
+		me.pickListProperties = {
+			filterData: function(criteria, callback, requestProperties) {
+				// ensure parameters are sent down in the requestProperties
+				if (requestProperties) {
+					if (requestProperties.params) {} else {
+						requestProperties.params = {};
+					}
+				}
+				else {
+					requestProperties = {};
+					requestProperties.params = {};
+				}
+	
+				requestProperties.params._attr = config._b;
+				requestProperties.params._a = config._a;
+				
+				// both of these are required (if defined) for Bizlet.complete() on server side
+				requestProperties.params._c = me.form._view.gather(false)._c;
+				if (me.form._view._b) {
+					requestProperties.params._b = me.form._view._b;
+				}
+				this.Super("filterData", arguments);
+			}
+		};
+		this.Super("init", arguments);
+	}
+});
+
+//register the editor
+isc.SimpleType.create({
+	inheritsFrom: "comboBox",
+	name: "bizComplete",
+	editorType: "BizCompleteItem"
 });
 
 // CKEditor is loaded on the fly when required
