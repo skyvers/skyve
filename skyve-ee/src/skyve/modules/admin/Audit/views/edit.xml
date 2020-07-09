@@ -9,6 +9,11 @@
         <column responsiveWidth="6" />
         <column />
         <row>
+            <item showLabel="true" label="User">
+            	<blurb>{sourceVersion.userName}</blurb>
+            </item>
+		</row>
+        <row>
             <item showLabel="true" label="Timestamp">
             	<blurb>{sourceVersion.timestamp}</blurb>
             </item>
