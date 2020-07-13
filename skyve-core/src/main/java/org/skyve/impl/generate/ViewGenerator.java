@@ -32,6 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
@@ -44,6 +45,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
@@ -113,14 +115,6 @@ public class ViewGenerator {
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
 
-		/*
-		 * Table table = generateTable(customer, document, null, query);
-		 * result.getContained().add(table);
-		 * String modelName = model.getName();
-		 * 
-		 * String documentName = modelName; if (model instanceof Selection) { documentName = ((Selection) model).getDocumentName();
-		 * }
-		 */
 		return result;
 	}
 
@@ -336,12 +330,32 @@ public class ViewGenerator {
 														propertyNames);
 					details.add(detail);
 				}
-				else if ((attribute instanceof Association) && 
-							AssociationType.embedded.equals(((Association) attribute).getType())) {
-					Association embeddedAssociation = (Association) attribute;
-					Document embeddedDocument = module.getDocument(customer, embeddedAssociation.getDocumentName());
-					Module embeddedModule = customer.getModule(embeddedDocument.getOwningModuleName());
-					processAttributes(customer, embeddedModule, embeddedDocument, form, details, binding + '.');
+				else if (attribute instanceof Association) {
+					Association association = (Association) attribute;
+					Document associationDocument = module.getDocument(customer, association.getDocumentName());
+					if (AssociationType.embedded.equals(association.getType())) {
+						Module associationModule = customer.getModule(associationDocument.getOwningModuleName());
+						processAttributes(customer, associationModule, associationDocument, form, details, binding + '.');
+					}
+					else {
+						MetaData metaData = null;
+						Persistent associationPersistent = associationDocument.getPersistent();
+						if ((associationPersistent == null) || (associationPersistent.getName() == null)) {
+							TextField widget = new TextField();
+							widget.setBinding(Binder.createCompoundBinding(binding, Bean.BIZ_KEY));
+							metaData = widget;
+						}
+						else {
+							DefaultWidget widget = new DefaultWidget();
+							widget.setBinding(binding);
+							metaData = widget;
+						}
+						FormItem item = new FormItem();
+						item.setWidget(metaData);
+						FormRow row = new FormRow();
+						row.getItems().add(item);
+						form.getRows().add(row);
+					}
 				}
 				else if (module.isPrototype() && (attribute instanceof Geometry)) {
 					FormItem item = new FormItem();
@@ -361,7 +375,7 @@ public class ViewGenerator {
 					row.getItems().add(item);
 					form.getRows().add(row);
 				}
-				else { // field or association or inverseOne
+				else { // field or inverseOne
 					FormItem item = new FormItem();
 					DefaultWidget widget = new DefaultWidget();
 					widget.setBinding(binding);
@@ -432,11 +446,20 @@ public class ViewGenerator {
 					}
 				}
 				// Set this field as non-editable coz the default widget (lookup description) 
-				// cannot query the document as its an embedded association
-				else if ((attribute instanceof Association) &&
-							AssociationType.embedded.equals(((Association) attribute).getType())) {
-					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
-					column.setEditable(Boolean.FALSE);
+				// cannot query the document as its either an embedded association or not persistent
+				else if (attribute instanceof Association) {
+					Association association = (Association) attribute;
+					Document associationDocument = module.getDocument(customer, association.getDocumentName());
+					Persistent associationPersistent = associationDocument.getPersistent();
+					if (AssociationType.embedded.equals(association.getType()) || // embedded
+							(associationPersistent == null) ||
+							(associationPersistent.getName() == null)) { // not persistent document
+						column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
+						column.setEditable(Boolean.FALSE);
+					}
+					else {
+						column.setBinding(propertyName);
+					}
 				}
 				else {
 					column.setBinding(propertyName);
