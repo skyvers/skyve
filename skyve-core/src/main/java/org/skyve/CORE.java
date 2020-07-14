@@ -7,7 +7,6 @@ import java.util.SortedMap;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Collection.Ordering;
@@ -90,21 +89,31 @@ public class CORE {
 	
 	/**
 	 * Get a date format for the current thread of execution.
-	 * Since format objects are not thread-safe, this convenience method exists to return one for each thread.
+	 * Since format objects are not thread-safe, this convenience method exists to return a new one each time.
 	 * 
 	 * @return A date format.
 	 */
 	public static SimpleDateFormat getDateFormat(String formatString) {
-		return ThreadSafeFactory.getDateFormat(formatString);
+		SimpleDateFormat result = new SimpleDateFormat(formatString);
+		result.setLenient(false);
+		return result;
 	}
 	
     /**
      * Get a decimal format for the current thread of execution.
-     * Since format objects are not thread-safe, this convenience method exists to return one for each thread.
+     * Since format objects are not thread-safe, this convenience method exists to return a new one each time.
      * 
      * @return A decimal format.
      */
 	public static DecimalFormat getDecimalFormat(String formatString) {
-		return ThreadSafeFactory.getDecimalFormat(formatString);
+		return new DecimalFormat(formatString);
+	}
+	
+	public static SimpleDateFormat getSerializableDateFormat() {
+		return getDateFormat("yyyy-MM-dd");
+	}
+
+	public static SimpleDateFormat getSerializableTimeFormat() {
+		return getDateFormat("HH:mm:ss");
 	}
 }

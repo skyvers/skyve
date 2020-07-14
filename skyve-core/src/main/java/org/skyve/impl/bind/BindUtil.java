@@ -45,7 +45,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.util.NullTolerantBeanComparator;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -466,7 +465,7 @@ public final class BindUtil {
 				result = new WKTReader().read(stringValue);
 			}
 			else if (Date.class.isAssignableFrom(type)) {
-				result = new java.sql.Timestamp(ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
+				result = new java.sql.Timestamp(CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
 			}
 			else if (type.equals(OptimisticLock.class)) {
 				result = new OptimisticLock(stringValue);
@@ -543,7 +542,7 @@ public final class BindUtil {
 				result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
 			}
 			else if (value instanceof Date) {
-				result = ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
+				result = CORE.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
 			}
 			else if (value instanceof Boolean) {
 				result = (((Boolean) value).booleanValue() ? "Yes" : "No");

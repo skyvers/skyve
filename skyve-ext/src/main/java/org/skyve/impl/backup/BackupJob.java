@@ -25,6 +25,7 @@ import java.util.TreeMap;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -35,7 +36,6 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -76,7 +76,7 @@ public class BackupJob extends CancellableJob {
 											UtilImpl.CONTENT_DIRECTORY, 
 											customerName, 
 											File.separator, 
-											ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
+											CORE.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
 											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();

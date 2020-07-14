@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateTime;
@@ -11,7 +12,6 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -59,8 +59,8 @@ public class WebStatsUtil {
 			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();
-			Integer month = new Integer(ThreadSafeFactory.getDateFormat(MONTH_FORMAT).format(now));
-			Integer year = new Integer(ThreadSafeFactory.getDateFormat(YEAR_FORMAT).format(now));
+			Integer month = new Integer(CORE.getDateFormat(MONTH_FORMAT).format(now));
+			Integer year = new Integer(CORE.getDateFormat(YEAR_FORMAT).format(now));
 			
 			String truncatedUserAgentHeader = userAgentHeader;
 			if ((truncatedUserAgentHeader != null) && (truncatedUserAgentHeader.length() > 400)) {

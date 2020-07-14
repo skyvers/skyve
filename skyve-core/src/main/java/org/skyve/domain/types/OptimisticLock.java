@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.util.ThreadSafeFactory;
 
 /**
  * 
@@ -48,7 +48,7 @@ public class OptimisticLock implements Serializable {
 		
 		this.lockUsername = lockString.substring(17);
 		try {
-			this.lockTimestamp = ThreadSafeFactory.getDateFormat(LOCK_TIMESTAMP_FORMAT).parse(lockString.substring(0, 17));
+			this.lockTimestamp = CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT).parse(lockString.substring(0, 17));
 		}
 		catch (ParseException e) {
 			throw new DomainException("Exception parsing " + lockString, e);
@@ -60,7 +60,7 @@ public class OptimisticLock implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return ThreadSafeFactory.getDateFormat(LOCK_TIMESTAMP_FORMAT).format(lockTimestamp) + lockUsername;
+		return CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT).format(lockTimestamp) + lockUsername;
 	}
 
 	/**

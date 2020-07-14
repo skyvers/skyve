@@ -3,7 +3,7 @@ package org.skyve.domain.types;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.skyve.impl.util.ThreadSafeFactory;
+import org.skyve.CORE;
 import org.skyve.impl.util.TimeUtil;
 
 /**
@@ -44,11 +44,11 @@ public class DateOnly extends Date {
 	 * 
 	 */
 	public DateOnly(String serializedForm) throws ParseException {
-		this(ThreadSafeFactory.getSerializableDateFormat().parse(serializedForm).getTime());
+		this(CORE.getSerializableDateFormat().parse(serializedForm).getTime());
 	}
 
 	@Override
 	public String toString() {
-		return ThreadSafeFactory.getSerializableDateFormat().format(this);
+		return CORE.getSerializableDateFormat().format(this);
 	}
 }

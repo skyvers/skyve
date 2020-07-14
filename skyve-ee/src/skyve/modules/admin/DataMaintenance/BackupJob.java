@@ -9,7 +9,6 @@ import java.util.Date;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.job.Job;
 import org.skyve.metadata.SortDirection;
 import org.skyve.util.FileUtil;
@@ -84,7 +83,7 @@ public class BackupJob extends Job {
 			if (weekly > 0) {
 				File copy = new File(backupDir,
 										String.format("WEEKLY_%s.zip",
-														ThreadSafeFactory.getDateFormat("yyyyMMWW").format(now)));
+														CORE.getDateFormat("yyyyMMWW").format(now)));
 				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 				log.add(trace);
 				Util.LOGGER.info(trace);
@@ -99,7 +98,7 @@ public class BackupJob extends Job {
 			if (monthly > 0) {
 				File copy = new File(backupDir,
 										String.format("MONTHLY_%s.zip",
-														ThreadSafeFactory.getDateFormat("yyyyMM").format(now)));
+														CORE.getDateFormat("yyyyMM").format(now)));
 				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 				log.add(trace);
 				Util.LOGGER.info(trace);
@@ -114,7 +113,7 @@ public class BackupJob extends Job {
 			if (yearly > 0) {
 				File copy = new File(backupDir,
 										String.format("YEARLY_%s.zip",
-														ThreadSafeFactory.getDateFormat("yyyy").format(now)));
+														CORE.getDateFormat("yyyy").format(now)));
 				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
 				log.add(trace);
 				Util.LOGGER.info(trace);

@@ -29,7 +29,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -226,7 +225,7 @@ public class FileUpload extends Localisable {
 		        StringBuilder message = new StringBuilder(128);
 		        message.append(file.getFileName()).append(" is uploaded. File Size is ");
 	
-				DecimalFormat format = ThreadSafeFactory.getDecimalFormat("###,##0.00");
+				DecimalFormat format = CORE.getDecimalFormat("###,##0.00");
 				if (size > 1048576) {
 		            message.append(format.format(size / 1048576.0)).append(" MB");
 		        }
