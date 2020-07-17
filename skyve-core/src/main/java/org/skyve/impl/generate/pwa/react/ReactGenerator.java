@@ -17,31 +17,31 @@ public class ReactGenerator {
 	File srcSkyvePath;
 	File srcSkyveViewsPath;
 	Set<ReactComponent> components = new TreeSet<>();
-	
+
 	public ReactGenerator(String uxui, String projectFolderPath) {
 		this.uxui = uxui;
 		this.projectFolderPath = projectFolderPath;
 		if (! new File(projectFolderPath).exists()) {
-			throw new IllegalArgumentException("Prject folder " + projectFolderPath + " does not exist");
+			throw new IllegalArgumentException("Project folder " + projectFolderPath + " does not exist");
 		}
 		this.srcSkyvePath = new File(projectFolderPath, "src/skyve/");
 		this.srcSkyveViewsPath = new File(projectFolderPath, "src/skyve/views/");
 	}
-	
+
 	// copy files in the router directly over
 	private void copyView() {
-		
+
 	}
-	
+
 	public void generate() throws IOException {
 		srcSkyveViewsPath.mkdirs();
-		new ReactRouter(this).create();
-				
+		new ReactNativeRouter(this).create();
+
 		for (ReactComponent component : components) {
 			component.create();
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		new ReactGenerator("desktop", "/Users/mike/Downloads/sigma-master/").generate();
 	}

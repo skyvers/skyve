@@ -47,39 +47,41 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class ReactNativeComponentRenderer extends ComponentRenderer {
-	private Map<String, String> imports;
-	private String startingIndent;
+	public static final String REACT_NATIVE_IMPORT = "react-native";
+
+	private final Map<String, String> imports;
+	private final String startingIndent;
 
 	public ReactNativeComponentRenderer(Map<String, String> imports, String startingIndent) {
 		this.imports = imports;
 		this.startingIndent = startingIndent;
 	}
-	
+
 	@Override
 	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
-		imports.put("{VBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
-		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent(startingIndent);
+		imports.put("{ View }", REACT_NATIVE_IMPORT);
+		RenderedComponent result = new RenderedComponent().setAfter("</View>").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
-		output.append("<VBox>");
+		output.append("<View>");
 		return result;
 	}
 
 	@Override
 	public List<RenderedComponent> toolbars(List<RenderedComponent> components, String widgetId) {
-		imports.put("{Toolbar}", "primereact/toolbar");
+		//imports.put("{Toolbar}", "primereact/toolbar");
 		RenderedComponent result = new RenderedComponent().setAfter("</Toolbar>");
 		StringBuilder output = result.getOutput();
 		output.append("<Toolbar>");
-		return Collections.singletonList(result);
+		return Collections.singletonList(new RenderedComponent());
 	}
 
 	@Override
 	public RenderedComponent tabPane(RenderedComponent component, TabPane tabPane) {
-		imports.put("{TabView, TabPanel}", "primereact/tabview");
+		//imports.put("{TabView, TabPanel}", "primereact/tabview");
 		RenderedComponent result = new RenderedComponent().setAfter("</TabView>");
 		StringBuilder output = result.getOutput();
 		output.append("<TabView>");
-		return result;
+		return new RenderedComponent();
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent().setAfter("</TabPanel>");
 		StringBuilder output = result.getOutput();
 		output.append("<TabPanel header=\"").append(title).append("\">");
-		return result;
+		return label(component, "tab");
 	}
 
 	@Override
@@ -95,7 +97,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 										String title,
 										String invisibileConditionName,
 										Integer pixelWidth) {
-		imports.put("{Card}", "primereact/card");
+		//imports.put("{Card}", "primereact/card");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Card");
@@ -104,14 +106,16 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		}
 		output.append('>');
 		result.setAfter("</Card>");
-		return result;
+		return new RenderedComponent();
 	}
 
 	@Override
 	public RenderedComponent label(RenderedComponent component, String value) {
-		RenderedComponent result = new RenderedComponent();
+		imports.put("{ Text }", REACT_NATIVE_IMPORT);
+		RenderedComponent result = new RenderedComponent().setAfter("</Text>").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
-		output.append("label");
+		output.append("<Text>");
+		output.append(value);
 		return result;
 	}
 
@@ -120,7 +124,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span />");
-		return result;
+		return label(component, "spacer");
 	}
 
 	@Override
@@ -129,20 +133,20 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											Button button,
 											Action action) {
-		imports.put("{Button}", "primereact/button");
+		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
-		return result;
+		return label(component, "actionButton");
 	}
 
 	@Override
 	public RenderedComponent reportButton(RenderedComponent component, Button button, Action action) {
-		imports.put("{Button}", "primereact/button");
+		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
-		return result;
+		return label(component, "reportButton");
 	}
 
 	@Override
@@ -151,11 +155,11 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 												Action action,
 												String moduleName,
 												String documentName) {
-		imports.put("{Button}", "primereact/button");
+		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
-		return result;
+		return label(component, "downloadButton");
 	}
 
 	@Override
@@ -163,7 +167,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>StaticImage</span>");
-		return result;
+		return label(component, "staticImage");
 	}
 
 	@Override
@@ -174,7 +178,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>DynamicImage</span>");
-		return result;
+		return label(component, "dynamic image");
 	}
 
 	@Override
@@ -186,7 +190,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>Blurb</span>");
-		return result;
+		return label(component, "blurb");
 	}
 
 	@Override
@@ -198,7 +202,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>Label</span>");
-		return result;
+		return label(component, "label");
 	}
 
 	@Override
@@ -207,11 +211,12 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 										boolean ordered,
 										String title,
 										DataGrid grid) {
-		imports.put("{DataTable}", "primereact/datatable");
-		RenderedComponent result = new RenderedComponent().setAfter("</DataTable>").setIndent("");
+		//imports.put("{DataTable}", "primereact/datatable");
+		RenderedComponent result = new RenderedComponent();
+		//result.setAfter("</DataTable>").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<DataTable value={this.state.").append(BindUtil.sanitiseBinding(grid.getBinding()));
-		output.append("} selectionMode=\"single\" onSelectionChange={e => alert(e.data.bizModule + '.' + e.data.bizDocument + '.' + e.data.bizId)}>");
+		//output.append("<DataTable value={this.state.").append(BindUtil.sanitiseBinding(grid.getBinding()));
+		//output.append("} selectionMode=\"single\" onSelectionChange={e => alert(e.data.bizModule + '.' + e.data.bizDocument + '.' + e.data.bizId)}>");
 		return result;
 	}
 
@@ -220,9 +225,10 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											String title,
 											DataRepeater repeater) {
-		RenderedComponent result = new RenderedComponent().setAfter("</div>").setIndent("");
+		RenderedComponent result = new RenderedComponent();
+		//result.setAfter("</div>").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<div>dataRepeater");
+		//output.append("<div>dataRepeater");
 		return result;
 	}
 
@@ -235,11 +241,12 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression) {
-		imports.put("{Column}", "primereact/column");
-		RenderedComponent result = new RenderedComponent().setIndent("");
+		//imports.put("{Column}", "primereact/column");
+		RenderedComponent result = new RenderedComponent();
+		//result.setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<Column field=\"").append(BindUtil.sanitiseBinding(columnBinding));
-		output.append("\" header=\"").append(columnTitle).append("\" />");
+		//output.append("<Column field=\"").append(BindUtil.sanitiseBinding(columnBinding));
+		//output.append("\" header=\"").append(columnTitle).append("\" />");
 		current.addChild(result);
 		return result;
 	}
@@ -259,7 +266,7 @@ System.out.println("end column " + current);
 System.out.println("conatin column " + column.getTitle());
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<span>addDataGridContainerColumn</span>");
+		//output.append("<span>addDataGridContainerColumn</span>");
 		current.addChild(result);
 		return result;
 	}
@@ -293,7 +300,7 @@ System.out.println("action column " + current);
 										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<span>ListGrid</span>");
+		//output.append("<span>ListGrid</span>");
 		return result;
 	}
 
@@ -309,7 +316,7 @@ System.out.println("action column " + current);
 											boolean showGrid) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<span>listRepeater</span>");
+		//output.append("<span>listRepeater</span>");
 		return result;
 	}
 
@@ -318,7 +325,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("listMembership");
-		return result;
+		return label(component, "listMembership");
 	}
 
 	@Override
@@ -330,7 +337,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("checkBox");
-		return result;
+		return label(component, "checkbox");
 	}
 
 	@Override
@@ -342,7 +349,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("colourPicker");
-		return result;
+		return label(component, "colourPicker");
 	}
 
 	@Override
@@ -351,11 +358,11 @@ System.out.println("action column " + current);
 									Combo combo,
 									String title,
 									boolean required) {
-		imports.put("{Dropdown}", "primereact/dropdown");
+		//imports.put("{Dropdown}", "primereact/dropdown");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Dropdown />");
-		return result;
+		return label(component, "combo");
 	}
 
 	@Override
@@ -367,7 +374,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("contentImage");
-		return result;
+		return label(component, "contentImage");
 	}
 
 	@Override
@@ -379,7 +386,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ContentLink</span>");
-		return result;
+		return label(component, "contentLink");
 	}
 
 	@Override
@@ -391,7 +398,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("html");
-		return result;
+		return label(component, "html");
 	}
 
 	@Override
@@ -405,7 +412,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("lookupDescription");
-		return result;
+		return label(component, "lookupDescription");
 	}
 
 	@Override
@@ -414,11 +421,11 @@ System.out.println("action column " + current);
 										Password password,
 										String title,
 										boolean required) {
-		imports.put("{Password}", "primereact/password");
+		//imports.put("{Password}", "primereact/password");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<Password />");
-		return result;
+		return label(component, "password");
 	}
 
 	@Override
@@ -430,7 +437,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("radio");
-		return result;
+		return label(component, "radio");
 	}
 
 	@Override
@@ -442,7 +449,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("richText");
-		return result;
+		return label(component, "richText");
 	}
 
 	@Override
@@ -454,7 +461,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("spinner");
-		return result;
+		return label(component, "spinner");
 	}
 
 	@Override
@@ -466,13 +473,13 @@ System.out.println("action column " + current);
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
-		imports.put("{InputText}", "primereact/inputtext");
+		//imports.put("{InputText}", "primereact/inputtext");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		String sanitisedBinding = BindUtil.sanitiseBinding(text.getBinding());
 		output.append("<InputText value={this.state.").append(sanitisedBinding).append("} onChange={(e) => this.change('");
 		output.append(sanitisedBinding).append("', e)} />");
-		return result;
+		return label(component, "text");
 	}
 
 	@Override
@@ -482,13 +489,13 @@ System.out.println("action column " + current);
 										String title,
 										boolean required,
 										Integer length) {
-		imports.put("{InputTextarea}", "primereact/inputtextarea");
+		//imports.put("{InputTextarea}", "primereact/inputtextarea");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		String sanitisedBinding = BindUtil.sanitiseBinding(text.getBinding());
 		output.append("<InputTextarea value={this.state.").append(sanitisedBinding).append("} onChange={(e) => this.change('");
 		output.append(sanitisedBinding).append("', e)} />");
-		return result;
+		return label(component, "textArea");
 	}
 
 	@Override
@@ -500,7 +507,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("<span>ActionLink</span>");
-		return result;
+		return label(component, "actionLink");
 	}
 
 	@Override
@@ -508,7 +515,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("report");
-		return result;
+		return label(component, "report");
 	}
 
 	@Override
@@ -519,7 +526,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("download");
-		return result;
+		return label(component, "download");
 	}
 
 	@Override
@@ -527,9 +534,9 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		output.append("download");
-		return result;
+		return label(component, "upload");
 	}
-	
+
 	@Override
 	public RenderedComponent action(RenderedComponent component,
 										String dataWidgetBinding,
@@ -537,7 +544,7 @@ System.out.println("action column " + current);
 										Action action,
 										ImplicitActionName name,
 										String title) {
-		imports.put("{Button}", "primereact/button");
+		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		if (ImplicitActionName.Cancel.equals(name)) {
@@ -546,6 +553,6 @@ System.out.println("action column " + current);
 		else {
 			output.append("action " + name);
 		}
-		return result;
+		return label(component, "action");
 	}
 }
