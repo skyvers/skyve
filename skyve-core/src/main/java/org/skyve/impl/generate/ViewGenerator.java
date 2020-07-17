@@ -340,7 +340,9 @@ public class ViewGenerator {
 					else {
 						MetaData metaData = null;
 						Persistent associationPersistent = associationDocument.getPersistent();
-						if ((associationPersistent == null) || (associationPersistent.getName() == null)) {
+						// Use a bizKey text field when there is no domain values defined and the association document is not persistent
+						if ((domainType == null) && 
+								((associationPersistent == null) || (associationPersistent.getName() == null))) {
 							TextField widget = new TextField();
 							widget.setBinding(Binder.createCompoundBinding(binding, Bean.BIZ_KEY));
 							metaData = widget;
