@@ -834,4 +834,42 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	public boolean isNotShowResults() {
 		return (! isShowResults());
 	}
+
+	/**
+	 * Whether to show the upload button
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowUpload() {
+		return (!isShowExport() && !isFileExists());
+	}
+
+	/**
+	 * {@link #isShowUpload} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowUpload() {
+		return (! isShowUpload());
+	}
+
+	/**
+	 * Whether to show the upload columns
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowUploadColumns() {
+		return (!isShowExport() && isFileExists());
+	}
+
+	/**
+	 * {@link #isShowUploadColumns} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowUploadColumns() {
+		return (! isShowUploadColumns());
+	}
 }

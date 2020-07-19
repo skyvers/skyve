@@ -89,6 +89,14 @@
 		</enum>
 	</attributes>
 	<conditions>
+		<condition name="showExport">
+			<description>Whether to show the export mode view rather than the default import</description>
+			<expression>
+				<![CDATA[
+				Mode.exportData.equals(mode)
+				]]>
+			</expression>
+		</condition>
 		<condition name="fileExists">
 			<description>Whether the upload file exists</description>
 			<expression>
@@ -96,6 +104,22 @@
 				Mode.importData.equals(mode) && importFileAbsolutePath!=null
 				]]>
 			</expression>
+		</condition>
+		<condition name="showUpload">
+			<description>Whether to show the upload button</description>
+			<expression>
+				<![CDATA[
+					!isShowExport() && !isFileExists()
+				]]>
+			</expression>			
+		</condition>
+		<condition name="showUploadColumns">
+			<description>Whether to show the upload columns</description>
+			<expression>
+				<![CDATA[
+					!isShowExport() && isFileExists()
+				]]>
+			</expression>			
 		</condition>
 		<condition name="showExpressions">
 			<description>Whether to show advanced binding strings</description>
@@ -116,14 +140,6 @@
 			<expression>
 				<![CDATA[
 					getModuleName()!=null && getDocumentName()!=null
-				]]>
-			</expression>
-		</condition>
-		<condition name="showExport">
-			<description>Whether to show the export mode view rather than the default import</description>
-			<expression>
-				<![CDATA[
-				Mode.exportData.equals(mode)
 				]]>
 			</expression>
 		</condition>

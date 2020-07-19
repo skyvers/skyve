@@ -22,100 +22,62 @@
 			</form>
 		</vbox>
 		<vbox border="true" borderTitle="Configure Options" widgetId="configureOptions">
-			<hbox>
-				<vbox>
-					<form>
-						<column />
-						<column />
-						<column />
-						<column />
-						<row>
-							<item colspan="3">
-								<combo binding="moduleName">
-									<onChangedHandlers>
-										<rerender clientValidation="false">
-											<properties>
-												<c:property key="update">configureOptions</c:property>
-											</properties>
-										</rerender>
-									</onChangedHandlers>
-								</combo>
-							</item>
-						</row>
-						<row>
-							<item colspan="3">
-								<combo binding="documentName">
-									<onChangedHandlers>
-										<rerender clientValidation="false">
-											<properties>
-												<c:property key="update">configureOptions</c:property>
-											</properties>
-										</rerender>
-									</onChangedHandlers>
-								</combo>
-							</item>
-						</row>
-						<row>
-							<item>
-								<checkBox triState="false" binding="fileContainsHeaders" />
-							</item>
-							<item>
-								<checkBox triState="false " binding="detailedLogging" />
-							</item>
-						</row>
-					</form>
-					<form invisible="showExport">
-						<column />
-						<column />
-						<column />
-						<column />
-						<row>
-							<item colspan="3">
-								<combo binding="loadType" />
-							</item>
-						</row>
-					</form>
-				</vbox>
-				<vbox>
-					<form visible="showExport">
-						<column />
-						<row>
-							<item>
-								<blurb invisible="contextSet" textAlignment="left">
+			<vbox>
+				<form disabled="fileExists">
+					<column responsiveWidth="2" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<blurb textAlignment="left">
 									<![CDATA[<em>Select a module and document...</em>]]>
 								</blurb>
-							</item>
-						</row>
-						<row>
-							<item>
-								<button pixelWidth="200" action="ResetColumns">
-									<properties>
-										<c:property key="update">columns</c:property>
-									</properties>
-								</button>
-							</item>
-						</row>
-						<row>
-							<item>
-								<button pixelWidth="200" action="RunExport" />
-							</item>
-						</row>
-					</form>
-					<form invisible="showExport">
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="moduleName">
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">configureOptions</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="documentName">
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">configureOptions</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox triState="false" binding="fileContainsHeaders" />
+						</item>
+					</row>
+				</form>
+				<vbox invisible="showExport">
+					<form invisible="fileExists">
+						<column responsiveWidth="2" />
+						<column />
 						<column />
 						<row>
 							<item>
-								<blurb invisible="contextSet" textAlignment="left">
-									<![CDATA[<em>Select a module and document...</em>]]>
-								</blurb>
+								<spacer />
 							</item>
-						</row>
-						<row>
-							<item>
-								<blurb visible="fileExists"><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
-							</item>
-						</row>
-						<row>
 							<item>
 								<button pixelWidth="200" action="UploadSimpleImportDataFile">
 									<properties>
@@ -124,7 +86,33 @@
 								</button>
 							</item>
 						</row>
+					</form>
+					<form visible="fileExists">
+						<column responsiveWidth="2" />
+						<column />
+						<column />
 						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<blurb><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="loadType" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox triState="false " binding="detailedLogging" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<spacer />
+							</item>
 							<item>
 								<button pixelWidth="200" action="RunImport">
 									<properties>
@@ -135,19 +123,38 @@
 						</row>
 					</form>
 				</vbox>
-			</hbox>
+			</vbox>
+			<vbox>
+				<form visible="showExport">
+					<column responsiveWidth="2" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button pixelWidth="200" action="ResetColumns">
+								<properties>
+									<c:property key="update">columns</c:property>
+								</properties>
+							</button>
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button pixelWidth="200" action="RunExport" />
+						</item>
+					</row>
+				</form>
+			</vbox>
 		</vbox>
 	</vbox>
 	<vbox widgetId="columns">
-		<vbox invisible="showExport" border="true" borderTitle="Configure Import Columns">
-			<form>
-				<column />
-				<row>
-					<item>
-						<blurb visible="showResults"><![CDATA[{results}]]></blurb>
-					</item>
-				</row>
-			</form>
+		<vbox visible="showUploadColumns" border="true" borderTitle="Configure Import Columns">
 			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
@@ -171,7 +178,7 @@
 	</vbox>
 	<actions>
 		<defaults />
-		<upload className="UploadSimpleImportDataFile" displayName="Upload file" invisible="showExport" inActionPanel="false" enabled="contextSet" />
+		<upload className="UploadSimpleImportDataFile" displayName="Upload file" visible="showUpload" inActionPanel="false" enabled="contextSet" />
 		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
 			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
 		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />

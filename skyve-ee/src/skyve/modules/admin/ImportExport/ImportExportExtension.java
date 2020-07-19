@@ -23,13 +23,13 @@ public class ImportExportExtension extends ImportExport {
 				getBizId());
 	}
 
-	public Boolean anyColumnHasExpression() {
+	public boolean anyColumnHasExpression() {
 		for (ImportExportColumn c : this.getImportExportColumns()) {
 			if (c.isShowExpression()) {
-				return Boolean.TRUE;
+				return true;
 			}
 		}
-		return Boolean.FALSE;
+		return false;
 	}
 
 	public void cleanupImportFile() {
