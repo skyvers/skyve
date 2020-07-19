@@ -161,6 +161,7 @@
 			</dataGrid>
 			<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
 				<boundColumn binding="columnName" />
+				<boundColumn binding="bindingName" />
 				<boundColumn binding="bindingExpression" />
 			</dataGrid>
 		</vbox>
