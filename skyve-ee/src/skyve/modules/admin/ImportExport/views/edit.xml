@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
 		<vbox border="true" borderTitle="Select Mode">

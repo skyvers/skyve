@@ -18,7 +18,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ImportExport.ImportExportExtension;
@@ -46,19 +45,16 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 
 			try {
 				// create the import upload file
-				File importFile = new File(String.format("%simportExport_%s%s%s",
-						Util.getContentDirectory(),
-						CORE.getUser().getCustomerName(),
+				File importFile = new File(String.format("%s%s%s",
+						bean.baseFolder(),
 						File.separator,
 						file.getFileName()));
 
 				// and save temporary copy of file
-				File import_directory = new File(String.format("%simportExport_%s",
-						Util.getContentDirectory(),
-						CORE.getUser().getCustomerName()));
+				File import_directory = new File(bean.baseFolder());
 
 				if (!import_directory.exists()) {
-					import_directory.mkdir();
+					import_directory.mkdirs();
 				}
 
 				// replace file if it exists
@@ -71,7 +67,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				bean.setImportFileName(file.getFileName());
 				bean.setImportFileAbsolutePath(importFile.getAbsolutePath());
 
-				loadColumnsFromFile(bean, exception);
+				bean = loadColumnsFromFile(bean, exception);
 				int i = bean.getImportExportColumns().size();
 
 				// construct a result message
@@ -88,6 +84,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				webContext.growl(MessageSeverity.info, bean.getResults());
 			} catch (Exception e) {
 				// clean up any uploaded file
+				e.printStackTrace();
 				bean.cleanupImportFile();
 			}
 		}
@@ -98,7 +95,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 		return bean;
 	}
 
-	public static void loadColumnsFromFile(ImportExportExtension bean, UploadException exception) throws Exception {
+	public static ImportExportExtension loadColumnsFromFile(ImportExportExtension bean, UploadException exception) throws Exception {
 
 		// clear previous columns
 		bean.getImportExportColumns().clear();
@@ -159,6 +156,6 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				i++;
 			}
 		}
-
+		return bean;
 	}
 }
