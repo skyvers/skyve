@@ -9,7 +9,8 @@ import javax.faces.convert.ConverterException;
 import org.skyve.impl.util.UtilImpl;
 
 /**
- * Convert an Integer to and from a string respecting null values.
+ * Convert an Integer to and from a String respecting null values.
+ * 
  * @author mike
  */
 public class Integer implements Converter {
