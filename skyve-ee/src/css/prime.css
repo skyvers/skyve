@@ -181,3 +181,10 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 .skyveEmptyListAddIcon {
 	color: rgb(5, 116, 218);
 }
+
+/* ensure radio button groups have a text wrap that looks like its in a table */
+.ui-selectoneradio tbody tr td {
+	display: inline-flex;
+	align-content: center;
+	align-items: center;
+}
