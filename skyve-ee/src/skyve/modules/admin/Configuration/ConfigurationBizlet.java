@@ -33,8 +33,8 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			}
 		}
 
-		if (result.getPasswordComplexityModel() == null) {
-			result.setPasswordComplexityModel(ComplexityModel.DEFAULT_COMPLEXITY_MODEL);
+		if (result.getPasswordMinLength() == null) {
+			result.setPasswordMinLength(Integer.valueOf(ConfigurationExtension.PASSWORD_DEFAULT_MIN_LENGTH));
 		}
 		if (result.getFromEmail() == null) {
 			result.setFromEmail(UtilImpl.SMTP_SENDER);

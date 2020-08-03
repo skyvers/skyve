@@ -1,9 +1,6 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -13,14 +10,11 @@ import modules.admin.Startup.StartupExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Setup
  * 
- * @depend - - - PasswordComplexityModel
  * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
@@ -42,7 +36,17 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String DOCUMENT_NAME = "Configuration";
 
 	/** @hidden */
-	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
+	public static final String passwordMinLengthPropertyName = "passwordMinLength";
+	/** @hidden */
+	public static final String passwordRequireLowercasePropertyName = "passwordRequireLowercase";
+	/** @hidden */
+	public static final String passwordRequireUppercasePropertyName = "passwordRequireUppercase";
+	/** @hidden */
+	public static final String passwordRequireNumericPropertyName = "passwordRequireNumeric";
+	/** @hidden */
+	public static final String passwordRequireSpecialPropertyName = "passwordRequireSpecial";
+	/** @hidden */
+	public static final String passwordRuleDescriptionPropertyName = "passwordRuleDescription";
 	/** @hidden */
 	public static final String fromEmailPropertyName = "fromEmail";
 	/** @hidden */
@@ -69,92 +73,42 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String startupPropertyName = "startup";
 
 	/**
-	 * Password Complexity
+	 * Minimum Password Length
 	 * <br/>
-	 * The security level/complexity model for user passwords
+	 * The minimum number of characters for new passwords
 	 **/
-	@XmlEnum
-	public static enum PasswordComplexityModel implements Enumeration {
-		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
-		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
-		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
-		strongMin10CharsUpperLowerNumericAndPunctuation("STRONG", "Strong - min 10 chars, upper, lower, numeric and punctuation");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues;
-
-		private PasswordComplexityModel(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toDescription() {
-			return description;
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static PasswordComplexityModel fromCode(String code) {
-			PasswordComplexityModel result = null;
-
-			for (PasswordComplexityModel value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static PasswordComplexityModel fromDescription(String description) {
-			PasswordComplexityModel result = null;
-
-			for (PasswordComplexityModel value : values()) {
-				if (value.description.equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				PasswordComplexityModel[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (PasswordComplexityModel value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
-			return domainValues;
-		}
-	}
-
+	private Integer passwordMinLength = new Integer(10);
 	/**
-	 * Password Complexity
+	 * Requires Lowercase
 	 * <br/>
-	 * The security level/complexity model for user passwords
+	 * If new passwords should require at least one lowercase character
 	 **/
-	private PasswordComplexityModel passwordComplexityModel;
+	private Boolean passwordRequireLowercase;
+	/**
+	 * Requires Uppercase
+	 * <br/>
+	 * If new passwords should require at least one uppercase character
+	 **/
+	private Boolean passwordRequireUppercase;
+	/**
+	 * Requires Numeric Characters
+	 * <br/>
+	 * If new passwords should require at least one numeric character
+	 **/
+	private Boolean passwordRequireNumeric;
+	/**
+	 * Requires Special Characters
+	 * <br/>
+	 * If new passwords should require at least one special character
+	 **/
+	private Boolean passwordRequireSpecial;
+	/**
+	 * Password Rule Description
+	 * <br/>
+	 * A text description which can be shown to the user if their password does not comply
+				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
+	 **/
+	private String passwordRuleDescription;
 	/**
 	 * Sender/From Email Address
 	 * <br/>
@@ -262,21 +216,110 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #passwordComplexityModel} accessor.
+	 * {@link #passwordMinLength} accessor.
 	 * @return	The value.
 	 **/
-	public PasswordComplexityModel getPasswordComplexityModel() {
-		return passwordComplexityModel;
+	public Integer getPasswordMinLength() {
+		return passwordMinLength;
 	}
 
 	/**
-	 * {@link #passwordComplexityModel} mutator.
-	 * @param passwordComplexityModel	The new value.
+	 * {@link #passwordMinLength} mutator.
+	 * @param passwordMinLength	The new value.
 	 **/
 	@XmlElement
-	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {
-		preset(passwordComplexityModelPropertyName, passwordComplexityModel);
-		this.passwordComplexityModel = passwordComplexityModel;
+	public void setPasswordMinLength(Integer passwordMinLength) {
+		preset(passwordMinLengthPropertyName, passwordMinLength);
+		this.passwordMinLength = passwordMinLength;
+	}
+
+	/**
+	 * {@link #passwordRequireLowercase} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPasswordRequireLowercase() {
+		return passwordRequireLowercase;
+	}
+
+	/**
+	 * {@link #passwordRequireLowercase} mutator.
+	 * @param passwordRequireLowercase	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordRequireLowercase(Boolean passwordRequireLowercase) {
+		preset(passwordRequireLowercasePropertyName, passwordRequireLowercase);
+		this.passwordRequireLowercase = passwordRequireLowercase;
+	}
+
+	/**
+	 * {@link #passwordRequireUppercase} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPasswordRequireUppercase() {
+		return passwordRequireUppercase;
+	}
+
+	/**
+	 * {@link #passwordRequireUppercase} mutator.
+	 * @param passwordRequireUppercase	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordRequireUppercase(Boolean passwordRequireUppercase) {
+		preset(passwordRequireUppercasePropertyName, passwordRequireUppercase);
+		this.passwordRequireUppercase = passwordRequireUppercase;
+	}
+
+	/**
+	 * {@link #passwordRequireNumeric} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPasswordRequireNumeric() {
+		return passwordRequireNumeric;
+	}
+
+	/**
+	 * {@link #passwordRequireNumeric} mutator.
+	 * @param passwordRequireNumeric	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordRequireNumeric(Boolean passwordRequireNumeric) {
+		preset(passwordRequireNumericPropertyName, passwordRequireNumeric);
+		this.passwordRequireNumeric = passwordRequireNumeric;
+	}
+
+	/**
+	 * {@link #passwordRequireSpecial} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPasswordRequireSpecial() {
+		return passwordRequireSpecial;
+	}
+
+	/**
+	 * {@link #passwordRequireSpecial} mutator.
+	 * @param passwordRequireSpecial	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordRequireSpecial(Boolean passwordRequireSpecial) {
+		preset(passwordRequireSpecialPropertyName, passwordRequireSpecial);
+		this.passwordRequireSpecial = passwordRequireSpecial;
+	}
+
+	/**
+	 * {@link #passwordRuleDescription} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordRuleDescription() {
+		return passwordRuleDescription;
+	}
+
+	/**
+	 * {@link #passwordRuleDescription} mutator.
+	 * @param passwordRuleDescription	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordRuleDescription(String passwordRuleDescription) {
+		this.passwordRuleDescription = passwordRuleDescription;
 	}
 
 	/**

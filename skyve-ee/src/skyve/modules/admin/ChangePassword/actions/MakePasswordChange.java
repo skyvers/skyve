@@ -17,7 +17,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.web.WebContext;
 
-import modules.admin.Configuration.ComplexityModel;
+import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
@@ -38,16 +38,13 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		String confirmPassword = bean.getConfirmPassword();
 
 		// check for suitable complexity
-		Configuration configuration = Configuration.newInstance();
-		ComplexityModel cm = new ComplexityModel(configuration.getPasswordComplexityModel());
+		ConfigurationExtension configuration = Configuration.newInstance();
 
-		if (!newPassword.matches(cm.getComparison())) {
+		if (!configuration.meetsComplexity(newPassword)) {
 			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex. ");
-			sb.append(cm.getRule());
+			sb.append(configuration.getPasswordRuleDescription());
 			sb.append(" Please re-enter and confirm the password.");
 			
-			System.out.println(cm.getComparison());
-
 			Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 			throw new ValidationException(message);
 		}

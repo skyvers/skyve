@@ -7,12 +7,30 @@
 	<component name="_backupsNotConfiguredBanner" />
 	
 	<form border="true" borderTitle="Password Complexity">
-		<column responsiveWidth="3"/>
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
 		<column />
-		<column responsiveWidth="1"/>
 		<row>
 			<item>
-				<default binding="passwordComplexityModel" />
+				<spinner binding="passwordMinLength" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireLowercase" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireUppercase" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireNumeric" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireSpecial" triState="false" />
 			</item>
 		</row>
 	</form>

@@ -11,7 +11,7 @@
 	<iconStyleClass>fa fa-lock</iconStyleClass>
 	<bizKey expression="Admin Setup"/>
 	<attributes>
-		<enum name="passwordComplexityModel" required="true">
+		<!-- <enum name="passwordComplexityModel" required="true" deprecated="true">
 			<displayName>Password Complexity</displayName>
 			<description>The security level/complexity model for user passwords</description>
 			<values>
@@ -20,7 +20,37 @@
 				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
 				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
 			</values>
-		</enum>
+		</enum> -->
+		
+		<integer name="passwordMinLength">
+			<displayName>Minimum Password Length</displayName>
+			<description>The minimum number of characters for new passwords</description>
+			<defaultValue>10</defaultValue>
+			<validator min="1"/>
+		</integer>
+		<boolean name="passwordRequireLowercase">
+			<displayName>Requires Lowercase</displayName>
+			<description>If new passwords should require at least one lowercase character</description>
+		</boolean>
+		<boolean name="passwordRequireUppercase">
+			<displayName>Requires Uppercase</displayName>
+			<description>If new passwords should require at least one uppercase character</description>
+		</boolean>
+		<boolean name="passwordRequireNumeric">
+			<displayName>Requires Numeric Characters</displayName>
+			<description>If new passwords should require at least one numeric character</description>
+		</boolean>
+		<boolean name="passwordRequireSpecial">
+			<displayName>Requires Special Characters</displayName>
+			<description>If new passwords should require at least one special character</description>
+		</boolean>
+		<text name="passwordRuleDescription" audited="false" persistent="false" trackChanges="false" usage="both">
+			<documentation>A text description which can be shown to the user if their password does not comply
+				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.</documentation>
+			<displayName>Password Rule Description</displayName>
+			<length>250</length>
+		</text>
+		
 		<text name="fromEmail" required="true">
 			<displayName>Sender/From Email Address</displayName>
 			<description>Email Address that all email's that the system sends will be sent from.</description>

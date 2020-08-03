@@ -115,11 +115,11 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="passwordComplexityModel" length="7">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
-			</type>
-		</property>
+		<property name="passwordMinLength" />
+		<property name="passwordRequireLowercase" />
+		<property name="passwordRequireUppercase" />
+		<property name="passwordRequireNumeric" />
+		<property name="passwordRequireSpecial" />
 		<property name="fromEmail" length="254" />
 		<property name="passwordResetEmailSubject" length="250" />
 		<property name="passwordResetEmailBody" type="text" />

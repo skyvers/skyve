@@ -311,6 +311,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * 
 	 * @param container
 	 */
+	@SuppressWarnings("boxing")
 	protected void layout(Container container) {
 		
 		int sizedCols = 0;
@@ -650,6 +651,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param percentageWidth
 	 * @param responsiveWidth
 	 */
+	@SuppressWarnings("boxing")
 	protected void addElementFromItem(String binding, ReportElement.ElementType elementType, Integer pixelWidth, Integer percentageWidth, Integer responsiveWidth, Integer pixelHeight, 
 			String valueFontName, String invisibleConditionName) {
 		
