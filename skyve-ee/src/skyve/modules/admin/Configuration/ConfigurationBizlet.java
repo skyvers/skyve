@@ -70,6 +70,18 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			StartupExtension startup = Startup.newInstance();
 			startup.loadProperties();
 			bean.setStartup(startup);
+
+			// read in password security settings from json
+			bean.setPasswordHistoryRetention(
+					UtilImpl.PASSWORD_HISTORY_RETENTION > 0 ? String.valueOf(UtilImpl.PASSWORD_HISTORY_RETENTION) : "");
+			bean.setPasswordExpiryDays(
+					UtilImpl.PASSWORD_EXPIRY_IN_DAYS > 0 ? String.valueOf(UtilImpl.PASSWORD_EXPIRY_IN_DAYS) : "");
+			bean.setPasswordAccountLockoutDuration(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0
+					? String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS)
+					: "");
+			bean.setPasswordAccountLockoutThreshold(
+					UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0 ? String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) : "");
+
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			if (bean.getUserSelfRegistrationGroup() == null) {
 				bean.setAllowUserSelfRegistration(Boolean.FALSE);

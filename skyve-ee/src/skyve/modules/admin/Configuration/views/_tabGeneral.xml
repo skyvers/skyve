@@ -33,6 +33,32 @@
 				<checkBox binding="passwordRequireSpecial" triState="false" />
 			</item>
 		</row>
+		<row>
+			<item colspan="4">
+				<blurb>
+					<![CDATA[
+						<span style="font-size: 90%; color: #666666;">Note: for security reasons, the following password 
+						settings must be configured from the application settings file.</span>
+					]]>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordExpiryDays" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutThreshold" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordHistoryRetention" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutDuration" disabled="true" />
+			</item>
+		</row>
 	</form>
 	
 	<!-- test email has a different component for desktop and external -->
