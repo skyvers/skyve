@@ -583,7 +583,8 @@ public class ReportElement {
 	 * @param invisibleConditionName
 	 */
 	public ReportElement(ReportElement.ElementType type, String name, String valueExpression, Integer top, Integer left, Integer width, String invisibleConditionName) {
-		this(type, name, valueExpression, null, null, top, left, width, null, null, null, false, false, invisibleConditionName);
+		this(type, name, valueExpression, null, null, top, left, width, null, null, null, Boolean.FALSE,
+				Boolean.FALSE, invisibleConditionName);
 	}
 
 }

@@ -26,6 +26,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	private int numRolledBackElements;
 
 	@Override
+	@SuppressWarnings("boxing")
 	public void execute() throws Exception {
 		getLog().add(String.format("Commencing job %s.", getDisplayName()));
 

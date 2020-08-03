@@ -84,9 +84,9 @@ public class JasperReportRenderer {
     protected final DesignSpecification designSpecification;
     protected final ReportDesignParameters reportDesignParameters;
 
-    private static final Float FONT_TEN = 10f;
-    private static final Float FONT_TWELVE = 12f;
-    private static final Float FONT_TWENTY_SIX = 26f;
+	private static final Float FONT_TEN = Float.valueOf(10f);
+	private static final Float FONT_TWELVE = Float.valueOf(12f);
+	private static final Float FONT_TWENTY_SIX = Float.valueOf(26f);
 
     private static final Map<String, String> properties;
     private boolean rendered = false;
@@ -597,7 +597,7 @@ public class JasperReportRenderer {
         textField.setExpression(expression);
         textField.setPositionType(PositionTypeEnum.FLOAT);
         summaryBand.addElement(textField);
-        if (Boolean.TRUE.equals(reportDesignParameters.isShowSummary())) {
+		if (reportDesignParameters.isShowSummary() == true) {
             jasperDesign.setSummary(summaryBand);
         }
 
@@ -628,7 +628,8 @@ public class JasperReportRenderer {
         jasperDesign.addParameter(designSpecParameter);
     }
 
-    protected void configureReportProperties(DesignSpecification design) {
+	@SuppressWarnings("boxing")
+	protected void configureReportProperties(DesignSpecification design) {
         jasperDesign.setName(design.getName());
         jasperDesign.setPageWidth(design.getWidth());
         jasperDesign.setPageHeight(design.getHeight());
@@ -1112,7 +1113,8 @@ public class JasperReportRenderer {
         textElement.setStrikeThrough(false);
     }
 
-    protected void configureDimensions(JRDesignElement jrDesignElement, ReportElement reportElement) {
+	@SuppressWarnings("boxing")
+	protected void configureDimensions(JRDesignElement jrDesignElement, ReportElement reportElement) {
         jrDesignElement.setX(Optional.ofNullable(reportElement.getElementLeft()).orElse(0));
         jrDesignElement.setY(Optional.ofNullable(reportElement.getElementTop()).orElse(0));
         jrDesignElement.setHeight(Optional.ofNullable(reportElement.getElementHeight()).orElse(0));

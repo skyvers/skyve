@@ -1,18 +1,21 @@
 package org.skyve.job;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.*;
-import org.skyve.persistence.Persistence;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
-import javax.inject.Inject;
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import javax.inject.Inject;
 
-@SuppressWarnings("unchecked")
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.skyve.persistence.Persistence;
+
 public class IteratingJobTest {
 
 	@Mock
@@ -29,6 +32,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testNoErrors() throws Exception {
 		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
 		testJob.execute();
@@ -44,6 +48,7 @@ public class IteratingJobTest {
 	 * Tests that no elements are processed after a failure.
 	 */
 	@Test
+	@SuppressWarnings("boxing")
 	public void testErrorOnFirstElementWithoutContinue() {
 		testJob.setElements(Arrays.asList("exception", "element2", "element3"));
 
@@ -65,6 +70,7 @@ public class IteratingJobTest {
 	 * Tests that no elements are processed after a failure.
 	 */
 	@Test
+	@SuppressWarnings("boxing")
 	public void testErrorOnSecondElementWithoutContinue() {
 		testJob.setElements(Arrays.asList("element1", "exception", "element3", "element4"));
 
@@ -83,6 +89,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitEveryElement() throws Exception {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
@@ -98,6 +105,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitInBatches() throws Exception {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(2);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4"));
@@ -113,6 +121,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithErrorInTheMiddleOfTheBatch() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4", "exception", "element6"));
@@ -134,6 +143,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitEveryElementWithErrorOnLastElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
@@ -155,6 +165,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testContinueOnFailureWithErrorOnFirstElement() {
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
 		testJob.setElements(Arrays.asList("exception", "element2", "element3", "element4"));
@@ -174,6 +185,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testContinueOnFailureWithErrorOnLastElement() {
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
@@ -193,6 +205,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitEveryElementWithContinueOnFailureAndErrorOnFirstElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
@@ -217,6 +230,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitEveryElementWithContinueOnFailureAndErrorOnLastElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
@@ -241,6 +255,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithContinueOnFailureAndErrorInTheMiddleOfTheBatch() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
@@ -264,6 +279,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
+	@SuppressWarnings("boxing")
 	public void testCommitInBatchesWithContinueOnFailureAndErrorsInMultipleBatches() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(true);
