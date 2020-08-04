@@ -7,6 +7,7 @@
 	<singularAlias>User Monthly Hits</singularAlias>
 	<pluralAlias>User Monthly Hits</pluralAlias>
 	<audited>false</audited>
+	<iconStyleClass>fa fa-bar-chart</iconStyleClass>
 	<bizKey expression="{userName} - {year}/{month} = {numberOfHits}"/>
 	<attributes>
 		<text name="userName" required="true">
