@@ -25,6 +25,7 @@ import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 
 import modules.admin.domain.ControlPanel;
+import modules.admin.domain.DocumentName;
 import modules.admin.domain.Generic;
 
 public class ControlPanelExtension extends ControlPanel {
@@ -57,6 +58,19 @@ public class ControlPanelExtension extends ControlPanel {
 
 	private String unescapedResults;
 
+	/**
+	 * Create a new DocumentName to hold the module and document name for creating test data.
+	 * 
+	 * @param documentName The document name to add
+	 * @return A {@link DocumentName} containing the module and document name for processing later
+	 */
+	public DocumentName addDocumentToCreate(final String documentName) {
+		DocumentName docName = DocumentName.newInstance();
+		docName.setModuleName(getTestModuleName());
+		docName.setDocumentName(documentName);
+		return docName;
+	}
+	
 	public void trapException(Exception e) {
 		StringWriter sw = new StringWriter(512);
 		PrintWriter pw = new PrintWriter(sw);

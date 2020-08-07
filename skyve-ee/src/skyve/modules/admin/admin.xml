@@ -15,6 +15,7 @@
 		<job name="jReindexBeans" displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" />
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
+		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -29,6 +30,7 @@
 		<document ref="DataMaintenance" />
 		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
+		<document ref="DocumentName"/>
 		<document ref="DocumentNumber" defaultQueryName="qDocumentNumbers"/>
 		<document ref="DownloadFolder" />
 		<document ref="Generic" />
@@ -200,6 +202,7 @@
 					<action name="DownloadClientSAIL" />
 					<action name="ApplyStartupConfiguration" />
 					<action name="AddAPIKey"/>
+					<action name="GenerateTestData" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
@@ -229,6 +232,7 @@
 					<action name="Submit" />
 					<action name="UpdatePreview" />
 				</document>
+				<document name="DocumentName" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="RunExport"/>
@@ -407,15 +411,15 @@
 		</edit> -->
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
-				<uxui name="desktop" />
+				<!-- <uxui name="desktop" /> -->
 				<role name="DevOps" />
 			</edit>
-			<edit document="ControlPanel" name="SAIL UI Testing">
+			<!-- <edit document="ControlPanel" name="SAIL UI Testing">
 				<uxui name="external" />
 				<uxui name="tablet" />
 				<uxui name="phone" />
 				<role name="DevOps" />
-			</edit>
+			</edit> -->
 			<edit document="DataMaintenance" name="Data Maintenance">
 				<role name="DevOps" />
 			</edit>
