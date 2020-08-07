@@ -8,9 +8,7 @@ import modules.admin.PasswordGenerator;
 import modules.admin.domain.User;
 
 public class GeneratePassword implements ServerSideAction<User> {
-	/**
-	 * For Serialization.
-	 */
+
 	private static final long serialVersionUID = 3904239033808385824L;
 
 	@Override
@@ -19,16 +17,13 @@ public class GeneratePassword implements ServerSideAction<User> {
 		generatePassword(user);
 
 		return new ServerSideActionResult<>(user);
-		// form
 	}
 
-	@SuppressWarnings({ "unused", "static-access" })
-	public static void generatePassword(User user) throws Exception {
-		user.setGeneratedPassword(new PasswordGenerator().generate());
+	private static void generatePassword(User user) throws Exception {
+		user.setGeneratedPassword(PasswordGenerator.generate());
 
 		user.setNewPassword(user.getGeneratedPassword());
 		user.setConfirmPassword(user.getGeneratedPassword());
 		user.setPasswordExpired(Boolean.TRUE);
-
 	}
 }

@@ -71,7 +71,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public final List<String> getLog() {
 		return log;
 	}
-	
+
 	protected final void setLog(List<String> log) {
 		this.log = log;
 	}
@@ -98,9 +98,9 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public abstract void execute() throws Exception;
 
 	public abstract void execute(Job job) throws Exception;
-	
+
 	public abstract String cancel();
-	
+
 	/**
 	 * Return true to persist the job execution into admin.Job when successful, or
 	 * false to only persist failed job executions.
@@ -112,7 +112,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	}
 
 	@Override
-	public final void interrupt() 
+	public final void interrupt()
 	throws UnableToInterruptJobException {
 		String cantCancelReason = cancel();
 		if (cantCancelReason != null) {
@@ -121,7 +121,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	}
 
 	@Override
-	public final void execute(JobExecutionContext context) 
+	public final void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = null;
@@ -173,26 +173,31 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 				if ((customer == null) || (user == null)) {
 					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
 				}
-	
+
 				try {
 					Module module = customer.getModule("admin");
 					Document document = module.getDocument(customer, "Job");
 					PersistentBean job = document.newInstance(user);
-	
+
 					BindUtil.set(job, "startTime", getStartTime());
 					BindUtil.set(job, "displayName", getDisplayName());
 					BindUtil.set(job, "status", status.toString());
 					BindUtil.set(job, "endTime", getEndTime());
 					BindUtil.set(job, "percentComplete", new Integer(getPercentComplete()));
 					BindUtil.set(job, "log", createLogDescriptionString());
-					
+					if (bean != null) {
+						BindUtil.set(job, "beanBizId", bean.getBizId());
+						BindUtil.set(job, "beanModuleName", bean.getBizModule());
+						BindUtil.set(job, "beanDocumentName", bean.getBizDocument());
+					}
+
 					persistence.save(document, job);
 				}
 				catch (Exception e) {
 					throw new JobExecutionException("Could not insert completed job in the database", e);
 				}
 			}
-			
+
 			persistence.evictAllCached();
 			persistence.commit(true);
 

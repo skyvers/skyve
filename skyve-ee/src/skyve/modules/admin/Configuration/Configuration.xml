@@ -11,7 +11,7 @@
 	<iconStyleClass>fa fa-lock</iconStyleClass>
 	<bizKey expression="Admin Setup"/>
 	<attributes>
-		<integer name="passwordMinLength">
+		<integer name="passwordMinLength" required="true">
 			<displayName>Minimum Password Length</displayName>
 			<description>The minimum number of characters for new passwords</description>
 			<defaultValue>10</defaultValue>
