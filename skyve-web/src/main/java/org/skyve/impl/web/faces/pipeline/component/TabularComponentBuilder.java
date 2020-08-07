@@ -2876,7 +2876,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						result.setIcon("fa fa-chevron-left");
 					}
 					result.setType("button"); // stop the post
-					result.setOnclick("SKYVE.PF.popHistory()");
+					result.setOnclick("SKYVE.PF.popHistory(true)");
 					break;
 				case Remove:
 					if (iconStyleClass == null) { 

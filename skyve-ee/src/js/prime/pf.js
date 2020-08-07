@@ -144,6 +144,8 @@ SKYVE.PF = function() {
 			}
 		},
 
+		// Called in the <head/> of PF pages when cold navigation to existing page.
+		// ie Not from menu of conversation navigation
 		establishHistory: function() {
 			var sessionHistory = getSessionHistory();
 			if (sessionHistory.length == 0) {
@@ -157,52 +159,69 @@ SKYVE.PF = function() {
 					sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
 				}
 			}
+			//console.log('establish history ' + sessionStorage.sessionHistory);
 		},
 		
+		// Called from the menu links to reset the history.
 		startHistory: function(url) {
-			sessionStorage.sessionHistory = "[]";
+			sessionStorage.sessionHistory = '[]';
 			window.location.assign(url);
+			//console.log('start history ' + sessionStorage.sessionHistory);
 		},
 		
-		pushHistory: function(url) {
+		// Called from New/Zoom In actions on DataGrids/ListGrids
+		pushHistory: function(url) { // url is optional and browser wont change location if not defined
 			var sessionHistory = getSessionHistory();
 			sessionHistory.push(window.location.href);
 			sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
-			window.location.assign(url);
+			if (url) {
+				window.location.assign(url);
+			}
+			//console.log('push history ' + sessionStorage.sessionHistory);
 		},
 		
-		popHistory: function() {
+		// Called from OK, Delete and Cancel buttons on top-level edit views and
+		// Zoom Out button on zoomed-in edit views.
+		popHistory: function(redirect) {
 			var sessionHistory = getSessionHistory();
 			if (sessionHistory.length > 0) {
 				var url = sessionHistory.pop();
 				sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
-				window.location.assign(url);
+				if (redirect) {
+					window.location.assign(url);
+				}
 			}
+			//console.log('pop history ' + sessionStorage.sessionHistory);
 		},
 		
-		saveHistory: function(url) {
+		// Called from Save button and from action buttons
+		// when a bean was not persistent and becomes persistent from the button push.
+		// It replaces the "new" URL (no i param) with an "edit" URL through the history stack.
+		saveHistory: function(bizModule, bizDocument, bizId) {
 			var sessionHistory = getSessionHistory();
-			if (sessionHistory.length > 0) {
-				sessionHistory.pop();
+			var historyChanged = false;
+			for (var i = 0; i < sessionHistory.length; i++) {
+				var url = sessionHistory[i];
+				if ((url.indexOf('a=e') > 0) && 
+						(url.indexOf('m=' + bizModule) > 0) && 
+						(url.indexOf('d=' + bizDocument) > 0) &&
+						(url.indexOf('i=') < 0)) {
+					url += '&i=' + bizId;
+					sessionHistory[i] = url;
+					historyChanged = true;
+				}
 			}
-			sessionHistory.push(url);
-			sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+			if (historyChanged) {
+				sessionStorage.sessionHistory = JSON.stringify(sessionHistory);
+			}
+			
 			if (window.history) {
 				if (history.replaceState) {
+					var url = window.location.href + '&i=' + bizId;
 					history.replaceState({}, '', url);
 				}
 			}
-		},
-		
-		restoreHistory: function() {
-			var sessionHistory = getSessionHistory();
-			if (sessionHistory.length > 0) {
-				if (window.history) {
-					if (history.replaceState) {
-						history.replaceState({}, '', sessionHistory[sessionHistory.length - 1]);
-					}
-				}
-			}
+			//console.log('save history ' + sessionStorage.sessionHistory);
 		},
 		
         toggleFilters: function(dataTableId) {

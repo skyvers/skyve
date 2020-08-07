@@ -1,8 +1,12 @@
 package org.skyve.impl.web.faces.actions;
 
+import java.util.Stack;
+
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.domain.Bean;
@@ -74,11 +78,14 @@ public class ActionUtil {
     	}
     }
     
-    static final void redirectViewScopedConversation(FacesView<? extends Bean> facesView, Bean currentBean)
+    static final void redirectViewScopedConversation(FacesView<? extends Bean> facesView, boolean zoomIn)
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
 		ConversationUtil.cacheConversation(webContext);
+
+		// Get the view's bean
+		Bean contextBean = facesView.getBean();
 		
 		// Put the view in the session
 		facesView.dehydrate();
@@ -88,7 +95,21 @@ public class ActionUtil {
 		// perform the redirect
 		StringBuilder outcome = new StringBuilder(64);
 		outcome.append(org.skyve.util.Util.getSkyveContextUrl()).append("/?a=e&m=");
-		outcome.append(currentBean.getBizModule()).append("&d=").append(currentBean.getBizDocument());
+		outcome.append(contextBean.getBizModule()).append("&d=").append(contextBean.getBizDocument());
+		if (contextBean.isPersisted()) {
+			outcome.append("&i=").append(contextBean.getBizId());
+		}
+		Stack<String> zoomInBindings = facesView.getZoomInBindings();
+		if ((zoomInBindings != null) && (! zoomInBindings.isEmpty())) {
+			outcome.append("&b=").append(StringUtils.join(zoomInBindings, ','));
+		}
+
+		if (zoomIn) {
+			PrimeFaces.current().executeScript("SKYVE.PF.pushHistory()");
+		}
+		else {
+			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(false)");
+		}
 		ec.redirect(outcome.toString());
     }
     
