@@ -365,6 +365,9 @@
 		<property name="percentComplete" />
 		<property name="status" length="8" />
 		<property name="log" type="text" />
+		<property name="beanBizId" length="36" />
+		<property name="beanModuleName" length="500" />
+		<property name="beanDocumentName" length="500" />
 		<filter name="adminJobNoneFilter" condition="1=0"/>
 		<filter name="adminJobCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminJobDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
