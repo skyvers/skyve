@@ -17,7 +17,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
@@ -64,7 +63,8 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	    if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
-			boolean notPersistedBefore = targetBean.isNotPersisted();
+			Bean contextBean = facesView.getBean();
+			boolean notPersistedBefore = contextBean.isNotPersisted();
 			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
 																				resourceName,
 																				targetBean,
@@ -74,8 +74,30 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 				internalCustomer.interceptAfterServerSideAction(targetDocument, resourceName, result, webContext);
 				Bean resultBean = result.getBean();
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) resultBean);
-				if (notPersistedBefore && resultBean.isPersisted()) {
-					PrimeFaces.current().executeScript("SKYVE.PF.saveHistory('" + Util.getDocumentUrl(result.getBean()) + "')");
+				contextBean = facesView.getBean();
+				if (notPersistedBefore) {
+					boolean persisted = contextBean.isPersisted();
+					if (! persisted) {
+						// The context bean could've been saved through a child bean's action above,
+						// so we need to see if its in the DB
+						try {
+							T bean = persistence.retrieve(contextBean.getBizModule(), contextBean.getBizDocument(), contextBean.getBizId());
+							if (bean != null) {
+								facesView.setBean(bean);
+								contextBean = bean;
+							}
+						}
+						catch (@SuppressWarnings("unused") Exception e) {
+							// do nothing - its not persisted
+						}
+					}
+					if (persisted) {
+						StringBuilder script = new StringBuilder(256);
+						script.append("SKYVE.PF.saveHistory('").append(contextBean.getBizModule()).append("','");
+						script.append(contextBean.getBizDocument()).append("','");
+						script.append(contextBean.getBizId()).append("')");
+						PrimeFaces.current().executeScript(script.toString());
+					}
 				}
 			}
 		}

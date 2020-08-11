@@ -102,7 +102,18 @@ public class FacesView<T extends Bean> extends Harness {
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
-
+	
+	// This parameter is used on GET requests to render a zoomed in view corresponding to the binding.
+	// and by map.xhtml to hold the geometryBinding for a map view.
+	private String bindingParameter;
+	
+	public String getBindingParameter() {
+		return bindingParameter;
+	}
+	public void setBindingParameter(String bindingParameter) {
+		this.bindingParameter = bindingParameter;
+	}
+	
 	@PostConstruct
 	protected void postConstruct() {
 		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(AbstractWebContext.UXUI);
@@ -215,21 +226,29 @@ public class FacesView<T extends Bean> extends Harness {
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			PrimeFaces.current().executeScript("SKYVE.PF.popHistory()");
+			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(true)");
 		}
 	}
 
 	public void save() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - save");
+		Bean contextBean = getBean();
+		boolean notPersistedBefore = contextBean.isNotPersisted();
+
 		new SaveAction<>(this, false).execute();
 		new SetTitleAction(this).execute();
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			PrimeFaces.current().executeScript("SKYVE.PF.saveHistory('" +
-												Util.getDocumentUrl(getCurrentBean().getBean()) +
-												"')");
 			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
+			contextBean = getBean();
+			if (notPersistedBefore && (contextBean.isPersisted())) {
+				StringBuilder script = new StringBuilder(256);
+				script.append("SKYVE.PF.saveHistory('").append(contextBean.getBizModule()).append("','");
+				script.append(contextBean.getBizDocument()).append("','");
+				script.append(contextBean.getBizId()).append("')");
+				PrimeFaces.current().executeScript(script.toString());
+			}
 		}
 	}
 	
@@ -239,7 +258,7 @@ public class FacesView<T extends Bean> extends Harness {
 
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			PrimeFaces.current().executeScript("SKYVE.PF.popHistory()");
+			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(true)");
 		}
 	}
 

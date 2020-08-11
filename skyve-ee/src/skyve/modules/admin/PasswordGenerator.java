@@ -1,8 +1,5 @@
 package modules.admin;
 
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
-
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.Configuration;
 
@@ -21,11 +18,6 @@ public class PasswordGenerator {
 
 		ConfigurationExtension config = Configuration.newInstance();
 
-		if (config.getPasswordMinLength() == null) {
-			throw new ValidationException(new Message(
-					"Passwords cannot be generated - the Password Complexity has not been defined in the system configuration"));
-		}
-
 		// construct a reasonable password
 		StringBuilder result = new StringBuilder(config.getPasswordMinLength().intValue());
 		result.append(PUNCTUATION.charAt((int) (Math.random() * PUNCTUATION.length())));
@@ -34,7 +26,8 @@ public class PasswordGenerator {
 		result.append(DIGITS.charAt((int) (Math.random() * DIGITS.length())));
 
 		// generate at least a length 6 string, or the min length, whichever is greater
-		int minLength = config.getPasswordMinLength().intValue() < 6 ? 6 : config.getPasswordMinLength().intValue();
+		int minLength = (config.getPasswordMinLength() == null || config.getPasswordMinLength().intValue() < 6) ? 6
+				: config.getPasswordMinLength().intValue();
 
 		for (int i = 0; i < minLength; i++) {
 			int r = (int) (Math.random() * 4);

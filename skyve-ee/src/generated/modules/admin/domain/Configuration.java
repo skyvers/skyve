@@ -68,6 +68,14 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String emailContentPropertyName = "emailContent";
 	/** @hidden */
+	public static final String passwordExpiryDaysPropertyName = "passwordExpiryDays";
+	/** @hidden */
+	public static final String passwordHistoryRetentionPropertyName = "passwordHistoryRetention";
+	/** @hidden */
+	public static final String passwordAccountLockoutThresholdPropertyName = "passwordAccountLockoutThreshold";
+	/** @hidden */
+	public static final String passwordAccountLockoutDurationPropertyName = "passwordAccountLockoutDuration";
+	/** @hidden */
 	public static final String emailToContactPropertyName = "emailToContact";
 	/** @hidden */
 	public static final String startupPropertyName = "startup";
@@ -163,6 +171,38 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Email
 	 **/
 	private String emailContent;
+	/**
+	 * Password Expiry in Days
+	 * <br/>
+	 * Number of days until a password change is required. Blank indicates no password aging.
+	 * <br/>
+	 * Read from the application JSON file set at system startup.
+	 **/
+	private String passwordExpiryDays;
+	/**
+	 * Password History Retention
+	 * <br/>
+	 * Number of previous passwords to check for duplicates. Blank indicates no password history.
+	 * <br/>
+	 * Read from the application JSON file set at system startup.
+	 **/
+	private String passwordHistoryRetention;
+	/**
+	 * Account Lockout Threshold
+	 * <br/>
+	 * Number of sign in attempts until the user account is locked. Blank indicates no account lockout.
+	 * <br/>
+	 * Read from the application JSON file set at system startup.
+	 **/
+	private String passwordAccountLockoutThreshold;
+	/**
+	 * Account Lockout Duration
+	 * <br/>
+	 * Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.
+	 * <br/>
+	 * Read from the application JSON file set at system startup.
+	 **/
+	private String passwordAccountLockoutDuration;
 	/**
 	 * Email To Contact
 	 **/
@@ -504,6 +544,74 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setEmailContent(String emailContent) {
 		preset(emailContentPropertyName, emailContent);
 		this.emailContent = emailContent;
+	}
+
+	/**
+	 * {@link #passwordExpiryDays} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordExpiryDays() {
+		return passwordExpiryDays;
+	}
+
+	/**
+	 * {@link #passwordExpiryDays} mutator.
+	 * @param passwordExpiryDays	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordExpiryDays(String passwordExpiryDays) {
+		this.passwordExpiryDays = passwordExpiryDays;
+	}
+
+	/**
+	 * {@link #passwordHistoryRetention} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordHistoryRetention() {
+		return passwordHistoryRetention;
+	}
+
+	/**
+	 * {@link #passwordHistoryRetention} mutator.
+	 * @param passwordHistoryRetention	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordHistoryRetention(String passwordHistoryRetention) {
+		this.passwordHistoryRetention = passwordHistoryRetention;
+	}
+
+	/**
+	 * {@link #passwordAccountLockoutThreshold} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordAccountLockoutThreshold() {
+		return passwordAccountLockoutThreshold;
+	}
+
+	/**
+	 * {@link #passwordAccountLockoutThreshold} mutator.
+	 * @param passwordAccountLockoutThreshold	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordAccountLockoutThreshold(String passwordAccountLockoutThreshold) {
+		this.passwordAccountLockoutThreshold = passwordAccountLockoutThreshold;
+	}
+
+	/**
+	 * {@link #passwordAccountLockoutDuration} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordAccountLockoutDuration() {
+		return passwordAccountLockoutDuration;
+	}
+
+	/**
+	 * {@link #passwordAccountLockoutDuration} mutator.
+	 * @param passwordAccountLockoutDuration	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordAccountLockoutDuration(String passwordAccountLockoutDuration) {
+		this.passwordAccountLockoutDuration = passwordAccountLockoutDuration;
 	}
 
 	/**
