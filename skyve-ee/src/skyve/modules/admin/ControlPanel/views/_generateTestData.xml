@@ -17,12 +17,6 @@
 					</combo>
 				</item>
 			</row>
-			<!-- <row>
-				<item colspan="3">
-					<default binding="testDocumentName" />
-				</item>
-			</row> -->
-
 		</form>
 		<listMembership binding="testDocumentNames" candidatesHeading="Available Documents" membersHeading="Documents to Create" />
 		<!-- requires GenerateTestData action to be defined -->
@@ -51,7 +45,7 @@
 						</checkBox>
 					</item>
 					<item>
-						<textField binding="testTagName" enabled="taggingGeneratedDataSelected"/>
+						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" />
 					</item>
 					<item align="right">
 						<button action="GenerateTestData" pixelWidth="200" />
