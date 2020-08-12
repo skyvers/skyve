@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
@@ -69,7 +70,37 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			return result;
 		}
 		
+		else if (ControlPanel.testModuleNamePropertyName.equals(attributeName)) {
+			Customer customer = CORE.getUser().getCustomer();
+			List<DomainValue> result = new ArrayList<>();
+			for (Module module : customer.getModules()) {
+				result.add(new DomainValue(module.getName(), module.getTitle()));
+			}
+			return result;
+		}
+		
 		return null;
+	}
+	
+	@Override
+	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
+		// list documents within modules
+		if (ControlPanel.testDocumentNamesPropertyName.equals(attributeName)) {
+			Customer customer = CORE.getUser().getCustomer();
+			List<DomainValue> result = new ArrayList<>();
+			if (bean.getTestModuleName() != null) {
+				Module module = customer.getModule(bean.getTestModuleName());
+				for (String documentName : module.getDocumentRefs().keySet()) {
+					Document document = module.getDocument(customer, documentName);
+					if (document.getPersistent() != null) {
+						// only add persistent documents
+						result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+					}
+				}
+			}
+			return result;
+		}
+		return super.getDynamicDomainValues(attributeName, bean);
 	}
 	
 	@Override
@@ -113,4 +144,5 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 		return null;
 	}
+	
 }
