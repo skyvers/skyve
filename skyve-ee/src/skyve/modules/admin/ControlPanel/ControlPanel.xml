@@ -186,6 +186,35 @@
 		<integer name="sessionCount" usage="view" audited="false" trackChanges="false">
 			<displayName>Session Count</displayName>
 		</integer>
+		
+		<!-- Demo Data -->
+		<integer name="testNumberToGenerate" required="true" persistent="false" >
+   			<displayName>Number To Generate</displayName>
+   			<description><![CDATA[The number of documents to create]]></description>
+   			<defaultValue>1</defaultValue>
+   			<validator min="1" max="10000"/>
+   		</integer>
+   		<text name="testModuleName" required="true">
+   			<displayName>Module Name</displayName>
+   			<description><![CDATA[The target module]]></description>
+   			<domain>constant</domain>
+   			<length>200</length>
+   		</text>
+   		<text name="testTagName" required="false">
+   			<displayName>Tag Name</displayName>
+   			<description><![CDATA[The name of the tag to be used]]></description>
+   			<length>256</length>
+   		</text>
+   		<boolean name="testTagGeneratedData">
+   			<displayName>Tag Generated Data?</displayName>
+   			<defaultValue>false</defaultValue>
+   		</boolean>
+   		<collection name="testDocumentNames" type="aggregation" usage="both">
+   			<displayName>Document Names</displayName>
+   			<domain>dynamic</domain>
+   			<documentName>DocumentName</documentName>
+   			<minCardinality>0</minCardinality>
+   		</collection>
 	</attributes>
 	<conditions>
 		<condition name="fixedCustomer" usage="view">
@@ -210,6 +239,11 @@
 				<![CDATA[
 				Boolean.TRUE.equals(addKeyNotSupported)
 				]]>
+			</expression>
+		</condition>
+		<condition name="taggingGeneratedDataSelected">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getTestTagGeneratedData())]]>
 			</expression>
 		</condition>
 	</conditions>

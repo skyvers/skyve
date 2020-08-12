@@ -25,6 +25,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @navhas n newProperty 0..1 Generic
  * @navhas n sailUser 0..1 UserProxy
  * @navhas n originalStartupProperties 0..n Generic
+ * @navhas n testDocumentNames 0..n DocumentName
  * @navhas n startupProperties 0..n Generic
  * @stereotype "transient"
  */
@@ -106,6 +107,16 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public static final String selectedCachePropertyName = "selectedCache";
 	/** @hidden */
 	public static final String sessionCountPropertyName = "sessionCount";
+	/** @hidden */
+	public static final String testNumberToGeneratePropertyName = "testNumberToGenerate";
+	/** @hidden */
+	public static final String testModuleNamePropertyName = "testModuleName";
+	/** @hidden */
+	public static final String testTagNamePropertyName = "testTagName";
+	/** @hidden */
+	public static final String testTagGeneratedDataPropertyName = "testTagGeneratedData";
+	/** @hidden */
+	public static final String testDocumentNamesPropertyName = "testDocumentNames";
 
 	/**
 	 * User Agent Type
@@ -501,6 +512,32 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Session Count
 	 **/
 	private Integer sessionCount;
+	/**
+	 * Number To Generate
+	 * <br/>
+	 * The number of documents to create
+	 **/
+	private Integer testNumberToGenerate = new Integer(1);
+	/**
+	 * Module Name
+	 * <br/>
+	 * The target module
+	 **/
+	private String testModuleName;
+	/**
+	 * Tag Name
+	 * <br/>
+	 * The name of the tag to be used
+	 **/
+	private String testTagName;
+	/**
+	 * Tag Generated Data?
+	 **/
+	private Boolean testTagGeneratedData = new Boolean(false);
+	/**
+	 * Document Names
+	 **/
+	private List<DocumentName> testDocumentNames = new ChangeTrackingArrayList<>("testDocumentNames", this);
 
 	@Override
 	@XmlTransient
@@ -1202,6 +1239,138 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #testNumberToGenerate} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getTestNumberToGenerate() {
+		return testNumberToGenerate;
+	}
+
+	/**
+	 * {@link #testNumberToGenerate} mutator.
+	 * @param testNumberToGenerate	The new value.
+	 **/
+	@XmlElement
+	public void setTestNumberToGenerate(Integer testNumberToGenerate) {
+		preset(testNumberToGeneratePropertyName, testNumberToGenerate);
+		this.testNumberToGenerate = testNumberToGenerate;
+	}
+
+	/**
+	 * {@link #testModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getTestModuleName() {
+		return testModuleName;
+	}
+
+	/**
+	 * {@link #testModuleName} mutator.
+	 * @param testModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setTestModuleName(String testModuleName) {
+		preset(testModuleNamePropertyName, testModuleName);
+		this.testModuleName = testModuleName;
+	}
+
+	/**
+	 * {@link #testTagName} accessor.
+	 * @return	The value.
+	 **/
+	public String getTestTagName() {
+		return testTagName;
+	}
+
+	/**
+	 * {@link #testTagName} mutator.
+	 * @param testTagName	The new value.
+	 **/
+	@XmlElement
+	public void setTestTagName(String testTagName) {
+		preset(testTagNamePropertyName, testTagName);
+		this.testTagName = testTagName;
+	}
+
+	/**
+	 * {@link #testTagGeneratedData} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getTestTagGeneratedData() {
+		return testTagGeneratedData;
+	}
+
+	/**
+	 * {@link #testTagGeneratedData} mutator.
+	 * @param testTagGeneratedData	The new value.
+	 **/
+	@XmlElement
+	public void setTestTagGeneratedData(Boolean testTagGeneratedData) {
+		preset(testTagGeneratedDataPropertyName, testTagGeneratedData);
+		this.testTagGeneratedData = testTagGeneratedData;
+	}
+
+	/**
+	 * {@link #testDocumentNames} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<DocumentName> getTestDocumentNames() {
+		return testDocumentNames;
+	}
+
+	/**
+	 * {@link #testDocumentNames} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public DocumentName getTestDocumentNamesElementById(String bizId) {
+		return getElementById(testDocumentNames, bizId);
+	}
+
+	/**
+	 * {@link #testDocumentNames} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setTestDocumentNamesElementById(String bizId, DocumentName element) {
+		setElementById(testDocumentNames, element);
+	}
+
+	/**
+	 * {@link #testDocumentNames} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addTestDocumentNamesElement(DocumentName element) {
+		return testDocumentNames.add(element);
+	}
+
+	/**
+	 * {@link #testDocumentNames} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addTestDocumentNamesElement(int index, DocumentName element) {
+		testDocumentNames.add(index, element);
+	}
+
+	/**
+	 * {@link #testDocumentNames} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeTestDocumentNamesElement(DocumentName element) {
+		return testDocumentNames.remove(element);
+	}
+
+	/**
+	 * {@link #testDocumentNames} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public DocumentName removeTestDocumentNamesElement(int index) {
+		return testDocumentNames.remove(index);
+	}
+
+	/**
 	 * allowAddAPIKey
 	 *
 	 * @return The condition
@@ -1256,5 +1425,24 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 */
 	public boolean isNotProductionInstance() {
 		return (! isProductionInstance());
+	}
+
+	/**
+	 * taggingGeneratedDataSelected
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isTaggingGeneratedDataSelected() {
+		return (Boolean.TRUE.equals(getTestTagGeneratedData()));
+	}
+
+	/**
+	 * {@link #isTaggingGeneratedDataSelected} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotTaggingGeneratedDataSelected() {
+		return (! isTaggingGeneratedDataSelected());
 	}
 }
