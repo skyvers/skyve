@@ -9,7 +9,7 @@
 	<iconStyleClass>fa fa-tag</iconStyleClass>
 	<bizKey expression="Tag {name}"/>
 	<attributes>
-		<text name="name">
+		<text name="name" required="true">
 			<displayName>Name</displayName>
 			<length>256</length>
 		</text>

@@ -14,7 +14,7 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * Job
- *
+ * 
  * @stereotype "persistent"
  */
 @XmlType
@@ -130,7 +130,7 @@ public class Job extends AbstractPersistentBean {
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof Job) &&
+		return ((o instanceof Job) && 
 					this.getBizId().equals(((Job) o).getBizId()));
 	}
 
