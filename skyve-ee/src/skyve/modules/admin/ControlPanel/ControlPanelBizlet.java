@@ -3,6 +3,7 @@ package modules.admin.ControlPanel;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.skyve.CORE;
@@ -87,18 +88,21 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		// list documents within modules
 		if (ControlPanel.testDocumentNamesPropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
-			List<DomainValue> result = new ArrayList<>();
+			List<DomainValue> results = new ArrayList<>();
 			if (bean.getTestModuleName() != null) {
 				Module module = customer.getModule(bean.getTestModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
 					if (document.getPersistent() != null) {
 						// only add persistent documents
-						result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+						results.add(new DomainValue(document.getName(), document.getSingularAlias()));
 					}
 				}
+
+				// sort the list by description in case the singular alias changes the sort order
+				results.sort(Comparator.comparing(DomainValue::getDescription));
 			}
-			return result;
+			return results;
 		}
 		return super.getDynamicDomainValues(attributeName, bean);
 	}

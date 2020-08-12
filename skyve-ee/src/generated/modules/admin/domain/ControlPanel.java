@@ -533,7 +533,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * Tag Generated Data?
 	 **/
-	private Boolean testTagGeneratedData;
+	private Boolean testTagGeneratedData = new Boolean(false);
 	/**
 	 * Document Names
 	 **/

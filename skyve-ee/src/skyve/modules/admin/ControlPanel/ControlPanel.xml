@@ -207,6 +207,7 @@
    		</text>
    		<boolean name="testTagGeneratedData">
    			<displayName>Tag Generated Data?</displayName>
+   			<defaultValue>false</defaultValue>
    		</boolean>
    		<collection name="testDocumentNames" type="aggregation" usage="both">
    			<displayName>Document Names</displayName>

@@ -34,7 +34,7 @@
 				</row>
 				<row>
 					<item>
-						<checkBox binding="testTagGeneratedData">
+						<checkBox binding="testTagGeneratedData" triState="false">
 							<onChangedHandlers>
 								<rerender clientValidation="false">
 									<properties>
