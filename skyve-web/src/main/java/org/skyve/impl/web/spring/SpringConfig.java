@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.impl.web.spring;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

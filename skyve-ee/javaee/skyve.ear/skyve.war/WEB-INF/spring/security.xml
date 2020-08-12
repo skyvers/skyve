@@ -32,8 +32,8 @@
 
 	<!-- Secure everything else -->
 	<http auto-config="false" use-expressions="true">
-		<form-login default-target-url="/" login-page="/login" />
-		<logout logout-success-url="/loggedOut" />
+		<form-login default-target-url="#{skyveConfig.skyveContextUrl + '/'}" login-page="#{skyveConfig.skyveContextUrl + '/login'}" authentication-failure-url="#{skyveConfig.skyveContextUrl + '/login?error'}" />
+		<logout logout-success-url="#{skyveConfig.skyveContextUrl + '/loggedOut'}" />
 		<remember-me key="remember"
 						token-validity-seconds="1209600"
 						remember-me-parameter="remember"
@@ -142,11 +142,12 @@
 		<b:property name="dataSource" ref="dataSource" />
 	</b:bean>
 
-	
 	<b:bean id="delegatingEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories" factory-method="createDelegatingPasswordEncoder">
 		<b:property name="defaultPasswordEncoderForMatches" ref="legacyEncoder" />
 	</b:bean>
 	<b:bean id="legacyEncoder" class="org.skyve.impl.security.SkyveLegacyPasswordEncoder" />
+	
+	<b:bean id="skyveConfig" class="org.skyve.impl.web.spring.SkyveConfig" />
 	
 <!--
 	<authentication-manager>
@@ -219,7 +220,7 @@
 	<b:bean id="skyveEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
  		<b:property name="realmName" value="Skyve" />
  	</b:bean>
- 	<b:bean id="skyveFilter" class="org.skyve.impl.web.SpringSingleCustomerBasicAuthenticationFilter">
+ 	<b:bean id="skyveFilter" class="org.skyve.impl.web.spring.SingleCustomerBasicAuthenticationFilter">
  		<b:constructor-arg name="authenticationManager" ref="authenticationManager" />
  	</b:bean>
  -->

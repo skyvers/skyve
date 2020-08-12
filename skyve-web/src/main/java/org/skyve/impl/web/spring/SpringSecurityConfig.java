@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.impl.web.spring;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
