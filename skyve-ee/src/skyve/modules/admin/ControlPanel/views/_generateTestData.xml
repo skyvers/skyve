@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Control Panel" name="_generateTestData" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" borderTitle="Generate Test Data">
+		<form>
+			<column responsiveWidth="3" />
+			<column pixelWidth="50" />
+			<column />
+			<column responsiveWidth="1" />
+			<column responsiveWidth="3" />
+			<row>
+				<item colspan="3">
+					<combo binding="testModuleName">
+						<onChangedHandlers>
+							<rerender clientValidation="false" />
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+		</form>
+		<listMembership binding="testDocumentNames" candidatesHeading="Available Documents" membersHeading="Documents to Create" />
+		<!-- requires GenerateTestData action to be defined -->
+		<vbox widgetId="generationParameters">
+			<form>
+				<column responsiveWidth="3" />
+				<column pixelWidth="50" />
+				<column responsiveWidth="1" />
+				<column />
+				<column responsiveWidth="3" />
+				<row>
+					<item colspan="3">
+						<default binding="testNumberToGenerate" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="testTagGeneratedData">
+							<onChangedHandlers>
+								<rerender clientValidation="false">
+									<properties>
+										<c:property key="update">generationParameters</c:property>
+									</properties>
+								</rerender>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+					<item>
+						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" />
+					</item>
+					<item align="right">
+						<button action="GenerateTestData" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+		</vbox>
+	</vbox>
+
+</view>
