@@ -395,6 +395,116 @@
 		<filter name="adminJobScheduleUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.ReportDataset.ReportDatasetExtension" table="ADM_ReportDataset" entity-name="adminReportDataset">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminReportTemplate" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ReportDataset_parent" />
+		<property name="datasetName" length="50" />
+		<property name="datasetType" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportDataset$DatasetType</param>
+			</type>
+		</property>
+		<property name="query" type="text" />
+		<filter name="adminReportDatasetNoneFilter" condition="1=0"/>
+		<filter name="adminReportDatasetCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportDatasetDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportDatasetUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ReportParameter.ReportParameterExtension" table="ADM_ReportParameter" entity-name="adminReportParameter">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizOrdinal" />
+		<many-to-one name="parent" entity-name="adminReportTemplate" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ReportParameter_parent" />
+		<property name="name" length="50" />
+		<property name="description" length="100" />
+		<property name="type" length="7">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportParameter$Type</param>
+			</type>
+		</property>
+		<property name="required" />
+		<property name="dateDefaultValue" type="DateOnly" />
+		<property name="numericalDefaultValue" />
+		<property name="textDefaultValue" length="100" />
+		<property name="dateTestValue" type="DateOnly" />
+		<property name="numericalTestValue" />
+		<property name="textTestValue" length="100" />
+		<filter name="adminReportParameterNoneFilter" condition="1=0"/>
+		<filter name="adminReportParameterCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportParameterDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportParameterUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ReportTemplate.ReportTemplateExtension" table="ADM_ReportTemplate" entity-name="adminReportTemplate">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="50" />
+		<property name="templateName" length="55" />
+		<property name="description" type="text" />
+		<property name="enabled" />
+		<property name="includeFragment" />
+		<property name="reportType" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$ReportType</param>
+			</type>
+		</property>
+		<property name="outputFormat" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$OutputFormat</param>
+			</type>
+		</property>
+		<property name="template" type="text" />
+		<property name="moduleName" length="100" />
+		<property name="documentName" length="255" />
+		<property name="reportName" length="255" />
+		<property name="mode" length="4">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$Mode</param>
+			</type>
+		</property>
+		<bag name="datasets" order-by="datasetName asc" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminReportDataset" />
+		</bag>
+		<bag name="parameters" order-by="bizOrdinal" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminReportParameter" />
+		</bag>
+		<property name="cronExpression" length="128" />
+		<bag name="usersToEmail" table="ADM_ReportTemplate_usersToEmail" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_ReportTemplate_usersToEmail_owner_id" />
+			<many-to-many entity-name="adminUserProxy" foreign-key="FK_ADM_ReportTemplate_usersToEmail_element_id" column="element_id" />
+		</bag>
+		<property name="startTime" type="DateTime" />
+		<property name="endTime" type="DateTime" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_ReportTemplate_runAs"/>
+		<property name="scheduled" />
+		<filter name="adminReportTemplateNoneFilter" condition="1=0"/>
+		<filter name="adminReportTemplateCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportTemplateDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.domain.Snapshot" table="ADM_Snapshot" entity-name="adminSnapshot">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -769,6 +879,36 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminJobScheduleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetNoneFilter" />
+	<filter-def name="adminReportDatasetCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterNoneFilter" />
+	<filter-def name="adminReportParameterCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateNoneFilter" />
+	<filter-def name="adminReportTemplateCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminSnapshotNoneFilter" />

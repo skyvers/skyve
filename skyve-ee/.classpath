@@ -151,5 +151,10 @@
 	<classpathentry kind="lib" path="lib/mockito-core-2.21.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cache-api-1.0.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/freemarker-2.3.29.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/flying-saucer-core-9.1.18.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/flying-saucer-pdf-9.1.18.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cron-utils-9.0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javax.activation-api-1.2.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

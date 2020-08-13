@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  name="create" title="New Report"
+	  xmlns:c="http://www.skyve.org/xml/common"
+	  xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	
+	<blurb>
+		Please Switch Mode to create a new report.
+	</blurb>  
+	
+	<actions>
+		<cancel />
+	</actions>
+</view>

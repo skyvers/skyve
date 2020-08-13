@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Report Dataset" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <form responsiveWidth="12" border="true">
+        <column responsiveWidth="2"/>
+        <column responsiveWidth="6"/>
+        <column responsiveWidth="4"/>
+        <row>
+            <item>
+                <default binding="datasetName"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <radio binding="datasetType" vertical="false">
+                	<onChangedHandlers>
+                		<rerender clientValidation="false" />
+                	</onChangedHandlers>
+                </radio>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textArea binding="query" minPixelHeight="150" visible="typeQuery">
+                	<onBlurHandlers>
+                		<rerender clientValidation="false" />
+                	</onBlurHandlers>
+                </textArea>
+            </item>
+            <item>
+            	<blurb visible="typeQuery">
+        			<![CDATA[
+        				<div class="editor">
+        					<output id="code-output-query" role="status" class="highlighted-output sql"></output>
+        				</div>
+        			]]>
+        		</blurb>
+            </item>
+        </row>
+        <row>
+        	<item label="Value" help="The value for this dataset">
+        		<textField binding="query" visible="notTypeQuery"/>
+        	</item>
+        </row>
+        <row>
+        	<item>
+        		<spacer/>
+        	</item>
+        	<item>
+        		<blurb visible="typeClass">
+        			<![CDATA[
+        				<span style="font-size: 90%; color: #444;">
+        					Fully qualified name of the class which returns the dataset. E.g. <code>modules.admin.Example.ExampleDataset</code>.
+        				</span>
+        			]]>
+        		</blurb>
+        	</item>
+        </row>
+        <row>
+            <item>
+                <textArea binding="results" visible="notTypeConstant"/>
+            </item>
+        </row>
+    </form>
+    <dataGrid title="Report Parameters" binding="parent.parameters" visible="notTypeConstant">
+        <boundColumn binding="name"/>
+        <boundColumn binding="description"/>
+        <boundColumn binding="type"/>
+        <boundColumn binding="required"/>
+        <boundColumn binding="testValueString"/>
+    </dataGrid>
+    
+    <inject>
+    	<script>
+    		<![CDATA[
+    			if(view) {
+					view.opened = function(data) {
+						SKYVE.Util.loadJS('pages/js/styleOutput.js?v=' + SKYVE.Util.v, function() {
+							styleOutput(v1, 'query', '#code-output-query');
+						});
+					};
+				}
+    		]]>
+    	</script>
+    </inject>
+    				
+    <actions>
+        <defaults/>
+        
+        <action className="TestQuery" displayName="Test Query" iconStyleClass="fa fa-cog" visible="notTypeConstant"/>
+    </actions>
+    <newParameters/>
+</view>

@@ -42,6 +42,10 @@
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="ReportDesign" />
+		<document ref="ReportDataset" />
+		<document ref="ReportParameter" />
+		<document ref="ReportManager" />
+		<document ref="ReportTemplate" defaultQueryName="qReportTemplates" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Startup"/>
 		<document ref="Subscription"/>
@@ -81,7 +85,8 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="CRUDU" />
-				<document name="Generic" permission="CRUDG"/>
+				<document name="Generic" permission="CRUDG" />
+				<document name="ReportTemplate" permission="_R__C" />
 				<document name="User" permission="_RU_U" />
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
@@ -117,6 +122,10 @@
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
+				<document name="ReportTemplate" permission="_R__C">
+					<action name="DownloadJasperReport" />
+					<action name="DownloadReport" />
+				</document>
 				<document name="Snapshot" permission="CRUDU">
 					<action name="CopySnapshotToUser" />
 				</document>
@@ -246,6 +255,26 @@
 					<action name="GenerateDefault" />
 					<action name="Preview" />
 				</document>
+				<document name="ReportDataset" permission="CRUDC">
+					<action name="TestQuery" />
+				</document>
+				<document name="ReportTemplate" permission="CRUDC">
+					<action name="AddUserToEmail" />
+					<action name="Back" />
+					<action name="CopyReport" />
+					<action name="DownloadJasperReport" />
+					<action name="DownloadReport" />
+					<action name="DownloadTemplate" />
+					<action name="ExportReportSpecification" />
+					<action name="Next" />
+					<action name="TestJasperReport" />
+					<action name="TestReport" />
+				</document>
+				<document name="ReportParameter" permission="CRUDC"/>
+				<document name="ReportManager" permission="_____">
+					<action name="ExportReportSpecifications"/>
+					<action name="ImportReportSpecifications"/>
+				</document>
 				<document name="UserMonthlyHits" permission="_R__C" />
 				<document name="UserToken" permission="CRUDC" />
 			</privileges>
@@ -307,6 +336,11 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
+				<document name="ReportTemplate" permission="_R__C">
+					<action name="AddUserToEmail" />
+					<action name="DownloadJasperReport" />
+					<action name="DownloadReport" />
+				</document>
 				<document name="Startup" permission="_____">
 					<action name="Dismiss"/>
 					<action name="SaveChanges"/>
@@ -429,13 +463,28 @@
 				<uxui name="tablet" />
 				<role name="DevOps" />
 			</edit>
-			<edit document="ReportDesign" name="Report Design">
+			<!-- <edit document="ReportDesign" name="Report Design">
 				<uxui name="desktop" />
 				<role name="DevOps" />
-			</edit>
+			</edit> -->
 			<list document="UserMonthlyHits" name="User Hits" autoPopulate="false">
 				<uxui name="desktop" />
 				<role name="DevOps" />
+			</list>
+		</group>
+		<group name="Reports">
+			<edit name="Report Manager" document="ReportManager">
+				<uxui name="desktop" />
+				<role name="DevOps"/>
+			</edit>
+			<list name="Report Designer" document="ReportTemplate">
+				<uxui name="desktop" />
+				<role name="DevOps"/>
+			</list>
+			<list name="Report Schedules" query="qReportSchedules">
+				<uxui name="desktop" />
+				<role name="DevOps"/>
+				<role name="SecurityAdministrator"/>
 			</list>
 		</group>
 		<list name="Snapshots" document="Snapshot">
@@ -726,5 +775,28 @@
                 <column binding="documentNumber" />
             </columns>
         </query>
+        <query documentName="ReportTemplate" name="qReportSchedules">
+			<documentation>Shows the schedules for enabled reports.</documentation>
+			<description><![CDATA[All Report Schedules]]></description>
+			<filter>bean.includeFragment = false and bean.enabled = true</filter>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="description" />
+				<column binding="scheduleDescription" editable="false" filterable="false" sortable="false" />
+			</columns>
+		</query>
+		<query documentName="ReportTemplate" name="qReportTemplates">
+			<description><![CDATA[All Report Templates]]></description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="description" />
+				<column binding="enabled" />
+				<column binding="includeFragment" />
+				<column binding="outputFormat" displayName="Format" pixelWidth="80" />
+				<column binding="reportType" hidden="true" />
+				<column binding="templateName" />
+				<column binding="template" hidden="true" />
+			</columns>
+		</query>
 	</queries>
 </module>

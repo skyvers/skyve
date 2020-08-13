@@ -72,6 +72,9 @@
 		<spring-security.version>5.0.3.RELEASE</spring-security.version>
 		<spring.version>5.0.4.RELEASE</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
+		<!-- freemarker report versions -->
+		<flying-saucer.version>9.1.18</flying-saucer.version>
+		<freemarker.version>2.3.29</freemarker.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -503,6 +506,32 @@
 				<groupId>org.pf4j</groupId>
 				<artifactId>pf4j</artifactId>
 				<version>${pf4j.version}</version>
+			</dependency>
+			<!-- html reports and html to pdf conversion -->
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>${freemarker.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xhtmlrenderer</groupId>
+				<artifactId>flying-saucer-core</artifactId>
+				<version>${flying-saucer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xhtmlrenderer</groupId>
+				<artifactId>flying-saucer-pdf</artifactId>
+				<version>${flying-saucer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xhtmlrenderer</groupId>
+				<artifactId>flying-saucer-swt</artifactId>
+				<version>${flying-saucer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.cronutils</groupId>
+				<artifactId>cron-utils</artifactId>
+				<version>9.0.1</version>
 			</dependency>
 
 			<!-- Test dependencies -->

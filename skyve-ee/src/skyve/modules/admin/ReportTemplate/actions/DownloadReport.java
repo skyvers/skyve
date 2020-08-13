@@ -1,0 +1,117 @@
+package modules.admin.ReportTemplate.actions;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.apache.commons.beanutils.DynaBean;
+import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.util.Util;
+import org.skyve.web.WebContext;
+
+import freemarker.template.Template;
+import modules.admin.ReportDataset.ReportDatasetExtension;
+import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.ReportTemplate.ReportTemplateExtension;
+import modules.admin.domain.ReportTemplate;
+import services.report.ReportService;
+
+public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
+
+	private static final long serialVersionUID = -3424661104239448743L;
+
+	@Inject
+	private transient ReportService reportService;
+
+	@Override
+	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
+		// validate any required parameters
+		ValidationException e = new ValidationException();
+		for (int i = 0; i < bean.getParameters().size(); i++) {
+			ReportParameterExtension p = bean.getParameters().get(i);
+			p.validate(e, i);
+		}
+
+		if (e.getMessages().size() > 0) {
+			throw e;
+		}
+
+		Template template = reportService.getTemplate(bean.getTemplateName());
+
+		Map<String, Object> root = new HashMap<>();
+
+		// put the parameters into the root
+		root.put("reportParameters", bean.getParameters());
+
+		// put all the datasets into the root
+		for (ReportDatasetExtension dataset : bean.getDatasets()) {
+			switch (dataset.getDatasetType()) {
+				case bizQL:
+					List<Bean> results = dataset.executeQuery();
+					if (results != null) {
+						root.put(dataset.getDatasetName(), results);
+					}
+					break;
+				case SQL:
+					List<DynaBean> sqlResults = dataset.executeSQLQuery();
+					if (sqlResults != null) {
+						root.put(dataset.getDatasetName(), sqlResults);
+					}
+					break;
+				case constant:
+					root.put(dataset.getDatasetName(), dataset.getQuery());
+					break;
+				case classValue:
+					List<DynaBean> beanResults = dataset.executeClass();
+					if (beanResults != null) {
+						root.put(dataset.getDatasetName(), beanResults);
+					}
+					break;
+			}
+		}
+
+		try (StringWriter sw = new StringWriter()) {
+			template.process(root, sw);
+			bean.setResults(sw.toString());
+		}
+	}
+
+	@Override
+	public Download download(ReportTemplateExtension bean, WebContext webContext) throws Exception {
+
+		// write the output string to an input stream
+		InputStream inputStream = new ByteArrayInputStream(bean.getResults().getBytes(Charset.forName("UTF-8")));
+
+		// return the correct report type
+		if (ReportTemplate.OutputFormat.CSV == bean.getOutputFormat()) {
+			return new Download(String.format("%s.csv", bean.getName()), inputStream, MimeType.csv);
+		}
+
+		// html report download
+		// return new Download(String.format("%s.html", bean.getName()), inputStream, MimeType.html);
+
+		// pdf report download
+		Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
+		tempDir.toFile().mkdirs();
+
+		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
+		pdfFile.deleteOnExit();
+		
+		reportService.generatePDFFromHTML(inputStream, pdfFile);
+		
+		return new Download(String.format("%s.pdf", bean.getName()), new FileInputStream(pdfFile), MimeType.pdf);
+	}
+}
