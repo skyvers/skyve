@@ -1194,7 +1194,7 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	public List<Generic> getChildren() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(Generic.MODULE_NAME, Generic.DOCUMENT_NAME);
-		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);
+		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}
 }

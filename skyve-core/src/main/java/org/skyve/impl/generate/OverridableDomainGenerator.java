@@ -3155,7 +3155,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				imports.add("java.util.List");
-				imports.add("org.skyve.domain.HierarchicalBean");
 				imports.add("org.skyve.CORE");
 				imports.add("org.skyve.domain.Bean");
 				imports.add("org.skyve.domain.HierarchicalBean");
@@ -3341,7 +3340,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("> getChildren() {\n");
 				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
 				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
-				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
+				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());\n");
 				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n");
 			}
