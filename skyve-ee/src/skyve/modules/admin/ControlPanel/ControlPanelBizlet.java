@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
@@ -18,6 +19,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
@@ -25,6 +27,7 @@ import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
+import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	private static final long serialVersionUID = -6033906392152210002L;
@@ -148,5 +151,23 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 		return null;
 	}
+
+	@Override
+	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
+		
+		if(ControlPanel.testTagNamePropertyName.equals(attributeName)) {
+			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+			q.getFilter().addLike(Tag.namePropertyName, value + "%");
+			List<Tag> potentialMatches = q.beanResults();
+			List<String> results = new ArrayList<>();
+			results.addAll(potentialMatches.stream()
+					.map(t -> t.getName())
+					.collect(Collectors.toList()));
+			return results;
+		}
+		
+		return super.complete(attributeName, value, bean);
+	}
+	
 	
 }

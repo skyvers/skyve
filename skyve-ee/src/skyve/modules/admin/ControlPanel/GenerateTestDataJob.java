@@ -68,14 +68,14 @@ public class GenerateTestDataJob extends CancellableJob {
 		}
 	
 		setPercentComplete(100);
-		int successful = (bean.getTestNumberToGenerate() * bean.getTestDocumentNames().size()) - failed;
+		int successful = (bean.getTestNumberToGenerate().intValue() * bean.getTestDocumentNames().size()) - failed;
 		log.add("Finished Generate Test Data job at " + new Date());
 		log.add(successful + " Documents successfully created, " + failed + " failed.");
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
-				String.format("%d Documents successfully created", successful)));
+				String.format("%d Documents successfully created", new Integer(successful))));
 	}
 
-	private Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {
+	private static Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {
 		Tag tag = null;
 
 		if (Boolean.TRUE.equals(bean.getTestTagGeneratedData())) {

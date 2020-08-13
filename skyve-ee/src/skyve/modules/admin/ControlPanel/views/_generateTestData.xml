@@ -45,7 +45,7 @@
 						</checkBox>
 					</item>
 					<item>
-						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" />
+						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" complete="suggest"/>
 					</item>
 					<item align="right">
 						<button action="GenerateTestData" pixelWidth="200" />
