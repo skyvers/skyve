@@ -10,6 +10,10 @@ import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * DocumentName
+ * <br/>
+ * Non-persistent document used to store a selection of a document belonging to a specific
+		module. This allows it to be used in a lookupDescription, e.g. Control Panel - Generate 
+		Test Data.
  * 
  * @stereotype "transient"
  */
@@ -68,8 +72,14 @@ public class DocumentName extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-		return toString();
-
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{documentName}",
+														this);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override
