@@ -116,6 +116,10 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 		}
 	}
 
+	public void nullAggAssociation() {
+		this.aggAssociation = null;
+	}
+
 	/**
 	 * {@link #invAggAssociation} accessor.
 	 * @return	The value.
@@ -148,7 +152,10 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	 * @param element	The element to add.
 	 **/
 	public boolean addInvAggAssociationElement(InverseOneToManyPersistent element) {
-		boolean result = invAggAssociation.add(element);
+		boolean result = false;
+		if (getElementById(invAggAssociation, element.getBizId()) == null) {
+			result = invAggAssociation.add(element);
+		}
 		element.setAggAssociation(this);
 		return result;
 	}
@@ -170,7 +177,7 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	public boolean removeInvAggAssociationElement(InverseOneToManyPersistent element) {
 		boolean result = invAggAssociation.remove(element);
 		if (result) {
-			element.setAggAssociation(null);
+			element.nullAggAssociation();
 		}
 		return result;
 	}
@@ -181,7 +188,7 @@ public class InverseOneToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public InverseOneToManyPersistent removeInvAggAssociationElement(int index) {
 		InverseOneToManyPersistent result = invAggAssociation.remove(index);
-		result.setAggAssociation(null);
+		result.nullAggAssociation();
 		return result;
 	}
 }

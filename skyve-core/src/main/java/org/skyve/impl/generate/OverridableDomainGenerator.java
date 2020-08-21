@@ -2328,7 +2328,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("this);\n");
 					methods.append("\t\t\t}\n");
 					methods.append("\t\t\tif (old").append(methodName).append(" != null) {\n");
-					methods.append("\t\t\t\told").append(methodName).append(".set").append(inverseMethodName).append("(null);\n");
+					methods.append("\t\t\t\told").append(methodName).append(".null").append(inverseMethodName).append("();\n");
 					methods.append("\t\t\t}\n");
 				}
 				else {
@@ -2351,6 +2351,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\t\t}\n");
 			methods.append("\t}\n");
+
+			// if 1 to 1 inverse add null methods
+			if (inverse != null) {
+				InverseRelationship relationship = inverse.getRelationship();
+				if (relationship != InverseRelationship.manyToMany) { // 1:1 or 1:many
+					methods.append("\n\tpublic void null").append(methodName).append("() {\n");
+					methods.append("\t\tthis.").append(name).append(" = null;\n");
+					methods.append("\t}\n");
+				}
+			}
 		}
 	}
 
@@ -2485,11 +2495,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\n\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
-			methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 			if (many) {
+				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 			}
 			else {
+				methods.append("\t\tboolean result = false;\n");
+				methods.append("\t\tif (getElementById(").append(name).append(", element.getBizId()) == null) {\n");
+				methods.append("\t\t\tresult = ").append(name).append(".add(element);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
 			}
 			if (owningDomainExtensionClassExists) {
@@ -2538,7 +2552,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
-				methods.append("\t\t\telement.set").append(inverseMethodName).append("(null);\n");
+				methods.append("\t\t\telement.null").append(inverseMethodName).append("();\n");
 			}
 			methods.append("\t\t}\n");
 			methods.append("\t\treturn result;\n");
@@ -2559,7 +2573,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tresult.get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
-				methods.append("\t\tresult.set").append(inverseMethodName).append("(null);\n");
+				methods.append("\t\tresult.null").append(inverseMethodName).append("();\n");
 			}
 			methods.append("\t\treturn result;\n");
 			methods.append("\t}\n");
@@ -2595,10 +2609,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t\told").append(methodName).append(".get").append(inverseMethodName).append("().remove(this);\n");
 			}
 			else {
-				methods.append("\t\t\t\told").append(methodName).append(".set").append(inverseMethodName).append("(null);\n");
+				methods.append("\t\t\t\told").append(methodName).append(".null").append(inverseMethodName).append("();\n");
 			}
 			methods.append("\t\t\t}\n");
 			methods.append("\t\t}\n");
+			methods.append("\t}\n");
+			
+			// Add null method
+			methods.append("\n\tpublic void null").append(methodName).append("() {\n");
+			methods.append("\t\tthis.").append(name).append(" = null;\n");
 			methods.append("\t}\n");
 		}
 	}
