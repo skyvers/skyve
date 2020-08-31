@@ -115,7 +115,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitView() {
-		renderView(viewTitle, viewIcon16x16Url, viewIcon32x32Url);
+		String title = Util.i18n(viewTitle, locale);
+		renderView(title, viewIcon16x16Url, viewIcon32x32Url);
 		currentContainers.push(view);
 	}
 
