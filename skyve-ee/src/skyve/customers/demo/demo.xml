@@ -2,7 +2,8 @@
 <customer name="demo"
 			xmlns="http://www.skyve.org/xml/customer"
 			xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			>
 	<uiResources logo="skyve_alternative.png" />
 	<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>
 	<defaultTimeConverter>HH24_MI</defaultTimeConverter>

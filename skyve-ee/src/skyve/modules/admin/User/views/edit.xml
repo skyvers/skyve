@@ -2,7 +2,7 @@
 <view title="{bizKey}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Profile">
+		<tab title="admin.user.profile.tabTitle">
 			<form border="true" percentageWidth="70" responsiveWidth="12">
 				<column percentageWidth="20" responsiveWidth="4" />
 				<column />
@@ -22,7 +22,7 @@
 					</item>
 				</row>
 				<row>
-					<item label="Data Group">
+					<item label="admin.user.profile.dataGroup.label">
 						<textField binding="dataGroup.name" disabled="true" invisible="notInDataGroup" />
 					</item>
 					<item>
@@ -37,27 +37,27 @@
 			</form>
 		</tab>
 
-		<tab title="Groups">
+		<tab title="admin.user.groups.tabTitle">
 			<vbox border="true" percentageHeight="50">
 				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" />
 			</vbox>
 			<vbox />
 		</tab>
-		<tab title="Roles">
+		<tab title="admin.user.roles.tabTitle">
 			<hbox>
-				<vbox border="true" borderTitle="User Roles" percentageHeight="50">
+				<vbox border="true" borderTitle="admin.user.roles.userRoles.title" percentageHeight="50">
 					<dataGrid binding="roles">
 						<boundColumn binding="roleName" />
 					</dataGrid>
 				</vbox>
-				<vbox border="true" borderTitle="Assigned Roles" percentageHeight="50">
+				<vbox border="true" borderTitle="admin.user.roles.assignedRoles.title" percentageHeight="50">
 					<dataRepeater binding="assignedRoles">
 						<boundColumn binding="roleName" editable="false" />
 					</dataRepeater>
 				</vbox>
 			</hbox>
 		</tab>
-		<tab title="Password">
+		<tab title="admin.user.password.tabTitle">
 			<form border="true" percentageWidth="70" responsiveWidth="12">
 				<column percentageWidth="30" responsiveWidth="4" />
 				<column />
@@ -86,9 +86,9 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action className="GenerateUniqueUserName" displayName="Generate UserName" invisible="notSecurityAdministrator" 
+		<action className="GenerateUniqueUserName" displayName="admin.user.actions.generateUserName.actionName" invisible="notSecurityAdministrator" 
 		relativeIconFileName="shared/icons/Job.gif"/>
-		<action className="GeneratePassword" displayName="Generate Password" invisible="notSecurityAdministrator" 
+		<action className="GeneratePassword" displayName="admin.user.actions.generatePassword.actionName" invisible="notSecurityAdministrator" 
 		relativeIconFileName="shared/icons/Job.gif"/>
 	</actions>
 </view>

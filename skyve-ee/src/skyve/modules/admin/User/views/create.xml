@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Create a New User" name="create" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.user.newUser.title" name="create" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
 		<vbox visible="confirmContact">
@@ -29,10 +29,10 @@
 	</vbox>
 	<actions>
 		<cancel/>
-		<action className="New" displayName="New Contact" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fa fa-user-plus"/>
-		<action className="Check" displayName="Search" inActionPanel="false" iconStyleClass="fa fa-search"/>
-		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
-		<action className="Next" displayName="Next" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
+		<action className="New" displayName="admin.user.newUser.actions.newContact.actionName" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fa fa-user-plus"/>
+		<action className="Check" displayName="admin.user.newUser.actions.search.actionName" inActionPanel="false" iconStyleClass="fa fa-search"/>
+		<action className="Back" displayName="admin.user.newUser.actions.back.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
+		<action className="Next" displayName="admin.user.newUser.actions.next.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
 		<save visible="confirmGroupMemberships"/>
 		<zoomOut visible="confirmGroupMemberships"/>
 	</actions>

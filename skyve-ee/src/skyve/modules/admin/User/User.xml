@@ -17,76 +17,76 @@
 					Length is derived from the maximum email address length from RFC 5321
 				]]>
 			</documentation>
-			<displayName>User Name</displayName>
+			<displayName>admin.user.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<text name="password" audited="false">
-			<displayName>Password</displayName>
-			<description>Check Password Complexity settings for minimum required strength.</description>
+			<displayName>admin.user.password.displayName</displayName>
+			<description>admin.user.password.description</description>
 			<!--  The password is checked and populated in the Bizlet -->
 			<length>100</length>
 		</text>
 		<text name="generatedPassword" audited="false"  persistent="false" trackChanges="false">
-			<displayName>Generated Password</displayName>
-			<description>Used to temporarily hold generated passwords for further processing.</description>
+			<displayName>admin.user.generatedPassword.displayName</displayName>
+			<description>admin.user.generatedPassword.description</description>
 			<length>255</length>
 		</text>
 		<dateTime name="createdDateTime">
-			<displayName>Created</displayName>
-			<description>The time and date when this user account was created.</description>
+			<displayName>admin.user.createdDateTime.displayName</displayName>
+			<description>admin.user.createdDateTime.description</description>
 		</dateTime>
 		<text name="homeModule" >
-			<displayName>Home Module</displayName>
-			<description>The module displayed when the user first logs in.</description>
+			<displayName>admin.user.homeModule.displayName</displayName>
+			<description>admin.user.homeModule.description</description>
 			<domain>variant</domain>
 			<length>30</length>
 		</text>
 		<text name="newPassword" persistent="false" audited="false">
-			<displayName>New Password</displayName>
-			<description>Check Password Complexity settings for minimum required strength.</description>
+			<displayName>admin.user.newPassword.displayName</displayName>
+			<description>admin.user.newPassword.description</description>
 			<length>255</length>
 		</text>
 		<text name="confirmPassword" persistent="false" audited="false">
-			<displayName>Confirm Password</displayName>
-			<description>Check Password Complexity settings for minimum required strength.</description>
+			<displayName>admin.user.confirmPassword.displayName</displayName>
+			<description>admin.user.confirmPassword.description</description>
 			<length>255</length>
 		</text>
 		<text name="legacyId" >
-			<displayName>Legacy Id</displayName>
-			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
+			<displayName>admin.user.legacyId.displayName</displayName>
+			<description>admin.user.legacyId.description</description>
 			<length>100</length>
 		</text>
 		<boolean name="passwordExpired">
-			<displayName>Must change password</displayName>
-			<description>Whether the password must be changed</description>
+			<displayName>admin.user.passwordExpired.displayName</displayName>
+			<description>admin.user.passwordExpired.description</description>
 		</boolean >
 		<dateTime name="passwordLastChanged">
-			<displayName>Last changed</displayName>
-			<description>Date and Time the users password was last changed</description>
+			<displayName>admin.user.passwordLastChanged.displayName</displayName>
+			<description>admin.user.passwordLastChanged.description</description>
 		</dateTime>
 		<text name="passwordResetToken">
 			<documentation>This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.</documentation>
-			<displayName>Password Reset Token</displayName>
-			<description>The password reset token emailed to the user on pass reset request.</description>
+			<displayName>admin.user.passwordResetToken.displayName</displayName>
+			<description>admin.user.passwordResetToken.description</description>
 			<length>56</length>
 		</text>
 		<memo name="passwordHistory" audited="false" trackChanges="false">
 			<documentation>
 				A tab separated list of previous password hashes used
 			</documentation>
-			<displayName>Password History</displayName>
+			<displayName>admin.user.passwordHistory.displayName</displayName>
 			<index>none</index>
 		</memo>
 		<integer name="authenticationFailures">
 			<documentation>
 				This value is zeroed on successful authentication.
 			</documentation>
-			<displayName>Authentication Failures</displayName>
-			<description>The number of authentication failures since the last successful authentication</description>
+			<displayName>admin.user.authenticationFailures.displayName</displayName>
+			<description>admin.user.authenticationFailures.description</description>
 		</integer>
 		<timestamp name="lastAuthenticationFailure">
-			<displayName>Last Authentication Failure</displayName>
-			<description>Time that last authentication failure occurred</description>
+			<displayName>admin.user.lastAuthenticationFailure.displayName</displayName>
+			<description>admin.user.lastAuthenticationFailure.description</description>
 		</timestamp>
 		<!-- If you change this association to be composed, change it in admin.UserProxy document also -->
 		<association name="contact" type="aggregation" required="true">
@@ -158,13 +158,13 @@
 			</values>
 		</enum>
 		<text name="searchContactName" persistent="false">
-			<displayName>Full name</displayName>
-			<description>This is used to determine if you are on the system already</description>
+			<displayName>admin.user.searchContactName.displayName</displayName>
+			<description>admin.user.searchContactName.description</description>
 			<length>1024</length>
 		</text>
 		<text name="searchEmail" persistent="false">
-			<displayName>Email</displayName>
-			<description>The email address to use to search existing contacts.</description>
+			<displayName>admin.user.searchEmail.displayName</displayName>
+			<description>admin.user.searchEmail.description</description>
 			<length>512</length>
 		</text>
 		<collection name="candidateContacts" type="child" persistent="false">
@@ -174,15 +174,15 @@
 			<minCardinality>0</minCardinality>
 		</collection>
 		<boolean name="contactSelected" persistent="false">
-			<displayName>The contact selected for this user.</displayName>
+			<displayName>admin.user.contactSelected.displayName</displayName>
 			<defaultValue>false</defaultValue>
 		</boolean>
 		<boolean name="inactive">
-			<displayName>Inactive</displayName>
-			<description>Indicates that this account has been marked as inactive and no longer in use.</description>
+			<displayName>admin.user.inactive.displayName</displayName>
+			<description>admin.user.inactive.description</description>
 		</boolean>
 		<enum name="groupSelection" persistent="false" audited="false" trackChanges="false">
-			<displayName>Groups</displayName>
+			<displayName>admin.user.groupSelection.displayName</displayName>
 			<values>
 				<value code="existingGroups" description="Existing groups"/>
 				<value code="newGroup" description="New group"/>
