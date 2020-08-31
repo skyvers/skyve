@@ -11,12 +11,12 @@
 	<attributes>
 		<text name="columnName" required="true">
 			<displayName>Column Title</displayName>
-			<length>100</length>
+			<length>500</length>
 		</text>
 		<text name="bindingName" >
 			<displayName>Binding</displayName>
 			<domain>dynamic</domain>
-			<length>100</length>
+			<length>200</length>
 		</text>
 		<text name="bindingExpression" >
 			<displayName>Expression</displayName>
@@ -25,7 +25,7 @@
 			For exports, you can use compound expressions using bindings and literals, for example:
 			<i>{name} ({mobile})</i>
 			]]></description>
-			<length>200</length>
+			<length>500</length>
 		</text>
 		<enum name="loadAction" >
 			<displayName>Action</displayName>

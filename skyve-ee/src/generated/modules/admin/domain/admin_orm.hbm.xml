@@ -336,9 +336,9 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="bizOrdinal" />
 		<many-to-one name="parent" entity-name="adminImportExport" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ImportExportColumn_parent" />
-		<property name="columnName" length="100" />
-		<property name="bindingName" length="100" />
-		<property name="bindingExpression" length="200" />
+		<property name="columnName" length="500" />
+		<property name="bindingName" length="200" />
+		<property name="bindingExpression" length="500" />
 		<property name="loadAction" length="8">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.ImportExportColumn$LoadAction</param>
