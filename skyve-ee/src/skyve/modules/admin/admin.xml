@@ -67,13 +67,13 @@
 			<privileges>
 				<document name="Communication" permission="_R__G"/>
 				<document name="CommunicationTemplate" permission="_R__G"/>
-				<document name="Generic" permission="CRUDG"/>
-				<document name="Subscription" permission="CRUDG"/>
 				<document name="Configuration" permission="_R__C" />				
+				<document name="Generic" permission="CRUDG"/>
 				<document name="SelfRegistration" permission="_____">
 					<action name="Register" />
 				</document>
 				<document name="SelfRegistrationActivation" permission="_____"/>
+				<document name="Subscription" permission="CRUDG"/>
 				<document name="User" permission="_R__C" />				
 			</privileges>
 		</role>
@@ -317,6 +317,9 @@
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="Job" permission="_R__C" />
+				<document name="SelfRegistration" permission="_RUDC">
+					<action name="Register"/>
+				</document>
 				<document name="Startup" permission="_____">
 					<action name="Dismiss"/>
 					<action name="SaveChanges"/>
@@ -339,10 +342,6 @@
 				<document name="UserLoginRecord" permission="_R__C" />
 				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
-
-				<document name="SelfRegistration" permission="_RUDC">
-					<action name="Register"/>
-				</document>
 			</privileges>
 		</role>
 		<role name="ViewUser">

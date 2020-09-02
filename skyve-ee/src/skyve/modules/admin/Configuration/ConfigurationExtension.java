@@ -34,7 +34,6 @@ public class ConfigurationExtension extends Configuration {
 	 */
 	public static final int PASSWORD_DEFAULT_MIN_LENGTH = 10;
 
-	/* Customised, do not overwrite*/
 	public static final String SELF_REGISTRATION_COMMUNICATION = "SYSTEM Self Registration";
 	public static final String SELF_REGISTRATION_SUBJECT = "Activate your account";
 	public static final String SELF_REGISTRATION_HEADING = "Welcome!";
@@ -46,7 +45,6 @@ public class ConfigurationExtension extends Configuration {
 			Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.contactPropertyName, Contact.namePropertyName),
 			SelfRegistration.activateUrlPropertyName);
 
-	
 	public void sendUserRegistrationEmail(SelfRegistration selfRegistration) throws Exception {
 		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION, 
 				selfRegistration.getUser().getContact().getEmail1(), 
@@ -57,7 +55,6 @@ public class ConfigurationExtension extends Configuration {
 				null,
 				selfRegistration);
 	}
-	
 	
 	/**
 	 * Generates a text description of the system password complexity to be shown to the
