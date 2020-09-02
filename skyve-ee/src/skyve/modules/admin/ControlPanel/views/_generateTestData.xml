@@ -31,6 +31,9 @@
 					<item colspan="3">
 						<default binding="testNumberToGenerate" />
 					</item>
+					<item align="right">
+						<button action="GenerateTestData" pixelWidth="200" />
+					</item>
 				</row>
 				<row>
 					<item>
@@ -45,10 +48,10 @@
 						</checkBox>
 					</item>
 					<item>
-						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" complete="suggest"/>
+						<textField binding="testTagName" complete="suggest"/>
 					</item>
 					<item align="right">
-						<button action="GenerateTestData" pixelWidth="200" />
+						<button action="DeleteTestData" pixelWidth="200" />
 					</item>
 				</row>
 			</form>

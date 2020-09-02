@@ -48,5 +48,6 @@
 	<actions>
 		<download className="DownloadClientSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
 		<action className="GenerateTestData" displayName="Generate Test Data" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="Delete Test Data" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false"/>
 	</actions>
 </view>

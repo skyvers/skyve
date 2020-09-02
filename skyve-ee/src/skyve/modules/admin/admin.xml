@@ -5,6 +5,7 @@
 	<homeDocument>UserDashboard</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
+		<job name="jDeleteAllTaggedDataForTag" displayName="Delete all tagged data for Tag" className="modules.admin.Tag.DeleteAllTaggedDataForTagJob"/>
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
 		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
 		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
@@ -203,6 +204,7 @@
 					<action name="ApplyStartupConfiguration" />
 					<action name="AddAPIKey"/>
 					<action name="GenerateTestData" />
+					<action name="DeleteTestData" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />

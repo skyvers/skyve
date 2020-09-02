@@ -28,14 +28,14 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		Customer customer = CORE.getCustomer();
 		Module m = customer.getModule(ControlPanel.MODULE_NAME);
 		JobMetaData job = m.getJob("jGenerateTestData");
-		
+
 		EXT.runOneShotJob(job, bean, CORE.getUser());
 		webContext.growl(MessageSeverity.info, "Generate Test Data Job has been started");
 
 		return new ServerSideActionResult<>(bean);
 	}
 
-	private void validateFields(ControlPanelExtension bean) {
+	private static void validateFields(ControlPanelExtension bean) {
 		ValidationException ve = new ValidationException();
 
 		if (bean.getTestModuleName() == null) {
@@ -49,13 +49,15 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		if (bean.getTestNumberToGenerate() == null) {
 			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName, "Number to Generate is required."));
 		}
-		
-		if (bean.getTestNumberToGenerate() < 1) {
+
+		if (bean.getTestNumberToGenerate() == null || bean.getTestNumberToGenerate().intValue() < 1) {
 			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName, "Number to Generate must be greater than 0."));
+		} else if (bean.getTestNumberToGenerate().intValue() > 10000) {
+			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName, "Number to Generate must be less than 10,000."));
 		}
 		
-		if (bean.getTestNumberToGenerate() > 10000) {
-			ve.getMessages().add(new Message(ControlPanel.testNumberToGeneratePropertyName, "Number to Generate must be less than 10,000."));
+		if(Boolean.TRUE.equals(bean.getTestTagGeneratedData()) && bean.getTestTagName()==null) {
+			ve.getMessages().add(new Message(ControlPanel.testTagNamePropertyName, "Enter the name of a tag for data tagging"));
 		}
 
 		if (ve.getMessages().size() > 0) {

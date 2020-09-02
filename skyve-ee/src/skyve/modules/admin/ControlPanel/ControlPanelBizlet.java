@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
@@ -19,7 +18,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
@@ -27,6 +25,7 @@ import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
+import modules.admin.domain.DocumentName;
 import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
@@ -88,7 +87,8 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
-		// list documents within modules
+
+		// list documents within modules that have not already been selected
 		if (ControlPanel.testDocumentNamesPropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> results = new ArrayList<>();
@@ -97,8 +97,20 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
 					if (document.getPersistent() != null) {
-						// only add persistent documents
-						results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+						
+						// check this is not already selected
+						boolean alreadySelected = false;
+						for(DocumentName n: bean.getTestDocumentNames()) {
+							if(documentName.equals(n.getDocumentName())){
+								alreadySelected = true;
+								break;
+							}
+						}
+						
+						if(!alreadySelected) {
+							// only add persistent documents
+							results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+						}
 					}
 				}
 
