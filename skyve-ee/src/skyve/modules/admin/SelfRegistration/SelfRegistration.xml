@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="SelfRegistration"
+          xmlns="http://www.skyve.org/xml/document"
+          xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <singularAlias>Self Registration</singularAlias>
+    <pluralAlias>Self Registrations</pluralAlias>
+    <bizKey expression="{user}" />
+    <attributes>
+        <text name="activateUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>Activation Url</displayName>
+            <length>2083</length>
+        </text>
+        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
+            <documentation>Confirm password checked during user registration to bypass change password
+                validation in the UserBizlet.</documentation>
+            <displayName>Confirm Password</displayName>
+            <length>30</length>
+        </text>
+        <text name="loginUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>Login Url</displayName>
+            <length>2083</length>
+        </text>
+        <text name="loginMessage" persistent="false" audited="false" trackChanges="false">
+            <documentation>Transient field to allow login message to be overridden</documentation>
+            <displayName>Login Message</displayName>
+            <length>2000</length>
+        </text>
+        <boolean name="registrationEmailWasSent">
+            <documentation>
+                <![CDATA[
+                    Indicates if an email was sent to the public user or not.
+                ]]>
+            </documentation>
+            <displayName>Registration Email Was Sent</displayName>
+        </boolean>
+        <dateTime name="registrationDate">
+            <documentation>The date and time that this self registration was completed.</documentation>
+            <displayName>Registration Date</displayName>
+        </dateTime>
+        <memo name="registrationQuestion">
+        	<documentation>Post-registration sign-up question to new users</documentation>
+        	<displayName>What led you to search for and try Skyve Foundry today?</displayName>
+        </memo>
+        <boolean name="registrationQuestionSubmitted">
+        	<documentation>True when the user has submitted a response</documentation>
+        	<displayName>Submitted</displayName>
+        	<defaultValue>false</defaultValue>
+        </boolean>
+
+        <association name="configuration" type="aggregation" required="true">
+            <displayName>Configuration</displayName>
+            <description>Settings for sending registration emails.</description>
+            <documentName>Configuration</documentName>
+        </association>
+        <association name="user" type="aggregation" required="true">
+            <displayName>User</displayName>
+            <description>The new user to register.</description>
+            <documentName>User</documentName>
+        </association>
+    </attributes>
+    <conditions>
+        <condition name="registrationComplete">
+            <description>Whether or not the registration process has finished.</description>
+            <expression><![CDATA[getUser() != null && getUser().isPersisted()]]></expression>
+        </condition>
+        <condition name="selfRegistrationAllowed">
+            <description>Whether or not self registration is allowed.</description>
+            <expression>
+                <![CDATA[
+					((java.util.function.BooleanSupplier) () -> {
+						throw new RuntimeException("Implemented in extension class.");
+					}).getAsBoolean()
+				]]>
+            </expression>
+        </condition>
+        <condition name="submittedReponse">
+        	<description>True when the user has submitted a response to the registration question.</description>
+        	<expression>Boolean.TRUE.equals(getRegistrationQuestionSubmitted())</expression>
+        </condition>
+    </conditions>
+</document>

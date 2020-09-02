@@ -203,6 +203,24 @@
 			<documentName>UserRole</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
+		
+		<!-- Self registration activation status and code -->
+		<boolean name="activated" required="true">
+			<documentation><![CDATA[
+			By default the account will be activated.
+			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
+			]]></documentation>
+			<displayName>Account activated</displayName>
+			<description>Whether this account has been activated or not. An account not activated means the user has not finished the activation process by clicking the link from their registration email.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<text name="activationCode">
+			<documentation>This contains a code which when submitted by the user will activate their account.</documentation>
+			<displayName>Activation Code</displayName>
+			<description>The activation code for this user account.</description>
+			<length>36</length>
+		</text>
+		
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->

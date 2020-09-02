@@ -106,6 +106,10 @@ public abstract class User extends AbstractPersistentBean {
 	public static final String newGroupPropertyName = "newGroup";
 	/** @hidden */
 	public static final String assignedRolesPropertyName = "assignedRoles";
+	/** @hidden */
+	public static final String activatedPropertyName = "activated";
+	/** @hidden */
+	public static final String activationCodePropertyName = "activationCode";
 
 	/**
 	 * Wizard State
@@ -443,6 +447,23 @@ public abstract class User extends AbstractPersistentBean {
 	 * The assigned roles through the groups, customer roles and module roles assigned.
 	 **/
 	private List<UserRole> assignedRoles = new ArrayList<>();
+	/**
+	 * Account activated
+	 * <br/>
+	 * Whether this account has been activated or not. An account not activated means the user has not finished the activation process by clicking the link from their registration email.
+	 * <br/>
+	 * By default the account will be activated.
+			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
+	 **/
+	private Boolean activated = new Boolean(true);
+	/**
+	 * Activation Code
+	 * <br/>
+	 * The activation code for this user account.
+	 * <br/>
+	 * This contains a code which when submitted by the user will activate their account.
+	 **/
+	private String activationCode;
 
 	@Override
 	@XmlTransient
@@ -1171,6 +1192,42 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public UserRole removeAssignedRolesElement(int index) {
 		return assignedRoles.remove(index);
+	}
+
+	/**
+	 * {@link #activated} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getActivated() {
+		return activated;
+	}
+
+	/**
+	 * {@link #activated} mutator.
+	 * @param activated	The new value.
+	 **/
+	@XmlElement
+	public void setActivated(Boolean activated) {
+		preset(activatedPropertyName, activated);
+		this.activated = activated;
+	}
+
+	/**
+	 * {@link #activationCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getActivationCode() {
+		return activationCode;
+	}
+
+	/**
+	 * {@link #activationCode} mutator.
+	 * @param activationCode	The new value.
+	 **/
+	@XmlElement
+	public void setActivationCode(String activationCode) {
+		preset(activationCodePropertyName, activationCode);
+		this.activationCode = activationCode;
 	}
 
 	/**

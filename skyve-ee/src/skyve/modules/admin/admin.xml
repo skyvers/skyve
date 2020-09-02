@@ -43,6 +43,8 @@
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="ReportDesign" />
+		<document ref="SelfRegistration" />		
+		<document ref="SelfRegistrationActivation" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Startup"/>
 		<document ref="Subscription"/>
@@ -67,6 +69,12 @@
 				<document name="CommunicationTemplate" permission="_R__G"/>
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Subscription" permission="CRUDG"/>
+				<document name="Configuration" permission="_R__C" />				
+				<document name="SelfRegistration" permission="_____">
+					<action name="Register" />
+				</document>
+				<document name="SelfRegistrationActivation" permission="_____"/>
+				<document name="User" permission="_R__C" />				
 			</privileges>
 		</role>
 		<role name="AppUser">
@@ -331,6 +339,10 @@
 				<document name="UserLoginRecord" permission="_R__C" />
 				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
+
+				<document name="SelfRegistration" permission="_RUDC">
+					<action name="Register"/>
+				</document>
 			</privileges>
 		</role>
 		<role name="ViewUser">
