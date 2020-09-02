@@ -220,6 +220,10 @@
 			<description>The activation code for this user account.</description>
 			<length>36</length>
 		</text>
+		<dateTime name="activationCodeCreationDateTime">
+			<displayName>The date and time the activation code was created</displayName>
+			<description>This setting is used to control expiry of activation codes.</description>
+		</dateTime>
 		
 	</attributes>
 	<conditions>

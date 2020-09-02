@@ -79,16 +79,21 @@
 	
 	<form border="true" borderTitle="User Self-Registration">
 		<column responsiveWidth="3"/>
+		<column responsiveWidth="1"/>
 		<column />
+		<column responsiveWidth="3"/>
 		<column responsiveWidth="1"/>
 		<row>
-			<item>
+			<item colspan="3">
 				<default binding="userSelfRegistrationGroup" />
 			</item>
 		</row>
 		<row>
 			<item>
 				<default binding="allowUserSelfRegistration" />
+			</item>
+			<item>
+				<default binding="selfRegistrationActivationExpiryHours" />
 			</item>
 		</row>
 	</form>

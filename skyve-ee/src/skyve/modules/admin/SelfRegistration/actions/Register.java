@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -85,6 +86,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				// Set activation details
 				bean.getUser().setActivated(Boolean.FALSE);
 				bean.getUser().setActivationCode(UUID.randomUUID().toString());
+				bean.getUser().setActivationCodeCreationDateTime(new DateTime());
+
 				bean.getUser().setBizUserId(bean.getBizId());
 
 				// Save and set the user

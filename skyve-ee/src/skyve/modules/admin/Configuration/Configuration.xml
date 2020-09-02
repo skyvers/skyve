@@ -68,6 +68,10 @@
 			<displayName>Allow User Self Registration</displayName>
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
+		<integer name="selfRegistrationActivationExpiryHours">
+			<displayName>Number of hours to Keep self-registration activation codes enabled</displayName>
+			<description>Clear this setting to have codes that never expire.</description>
+		</integer>
 		
 		<association name="publicUser" type="aggregation">
 			<displayName>Anonymous Public User</displayName>

@@ -110,6 +110,8 @@ public abstract class User extends AbstractPersistentBean {
 	public static final String activatedPropertyName = "activated";
 	/** @hidden */
 	public static final String activationCodePropertyName = "activationCode";
+	/** @hidden */
+	public static final String activationCodeCreationDateTimePropertyName = "activationCodeCreationDateTime";
 
 	/**
 	 * Wizard State
@@ -464,6 +466,12 @@ public abstract class User extends AbstractPersistentBean {
 	 * This contains a code which when submitted by the user will activate their account.
 	 **/
 	private String activationCode;
+	/**
+	 * The date and time the activation code was created
+	 * <br/>
+	 * This setting is used to control expiry of activation codes.
+	 **/
+	private DateTime activationCodeCreationDateTime;
 
 	@Override
 	@XmlTransient
@@ -1228,6 +1236,26 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setActivationCode(String activationCode) {
 		preset(activationCodePropertyName, activationCode);
 		this.activationCode = activationCode;
+	}
+
+	/**
+	 * {@link #activationCodeCreationDateTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getActivationCodeCreationDateTime() {
+		return activationCodeCreationDateTime;
+	}
+
+	/**
+	 * {@link #activationCodeCreationDateTime} mutator.
+	 * @param activationCodeCreationDateTime	The new value.
+	 **/
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	@XmlElement
+	public void setActivationCodeCreationDateTime(DateTime activationCodeCreationDateTime) {
+		preset(activationCodeCreationDateTimePropertyName, activationCodeCreationDateTime);
+		this.activationCodeCreationDateTime = activationCodeCreationDateTime;
 	}
 
 	/**

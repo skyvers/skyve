@@ -34,6 +34,23 @@
 			</item>
 		</row>
 	</form>
+	<form visible="showExpired" border="true" borderTitle="Your activation code has expired">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Sorry, that code is no longer valid.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</h4>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
 	<form visible="showFailure" border="true" borderTitle="Invalid access">
 		<column/>
 		<row>

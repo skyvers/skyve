@@ -125,6 +125,7 @@
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
 		<property name="allowUserSelfRegistration" />
+		<property name="selfRegistrationActivationExpiryHours" />
 		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -528,6 +529,7 @@
 		<property name="inactive" />
 		<property name="activated" />
 		<property name="activationCode" length="36" />
+		<property name="activationCodeCreationDateTime" type="DateTime" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>
 		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -10,6 +10,7 @@
 			<values>
 				<value code="SUCCESS" />
 				<value code="ALREADY_ACTIVATED" />
+				<value code="EXPIRED" />
 				<value code="FAILURE" />
 			</values>
 		</enum>
@@ -29,6 +30,9 @@
 		</condition>
 		<condition name="showAlready">
 			<expression><![CDATA[result==Result.ALREADYACTIVATED]]></expression>
+		</condition>
+		<condition name="showExpired">
+			<expression><![CDATA[result==Result.EXPIRED]]></expression>
 		</condition>
 		<condition name="showFailure">
 			<expression><![CDATA[result==Result.FAILURE]]></expression>

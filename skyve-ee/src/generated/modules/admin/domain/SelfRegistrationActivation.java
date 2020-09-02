@@ -50,6 +50,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	public static enum Result implements Enumeration {
 		SUCCESS("SUCCESS", "SUCCESS"),
 		ALREADYACTIVATED("ALREADY_ACTIVATED", "ALREADY_ACTIVATED"),
+		EXPIRED("EXPIRED", "EXPIRED"),
 		FAILURE("FAILURE", "FAILURE");
 
 		private String code;
@@ -251,6 +252,25 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	 */
 	public boolean isNotShowAlready() {
 		return (! isShowAlready());
+	}
+
+	/**
+	 * showExpired
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowExpired() {
+		return (result==Result.EXPIRED);
+	}
+
+	/**
+	 * {@link #isShowExpired} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowExpired() {
+		return (! isShowExpired());
 	}
 
 	/**

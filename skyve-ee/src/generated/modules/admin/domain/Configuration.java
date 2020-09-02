@@ -58,6 +58,8 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
 	/** @hidden */
+	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
+	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
 	/** @hidden */
 	public static final String emailFromPropertyName = "emailFrom";
@@ -149,6 +151,12 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Master switch to allow or disallow self registration.
 	 **/
 	private Boolean allowUserSelfRegistration;
+	/**
+	 * Number of hours to Keep self-registration activation codes enabled
+	 * <br/>
+	 * Clear this setting to have codes that never expire.
+	 **/
+	private Integer selfRegistrationActivationExpiryHours;
 	/**
 	 * Anonymous Public User
 	 * <br/>
@@ -452,6 +460,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
 		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
 		this.allowUserSelfRegistration = allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #selfRegistrationActivationExpiryHours} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getSelfRegistrationActivationExpiryHours() {
+		return selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #selfRegistrationActivationExpiryHours} mutator.
+	 * @param selfRegistrationActivationExpiryHours	The new value.
+	 **/
+	@XmlElement
+	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
+		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
+		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
 	}
 
 	/**
