@@ -156,14 +156,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
 		
 		if(ControlPanel.testTagNamePropertyName.equals(attributeName)) {
-			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
-			q.getFilter().addLike(Tag.namePropertyName, value + "%");
-			List<Tag> potentialMatches = q.beanResults();
-			List<String> results = new ArrayList<>();
-			results.addAll(potentialMatches.stream()
-					.map(t -> t.getName())
-					.collect(Collectors.toList()));
-			return results;
+			return ModulesUtil.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName,value);
 		}
 		
 		return super.complete(attributeName, value, bean);
