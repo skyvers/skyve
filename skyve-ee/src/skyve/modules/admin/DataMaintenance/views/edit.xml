@@ -75,35 +75,35 @@
 					<column />
 					<row>
 						<item>
-							<button action="RefreshBackupList" pixelWidth="170" >
+							<button action="RefreshBackupList">
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button> 
 						</item>
 						<item>
-							<button action="Backup" pixelWidth="170" >
+							<button action="Backup" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="DownloadBackup" pixelWidth="170" >
+							<button action="DownloadBackup" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="UploadBackup" pixelWidth="170" >
+							<button action="UploadBackup" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="DeleteBackup" pixelWidth="170" >
+							<button action="DeleteBackup"  >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
@@ -144,7 +144,7 @@
 							<spacer/>
 						</item>
 						<item>
-							<button action="Restore" pixelWidth="200" >
+							<button action="Restore" pixelWidth="200">
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
