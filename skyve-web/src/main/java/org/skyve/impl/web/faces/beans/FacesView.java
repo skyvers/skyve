@@ -737,12 +737,12 @@ public class FacesView<T extends Bean> extends Harness {
 	 * This method is called within the div styleClass attribute
 	 * in form layouts.
 	 * @param formIndex	The form to reset the style for.
-	 * @return ui-g-12 ui-g-nopad
+	 * @return ui-g-12 ui-g-nopad for GridCSS or p-col-12 p-col-nogutter for PrimeFlex
 	 */
 	@SuppressWarnings({"unchecked", "static-method"})
 	public String resetResponsiveFormStyle(int formIndex) {
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
 		formStyles.get(formIndex).reset();
-		return "ui-g-12 ui-g-nopad";
+		return UtilImpl.PRIMEFLEX ? "p-col-12 p-col-nogutter" : "ui-g-12 ui-g-nopad";
 	}
 }
