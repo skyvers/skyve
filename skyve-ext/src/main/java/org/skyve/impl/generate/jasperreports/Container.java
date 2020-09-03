@@ -12,13 +12,13 @@ public class Container {
 
 	private ContainerType containerType;
 
-	private Boolean horizontal = false;
+	private Boolean horizontal = Boolean.FALSE;
 	private int depth = 0;
 	private Integer left = null;
 	private Integer top = null;
 	private Integer width = null;
 	private Integer height = null;
-	private Boolean border = false;
+	private Boolean border = Boolean.FALSE;
 	private String borderTitle= null;
 	
 	private Integer pixelWidth = null;
@@ -39,7 +39,7 @@ public class Container {
 	}
 	
 	public Container() {
-		horizontal = false;
+		horizontal = Boolean.FALSE;
 		left = null;
 		top = null;
 		width = null;
@@ -53,7 +53,7 @@ public class Container {
 	}
 
 	public Container(Integer top, Integer left, Integer width, boolean horizontal, ContainerType containerType) {
-		this.horizontal = horizontal;
+		this.horizontal = Boolean.valueOf(horizontal);
 		this.left = left;
 		this.top = top;
 		this.width = width;

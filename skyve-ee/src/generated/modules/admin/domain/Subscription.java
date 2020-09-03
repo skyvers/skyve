@@ -153,6 +153,10 @@ public class Subscription extends AbstractPersistentBean {
 		}
 	}
 
+	public void nullCommunication() {
+		this.communication = null;
+	}
+
 	/**
 	 * {@link #receiverIdentifier} accessor.
 	 * @return	The value.

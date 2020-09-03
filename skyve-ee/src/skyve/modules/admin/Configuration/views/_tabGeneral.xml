@@ -7,12 +7,56 @@
 	<component name="_backupsNotConfiguredBanner" />
 	
 	<form border="true" borderTitle="Password Complexity">
-		<column responsiveWidth="3"/>
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
 		<column />
-		<column responsiveWidth="1"/>
 		<row>
 			<item>
-				<default binding="passwordComplexityModel" />
+				<spinner binding="passwordMinLength" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireLowercase" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireUppercase" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireNumeric" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireSpecial" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item colspan="4">
+				<blurb>
+					<![CDATA[
+						<span style="font-size: 90%; color: #666666;">Note: for security reasons, the following password 
+						settings must be configured from the application settings file.</span>
+					]]>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordExpiryDays" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutThreshold" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordHistoryRetention" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutDuration" disabled="true" />
 			</item>
 		</row>
 	</form>
@@ -35,16 +79,21 @@
 	
 	<form border="true" borderTitle="User Self-Registration">
 		<column responsiveWidth="3"/>
+		<column responsiveWidth="1"/>
 		<column />
+		<column responsiveWidth="3"/>
 		<column responsiveWidth="1"/>
 		<row>
-			<item>
+			<item colspan="3">
 				<default binding="userSelfRegistrationGroup" />
 			</item>
 		</row>
 		<row>
 			<item>
 				<default binding="allowUserSelfRegistration" />
+			</item>
+			<item>
+				<default binding="selfRegistrationActivationExpiryHours" />
 			</item>
 		</row>
 	</form>

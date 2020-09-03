@@ -26,7 +26,12 @@ import org.skyve.util.Util;
 public class TextValidator extends FieldValidator<String> {
 
 	private static final long serialVersionUID = -1957608134362029502L;
+	/**
+	 * Default protocol scheme which will prepended when a URL being validated does not supply one.
+	 */
+	private static final String DEFAULT_PROTOCOL = "http://";
 	private static final String PATTERN_EMAIL = "^[^@]+@[^@]+$";
+	private static final String PATTERN_PROTOCOL = "^(?:(ht|f)tp(s?)\\:\\/\\/)+.*$";
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ValidatorType {
@@ -126,7 +131,12 @@ public class TextValidator extends FieldValidator<String> {
 						valid = new LuhnCheckDigit().isValid(value);
 						break;
 					case url:
-						valid = GenericValidator.isUrl(value);
+						// if the supplied value does not contain a protocol, prepend one
+						if (!value.matches(PATTERN_PROTOCOL)) {
+							valid = GenericValidator.isUrl(DEFAULT_PROTOCOL + value);
+						} else {
+							valid = GenericValidator.isUrl(value);
+						}
 						break;
 					case verhoeffCheckDigit:
 						valid = new VerhoeffCheckDigit().isValid(value);

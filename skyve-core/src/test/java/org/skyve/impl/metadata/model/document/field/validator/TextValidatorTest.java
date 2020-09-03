@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
@@ -11,12 +12,21 @@ import org.skyve.impl.metadata.user.SuperUser;
 
 public class TextValidatorTest {
 
+	private TextValidator validator;
+	private SuperUser user;
+
+	@Before
+	public void before() {
+		validator = new TextValidator();
+
+		user = new SuperUser();
+		user.setWebLocale(Locale.getDefault());
+	}
+
 	@Test
-	@SuppressWarnings("static-method")
 	public void testValidateEmailInvalid() throws Exception {
 		// setup the test data
-		TextValidator v = new TextValidator();
-		v.setType(ValidatorType.email);
+		validator.setType(ValidatorType.email);
 
 		String[] testEmails = new String[] {
 				"plainaddress", // Missing @ sign and domain
@@ -29,9 +39,7 @@ public class TextValidatorTest {
 		// call the method under test
 		for (String email : testEmails) {
 			ValidationException e = new ValidationException();
-			SuperUser u = new SuperUser();
-			u.setWebLocale(Locale.getDefault());
-			v.validate(u, email, "binding", "Binding", null, e);
+			validator.validate(user, email, "binding", "Binding", null, e);
 
 			// verify the result
 			if (e.getMessages().isEmpty()) {
@@ -41,11 +49,9 @@ public class TextValidatorTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	public void testValidateEmailValid() throws Exception {
 		// setup the test data
-		TextValidator v = new TextValidator();
-		v.setType(ValidatorType.email);
+		validator.setType(ValidatorType.email);
 
 		String[] testEmails = new String[] {
 				"email@domain.com", // Valid email
@@ -68,12 +74,63 @@ public class TextValidatorTest {
 		// call the method under test
 		for (String email : testEmails) {
 			ValidationException e = new ValidationException();
-			SuperUser u = new SuperUser();
-			u.setWebLocale(Locale.getDefault());
-			v.validate(u, email, "binding", "Binding", null, e);
+			validator.validate(user, email, "binding", "Binding", null, e);
 
 			if (!e.getMessages().isEmpty()) {
 				fail("Email " + email + " should have passed validation.");
+			}
+		}
+	}
+
+	@Test
+	public void testValidateUrlInvalid() {
+		// setup the test data
+		validator.setType(ValidatorType.url);
+
+		String[] testUrls = new String[] {
+				"http://skyve",
+				"https://skyve",
+				"www.skyve",
+				"skyve"
+		};
+
+		// call the method under test
+		for (String url : testUrls) {
+			ValidationException e = new ValidationException();
+			validator.validate(user, url, "binding", "Binding", null, e);
+
+			// verify the result
+			if (e.getMessages().isEmpty()) {
+				fail("Url " + url + " should not have passed validation.");
+			}
+		}
+	}
+
+	@Test
+	public void testValidateUrlValid() {
+		// setup the test data
+		validator.setType(ValidatorType.url);
+
+		String[] testUrls = new String[] {
+				"http://skyve.org",
+				"https://skyve.org",
+				"ftp://skyve.org",
+				"http://foundry.skyve.org",
+				"https://foundry.skyve.org",
+				"http://www.skyve.org",
+				"https://www.skyve.org",
+				"www.skyve.org",
+				"skyve.org"
+		};
+
+		// call the method under test
+		for (String url : testUrls) {
+			ValidationException e = new ValidationException();
+			validator.validate(user, url, "binding", "Binding", null, e);
+
+			// verify the result
+			if (!e.getMessages().isEmpty()) {
+				fail("Url " + url + " should have passed validation.");
 			}
 		}
 	}

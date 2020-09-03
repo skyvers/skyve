@@ -22,7 +22,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
-import modules.admin.Configuration.ComplexityModel;
+import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
@@ -263,7 +263,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		// validate username is not null, not too short and unique
 		if (user.getUserName() == null) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is required."));
-		} else if (!user.isPersisted() && user.getUserName().length() < ComplexityModel.MINIMUM_USERNAME_LENGTH) {
+		} else if (!user.isPersisted() && user.getUserName().length() < ConfigurationExtension.MINIMUM_USERNAME_LENGTH) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
 			Persistence pers = CORE.getPersistence();
@@ -295,12 +295,11 @@ public class UserBizlet extends Bizlet<UserExtension> {
 					} else if (newPassword.equals(confirmPassword)) {
 
 						// check for suitable complexity
-						Configuration configuration = Configuration.newInstance();
-						ComplexityModel cm = new ComplexityModel(configuration.getPasswordComplexityModel());
-						if (!newPassword.matches(cm.getComparison())) {
+						ConfigurationExtension configuration = Configuration.newInstance();
+						if (!configuration.meetsComplexity(newPassword)) {
 							StringBuilder sb = new StringBuilder(64);
 							sb.append("The password you have entered is not sufficiently complex. ");
-							sb.append(cm.getRule());
+							sb.append(configuration.getPasswordRuleDescription());
 							sb.append(" Please re-enter and confirm the password.");
 							Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 							e.getMessages().add(message);

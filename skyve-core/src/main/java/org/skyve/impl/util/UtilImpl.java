@@ -59,8 +59,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "24";
-	public static final String SKYVE_VERSION = "4.2.1-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "27";
+	public static final String SKYVE_VERSION = "5.0.1";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -223,6 +223,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_USER = null;
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
+	
+	public static boolean PRIMEFLEX = true;
 	
 	// for skyve script
 	/**

@@ -676,7 +676,9 @@ public class JasperReportRenderer {
                     extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
                     designSpecification.setAlias(designSpecification.getAlias() + 1);
                 }
-                sqlName = extDocument.getName();
+				if (extDocument != null) {
+					sqlName = extDocument.getName();
+				}
             }
 
             StringBuilder sql = new StringBuilder();

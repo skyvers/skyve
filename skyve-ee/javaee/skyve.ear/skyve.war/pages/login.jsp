@@ -227,6 +227,11 @@
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
+		        <!-- uncomment to enable self-registration 
+				<div class="ui message">
+					Don't have an account? <a href="?a=e&m=admin&d=SelfRegistration">Register now</a>
+			    </div>	        
+			    -->
 		    </div>
 		</div>
 	</body>

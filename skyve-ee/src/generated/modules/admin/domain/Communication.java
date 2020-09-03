@@ -1222,7 +1222,10 @@ public abstract class Communication extends AbstractPersistentBean {
 	 * @param element	The element to add.
 	 **/
 	public boolean addSubscriptionsElement(Subscription element) {
-		boolean result = subscriptions.add(element);
+		boolean result = false;
+		if (getElementById(subscriptions, element.getBizId()) == null) {
+			result = subscriptions.add(element);
+		}
 		element.setCommunication((CommunicationExtension) this);
 		return result;
 	}
@@ -1244,7 +1247,7 @@ public abstract class Communication extends AbstractPersistentBean {
 	public boolean removeSubscriptionsElement(Subscription element) {
 		boolean result = subscriptions.remove(element);
 		if (result) {
-			element.setCommunication(null);
+			element.nullCommunication();
 		}
 		return result;
 	}
@@ -1255,7 +1258,7 @@ public abstract class Communication extends AbstractPersistentBean {
 	 **/
 	public Subscription removeSubscriptionsElement(int index) {
 		Subscription result = subscriptions.remove(index);
-		result.setCommunication(null);
+		result.nullCommunication();
 		return result;
 	}
 

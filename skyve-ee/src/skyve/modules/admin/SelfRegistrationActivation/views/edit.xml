@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Welcome {user.contact.name}" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form visible="showSuccess" border="true" borderTitle="Account activated successfully">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Congratulations {user.contact.name}! Your account is now active.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</h4>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showAlready" border="true" borderTitle="Account previously activated">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Welcome {user.contact.name} - you have already activated your account.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</h4>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showExpired" border="true" borderTitle="Your activation code has expired">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Sorry, that code is no longer valid.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</h4>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showFailure" border="true" borderTitle="Invalid access">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Sorry, that link is not recognised.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</h4>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+    <actions>
+    </actions>
+    <newParameters/>
+</view>

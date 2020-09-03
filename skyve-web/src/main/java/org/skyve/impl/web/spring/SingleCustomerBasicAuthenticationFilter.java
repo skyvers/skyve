@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.impl.web.spring;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -45,16 +45,16 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  *  <b:bean id="skyveEntryPoint" class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
  *      <b:property name="realmName" value="Skyve" />
  *  </b:bean>
- *  <b:bean id="skyveFilter" class="org.skyve.impl.web.SpringSingleCustomerBasicAuthenticationFilter">
+ *  <b:bean id="skyveFilter" class="org.skyve.impl.web.spring.SingleCustomerBasicAuthenticationFilter">
  *      <b:constructor-arg name="authenticationManager" ref="authenticationManager" />
  *  </b:bean>
  */
-public class SpringSingleCustomerBasicAuthenticationFilter extends BasicAuthenticationFilter {
-	public SpringSingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
+public class SingleCustomerBasicAuthenticationFilter extends BasicAuthenticationFilter {
+	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
 		super(authenticationManager);
 	}
 
-	public SpringSingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager,
+	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager,
 										AuthenticationEntryPoint authenticationEntryPoint) {
 		super(authenticationManager, authenticationEntryPoint);
 	}

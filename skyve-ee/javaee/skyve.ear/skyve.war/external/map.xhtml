@@ -5,34 +5,34 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui"
-		dir="#{skyveMap.dir}">
+		dir="#{skyve.dir}">
 	<f:view encoding="UTF-8">
 		<f:metadata>
-			<f:viewParam name="a" value="#{skyveMap.webActionParameter}" />
-			<f:viewParam name="m" value="#{skyveMap.bizModuleParameter}" />
-			<f:viewParam name="d" value="#{skyveMap.bizDocumentParameter}" />
-			<f:viewParam name="q" value="#{skyveMap.queryNameParameter}" />
-			<f:viewParam name="b" value="#{skyveMap.bindingParameter}" />
-			<f:event type="preRenderView" listener="#{skyveMap.preRender}"/>
+			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyve.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyve.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
+			<f:viewParam name="b" value="#{skyve.bindingParameter}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
 		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
-		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyveMap.templateName).concat('/view.xhtml')}">
-			<ui:param name="bean" value="#{skyveMap}" />
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyve.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyve}" />
 			<ui:param name="showMenu" value="true" />
 			<ui:param name="showSwitchMode" value="true" />
 			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<h:form prependId="false">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
-						<ui:param name="bean" value="#{skyveMap}" />
+						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
 				</h:form>
-				<s:map module="#{skyveMap.bizModuleParameter}"
-						document="#{skyveMap.bizDocumentParameter}"
-						query="#{skyveMap.queryNameParameter}"
-						model="#{skyveMap.modelName}"
-						geometryBinding="#{skyveMap.bindingParameter}"
-						managedBean="skyveMap"
+				<s:map module="#{skyve.bizModuleParameter}"
+						document="#{skyve.bizDocumentParameter}"
+						query="#{skyve.queryNameParameter}"
+						model="#{skyve.modelName}"
+						geometryBinding="#{skyve.bindingParameter}"
+						managedBean="skyve"
 						update="@none" />
 				<!-- Map is height of window - 250px for header and footer -->
 				<script>

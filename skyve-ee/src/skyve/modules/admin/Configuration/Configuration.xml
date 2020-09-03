@@ -11,16 +11,35 @@
 	<iconStyleClass>fa fa-lock</iconStyleClass>
 	<bizKey expression="Admin Setup"/>
 	<attributes>
-		<enum name="passwordComplexityModel" required="true">
-			<displayName>Password Complexity</displayName>
-			<description>The security level/complexity model for user passwords</description>
-			<values>
-				<value code="MINIMUM" description="Minimum - min 6 chars"/>
-				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
-				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
-				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
-			</values>
-		</enum>
+		<integer name="passwordMinLength" required="true">
+			<displayName>Minimum Password Length</displayName>
+			<description>The minimum number of characters for new passwords</description>
+			<defaultValue>10</defaultValue>
+			<validator min="1"/>
+		</integer>
+		<boolean name="passwordRequireLowercase">
+			<displayName>Requires Lowercase</displayName>
+			<description>If new passwords should require at least one lowercase character</description>
+		</boolean>
+		<boolean name="passwordRequireUppercase">
+			<displayName>Requires Uppercase</displayName>
+			<description>If new passwords should require at least one uppercase character</description>
+		</boolean>
+		<boolean name="passwordRequireNumeric">
+			<displayName>Requires Numeric Characters</displayName>
+			<description>If new passwords should require at least one numeric character</description>
+		</boolean>
+		<boolean name="passwordRequireSpecial">
+			<displayName>Requires Special Characters</displayName>
+			<description>If new passwords should require at least one special character</description>
+		</boolean>
+		<text name="passwordRuleDescription" audited="false" persistent="false" trackChanges="false" usage="both">
+			<documentation>A text description which can be shown to the user if their password does not comply
+				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.</documentation>
+			<displayName>Password Rule Description</displayName>
+			<length>250</length>
+		</text>
+		
 		<text name="fromEmail" required="true">
 			<displayName>Sender/From Email Address</displayName>
 			<description>Email Address that all email's that the system sends will be sent from.</description>
@@ -49,6 +68,10 @@
 			<displayName>Allow User Self Registration</displayName>
 			<description>Master switch to allow or disallow self registration.</description>
 		</boolean>
+		<integer name="selfRegistrationActivationExpiryHours">
+			<displayName>Number of hours to Keep self-registration activation codes enabled</displayName>
+			<description>Clear this setting to have codes that never expire.</description>
+		</integer>
 		
 		<association name="publicUser" type="aggregation">
 			<displayName>Anonymous Public User</displayName>
@@ -72,6 +95,30 @@
 		<markup name="emailContent" persistent="false">
 			<displayName>Email</displayName>
 		</markup>
+		<text name="passwordExpiryDays" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>Password Expiry in Days</displayName>
+			<description>Number of days until a password change is required. Blank indicates no password aging.</description>
+			<length>20</length>
+		</text>
+		<text name="passwordHistoryRetention" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>Password History Retention</displayName>
+			<description>Number of previous passwords to check for duplicates. Blank indicates no password history.</description>
+			<length>20</length>
+		</text>
+		<text name="passwordAccountLockoutThreshold" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>Account Lockout Threshold</displayName>
+			<description>Number of sign in attempts until the user account is locked. Blank indicates no account lockout.</description>
+			<length>20</length>
+		</text>
+		<text name="passwordAccountLockoutDuration" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>Account Lockout Duration</displayName>
+			<description>Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.</description>
+			<length>20</length>
+		</text>
 		<association name="emailToContact" type="aggregation" persistent="false">
 			<displayName>Email To Contact</displayName>
 			<documentName>Contact</documentName>

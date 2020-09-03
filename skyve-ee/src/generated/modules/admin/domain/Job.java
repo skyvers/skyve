@@ -43,6 +43,12 @@ public class Job extends AbstractPersistentBean {
 	public static final String statusPropertyName = "status";
 	/** @hidden */
 	public static final String logPropertyName = "log";
+	/** @hidden */
+	public static final String beanBizIdPropertyName = "beanBizId";
+	/** @hidden */
+	public static final String beanModuleNamePropertyName = "beanModuleName";
+	/** @hidden */
+	public static final String beanDocumentNamePropertyName = "beanDocumentName";
 
 	/**
 	 * Start Time
@@ -68,6 +74,22 @@ public class Job extends AbstractPersistentBean {
 	 * Log
 	 **/
 	private String log;
+	/**
+	 * Bean Biz Id
+	 **/
+	private String beanBizId;
+	/**
+	 * Bean Module Name
+	 * <br/>
+	 * The name of the module for the bean.
+	 **/
+	private String beanModuleName;
+	/**
+	 * Bean Document Name
+	 * <br/>
+	 * The name of the document for the bean.
+	 **/
+	private String beanDocumentName;
 
 	@Override
 	@XmlTransient
@@ -222,5 +244,59 @@ public class Job extends AbstractPersistentBean {
 	public void setLog(String log) {
 		preset(logPropertyName, log);
 		this.log = log;
+	}
+
+	/**
+	 * {@link #beanBizId} accessor.
+	 * @return	The value.
+	 **/
+	public String getBeanBizId() {
+		return beanBizId;
+	}
+
+	/**
+	 * {@link #beanBizId} mutator.
+	 * @param beanBizId	The new value.
+	 **/
+	@XmlElement
+	public void setBeanBizId(String beanBizId) {
+		preset(beanBizIdPropertyName, beanBizId);
+		this.beanBizId = beanBizId;
+	}
+
+	/**
+	 * {@link #beanModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getBeanModuleName() {
+		return beanModuleName;
+	}
+
+	/**
+	 * {@link #beanModuleName} mutator.
+	 * @param beanModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setBeanModuleName(String beanModuleName) {
+		preset(beanModuleNamePropertyName, beanModuleName);
+		this.beanModuleName = beanModuleName;
+	}
+
+	/**
+	 * {@link #beanDocumentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getBeanDocumentName() {
+		return beanDocumentName;
+	}
+
+	/**
+	 * {@link #beanDocumentName} mutator.
+	 * @param beanDocumentName	The new value.
+	 **/
+	@XmlElement
+	public void setBeanDocumentName(String beanDocumentName) {
+		preset(beanDocumentNamePropertyName, beanDocumentName);
+		this.beanDocumentName = beanDocumentName;
 	}
 }

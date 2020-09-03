@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DocumentName"
+	xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		Non-persistent document used to store a selection of a document belonging to a specific
+		module. This allows it to be used in a lookupDescription, e.g. Control Panel - Generate 
+		Test Data.
+	</documentation>
+	<singularAlias>DocumentName</singularAlias>
+	<pluralAlias>DocumentNames</pluralAlias>
+	<bizKey expression="{documentName}" />
+	<attributes>
+		<text name="moduleName">
+			<displayName>Module Name</displayName>
+			<length>500</length>
+		</text>
+		<text name="documentName">
+			<displayName>Document Name</displayName>
+			<length>500</length>
+		</text>
+	</attributes>
+</document>

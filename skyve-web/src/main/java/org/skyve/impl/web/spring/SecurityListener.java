@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.impl.web.spring;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +21,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpringSecurityListener {
+public class SecurityListener {
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
@@ -34,15 +34,27 @@ public class SpringSecurityListener {
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
 		Object principal = evt.getAuthentication().getPrincipal();
+
+		// The username is hard to get in spring security.
+		// The principal is an object and getUserName() is not on an interface.
+		// Some security plugin implementations (the waffle one) have a getUserName() but the principal 
+		// does not extend User.
+		// NB It would be possible to use reflection to obtain the username from different implementations
+		// but I think the best thing we can do is warn about it and let a skyve project mask this class if required.
 		String username = null;
-		if (principal instanceof String) {
+		if (principal instanceof User) {
+			username = ((User) principal).getUsername();
+		}
+		else if (principal instanceof String) {
 			username = (String) principal;
 		}
 		else {
-			username = ((User) principal).getUsername();
+			UtilImpl.LOGGER.warning("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in you project and handle the principal yourself.");
 		}
 		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
-		resetLoginFailure(username);
+		if (username != null) {
+			resetLoginFailure(username);
+		}
 	}
 	
 	private static void recordLoginFailure(String username) {
@@ -62,7 +74,7 @@ public class SpringSecurityListener {
 			sql = "update ADM_SecurityUser set authenticationFailures = coalesce(authenticationFailures, 0) + 1, lastAuthenticationFailure = ? where bizId = ?";
 		}
 		else {
-			UtilImpl.LOGGER.warning("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SpringSecurityListener");
+			UtilImpl.LOGGER.warning("Login Failure for " + username + " was not recorded because " + rdbms + " is not suported in SecurityListener");
 			return;
 		}
 

@@ -473,7 +473,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	public List<Staff> getChildren() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
-		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);
+		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}
 }

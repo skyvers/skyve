@@ -56,15 +56,15 @@ public class JobScheduler {
 		}
 		
 		try {
-			if (UtilImpl.JOB_SCHEDULER) {
-				// Add metadata jobs
-				AbstractRepository repository = AbstractRepository.get();
-				for (String moduleName : repository.getAllVanillaModuleNames()) {
-					Module module = repository.getModule(null, moduleName);
-					addJobs(module);
-				}
+			// Add metadata jobs
+			AbstractRepository repository = AbstractRepository.get();
+			for (String moduleName : repository.getAllVanillaModuleNames()) {
+				Module module = repository.getModule(null, moduleName);
+				addJobs(module);
+			}
 	
-				// Add triggers
+			// Add triggers if this Skyve instance is able to schedule jobs
+			if (UtilImpl.JOB_SCHEDULER) {
 				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers().stream()
 						.filter(js -> !Boolean.TRUE.equals(BindUtil.get(js, "disabled")))
 						.collect(Collectors.toList());
