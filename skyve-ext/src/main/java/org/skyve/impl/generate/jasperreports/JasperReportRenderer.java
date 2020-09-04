@@ -1228,8 +1228,8 @@ public class JasperReportRenderer {
 
         reportDesignParameters.setReportFormat(ReportFormat.pdf);
         reportDesignParameters.setReportStyle(ReportDesignParameters.ReportStyle.tabular);
-        reportDesignParameters.setPageWidth(designSpecification.getWidth());
-        reportDesignParameters.setPageHeight(designSpecification.getHeight());
+		reportDesignParameters.setPageWidth(designSpecification.getWidth().intValue());
+		reportDesignParameters.setPageHeight(designSpecification.getHeight().intValue());
         reportDesignParameters.setPaginated(true);
         reportDesignParameters.setPretty(true);
         reportDesignParameters.setTopMargin(20);
@@ -1245,7 +1245,7 @@ public class JasperReportRenderer {
             reportColumn.setName(queryColumn.getBinding());
             reportColumn.setTitle(queryColumn.getBinding());
             reportColumn.setType("text");
-            reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth() : 100);
+			reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth().intValue() : 100);
             String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toAlignmentString() : null;
             if (align != null) {
                 reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.valueOf(align));

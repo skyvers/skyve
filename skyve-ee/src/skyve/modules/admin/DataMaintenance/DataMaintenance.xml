@@ -30,8 +30,6 @@
 			<length>1024</length>
 		</text>
 		
-		
-		
 		<!-- Data Refresh -->
 		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
 			<displayName>Refresh Documents</displayName>

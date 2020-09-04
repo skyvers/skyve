@@ -312,18 +312,17 @@ public abstract class ReportDesignGenerator {
                     if (DesignSpecification.Mode.sql.equals(design.getMode()) && !a.isPersistent()) {
                         // abandon creating a field - sql reports can't report on non persistent fields
                         break;
-                    } else {
+					}
 
-                        // build up join string
-                        if (Attribute.AttributeType.association.equals(a.getAttributeType())) {
-                            uniqueJoinIdentifier = uniqueJoinIdentifier + ":" + a.getName();
+					// build up join string
+					if (Attribute.AttributeType.association.equals(a.getAttributeType())) {
+						uniqueJoinIdentifier = uniqueJoinIdentifier + ":" + a.getName();
 
-                            sJoin = addJoinForAssociation(sJoin, customer, design, document, a, uniqueJoinIdentifier);
-                            prefix.append(bindings[i]).append("_");
-                        } else {
-                            result = fieldFromAttribute(design, customer, document, a, sJoin, prefix);
-                        }
-                    }
+						sJoin = addJoinForAssociation(sJoin, customer, design, document, a, uniqueJoinIdentifier);
+						prefix.append(bindings[i]).append("_");
+					} else {
+						result = fieldFromAttribute(design, customer, document, a, sJoin, prefix);
+					}
                 }
             } else {
                 Attribute a = document.getAttribute(binding);

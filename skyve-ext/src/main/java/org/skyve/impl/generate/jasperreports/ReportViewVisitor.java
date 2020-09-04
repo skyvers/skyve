@@ -166,6 +166,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param responsive
 	 * @return
 	 */
+	@SuppressWarnings("boxing")
 	private Integer calculateTwipSize(Integer containerSizeInTwips, Integer pixels, Integer percentage, Integer responsive) {
 		Integer resultSizeInTwips = null; // auto set
 		if (pixels != null) {
