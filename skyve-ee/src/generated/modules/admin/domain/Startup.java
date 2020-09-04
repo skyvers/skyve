@@ -260,7 +260,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	private String apiTwilioSID;
 	/**
-	 * Account SID
+	 * Account Auth Token
 	 **/
 	private String apiTwilioAuthToken;
 	/**

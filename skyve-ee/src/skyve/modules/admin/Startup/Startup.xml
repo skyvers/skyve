@@ -40,7 +40,7 @@
 				<value name="leaflet" code="leaflet" description="Open Street Map"/>
 			</values>
 		</enum>
-		<integer name="mapZoom">
+		<integer name="mapZoom" required="true">
 			<displayName>Zoom</displayName>
 			<description>What should the default zoom level be when opening a new map (value between 1-19)?</description>
 			<defaultValue>1</defaultValue>
@@ -118,7 +118,7 @@
 			<length>200</length>
 		</text>
 		<text name="apiTwilioAuthToken">
-			<displayName>Account SID</displayName>
+			<displayName>Account Auth Token</displayName>
 			<length>200</length>
 		</text>
 		<text name="apiTwilioDefaultSendNumber">

@@ -34,7 +34,7 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commonmark-0.10.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.2.jar" sourcepath="/Users/benpetito/.m2/repository/org/apache/commons/commons-lang3/3.2/commons-lang3-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-api-3.141.59.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-support-3.141.59.jar"/>
 	<classpathentry kind="lib" path="lib/guava-25.0-jre.jar"/>

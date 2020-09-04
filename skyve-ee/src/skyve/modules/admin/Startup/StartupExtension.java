@@ -194,14 +194,14 @@ public class StartupExtension extends Startup {
 		}
 
 		// add any values to the override configuration if they have changed
-		if (getEnvironmentIdentifier() != null
-				&& !StringUtils.equals(UtilImpl.ENVIRONMENT_IDENTIFIER, getEnvironmentIdentifier())) {
+		if (getEnvironmentIdentifier() == null
+				|| !StringUtils.equals(UtilImpl.ENVIRONMENT_IDENTIFIER, getEnvironmentIdentifier())) {
 			environment.put(ENVIRONMENT_IDENTIFIER_KEY, getEnvironmentIdentifier());
 			UtilImpl.ENVIRONMENT_IDENTIFIER = getEnvironmentIdentifier();
 		}
 
-		if (getEnvironmentSupportEmail() != null
-				& !StringUtils.equals(UtilImpl.SUPPORT_EMAIL_ADDRESS, getEnvironmentSupportEmail())) {
+		if (getEnvironmentSupportEmail() == null
+				|| !StringUtils.equals(UtilImpl.SUPPORT_EMAIL_ADDRESS, getEnvironmentSupportEmail())) {
 			environment.put(ENVIRONMENT_SUPPORT_EMAIL_ADDRESS_KEY, getEnvironmentSupportEmail());
 			UtilImpl.SUPPORT_EMAIL_ADDRESS = getEnvironmentSupportEmail();
 		}
@@ -242,12 +242,12 @@ public class StartupExtension extends Startup {
 			UtilImpl.SMTP_PORT = getMailPort().intValue();
 		}
 
-		if (getMailUsername() != null && !StringUtils.equals(UtilImpl.SMTP_UID, getMailUsername())) {
+		if (getMailUsername() == null || !StringUtils.equals(UtilImpl.SMTP_UID, getMailUsername())) {
 			smtp.put(SMTP_UID_KEY, getMailUsername());
 			UtilImpl.SMTP_UID = getMailUsername();
 		}
 
-		if (getMailPassword() != null && !StringUtils.equals(UtilImpl.SMTP_PWD, getMailPassword())) {
+		if (getMailPassword() == null || !StringUtils.equals(UtilImpl.SMTP_PWD, getMailPassword())) {
 			smtp.put(SMTP_PWD_KEY, getMailPassword());
 			UtilImpl.SMTP_PWD = getMailPassword();
 		}
@@ -262,7 +262,7 @@ public class StartupExtension extends Startup {
 			UtilImpl.SMTP_TEST_BOGUS_SEND = getMailBogusSend().booleanValue();
 		}
 
-		if (getMailTestRecipient() != null && !StringUtils.equals(UtilImpl.SMTP_TEST_RECIPIENT, getMailTestRecipient())) {
+		if (getMailTestRecipient() == null || !StringUtils.equals(UtilImpl.SMTP_TEST_RECIPIENT, getMailTestRecipient())) {
 			smtp.put(SMTP_TEST_RECIPIENT_KEY, getMailTestRecipient());
 			UtilImpl.SMTP_TEST_RECIPIENT = getMailTestRecipient();
 		}
@@ -304,7 +304,10 @@ public class StartupExtension extends Startup {
 		}
 
 		String mapCentreWkt = getMapCentre() != null ? new WKTWriter().write(getMapCentre()) : null;
-		if (mapCentreWkt != null && !StringUtils.equals(UtilImpl.MAP_CENTRE, mapCentreWkt)) {
+		if (mapCentreWkt == null) {
+			map.remove(MAP_CENTRE_KEY);
+			UtilImpl.MAP_CENTRE = null;
+		} else if (!StringUtils.equals(UtilImpl.MAP_CENTRE, mapCentreWkt)) {
 			map.put(MAP_CENTRE_KEY, mapCentreWkt);
 			UtilImpl.MAP_CENTRE = mapCentreWkt;
 		}

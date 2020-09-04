@@ -4,7 +4,7 @@
 	
 	<vbox border="true" borderTitle="Environment Settings">
 	    <form responsiveWidth="12" widgetId="formEnvironment">
-	        <column responsiveWidth="4"/>
+	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -22,7 +22,7 @@
 	
 	<vbox border="true" borderTitle="Mail Settings">
 		<form responsiveWidth="12" widgetId="formMail">
-	        <column responsiveWidth="1"/>
+	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -65,7 +65,7 @@
 	
 	<vbox border="true" borderTitle="Map Settings">
 	    <form responsiveWidth="12" widgetId="formMap">
-	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -121,7 +121,7 @@
 	
 	<vbox border="true" borderTitle="Security Settings">
 		<form responsiveWidth="12" widgetId="formSecurity">
-	        <column responsiveWidth="4"/>
+	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
@@ -148,7 +148,7 @@
     
     <vbox border="true" borderTitle="SMS Settings">
 	    <form responsiveWidth="12" widgetId="formSMS">
-	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
