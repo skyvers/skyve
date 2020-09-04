@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
-	<form border="true" borderTitle="Test Email" visible="emailConfigured">
+	<form border="true" borderTitle="admin.configuration.testEmail.testEmail.borderTitle" visible="emailConfigured">
 		<column pixelWidth="175" />
 		<column />
 		<column pixelWidth="110" />
