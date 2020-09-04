@@ -70,15 +70,15 @@
 				</item>
 			</row>
 		</form>
-		<vbox visible="showGroupCreator" borderTitle="Create a new group">
+		<vbox visible="showGroupCreator" borderTitle="admin.user.newUser.confirmGroup.title">
 			<component binding="newGroup" name="_groupCreator" />
 		</vbox>
 		<vbox invisible="showGroupCreator">
-			<listMembership binding="groups" candidatesHeading="Available Groups" membersHeading="Assigned Groups"/>
+			<listMembership binding="groups" candidatesHeading="admin.group.candidatesHeading.title" membersHeading="admin.group.membersHeading.title"/>
 		</vbox>
 	</vbox>
 	<actions>
-		<action className="Back" displayName="Back" clientValidation="false" relativeIconFileName="shared/icons/Back.gif" invisible="confirmContact" />
-		<action className="Next" displayName="Next" clientValidation="false" relativeIconFileName="shared/icons/Next.gif" invisible="notShowNextButton" />
+		<action className="Back" displayName="admin.user.newUser.confirmGroupMemberships.action.back.actionName" clientValidation="false" relativeIconFileName="shared/icons/Back.gif" invisible="confirmContact" />
+		<action className="Next" displayName="admin.user.newUser.confirmGroupMemberships.action.next.actionName" clientValidation="false" relativeIconFileName="shared/icons/Next.gif" invisible="notShowNextButton" />
 	</actions>
 </view>

@@ -13,7 +13,7 @@
 								<ul>
 									<li role="alert" aria-atomic="true">
 										<span class="ui-messages-info-detail">
-											Identify the user's contact details
+											<i>Search for an existing <b>contact</b></i>
 										</span>
 									</li>
 								</ul>
@@ -112,7 +112,7 @@
 		</form>
 	</vbox>
 	<actions>
-		<action className="New" displayName="New Contact" invisible="notConfirmContact" inActionPanel="false" relativeIconFileName="actions/New.gif" />
-		<action className="Check" displayName="Search" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
+		<action className="New" displayName="admin.user.newUser.confirmContact.action.new.actionName" invisible="notConfirmContact" inActionPanel="false" relativeIconFileName="actions/New.gif" />
+		<action className="Check" displayName="admin.user.newUser.confirmContact.action.check.actionName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
 	</actions>	
 </view>

@@ -2,7 +2,7 @@
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:c="http://www.skyve.org/xml/common">
 	
-	<vbox border="true" borderTitle="Environment Settings">
+	<vbox border="true" borderTitle="admin.startup.environmentSettings.frameset.title">
 	    <form responsiveWidth="12" widgetId="formEnvironment">
 	        <column responsiveWidth="3"/>
 	        <column/>
@@ -20,7 +20,7 @@
 		</form>
 	</vbox>
 	
-	<vbox border="true" borderTitle="Mail Settings">
+	<vbox border="true" borderTitle="admin.startup.mailSettings.frameset.title">
 		<form responsiveWidth="12" widgetId="formMail">
 	        <column responsiveWidth="3"/>
 	        <column/>
@@ -63,7 +63,7 @@
 		</form>
 	</vbox>
 	
-	<vbox border="true" borderTitle="Map Settings">
+	<vbox border="true" borderTitle="admin.startup.mapSettings.frameset.title">
 	    <form responsiveWidth="12" widgetId="formMap">
 	        <column responsiveWidth="3"/>
 	        <column/>
@@ -119,7 +119,7 @@
 		</form>
 	</vbox>
 	
-	<vbox border="true" borderTitle="Security Settings">
+	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title">
 		<form responsiveWidth="12" widgetId="formSecurity">
 	        <column responsiveWidth="3"/>
 	        <column/>
@@ -146,7 +146,7 @@
 	    </form>
     </vbox>
     
-    <vbox border="true" borderTitle="SMS Settings">
+    <vbox border="true" borderTitle="admin.startup.smsSettings.frameset.title">
 	    <form responsiveWidth="12" widgetId="formSMS">
 	        <column responsiveWidth="3"/>
 	        <column/>

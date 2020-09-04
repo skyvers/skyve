@@ -45,9 +45,9 @@ public class Contact extends AbstractPersistentBean {
 	public static final String imagePropertyName = "image";
 
 	/**
-	 * Contact Type
+	 * admin.contact.contactType.displayName
 	 * <br/>
-	 * Whether this contact is a person or an organisation.
+	 * admin.contact.contactType.description
 	 **/
 	@XmlEnum
 	public static enum ContactType implements Enumeration {
@@ -124,25 +124,25 @@ public class Contact extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Name
+	 * admin.contact.name.displayName
 	 **/
 	private String name;
 	/**
-	 * Contact Type
+	 * admin.contact.contactType.displayName
 	 * <br/>
-	 * Whether this contact is a person or an organisation.
+	 * admin.contact.contactType.description
 	 **/
 	private ContactType contactType;
 	/**
-	 * Email
+	 * admin.contact.email1.displayName
 	 **/
 	private String email1;
 	/**
-	 * Mobile
+	 * admin.contact.mobile.displayName
 	 **/
 	private String mobile;
 	/**
-	 * Image
+	 * admin.contact.image.displayName
 	 **/
 	private String image;
 
