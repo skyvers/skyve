@@ -13,7 +13,7 @@
 								<ul>
 									<li role="alert" aria-atomic="true">
 										<span class="ui-messages-info-detail">
-											<div>admin.user.newUser.confirmContact.uiDetailsMessage</div>
+											<i>Search for an existing <b>contact</b></i>
 										</span>
 									</li>
 								</ul>

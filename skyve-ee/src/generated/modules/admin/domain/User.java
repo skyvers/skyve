@@ -200,7 +200,7 @@ public abstract class User extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Groups
+	 * admin.user.groupSelection.displayName
 	 **/
 	@XmlEnum
 	public static enum GroupSelection implements Enumeration {
@@ -277,119 +277,115 @@ public abstract class User extends AbstractPersistentBean {
 	}
 
 	/**
-	 * User Name
+	 * admin.user.userName.displayName
 	 * <br/>
 	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
 	/**
-	 * Password
+	 * admin.user.password.displayName
 	 * <br/>
-	 * Check Password Complexity settings for minimum required strength.
+	 * admin.user.password.description
 	 **/
 	private String password;
 	/**
-	 * Generated Password
+	 * admin.user.generatedPassword.displayName
 	 * <br/>
-	 * Used to temporarily hold generated passwords for further processing.
+	 * admin.user.generatedPassword.description
 	 **/
 	private String generatedPassword;
 	/**
-	 * Created
+	 * admin.user.createdDateTime.displayName
 	 * <br/>
-	 * The time and date when this user account was created.
+	 * admin.user.createdDateTime.description
 	 **/
 	private DateTime createdDateTime;
 	/**
-	 * Home Module
+	 * admin.user.homeModule.displayName
 	 * <br/>
-	 * The module displayed when the user first logs in.
+	 * admin.user.homeModule.description
 	 **/
 	private String homeModule;
 	/**
-	 * New Password
+	 * admin.user.newPassword.displayName
 	 * <br/>
-	 * Check Password Complexity settings for minimum required strength.
+	 * admin.user.newPassword.description
 	 **/
 	private String newPassword;
 	/**
-	 * Confirm Password
+	 * admin.user.confirmPassword.displayName
 	 * <br/>
-	 * Check Password Complexity settings for minimum required strength.
+	 * admin.user.confirmPassword.description
 	 **/
 	private String confirmPassword;
 	/**
-	 * Legacy Id
+	 * admin.user.legacyId.displayName
 	 * <br/>
-	 * Legacy ID value when imported from legacy System using the conversion tool.
+	 * admin.user.legacyId.description
 	 **/
 	private String legacyId;
 	/**
-	 * Must change password
+	 * admin.user.passwordExpired.displayName
 	 * <br/>
-	 * Whether the password must be changed
+	 * admin.user.passwordExpired.description
 	 **/
 	private Boolean passwordExpired;
 	/**
-	 * Last changed
+	 * admin.user.passwordLastChanged.displayName
 	 * <br/>
-	 * Date and Time the users password was last changed
+	 * admin.user.passwordLastChanged.description
 	 **/
 	private DateTime passwordLastChanged;
 	/**
-	 * Password Reset Token
+	 * admin.user.passwordResetToken.displayName
 	 * <br/>
-	 * The password reset token emailed to the user on pass reset request.
+	 * admin.user.passwordResetToken.description
 	 * <br/>
 	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
 	 **/
 	private String passwordResetToken;
 	/**
-	 * Password History
+	 * admin.user.passwordHistory.displayName
 	 * <br/>
 	 * A tab separated list of previous password hashes used
 	 **/
 	private String passwordHistory;
 	/**
-	 * Authentication Failures
+	 * admin.user.authenticationFailures.displayName
 	 * <br/>
-	 * The number of authentication failures since the last successful authentication
+	 * admin.user.authenticationFailures.description
 	 * <br/>
 	 * This value is zeroed on successful authentication.
 	 **/
 	private Integer authenticationFailures;
 	/**
-	 * Last Authentication Failure
+	 * admin.user.lastAuthenticationFailure.displayName
 	 * <br/>
-	 * Time that last authentication failure occurred
+	 * admin.user.lastAuthenticationFailure.description
 	 **/
 	private Timestamp lastAuthenticationFailure;
 	/**
-	 * Contact
+	 * admin.user.association.contact.displayName
 	 * <br/>
-	 * The contact details for the user.
+	 * admin.user.association.contact.description
 	 **/
 	private Contact contact = null;
 	/**
-	 * Data Group
+	 * admin.user.association.dataGroup.displayName
 	 * <br/>
-	 * The group that constrains what information this user can see.
+	 * admin.user.association.dataGroup.description
 	 **/
 	private DataGroup dataGroup = null;
 	/**
-	 * Security Groups
+	 * admin.user.collection.groups.displayName
 	 * <br/>
-	 * The collection of security groups that this user belongs to.
+	 * admin.user.collection.groups.description
 	 **/
 	private List<GroupExtension> groups = new ChangeTrackingArrayList<>("groups", this);
 	/**
-	 * Roles
+	 * admin.user.collection.roles.displayName
 	 * <br/>
-	 * Typically users are assigned membership of groups, which define sets of roles, 
-			corresponding to business roles within an organisation.
-			<br/>
-			However user may also have specific roles assigned in addition to the roles
-			which are implied from the groups to which they belong.
+	 * admin.user.collection.roles.description
 	 **/
 	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
 	/**
@@ -404,49 +400,49 @@ public abstract class User extends AbstractPersistentBean {
 	 **/
 	private WizardState wizardState;
 	/**
-	 * Full name
+	 * admin.user.searchContactName.displayName
 	 * <br/>
-	 * This is used to determine if you are on the system already
+	 * admin.user.searchContactName.description
 	 **/
 	private String searchContactName;
 	/**
-	 * Email
+	 * admin.user.searchEmail.displayName
 	 * <br/>
-	 * The email address to use to search existing contacts.
+	 * admin.user.searchEmail.description
 	 **/
 	private String searchEmail;
 	/**
-	 * Candidate Contacts
+	 * admin.user.collection.candidateContacts.displayName
 	 * <br/>
-	 * The contacts who possibly match the search criteria.
+	 * admin.user.collection.candidateContacts.description
 	 **/
 	private List<UserCandidateContact> candidateContacts = new ChangeTrackingArrayList<>("candidateContacts", this);
 	/**
-	 * The contact selected for this user.
+	 * admin.user.contactSelected.displayName
 	 **/
 	private Boolean contactSelected = new Boolean(false);
 	/**
-	 * Inactive
+	 * admin.user.inactive.displayName
 	 * <br/>
-	 * Indicates that this account has been marked as inactive and no longer in use.
+	 * admin.user.inactive.description
 	 **/
 	private Boolean inactive;
 	/**
-	 * Groups
+	 * admin.user.groupSelection.displayName
 	 **/
 	private GroupSelection groupSelection;
 	/**
-	 * Groups Exist
+	 * admin.user.groupsExist.displayName
 	 **/
 	private Boolean groupsExist;
 	/**
-	 * New Group
+	 * admin.user.association.newGroup.displayName
 	 **/
 	private GroupExtension newGroup = null;
 	/**
-	 * Roles
+	 * admin.user.collection.assignedRoles.displayName
 	 * <br/>
-	 * The assigned roles through the groups, customer roles and module roles assigned.
+	 * admin.user.collection.assignedRoles.description
 	 **/
 	private List<UserRole> assignedRoles = new ArrayList<>();
 	/**
