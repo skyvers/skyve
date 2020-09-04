@@ -212,7 +212,7 @@
    		<collection name="testDocumentNames" type="aggregation" usage="both">
    			<displayName>Document Names</displayName>
    			<domain>dynamic</domain>
-   			<documentName>DocumentName</documentName>
+   			<documentName>ModuleDocument</documentName>
    			<minCardinality>0</minCardinality>
    		</collection>
 	</attributes>

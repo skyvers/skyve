@@ -11,15 +11,15 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.util.PushMessage;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.PushMessage;
 
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.DataMaintenance.RefreshOption;
-import modules.admin.domain.DataMaintenanceModuleDocument;
+import modules.admin.domain.ModuleDocument;
 
 public class RefreshDocumentTuplesJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -41,7 +41,7 @@ public class RefreshDocumentTuplesJob extends Job {
 		int processed = 0;
 
 		// calculate size
-		for (DataMaintenanceModuleDocument doc : dm.getRefreshDocuments()) {
+		for (ModuleDocument doc : dm.getRefreshDocuments()) {
 			if (Boolean.TRUE.equals(doc.getInclude())) {
 				// get relevant document to action
 				Persistence pers = CORE.getPersistence();
@@ -55,7 +55,7 @@ public class RefreshDocumentTuplesJob extends Job {
 		EvictOption evict = dm.getEvictOption();
 
 		// iterate
-		for (DataMaintenanceModuleDocument doc : dm.getRefreshDocuments()) {
+		for (ModuleDocument doc : dm.getRefreshDocuments()) {
 			if (Boolean.TRUE.equals(doc.getInclude())) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("Document Data Refresh requested for [")
@@ -74,21 +74,19 @@ public class RefreshDocumentTuplesJob extends Job {
 						
 						if (RefreshOption.upsert.equals(refresh)) {
 							pers.upsertBeanTuple(bean);
-						}
-						else if (RefreshOption.save.equals(refresh)) {
+						} else if (RefreshOption.save.equals(refresh)) {
 							bean = pers.save(bean);
 						}
 						pers.commit(false);
 						
 						if (EvictOption.bean.equals(evict)) {
 							pers.evictCached(bean);
-						}
-						else if (EvictOption.all.equals(evict)) {
+						} else if (EvictOption.all.equals(evict)) {
 							pers.evictAllCached();
 						}
 						pers.begin();
 					}
-					catch (@SuppressWarnings("unused") Exception e) {
+					catch (Exception e) {
 						log.add(String.format("%s - %s failed for id: %s",
 												sb.toString(),
 												dm.getRefreshOption().toDescription(),
@@ -114,6 +112,6 @@ public class RefreshDocumentTuplesJob extends Job {
 
 		setPercentComplete(100);
 		log.add("Finished Document Data Refresh Job at " + new Date());
-		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Tag action Job completed."));
+		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info, "Refresh Documents job completed."));
 	}
 }

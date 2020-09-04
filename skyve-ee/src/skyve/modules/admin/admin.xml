@@ -29,9 +29,7 @@
 		<document ref="ControlPanel" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
-		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
-		<document ref="DocumentName"/>
 		<document ref="DocumentNumber" defaultQueryName="qDocumentNumbers"/>
 		<document ref="DownloadFolder" />
 		<document ref="Generic" />
@@ -42,6 +40,7 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="ModuleDocument" />
 		<document ref="ReportDesign" />
 		<document ref="SelfRegistration" />		
 		<document ref="SelfRegistrationActivation" />
@@ -237,12 +236,10 @@
 					<action name="Sync" />
 					<action name="UploadBackup" />
 				</document>
-				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
 				<document name="DocumentCreator" permission="_____">
 					<action name="Submit" />
 					<action name="UpdatePreview" />
 				</document>
-				<document name="DocumentName" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="RunExport"/>
@@ -252,6 +249,7 @@
 					<action name="GetImportTemplate"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
+				<document name="ModuleDocument" permission="_RU_C"/>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
 					<action name="Preview" />

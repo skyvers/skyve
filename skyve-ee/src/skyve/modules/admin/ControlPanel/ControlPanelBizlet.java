@@ -25,7 +25,7 @@ import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
-import modules.admin.domain.DocumentName;
+import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
@@ -100,7 +100,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 						
 						// check this is not already selected
 						boolean alreadySelected = false;
-						for(DocumentName n: bean.getTestDocumentNames()) {
+						for (ModuleDocument n : bean.getTestDocumentNames()) {
 							if(documentName.equals(n.getDocumentName())){
 								alreadySelected = true;
 								break;
