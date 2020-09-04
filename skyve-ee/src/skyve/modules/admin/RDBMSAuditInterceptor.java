@@ -1,9 +1,5 @@
 package modules.admin;
 
-import modules.admin.domain.Audit;
-import modules.admin.domain.Audit.Operation;
-import modules.admin.domain.UserLoginRecord;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +17,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+
+import modules.admin.domain.Audit;
+import modules.admin.domain.Audit.Operation;
+import modules.admin.domain.UserLoginRecord;
 
 public class RDBMSAuditInterceptor extends Interceptor {
 	private static final long serialVersionUID = 8133933539853560711L;
@@ -128,8 +128,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		}
 	}
 	
-	private static void audit(PersistentBean bean, Operation operation, boolean originalInsert) 
-	throws Exception {
+	private static void audit(PersistentBean bean, Operation operation, boolean originalInsert) throws Exception {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
@@ -166,8 +165,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		}
 	}
 	
-	public static void audit(PersistentBean bean, Operation operation)
-	throws Exception {
+	public static void audit(PersistentBean bean, Operation operation) throws Exception {
 		ensureOriginalInsertAuditExists(bean);
 		audit(bean, operation, false);
 	}
@@ -180,7 +178,6 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		}
 		map.put(bizId, operation);
 	}
-	
 	
 	private static Operation getThreadLocalOperation(String bizId) {
 		Map<String, Operation> map = BIZ_ID_TO_OPERATION.get();

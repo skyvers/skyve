@@ -5,47 +5,6 @@ h2 {
 	text-align: center !important;
 }
 
-/* skyve alignment styles */
-.left {
-	text-align: left;
-}
-span.left {
-	display: block;
-}
-.center {
-	text-align: center;
-}
-span.left {
-	display: block;
-}
-.right {
-	text-align: right;
-}
-span.right {
-	display: block;
-}
-
-/* skyve form label alignment (left always on phone) */
-.leftFormLabel {
-	text-align: left;
-}
-@media (min-width: 641px) {
-	.rightFormLabel {
-		text-align: right;
-	}
-	.centerFormLabel {
-		text-align: center;
-	}
-}
-@media (max-width: 640px) {
-	.rightFormLabel {
-		text-align: left;
-	}
-	.centerFormLabel {
-		text-align: left;
-	}
-}
-
 /* data tables */
 .ui-datatable tbody td {
 	text-align: center;

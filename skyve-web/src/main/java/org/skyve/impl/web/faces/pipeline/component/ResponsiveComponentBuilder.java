@@ -8,6 +8,7 @@ import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
+import org.skyve.impl.util.UtilImpl;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
@@ -17,11 +18,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		}
 
 		HtmlPanelGroup result = panelGroup(false, false, true, invisibleConditionName, null);
-		result.setStyleClass("ui-g");
+		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
 		return result;
 	}
 
-	// Overridden to not set the toolbar style width to 100% since it's wrapped in a ui-g-12
+	// Overridden to not set the toolbar style width to 100% since it's wrapped in a ui-g-12 or p-col-12
 	// for the responsive renderer.
 	@Override
 	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
@@ -63,7 +64,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		setValueOrValueExpression(borderTitle, result::setHeader, "header", result);
 		setInvisible(result, invisibleConditionName, null);
 		setId(result, null);
-		result.setStyleClass("ui-g-12");
+		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
 		return result;
 	}
 

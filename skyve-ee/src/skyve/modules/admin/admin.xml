@@ -418,21 +418,10 @@
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
-		<!-- <edit document="Startup" name="Startup">
-			<uxui name="startup" />
-			<role name="SecurityAdministrator" />
-		</edit> -->
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
-				<!-- <uxui name="desktop" /> -->
 				<role name="DevOps" />
 			</edit>
-			<!-- <edit document="ControlPanel" name="SAIL UI Testing">
-				<uxui name="external" />
-				<uxui name="tablet" />
-				<uxui name="phone" />
-				<role name="DevOps" />
-			</edit> -->
 			<edit document="DataMaintenance" name="Data Maintenance">
 				<role name="DevOps" />
 			</edit>

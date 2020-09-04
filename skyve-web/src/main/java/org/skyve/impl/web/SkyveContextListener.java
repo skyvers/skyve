@@ -468,6 +468,11 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			UtilImpl.BOOTSTRAP_PASSWORD = getString("bootstrap", "password", bootstrap, true);
 		}
+		
+		String primeFlex = UtilImpl.processStringValue(ctx.getInitParameter("org.skyve.web.faces.PRIMEFLEX"));
+		if (primeFlex != null) {
+			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
+		}
 	}
 	
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {

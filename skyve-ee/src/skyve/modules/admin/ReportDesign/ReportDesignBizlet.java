@@ -38,18 +38,18 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 
 	@Override
 	public ReportDesign newInstance(ReportDesign bean) throws Exception {
-		bean = super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));
+		ReportDesign rd = super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));
 
 		// populate the output directory from the JSON if provided
 		if (Util.getModuleDirectory() != null) {
-			bean.setRepositoryPath(Util.getModuleDirectory());
+			rd.setRepositoryPath(Util.getModuleDirectory());
 		}
 
-		return bean;
+		return rd;
 	}
 
 	/**
-	 * copy fields from conceptual specification to this report design
+	 * Copy fields from conceptual specification to this report design
 	 * 
 	 * @param spec
 	 * @return
@@ -351,6 +351,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		super.preRerender(source, bean, webContext);
 	}
 
+	@SuppressWarnings("boxing")
 	public static ReportDesign resetDesign(ReportDesign design) throws Exception {
 		ReportDesign result = design;
 		if (Orientation.portrait.equals(result.getOrientation())) {

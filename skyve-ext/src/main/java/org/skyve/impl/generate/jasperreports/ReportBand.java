@@ -66,7 +66,7 @@ public class ReportBand {
 		this.type = type;
 	}
 	public Integer getHeight() {
-		int maxHeight = this.getParent().getDefaultElementHeight();
+		int maxHeight = this.getParent().getDefaultElementHeight().intValue();
 		for (ReportElement e : this.getElements()) {
 			if (e.getElementTop() != null && e.getElementHeight() != null) {
 				if ((e.getElementTop().intValue() + e.getElementHeight().intValue()) > maxHeight) {
@@ -77,7 +77,7 @@ public class ReportBand {
 
 		//handle max
 		if(height==null || height.intValue()<maxHeight){
-			return maxHeight;
+			return Integer.valueOf(maxHeight);
 		}
 		
 		return height;
@@ -169,32 +169,29 @@ public class ReportBand {
 
 	/**
 	 * Spread elements evenly
-	 * 
 	 */
 	public void spreadElements() {
-
 		if (this.getElements().isEmpty()) {
-
+			return;
 		} else if (this.getParent().getWidth() != null) {
-			int width = this.getParent().getWidth() / this.getElements().size();
+			int width = this.getParent().getWidth().intValue() / this.getElements().size();
 			int left = 0;
 			for (ReportElement e : this.getElements()) {
-				e.setElementLeft(left);
+				e.setElementLeft(Integer.valueOf(left));
 				if (this.getElements().indexOf(e) == 0) {
 					// first
-					width = e.getElementHeight() * 5;
+					width = e.getElementHeight().intValue() * 5;
 				} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
 					// last
 					width = this.getParent().getColumnWidth().intValue() - left;
 				} else {
 					// other
-					width = e.getElementHeight() * 5;
+					width = e.getElementHeight().intValue() * 5;
 				}
-				e.setElementWidth(width);
+				e.setElementWidth(Integer.valueOf(width));
 				left = left + width;
 			}
 		}
-
 	}
 
 	/**

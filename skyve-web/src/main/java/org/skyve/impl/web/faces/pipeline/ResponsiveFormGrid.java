@@ -2,6 +2,8 @@ package org.skyve.impl.web.faces.pipeline;
 
 import java.io.Serializable;
 
+import org.skyve.impl.util.UtilImpl;
+
 /**
  * Encapsulates the calculated responsive column style calcs
  * that enable the layout of skyve <form/> edit view definitions 
@@ -43,7 +45,7 @@ public class ResponsiveFormGrid implements Serializable {
 		 */
 		@Override
 		public String toString() {
-			return String.format("ui-g-12 ui-md-%s ui-lg-%s", 
+			return String.format(UtilImpl.PRIMEFLEX ? "p-col-12 p-md-%s p-lg-%s" : "ui-g-12 ui-md-%s ui-lg-%s", 
 									Integer.toString(mediumCols), 
 									Integer.toString(largeCols));
 		}
