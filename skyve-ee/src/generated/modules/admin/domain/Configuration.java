@@ -83,62 +83,62 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String startupPropertyName = "startup";
 
 	/**
-	 * Minimum Password Length
+	 * admin.configuration.passwordMinLength.displayName
 	 * <br/>
-	 * The minimum number of characters for new passwords
+	 * admin.configuration.passwordMinLength.description
 	 **/
 	private Integer passwordMinLength = new Integer(10);
 	/**
-	 * Requires Lowercase
+	 * admin.configuration.passwordRequireLowercase.displayName
 	 * <br/>
-	 * If new passwords should require at least one lowercase character
+	 * admin.configuration.passwordRequireLowercase.description
 	 **/
 	private Boolean passwordRequireLowercase;
 	/**
-	 * Requires Uppercase
+	 * admin.configuration.passwordRequireUppercase.displayName
 	 * <br/>
-	 * If new passwords should require at least one uppercase character
+	 * admin.configuration.passwordRequireUppercase.description
 	 **/
 	private Boolean passwordRequireUppercase;
 	/**
-	 * Requires Numeric Characters
+	 * admin.configuration.passwordRequireNumeric.displayName
 	 * <br/>
-	 * If new passwords should require at least one numeric character
+	 * admin.configuration.passwordRequireNumeric.description
 	 **/
 	private Boolean passwordRequireNumeric;
 	/**
-	 * Requires Special Characters
+	 * admin.configuration.passwordRequireSpecial.displayName
 	 * <br/>
-	 * If new passwords should require at least one special character
+	 * admin.configuration.passwordRequireSpecial.description
 	 **/
 	private Boolean passwordRequireSpecial;
 	/**
-	 * Password Rule Description
+	 * admin.configuration.passwordRuleDescription
 	 * <br/>
 	 * A text description which can be shown to the user if their password does not comply
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
 	 **/
 	private String passwordRuleDescription;
 	/**
-	 * Sender/From Email Address
+	 * admin.configuration.fromEmail.displayName
 	 * <br/>
-	 * Email Address that all email's that the system sends will be sent from.
+	 * admin.configuration.fromEmail.description
 	 **/
 	private String fromEmail;
 	/**
-	 * Password Reset Email Subject
+	 * admin.configuration.passwordResetEmailSubject.displayName
 	 * <br/>
-	 * The subject of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
+	 * admin.configuration.passwordResetEmailSubject.description
 	 **/
 	private String passwordResetEmailSubject;
 	/**
-	 * Password Reset Email Body
+	 * admin.configuration.passwordResetEmailBody.displayName
 	 * <br/>
-	 * The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
+	 * admin.configuration.passwordResetEmailBody.description
 	 **/
 	private String passwordResetEmailBody;
 	/**
-	 * User Self Registration Group
+	 * admin.configuration.userSelfResgistrationGroup.displayName
 	 * <br/>
 	 * The user group which specifies role-access for self-registering users.
 			<br/>
@@ -146,77 +146,77 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	private GroupExtension userSelfRegistrationGroup = null;
 	/**
-	 * Allow User Self Registration
+	 * admin.configuration.allowUserSelfRegistration.displayName
 	 * <br/>
-	 * Master switch to allow or disallow self registration.
+	 * admin.configuration.allowUserSelfRegistration.description
 	 **/
 	private Boolean allowUserSelfRegistration;
 	/**
-	 * Number of hours to Keep self-registration activation codes enabled
+	 * admin.configuration.selfRegistrationActivationExpiryHours.displayName
 	 * <br/>
-	 * Clear this setting to have codes that never expire.
+	 * admin.configuration.selfRegistrationActivationExpiryHours.description
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
 	/**
-	 * Anonymous Public User
+	 * admin.configuration.association.publicUser.displayName
 	 * <br/>
-	 * The anonymous public user asserted on all public pages.
+	 * admin.configuration.association.publicUser.description
 	 **/
 	private UserProxyExtension publicUser = null;
 	/**
-	 * Email From
+	 * admin.configuration.emailFrom.displayName
 	 **/
 	private String emailFrom;
 	/**
-	 * Email To
+	 * admin.configuration.emailTo.displayName
 	 **/
 	private String emailTo;
 	/**
-	 * Email Subject
+	 * admin.configuration.emailSubject.displayName
 	 **/
 	private String emailSubject;
 	/**
-	 * Email
+	 * admin.configuration.emailContent.displayName
 	 **/
 	private String emailContent;
 	/**
-	 * Password Expiry in Days
+	 * admin.configuration.passwordExpiryDays.displayName
 	 * <br/>
-	 * Number of days until a password change is required. Blank indicates no password aging.
+	 * admin.configuration.passwordExpiryDays.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordExpiryDays;
 	/**
-	 * Password History Retention
+	 * admin.configuration.passwordHistoryRetention.displayName
 	 * <br/>
-	 * Number of previous passwords to check for duplicates. Blank indicates no password history.
+	 * admin.configuration.passwordHistoryRetention.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordHistoryRetention;
 	/**
-	 * Account Lockout Threshold
+	 * admin.configuration.passwordAccountLockoutThreshold.displayName
 	 * <br/>
-	 * Number of sign in attempts until the user account is locked. Blank indicates no account lockout.
+	 * admin.configuration.passwordAccountLockoutThreshold.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutThreshold;
 	/**
-	 * Account Lockout Duration
+	 * admin.configuration.passwordAccountLockoutDuration.displayName
 	 * <br/>
-	 * Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.
+	 * admin.configuration.passwordAccoutnLockoutDuration.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutDuration;
 	/**
-	 * Email To Contact
+	 * admin.configuration.association.emailToContact.displayName
 	 **/
 	private Contact emailToContact = null;
 	/**
-	 * Startup
+	 * admin.configuration.association.startup.displayName
 	 **/
 	private StartupExtension startup = null;
 

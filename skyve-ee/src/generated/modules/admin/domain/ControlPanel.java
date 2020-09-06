@@ -25,7 +25,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @navhas n newProperty 0..1 Generic
  * @navhas n sailUser 0..1 UserProxy
  * @navhas n originalStartupProperties 0..n Generic
- * @navhas n testDocumentNames 0..n DocumentName
+ * @navhas n testDocumentNames 0..n ModuleDocument
  * @navhas n startupProperties 0..n Generic
  * @stereotype "transient"
  */
@@ -537,7 +537,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * Document Names
 	 **/
-	private List<DocumentName> testDocumentNames = new ChangeTrackingArrayList<>("testDocumentNames", this);
+	private List<ModuleDocument> testDocumentNames = new ChangeTrackingArrayList<>("testDocumentNames", this);
 
 	@Override
 	@XmlTransient
@@ -1315,7 +1315,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<DocumentName> getTestDocumentNames() {
+	public List<ModuleDocument> getTestDocumentNames() {
 		return testDocumentNames;
 	}
 
@@ -1324,7 +1324,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public DocumentName getTestDocumentNamesElementById(String bizId) {
+	public ModuleDocument getTestDocumentNamesElementById(String bizId) {
 		return getElementById(testDocumentNames, bizId);
 	}
 
@@ -1333,7 +1333,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setTestDocumentNamesElementById(String bizId, DocumentName element) {
+	public void setTestDocumentNamesElementById(String bizId, ModuleDocument element) {
 		setElementById(testDocumentNames, element);
 	}
 
@@ -1341,7 +1341,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #testDocumentNames} add.
 	 * @param element	The element to add.
 	 **/
-	public boolean addTestDocumentNamesElement(DocumentName element) {
+	public boolean addTestDocumentNamesElement(ModuleDocument element) {
 		return testDocumentNames.add(element);
 	}
 
@@ -1350,7 +1350,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * @param index	The index in the list to add the element to.
 	 * @param element	The element to add.
 	 **/
-	public void addTestDocumentNamesElement(int index, DocumentName element) {
+	public void addTestDocumentNamesElement(int index, ModuleDocument element) {
 		testDocumentNames.add(index, element);
 	}
 
@@ -1358,7 +1358,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #testDocumentNames} remove.
 	 * @param element	The element to remove.
 	 **/
-	public boolean removeTestDocumentNamesElement(DocumentName element) {
+	public boolean removeTestDocumentNamesElement(ModuleDocument element) {
 		return testDocumentNames.remove(element);
 	}
 
@@ -1366,7 +1366,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * {@link #testDocumentNames} remove.
 	 * @param index	The index in the list to remove the element from.
 	 **/
-	public DocumentName removeTestDocumentNamesElement(int index) {
+	public ModuleDocument removeTestDocumentNamesElement(int index) {
 		return testDocumentNames.remove(index);
 	}
 

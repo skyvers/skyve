@@ -18,7 +18,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.PushMessage;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.DocumentName;
+import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class GenerateTestDataJob extends CancellableJob {
@@ -38,7 +38,7 @@ public class GenerateTestDataJob extends CancellableJob {
 		int failed = 0;
 		int size = bean.getTestDocumentNames().size() * bean.getTestNumberToGenerate().intValue();
 		
-		for (DocumentName docName : bean.getTestDocumentNames()) {
+		for (ModuleDocument docName : bean.getTestDocumentNames()) {
 			for (int i = 0; i < bean.getTestNumberToGenerate().intValue(); i++) {
 				try {
 					Module module = customer.getModule(docName.getModuleName());

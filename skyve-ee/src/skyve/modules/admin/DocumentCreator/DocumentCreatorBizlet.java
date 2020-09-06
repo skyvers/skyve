@@ -11,24 +11,22 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
-import modules.admin.domain.DataMaintenanceModuleDocument;
 import modules.admin.domain.DocumentCreator;
+import modules.admin.domain.ModuleDocument;
 
 public class DocumentCreatorBizlet extends Bizlet<DocumentCreator> {
 
 	private static final long serialVersionUID = -7115312801389008421L;
 
 	@Override
-	public List<org.skyve.metadata.model.document.Bizlet.DomainValue> getVariantDomainValues(String attributeName)
-			throws Exception {
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (DocumentCreator.defaultModulePropertyName.equals(attributeName)) {
 			List<DomainValue> values = new ArrayList<>();
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
-				DataMaintenanceModuleDocument module = DataMaintenanceModuleDocument.newInstance();
+				ModuleDocument module = ModuleDocument.newInstance();
 				module.setModuleName(m.getName());
 				module.setDocumentName(null);
-				module.setModDocName(null);
 				DomainValue v = new DomainValue(m.getName());
 				values.add(v);
 			}

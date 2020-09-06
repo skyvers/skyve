@@ -18,7 +18,7 @@ import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
-import modules.admin.domain.DataMaintenanceModuleDocument;
+import modules.admin.domain.ModuleDocument;
 
 public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance> {
 	private static final long serialVersionUID = -2754093263194272489L;
@@ -36,7 +36,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			for (String k : m.getDocumentRefs().keySet()) {
 				Document d = m.getDocument(c, k);
 				if (d.getPersistent() != null) {
-					DataMaintenanceModuleDocument doc = DataMaintenanceModuleDocument.newInstance();
+					ModuleDocument doc = ModuleDocument.newInstance();
 					doc.setModuleName(m.getName());
 					doc.setDocumentName(d.getName());
 					doc.setModDocName(String.format("%s.%s", m.getTitle(), d.getSingularAlias()));

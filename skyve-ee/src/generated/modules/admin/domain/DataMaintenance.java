@@ -31,7 +31,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
  * @navhas n auditUser 0..1 UserProxy
- * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
+ * @navhas n refreshDocuments 0..n ModuleDocument
  * @stereotype "persistent"
  */
 @XmlType
@@ -527,7 +527,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * Refresh Documents
 	 **/
-	private List<DataMaintenanceModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
+	private List<ModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
 	/**
 	 * Notify me on completion
 	 **/
@@ -752,7 +752,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<DataMaintenanceModuleDocument> getRefreshDocuments() {
+	public List<ModuleDocument> getRefreshDocuments() {
 		return refreshDocuments;
 	}
 
@@ -761,7 +761,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public DataMaintenanceModuleDocument getRefreshDocumentsElementById(String bizId) {
+	public ModuleDocument getRefreshDocumentsElementById(String bizId) {
 		return getElementById(refreshDocuments, bizId);
 	}
 
@@ -770,7 +770,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRefreshDocumentsElementById(String bizId, DataMaintenanceModuleDocument element) {
+	public void setRefreshDocumentsElementById(String bizId, ModuleDocument element) {
 		setElementById(refreshDocuments, element);
 	}
 
@@ -778,7 +778,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #refreshDocuments} add.
 	 * @param element	The element to add.
 	 **/
-	public boolean addRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
+	public boolean addRefreshDocumentsElement(ModuleDocument element) {
 		return refreshDocuments.add(element);
 	}
 
@@ -787,7 +787,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @param index	The index in the list to add the element to.
 	 * @param element	The element to add.
 	 **/
-	public void addRefreshDocumentsElement(int index, DataMaintenanceModuleDocument element) {
+	public void addRefreshDocumentsElement(int index, ModuleDocument element) {
 		refreshDocuments.add(index, element);
 	}
 
@@ -795,7 +795,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #refreshDocuments} remove.
 	 * @param element	The element to remove.
 	 **/
-	public boolean removeRefreshDocumentsElement(DataMaintenanceModuleDocument element) {
+	public boolean removeRefreshDocumentsElement(ModuleDocument element) {
 		return refreshDocuments.remove(element);
 	}
 
@@ -803,7 +803,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #refreshDocuments} remove.
 	 * @param index	The index in the list to remove the element from.
 	 **/
-	public DataMaintenanceModuleDocument removeRefreshDocumentsElement(int index) {
+	public ModuleDocument removeRefreshDocumentsElement(int index) {
 		return refreshDocuments.remove(index);
 	}
 

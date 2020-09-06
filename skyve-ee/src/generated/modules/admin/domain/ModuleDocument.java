@@ -10,12 +10,16 @@ import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * Module Document
+ * <br/>
+ * Non-persistent document used to store a selection of a document belonging to a specific
+		module. This allows it to be used in a lookupDescription, e.g. Control Panel - Generate 
+		Test Data, or when refreshing documents as part of DataMaintenance.
  * 
  * @stereotype "transient"
  */
 @XmlType
 @XmlRootElement
-public class DataMaintenanceModuleDocument extends AbstractTransientBean {
+public class ModuleDocument extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -25,7 +29,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "DataMaintenanceModuleDocument";
+	public static final String DOCUMENT_NAME = "ModuleDocument";
 
 	/** @hidden */
 	public static final String includePropertyName = "include";
@@ -38,6 +42,8 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * Include
+	 * <br/>
+	 * Used to indicate if this document is to be included when refreshing as part of DataMaintenance.
 	 **/
 	private Boolean include;
 	/**
@@ -62,16 +68,16 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return DataMaintenanceModuleDocument.MODULE_NAME;
+		return ModuleDocument.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return DataMaintenanceModuleDocument.DOCUMENT_NAME;
+		return ModuleDocument.DOCUMENT_NAME;
 	}
 
-	public static DataMaintenanceModuleDocument newInstance() {
+	public static ModuleDocument newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -92,8 +98,8 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof DataMaintenanceModuleDocument) && 
-					this.getBizId().equals(((DataMaintenanceModuleDocument) o).getBizId()));
+		return ((o instanceof ModuleDocument) && 
+					this.getBizId().equals(((ModuleDocument) o).getBizId()));
 	}
 
 	/**

@@ -30,13 +30,11 @@
 			<length>1024</length>
 		</text>
 		
-		
-		
 		<!-- Data Refresh -->
 		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
 			<displayName>Refresh Documents</displayName>
 			<domain>constant</domain>
-			<documentName>DataMaintenanceModuleDocument</documentName>
+			<documentName>ModuleDocument</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
 		<boolean name="notification">
