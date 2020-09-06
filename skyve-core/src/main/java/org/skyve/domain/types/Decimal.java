@@ -132,6 +132,11 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 		}
 	}
 	
+	public boolean approximately(Decimal otherValue, double tolerance) {
+		Decimal difference = this.subtract(otherValue).abs();
+		return difference.lessThan(Decimal10.MAX_DOUBLE_VALUE) && (difference.doubleValue() <= tolerance);
+	}
+	
 	/**
 	 * 
 	 */

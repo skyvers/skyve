@@ -33,6 +33,11 @@ public class Decimal10 extends Decimal {
 	 */
 	public static final Decimal10 ONE_HUNDRED = new Decimal10(100);
 
+	public static final Decimal10 MIN_FLOAT_VALUE = new Decimal10(Float.MIN_VALUE);
+	public static final Decimal10 MAX_FLOAT_VALUE = new Decimal10(Float.MAX_VALUE);
+	public static final Decimal10 MIN_DOUBLE_VALUE = new Decimal10(Double.MIN_VALUE);
+	public static final Decimal10 MAX_DOUBLE_VALUE = new Decimal10(Double.MAX_VALUE);
+	
 	/**
 	 * 
 	 * @param value
