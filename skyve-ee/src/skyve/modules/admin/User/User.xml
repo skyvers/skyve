@@ -202,19 +202,19 @@
 			By default the account will be activated.
 			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
 			]]></documentation>
-			<displayName>Account activated</displayName>
-			<description>Whether this account has been activated or not. An account not activated means the user has not finished the activation process by clicking the link from their registration email.</description>
+			<displayName>admin.user.activated.displayName</displayName>
+			<description>admin.user.activated.description</description>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<text name="activationCode">
 			<documentation>This contains a code which when submitted by the user will activate their account.</documentation>
-			<displayName>Activation Code</displayName>
-			<description>The activation code for this user account.</description>
+			<displayName>admin.user.activationCode.displayName</displayName>
+			<description>admin.user.activationCode.description</description>
 			<length>36</length>
 		</text>
 		<dateTime name="activationCodeCreationDateTime">
-			<displayName>The date and time the activation code was created</displayName>
-			<description>This setting is used to control expiry of activation codes.</description>
+			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
+			<description>admin.user.activationCodeCreationDateTime.description</description>
 		</dateTime>
 		
 	</attributes>
