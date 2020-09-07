@@ -73,7 +73,7 @@
 				<column />
 				<row>
 					<item align="right">
-						<label value="Count:" />
+						<label value="admin.controlPanel.edit.count.label" />
 					</item>
 					<item>
 						<blurb>
