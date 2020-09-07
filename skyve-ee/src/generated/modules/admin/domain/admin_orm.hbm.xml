@@ -124,7 +124,6 @@
 		<property name="passwordResetEmailSubject" length="250" />
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
-		<property name="allowUserSelfRegistration" />
 		<property name="selfRegistrationActivationExpiryHours" />
 		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>

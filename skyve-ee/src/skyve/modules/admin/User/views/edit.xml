@@ -34,6 +34,11 @@
 						<combo binding="homeModule" />
 					</item>
 				</row>
+				<row>
+					<item>
+						<checkBox binding="activated" triState="false" enabled="canActivateUser" visible="selfRegistrationEnabled"/>
+					</item>
+				</row>
 			</form>
 		</tab>
 

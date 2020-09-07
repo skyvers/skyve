@@ -427,6 +427,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (number != null) {
 			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = number.intValue();
 		}
+		UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getBoolean("account", "allowUserSelfRegistration", account);
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);

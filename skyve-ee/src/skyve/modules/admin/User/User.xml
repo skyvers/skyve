@@ -290,6 +290,18 @@
 				<![CDATA[GroupSelection.newGroup.equals(groupSelection)]]>
 			</expression>
 		</condition>
+		<condition name="selfRegistrationEnabled" usage="view">
+			<description>True when User Self-Registration is enabled.</description>
+			<expression>
+				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION]]>
+			</expression>
+		</condition>
+		<condition name="canActivateUser" usage="view">
+			<description>Allows administrators to manually activate users when User Self-Registration is enabled.</description>
+			<expression>
+				<![CDATA[isSecurityAdministrator() && isSelfRegistrationEnabled()]]>
+			</expression>
+		</condition>
 	</conditions>
 	<uniqueConstraints>
 		<constraint name="UniqueUserName" scope="customer">

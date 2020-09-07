@@ -1255,6 +1255,25 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * Allows administrators to manually activate users when User Self-Registration is enabled.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanActivateUser() {
+		return (isSecurityAdministrator() && isSelfRegistrationEnabled());
+	}
+
+	/**
+	 * {@link #isCanActivateUser} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanActivateUser() {
+		return (! isCanActivateUser());
+	}
+
+	/**
 	 * Candidate Contacts is empty
 	 *
 	 * @return The condition
@@ -1425,6 +1444,25 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	public boolean isNotSecurityAdministrator() {
 		return (! isSecurityAdministrator());
+	}
+
+	/**
+	 * True when User Self-Registration is enabled.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelfRegistrationEnabled() {
+		return (org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION);
+	}
+
+	/**
+	 * {@link #isSelfRegistrationEnabled} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelfRegistrationEnabled() {
+		return (! isSelfRegistrationEnabled());
 	}
 
 	/**

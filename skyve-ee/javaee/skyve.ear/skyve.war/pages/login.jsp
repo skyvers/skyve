@@ -44,6 +44,9 @@
 	String userFieldName = "user";
 
 	boolean mobile = UserAgent.getType(request).isMobile();
+	
+	// is self-registration enabled
+	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -227,11 +230,11 @@
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
-		        <!-- uncomment to enable self-registration 
+		        <% if(allowRegistration && customer != null) { %>
 				<div class="ui message">
-					Don't have an account? <a href="?a=e&m=admin&d=SelfRegistration">Register now</a>
+					<%=Util.i18n("page.login.register.label.pre", locale)%> <a href="?a=e&m=admin&d=SelfRegistration"><%=Util.i18n("page.login.register.label.post", locale)%></a>
 			    </div>	        
-			    -->
+			    <% } %>
 		    </div>
 		</div>
 	</body>

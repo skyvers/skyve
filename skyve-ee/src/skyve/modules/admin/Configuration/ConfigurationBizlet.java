@@ -83,10 +83,6 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0 ? String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) : "");
 
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			if (bean.getUserSelfRegistrationGroup() == null) {
-				bean.setAllowUserSelfRegistration(Boolean.FALSE);
-			}
-			
 			bean.getStartup().saveConfiguration();
 		}
 

@@ -19,7 +19,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Jobs.JobsBizlet;
@@ -66,14 +65,12 @@ public class TagBizlet extends Bizlet<Tag> {
 				&& bean.getUploadModuleName() != null && bean.getUploadDocumentName() != null) {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			Document document = module.getDocument(customer, bean.getUploadDocumentName());
-			Util.LOGGER.info("UPLOAD DOCUMENT IS " + bean.getUploadDocumentName());
 			for (Attribute attribute : document.getAllAttributes()) {
 				result.add(new DomainValue(attribute.getName(), attribute.getDisplayName()));
 			}
 		}
 
 		if (Tag.operandTagPropertyName.equals(attributeName)) {
-
 			// look for OTHER tags
 			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, bean.getBizId());
