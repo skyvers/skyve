@@ -18,4 +18,13 @@ public class Decimal10Test {
 		Assert.assertEquals(Decimal10.ONE_HUNDRED, Decimal10.ONE.max(Decimal10.ONE_HUNDRED));
 		Assert.assertEquals(Decimal10.ONE_HUNDRED, Decimal10.ONE_HUNDRED.max(Decimal10.ONE));
 	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testApproximately() {
+		Assert.assertTrue(Decimal10.ONE.approximately(Decimal10.ONE, 0.0));
+		Assert.assertTrue(Decimal10.ONE.approximately(Decimal10.ONE, 0.1));
+		Assert.assertFalse(Decimal10.ONE_HUNDRED.approximately(Decimal10.ONE, 0.1));
+		Assert.assertFalse(new Decimal10(Double.MAX_VALUE).add(Decimal10.ONE_HUNDRED).approximately(Decimal10.ONE, 1.0));
+	}
 }
