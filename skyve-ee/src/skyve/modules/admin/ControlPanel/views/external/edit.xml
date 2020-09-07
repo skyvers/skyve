@@ -46,7 +46,7 @@
 	</tabPane>
 	
 	<actions>
-		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downlaodClientSail.toolTip" />
+		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false"/>
 	</actions>
