@@ -5,10 +5,10 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
-		<tab title="Design">
+		<tab title="admin.controlPanel.edit.design.tabTitle">
 			<component name="_generateTestData" />
 		</tab>
-		<tab title="SAIL">
+		<tab title="admin.controlPanel.edit.sail.tabTitle">
 			<form border="true">
 				<column responsiveWidth="3" />
 				<column />
@@ -46,8 +46,8 @@
 	</tabPane>
 	
 	<actions>
-		<download className="DownloadClientSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
-		<action className="GenerateTestData" displayName="Generate Test Data" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
-		<action className="DeleteTestData" displayName="Delete Test Data" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false"/>
+		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downlaodClientSail.toolTip" />
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false"/>
 	</actions>
 </view>
