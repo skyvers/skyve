@@ -138,7 +138,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	private String passwordResetEmailBody;
 	/**
-	 * admin.configuration.userSelfResgistrationGroup.displayName
+	 * admin.configuration.association.userSelfRegistrationGroup.displayName
 	 * <br/>
 	 * The user group which specifies role-access for self-registering users.
 			<br/>
