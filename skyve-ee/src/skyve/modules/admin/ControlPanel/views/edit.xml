@@ -375,6 +375,6 @@
 		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey" 
 			iconStyleClass="fa fa-plus"/>
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
-		<action className="DeleteTestData" displayName="Delete Test Data" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
 	</actions>
 </view>
