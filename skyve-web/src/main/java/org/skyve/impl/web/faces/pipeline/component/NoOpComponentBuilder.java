@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 
@@ -260,7 +261,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		return component;
 	}
 
@@ -273,7 +275,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid) {
+										boolean showGrid,
+										Locale locale) {
 		return component;
 	}
 

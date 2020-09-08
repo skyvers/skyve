@@ -1039,7 +1039,8 @@ public class FacesViewRenderer extends ViewRenderer {
 										title,
 										grid,
 										user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
-										aggregateQuery);
+										aggregateQuery,
+										locale);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 
@@ -1070,7 +1071,8 @@ public class FacesViewRenderer extends ViewRenderer {
 											repeater.getParameters(),
 											title,
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
-											Boolean.TRUE.equals(repeater.getShowGrid()));
+											Boolean.TRUE.equals(repeater.getShowGrid()),
+											locale);
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 	}
 
