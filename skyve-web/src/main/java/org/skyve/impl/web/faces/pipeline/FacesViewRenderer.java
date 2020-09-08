@@ -2098,7 +2098,7 @@ public class FacesViewRenderer extends ViewRenderer {
 																dataWidgetVar,
 																action,
 																null,
-																action.getDisplayName()));
+																label));
 				}
 			}
 		}
