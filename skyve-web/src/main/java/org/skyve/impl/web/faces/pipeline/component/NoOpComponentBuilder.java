@@ -278,7 +278,10 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component,
+												String candidatesHeading,
+												String membersHeading,
+												ListMembership membership) {
 		return component;
 	}
 

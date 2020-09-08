@@ -1798,7 +1798,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component,
+												String candidatesHeading,
+												String membersHeading,
+												ListMembership membership) {
 		if (component != null) {
 			return component;
 		}
@@ -1822,14 +1825,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.description}", String.class));
         
         Map<String, UIComponent> facets = result.getFacets();
-		String heading = membership.getCandidatesHeading();
 		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		text.setValue((heading == null) ? "Candidates" : heading);
+		text.setValue((candidatesHeading == null) ? "Candidates" : candidatesHeading);
 		setId(text, null);
 		facets.put("sourceCaption", text);
-		heading = membership.getMembersHeading();
 		text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		text.setValue((heading == null) ? "Members" : heading);
+		text.setValue((membersHeading == null) ? "Members" : membersHeading);
 		setId(text, null);
 		facets.put("targetCaption", text);
 		return new EventSourceComponent(result, result);

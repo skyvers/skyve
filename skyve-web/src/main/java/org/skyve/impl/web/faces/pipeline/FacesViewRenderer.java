@@ -1473,7 +1473,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		EventSourceComponent c = cb.listMembership(null, membership);
+		EventSourceComponent c = cb.listMembership(null, candidatesHeading, membersHeading, membership);
 		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
 		addToContainer(c.getComponent(), pixelWidth, null, null, membership.getInvisibleConditionName());

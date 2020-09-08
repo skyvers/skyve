@@ -517,10 +517,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component,
+												String candidatesHeading,
+												String membersHeading,
+												ListMembership membership) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.listMembership(result, membership);
+			result = builder.listMembership(result, candidatesHeading, membersHeading, membership);
 		}
 		return result;
 	}

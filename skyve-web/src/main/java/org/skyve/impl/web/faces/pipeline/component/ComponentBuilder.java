@@ -265,7 +265,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 
 	public abstract UIComponent chart(UIComponent component, Chart chart);
 
-	public abstract EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership);
+	public abstract EventSourceComponent listMembership(EventSourceComponent component,
+															String candidatesHeading,
+															String membersHeading,
+															ListMembership membership);
 	
 	public abstract EventSourceComponent checkBox(EventSourceComponent component, 
 													String dataWidgetVar, 
