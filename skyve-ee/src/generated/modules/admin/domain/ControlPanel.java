@@ -119,7 +119,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public static final String testDocumentNamesPropertyName = "testDocumentNames";
 
 	/**
-	 * User Agent Type
+	 * admin.controlPanel.sailUserAgentType.displayName
 	 **/
 	@XmlEnum
 	public static enum SailUserAgentType implements Enumeration {
@@ -198,9 +198,9 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * Test Strategy
+	 * admin.controlPanel.sailTestStrategy.displayName
 	 * <br/>
-	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
+	 * admin.controlPanel.sailTestStrategy.description
 	 **/
 	@XmlEnum
 	public static enum SailTestStrategy implements Enumeration {
@@ -278,7 +278,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * Executor
+	 * admin.controlPanel.sailExecutor.displayName
 	 **/
 	@XmlEnum
 	public static enum SailExecutor implements Enumeration {
@@ -355,187 +355,186 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * XML
+	 * admin.controlPanel.xmlTrace.displayName
 	 * <br/>
-	 * Log XML metadata parse operations
+	 * admin.controlPanel.xmlTrace.description
 	 **/
 	private Boolean xmlTrace;
 	/**
-	 * HTTP
+	 * admin.controlPanel.httpTrace.displayName
 	 * <br/>
-	 * Log request information including headers, parameters, cache state and timings.
+	 * admin.controlPanel.httpTrace.description
 	 **/
 	private Boolean httpTrace;
 	/**
-	 * Query
+	 * admin.controlPanel.queryTrace.displayName
 	 * <br/>
-	 * Log BizQL, Document Queries, Metadata Queries generated and executed during processing.
+	 * admin.controlPanel.queryTrace.description
 	 **/
 	private Boolean queryTrace;
 	/**
-	 * Command
+	 * admin.controlPanel.commandTrace.displayName
 	 * <br/>
-	 * Log command information such as filter criteria and paging row counts.
+	 * admin.controlPanel.commandTrace.description
 	 **/
 	private Boolean commandTrace;
 	/**
-	 * Faces
+	 * admin.controlPanel.facesTrace.displayName
 	 * <br/>
-	 * Log the faces phases and the xhtml generated.
+	 * admin.controlPanel.facesTrace.description
 	 **/
 	private Boolean facesTrace;
 	/**
-	 * Content
+	 * admin.controlPanel.contentTrace.displayName
 	 * <br/>
-	 * Log information on content fetched and stored.
+	 * admin.controlPanel.contentTrace.description
 	 **/
 	private Boolean contentTrace;
 	/**
-	 * Security
+	 * admin.controlPanel.securityTrace.displayName
 	 * <br/>
-	 * Log information on security denials.
+	 * admin.controlPanel.securityTrace.description
 	 **/
 	private Boolean securityTrace;
 	/**
-	 * Bizlet
+	 * admin.controlPanel.bizletTrace.displayName
 	 * <br/>
-	 * Log every bizlet callback made (verbose).
+	 * admin.controlPanel.bizletTrace.description
 	 **/
 	private Boolean bizletTrace;
 	/**
-	 * Dirty
+	 * admin.controlPanel.dirtyTrace.displayName
 	 * <br/>
-	 * Log the dirty state of domain objects (verbose).
+	 * admin.controlPanel.dirtyTrace.description
 	 **/
 	private Boolean dirtyTrace;
 	/**
-	 * Module.Document Name
+	 * admin.controlPanel.designModuleDocumentName.displayName
 	 **/
 	private String designModuleDocumentName;
 	/**
-	 * BizQL
+	 * admin.controlPanel.query.displayName
 	 **/
 	private String query;
 	/**
-	 * Customer Name To Swap To
+	 * admin.controlPanel.customerNameToSwapTo.displayName
 	 **/
 	private String customerNameToSwapTo;
 	/**
-	 * User
+	 * admin.controlPanel.association.sailUser.displayName
 	 **/
 	private UserProxyExtension sailUser = null;
 	/**
-	 * Module Name
+	 * admin.controlPanel.sailModuleName.displayName
 	 **/
 	private String sailModuleName;
 	/**
-	 * UX/UI
+	 * admin.controlPanel.sailUxUi.displayName
 	 **/
 	private String sailUxUi;
 	/**
-	 * User Agent Type
+	 * admin.controlPanel.sailUserAgentType.displayName
 	 **/
 	private SailUserAgentType sailUserAgentType;
 	/**
-	 * Test Strategy
+	 * admin.controlPanel.sailTestStrategy.displayName
 	 * <br/>
-	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
+	 * admin.controlPanel.sailTestStrategy.description
 	 **/
 	private SailTestStrategy sailTestStrategy = SailTestStrategy.Assert;
 	/**
-	 * Executor
+	 * admin.controlPanel.sailExecutor.displayName
 	 **/
 	private SailExecutor sailExecutor;
 	/**
-	 * Component Builder
+	 * admin.controlPanel.sailComponentBuilder.displayName
 	 **/
 	private String sailComponentBuilder = "org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain";
 	/**
-	 * Layout Builder
+	 * admin.controlPanel.sailLayoutBuilder.displayName
 	 **/
 	private String sailLayoutBuilder = "org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder";
 	/**
-	 * SAIL
+	 * admin.controlPanel.sail.displayName
 	 **/
 	private String sail;
 	/**
-	 * Login Customer
+	 * admin.controlPanel.sailLoginCustomer.displayName
 	 **/
 	private String sailLoginCustomer;
 	/**
-	 * Login Password
+	 * admin.controlPanel.sailLoginPassword.displayName
 	 **/
 	private String sailLoginPassword;
 	/**
-	 * Base URL
+	 * admin.controlPanel.sailBaseUrl.displayName
 	 **/
 	private String sailBaseUrl;
 	/**
-	 * Results
+	 * admin.controlPanel.results.displayName
 	 **/
 	private String results;
 	/**
-	 * TabIndex
+	 * admin.controlPanel.tabIndex.displayName
 	 * <br/>
 	 * The index of the tab in the edit view.
 			 	This is set to the results tab when there is results to display.
 	 **/
 	private Integer tabIndex;
 	/**
-	 * Startup
+	 * admin.controlPanel.collection.startupProperties.displayName
 	 * <br/>
-	 * Startup Configuration
+	 * admin.controlPanel.collection.startupProperties.description
 	 **/
 	private List<Generic> startupProperties = new ChangeTrackingArrayList<>("startupProperties", this);
 	/**
-	 * Original Startup values
+	 * admin.controlPanel.collection.originalStartupProperties.displayName
 	 * <br/>
-	 * Startup Configuration
+	 * admin.controlPanel.collection.originalStartupProperties.description
 	 **/
 	private List<Generic> originalStartupProperties = new ChangeTrackingArrayList<>("originalStartupProperties", this);
 	/**
-	 * New Property
+	 * admin.controlPanel.association.newProperty.displayName
 	 **/
 	private Generic newProperty = null;
 	/**
-	 * Add Key Not Supported
+	 * admin.controlPanel.addKeyNotSupported.displayName
 	 * <br/>
-	 * Flag to control whether adding an API key will be supported.
-			API stanzas with substanzas is not yet implemented.
+	 * admin.controlPanel.addkeyNotSupported.description
 	 **/
 	private Boolean addKeyNotSupported;
 	/**
-	 * Cache
+	 * admin.controlPanel.selectedCache.displayName
 	 **/
 	private String selectedCache;
 	/**
-	 * Session Count
+	 * admin.controlPanel.sessionCount.displayName
 	 **/
 	private Integer sessionCount;
 	/**
-	 * Number To Generate
+	 * admin.controlPanel.testNumberToGenerate.displayName
 	 * <br/>
-	 * The number of documents to create
+	 * admin.controlPanel.testnumberToGenerate.description
 	 **/
 	private Integer testNumberToGenerate = new Integer(1);
 	/**
-	 * Module Name
+	 * admin.controlPanel.testModuleName.displayName
 	 * <br/>
-	 * The target module
+	 * admin.controlPanel.testModuleName.description
 	 **/
 	private String testModuleName;
 	/**
-	 * Tag Name
+	 * admin.controlPanel.testTagName.displayName
 	 * <br/>
-	 * The name of the tag to be used
+	 * admin.controlPanel.testTagName.description
 	 **/
 	private String testTagName;
 	/**
-	 * Tag Generated Data?
+	 * admin.controlPanel.testTagGeneratedData.displayName
 	 **/
 	private Boolean testTagGeneratedData = new Boolean(false);
 	/**
-	 * Document Names
+	 * admin.controlPanel.testDocumentNames.displayName
 	 **/
 	private List<ModuleDocument> testDocumentNames = new ChangeTrackingArrayList<>("testDocumentNames", this);
 

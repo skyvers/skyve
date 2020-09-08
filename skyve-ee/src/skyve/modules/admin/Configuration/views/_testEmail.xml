@@ -12,7 +12,7 @@
 			<item>
 				<textField binding="emailTo" />
 			</item>
-			<item label="OR Contact Email">
+			<item label="admin.configuration.testEmail.emailToContact.label">
 				<lookupDescription binding="emailToContact" descriptionBinding="email1">
 					<filterParameter filterBinding="email1" operator="notNull" />
 				</lookupDescription>

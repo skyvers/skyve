@@ -57,17 +57,9 @@
 		</markup>
 		<association type="aggregation" name="userSelfRegistrationGroup">
 			<displayName>admin.configuration.association.userSelfRegistrationGroup.displayName</displayName>
-			<description><![CDATA[
-			The user group which specifies role-access for self-registering users.
-			<br/>
-			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
-			]]></description>
+			<description>admin.configuration.association.userSelfRegistrationGroup.description</description>
 			<documentName>Group</documentName>
 		</association>
-		<boolean name="allowUserSelfRegistration">
-			<displayName>admin.configuration.allowUserSelfRegistration.displayName</displayName>
-			<description>admin.configuration.allowUserSelfRegistration.description</description>
-		</boolean>
 		<integer name="selfRegistrationActivationExpiryHours">
 			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>

@@ -27,6 +27,7 @@ import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationBizlet;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 
@@ -59,7 +60,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					// Encode password
 					encodePassword(bean.getUser());
 
-					final GroupExtension selfRegistrationGroup = bean.getConfiguration().getUserSelfRegistrationGroup();
+					final GroupExtension selfRegistrationGroup = Configuration.newInstance().getUserSelfRegistrationGroup();
 					if (selfRegistrationGroup != null) {
 						bean.getUser().getGroups().add(selfRegistrationGroup);
 					} else {
@@ -118,7 +119,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	private static void sendRegistrationEmail(SelfRegistrationExtension bean) throws Exception {
 		try {
 			// Send the registration email if a generated password is set.
-			final ConfigurationExtension configuration = bean.getConfiguration();
+			final ConfigurationExtension configuration = Configuration.newInstance();
 
 			CORE.getPersistence().begin();
 			configuration.sendUserRegistrationEmail(bean);

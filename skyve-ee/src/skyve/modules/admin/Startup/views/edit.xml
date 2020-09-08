@@ -146,6 +146,33 @@
 	    </form>
     </vbox>
     
+    <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">
+	    <form responsiveWidth="12" widgetId="formAccount">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <checkBox binding="accountAllowUserSelfRegistration" triState="false"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					This requires email to be configured and additional setup in Configuration -> General. 
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
+    
     <vbox border="true" borderTitle="admin.startup.smsSettings.frameset.title">
 	    <form responsiveWidth="12" widgetId="formSMS">
 	        <column responsiveWidth="3"/>

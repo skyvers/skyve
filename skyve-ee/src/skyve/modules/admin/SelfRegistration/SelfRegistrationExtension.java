@@ -3,6 +3,7 @@ package modules.admin.SelfRegistration;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
@@ -19,24 +20,6 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	static final String PASSWORD_MISMATCH = "You did not type the same password.  Please re-enter the password again.";
 	static final String PASSWORD_REQUIRED = "Password is required.";
 
-	private ConfigurationExtension configuration;
-	
-	 /**
-	 * Get the configuration object on-demand.
-	 */
-	@Override
-	public ConfigurationExtension getConfiguration() {
-		try {
-			if (configuration == null) {
-				configuration = Configuration.newInstance();
-			}
-			
-			return configuration;
-		} catch (Exception e) {
-			throw new IllegalStateException("Failed to load configuration", e);
-		}
-	}
-	
 	@Override
 	public String getLoginUrl() {
 		return Util.getSkyveContextUrl() + "/login";
@@ -97,16 +80,8 @@ public class SelfRegistrationExtension extends SelfRegistration {
 		return String.format("If you are an existing user, please <a href=\"%s\">Log in</a>", getLoginUrl());
 	}
 
-	private Boolean selfRegistrationAllowed = null;
-	
 	@Override
 	public boolean isSelfRegistrationAllowed() {
-		if (selfRegistrationAllowed == null) {
-			selfRegistrationAllowed = getConfiguration().getAllowUserSelfRegistration();
-			if (selfRegistrationAllowed == null) {
-				selfRegistrationAllowed = Boolean.FALSE;
-			}
-		}
-		return selfRegistrationAllowed.booleanValue();
+		return UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
 	}
 }

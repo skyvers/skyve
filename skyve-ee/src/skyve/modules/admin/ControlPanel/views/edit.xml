@@ -2,9 +2,9 @@
 <view title="Control Panel" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
-		<tab title="Design">
+		<tab title="admin.controlPanel.edit.design.tabTitle">
 			<component name="_generateTestData" />
-			<form border="true" borderTitle="Generate">
+			<form border="true" borderTitle="admin.controlPanel.edit.design.generate.borderTitle">
 				<column pixelWidth="175" />
 				<column />
 				<column pixelWidth="140" />
@@ -21,7 +21,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Swap Customer">
+			<form border="true" borderTitle="admin.controlPanel.edit.design.swapCustomer.borderTitle">
 				<column pixelWidth="175" />
 				<column />
 				<column pixelWidth="140" />
@@ -34,7 +34,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Query">
+			<form border="true" borderTitle="admin.controlPanel.edit.design.query.borderTitle">
 				<column pixelWidth="50" />
 				<column />
 				<column pixelWidth="140" />
@@ -47,7 +47,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Caches">
+			<form border="true" borderTitle="admin.controlPanel.edit.design.caches.borderTitle">
 				<column pixelWidth="50" />
 				<column />
 				<column pixelWidth="140" />
@@ -68,12 +68,12 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Sessions">
+			<form border="true" borderTitle="admin.controlPanel.edit.design.sessions.borderTitle">
 				<column pixelWidth="50" />
 				<column />
 				<row>
 					<item align="right">
-						<label value="Count:" />
+						<label value="admin.controlPanel.edit.count.label" />
 					</item>
 					<item>
 						<blurb>
@@ -85,8 +85,8 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="SAIL">
-			<form border="true" borderTitle="User">
+		<tab title="admin.controlPanel.edit.sail.tabTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.user.borderTitle">
 				<column pixelWidth="120" />
 				<column />
 				<row>
@@ -110,7 +110,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Generate">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.generate.borderTitle">
 				<column pixelWidth="120" />
 				<column />
 				<column pixelWidth="130" />
@@ -142,7 +142,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Execute">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.execute.borderTitle">
 				<column pixelWidth="120" />
 				<column />
 				<column pixelWidth="130" />
@@ -175,7 +175,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Results">
+		<tab title="admin.controlPanel.edit.results.tabTitle">
 			<form>
 				<column />
 				<row>
@@ -191,8 +191,8 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Instrumentation">
-			<form border="true" borderTitle="Web">
+		<tab title="admin.controlPanel.edit.instrumentation.tabTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.web.borderTitle">
 				<column responsiveWidth="1" />
 				<column responsiveWidth="1" />
 				<column />
@@ -224,7 +224,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Data">
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.data.borderTitle">
 				<column responsiveWidth="1" />
 				<column responsiveWidth="1" />
 				<column responsiveWidth="1" />
@@ -267,7 +267,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Behaviour">
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.behaviour.borderTitle">
 				<column responsiveWidth="1" />
 				<column responsiveWidth="1" />
 				<column />
@@ -309,10 +309,10 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="User Remember-Me Tokens">
+		<tab title="admin.controlPanel.edit.userRememberMeTokens.tabTitle">
 			<listGrid query="qUserTokens" continueConversation="false" />
 		</tab>
-		<tab title="Startup Configuration" visible="false">
+		<tab title="admin.controlPanel.edit.startupConfiguration.tabTitle" visible="false">
 			<vbox>
 				<form>
 					<column />
@@ -323,21 +323,21 @@
 					</row>
 				</form>
 				<dataGrid binding="startupProperties" showRemove="false" inline="true" showZoom="false">
-					<boundColumn binding="text5001" title="Key" editable="false" />
-					<boundColumn binding="text5002" title="Value" />
-					<boundColumn binding="text5003" title="Description" editable="false" />
+					<boundColumn binding="text5001" title="admin.controlPanel.startupProperties.key.title" editable="false" />
+					<boundColumn binding="text5002" title="admin.controlPanel.startupProperties.value.title" />
+					<boundColumn binding="text5003" title="admin.controlPanel.startupProperties.description.title" editable="false" />
 				</dataGrid>
-				<form border="true" borderTitle="Add API Key" visible="allowAddAPIKey">
+				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" visible="allowAddAPIKey">
 					<column />
 					<column />
 					<column />
 					<column />
 					<column />
 					<row>
-						<item label="API Key Name">
+						<item label="admin.controlPanel.edit.apiKeyName.label">
 							<textField binding="newProperty.text5001" />
 						</item>
-						<item label="Key Value">
+						<item label="admin.controlPanel.edit.keyValue.label">
 							<textField binding="newProperty.text5002" />
 						</item>
 						<item>
@@ -345,7 +345,7 @@
 						</item>
 					</row>
 				</form>
-				<form border="true" borderTitle="Add API Key" invisible="allowAddAPIKey">
+				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" invisible="allowAddAPIKey">
 					<column />
 					<column />
 					<row>
@@ -358,23 +358,23 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="CacheStats" displayName="All Cache Stats" clientValidation="false" inActionPanel="false" />
-		<action className="EvictSelectedCache" displayName="Evict Cache" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
-		<action className="StopOrStartSelectedCache" displayName="Stop/Start Cache" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
-		<action className="EvictFromCache" displayName="Evict All Cached Metadata" />
-		<action className="SwapCustomer" displayName="Swap Customer" inActionPanel="false" />
-		<action className="GenerateEditView" displayName="Edit View" inActionPanel="false" />
-		<action className="GenerateQuery" displayName="Query XML" inActionPanel="false" />
-		<action className="ExecuteQuery" displayName="Execute" inActionPanel="false" />
-		<action className="GenerateMenuSAIL" displayName="Menu SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) menu" />
-		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
-		<action className="ExecuteSAIL" displayName="Generate Test" inActionPanel="false" toolTip="Execute SAIL and output results" />
-		<download className="DownloadSAIL" displayName="Download" inActionPanel="false" toolTip="Generate SAIL jar for SAIL client" />
-		<action className="ApplyStartupConfiguration" displayName="Apply Changes" inActionPanel="false" toolTip="OK to apply configuration? There is no undo."
+		<action className="CacheStats" displayName="admin.controlPanel.actions.cacheStats.actionName" clientValidation="false" inActionPanel="false" />
+		<action className="EvictSelectedCache" displayName="admin.controlPanel.actions.evictSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
+		<action className="StopOrStartSelectedCache" displayName="admin.controlPanel.actions.stopOrStartSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
+		<action className="EvictFromCache" displayName="admin.controlPanel.actions.evictFromCache.actionName" />
+		<action className="SwapCustomer" displayName="admin.controlPanel.actions.swapCustomer.actionName" inActionPanel="false" />
+		<action className="GenerateEditView" displayName="admin.controlPanel.actions.generateEditView.actionName" inActionPanel="false" />
+		<action className="GenerateQuery" displayName="admin.controlPanel.actions.generateQuery.actionName" inActionPanel="false" />
+		<action className="ExecuteQuery" displayName="admin.controlPanel.actions.executeQuery.actionName" inActionPanel="false" />
+		<action className="GenerateMenuSAIL" displayName="admin.controlPanel.actions.generateMenuSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateMenuSail.toolTip" />
+		<action className="GenerateModuleSAIL" displayName="admin.controlPanel.actions.generateModuleSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateModuleSail.toolTip" />
+		<action className="ExecuteSAIL" displayName="admin.controlPanel.actions.executeSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.executeSail.toolTip" />
+		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
+		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
 			iconStyleClass="fa fa-exclamation" />
-		<action className="AddAPIKey" displayName="Add API Key" inActionPanel="false" enabled="allowAddAPIKey" 
+		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey" 
 			iconStyleClass="fa fa-plus"/>
-		<action className="GenerateTestData" displayName="Generate Test Data" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
-		<action className="DeleteTestData" displayName="Delete Test Data" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
 	</actions>
 </view>

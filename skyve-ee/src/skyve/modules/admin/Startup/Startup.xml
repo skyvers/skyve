@@ -112,6 +112,12 @@
 			<length>200</length>
 		</text>
 		
+		<!-- account settings -->
+		<boolean name="accountAllowUserSelfRegistration" persistent="false">
+			<displayName>admin.startup.accountAllowUserSelfRegistration.displayName</displayName>
+			<description>admin.startup.accountAllowUserSelfRegistration.description</description>
+		</boolean>
+		
 		<!-- sms settings -->
 		<text name="apiTwilioSID">
 			<displayName>Account SID</displayName>

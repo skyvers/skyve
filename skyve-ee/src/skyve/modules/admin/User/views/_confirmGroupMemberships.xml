@@ -8,7 +8,7 @@
 				<blurb>
 					<![CDATA[
 						<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
-							<div class="ui-messages-info ui-corner-all">
+							<div style="margin-bottom: 0" class="ui-messages-info ui-corner-all">
 								<span class="ui-messages-info-icon"></span>
 								<ul>
 									<li role="alert" aria-atomic="true">

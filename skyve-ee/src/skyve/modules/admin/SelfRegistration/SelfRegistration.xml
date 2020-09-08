@@ -47,15 +47,9 @@
         	<displayName>Submitted</displayName>
         	<defaultValue>false</defaultValue>
         </boolean>
-
-        <association name="configuration" type="aggregation" required="true">
-            <displayName>Configuration</displayName>
-            <description>Settings for sending registration emails.</description>
-            <documentName>Configuration</documentName>
-        </association>
         <association name="user" type="aggregation" required="true">
+        	<documentation>The new user to create for this registration</documentation>
             <displayName>User</displayName>
-            <description>The new user to register.</description>
             <documentName>User</documentName>
         </association>
     </attributes>

@@ -30,6 +30,9 @@ public class StartupExtension extends Startup {
 
 	private static final long serialVersionUID = -8931459527432227257L;
 
+	static final String ACCOUNT_STANZA_KEY = "account";
+	static final String ACCOUNT_ALLOW_SELF_REGISTRATION_KEY = "allowUserSelfRegistration";
+
 	static final String API_STANZA_KEY = "api";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 	static final String API_GOOGLE_RECAPTCHA_KEY = "googleRecaptchaSiteKey";
@@ -86,6 +89,8 @@ public class StartupExtension extends Startup {
 		setMapLayer(UtilImpl.MAP_LAYERS);
 		setMapType(MapType.fromCode(UtilImpl.MAP_TYPE.name()));
 		setMapZoom(Integer.valueOf(UtilImpl.MAP_ZOOM));
+
+		setAccountAllowUserSelfRegistration(Boolean.valueOf(UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION));
 	}
 
 	/**
@@ -98,13 +103,14 @@ public class StartupExtension extends Startup {
 			UtilImpl.SHOW_SETUP = false;
 		}
 
-		Map<String, Object> properties = UtilImpl.OVERRIDE_CONFIGURATION;
+		Map<String, Object> properties = new HashMap<>(UtilImpl.OVERRIDE_CONFIGURATION);
 
 		// update the override properties with any modified values
 		putApi(properties);
 		putEnvironment(properties);
 		putMail(properties);
 		putMap(properties);
+		putAccount(properties);
 
 		// write the json out to the content directory
 		String json = marshall(properties);
@@ -139,6 +145,33 @@ public class StartupExtension extends Startup {
 		if (StringUtils.isNotBlank(json)) {
 			writeConfiguration(json);
 		}
+	}
+
+	/**
+	 * Compares the current value of the account configuration against the
+	 * new value from the startup page and if the value has changed, adds it to the
+	 * map to be persisted and updates the running configuration with the new value.
+	 * 
+	 * @param properties The current override configuration property map
+	 * @return The map of account properties which have been modified
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> putAccount(Map<String, Object> properties) {
+
+		// initialise or get the existing property map
+		Map<String, Object> account = (Map<String, Object>) properties.get(ACCOUNT_STANZA_KEY);
+		if (account == null) {
+			account = new HashMap<>();
+			properties.put(ACCOUNT_STANZA_KEY, account);
+		}
+
+		// add any values to the override configuration if they have changed
+		if (UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION != getAccountAllowUserSelfRegistration().booleanValue()) {
+			account.put(ACCOUNT_ALLOW_SELF_REGISTRATION_KEY, getAccountAllowUserSelfRegistration());
+			UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getAccountAllowUserSelfRegistration().booleanValue();
+		}
+
+		return account;
 	}
 
 	/**

@@ -56,8 +56,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
 	/** @hidden */
-	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
-	/** @hidden */
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
@@ -138,19 +136,11 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	private String passwordResetEmailBody;
 	/**
-	 * admin.configuration.userSelfResgistrationGroup.displayName
+	 * admin.configuration.association.userSelfRegistrationGroup.displayName
 	 * <br/>
-	 * The user group which specifies role-access for self-registering users.
-			<br/>
-			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
+	 * admin.configuration.association.userSelfRegistrationGroup.description
 	 **/
 	private GroupExtension userSelfRegistrationGroup = null;
-	/**
-	 * admin.configuration.allowUserSelfRegistration.displayName
-	 * <br/>
-	 * admin.configuration.allowUserSelfRegistration.description
-	 **/
-	private Boolean allowUserSelfRegistration;
 	/**
 	 * admin.configuration.selfRegistrationActivationExpiryHours.displayName
 	 * <br/>
@@ -442,24 +432,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 			preset(userSelfRegistrationGroupPropertyName, userSelfRegistrationGroup);
 			this.userSelfRegistrationGroup = userSelfRegistrationGroup;
 		}
-	}
-
-	/**
-	 * {@link #allowUserSelfRegistration} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getAllowUserSelfRegistration() {
-		return allowUserSelfRegistration;
-	}
-
-	/**
-	 * {@link #allowUserSelfRegistration} mutator.
-	 * @param allowUserSelfRegistration	The new value.
-	 **/
-	@XmlElement
-	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
-		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
-		this.allowUserSelfRegistration = allowUserSelfRegistration;
 	}
 
 	/**

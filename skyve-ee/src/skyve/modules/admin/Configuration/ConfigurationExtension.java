@@ -191,7 +191,7 @@ public class ConfigurationExtension extends Configuration {
 	 * @return
 	 */
 	public boolean validSelfRegistration() {
-		return (getUserSelfRegistrationGroup() != null && Boolean.TRUE.equals(getAllowUserSelfRegistration()));
+		return (getUserSelfRegistrationGroup() != null && UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION == true);
 	}
 
 	/**

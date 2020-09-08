@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
@@ -18,7 +17,6 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * Self Registration
  * 
- * @navhas n configuration 1 Configuration
  * @navhas n user 1 User
  * @stereotype "transient"
  */
@@ -52,8 +50,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public static final String registrationQuestionPropertyName = "registrationQuestion";
 	/** @hidden */
 	public static final String registrationQuestionSubmittedPropertyName = "registrationQuestionSubmitted";
-	/** @hidden */
-	public static final String configurationPropertyName = "configuration";
 	/** @hidden */
 	public static final String userPropertyName = "user";
 
@@ -103,15 +99,9 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 **/
 	private Boolean registrationQuestionSubmitted = new Boolean(false);
 	/**
-	 * Configuration
-	 * <br/>
-	 * Settings for sending registration emails.
-	 **/
-	private ConfigurationExtension configuration = null;
-	/**
 	 * User
 	 * <br/>
-	 * The new user to register.
+	 * The new user to create for this registration
 	 **/
 	private UserExtension user = null;
 
@@ -299,26 +289,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public void setRegistrationQuestionSubmitted(Boolean registrationQuestionSubmitted) {
 		preset(registrationQuestionSubmittedPropertyName, registrationQuestionSubmitted);
 		this.registrationQuestionSubmitted = registrationQuestionSubmitted;
-	}
-
-	/**
-	 * {@link #configuration} accessor.
-	 * @return	The value.
-	 **/
-	public ConfigurationExtension getConfiguration() {
-		return configuration;
-	}
-
-	/**
-	 * {@link #configuration} mutator.
-	 * @param configuration	The new value.
-	 **/
-	@XmlElement
-	public void setConfiguration(ConfigurationExtension configuration) {
-		if (this.configuration != configuration) {
-			preset(configurationPropertyName, configuration);
-			this.configuration = configuration;
-		}
 	}
 
 	/**

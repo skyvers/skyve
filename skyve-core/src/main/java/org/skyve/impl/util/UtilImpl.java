@@ -214,6 +214,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
 	// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+	// Enables new users to register for an account when true, requires email
+	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;

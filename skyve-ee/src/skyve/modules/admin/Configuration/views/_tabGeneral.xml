@@ -84,14 +84,16 @@
 		<column responsiveWidth="3"/>
 		<column responsiveWidth="1"/>
 		<row>
-			<item colspan="3">
+			<item showLabel="true" label="User Self-Registration Enabled">
+				<blurb>{startup.accountAllowUserSelfRegistration}</blurb>
+			</item>
+		</row>
+		<row>
+			<item colspan="2">
 				<default binding="userSelfRegistrationGroup" />
 			</item>
 		</row>
 		<row>
-			<item>
-				<default binding="allowUserSelfRegistration" />
-			</item>
 			<item>
 				<default binding="selfRegistrationActivationExpiryHours" />
 			</item>
