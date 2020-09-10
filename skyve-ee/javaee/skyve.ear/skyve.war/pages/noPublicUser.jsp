@@ -33,8 +33,7 @@
 			<meta name="format-detection" content="email=no">
 		<% } %>
 
-		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
-		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
+		<%@include file="fragments/favicon.html" %>
 		<link rel="stylesheet" href="semantic24/semantic.min.css">
 		
 		<%@include file="fragments/styles.html" %>

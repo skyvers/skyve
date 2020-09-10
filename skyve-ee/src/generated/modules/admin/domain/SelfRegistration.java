@@ -47,10 +47,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	/** @hidden */
 	public static final String registrationDatePropertyName = "registrationDate";
 	/** @hidden */
-	public static final String registrationQuestionPropertyName = "registrationQuestion";
-	/** @hidden */
-	public static final String registrationQuestionSubmittedPropertyName = "registrationQuestionSubmitted";
-	/** @hidden */
 	public static final String userPropertyName = "user";
 
 	/**
@@ -86,18 +82,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * The date and time that this self registration was completed.
 	 **/
 	private DateTime registrationDate;
-	/**
-	 * What led you to search for and try Skyve Foundry today?
-	 * <br/>
-	 * Post-registration sign-up question to new users
-	 **/
-	private String registrationQuestion;
-	/**
-	 * Submitted
-	 * <br/>
-	 * True when the user has submitted a response
-	 **/
-	private Boolean registrationQuestionSubmitted = new Boolean(false);
 	/**
 	 * User
 	 * <br/>
@@ -253,42 +237,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public void setRegistrationDate(DateTime registrationDate) {
 		preset(registrationDatePropertyName, registrationDate);
 		this.registrationDate = registrationDate;
-	}
-
-	/**
-	 * {@link #registrationQuestion} accessor.
-	 * @return	The value.
-	 **/
-	public String getRegistrationQuestion() {
-		return registrationQuestion;
-	}
-
-	/**
-	 * {@link #registrationQuestion} mutator.
-	 * @param registrationQuestion	The new value.
-	 **/
-	@XmlElement
-	public void setRegistrationQuestion(String registrationQuestion) {
-		preset(registrationQuestionPropertyName, registrationQuestion);
-		this.registrationQuestion = registrationQuestion;
-	}
-
-	/**
-	 * {@link #registrationQuestionSubmitted} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getRegistrationQuestionSubmitted() {
-		return registrationQuestionSubmitted;
-	}
-
-	/**
-	 * {@link #registrationQuestionSubmitted} mutator.
-	 * @param registrationQuestionSubmitted	The new value.
-	 **/
-	@XmlElement
-	public void setRegistrationQuestionSubmitted(Boolean registrationQuestionSubmitted) {
-		preset(registrationQuestionSubmittedPropertyName, registrationQuestionSubmitted);
-		this.registrationQuestionSubmitted = registrationQuestionSubmitted;
 	}
 
 	/**
