@@ -38,15 +38,6 @@
             <documentation>The date and time that this self registration was completed.</documentation>
             <displayName>Registration Date</displayName>
         </dateTime>
-        <memo name="registrationQuestion">
-        	<documentation>Post-registration sign-up question to new users</documentation>
-        	<displayName>What led you to search for and try Skyve Foundry today?</displayName>
-        </memo>
-        <boolean name="registrationQuestionSubmitted">
-        	<documentation>True when the user has submitted a response</documentation>
-        	<displayName>Submitted</displayName>
-        	<defaultValue>false</defaultValue>
-        </boolean>
         <association name="user" type="aggregation" required="true">
         	<documentation>The new user to create for this registration</documentation>
             <displayName>User</displayName>
