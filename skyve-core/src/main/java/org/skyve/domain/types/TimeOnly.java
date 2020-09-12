@@ -1,6 +1,9 @@
 package org.skyve.domain.types;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.skyve.CORE;
@@ -20,6 +23,7 @@ public class TimeOnly extends Date {
 	 */
 	public TimeOnly() {
 		super();
+		TimeUtil.clearDateComponent(this);
 		TimeUtil.clearMillisecondComponent(this);
 	}
 
@@ -67,5 +71,18 @@ public class TimeOnly extends Date {
 	@Override
 	public String toString() {
 		return CORE.getSerializableTimeFormat().format(this);
+	}
+	
+	public LocalTime toLocalTime() {
+		return toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+	}
+
+	public TimeOnly set(LocalDateTime date) {
+		return set(date.toLocalTime());
+	}
+	
+	public TimeOnly set(LocalTime time) {
+		TimeUtil.setTime(this, time.getHour(), time.getMinute(), time.getSecond());
+		return this; // for EL or method chaining
 	}
 }
