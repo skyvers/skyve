@@ -84,8 +84,8 @@ public final class BindUtil {
 				if (closedCurlyBraceIndex < openCurlyBraceIndex) {
 					throw new MetaDataException('[' + message + "] does not have a matching '}' for the '{' at position " + (openCurlyBraceIndex + 1));
 				}
-				String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
-				boolean found = false;
+				String expression = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
+				boolean success = false;
 				Exception cause = null;
 				for (Bean bean : beans) {
 					String documentName = bean.getBizDocument();
@@ -94,14 +94,14 @@ public final class BindUtil {
 							// Try to get the value from this bean
 							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
 							// property, it could be a condition or an implicit property.
-							String displayValue = BindUtil.getDisplay(customer, bean, binding);
+							String displayValue = ExpressionEvaluator.format(expression, bean);
 							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
 							// move the openCurlyBraceIndex along by the display value length so that
 							// any '{' occurrences replaced in as literals above are skipped.
 							openCurlyBraceIndex += displayValue.length();
 							// find the next occurrence
 							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
-							found = true;
+							success = true;
 							
 							break;
 						}
@@ -111,9 +111,9 @@ public final class BindUtil {
 					}
 				}
 				
-				if (! found) {
+				if (! success) {
 					StringBuilder exMessage = new StringBuilder();
-					exMessage.append("Bean");
+					exMessage.append("Expression {").append(expression).append("} cannot be evaluated against bean");
 					if (beans.length > 1) {
 						exMessage.append("s");
 					}
@@ -127,14 +127,6 @@ public final class BindUtil {
 							exMessage.append(", ");
 						}
 					}
-					
-					exMessage.append(" do");
-					if (beans.length == 1) {
-						exMessage.append("es");
-					}
-					
-					exMessage.append(" not contain binding - ");
-					exMessage.append(binding);
 					
 					if (cause == null) {
 						throw new MetaDataException(exMessage.toString());
@@ -497,7 +489,7 @@ public final class BindUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private static synchronized String toDisplay(Customer customer, 
+	static synchronized String toDisplay(Customer customer, 
 													@SuppressWarnings("rawtypes") Converter converter, 
 													List<DomainValue> domainValues, 
 													Object value) {
