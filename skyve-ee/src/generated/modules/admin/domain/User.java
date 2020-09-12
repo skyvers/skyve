@@ -446,26 +446,26 @@ public abstract class User extends AbstractPersistentBean {
 	 **/
 	private List<UserRole> assignedRoles = new ArrayList<>();
 	/**
-	 * Account activated
+	 * admin.user.activated.displayName
 	 * <br/>
-	 * Whether this account has been activated or not. An account not activated means the user has not finished the activation process by clicking the link from their registration email.
+	 * admin.user.activated.description
 	 * <br/>
 	 * By default the account will be activated.
 			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
 	 **/
 	private Boolean activated = new Boolean(true);
 	/**
-	 * Activation Code
+	 * admin.user.activationCode.displayName
 	 * <br/>
-	 * The activation code for this user account.
+	 * admin.user.activationCode.description
 	 * <br/>
 	 * This contains a code which when submitted by the user will activate their account.
 	 **/
 	private String activationCode;
 	/**
-	 * The date and time the activation code was created
+	 * admin.user.activationCodeCreationDateTime.displayName
 	 * <br/>
-	 * This setting is used to control expiry of activation codes.
+	 * admin.user.activationCodeCreationDateTime.description
 	 **/
 	private DateTime activationCodeCreationDateTime;
 
