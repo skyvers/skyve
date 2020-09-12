@@ -59,9 +59,5 @@
 				]]>
             </expression>
         </condition>
-        <condition name="submittedReponse">
-        	<description>True when the user has submitted a response to the registration question.</description>
-        	<expression>Boolean.TRUE.equals(getRegistrationQuestionSubmitted())</expression>
-        </condition>
     </conditions>
 </document>

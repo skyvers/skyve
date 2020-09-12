@@ -298,23 +298,4 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public boolean isNotSelfRegistrationAllowed() {
 		return (! isSelfRegistrationAllowed());
 	}
-
-	/**
-	 * True when the user has submitted a response to the registration question.
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isSubmittedReponse() {
-		return (Boolean.TRUE.equals(getRegistrationQuestionSubmitted()));
-	}
-
-	/**
-	 * {@link #isSubmittedReponse} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotSubmittedReponse() {
-		return (! isSubmittedReponse());
-	}
 }
