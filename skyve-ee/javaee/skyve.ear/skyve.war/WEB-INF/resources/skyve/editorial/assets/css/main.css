@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");
+/*@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700");*/
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic");
 
 /*
 	Editorial by HTML5 UP
@@ -149,18 +150,19 @@ mark {
 	}
 
 	h1, h2, h3, h4, h5, h6 {
-/*		color: #3d4449; */
-		font-family: "Roboto Slab", serif;
+		/* color: #3d4449; */
+		/* font-family: "Roboto Slab", serif; */
+		font-family: "Open Sans","Helvetica Neue",sans-serif;
 		font-weight: 700;
 		line-height: 1.5;
 		margin: 0 0 1em 0;
 	}
 
-		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
-			color: inherit;
-			text-decoration: none;
-			border-bottom: 0;
-		}
+	h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+		color: inherit;
+		text-decoration: none;
+		border-bottom: 0;
+	}
 
 	h1 {
 		font-size: 4em;
@@ -1757,7 +1759,8 @@ mark {
 	}
 
 	header p {
-		font-family: "Roboto Slab", serif;
+		/* font-family: "Roboto Slab", serif; */
+		font-family: "Open Sans","Helvetica Neue",sans-serif;
 		font-size: 1em;
 		font-weight: 400;
 		letter-spacing: 0.075em;

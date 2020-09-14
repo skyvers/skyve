@@ -198,11 +198,16 @@
 						<% } %>
 		                <div class="field">
 		                    <div class="ui left icon input">
+	                    	<% if(allowRegistration) { %>
+	                    		<i class="envelope icon"></i>
+	                    		<input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.email.label", locale)%>">
+	                    	<% } else { %>
 		                        <i class="user icon"></i>
 		                        <input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.user.label", locale)%>">
-		                        <% if (customer != null) { %>
-									<input type="hidden" name="customer" value="<%=customer%>" />
-								<% } %>
+							<% } %>
+							<% if (customer != null) { %>
+								<input type="hidden" name="customer" value="<%=customer%>" />
+							<% } %>
 		                    </div>
 		                </div>
 		                <div class="field">
