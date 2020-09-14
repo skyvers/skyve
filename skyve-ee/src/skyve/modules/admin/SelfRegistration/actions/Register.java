@@ -18,6 +18,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,8 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 
 /**
- * Action to register a new user, giving them appropriate permissions and sending a registration email to confirm their user account.
- * 
+ * Action to register a new user, giving them appropriate permissions and sending a
+ * registration email to confirm their user account.
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
@@ -100,12 +101,15 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				// Send registration email to the new user
 				sendRegistrationEmail(bean);
 				
-				webContext.growl(MessageSeverity.info, "An activation email has been sent to your address." );
+				webContext.growl(MessageSeverity.info, String.format(
+						"An activation email has been sent to %s. Please use the link in the email to activate your account prior to signing in.",
+						bean.getUser().getContact().getEmail1()));
 				
-			} catch (ValidationException e) {
-				// Catch and re-throw so that we do not send a slack message for ValidationExceptions.
-				throw e;
 			} catch (Exception e) {
+				webContext.growl(MessageSeverity.error,
+						String.format(
+								"An error occured registering this account. Please contact the <a href=\"mailto:%s\">system administrator</a>.",
+								Util.getSupportEmailAddress()));
 				throw e;
 			}
 		}
