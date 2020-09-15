@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Welcome {user.contact.name}" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
-	<form visible="showSuccess" border="true" borderTitle="Account activated successfully">
+	<form visible="showSuccess" border="true" borderTitle="Account Activated Successfully">
 		<column/>
 		<row>
 			<item>
 				<blurb>
 					<![CDATA[
-						<div style="width:100%;text-align:center">
+						<div style="width:100%; text-align:center">
 							<h4 style="margin: 2px auto;">
 								<p>Congratulations {user.contact.name}! Your account is now active.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a> with the email address {user.contact.email1}.</p>
 							</h4>
+						</div>
+						<div style="width:100%; text-align:center; text-size: 120%;">
+							<a href="{loginUrl}">Sign in</a>
 						</div>
 					]]>
 				</blurb>
