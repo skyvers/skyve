@@ -128,6 +128,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -315,10 +316,8 @@ class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		result.put("_title", 
-					BindUtil.formatMessage(user.getCustomer(), 
-											view.getTitle(), 
-											bean));
+		String title = Util.i18n(view.getTitle(), user.getLocale());
+		result.put("_title", BindUtil.formatMessage(user.getCustomer(), title, bean));
 
 		// put the view changed/dirty flag in
 		result.put("_changed", Boolean.valueOf(UtilImpl.hasChanged(webContextToReference.getCurrentBean())));

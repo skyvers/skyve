@@ -8,6 +8,7 @@ import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
@@ -24,7 +25,8 @@ public class SetTitleAction extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SetTitleAction");
 
 		if (facesView.getBean() != null) {
-	    	Customer customer = CORE.getUser().getCustomer();
+			User user = CORE.getUser();
+			Customer customer = user.getCustomer();
 			Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
@@ -33,7 +35,8 @@ public class SetTitleAction extends FacesAction<Void> {
 												targetBean.isCreated() ? 
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
-			facesView.setTitle(Binder.formatMessage(customer, view.getTitle(), targetBean));
+			String title = Util.i18n(view.getTitle(), user.getLocale());
+			facesView.setTitle(Binder.formatMessage(customer, title, targetBean));
 	    }
 		else {
         	UtilImpl.LOGGER.warning("SetTitleAction: FacesView.getBean() yields null");

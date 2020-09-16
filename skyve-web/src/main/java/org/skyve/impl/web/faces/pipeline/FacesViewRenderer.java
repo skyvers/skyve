@@ -191,7 +191,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderView(String icon16x16Url, String icon32x32Url) {
 	    // Ensure visibility is set for both create and edit views
         current = cb.view(null, createView ? "created" : "notCreated");
         facesView = current;
@@ -210,7 +210,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderedView(String icon16x16Url, String icon32x32Url) {
         // Add the toolbar(s) if this is a full view render or
         // a view with a widgetId = actions widgetId
         if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
