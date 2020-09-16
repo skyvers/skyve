@@ -65,6 +65,19 @@
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
 		
+		<enum name="passwordComplexityModel" required="false" deprecated="true">
+			<documentation>Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.</documentation>
+ 			<displayName>Password Complexity</displayName>
+ 			<description>The security level/complexity model for user passwords</description>
+ 			<values>
+ 				<value code="MINIMUM" description="Minimum - min 6 chars"/>
+ 				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
+ 				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
+ 				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
+ 			</values>
+		</enum>
+		
 		<association name="publicUser" type="aggregation">
 			<displayName>admin.configuration.association.publicUser.displayName</displayName>
 			<description>admin.configuration.association.publicUser.description</description>

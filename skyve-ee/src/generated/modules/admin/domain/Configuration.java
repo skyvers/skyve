@@ -1,6 +1,9 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -10,11 +13,14 @@ import modules.admin.Startup.StartupExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Setup
  * 
+ * @depend - - - PasswordComplexityModel
  * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
@@ -58,6 +64,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 	/** @hidden */
+	@Deprecated
+	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
+	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
 	/** @hidden */
 	public static final String emailFromPropertyName = "emailFrom";
@@ -79,6 +88,90 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String emailToContactPropertyName = "emailToContact";
 	/** @hidden */
 	public static final String startupPropertyName = "startup";
+
+	/**
+	 * Password Complexity
+	 * <br/>
+	 * The security level/complexity model for user passwords
+	 * <br/>
+	 * Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.
+	 **/
+	@XmlEnum
+	public static enum PasswordComplexityModel implements Enumeration {
+		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
+		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
+		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
+		strongMin10CharsUpperLowerNumericAndPunctuation("STRONG", "Strong - min 10 chars, upper, lower, numeric and punctuation");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private PasswordComplexityModel(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static PasswordComplexityModel fromCode(String code) {
+			PasswordComplexityModel result = null;
+
+			for (PasswordComplexityModel value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static PasswordComplexityModel fromDescription(String description) {
+			PasswordComplexityModel result = null;
+
+			for (PasswordComplexityModel value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				PasswordComplexityModel[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (PasswordComplexityModel value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * admin.configuration.passwordMinLength.displayName
@@ -147,6 +240,16 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * admin.configuration.selfRegistrationActivationExpiryHours.description
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+	/**
+	 * Password Complexity
+	 * <br/>
+	 * The security level/complexity model for user passwords
+	 * <br/>
+	 * Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.
+	 **/
+	@Deprecated
+	private PasswordComplexityModel passwordComplexityModel;
 	/**
 	 * admin.configuration.association.publicUser.displayName
 	 * <br/>
@@ -450,6 +553,26 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #passwordComplexityModel} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public PasswordComplexityModel getPasswordComplexityModel() {
+		return passwordComplexityModel;
+	}
+
+	/**
+	 * {@link #passwordComplexityModel} mutator.
+	 * @param passwordComplexityModel	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {
+		preset(passwordComplexityModelPropertyName, passwordComplexityModel);
+		this.passwordComplexityModel = passwordComplexityModel;
 	}
 
 	/**
