@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
@@ -68,7 +69,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(null, null);
+		return responsiveContainer(null, null, null, null);
 	}
 	
 	@Override
@@ -77,7 +78,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(vbox.getInvisibleConditionName(), vbox.getWidgetId());
+		return responsiveContainer(vbox.getVerticalAlignment(),
+									vbox.getHorizontalAlignment(),
+									vbox.getInvisibleConditionName(),
+									vbox.getWidgetId());
 	}
 	
 	@Override
@@ -86,7 +90,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(hbox.getInvisibleConditionName(), hbox.getWidgetId());
+		return responsiveContainer(hbox.getVerticalAlignment(),
+									hbox.getHorizontalAlignment(),
+									hbox.getInvisibleConditionName(),
+									hbox.getWidgetId());
 	}
 
 	@Override
@@ -358,10 +365,37 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 	
-	private HtmlPanelGroup responsiveContainer(String invisibleConditionName, String widgetId) {
+	private HtmlPanelGroup responsiveContainer(VerticalAlignment vertical,
+												HorizontalAlignment horizontal,
+												String invisibleConditionName,
+												String widgetId) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleConditionName, null);
-		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
+		if (UtilImpl.PRIMEFLEX) {
+			String styleClass = "p-grid p-nogutter";
+			if (vertical == VerticalAlignment.top) {
+				styleClass += " p-align-start";
+			}
+			else if (vertical == VerticalAlignment.middle) {
+				styleClass += " p-align-center";
+			}
+			else if (vertical == VerticalAlignment.bottom) {
+				styleClass += " p-align-end";
+			}
+			
+			if (horizontal == HorizontalAlignment.centre) {
+				styleClass += " p-justify-center";
+			}
+			else if (horizontal == HorizontalAlignment.right) {
+				styleClass += " p-justify-end";
+			}
+
+			result.setStyleClass(styleClass);
+		}
+		else {
+			result.setStyleClass("ui-g");
+		}
+		
 		return result;
 	}
 
