@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -373,5 +374,32 @@ public class WebUtil {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Sends a registration email with an activation code to the specified email address.
+	 * 
+	 * @param userBizId The email address to send the email to
+	 * @throws Exception
+	 */
+	public static void sendRegistrationEmail(final String userBizId) throws Exception {
+		Customer cust = CORE.getCustomer();
+		Module admin = cust.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
+		Document selfRegistration = admin.getDocument(cust, SQLMetaDataUtil.SELF_REGISTRATION_DOCUMENT_NAME);
+		Bean bean = selfRegistration.newInstance(CORE.getUser());
+		BindUtil.set(bean, Binder.createCompoundBinding(SQLMetaDataUtil.USER_PROPERTY_NAME, Bean.DOCUMENT_ID), userBizId);
+		AbstractRepository r = AbstractRepository.get();
+
+		AbstractPersistence persistence = AbstractPersistence.get();
+		persistence.setUser(CORE.getUser()); // user has not been set as this is called directly from changePassword.jsp
+		persistence.begin();
+		try {
+			r.getServerSideAction(cust, selfRegistration, SQLMetaDataUtil.RESEND_ACTIVATION_ACTION_NAME, true).execute(bean, null);
+		} catch (Exception e) {
+			persistence.rollback();
+			e.printStackTrace();
+		} finally {
+			persistence.commit(true);
+		}
 	}
 }

@@ -8,6 +8,7 @@
 					<strong>Thanks for registering! Your activation email should be in your Inbox now.</strong>
 					<br/><br/>
 					<p>Click the link in your activation email to activate your new account and sign in.</p>
+					<p>If you did not receive the email, please check your spam folder.</p>
 				</div>
 			]]>
 		</blurb>
@@ -17,7 +18,7 @@
 			<blurb>
 				<![CDATA[
 					<div style="width:100%;text-align:center">
-						<h4 style="margin: 2px auto;">If you are an existing user, please <a href="{loginUrl}">Sign in</a>.</h4>
+						<strong style="margin: 2px auto;">If you are an existing user, please <a href="{loginUrl}">Sign in</a>.</strong>
 					</div>
 				]]>
 			</blurb>

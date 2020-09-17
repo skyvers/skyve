@@ -9,16 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.util.Binder;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.Configuration;
-import modules.admin.domain.Contact;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.JobSchedule;
-import modules.admin.domain.SelfRegistration;
-import modules.admin.domain.User;
 
 public class ConfigurationExtension extends Configuration {
 
@@ -33,28 +27,6 @@ public class ConfigurationExtension extends Configuration {
 	 * The minimum length for new passwords when one is not defined
 	 */
 	public static final int PASSWORD_DEFAULT_MIN_LENGTH = 10;
-
-	public static final String SELF_REGISTRATION_COMMUNICATION = "SYSTEM Self Registration";
-	public static final String SELF_REGISTRATION_SUBJECT = "Activate your account";
-	public static final String SELF_REGISTRATION_HEADING = "Welcome!";
-	public static final String SELF_REGISTRATION_BODY = String.format("<p>Hi <b>{%1$s}</b>,</p><br/>"
-			+ "<p>Thank you for registering.</p>"
-			+ "<p>To complete your account setup, please click the activation link below.</p>"
-			+ "<p><a href=\"{%2$s}\">{%2$s}</a></p>"
-			+ "<p>If you have any questions about your new account, contact us at <a href=\"mailto:info@skyve.org\">info@skyve.org</a>.</p>",
-			Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.contactPropertyName, Contact.namePropertyName),
-			SelfRegistration.activateUrlPropertyName);
-
-	public void sendUserRegistrationEmail(SelfRegistration selfRegistration) throws Exception {
-		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION, 
-				selfRegistration.getUser().getContact().getEmail1(), 
-				null, 
-				SELF_REGISTRATION_SUBJECT,
-				SELF_REGISTRATION_BODY,
-				ResponseMode.EXPLICIT,
-				null,
-				selfRegistration);
-	}
 	
 	/**
 	 * Generates a text description of the system password complexity to be shown to the

@@ -507,6 +507,8 @@
 				<column binding="contact.mobile" sortOrder="ascending" />
 				<column binding="userName" sortOrder="ascending" />
 				<column binding="passwordExpired" hidden="true"/>
+				<column binding="inactive" hidden="true"/>
+				<column binding="activated" hidden="true"/>
 			</columns>
 		</query>
 		<query name="qUserProxies" documentName="UserProxy">

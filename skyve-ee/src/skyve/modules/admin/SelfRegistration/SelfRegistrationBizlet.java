@@ -1,8 +1,5 @@
 package modules.admin.SelfRegistration;
 
-import java.util.List;
-
-import org.h2.util.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -11,19 +8,11 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
-import modules.admin.domain.Contact;
 import modules.admin.domain.User;
 
 public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 
 	private static final long serialVersionUID = -3270121906624275634L;
-
-	public static void generateActivationLink(SelfRegistrationExtension bean) {
-		StringBuilder urlBuilder = new StringBuilder(Util.getSkyveContextUrl());
-		urlBuilder.append("/?a=e&m=admin&d=SelfRegistrationActivation&code=");
-		urlBuilder.append(bean.getUser().getActivationCode());
-		bean.setActivateUrl(urlBuilder.toString());
-	}
 	
 	@Override
 	public SelfRegistrationExtension newInstance(SelfRegistrationExtension bean) throws Exception {
@@ -41,40 +30,41 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 	}
 	
 	/**
-	 * Validates that a mobile phone or local or international telephone 
-	 * number has been entered during the registration, at least 1 is required.
-	 * @param contact The contact to validate the phone numbers of
-	 * @throws {@link ValidationException} if both fields are blank
-	 */
-	private void validateMobileOrTelephone(Contact contact) {
-		if (contact == null || (StringUtils.isNullOrEmpty(contact.getMobile()))) {
-			throw new ValidationException(
-					new Message(Contact.mobilePropertyName,
-							"A mobile number is required"));
-		}
-	}
-	
-	/**
 	 * Checks that a {@link User} does not already exist in the system with the
 	 * same username (email address) as the one trying to be registered. Throws
 	 * a {@link ValidationException} if it has already been registered.
 	 */
-	private void validateUniqueEmail(final String emailAddress) {
+	private static void validateUniqueEmail(final String emailAddress) {
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(User.userNamePropertyName, emailAddress);
-		List<User> otherUsers = q.beanResults();
+		User existingUser = q.beanResult();
 		
-		if (!otherUsers.isEmpty()) {
+		if (existingUser != null) {
 			final String baseHref = Util.getSkyveContextUrl() + '/';
 			final String loginUrl = baseHref;
 			
 			final String requestPasswordResetUrl = baseHref + "pages/requestPasswordReset.jsp";
+			final String resendRegistrationEmailUrl = baseHref + "pages/resendRegistrationEmail.jsp?userId="
+					+ existingUser.getBizId();
+
+			// if the user exists but is not activated, prompt to resend the activation email
+			if (Boolean.FALSE.equals(existingUser.getActivated())) {
+				throw new ValidationException(
+						new Message(
+								String.format("This email address has already been registered but not yet activated. " +
+										"Please activate then login <a href=\"%s\" title=\"Login\">here</a> " +
+										"or <a href=\"%s\" title=\"Resend activation\">resend your activation email</a>.",
+										loginUrl,
+										resendRegistrationEmailUrl)));
+			}
+
+			// if the user exists and is activated, prompt to login or reset password
 			throw new ValidationException(
 					new Message(
 							String.format("This email address has already been registered. " + 
 											"Please login <a href=\"%s\" title=\"Login\">here</a> " +
-											"or <a href=\"%s\" title=\"Reset password\">reset your password</a>",
+									"or <a href=\"%s\" title=\"Reset password\">reset your password</a>.",
 									loginUrl,
 									requestPasswordResetUrl)));
 		}

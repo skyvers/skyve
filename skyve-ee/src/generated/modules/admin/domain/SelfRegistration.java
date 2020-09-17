@@ -43,8 +43,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	/** @hidden */
 	public static final String loginMessagePropertyName = "loginMessage";
 	/** @hidden */
-	public static final String registrationEmailWasSentPropertyName = "registrationEmailWasSent";
-	/** @hidden */
 	public static final String registrationDatePropertyName = "registrationDate";
 	/** @hidden */
 	public static final String userPropertyName = "user";
@@ -70,12 +68,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * Transient field to allow login message to be overridden
 	 **/
 	private String loginMessage;
-	/**
-	 * Registration Email Was Sent
-	 * <br/>
-	 * Indicates if an email was sent to the public user or not.
-	 **/
-	private Boolean registrationEmailWasSent;
 	/**
 	 * Registration Date
 	 * <br/>
@@ -202,24 +194,6 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #registrationEmailWasSent} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getRegistrationEmailWasSent() {
-		return registrationEmailWasSent;
-	}
-
-	/**
-	 * {@link #registrationEmailWasSent} mutator.
-	 * @param registrationEmailWasSent	The new value.
-	 **/
-	@XmlElement
-	public void setRegistrationEmailWasSent(Boolean registrationEmailWasSent) {
-		preset(registrationEmailWasSentPropertyName, registrationEmailWasSent);
-		this.registrationEmailWasSent = registrationEmailWasSent;
-	}
-
-	/**
 	 * {@link #registrationDate} accessor.
 	 * @return	The value.
 	 **/
@@ -285,9 +259,7 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isSelfRegistrationAllowed() {
-		return (((java.util.function.BooleanSupplier) () -> {
-						throw new RuntimeException("Implemented in extension class.");
-					}).getAsBoolean());
+		return (org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION);
 	}
 
 	/**

@@ -20,17 +20,17 @@
 			</item>
 		</row>
 	</form>
-	<form visible="showAlready" border="true" borderTitle="Account previously activated">
+	<form visible="showAlready" border="true" borderTitle="Account Previously Activated">
 		<column/>
 		<row>
 			<item>
 				<blurb>
 					<![CDATA[
 						<div style="width:100%;text-align:center">
-							<h4 style="margin: 2px auto;">
+							<strong style="margin: 2px auto;">
 								<p>Welcome {user.contact.name} - you have already activated your account.</p>
 								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
-							</h4>
+							</strong>
 						</div>
 					]]>
 				</blurb>
@@ -44,27 +44,27 @@
 				<blurb>
 					<![CDATA[
 						<div style="width:100%;text-align:center">
-							<h4 style="margin: 2px auto;">
+							<strong style="margin: 2px auto;">
 								<p>Sorry, that code is no longer valid.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
-							</h4>
+								<p>Please <a href="{loginUrl}">Sign in</a> or Register again to request a new activation email.</p>
+							</strong>
 						</div>
 					]]>
 				</blurb>
 			</item>
 		</row>
 	</form>
-	<form visible="showFailure" border="true" borderTitle="Invalid access">
+	<form visible="showFailure" border="true" borderTitle="Invalid Access">
 		<column/>
 		<row>
 			<item>
 				<blurb>
 					<![CDATA[
 						<div style="width:100%;text-align:center">
-							<h4 style="margin: 2px auto;">
-								<p>Sorry, that link is not recognised.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
-							</h4>
+							<strong style="margin: 2px auto;">
+								<p>Sorry, that link is not recognised. Please check the link and try again.</p>
+								<p>Return to <a href="{loginUrl}">Sign in</a>.</p>
+							</strong>
 						</div>
 					]]>
 				</blurb>

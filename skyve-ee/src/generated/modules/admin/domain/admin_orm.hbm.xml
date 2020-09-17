@@ -125,6 +125,11 @@
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
 		<property name="selfRegistrationActivationExpiryHours" />
+		<property name="passwordComplexityModel" length="7">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
+			</type>
+		</property>
 		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>

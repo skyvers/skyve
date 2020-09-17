@@ -26,14 +26,14 @@
             <displayName>Login Message</displayName>
             <length>2000</length>
         </text>
-        <boolean name="registrationEmailWasSent">
+       <!--  <boolean name="registrationEmailWasSent">
             <documentation>
                 <![CDATA[
                     Indicates if an email was sent to the public user or not.
                 ]]>
             </documentation>
             <displayName>Registration Email Was Sent</displayName>
-        </boolean>
+        </boolean> -->
         <dateTime name="registrationDate">
             <documentation>The date and time that this self registration was completed.</documentation>
             <displayName>Registration Date</displayName>
@@ -53,9 +53,7 @@
             <description>Whether or not self registration is allowed.</description>
             <expression>
                 <![CDATA[
-					((java.util.function.BooleanSupplier) () -> {
-						throw new RuntimeException("Implemented in extension class.");
-					}).getAsBoolean()
+					org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION
 				]]>
             </expression>
         </condition>
