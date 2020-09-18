@@ -81,6 +81,9 @@ public class QueryGenerator {
 					metaDataColumn.setDisplayName(queryColumn.getDisplayName());
 					metaDataColumn.setName(queryColumn.getName());
 					metaDataColumn.setSortOrder(queryColumn.getSortOrder());
+					if (queryColumn.isHidden()) {
+						metaDataColumn.setHidden(Boolean.TRUE);
+					}
 					metaDataColumns.add(metaDataColumn);
 				}
 				metaDataQueries.add(documentQueryMetaData);

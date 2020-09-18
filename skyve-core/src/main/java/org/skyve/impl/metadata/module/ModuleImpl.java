@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
@@ -148,25 +150,31 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				
 				result = query;
 
-				processColumns(customer, document, result.getColumns(), includeAssociationBizKeys);
+				processColumns(customer,
+								document,
+								result.getColumns(),
+								includeAssociationBizKeys,
+								new MutableBoolean(true),
+								new MutableInt(0));
 			}
 		}
 
 		return result;
 	}
 
-	private void processColumns(Customer customer, Document document, List<MetaDataQueryColumn> columns, boolean includeAssociationBizKeys) {
+	private void processColumns(Customer customer,
+									Document document,
+									List<MetaDataQueryColumn> columns,
+									boolean includeAssociationBizKeys,
+									MutableBoolean orderNotApplied,
+									MutableInt columnIndex) {
 		// NB We have to manually traverse the document inheritance hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
-		boolean firstColumn = true;
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = getDocument(customer, inherits.getDocumentName());
-			processColumns(customer, baseDocument, columns, includeAssociationBizKeys);
-			if (! columns.isEmpty()) {
-				firstColumn = false;
-			}
+			processColumns(customer, baseDocument, columns, includeAssociationBizKeys, orderNotApplied, columnIndex);
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
@@ -174,36 +182,45 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				// Note - collections not included in generated queries
 				if (attribute instanceof Content) {
 					MetaDataQueryContentColumnImpl column = new MetaDataQueryContentColumnImpl();
-					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());
 					column.setDisplay(DisplayType.thumbnail);
 					column.setPixelWidth(Integer.valueOf(64));
 					column.setPixelHeight(Integer.valueOf(64));
+					if (columnIndex.intValue() > 7) {
+						column.setHidden(true);
+					}
 					columns.add(column);
+					columnIndex.increment();
 				}
 				else if (attribute instanceof Field) {
 					MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 					column.setEditable(false);
-					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());
-					if (firstColumn) {
+					if (orderNotApplied.booleanValue()) {
 						column.setSortOrder(SortDirection.ascending);
-						firstColumn = false;
+						orderNotApplied.setValue(false);
+					}
+					if (columnIndex.intValue() > 7) {
+						column.setHidden(true);
 					}
 					columns.add(column);
+					columnIndex.increment();
 				}
 				else if (includeAssociationBizKeys && attribute instanceof Association) {
 					final Association association = (Association) attribute;
 
 					final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 					column.setEditable(false);
-					column.setDisplayName(association.getDisplayName());
 					column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
-					if (firstColumn) {
+					if (orderNotApplied.booleanValue()) {
 						column.setSortOrder(SortDirection.ascending);
-						firstColumn = false;
+						orderNotApplied.setValue(false);
+					}
+					if (columnIndex.intValue() > 7) {
+						column.setHidden(true);
 					}
 					columns.add(column);
+					columnIndex.increment();
 				}
 /*
 Commented this out as it inadvertently creates dependencies on first-level associations on the referenced document.
@@ -229,6 +246,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 			}
 		}
 	}
+	
 	/**
 	 * 
 	 * @param customer Can be null which means that this method returns the un-overridden document.
