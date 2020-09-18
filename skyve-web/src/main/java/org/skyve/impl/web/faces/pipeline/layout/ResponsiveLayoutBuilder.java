@@ -372,7 +372,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleConditionName, null);
 		if (UtilImpl.PRIMEFLEX) {
-			String styleClass = "p-grid p-nogutter";
+			String styleClass = "p-grid";
 			if (vertical == VerticalAlignment.top) {
 				styleClass += " p-align-start";
 			}
