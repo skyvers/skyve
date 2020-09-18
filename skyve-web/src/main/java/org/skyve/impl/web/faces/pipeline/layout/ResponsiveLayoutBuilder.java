@@ -406,13 +406,19 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 												boolean nopad) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
-		String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth);
-		if (responsiveGridStyleClasses != null) {
-			if (nopad && (! UtilImpl.PRIMEFLEX)) {
-				result.setStyleClass(responsiveGridStyleClasses + " ui-g-nopad");
-			}
-			else {
-				result.setStyleClass(responsiveGridStyleClasses);
+		if (UtilImpl.PRIMEFLEX && (pixelWidth != null)) {
+			result.setStyleClass("p-col-fixed");
+			result.setStyle(new StringBuilder(16).append("width:").append(pixelWidth).append("px").toString());
+		}
+		else {
+			String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth);
+			if (responsiveGridStyleClasses != null) {
+				if (nopad && (! UtilImpl.PRIMEFLEX)) {
+					result.setStyleClass(responsiveGridStyleClasses + " ui-g-nopad");
+				}
+				else {
+					result.setStyleClass(responsiveGridStyleClasses);
+				}
 			}
 		}
 		setInvisible(result, widgetInvisible, null);
