@@ -8,6 +8,14 @@ public interface RelativeSize extends AbsoluteSize, ConstrainableSize {
 	public void setPercentageWidth(Integer percentageWidth);
 	public Integer getResponsiveWidth();
 	public void setResponsiveWidth(Integer responsiveWidth);
+	public Integer getSm();
+	public void setSm(Integer sm);
+	public Integer getMd();
+	public void setMd(Integer md);
+	public Integer getLg();
+	public void setLg(Integer lg);
+	public Integer getXl();
+	public void setXl(Integer xl);
 	public Integer getPercentageHeight();
 	public void setPercentageHeight(Integer percentageHeight);
 }

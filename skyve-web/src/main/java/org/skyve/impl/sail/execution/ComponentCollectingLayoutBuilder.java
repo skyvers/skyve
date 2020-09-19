@@ -20,6 +20,10 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 										Integer pixelWidth,
 										Integer responsiveWidth,
 										Integer percentageWidth,
+										Integer sm,
+										Integer md,
+										Integer lg,
+										Integer xl,
 										String invisibleConditionName) {
 		cccb.addToContainer(componentToAdd);
 		return component;

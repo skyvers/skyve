@@ -254,6 +254,10 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										Integer pixelWidth, 
 										Integer responsiveWidth,
 										Integer percentageWidth,
+										Integer sm,
+										Integer md,
+										Integer lg,
+										Integer xl,
 										String widgetInvisible) {
 		if (component != null) {
 			return component;

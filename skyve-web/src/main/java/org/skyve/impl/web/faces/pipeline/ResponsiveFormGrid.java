@@ -21,12 +21,16 @@ public class ResponsiveFormGrid implements Serializable {
 	public static class ResponsiveGridStyle implements Serializable {
 		private static final long serialVersionUID = -5073864962769492729L;
 
+		private int smallCols;
 		private int mediumCols;
 		private int largeCols;
+		private int extraLargeCols;
 		
-		public ResponsiveGridStyle(int mediumCols, int largeCols) {
+		public ResponsiveGridStyle(int smallCols, int mediumCols, int largeCols, int extraLargeCols) {
+			this.smallCols = smallCols;
 			this.mediumCols = mediumCols;
 			this.largeCols = largeCols;
+			this.extraLargeCols = extraLargeCols;
 		}
 
 		/**
@@ -35,9 +39,11 @@ public class ResponsiveFormGrid implements Serializable {
 		 * @return	A new ResponsiveGridStyle that adds the various columns together.
 		 */
 		public ResponsiveGridStyle add(ResponsiveGridStyle other) {
-			int medium = mediumCols + other.mediumCols;
-			int large = largeCols + other.largeCols;
-			return new ResponsiveGridStyle(medium, large);
+			int small = Math.min(smallCols + other.smallCols, 12);
+			int medium = Math.min(mediumCols + other.mediumCols, 12);
+			int large = Math.min(largeCols + other.largeCols, 12);
+			int extraLarge = Math.min(extraLargeCols + other.extraLargeCols, 12);
+			return new ResponsiveGridStyle(small, medium, large, extraLarge);
 		}
 		
 		/**
@@ -45,9 +51,32 @@ public class ResponsiveFormGrid implements Serializable {
 		 */
 		@Override
 		public String toString() {
-			return String.format(UtilImpl.PRIMEFLEX ? "p-col-12 p-md-%s p-lg-%s" : "ui-g-12 ui-md-%s ui-lg-%s", 
-									Integer.toString(mediumCols), 
-									Integer.toString(largeCols));
+			StringBuilder result = new StringBuilder(34);
+			if (UtilImpl.PRIMEFLEX) {
+				result.append("p-col-").append(smallCols);
+				if (smallCols != mediumCols) {
+					result.append(" p-md-").append(mediumCols);
+				}
+				if (smallCols != largeCols) {
+					result.append(" p-lg-").append(largeCols);
+				}
+				if (smallCols != extraLargeCols) {
+					result.append(" p-xl-").append(extraLargeCols);
+				}
+			}
+			else {
+				result.append("ui-g-").append(smallCols);
+				if (smallCols != mediumCols) {
+					result.append(" ui-md-").append(mediumCols);
+				}
+				if (smallCols != largeCols) {
+					result.append(" ui-lg-").append(largeCols);
+				}
+				if (smallCols != extraLargeCols) {
+					result.append(" ui-xl-").append(extraLargeCols);
+				}				
+			}
+			return result.toString();
 		}
 	}
 

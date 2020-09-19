@@ -18,6 +18,10 @@ public class FormColumn implements DecoratedMetaData {
 
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
+	private Integer sm;
+	private Integer md;
+	private Integer lg;
+	private Integer xl;
 	private Integer percentageWidth;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -51,6 +55,42 @@ public class FormColumn implements DecoratedMetaData {
 		this.responsiveWidth = responsiveWidth;
 	}
 
+	public Integer getSm() {
+		return sm;
+	}
+	
+	@XmlAttribute(required = false)
+	public void setSm(Integer sm) {
+		this.sm = sm;
+	}
+
+	public Integer getMd() {
+		return md;
+	}
+	
+	@XmlAttribute(required = false)
+	public void setMd(Integer md) {
+		this.md = md;
+	}
+	
+	public Integer getLg() {
+		return lg;
+	}
+	
+	@XmlAttribute(required = false)
+	public void setLg(Integer lg) {
+		this.lg = lg;
+	}
+
+	public Integer getXl() {
+		return xl;
+	}
+	
+	@XmlAttribute(required = false)
+	public void setXl(Integer xl) {
+		this.xl = xl;
+	}
+	
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
