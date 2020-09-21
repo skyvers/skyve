@@ -13,7 +13,7 @@
 								<ul>
 									<li role="alert" aria-atomic="true">
 										<span class="ui-messages-info-detail">
-											Search for an existing <b>contact</b> for the new user or create a new contact.
+											{i18n:admin.user.confirmContact.existingContact.label}
 										</span>
 									</li>
 								</ul>
@@ -37,7 +37,7 @@
 					<item colspan="2">
 						<blurb textAlignment="left">
 							<![CDATA[
-								<i>Search for an existing <b>contact</b></i>
+								{i18n:admin.user.confirmContact.existingContact.label}
 							]]>
 						</blurb>
 					</item>
@@ -93,10 +93,7 @@
 				<item colspan="2">
 					<blurb textAlignment="left">
 					<![CDATA[
-						<b><i>OR</i> </b>
-						<br/>
-						<br/>
-						<i>Create a new <b>contact</b></i>
+						{i18n:admin.user.confirmContact.newContact.label}
 					]]>
 					</blurb>
 				</item>
