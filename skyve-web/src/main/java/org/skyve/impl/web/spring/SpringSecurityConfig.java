@@ -101,23 +101,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
 		if (RDBMS.h2.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, not ifNull(inactive, false), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
+			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 		}
 		else if (RDBMS.mysql.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
+			result.setUsersByUsernameQuery("select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
 			result.setAuthoritiesByUsernameQuery("select concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
 			result.setGroupAuthoritiesByUsernameQuery("select concat(bizCustomer, '/', userName), concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
 			
 		}
 		else if (RDBMS.sqlserver.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer + '/' + userName, password, case when coalesce(inactive,0) = 0 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
+			result.setUsersByUsernameQuery("select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
 			result.setAuthoritiesByUsernameQuery("select bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
 			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer + '/' + userName, bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
 		}
 		else if (RDBMS.postgresql.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, coalesce(inactive, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
+			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
 		}
