@@ -7,6 +7,7 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://primefaces.org/ecuador"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -56,10 +57,15 @@
 					<ui:param name="bean" value="#{bean}" />
 				</ui:include>
 	
+				<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
+				<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
+					<pt:menu />
+				</c:if>
+				
 				<h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{showMenu}">
 					<div class="nano">
 						<div class="nano-content menu-scroll-content">
-							<h:form id="menuform" prependId="false" rendered="#{showMenu}">
+							<h:form id="menuform" prependId="false">
 								<pt:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
 							</h:form>
 						</div>

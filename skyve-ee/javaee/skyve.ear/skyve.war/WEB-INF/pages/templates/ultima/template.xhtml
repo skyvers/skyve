@@ -7,6 +7,7 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pu="http://primefaces.org/ultima"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -58,6 +59,11 @@
 					<ui:param name="bean" value="#{bean}" />
 				</ui:include>
 	
+				<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
+				<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
+					<pu:menu />
+				</c:if>
+
 				<h:form id="menuform" prependId="false" rendered="#{showMenu}">
 					<div class="layout-menu layout-menu-dark">
 						<div class="nano">
