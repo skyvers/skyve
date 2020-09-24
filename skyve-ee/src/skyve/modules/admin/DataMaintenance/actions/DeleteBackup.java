@@ -3,6 +3,7 @@ package modules.admin.DataMaintenance.actions;
 import java.io.File;
 
 import org.skyve.CORE;
+import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.FileUtil;
@@ -18,14 +19,18 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		File backup = new File(String.format("%sbackup_%s%s%s", 
+		File backup = new File(String.format("%sbackup_%s%s%s",
 												Util.getContentDirectory(),
 												customerName,
 												File.separator,
 												bean.getSelectedBackupName()));
 		if (backup.exists()) {
 			Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
-			FileUtil.delete(backup);
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
+			} else {
+				FileUtil.delete(backup);
+			}
 			Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
 		}
 		else {

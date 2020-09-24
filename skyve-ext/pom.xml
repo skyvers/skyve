@@ -12,7 +12,7 @@
 		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
 	</build>
-	
+
 	<properties>
 		<commonmark.version>0.10.0</commonmark.version>
 	</properties>
@@ -152,7 +152,15 @@
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-blob</artifactId>
+			<version>12.8.0</version>
+			<scope>compile</scope>
+			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
