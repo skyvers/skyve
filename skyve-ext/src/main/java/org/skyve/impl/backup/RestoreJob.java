@@ -1,9 +1,6 @@
 package org.skyve.impl.backup;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -59,22 +56,26 @@ public class RestoreJob extends CancellableJob {
 		String customerName = CORE.getUser().getCustomerName();
 		Collection<String> log = getLog();
 		String trace;
-		
+
 		String selectedBackupName = options.getSelectedBackupName();
-		File backup = new File(String.format("%sbackup_%s%s%s", 
+		File backup = new File(String.format("%sbackup_%s%s%s",
 												Util.getContentDirectory(),
 												customerName,
 												File.separator,
 												selectedBackupName));
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			ExternalBackup.getInstance().downloadBackup(selectedBackupName, new FileOutputStream(backup));
+			backup.deleteOnExit();
+		}
 		if (! backup.exists()) {
 			trace = "Backup " + backup.getAbsolutePath() + " does not exist.";
 			log.add(trace);
 			Util.LOGGER.warning(trace);
 			return;
 		}
-		
+
 		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
-		
+
 		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
 		File extractDir = new File(backup.getParentFile(), extractDirName);
 		trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
@@ -94,10 +95,10 @@ public class RestoreJob extends CancellableJob {
 		log.add(trace);
 		Util.LOGGER.info(trace);
 		setPercentComplete(50);
-		
+
 		PreProcess restorePreProcess = options.getPreProcess();
 		ContentOption contrentRestoreOption =  options.getContentOption();
-		
+
 		boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
 		if (truncateDatabase) {
 			trace = "Truncate " + ((UtilImpl.SCHEMA == null) ? "default" : UtilImpl.SCHEMA) + " schema";
@@ -165,26 +166,26 @@ public class RestoreJob extends CancellableJob {
 		log.add(trace);
 		Util.LOGGER.info(trace);
 		setPercentComplete(100);
-		
+
 		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 	}
-	
+
 	private void restore(String extractDirName,
 							boolean createUsingBackup,
 							ContentOption contentRestoreOption,
 							IndexingOption indexingOption)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		
-		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY + 
-										"backup_" + customerName + 
+
+		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY +
+										"backup_" + customerName +
 										File.separator + extractDirName;
 		File backupDirectory = new File(backupDirectoryPath);
 		if ((! backupDirectory.exists()) || (! backupDirectory.isDirectory())) {
 			throw new IllegalArgumentException(backupDirectoryPath + " is not a directory");
 		}
 
-		Collection<Table> tables = createUsingBackup ? 
+		Collection<Table> tables = createUsingBackup ?
 										BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
 										BackupUtil.getTables();
 
@@ -217,7 +218,7 @@ public class RestoreJob extends CancellableJob {
 								boolean joinTables,
 								boolean extensionTables,
 								ContentOption contentRestoreOption,
-								IndexingOption indexingOption) 
+								IndexingOption indexingOption)
 	throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
@@ -292,7 +293,7 @@ public class RestoreJob extends CancellableJob {
 								if (isCancelled()) {
 									return;
 								}
-								
+
 								statement.clearParameters();
 
 								int index = 1;
@@ -333,8 +334,8 @@ public class RestoreJob extends CancellableJob {
 											statement.setBytes(index++, (byte[]) dialect.convertToPersistedValue(geometry));
 										}
 										else {
-											statement.setObject(index++, 
-																	dialect.convertToPersistedValue(geometry), 
+											statement.setObject(index++,
+																	dialect.convertToPersistedValue(geometry),
 																	geometrySqlType);
 										}
 									}
@@ -367,7 +368,7 @@ public class RestoreJob extends CancellableJob {
 										StringBuilder contentPath = new StringBuilder(128);
 										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
 										contentPath.append(AbstractContentManager.FILE_STORE_NAME).append('/');
-								
+
 										AttachmentContent content = ElasticContentManager.getFromFileSystem(contentPath, stringValue);
 										if (content == null) {
 											trace = "        Could not find file associated with " + stringValue;
@@ -423,8 +424,8 @@ public class RestoreJob extends CancellableJob {
 							trace = "CAUSED BY:- " + sql.toString();
 							log.add(trace);
 							Util.LOGGER.severe(trace);
-							
-							
+
+
 							StringBuilder sb = new StringBuilder(512);
 							sb.append("VALUES  :- ");
 							if (values == null) {
@@ -439,7 +440,7 @@ public class RestoreJob extends CancellableJob {
 							trace = sb.toString();
 							log.add(trace);
 							Util.LOGGER.severe(trace);
-							
+
 							throw t;
 						}
 					}
@@ -451,13 +452,13 @@ public class RestoreJob extends CancellableJob {
 		}
 	}
 
-	private void restoreForeignKeys(File backupDirectory, 
-										Collection<Table> tables, 
+	private void restoreForeignKeys(File backupDirectory,
+										Collection<Table> tables,
 										Connection connection)
 	throws Exception {
 		Collection<String> log = getLog();
 		String trace;
-		
+
 		for (Table table : tables) {
 			if (table instanceof JoinTable) {
 				continue;
@@ -472,7 +473,7 @@ public class RestoreJob extends CancellableJob {
 				System.err.println(trace);
 				continue;
 			}
-			
+
 			long rowCount = 0;
 
 			try (FileReader fr = new FileReader(backupFile)) {
@@ -497,14 +498,14 @@ public class RestoreJob extends CancellableJob {
 
 					if (foundAForeignKey) {
 						sql.append(" where bizId = ?");
-						
+
 						try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
 							Map<String, String> values = null;
 							while ((values = reader.read(headers)) != null) {
 								if (isCancelled()) {
 									return;
 								}
-								
+
 								statement.clearParameters();
 
 								int i = 1;

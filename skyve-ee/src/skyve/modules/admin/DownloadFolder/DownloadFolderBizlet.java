@@ -16,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.view.model.list.Page;
@@ -40,7 +41,7 @@ public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 				return pathname.isDirectory() && (pathname.getName().length() == 14);
 			}
 		});
-		
+
 		// Sort the folder names
 		Set<String> folderNames = new TreeSet<>(Collections.reverseOrder());
 		if (folders != null) {
@@ -51,30 +52,34 @@ public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 
 		return fetch(folderNames, startRow, endRow);
 	}
-	
+
 	/**
 	 * Fetch backup zip files.
-	 * 
+	 *
 	 * @param dirPath
 	 * @param startRow
 	 * @param endRow
 	 * @return
 	 */
 	public static Page fetchBackups(String dirPath, int startRow, int endRow) {
-		File[] files = FileUtil.listFiles(new File(dirPath), ".*.zip", SortDirection.descending);
 		Set<String> backups = new TreeSet<>();
-		if (files != null) {
-			for (File file : files) {
-				backups.add(file.getName());
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			backups.addAll(ExternalBackup.getInstance().listBackups());
+		} else {
+			File[] files = FileUtil.listFiles(new File(dirPath), ".*.zip", SortDirection.descending);
+			if (files != null) {
+				for (File file : files) {
+					backups.add(file.getName());
+				}
 			}
 		}
-		
+
 		return fetch(backups, startRow, endRow);
 	}
-	
+
 	/**
 	 * Return a page of things.
-	 * 
+	 *
 	 * @param things
 	 * @param startRow
 	 * @param endRow

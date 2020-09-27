@@ -47,12 +47,12 @@ import org.supercsv.prefs.CsvPreference;
 
 /**
  * Tables and the content repository files are backed up by this.
- * The fields are added to the tables taking into account that 
+ * The fields are added to the tables taking into account that
  * there may be multiple documents mapped onto the same table.
  * But we only want one copy of each table.
  * The customer data is separated out in the data base.
- * 
- * Each content file contains an associated named properties file 
+ *
+ * Each content file contains an associated named properties file
  * that contains all the information needed to construct the path
  * of the content node - ie module name and document name are not known to the table.
  */
@@ -60,7 +60,7 @@ public class BackupJob extends CancellableJob {
 	private static final long serialVersionUID = 1590777761018078475L;
 
 	private File backupZip;
-	
+
 	public File getBackupZip() {
 		return backupZip;
 	}
@@ -71,11 +71,11 @@ public class BackupJob extends CancellableJob {
 		Collection<Table> tables = BackupUtil.getTables();
 		AbstractPersistence p = AbstractPersistence.get();
 		String customerName = p.getUser().getCustomerName();
-		
+
 		String backupDir = String.format("%sbackup_%s%s%s%s",
-											UtilImpl.CONTENT_DIRECTORY, 
-											customerName, 
-											File.separator, 
+											UtilImpl.CONTENT_DIRECTORY,
+											customerName,
+											File.separator,
 											CORE.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
 											File.separator);
 		File directory = new File(backupDir);
@@ -86,7 +86,7 @@ public class BackupJob extends CancellableJob {
 
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
-		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(), 
+		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(),
 						new File(backupDir, "create.sql").getAbsolutePath(),
 						null);
 		boolean problem = false; // indicates if the backup had a problem
@@ -95,7 +95,7 @@ public class BackupJob extends CancellableJob {
 				try (BufferedWriter problems = new BufferedWriter(problemsTxt)) {
 					try (Connection connection = EXT.getDataStoreConnection()) {
 						connection.setAutoCommit(false);
-			
+
 						try (ContentManager cm = EXT.newContentManager()) {
 							for (Table table : tables) {
 								StringBuilder sql = new StringBuilder(128);
@@ -113,19 +113,19 @@ public class BackupJob extends CancellableJob {
 												Map<String, Object> values = new TreeMap<>();
 												String[] headers = new String[table.fields.size()];
 												headers = table.fields.keySet().toArray(headers);
-				
+
 												writer.writeHeader(headers);
-				
+
 												while (resultSet.next()) {
 													if (isCancelled()) {
 														return;
 													}
 													values.clear();
-				
+
 													for (String name : table.fields.keySet()) {
 														AttributeType attributeType = table.fields.get(name);
 														Object value = null;
-				
+
 														if (AttributeType.association.equals(attributeType) ||
 																AttributeType.colour.equals(attributeType) ||
 																AttributeType.memo.equals(attributeType) ||
@@ -144,25 +144,25 @@ public class BackupJob extends CancellableJob {
 																}
 																// bizLock is mandatory
 																if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
-																	throw new IllegalStateException(table.name + " with " + 
+																	throw new IllegalStateException(table.name + " with " +
 																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																										" is missing a " + PersistentBean.LOCK_NAME + " value.");
 																}
 																// bizKey is mandatory
 																if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
-																	throw new IllegalStateException(table.name + " with " + 
+																	throw new IllegalStateException(table.name + " with " +
 																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																										" is missing a " + Bean.BIZ_KEY + " value.");
 																}
 																// bizCustomer is mandatory
 																if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-																	throw new IllegalStateException(table.name + " with " + 
+																	throw new IllegalStateException(table.name + " with " +
 																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																										" is missing a " + Bean.CUSTOMER_NAME + " value.");
 																}
 																// bizUserId is mandatory
 																if (name.equalsIgnoreCase(Bean.USER_ID)) {
-																	throw new IllegalStateException(table.name + " with " + 
+																	throw new IllegalStateException(table.name + " with " +
 																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																										" is missing a " + Bean.USER_ID + " value.");
 																}
@@ -236,13 +236,13 @@ public class BackupJob extends CancellableJob {
 																value = new Integer(intValue);
 															}
 															// bizVersion is mandatory
-															if ("".equals(value) && 
+															if ("".equals(value) &&
 																	name.equalsIgnoreCase(PersistentBean.VERSION_NAME)) {
-																throw new IllegalStateException(table.name + " with " + 
+																throw new IllegalStateException(table.name + " with " +
 																									Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																									" is missing a " + PersistentBean.VERSION_NAME + " value.");
 															}
-			
+
 														}
 														else if (AttributeType.longInteger.equals(attributeType)) {
 															long longValue = resultSet.getLong(name);
@@ -272,7 +272,7 @@ public class BackupJob extends CancellableJob {
 																										values.get(Bean.DOCUMENT_ID),
 																										name,
 																										stringValue));
-																		// See if the content file exists 
+																		// See if the content file exists
 																		final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
 																		final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
 																		AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
@@ -305,10 +305,10 @@ public class BackupJob extends CancellableJob {
 																}
 															}
 														}
-				
+
 														values.put(name, value);
 													}
-				
+
 													writer.write(values, headers);
 												}
 											}
@@ -352,13 +352,20 @@ public class BackupJob extends CancellableJob {
 				Util.LOGGER.info(trace);
 				setPercentComplete(50);
 				try {
-					File zip = new File(directory.getParentFile(), 
+					File zip = new File(directory.getParentFile(),
 											directory.getName() + (problem ? "_PROBLEMS.zip" : ".zip"));
 					FileUtil.createZipArchive(directory, zip);
 					trace = "Compressed backup to " + zip.getAbsolutePath();
 					log.add(trace);
 					Util.LOGGER.info(trace);
 					backupZip = zip;
+
+					if (ExternalBackup.areExternalBackupsEnabled()) {
+						ExternalBackup.getInstance().uploadBackup(zip.getAbsolutePath());
+						final String uploadLogMessage = "Uploaded compressed backup";
+						log.add(uploadLogMessage);
+						Util.LOGGER.info(uploadLogMessage);
+					}
 				}
 				finally {
 					FileUtil.delete(directory);
