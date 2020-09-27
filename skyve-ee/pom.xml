@@ -279,9 +279,9 @@
 			<version>${ehcache.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>eu.bitwalker</groupId>
-			<artifactId>UserAgentUtils</artifactId>
-			<version>${UserAgentUtils.version}</version>
+			<groupId>com.blueconic</groupId>
+			<artifactId>browscap-java</artifactId>
+			<version>${browscap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch</groupId>

@@ -118,8 +118,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>eu.bitwalker</groupId>
-			<artifactId>UserAgentUtils</artifactId>
+			<groupId>com.blueconic</groupId>
+			<artifactId>browscap-java</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

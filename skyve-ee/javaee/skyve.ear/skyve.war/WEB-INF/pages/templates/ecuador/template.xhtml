@@ -38,6 +38,7 @@
 	
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>

@@ -77,6 +77,7 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script type="text/javascript" src="prime/skyve-min.js"></script>
 
 		<script type="text/javascript">
 			<!--
@@ -128,6 +129,7 @@
 			            }
 			        }
 			    });
+			    SKYVE.Util.setTouchCookie();
 			});
 			-->
 		</script>
