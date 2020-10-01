@@ -133,7 +133,7 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderView(String icon16x16Url, String icon32x32Url) {
 	    // Ensure visibility is set for both create and edit views
         current = cr.view(null, createView ? "created" : "notCreated");
         result = current;
@@ -150,7 +150,7 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		// Add the toolbar(s) if it/they has/have contents
     	if ((toolbarLayouts != null) && (! toolbarLayouts.isEmpty()) && (! toolbarLayouts.get(0).isLeaf())) {
 			// If we get any toolbars back, add the toolbar layouts to it

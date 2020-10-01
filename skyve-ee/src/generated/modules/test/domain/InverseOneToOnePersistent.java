@@ -109,9 +109,13 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 				aggAssociation.setInvAggAssociation(this);
 			}
 			if (oldAggAssociation != null) {
-				oldAggAssociation.setInvAggAssociation(null);
+				oldAggAssociation.nullInvAggAssociation();
 			}
 		}
+	}
+
+	public void nullAggAssociation() {
+		this.aggAssociation = null;
 	}
 
 	/**
@@ -135,8 +139,12 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 				invAggAssociation.setAggAssociation(this);
 			}
 			if (oldInvAggAssociation != null) {
-				oldInvAggAssociation.setAggAssociation(null);
+				oldInvAggAssociation.nullAggAssociation();
 			}
 		}
+	}
+
+	public void nullInvAggAssociation() {
+		this.invAggAssociation = null;
 	}
 }

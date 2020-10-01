@@ -5,6 +5,7 @@
 	<homeDocument>UserDashboard</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
+		<job name="jDeleteAllTaggedDataForTag" displayName="Delete all tagged data for Tag" className="modules.admin.Tag.DeleteAllTaggedDataForTagJob"/>
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
 		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
 		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
@@ -28,9 +29,7 @@
 		<document ref="ControlPanel" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
-		<document ref="DataMaintenanceModuleDocument" />
 		<document ref="DocumentCreator" />
-		<document ref="DocumentName"/>
 		<document ref="DocumentNumber" defaultQueryName="qDocumentNumbers"/>
 		<document ref="DownloadFolder" />
 		<document ref="Generic" />
@@ -41,11 +40,14 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="Jobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="ModuleDocument" />
 		<document ref="ReportDesign" />
 		<document ref="ReportDataset" />
 		<document ref="ReportParameter" />
 		<document ref="ReportManager" />
 		<document ref="ReportTemplate" defaultQueryName="qReportTemplates" />
+		<document ref="SelfRegistration" />		
+		<document ref="SelfRegistrationActivation" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Startup"/>
 		<document ref="Subscription"/>
@@ -68,8 +70,14 @@
 			<privileges>
 				<document name="Communication" permission="_R__G"/>
 				<document name="CommunicationTemplate" permission="_R__G"/>
+				<document name="Configuration" permission="_R__C" />				
 				<document name="Generic" permission="CRUDG"/>
+				<document name="SelfRegistration" permission="_____">
+					<action name="Register" />
+				</document>
+				<document name="SelfRegistrationActivation" permission="_____"/>
 				<document name="Subscription" permission="CRUDG"/>
+				<document name="User" permission="_R__C" />				
 			</privileges>
 		</role>
 		<role name="AppUser">
@@ -212,6 +220,7 @@
 					<action name="ApplyStartupConfiguration" />
 					<action name="AddAPIKey"/>
 					<action name="GenerateTestData" />
+					<action name="DeleteTestData" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
@@ -236,12 +245,10 @@
 					<action name="Sync" />
 					<action name="UploadBackup" />
 				</document>
-				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
 				<document name="DocumentCreator" permission="_____">
 					<action name="Submit" />
 					<action name="UpdatePreview" />
 				</document>
-				<document name="DocumentName" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="RunExport"/>
@@ -251,6 +258,7 @@
 					<action name="GetImportTemplate"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
+				<document name="ModuleDocument" permission="_RU_C"/>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
 					<action name="Preview" />
@@ -340,6 +348,9 @@
 					<action name="AddUserToEmail" />
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
+				</document>
+				<document name="SelfRegistration" permission="_RUDC">
+					<action name="Register"/>
 				</document>
 				<document name="Startup" permission="_____">
 					<action name="Dismiss"/>
@@ -439,21 +450,10 @@
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
-		<!-- <edit document="Startup" name="Startup">
-			<uxui name="startup" />
-			<role name="SecurityAdministrator" />
-		</edit> -->
 		<group name="DevOps">
 			<edit document="ControlPanel" name="Control Panel">
-				<!-- <uxui name="desktop" /> -->
 				<role name="DevOps" />
 			</edit>
-			<!-- <edit document="ControlPanel" name="SAIL UI Testing">
-				<uxui name="external" />
-				<uxui name="tablet" />
-				<uxui name="phone" />
-				<role name="DevOps" />
-			</edit> -->
 			<edit document="DataMaintenance" name="Data Maintenance">
 				<role name="DevOps" />
 			</edit>
@@ -556,6 +556,8 @@
 				<column binding="contact.mobile" sortOrder="ascending" />
 				<column binding="userName" sortOrder="ascending" />
 				<column binding="passwordExpired" hidden="true"/>
+				<column binding="inactive" hidden="true"/>
+				<column binding="activated" hidden="true"/>
 			</columns>
 		</query>
 		<query name="qUserProxies" documentName="UserProxy">

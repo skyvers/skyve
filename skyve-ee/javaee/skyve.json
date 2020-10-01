@@ -209,7 +209,9 @@
 		// Number of sign in attempts until the user account is locked - Use null to indicate no account lockout
 		accountLockoutThreshold: 3,
 		// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
-		accountLockoutDurationMultipleInSeconds: 10
+		accountLockoutDurationMultipleInSeconds: 10,
+		// Enables new users to register for an account when true, requires email
+		allowUserSelfRegistration: false
 	},
 	// Environment settings
 	environment: {

@@ -1,6 +1,7 @@
 package org.skyve.impl.sail.execution;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
@@ -171,7 +172,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		if (component != null) {
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext) { // an edit view

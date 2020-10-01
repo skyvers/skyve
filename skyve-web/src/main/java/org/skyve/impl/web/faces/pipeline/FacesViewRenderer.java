@@ -191,7 +191,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderView(String icon16x16Url, String icon32x32Url) {
 	    // Ensure visibility is set for both create and edit views
         current = cb.view(null, createView ? "created" : "notCreated");
         facesView = current;
@@ -210,7 +210,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderedView(String icon16x16Url, String icon32x32Url) {
         // Add the toolbar(s) if this is a full view render or
         // a view with a widgetId = actions widgetId
         if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
@@ -245,6 +245,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
         				tabPane.getPercentageWidth(),
+        				tabPane.getSm(),
+        				tabPane.getMd(),
+        				tabPane.getLg(),
+        				tabPane.getXl(),
         				tabPane.getInvisibleConditionName());
 
 		// start rendering if appropriate
@@ -308,6 +312,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
+							vbox.getSm(),
+							vbox.getMd(),
+							vbox.getLg(),
+							vbox.getXl(),
 							vbox.getInvisibleConditionName());
 		}
 
@@ -327,6 +335,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
+							vbox.getSm(),
+							vbox.getMd(),
+							vbox.getLg(),
+							vbox.getXl(),
 							vbox.getInvisibleConditionName());
 
 			// start rendering if appropriate
@@ -364,6 +376,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
+							hbox.getSm(),
+							hbox.getMd(),
+							hbox.getLg(),
+							hbox.getXl(),
 							hbox.getInvisibleConditionName());
 		}
 
@@ -383,6 +399,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
+							hbox.getSm(),
+							hbox.getMd(),
+							hbox.getLg(),
+							hbox.getXl(),
 							hbox.getInvisibleConditionName());
 			
 			// start rendering if appropriate
@@ -420,6 +440,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
+							form.getSm(),
+							form.getMd(),
+							form.getLg(),
+							form.getXl(),
 							form.getInvisibleConditionName());
 		}
 
@@ -439,6 +463,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
+							form.getSm(),
+							form.getMd(),
+							form.getLg(),
+							form.getXl(),
 							form.getInvisibleConditionName());
 
 			// start rendering if appropriate
@@ -515,7 +543,11 @@ public class FacesViewRenderer extends ViewRenderer {
 								UIComponent component,
 								Integer pixelWidth,
 								Integer responsiveWidth,
-								Integer percentageWidth) {
+								Integer percentageWidth,
+								Integer sm,
+								Integer md,
+								Integer lg,
+								Integer xl) {
 		if (component == null) {
 			return;
 		}
@@ -547,7 +579,7 @@ public class FacesViewRenderer extends ViewRenderer {
 					children.add(component);
 				}
 				else {  // This must be a container (vbox, hbox etc)
-					addToContainer(component, pixelWidth, responsiveWidth, percentageWidth, widgetInvisible);
+					addToContainer(component, pixelWidth, responsiveWidth, percentageWidth, sm, md, lg, xl, widgetInvisible);
 					addedToContainer();
 				}
 			}
@@ -680,6 +712,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				c, 
 	    				button.getPixelWidth(), 
 	    				null, 
+	    				null,
+	    				null,
+	    				null,
+	    				null,
 	    				null);
 	}
 
@@ -693,7 +729,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				l, 
 	    				map.getPixelWidth(), 
 	    				map.getResponsiveWidth(),
-	    				map.getPercentageWidth());
+	    				map.getPercentageWidth(),
+	    				map.getSm(),
+	    				map.getMd(),
+	    				map.getLg(),
+	    				map.getXl());
 	}
 
 	@Override
@@ -706,7 +746,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				l, 
 	    				chart.getPixelWidth(), 
 	    				chart.getResponsiveWidth(),
-	    				chart.getPercentageWidth());
+	    				chart.getPercentageWidth(),
+	    				chart.getSm(),
+	    				chart.getMd(),
+	    				chart.getLg(),
+	    				chart.getXl());
 	}
 
 	@Override
@@ -733,6 +777,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(),
         				geometry.getPixelWidth(), 
         				null, 
+        				null,
+        				null,
+        				null,
+        				null,
         				null);
 	}
 	
@@ -764,6 +812,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(),
         				geometry.getPixelWidth(), 
         				null, 
+        				null,
+        				null,
+        				null,
+        				null,
         				null);
 	}
 
@@ -787,6 +839,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				bn, 
 	    				null, 
 	    				null, 
+	    				null,
+	    				null,
+	    				null,
+	    				null,
 	    				null);
 	}
 
@@ -806,6 +862,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							component, 
 							spacer.getPixelWidth(), 
 							null, 
+							null,
+							null,
+							null,
+							null,
 							null);
 		}
 	}
@@ -825,7 +885,11 @@ public class FacesViewRenderer extends ViewRenderer {
 						i, 
 						image.getPixelWidth(), 
 						image.getResponsiveWidth(),
-						image.getPercentageWidth());
+						image.getPercentageWidth(),
+						image.getSm(),
+						image.getMd(),
+						image.getLg(),
+						image.getXl());
 	}
 
 	@Override
@@ -848,7 +912,11 @@ public class FacesViewRenderer extends ViewRenderer {
 						i, 
 						image.getPixelWidth(), 
 						image.getResponsiveWidth(),
-						image.getPercentageWidth());
+						image.getPercentageWidth(),
+						image.getSm(),
+						image.getMd(),
+						image.getLg(),
+						image.getXl());
 	}
 
 	@Override
@@ -938,6 +1006,10 @@ public class FacesViewRenderer extends ViewRenderer {
 							component, 
 							link.getPixelWidth(), 
 							null, 
+							null,
+							null,
+							null,
+							null,
 							null);
 		}
 	}
@@ -970,6 +1042,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						c, 
 						blurb.getPixelWidth(), 
 						null, 
+						null,
+						null,
+						null,
+						null,
 						null);
 	}
 
@@ -1012,6 +1088,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				c, 
 	    				label.getPixelWidth(), 
 	    				null, 
+	    				null,
+	    				null,
+	    				null,
+	    				null,
 	    				null);
 	}
 
@@ -1025,6 +1105,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				p, 
 	    				progressBar.getPixelWidth(), 
 	    				null, 
+	    				null,
+	    				null,
+	    				null,
+	    				null,
 	    				null);
 	}
 
@@ -1039,8 +1123,17 @@ public class FacesViewRenderer extends ViewRenderer {
 										title,
 										grid,
 										user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
-										aggregateQuery);
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+										aggregateQuery,
+										locale);
+		addToContainer(l,
+						grid.getPixelWidth(),
+						grid.getResponsiveWidth(),
+						grid.getPercentageWidth(),
+						grid.getSm(),
+						grid.getMd(),
+						grid.getLg(),
+						grid.getXl(),
+						grid.getInvisibleConditionName());
 	}
 
 	@Override
@@ -1070,8 +1163,17 @@ public class FacesViewRenderer extends ViewRenderer {
 											repeater.getParameters(),
 											title,
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
-											Boolean.TRUE.equals(repeater.getShowGrid()));
-		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+											Boolean.TRUE.equals(repeater.getShowGrid()),
+											locale);
+		addToContainer(r,
+						repeater.getPixelWidth(),
+						repeater.getResponsiveWidth(),
+						repeater.getPercentageWidth(),
+						repeater.getSm(),
+						repeater.getMd(),
+						repeater.getLg(),
+						repeater.getXl(),
+						repeater.getInvisibleConditionName());
 	}
 
 	@Override
@@ -1094,7 +1196,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderTreeGrid(String title, TreeGrid grid) {
 		UIComponent l = cb.label(null, "treeGrid");
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
+		addToContainer(l,
+						grid.getPixelWidth(),
+						grid.getResponsiveWidth(),
+						grid.getPercentageWidth(),
+						grid.getSm(),
+						grid.getMd(),
+						grid.getLg(),
+						grid.getXl(),
+						grid.getInvisibleConditionName()); // TODO tree grid
 	}
 
 	@Override
@@ -1133,7 +1243,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Create the datagrid faces component
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		UIComponent g = cb.dataGrid(null, dataWidgetVar, ordered, title, grid);
-        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+        addToContainer(g,
+        				grid.getPixelWidth(),
+        				grid.getResponsiveWidth(),
+        				grid.getPercentageWidth(),
+        				grid.getSm(),
+        				grid.getMd(),
+        				grid.getLg(),
+        				grid.getXl(),
+        				grid.getInvisibleConditionName());
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
@@ -1153,7 +1271,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		dataWidgetBinding = repeater.getBinding();
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		UIComponent r = cb.dataRepeater(null, dataWidgetVar, title, repeater);
-        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+        addToContainer(r,
+        				repeater.getPixelWidth(),
+        				repeater.getResponsiveWidth(),
+        				repeater.getPercentageWidth(),
+        				repeater.getSm(),
+        				repeater.getMd(),
+        				repeater.getLg(),
+        				repeater.getXl(),
+        				repeater.getInvisibleConditionName());
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
@@ -1288,6 +1414,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						c.getComponent(), 
 						checkBox.getPixelWidth(), 
 						null,
+						null,
+						null,
+						null,
+						null,
 						null);
 	}
 
@@ -1305,7 +1435,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderCheckMembership(CheckMembership membership) {
         UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
-        addToContainer(c, null, null, null, membership.getInvisibleConditionName());
+        addToContainer(c, null, null, null, null, null, null, null, membership.getInvisibleConditionName());
 	}
 
 	@Override
@@ -1338,6 +1468,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						c.getComponent(), 
 						colour.getPixelWidth(), 
 						null, 
+						null,
+						null,
+						null,
+						null,
 						null);
 	}
 
@@ -1375,6 +1509,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						c.getComponent(), 
 						combo.getPixelWidth(), 
 						null, 
+						null,
+						null,
+						null,
+						null,
 						null);
 	}
 
@@ -1416,6 +1554,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c, 
         				image.getPixelWidth(), 
         				null, 
+        				null,
+        				null,
+        				null,
+        				null,
         				null);
 	}
 
@@ -1442,6 +1584,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						c, 
 						link.getPixelWidth(), 
 						null, 
+						null,
+						null,
+						null,
+						null,
 						null);
 	}
 
@@ -1468,15 +1614,27 @@ public class FacesViewRenderer extends ViewRenderer {
         				c, 
         				html.getPixelWidth(), 
         				null, 
+        				null,
+        				null,
+        				null,
+        				null,
         				null);
 	}
 
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		EventSourceComponent c = cb.listMembership(null, membership);
+		EventSourceComponent c = cb.listMembership(null, candidatesHeading, membersHeading, membership);
 		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
-		addToContainer(c.getComponent(), pixelWidth, null, null, membership.getInvisibleConditionName());
+		addToContainer(c.getComponent(),
+						pixelWidth,
+						null,
+						null,
+						null,
+						null,
+						null,
+						null,
+						membership.getInvisibleConditionName());
 	}
 
 	@Override
@@ -1488,7 +1646,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderComparison(Comparison comparison) {
         UIComponent c = cb.label(null, "comparison"); // TODO comparison
-        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
+        addToContainer(c,
+        				comparison.getPixelWidth(),
+        				comparison.getResponsiveWidth(),
+        				comparison.getPercentageWidth(),
+        				comparison.getSm(),
+        				comparison.getMd(),
+        				comparison.getLg(),
+        				comparison.getXl(),
+        				comparison.getInvisibleConditionName());
         addedToContainer();
 	}
 
@@ -1526,6 +1692,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(), 
         				lookup.getPixelWidth(), 
         				null, 
+        				null,
+        				null,
+        				null,
+        				null,
         				null);
 	}
 
@@ -1555,6 +1725,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						lookup.getInvisibleConditionName(), 
 						null,
 						c, 
+						null, 
+						null, 
+						null, 
+						null, 
 						null, 
 						null, 
 						null);
@@ -1589,6 +1763,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(), 
         				password.getPixelWidth(), 
         				null, 
+						null, 
+						null, 
+						null, 
+						null, 
         				null);
 	}
 
@@ -1625,6 +1803,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						getCurrentWidgetHelp(),
 						c.getComponent(), 
 						radio.getPixelWidth(), 
+						null, 
+						null, 
+						null, 
+						null, 
 						null, 
 						null);
 	}
@@ -1663,6 +1845,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(), 
         				text.getPixelWidth(), 
         				null, 
+						null, 
+						null, 
+						null, 
+						null, 
         				null);
 	}
 
@@ -1694,6 +1880,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c, 
         				slider.getPixelWidth(), 
         				null, 
+						null, 
+						null, 
+						null, 
+						null, 
         				null);
 	}
 
@@ -1740,6 +1930,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(), 
         				spinner.getPixelWidth(), 
         				null, 
+						null, 
+						null, 
+						null, 
+						null, 
         				null);
 	}
 
@@ -1785,6 +1979,10 @@ public class FacesViewRenderer extends ViewRenderer {
         				c.getComponent(), 
         				text.getPixelWidth(), 
         				null, 
+						null, 
+						null, 
+						null, 
+						null, 
         				null);
 	}
 
@@ -1859,6 +2057,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						getCurrentWidgetHelp(),
 						c.getComponent(), 
 						text.getPixelWidth(), 
+						null, 
+						null, 
+						null, 
+						null, 
 						null, 
 						null);
 	}
@@ -2051,6 +2253,10 @@ public class FacesViewRenderer extends ViewRenderer {
 									Integer pixelWidth,
 									Integer responsiveWidth,
 									Integer percentageWidth,
+									Integer sm,
+									Integer md,
+									Integer lg,
+									Integer xl,
 									String invisibleConditionName) {
 		Stack<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
@@ -2065,6 +2271,10 @@ public class FacesViewRenderer extends ViewRenderer {
 										pixelWidth,
 										responsiveWidth,
 										percentageWidth,
+										sm,
+										md,
+										lg,
+										xl,
 										invisibleConditionName);
 	}
 
@@ -2098,7 +2308,7 @@ public class FacesViewRenderer extends ViewRenderer {
 																dataWidgetVar,
 																action,
 																null,
-																action.getDisplayName()));
+																label));
 				}
 			}
 		}

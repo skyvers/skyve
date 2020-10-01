@@ -34,6 +34,10 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
+	private Integer sm;
+	private Integer md;
+	private Integer lg;
+	private Integer xl;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -163,6 +167,50 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(required = false)
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
+	}
+
+	@Override
+	public Integer getSm() {
+		return sm;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setSm(Integer sm) {
+		this.sm = sm;
+	}
+
+	@Override
+	public Integer getMd() {
+		return md;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setMd(Integer md) {
+		this.md = md;
+	}
+	
+	@Override
+	public Integer getLg() {
+		return lg;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setLg(Integer lg) {
+		this.lg = lg;
+	}
+
+	@Override
+	public Integer getXl() {
+		return xl;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setXl(Integer xl) {
+		this.xl = xl;
 	}
 
 	@Override

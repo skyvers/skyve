@@ -27,11 +27,13 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
 			
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>

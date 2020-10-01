@@ -27,7 +27,7 @@ public class ConfigurationExtension extends Configuration {
 	 * The minimum length for new passwords when one is not defined
 	 */
 	public static final int PASSWORD_DEFAULT_MIN_LENGTH = 10;
-
+	
 	/**
 	 * Generates a text description of the system password complexity to be shown to the
 	 * user if their entered password does not comply.
@@ -98,7 +98,7 @@ public class ConfigurationExtension extends Configuration {
 				return false;
 			}
 		}
-
+	
 		// if requires uppercase, check if it contains any
 		if (Boolean.TRUE.equals(getPasswordRequireUppercase())) {
 			if (!cleartext.matches("^(?=.*[A-Z]).{1,}$")) {
@@ -163,7 +163,7 @@ public class ConfigurationExtension extends Configuration {
 	 * @return
 	 */
 	public boolean validSelfRegistration() {
-		return (getUserSelfRegistrationGroup() != null && Boolean.TRUE.equals(getAllowUserSelfRegistration()));
+		return (getUserSelfRegistrationGroup() != null && UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION == true);
 	}
 
 	/**

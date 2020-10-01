@@ -16,29 +16,29 @@
 	</bizKey>
 	<attributes>
 		<text name="name" required="true">
-			<displayName>Name</displayName>
+			<displayName>admin.contact.name.displayName</displayName>
 			<index>textual</index>
 			<length>200</length>
 		</text>
 		<enum name="contactType">
-			<displayName>Contact Type</displayName>
-			<description>Whether this contact is a person or an organisation.</description>
+			<displayName>admin.contact.contactType.displayName</displayName>
+			<description>admin.contact.contactType.description</description>
 			<values>
 				<value code="Person"/>
 				<value code="Organisation"/>
 			</values>
 		</enum>
 		<text name="email1">
-			<displayName>Email</displayName>
+			<displayName>admin.contact.email1.displayName</displayName>
 			<length>500</length>
 			<validator type="email" />
 		</text>
 		<text name="mobile" >
-			<displayName>Mobile</displayName>
+			<displayName>admin.contact.mobile.displayName</displayName>
 			<length>20</length>
 		</text>
 		<image name="image">
-			<displayName>Image</displayName>
+			<displayName>admin.contact.image.displayName</displayName>
 		</image>
 	</attributes>
 </document>

@@ -56,6 +56,22 @@ span.right {
 		text-align: left;
 	}
 }
+@media (min-width: 768px) {
+	.rightFormLabelFlex {
+		text-align: right;
+	}
+	.centerFormLabelFlex {
+		text-align: center;
+	}
+}
+@media (max-width: 767px) {
+	.rightFormLabelFlex {
+		text-align: left;
+	}
+	.centerFormLabelFlex {
+		text-align: left;
+	}
+}
 
 /* data repeater */
 .repeater .ui-datatable-tablewrapper table tbody tr {
@@ -162,6 +178,10 @@ table td.shrink {
 /* Don't put a margin to the left for error message in form */
 .formMessageStyle {
 	margin-left: 0
+}
+/* Ensure that the error message has no padding when it is empty */
+.ui-message:empty {
+	padding: 0px;
 }
 /* For help icon */
 table td i.help {

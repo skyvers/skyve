@@ -326,6 +326,10 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 		}
 	}
 
+	public void nullAggregatedAssociation() {
+		this.aggregatedAssociation = null;
+	}
+
 	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.
@@ -624,7 +628,10 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 * @param element	The element to add.
 	 **/
 	public boolean addInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
-		boolean result = inverseAggregatedAssociation.add(element);
+		boolean result = false;
+		if (getElementById(inverseAggregatedAssociation, element.getBizId()) == null) {
+			result = inverseAggregatedAssociation.add(element);
+		}
 		element.setAggregatedAssociation(this);
 		return result;
 	}
@@ -646,7 +653,7 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	public boolean removeInverseAggregatedAssociationElement(AllAttributesRequiredPersistent element) {
 		boolean result = inverseAggregatedAssociation.remove(element);
 		if (result) {
-			element.setAggregatedAssociation(null);
+			element.nullAggregatedAssociation();
 		}
 		return result;
 	}
@@ -657,7 +664,7 @@ public class AllAttributesRequiredPersistent extends AbstractPersistentBean {
 	 **/
 	public AllAttributesRequiredPersistent removeInverseAggregatedAssociationElement(int index) {
 		AllAttributesRequiredPersistent result = inverseAggregatedAssociation.remove(index);
-		result.setAggregatedAssociation(null);
+		result.nullAggregatedAssociation();
 		return result;
 	}
 

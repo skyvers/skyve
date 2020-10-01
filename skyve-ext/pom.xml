@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>4.2.1-SNAPSHOT</version>
+		<version>5.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 
@@ -12,7 +12,7 @@
 		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
 	</build>
-	
+
 	<properties>
 		<commonmark.version>0.10.0</commonmark.version>
 	</properties>
@@ -118,8 +118,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>eu.bitwalker</groupId>
-			<artifactId>UserAgentUtils</artifactId>
+			<groupId>com.blueconic</groupId>
+			<artifactId>browscap-java</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -152,7 +152,15 @@
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-storage-blob</artifactId>
+			<version>12.8.0</version>
+			<scope>compile</scope>
+			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>

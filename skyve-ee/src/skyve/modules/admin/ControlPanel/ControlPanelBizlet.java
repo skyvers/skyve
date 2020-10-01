@@ -25,6 +25,8 @@ import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
+import modules.admin.domain.ModuleDocument;
+import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	private static final long serialVersionUID = -6033906392152210002L;
@@ -85,7 +87,8 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ControlPanelExtension bean) throws Exception {
-		// list documents within modules
+
+		// list documents within modules that have not already been selected
 		if (ControlPanel.testDocumentNamesPropertyName.equals(attributeName)) {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> results = new ArrayList<>();
@@ -94,8 +97,20 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
 					if (document.getPersistent() != null) {
-						// only add persistent documents
-						results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+						
+						// check this is not already selected
+						boolean alreadySelected = false;
+						for (ModuleDocument n : bean.getTestDocumentNames()) {
+							if(documentName.equals(n.getDocumentName())){
+								alreadySelected = true;
+								break;
+							}
+						}
+						
+						if(!alreadySelected) {
+							// only add persistent documents
+							results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+						}
 					}
 				}
 
@@ -148,5 +163,16 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 		return null;
 	}
+
+	@Override
+	public List<String> complete(String attributeName, String value, ControlPanelExtension bean) throws Exception {
+		
+		if(ControlPanel.testTagNamePropertyName.equals(attributeName)) {
+			return ModulesUtil.getCompleteSuggestions(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, Tag.namePropertyName,value);
+		}
+		
+		return super.complete(attributeName, value, bean);
+	}
+	
 	
 }

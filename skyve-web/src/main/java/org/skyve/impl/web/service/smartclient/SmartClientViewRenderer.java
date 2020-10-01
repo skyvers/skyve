@@ -137,7 +137,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderView(String icon16x16Url, String icon32x32Url) {
 		UtilImpl.LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
 		if (noCreateView) {
 			containerVariables.push("view");
@@ -157,7 +157,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedView(String title, String icon16x16Url, String icon32x32Url) {
+	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		containerVariables.pop();
 		if (! noCreateView) {
 			if (ViewType.edit.toString().equals(view.getName())) {

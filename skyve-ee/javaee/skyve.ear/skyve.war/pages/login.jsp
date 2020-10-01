@@ -44,6 +44,9 @@
 	String userFieldName = "user";
 
 	boolean mobile = UserAgent.getType(request).isMobile();
+	
+	// is self-registration enabled
+	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -66,8 +69,7 @@
 			<meta name="format-detection" content="email=no">
 		<% } %>
 
-		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
-		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
+		<%@include file="fragments/favicon.html" %>
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
 	    
 	    <%@include file="fragments/styles.html" %>
@@ -75,6 +77,7 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script type="text/javascript" src="prime/skyve-min.js"></script>
 
 		<script type="text/javascript">
 			<!--
@@ -126,6 +129,7 @@
 			            }
 			        }
 			    });
+			    SKYVE.Util.setTouchCookie();
 			});
 			-->
 		</script>
@@ -196,11 +200,16 @@
 						<% } %>
 		                <div class="field">
 		                    <div class="ui left icon input">
+	                    	<% if(allowRegistration) { %>
+	                    		<i class="envelope icon"></i>
+	                    		<input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.email.label", locale)%>">
+	                    	<% } else { %>
 		                        <i class="user icon"></i>
 		                        <input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.user.label", locale)%>">
-		                        <% if (customer != null) { %>
-									<input type="hidden" name="customer" value="<%=customer%>" />
-								<% } %>
+							<% } %>
+							<% if (customer != null) { %>
+								<input type="hidden" name="customer" value="<%=customer%>" />
+							<% } %>
 		                    </div>
 		                </div>
 		                <div class="field">
@@ -227,6 +236,11 @@
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
+		        <% if(allowRegistration && customer != null) { %>
+				<div class="ui message">
+					<%=Util.i18n("page.login.register.label.pre", locale)%> <a href="?a=e&m=admin&d=SelfRegistration"><%=Util.i18n("page.login.register.label.post", locale)%></a>
+			    </div>	        
+			    <% } %>
 		    </div>
 		</div>
 	</body>

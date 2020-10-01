@@ -60,6 +60,11 @@ public class SQLMetaDataUtil {
 	
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	
+	// resend activation email properties
+	public static final String RESEND_ACTIVATION_ACTION_NAME = "ResendActivation";
+	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
+	public static final String USER_PROPERTY_NAME = "user";
+
 	public static void populateUser(User user) {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			populateUser(user, connection);

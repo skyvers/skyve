@@ -6,7 +6,7 @@
 	<component name="_emailNotConfiguredBanner" />
 	<component name="_backupsNotConfiguredBanner" />
 	
-	<form border="true" borderTitle="Password Complexity">
+	<form border="true" borderTitle="admin.configuration.tabGeneral.passwordComplexity.borderTitle">
 		<column responsiveWidth="3" />
 		<column responsiveWidth="2" />
 		<column responsiveWidth="3" />
@@ -63,7 +63,7 @@
 	
 	<!-- test email has a different component for desktop and external -->
 	<component name="_testEmail" />
-	<vbox border="true" borderTitle="Test Email" shrinkWrap="height" invisible="emailConfigured">
+	<vbox border="true" borderTitle="admin.configuration.tabGeneral.testEmail.borderTitle" shrinkWrap="height" invisible="emailConfigured">
 		<blurb pixelHeight="20">
 			<![CDATA[<em>Email must be configured before Test Email can be used.</em>]]>
 		</blurb>
@@ -71,29 +71,36 @@
 	
 	<!-- password reset has a different component for desktop and external -->
 	<component name="_passwordReset" />
-	<vbox border="true" borderTitle="Password Reset" shrinkWrap="height" invisible="emailConfigured">
+	<vbox border="true" borderTitle="admin.configuration.tabGeneral.passwordReset.borderTitle" shrinkWrap="height" invisible="emailConfigured">
 		<blurb pixelHeight="20">
 			<![CDATA[<em>Email must be configured before Password Reset can be customised.</em>]]>
 		</blurb>
 	</vbox>
 	
-	<form border="true" borderTitle="User Self-Registration">
+	<form border="true" borderTitle="admin.configuration.tabGeneral.userSelfRegistration.borderTitle">
 		<column responsiveWidth="3"/>
+		<column responsiveWidth="1"/>
 		<column />
+		<column responsiveWidth="3"/>
 		<column responsiveWidth="1"/>
 		<row>
-			<item>
+			<item showLabel="true" label="User Self-Registration Enabled">
+				<blurb>{startup.accountAllowUserSelfRegistration}</blurb>
+			</item>
+		</row>
+		<row>
+			<item colspan="2">
 				<default binding="userSelfRegistrationGroup" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="allowUserSelfRegistration" />
+				<default binding="selfRegistrationActivationExpiryHours" />
 			</item>
 		</row>
 	</form>
 	
-	<form border="true" borderTitle="Anonymous Public User">
+	<form border="true" borderTitle="admin.configuration.tabGeneral.anonymousPublicUser.borderTitle">
 		<column responsiveWidth="3"/>
 		<column />
 		<column responsiveWidth="1"/>

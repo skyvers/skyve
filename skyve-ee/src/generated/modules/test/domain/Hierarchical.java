@@ -136,7 +136,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 	public List<Hierarchical> getChildren() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(Hierarchical.MODULE_NAME, Hierarchical.DOCUMENT_NAME);
-		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);
+		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());
 		return q.beanResults();
 	}
 }

@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 
@@ -23,7 +24,8 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		if (component != null) {
 			((DataTable) component).setStickyHeader(true);
 		}
@@ -39,7 +41,8 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid) {
+										boolean showGrid,
+										Locale locale) {
 		if (component != null) {
 			((DataTable) component).setStickyHeader(true);
 		}

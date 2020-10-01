@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.Locale;
+
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.api.UIData;
@@ -19,7 +21,8 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		if (component != null) {
 			UIData dt = (UIData) component;
 			dt.setPaginator(true);

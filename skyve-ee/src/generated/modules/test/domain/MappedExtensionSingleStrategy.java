@@ -140,6 +140,10 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 		}
 	}
 
+	public void nullAggregatedAssociation() {
+		this.aggregatedAssociation = null;
+	}
+
 	/**
 	 * {@link #aggregatedCollection} accessor.
 	 * @return	The value.
@@ -292,7 +296,10 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	 * @param element	The element to add.
 	 **/
 	public boolean addInverseAggregatedAssociationElement(MappedExtensionSingleStrategyExtension element) {
-		boolean result = inverseAggregatedAssociation.add(element);
+		boolean result = false;
+		if (getElementById(inverseAggregatedAssociation, element.getBizId()) == null) {
+			result = inverseAggregatedAssociation.add(element);
+		}
 		element.setAggregatedAssociation((MappedExtensionSingleStrategyExtension) this);
 		return result;
 	}
@@ -314,7 +321,7 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	public boolean removeInverseAggregatedAssociationElement(MappedExtensionSingleStrategyExtension element) {
 		boolean result = inverseAggregatedAssociation.remove(element);
 		if (result) {
-			element.setAggregatedAssociation(null);
+			element.nullAggregatedAssociation();
 		}
 		return result;
 	}
@@ -325,7 +332,7 @@ public abstract class MappedExtensionSingleStrategy extends MappedBase {
 	 **/
 	public MappedExtensionSingleStrategyExtension removeInverseAggregatedAssociationElement(int index) {
 		MappedExtensionSingleStrategyExtension result = inverseAggregatedAssociation.remove(index);
-		result.setAggregatedAssociation(null);
+		result.nullAggregatedAssociation();
 		return result;
 	}
 

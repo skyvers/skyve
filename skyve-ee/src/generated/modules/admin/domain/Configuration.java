@@ -1,6 +1,9 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -10,11 +13,14 @@ import modules.admin.Startup.StartupExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Setup
  * 
+ * @depend - - - PasswordComplexityModel
  * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
@@ -56,7 +62,10 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
 	/** @hidden */
-	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
+	/** @hidden */
+	@Deprecated
+	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
 	/** @hidden */
@@ -81,134 +90,226 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String startupPropertyName = "startup";
 
 	/**
-	 * Minimum Password Length
+	 * Password Complexity
 	 * <br/>
-	 * The minimum number of characters for new passwords
+	 * The security level/complexity model for user passwords
+	 * <br/>
+	 * Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.
+	 **/
+	@XmlEnum
+	public static enum PasswordComplexityModel implements Enumeration {
+		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
+		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
+		goodMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Good - min 8 chars, upper, lower, numeric and punctuation"),
+		strongMin10CharsUpperLowerNumericAndPunctuation("STRONG", "Strong - min 10 chars, upper, lower, numeric and punctuation");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private PasswordComplexityModel(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static PasswordComplexityModel fromCode(String code) {
+			PasswordComplexityModel result = null;
+
+			for (PasswordComplexityModel value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static PasswordComplexityModel fromDescription(String description) {
+			PasswordComplexityModel result = null;
+
+			for (PasswordComplexityModel value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				PasswordComplexityModel[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (PasswordComplexityModel value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * admin.configuration.passwordMinLength.displayName
+	 * <br/>
+	 * admin.configuration.passwordMinLength.description
 	 **/
 	private Integer passwordMinLength = new Integer(10);
 	/**
-	 * Requires Lowercase
+	 * admin.configuration.passwordRequireLowercase.displayName
 	 * <br/>
-	 * If new passwords should require at least one lowercase character
+	 * admin.configuration.passwordRequireLowercase.description
 	 **/
 	private Boolean passwordRequireLowercase;
 	/**
-	 * Requires Uppercase
+	 * admin.configuration.passwordRequireUppercase.displayName
 	 * <br/>
-	 * If new passwords should require at least one uppercase character
+	 * admin.configuration.passwordRequireUppercase.description
 	 **/
 	private Boolean passwordRequireUppercase;
 	/**
-	 * Requires Numeric Characters
+	 * admin.configuration.passwordRequireNumeric.displayName
 	 * <br/>
-	 * If new passwords should require at least one numeric character
+	 * admin.configuration.passwordRequireNumeric.description
 	 **/
 	private Boolean passwordRequireNumeric;
 	/**
-	 * Requires Special Characters
+	 * admin.configuration.passwordRequireSpecial.displayName
 	 * <br/>
-	 * If new passwords should require at least one special character
+	 * admin.configuration.passwordRequireSpecial.description
 	 **/
 	private Boolean passwordRequireSpecial;
 	/**
-	 * Password Rule Description
+	 * admin.configuration.passwordRuleDescription
 	 * <br/>
 	 * A text description which can be shown to the user if their password does not comply
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
 	 **/
 	private String passwordRuleDescription;
 	/**
-	 * Sender/From Email Address
+	 * admin.configuration.fromEmail.displayName
 	 * <br/>
-	 * Email Address that all email's that the system sends will be sent from.
+	 * admin.configuration.fromEmail.description
 	 **/
 	private String fromEmail;
 	/**
-	 * Password Reset Email Subject
+	 * admin.configuration.passwordResetEmailSubject.displayName
 	 * <br/>
-	 * The subject of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
+	 * admin.configuration.passwordResetEmailSubject.description
 	 **/
 	private String passwordResetEmailSubject;
 	/**
-	 * Password Reset Email Body
+	 * admin.configuration.passwordResetEmailBody.displayName
 	 * <br/>
-	 * The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
+	 * admin.configuration.passwordResetEmailBody.description
 	 **/
 	private String passwordResetEmailBody;
 	/**
-	 * User Self Registration Group
+	 * admin.configuration.association.userSelfRegistrationGroup.displayName
 	 * <br/>
-	 * The user group which specifies role-access for self-registering users.
-			<br/>
-			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
+	 * admin.configuration.association.userSelfRegistrationGroup.description
 	 **/
 	private GroupExtension userSelfRegistrationGroup = null;
 	/**
-	 * Allow User Self Registration
+	 * admin.configuration.selfRegistrationActivationExpiryHours.displayName
 	 * <br/>
-	 * Master switch to allow or disallow self registration.
+	 * admin.configuration.selfRegistrationActivationExpiryHours.description
 	 **/
-	private Boolean allowUserSelfRegistration;
+	private Integer selfRegistrationActivationExpiryHours;
 	/**
-	 * Anonymous Public User
+	 * Password Complexity
 	 * <br/>
-	 * The anonymous public user asserted on all public pages.
+	 * The security level/complexity model for user passwords
+	 * <br/>
+	 * Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.
+	 **/
+	@Deprecated
+	private PasswordComplexityModel passwordComplexityModel;
+	/**
+	 * admin.configuration.association.publicUser.displayName
+	 * <br/>
+	 * admin.configuration.association.publicUser.description
 	 **/
 	private UserProxyExtension publicUser = null;
 	/**
-	 * Email From
+	 * admin.configuration.emailFrom.displayName
 	 **/
 	private String emailFrom;
 	/**
-	 * Email To
+	 * admin.configuration.emailTo.displayName
 	 **/
 	private String emailTo;
 	/**
-	 * Email Subject
+	 * admin.configuration.emailSubject.displayName
 	 **/
 	private String emailSubject;
 	/**
-	 * Email
+	 * admin.configuration.emailContent.displayName
 	 **/
 	private String emailContent;
 	/**
-	 * Password Expiry in Days
+	 * admin.configuration.passwordExpiryDays.displayName
 	 * <br/>
-	 * Number of days until a password change is required. Blank indicates no password aging.
+	 * admin.configuration.passwordExpiryDays.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordExpiryDays;
 	/**
-	 * Password History Retention
+	 * admin.configuration.passwordHistoryRetention.displayName
 	 * <br/>
-	 * Number of previous passwords to check for duplicates. Blank indicates no password history.
+	 * admin.configuration.passwordHistoryRetention.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordHistoryRetention;
 	/**
-	 * Account Lockout Threshold
+	 * admin.configuration.passwordAccountLockoutThreshold.displayName
 	 * <br/>
-	 * Number of sign in attempts until the user account is locked. Blank indicates no account lockout.
+	 * admin.configuration.passwordAccountLockoutThreshold.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutThreshold;
 	/**
-	 * Account Lockout Duration
+	 * admin.configuration.passwordAccountLockoutDuration.displayName
 	 * <br/>
-	 * Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.
+	 * admin.configuration.passwordAccoutnLockoutDuration.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutDuration;
 	/**
-	 * Email To Contact
+	 * admin.configuration.association.emailToContact.displayName
 	 **/
 	private Contact emailToContact = null;
 	/**
-	 * Startup
+	 * admin.configuration.association.startup.displayName
 	 **/
 	private StartupExtension startup = null;
 
@@ -437,21 +538,41 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #allowUserSelfRegistration} accessor.
+	 * {@link #selfRegistrationActivationExpiryHours} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getAllowUserSelfRegistration() {
-		return allowUserSelfRegistration;
+	public Integer getSelfRegistrationActivationExpiryHours() {
+		return selfRegistrationActivationExpiryHours;
 	}
 
 	/**
-	 * {@link #allowUserSelfRegistration} mutator.
-	 * @param allowUserSelfRegistration	The new value.
+	 * {@link #selfRegistrationActivationExpiryHours} mutator.
+	 * @param selfRegistrationActivationExpiryHours	The new value.
 	 **/
 	@XmlElement
-	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
-		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
-		this.allowUserSelfRegistration = allowUserSelfRegistration;
+	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
+		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
+		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #passwordComplexityModel} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public PasswordComplexityModel getPasswordComplexityModel() {
+		return passwordComplexityModel;
+	}
+
+	/**
+	 * {@link #passwordComplexityModel} mutator.
+	 * @param passwordComplexityModel	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {
+		preset(passwordComplexityModelPropertyName, passwordComplexityModel);
+		this.passwordComplexityModel = passwordComplexityModel;
 	}
 
 	/**

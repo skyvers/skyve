@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 
@@ -474,7 +475,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -486,7 +488,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										title,
 										listGrid,
 										canCreateDocument,
-										aggregateQuery);
+										aggregateQuery,
+										locale);
 		}
 		return result;
 	}
@@ -500,7 +503,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid) {
+										boolean showGrid,
+										Locale locale) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listRepeater(result,
@@ -511,16 +515,20 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											parameters,
 											title,
 											showColumnHeaders,
-											showGrid);
+											showGrid,
+											locale);
 		}
 		return result;
 	}
 
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component, ListMembership membership) {
+	public EventSourceComponent listMembership(EventSourceComponent component,
+												String candidatesHeading,
+												String membersHeading,
+												ListMembership membership) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.listMembership(result, membership);
+			result = builder.listMembership(result, candidatesHeading, membersHeading, membership);
 		}
 		return result;
 	}

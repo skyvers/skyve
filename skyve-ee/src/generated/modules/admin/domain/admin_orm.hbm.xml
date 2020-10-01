@@ -124,7 +124,12 @@
 		<property name="passwordResetEmailSubject" length="250" />
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
-		<property name="allowUserSelfRegistration" />
+		<property name="selfRegistrationActivationExpiryHours" />
+		<property name="passwordComplexityModel" length="7">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
+			</type>
+		</property>
 		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -336,9 +341,9 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="bizOrdinal" />
 		<many-to-one name="parent" entity-name="adminImportExport" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ImportExportColumn_parent" />
-		<property name="columnName" length="100" />
-		<property name="bindingName" length="100" />
-		<property name="bindingExpression" length="200" />
+		<property name="columnName" length="500" />
+		<property name="bindingName" length="200" />
+		<property name="bindingExpression" length="500" />
 		<property name="loadAction" length="8">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.ImportExportColumn$LoadAction</param>
@@ -636,6 +641,9 @@
 			<one-to-many entity-name="adminUserRole" />
 		</bag>
 		<property name="inactive" />
+		<property name="activated" />
+		<property name="activationCode" length="36" />
+		<property name="activationCodeCreationDateTime" type="DateTime" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>
 		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

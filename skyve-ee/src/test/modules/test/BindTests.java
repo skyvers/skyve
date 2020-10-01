@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.CORE;
 import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
@@ -234,5 +235,47 @@ public class BindTests extends AbstractSkyveTest {
 	public void testDanglingMessageFormat() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Assert.assertEquals("{text", Binder.formatMessage(c, "{text", aap));
+	}
+	
+	@Test
+	public void testExpressions() throws Exception {
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 2);
+		bean.setText("Test");
+		CORE.getStash().put("text", "Test");
+		CORE.getUser().getAttributes().put("text", "Test");
+		
+		Assert.assertEquals("TestUser", Binder.formatMessage(c, "{USER}", bean));
+		Assert.assertEquals("TestUser", Binder.formatMessage(c, "{USERID}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{USERNAME}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{DATAGROUPID}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{CONTACTID}", bean));
+		Assert.assertEquals("bizhub", Binder.formatMessage(c, "{CUSTOMER}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{DATE}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{TIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{DATETIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{TIMESTAMP}", bean));
+		
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{ text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean:text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean: text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean : text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:bean.text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:stash['text']}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:user.attributes['text']}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{el:stash['nothing']}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{el:user.attributes['nothing']}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATE}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATE.set(DATE.toLocalDate().plusDays(1))}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:TIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATETIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:TIMESTAMP}", bean));
+		Assert.assertEquals("some.non-existent.key", Binder.formatMessage(c, "{i18n:some.non-existent.key}", bean));
+		Assert.assertEquals("Yes", Binder.formatMessage(c, "{role:admin.BasicUser}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{stash:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{stash:nothing}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage(c, "{user:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage(c, "{user:nothing}", bean));
+		
 	}
 }

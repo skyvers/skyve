@@ -84,6 +84,10 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param pixelWidth
 	 * @param responsiveWidth
 	 * @param percentageWidth
+	 * @param sm
+	 * @param md
+	 * @param lg
+	 * @param xl
 	 * @param invisibleConditionName
 	 * @return	The new current component to continue processing with.
 	 */
@@ -94,6 +98,10 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												Integer pixelWidth, 
 												Integer responsiveWidth,
 												Integer percentageWidth,
+												Integer sm,
+												Integer md,
+												Integer lg,
+												Integer xl,
 												String invisibleConditionName);
 	
 	/**

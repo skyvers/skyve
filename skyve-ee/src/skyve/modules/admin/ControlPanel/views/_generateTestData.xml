@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Control Panel" name="_generateTestData" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" borderTitle="Generate Test Data">
+	<vbox border="true" borderTitle="admin.controlPanel.generateTestData.generateTestData.borderTitle">
 		<form>
 			<column responsiveWidth="3" />
 			<column pixelWidth="50" />
@@ -18,7 +18,7 @@
 				</item>
 			</row>
 		</form>
-		<listMembership binding="testDocumentNames" candidatesHeading="Available Documents" membersHeading="Documents to Create" />
+		<listMembership binding="testDocumentNames" candidatesHeading="admin.controlPanel.generateTestData.testDocumentNames.candidatesHeading" membersHeading="admin.controlPanel.generateTestData.testDocumentNames.membersHeading" />
 		<!-- requires GenerateTestData action to be defined -->
 		<vbox widgetId="generationParameters">
 			<form>
@@ -30,6 +30,9 @@
 				<row>
 					<item colspan="3">
 						<default binding="testNumberToGenerate" />
+					</item>
+					<item align="right">
+						<button action="GenerateTestData" pixelWidth="200" />
 					</item>
 				</row>
 				<row>
@@ -45,10 +48,10 @@
 						</checkBox>
 					</item>
 					<item>
-						<textField binding="testTagName" enabled="taggingGeneratedDataSelected" />
+						<textField binding="testTagName" complete="suggest"/>
 					</item>
 					<item align="right">
-						<button action="GenerateTestData" pixelWidth="200" />
+						<button action="DeleteTestData" pixelWidth="200" />
 					</item>
 				</row>
 			</form>

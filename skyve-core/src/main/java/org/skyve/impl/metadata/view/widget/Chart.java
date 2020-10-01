@@ -25,6 +25,10 @@ import org.skyve.metadata.view.Invisible;
 							"modelName",
 							"pixelWidth", 
 							"responsiveWidth",
+							"sm",
+							"md",
+							"lg",
+							"xl",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -49,6 +53,10 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
+	private Integer sm;
+	private Integer md;
+	private Integer lg;
+	private Integer xl;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -115,6 +123,50 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 		this.responsiveWidth = responsiveWidth;
 	}
 
+	@Override
+	public Integer getSm() {
+		return sm;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setSm(Integer sm) {
+		this.sm = sm;
+	}
+
+	@Override
+	public Integer getMd() {
+		return md;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setMd(Integer md) {
+		this.md = md;
+	}
+	
+	@Override
+	public Integer getLg() {
+		return lg;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setLg(Integer lg) {
+		this.lg = lg;
+	}
+
+	@Override
+	public Integer getXl() {
+		return xl;
+	}
+	
+	@Override
+	@XmlAttribute(required = false)
+	public void setXl(Integer xl) {
+		this.xl = xl;
+	}
+	
 	@Override
 	public Integer getPercentageWidth() {
 		return percentageWidth;

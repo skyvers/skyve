@@ -710,8 +710,8 @@ public class DesignSpecification {
 	
 	public void addJoin(String documentName, String alias, String join){
 		if(joins==null){
-			joins = new HashMap<String, String>();
-			joinAlias = new HashMap<String, String>();
+			joins = new HashMap<>();
+			joinAlias = new HashMap<>();
 		}
 		joins.put(documentName, join);
 		joinAlias.put(join, alias);

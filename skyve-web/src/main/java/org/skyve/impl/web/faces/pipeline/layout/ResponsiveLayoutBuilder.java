@@ -14,14 +14,17 @@ import org.primefaces.component.message.Message;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
@@ -42,7 +45,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	@Override
 	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
-		div.setStyleClass("ui-g-12");
+		div.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
 		div.getChildren().add(toolbarsOrLayouts.get(0));
 		view.getChildren().add(0, div);
 	}
@@ -53,7 +56,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveColumn(null, Integer.valueOf(12), null, null, true);
+		HtmlPanelGroup result = responsiveColumn(null, Integer.valueOf(12), null, null, null, null, null, null, true);
+		if (UtilImpl.PRIMEFLEX) {
+			result.setStyleClass(result.getStyleClass() + " p-col-nogutter");
+		}
+		return result;
 	}
 	
 	@Override
@@ -62,7 +69,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(null, null);
+		return responsiveContainer(null, null, null, null);
 	}
 	
 	@Override
@@ -71,7 +78,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(vbox.getInvisibleConditionName(), vbox.getWidgetId());
+		return responsiveContainer(vbox.getVerticalAlignment(),
+									vbox.getHorizontalAlignment(),
+									vbox.getInvisibleConditionName(),
+									vbox.getWidgetId());
 	}
 	
 	@Override
@@ -80,7 +90,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			return component;
 		}
 
-		return responsiveContainer(hbox.getInvisibleConditionName(), hbox.getWidgetId());
+		return responsiveContainer(hbox.getVerticalAlignment(),
+									hbox.getHorizontalAlignment(),
+									hbox.getInvisibleConditionName(),
+									hbox.getWidgetId());
 	}
 
 	@Override
@@ -91,6 +104,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										Integer pixelWidth, 
 										Integer responsiveWidth,
 										Integer percentageWidth,
+										Integer sm,
+										Integer md,
+										Integer lg,
+										Integer xl,
 										String widgetInvisible) {
 		if (component != null) {
 			return component;
@@ -137,13 +154,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 						unsizedCols++;
 					}
 				}
-				else {
+				else if (! (contained instanceof Inject)) { // inject takes up no layout
 					unsizedCols++;
 				}
 			}
 			mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
 		}
-		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, widgetInvisible, nopad);
+		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, sm, md, lg, xl, widgetInvisible, nopad);
 		div.getChildren().add(componentToAdd);
 		container.getChildren().add(div);
 		return componentToAdd;
@@ -170,7 +187,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		addResponsiveStyles(grid);
 		
 		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName(), form.getWidgetId());
-		result.setStyleClass("ui-g ui-g-nopad ui-fluid");
+		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid p-nogutter ui-fluid" : "ui-g ui-g-nopad ui-fluid");
 		return result;
 	}
 
@@ -210,14 +227,22 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 									ef.createValueExpression(elc, expression, String.class));
 		return result;
 	}
-	
+
+	/**
+	 * Overridden to add an extra <div class="ui-g or p-grid" /> to support responsive nesting.
+	 */
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
 		if (component != null) {
 			return component;
 		}
 
-		return rowLayout.getParent();
+		HtmlPanelGroup grid = panelGroup(false, false, true, null, null);
+		grid.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
+		rowLayout.getChildren().add(grid);
+		formLayout.getChildren().add(rowLayout);
+
+		return grid;
 	}
 
 	// respect responsive width if it is defined in this renderer
@@ -338,48 +363,119 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			result = alignment.toAlignmentString();
 		}
 
-		return (forFormLabel ? (result + "FormLabel") : result);
+		if (forFormLabel) {
+			result = result + (UtilImpl.PRIMEFLEX ? "FormLabelFlex" : "FormLabel");
+		}
+		return result;
 	}
 	
-	private HtmlPanelGroup responsiveContainer(String invisibleConditionName, String widgetId) {
+	private HtmlPanelGroup responsiveContainer(VerticalAlignment vertical,
+												HorizontalAlignment horizontal,
+												String invisibleConditionName,
+												String widgetId) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleConditionName, null);
-		result.setStyleClass("ui-g");
+		if (UtilImpl.PRIMEFLEX) {
+			String styleClass = "p-grid";
+			if (vertical == VerticalAlignment.top) {
+				styleClass += " p-align-start";
+			}
+			else if (vertical == VerticalAlignment.middle) {
+				styleClass += " p-align-center";
+			}
+			else if (vertical == VerticalAlignment.bottom) {
+				styleClass += " p-align-end";
+			}
+			
+			if (horizontal == HorizontalAlignment.centre) {
+				styleClass += " p-justify-center";
+			}
+			else if (horizontal == HorizontalAlignment.right) {
+				styleClass += " p-justify-end";
+			}
+
+			result.setStyleClass(styleClass);
+		}
+		else {
+			result.setStyleClass("ui-g");
+		}
+		
 		return result;
 	}
 
 	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
 												Integer responsiveWidth, 
-												Integer percentageWidth, 
+												Integer percentageWidth,
+												Integer sm,
+												Integer md,
+												Integer lg,
+												Integer xl,
 												String widgetInvisible,
 												boolean nopad) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
-		String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth);
-		if (responsiveGridStyleClasses != null) {
-			result.setStyleClass(nopad ? responsiveGridStyleClasses + " ui-g-nopad" : responsiveGridStyleClasses);
+		if (UtilImpl.PRIMEFLEX && (pixelWidth != null)) {
+			result.setStyleClass("p-col-fixed");
+			result.setStyle(new StringBuilder(16).append("width:").append(pixelWidth).append("px").toString());
+		}
+		else {
+			String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth, sm, md, lg, xl);
+			if (responsiveGridStyleClasses != null) {
+				if (nopad && (! UtilImpl.PRIMEFLEX)) {
+					result.setStyleClass(responsiveGridStyleClasses + " ui-g-nopad");
+				}
+				else {
+					result.setStyleClass(responsiveGridStyleClasses);
+				}
+			}
 		}
 		setInvisible(result, widgetInvisible, null);
 		return result;
 	}
 
-	private static String responsiveGridStyleClasses(Integer pixelWidth, Integer responsiveWidth, Integer percentageWidth) {
+	private static String responsiveGridStyleClasses(Integer pixelWidth,
+														Integer responsiveWidth,
+														Integer percentageWidth,
+														Integer sm,
+														Integer md,
+														Integer lg,
+														Integer xl) {
+		int small = 12;
+		int medium = 12;
+		int large = 12;
+		int extraLarge = 12;
+		
 		if (responsiveWidth != null) {
-			int width = responsiveWidth.intValue();
-			return new ResponsiveGridStyle(width, width).toString();
+			medium = responsiveWidth.intValue();
+			large = medium;
+			extraLarge = medium;
 		}
 		else if (pixelWidth != null) {
 			double width = pixelWidth.doubleValue();
-			int medium = LayoutUtil.pixelWidthToMediumResponsiveWidth(width);
-			int large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
-			return new ResponsiveGridStyle(medium, large).toString();
+			medium = LayoutUtil.pixelWidthToMediumResponsiveWidth(width);
+			large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
+			extraLarge = large;
 		}
 		else if (percentageWidth != null) {
-			int width = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
-			return new ResponsiveGridStyle(width, width).toString();
+			medium = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
+			large = medium;
+			extraLarge = medium;
 		}
-		
-		return "ui-g-12";
+
+		if (sm != null) {
+			small = sm.intValue();
+		}
+		if (md != null) {
+			medium = md.intValue();
+		}
+		if (lg != null) {
+			large = lg.intValue();
+		}
+		if (xl != null) {
+			extraLarge = xl.intValue();
+		}
+
+		return new ResponsiveGridStyle(small, medium, large, extraLarge).toString();
 	}
 	
 	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
@@ -395,29 +491,56 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			FormColumn formColumn = formColumns.get(i);
 			Integer pixelWidth = formColumn.getPixelWidth();
 			Integer responsiveWidth = formColumn.getResponsiveWidth();
+			Integer sm = formColumn.getSm();
+			Integer md = formColumn.getMd();
+			Integer lg = formColumn.getLg();
+			Integer xl = formColumn.getXl();
 			Integer percentageWidth = formColumn.getPercentageWidth();
+
+			int small = 12;
+			int medium = 0;
+			int large = 0;
+			int extraLarge = 0;
+			boolean sized = true;
+			
 			if (responsiveWidth != null) {
-				int width = responsiveWidth.intValue();
-				mediumColsRemaining -= width;
-				largeColsRemaining -= width;
-				result[i] = new ResponsiveGridStyle(width, width);
+				medium = responsiveWidth.intValue();
+				large = medium;
+				extraLarge = medium;
 			}
 			else if (pixelWidth != null) {
 				double width = pixelWidth.doubleValue();
-				int medium = LayoutUtil.pixelWidthToMediumResponsiveWidth(width);
-				int large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
-				mediumColsRemaining -= medium;
-				largeColsRemaining -= large;
-				result[i] = new ResponsiveGridStyle(medium, large);
+				medium = LayoutUtil.pixelWidthToMediumResponsiveWidth(width);
+				large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
+				extraLarge = large;
 			}
 			else if (percentageWidth != null) {
-				int cols = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
-				mediumColsRemaining -= cols;
-				largeColsRemaining -= cols;
-				result[i] = new ResponsiveGridStyle(cols, cols);
+				medium = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
+				large = medium;
+				extraLarge = medium;
 			}
 			else {
+				sized = false;
 				unsizedCols++;
+			}
+			
+			if (sized) {
+				if (sm != null) {
+					small = sm.intValue();
+				}
+				if (md != null) {
+					medium = md.intValue();
+				}
+				if (lg != null) {
+					large = lg.intValue();
+				}
+				if (xl != null) {
+					extraLarge = xl.intValue();
+				}
+
+				mediumColsRemaining -= medium;
+				largeColsRemaining -= large;
+				result[i] = new ResponsiveGridStyle(small, medium, large, extraLarge);
 			}
 		}
 
@@ -427,7 +550,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 			for (int i = 0, l = formColumns.size(); i < l; i++) {
 				if (result[i] == null) {
-					result[i] = new ResponsiveGridStyle(medium, large);
+					result[i] = new ResponsiveGridStyle(12, medium, large, large);
 				}
 			}
 		}

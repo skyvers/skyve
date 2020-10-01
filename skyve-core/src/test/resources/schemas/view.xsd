@@ -219,6 +219,10 @@
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -937,6 +941,10 @@
     <xs:attribute name="relativeFile" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -958,8 +966,10 @@
         <xs:attribute name="borderTitle" type="xs:string"/>
         <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="lg" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
         <xs:attribute name="minPixelHeight" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="percentageHeight" type="xs:int"/>
@@ -970,9 +980,11 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
+        <xs:attribute name="sm" type="xs:int"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="xl" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -987,8 +999,10 @@
         <xs:attribute name="borderTitle" type="xs:string"/>
         <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="lg" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
         <xs:attribute name="minPixelHeight" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="percentageHeight" type="xs:int"/>
@@ -999,9 +1013,11 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
+        <xs:attribute name="sm" type="xs:int"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="xl" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1015,6 +1031,10 @@
     <xs:attribute name="widgetId" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1035,9 +1055,13 @@
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="formRow">
@@ -1158,6 +1182,10 @@
         <xs:attribute name="type" type="tns:geometryInputType"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1345,6 +1373,10 @@
     <xs:attribute name="widgetId" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1385,6 +1417,10 @@
     <xs:attribute name="modelName" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1481,6 +1517,10 @@
     <xs:attribute name="showRefreshControls" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1508,6 +1548,10 @@
     <xs:attribute name="imageInitialPixelHeight" type="xs:int"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1567,6 +1611,10 @@
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1667,6 +1715,10 @@
         <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1799,6 +1851,10 @@
     <xs:attribute name="postRefresh" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>

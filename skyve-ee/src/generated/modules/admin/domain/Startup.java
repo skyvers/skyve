@@ -73,6 +73,8 @@ public abstract class Startup extends AbstractTransientBean {
 	/** @hidden */
 	public static final String apiGoogleRecaptchaKeyPropertyName = "apiGoogleRecaptchaKey";
 	/** @hidden */
+	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
+	/** @hidden */
 	public static final String apiTwilioSIDPropertyName = "apiTwilioSID";
 	/** @hidden */
 	public static final String apiTwilioAuthTokenPropertyName = "apiTwilioAuthToken";
@@ -256,11 +258,17 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	private String apiGoogleRecaptchaKey;
 	/**
+	 * admin.startup.accountAllowUserSelfRegistration.displayName
+	 * <br/>
+	 * admin.startup.accountAllowUserSelfRegistration.description
+	 **/
+	private Boolean accountAllowUserSelfRegistration;
+	/**
 	 * Account SID
 	 **/
 	private String apiTwilioSID;
 	/**
-	 * Account SID
+	 * Account Auth Token
 	 **/
 	private String apiTwilioAuthToken;
 	/**
@@ -592,6 +600,24 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setApiGoogleRecaptchaKey(String apiGoogleRecaptchaKey) {
 		preset(apiGoogleRecaptchaKeyPropertyName, apiGoogleRecaptchaKey);
 		this.apiGoogleRecaptchaKey = apiGoogleRecaptchaKey;
+	}
+
+	/**
+	 * {@link #accountAllowUserSelfRegistration} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getAccountAllowUserSelfRegistration() {
+		return accountAllowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #accountAllowUserSelfRegistration} mutator.
+	 * @param accountAllowUserSelfRegistration	The new value.
+	 **/
+	@XmlElement
+	public void setAccountAllowUserSelfRegistration(Boolean accountAllowUserSelfRegistration) {
+		preset(accountAllowUserSelfRegistrationPropertyName, accountAllowUserSelfRegistration);
+		this.accountAllowUserSelfRegistration = accountAllowUserSelfRegistration;
 	}
 
 	/**

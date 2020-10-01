@@ -59,8 +59,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "24";
-	public static final String SKYVE_VERSION = "4.2.1-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "28";
+	public static final String SKYVE_VERSION = "5.0.2-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -214,6 +214,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
 	// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+	// Enables new users to register for an account when true, requires email
+	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
@@ -223,6 +225,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_USER = null;
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
+	
+	public static boolean PRIMEFLEX = true;
 	
 	// for skyve script
 	/**

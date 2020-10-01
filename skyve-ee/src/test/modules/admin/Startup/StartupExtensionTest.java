@@ -55,7 +55,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationEmptyPropertiesDoesntWrite() throws Exception {
+	public void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
 		// setup mocks
 		Mockito.doNothing().when(bean).writeConfiguration(anyString());
 
@@ -63,7 +63,7 @@ public class StartupExtensionTest {
 		bean.saveConfiguration();
 
 		// verify
-		Mockito.verify(bean, times(0)).writeConfiguration(anyString());
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
 	}
 	
 	@Test

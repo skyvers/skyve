@@ -261,6 +261,10 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										Integer pixelWidth,
 										Integer responsiveWidth,
 										Integer percentageWidth,
+										Integer sm,
+										Integer md,
+										Integer lg,
+										Integer xl,
 										String invisibleConditionName) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
@@ -271,6 +275,10 @@ public class LayoutBuilderChain extends LayoutBuilder {
 												pixelWidth,
 												responsiveWidth,
 												percentageWidth,
+												sm,
+												md,
+												lg,
+												xl,
 												invisibleConditionName);
 		}
 		return result;

@@ -12,115 +12,124 @@
 	<bizKey expression="Admin Setup"/>
 	<attributes>
 		<integer name="passwordMinLength" required="true">
-			<displayName>Minimum Password Length</displayName>
-			<description>The minimum number of characters for new passwords</description>
+			<displayName>admin.configuration.passwordMinLength.displayName</displayName>
+			<description>admin.configuration.passwordMinLength.description</description>
 			<defaultValue>10</defaultValue>
 			<validator min="1"/>
 		</integer>
 		<boolean name="passwordRequireLowercase">
-			<displayName>Requires Lowercase</displayName>
-			<description>If new passwords should require at least one lowercase character</description>
+			<displayName>admin.configuration.passwordRequireLowercase.displayName</displayName>
+			<description>admin.configuration.passwordRequireLowercase.description</description>
 		</boolean>
 		<boolean name="passwordRequireUppercase">
-			<displayName>Requires Uppercase</displayName>
-			<description>If new passwords should require at least one uppercase character</description>
+			<displayName>admin.configuration.passwordRequireUppercase.displayName</displayName>
+			<description>admin.configuration.passwordRequireUppercase.description</description>
 		</boolean>
 		<boolean name="passwordRequireNumeric">
-			<displayName>Requires Numeric Characters</displayName>
-			<description>If new passwords should require at least one numeric character</description>
+			<displayName>admin.configuration.passwordRequireNumeric.displayName</displayName>
+			<description>admin.configuration.passwordRequireNumeric.description</description>
 		</boolean>
 		<boolean name="passwordRequireSpecial">
-			<displayName>Requires Special Characters</displayName>
-			<description>If new passwords should require at least one special character</description>
+			<displayName>admin.configuration.passwordRequireSpecial.displayName</displayName>
+			<description>admin.configuration.passwordRequireSpecial.description</description>
 		</boolean>
 		<text name="passwordRuleDescription" audited="false" persistent="false" trackChanges="false" usage="both">
 			<documentation>A text description which can be shown to the user if their password does not comply
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.</documentation>
-			<displayName>Password Rule Description</displayName>
+			<displayName>admin.configuration.passwordRuleDescription</displayName>
 			<length>250</length>
 		</text>
 		
 		<text name="fromEmail" required="true">
-			<displayName>Sender/From Email Address</displayName>
-			<description>Email Address that all email's that the system sends will be sent from.</description>
+			<displayName>admin.configuration.fromEmail.displayName</displayName>
+			<description>admin.configuration.fromEmail.description</description>
 			<length>254</length>
 			<validator type="email" />
 		</text>
 		<text name="passwordResetEmailSubject" required="true">
-			<displayName>Password Reset Email Subject</displayName>
-			<description>The subject of the password reset email to be sent to clients.  Bindings are allowed relative to the User.</description>
+			<displayName>admin.configuration.passwordResetEmailSubject.displayName</displayName>
+			<description>admin.configuration.passwordResetEmailSubject.description</description>
 			<length>250</length>
 		</text>
 		<markup name="passwordResetEmailBody" required="true">
-			<displayName>Password Reset Email Body</displayName>
-			<description>The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.</description>
+			<displayName>admin.configuration.passwordResetEmailBody.displayName</displayName>
+			<description>admin.configuration.passwordResetEmailBody.description</description>
 		</markup>
 		<association type="aggregation" name="userSelfRegistrationGroup">
-			<displayName>User Self Registration Group</displayName>
-			<description><![CDATA[
-			The user group which specifies role-access for self-registering users.
-			<br/>
-			To disable self-registration, leave this group unselected, or select a group with minimal access permissions.
-			]]></description>
+			<displayName>admin.configuration.association.userSelfRegistrationGroup.displayName</displayName>
+			<description>admin.configuration.association.userSelfRegistrationGroup.description</description>
 			<documentName>Group</documentName>
 		</association>
-		<boolean name="allowUserSelfRegistration">
-			<displayName>Allow User Self Registration</displayName>
-			<description>Master switch to allow or disallow self registration.</description>
-		</boolean>
+		<integer name="selfRegistrationActivationExpiryHours">
+			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
+			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
+		</integer>
+		
+		<enum name="passwordComplexityModel" required="false" deprecated="true">
+			<documentation>Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatability during Restore.</documentation>
+ 			<displayName>Password Complexity</displayName>
+ 			<description>The security level/complexity model for user passwords</description>
+ 			<values>
+ 				<value code="MINIMUM" description="Minimum - min 6 chars"/>
+ 				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
+ 				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
+ 				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
+ 			</values>
+		</enum>
 		
 		<association name="publicUser" type="aggregation">
-			<displayName>Anonymous Public User</displayName>
-			<description>The anonymous public user asserted on all public pages.</description>
+			<displayName>admin.configuration.association.publicUser.displayName</displayName>
+			<description>admin.configuration.association.publicUser.description</description>
 			<documentName>UserProxy</documentName>
 		</association>
 		
 		<!-- non-persistent configuration attributes -->
 		<text name="emailFrom" persistent="false">
-			<displayName>Email From</displayName>
+			<displayName>admin.configuration.emailFrom.displayName</displayName>
 			<length>254</length>
 		</text>
 		<text name="emailTo" persistent="false">
-			<displayName>Email To</displayName>
+			<displayName>admin.configuration.emailTo.displayName</displayName>
 			<length>254</length>
 		</text>
 		<text name="emailSubject" persistent="false">
-			<displayName>Email Subject</displayName>
+			<displayName>admin.configuration.emailSubject.displayName</displayName>
 			<length>128</length>
 		</text>
 		<markup name="emailContent" persistent="false">
-			<displayName>Email</displayName>
+			<displayName>admin.configuration.emailContent.displayName</displayName>
 		</markup>
 		<text name="passwordExpiryDays" audited="false" persistent="false" trackChanges="false" usage="view">
 			<documentation>Read from the application JSON file set at system startup.</documentation>
-			<displayName>Password Expiry in Days</displayName>
-			<description>Number of days until a password change is required. Blank indicates no password aging.</description>
+			<displayName>admin.configuration.passwordExpiryDays.displayName</displayName>
+			<description>admin.configuration.passwordExpiryDays.description</description>
 			<length>20</length>
 		</text>
 		<text name="passwordHistoryRetention" audited="false" persistent="false" trackChanges="false" usage="view">
 			<documentation>Read from the application JSON file set at system startup.</documentation>
-			<displayName>Password History Retention</displayName>
-			<description>Number of previous passwords to check for duplicates. Blank indicates no password history.</description>
+			<displayName>admin.configuration.passwordHistoryRetention.displayName</displayName>
+			<description>admin.configuration.passwordHistoryRetention.description</description>
 			<length>20</length>
 		</text>
 		<text name="passwordAccountLockoutThreshold" audited="false" persistent="false" trackChanges="false" usage="view">
 			<documentation>Read from the application JSON file set at system startup.</documentation>
-			<displayName>Account Lockout Threshold</displayName>
-			<description>Number of sign in attempts until the user account is locked. Blank indicates no account lockout.</description>
+			<displayName>admin.configuration.passwordAccountLockoutThreshold.displayName</displayName>
+			<description>admin.configuration.passwordAccountLockoutThreshold.description</description>
 			<length>20</length>
 		</text>
 		<text name="passwordAccountLockoutDuration" audited="false" persistent="false" trackChanges="false" usage="view">
 			<documentation>Read from the application JSON file set at system startup.</documentation>
-			<displayName>Account Lockout Duration</displayName>
-			<description>Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.</description>
+			<displayName>admin.configuration.passwordAccountLockoutDuration.displayName</displayName>
+			<description>admin.configuration.passwordAccoutnLockoutDuration.description</description>
 			<length>20</length>
 		</text>
 		<association name="emailToContact" type="aggregation" persistent="false">
-			<displayName>Email To Contact</displayName>
+			<displayName>admin.configuration.association.emailToContact.displayName</displayName>
 			<documentName>Contact</documentName>
 		</association>
 		<association name="startup" type="aggregation" persistent="false">
-			<displayName>Startup</displayName>
+			<displayName>admin.configuration.association.startup.displayName</displayName>
 			<documentName>Startup</documentName>
 		</association>
 	</attributes>

@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.Locale;
+
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.column.Column;
@@ -19,7 +21,8 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery) {
+									boolean aggregateQuery,
+									Locale locale) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column) {

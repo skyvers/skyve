@@ -109,25 +109,29 @@ public abstract class ViewRenderer extends ViewVisitor {
 		locale = user.getLocale();
 	}
 
-	private String viewTitle;
 	private String viewIcon16x16Url;
 	private String viewIcon32x32Url;
 	
 	@Override
 	public final void visitView() {
-		renderView(viewTitle, viewIcon16x16Url, viewIcon32x32Url);
+		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
+		String viewIcon32x32 = view.getIcon32x32RelativeFileName();
+		viewIcon32x32Url = iconToUrl((viewIcon32x32 == null) ? document.getIcon32x32RelativeFileName() : viewIcon32x32);
+		renderView(viewIcon16x16Url, viewIcon32x32Url);
 		currentContainers.push(view);
 	}
 
-	public abstract void renderView(String title, String icon16x16Url, String icon32x32Url);
+	// NB View titles are evaluated dynamically for a view
+	public abstract void renderView(String icon16x16Url, String icon32x32Url);
 	
 	@Override
 	public final void visitedView() {
-		renderedView(viewTitle, viewIcon16x16Url, viewIcon32x32Url);
+		renderedView(viewIcon16x16Url, viewIcon32x32Url);
 		currentContainers.pop();
 	}
 
-	public abstract void renderedView(String title, String icon16x16Url, String icon32x32Url);
+	// NB View titles are evaluated dynamically for a view
+	public abstract void renderedView(String icon16x16Url, String icon32x32Url);
 	
 	private TabPane currentTabPane;
 	public TabPane getCurrentTabPane() {

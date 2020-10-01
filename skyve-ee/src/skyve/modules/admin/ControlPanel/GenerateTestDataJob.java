@@ -18,7 +18,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.PushMessage;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.DocumentName;
+import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class GenerateTestDataJob extends CancellableJob {
@@ -38,7 +38,7 @@ public class GenerateTestDataJob extends CancellableJob {
 		int failed = 0;
 		int size = bean.getTestDocumentNames().size() * bean.getTestNumberToGenerate().intValue();
 		
-		for (DocumentName docName : bean.getTestDocumentNames()) {
+		for (ModuleDocument docName : bean.getTestDocumentNames()) {
 			for (int i = 0; i < bean.getTestNumberToGenerate().intValue(); i++) {
 				try {
 					Module module = customer.getModule(docName.getModuleName());
@@ -68,14 +68,14 @@ public class GenerateTestDataJob extends CancellableJob {
 		}
 	
 		setPercentComplete(100);
-		int successful = (bean.getTestNumberToGenerate() * bean.getTestDocumentNames().size()) - failed;
+		int successful = (bean.getTestNumberToGenerate().intValue() * bean.getTestDocumentNames().size()) - failed;
 		log.add("Finished Generate Test Data job at " + new Date());
 		log.add(successful + " Documents successfully created, " + failed + " failed.");
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
-				String.format("%d Documents successfully created", successful)));
+				String.format("%d Documents successfully created", new Integer(successful))));
 	}
 
-	private Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {
+	private static Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {
 		Tag tag = null;
 
 		if (Boolean.TRUE.equals(bean.getTestTagGeneratedData())) {
