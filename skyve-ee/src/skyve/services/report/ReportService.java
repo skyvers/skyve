@@ -22,6 +22,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
@@ -325,7 +326,10 @@ public class ReportService {
 
 	public Template getTemplate(final String templateName)
 			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateModelException {
-		return getInstance().getTemplate(templateName);
+		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
+		Template t = getInstance().getTemplate(templateName);
+		CORE.getPersistence().resetDocumentPermissionScopes();
+		return t;
 	}
 
 	/**
@@ -345,8 +349,9 @@ public class ReportService {
 		Map<String, Object> root = new HashMap<>();
 
 		// if any parameters were passed in, overwrite any with the same name in the template
+		List<ReportParameterExtension> parameters = reportTemplate.getParameters();
 		if (reportParameters != null) {
-			for (ReportParameterExtension param : reportTemplate.getParameters()) {
+			for (ReportParameterExtension param : parameters) {
 				if (reportParameters.containsKey(param.getName())) {
 					param.setReportInputValue((String) reportParameters.get(param.getName()));
 				}
@@ -354,7 +359,7 @@ public class ReportService {
 		}
 
 		// put the parameters into the root
-		root.put("reportParameters", reportTemplate.getParameters());
+		root.put("reportParameters", parameters);
 
 		// put all the datasets into the root
 		for (ReportDatasetExtension dataset : reportTemplate.getDatasets()) {
@@ -386,7 +391,9 @@ public class ReportService {
 		Template template = getTemplate(reportName);
 
 		try (StringWriter sw = new StringWriter()) {
+			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 			template.process(root, sw);
+			CORE.getPersistence().resetDocumentPermissionScopes();
 			return sw.toString();
 		}
 	}
@@ -443,9 +450,11 @@ public class ReportService {
 	 * @return The ReportTemplate, if one is found
 	 */
 	private ReportTemplate retrieveReportTemplate(final String templateName) {
+		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
 		q.getFilter().addEquals(ReportTemplate.templateNamePropertyName, templateName);
 		ReportTemplate template = q.beanResult();
+		CORE.getPersistence().resetDocumentPermissionScopes();
 
 		if (template == null) {
 			throw new DomainException(String.format("No report template with the name '%s' could be found", templateName));
