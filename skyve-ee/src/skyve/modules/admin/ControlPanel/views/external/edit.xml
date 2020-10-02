@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Control Panel"
+<view title="admin.controlPanel.edit.title"
 		name="edit"
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
