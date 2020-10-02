@@ -23,10 +23,10 @@
 		
 			<title>Skyve</title>
 			<base href="#{bean.baseHref}" />
-<!-- normally commented out for security reasons
+			<!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
--->
-			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+			-->
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
 			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
