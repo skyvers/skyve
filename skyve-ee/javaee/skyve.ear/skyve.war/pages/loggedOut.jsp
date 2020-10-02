@@ -37,6 +37,7 @@
 		<link rel="stylesheet" href="semantic24/semantic.min.css">
 		
 		<%@include file="fragments/styles.html" %>
+		<%@include file="fragments/backgroundImage.html" %>
 	</head>
 	<body>
 		<%

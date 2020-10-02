@@ -73,6 +73,7 @@
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
 	    
 	    <%@include file="fragments/styles.html" %>
+	    <%@include file="fragments/backgroundImage.html" %>
 		
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
