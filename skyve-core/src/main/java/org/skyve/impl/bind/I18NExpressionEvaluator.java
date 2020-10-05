@@ -2,6 +2,9 @@ package org.skyve.impl.bind;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
 class I18NExpressionEvaluator extends ExpressionEvaluator {
@@ -15,5 +18,10 @@ class I18NExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	public String formatWithoutPrefix(String expression, Bean bean) {
 		return Util.i18n(expression, CORE.getUser().getLocale());
+	}
+	
+	@Override
+	public boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+		return true;
 	}
 }

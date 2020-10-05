@@ -276,6 +276,48 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("", Binder.formatMessage(c, "{stash:nothing}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage(c, "{user:text}", bean));
 		Assert.assertEquals("", Binder.formatMessage(c, "{user:nothing}", bean));
+	}
+	
+	@Test
+	public void testExpressionValidation() throws Exception {
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USER}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USERID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USERNAME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATAGROUPID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{CONTACTID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{CUSTOMER}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATE}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATETIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIMESTAMP}"));
 		
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{ text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean: text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean : text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:bean.text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:stash['text']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:user.attributes['text']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:stash['nothing']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:user.attributes['nothing']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATE}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATE.set(DATE.toLocalDate().plusDays(1))}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:TIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATETIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:TIMESTAMP}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{i18n:some.non-existent.key}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{role:admin.BasicUser}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{stash:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{stash:nothing}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{user:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{user:nothing}"));
+		
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "}"));
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{}"));
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{text\\}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{{text}"));
 	}
 }

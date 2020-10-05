@@ -1224,7 +1224,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		Module module = getModule(customer, document.getOwningModuleName());
 		String bizKeyExpression = ((DocumentImpl) document).getBizKeyExpression();
 		if (bizKeyExpression != null) {
-			if (! BindUtil.messageBindingsAreValid(customer, module, document, bizKeyExpression)) {
+			if (! BindUtil.messageExpressionsAreValid(customer, module, document, bizKeyExpression)) {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier);
 			}
 		}
@@ -1339,7 +1339,7 @@ public class LocalDesignRepository extends AbstractRepository {
 			Module owningModule = getModule(customer, document.getOwningModuleName());
 			for (UniqueConstraint constraint : constraints) {
 				String message = constraint.getMessage();
-				if (! BindUtil.messageBindingsAreValid(customer, owningModule, document, message)) {
+				if (! BindUtil.messageExpressionsAreValid(customer, owningModule, document, message)) {
 					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
 							constraint.getName() + " in document " + documentIdentifier);
 				}

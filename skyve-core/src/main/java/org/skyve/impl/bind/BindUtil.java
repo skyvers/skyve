@@ -155,7 +155,7 @@ public final class BindUtil {
 		return bound;
 	}
 	
-	public static boolean messageBindingsAreValid(Customer customer, Module module, Document document, String message) {
+	public static boolean messageExpressionsAreValid(Customer customer, Module module, Document document, String message) {
 		boolean valid = true;
 		
 		StringBuilder result = new StringBuilder(message);
@@ -175,17 +175,8 @@ public final class BindUtil {
 						valid = false;
 					}
 					else {
-						try {
-							// Check the binding in this bean
-							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-							if (target == null) {
-								valid = false;
-							}
-							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
-						}
-						catch (@SuppressWarnings("unused") Exception e) {
-							valid = false;
-						}
+						valid = ExpressionEvaluator.validate(binding, customer, module, document);
+						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 					}
 				}
 			}
