@@ -20,7 +20,11 @@ public interface ExternalBackup {
 	 */
 	@SuppressWarnings("unchecked")
 	static Map<String, Object> getProperties() {
-		return (Map<String, Object>) UtilImpl.CONFIGURATION.get("backup");
+		if (UtilImpl.CONFIGURATION != null) {
+			return (Map<String, Object>) UtilImpl.CONFIGURATION.get("backup");
+		}
+
+		return null;
 	}
 
 	/**
