@@ -138,7 +138,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/thumbnailator-0.4.8.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-core-1.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-parsers-1.5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/UserAgentUtils-1.20.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.1-tests.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-tika-0.1.jar"/>
