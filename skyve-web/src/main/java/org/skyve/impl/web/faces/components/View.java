@@ -13,7 +13,6 @@ import javax.faces.context.FacesContext;
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -31,6 +30,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {

@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.web.UserAgentType;
 
 /**
  * Push a new list automation context onto the stack.

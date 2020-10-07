@@ -11,7 +11,6 @@ import javax.faces.context.FacesContext;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
@@ -25,6 +24,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(ListGrid.COMPONENT_TYPE)
 public class ListGrid extends HtmlPanelGroup {

@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.web;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;

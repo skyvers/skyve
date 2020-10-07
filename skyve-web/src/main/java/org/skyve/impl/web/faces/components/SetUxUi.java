@@ -11,10 +11,10 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(SetUxUi.COMPONENT_TYPE)
 public class SetUxUi extends UIComponentBase {

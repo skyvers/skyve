@@ -1,7 +1,6 @@
 package org.skyve.impl.metadata.view.reference;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -10,6 +9,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.web.UserAgentType;
 
 public abstract class ReferenceProcessor {
 	public final void process(Reference reference) {

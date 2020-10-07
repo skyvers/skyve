@@ -7,13 +7,13 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.user.User;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;

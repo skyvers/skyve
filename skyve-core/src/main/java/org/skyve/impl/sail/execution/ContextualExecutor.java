@@ -4,7 +4,6 @@ import java.util.Stack;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -20,6 +19,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.web.UserAgentType;
 
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
 	private String currentUxUi = null;

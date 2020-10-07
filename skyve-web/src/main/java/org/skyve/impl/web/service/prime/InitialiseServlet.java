@@ -21,7 +21,6 @@ import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -33,6 +32,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 public class InitialiseServlet extends HttpServlet {
 	private static final long serialVersionUID = -1850794772969374823L;

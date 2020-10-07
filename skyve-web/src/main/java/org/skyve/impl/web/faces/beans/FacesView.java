@@ -29,7 +29,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
@@ -60,6 +59,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @ViewScoped
 @ManagedBean(name = "skyve")

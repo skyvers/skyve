@@ -3,10 +3,10 @@ package modules.admin.ControlPanel.actions;
 import java.util.List;
 
 import org.skyve.impl.generate.sail.Generator;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.user.User;
+import org.skyve.web.UserAgentType;
 
 public class GenerateMenuSAIL extends GenerateSAIL {
 	private static final long serialVersionUID = 3235202497294674514L;

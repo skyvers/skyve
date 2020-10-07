@@ -9,13 +9,13 @@ import javax.faces.context.FacesContext;
 
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(Map.COMPONENT_TYPE)
 public class Map extends HtmlPanelGroup {

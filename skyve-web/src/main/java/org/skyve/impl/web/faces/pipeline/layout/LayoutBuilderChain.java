@@ -11,8 +11,8 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.web.UserAgentType;
 
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
