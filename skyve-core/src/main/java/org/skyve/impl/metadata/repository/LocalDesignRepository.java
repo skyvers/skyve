@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
@@ -76,7 +77,7 @@ import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Binder.TargetMetaData;
 
 /**
- * Do not instantiate directly, use the RepositoryFactory.
+ * Do not instantiate directly, use CORE.getRepository().
  * 
  * @author Mike
  */
@@ -85,6 +86,15 @@ public class LocalDesignRepository extends AbstractRepository {
 	 * The cache. MetaData File Location -> MetaData
 	 */
 	private Map<String, MetaData> cache = new HashMap<>();
+
+	
+	public LocalDesignRepository() {
+		super();
+	}
+
+	public LocalDesignRepository(String absolutePath) {
+		super(absolutePath);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -160,7 +170,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	@Override
 	public Router getGlobalRouter() {
 		StringBuilder sb = new StringBuilder(256);
-		sb.append(UtilImpl.getAbsoluteBasePath());
+		sb.append(absolutePath);
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
 		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
 	}
@@ -175,7 +185,7 @@ public class LocalDesignRepository extends AbstractRepository {
 			final Customer customer = getCustomer(customerName);
 			for (Module module : customer.getModules()) {
 				final StringBuilder sb = new StringBuilder(256);
-				sb.append(UtilImpl.getAbsoluteBasePath());
+				sb.append(absolutePath);
 				sb.append(MODULES_NAMESPACE).append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
 				if (new File(sb.toString()).exists()) {
 					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this));
@@ -197,7 +207,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				if (result == null) {
 					try {
 						StringBuilder sb = new StringBuilder(256);
-						sb.append(UtilImpl.getAbsoluteBasePath());
+						sb.append(absolutePath);
 						sb.append(CUSTOMERS_NAMESPACE);
 						sb.append(customerName).append('/').append(customerName).append(".xml");
 						CustomerMetaData customer = XMLMetaData.unmarshalCustomer(sb.toString());
@@ -208,6 +218,9 @@ public class LocalDesignRepository extends AbstractRepository {
 						result = customer.convert(customerName, this);
 						populateVTable((CustomerImpl) result);
 						put(customerKey, result);
+					}
+					catch (SkyveException e) {
+						throw e;
 					}
 					catch (Exception e) {
 						throw new MetaDataException(e);
@@ -223,7 +236,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>();
 		
-		File customersDirectory = new File(UtilImpl.getAbsoluteBasePath() + CUSTOMERS_NAMESPACE);
+		File customersDirectory = new File(absolutePath + CUSTOMERS_NAMESPACE);
 		if (customersDirectory.exists() && customersDirectory.isDirectory()) {
 			for (File customerDirectory : customersDirectory.listFiles()) {
 				if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
@@ -239,7 +252,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>();
 
-		File modulesDirectory = new File(UtilImpl.getAbsoluteBasePath() + MODULES_NAMESPACE);
+		File modulesDirectory = new File(absolutePath + MODULES_NAMESPACE);
 		if (modulesDirectory.exists() && modulesDirectory.isDirectory()) {
 			for (File moduleDirectory : modulesDirectory.listFiles()) {
 				if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
@@ -291,7 +304,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		sb.append(MODULES_NAMESPACE).append(moduleName);
 		String moduleLocation = sb.toString();
 		sb.setLength(0);
-		sb.append(UtilImpl.getAbsoluteBasePath());
+		sb.append(absolutePath);
 		sb.append(moduleLocation).append('/');
 		sb.append(moduleName).append(".xml");
 		File moduleFile = new File(sb.toString());
@@ -302,7 +315,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		else {
 			moduleLocation = MODULES_NAMESPACE + moduleName;
 			sb.setLength(0);
-			sb.append(UtilImpl.getAbsoluteBasePath());
+			sb.append(absolutePath);
 			sb.append(moduleLocation).append('/');
 			sb.append(moduleName).append(".xml");
 			moduleFile = new File(sb.toString());
@@ -312,7 +325,7 @@ public class LocalDesignRepository extends AbstractRepository {
 			}
 			else {
 				throw new MetaDataException("Cannot determine the location of module " + moduleName + 
-												" for customer " + customer.getName() + "(base path is " + UtilImpl.getAbsoluteBasePath() + ')');
+												" for customer " + customer.getName() + "(base path is " + absolutePath + ')');
 			}
 		}
 	}
@@ -321,7 +334,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder sb = new StringBuilder(256);
 		Map<String, String> vtable = customer.getVTable();
 		
-		File customerModuleDirectory = new File(UtilImpl.getAbsoluteBasePath() + moduleLocation);
+		File customerModuleDirectory = new File(absolutePath + moduleLocation);
 		if (customerModuleDirectory.exists() && customerModuleDirectory.isDirectory()) {
 			for (File moduleFile : customerModuleDirectory.listFiles()) {
 				String moduleFileName = moduleFile.getName();
@@ -535,7 +548,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				if (result == null) {
 					try {
 						StringBuilder sb = new StringBuilder(256);
-						sb.append(UtilImpl.getAbsoluteBasePath());
+						sb.append(absolutePath);
 						sb.append(moduleLocation).append('/');
 						sb.append(moduleName).append(".xml");
 						ModuleMetaData module = XMLMetaData.unmarshalModule(sb.toString());
@@ -548,6 +561,9 @@ public class LocalDesignRepository extends AbstractRepository {
 						sb.append(moduleName).append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
 						result = module.convert(sb.toString(), this);
 						put(moduleLocation, result);
+					}
+					catch (SkyveException e) {
+						throw e;
 					}
 					catch (Exception e) {
 						throw new MetaDataException(e);
@@ -594,7 +610,7 @@ public class LocalDesignRepository extends AbstractRepository {
 					try {
 						DocumentImpl internalResult = null;
 						sb.setLength(0);
-						sb.append(UtilImpl.getAbsoluteBasePath());
+						sb.append(absolutePath);
 						sb.append(documentLocation).append('/');
 						sb.append(documentName).append(".xml");
 						DocumentMetaData document = XMLMetaData.unmarshalDocument(sb.toString());
@@ -645,6 +661,9 @@ public class LocalDesignRepository extends AbstractRepository {
 
 						put(documentLocation, result);
 					} // try (populate Metadata)
+					catch (MetaDataException e) {
+						throw e;
+					}
 					catch (Exception e) {
 						throw new MetaDataException(e);
 					}
@@ -723,7 +742,7 @@ public class LocalDesignRepository extends AbstractRepository {
 					if (result == null) {
 						try {
 							sb.setLength(0);
-							sb.append(UtilImpl.getAbsoluteBasePath());
+							sb.append(absolutePath);
 							sb.append(viewLocation).append(".xml");
 							ViewMetaData view = XMLMetaData.unmarshalView(sb.toString());
 							if (! name.equals(view.getName())) {
@@ -740,7 +759,7 @@ public class LocalDesignRepository extends AbstractRepository {
 								put(viewLocation, result);
 							}
 						}
-						catch (MetaDataException e) {
+						catch (SkyveException e) {
 							throw e;
 						}
 						catch (Exception e) {

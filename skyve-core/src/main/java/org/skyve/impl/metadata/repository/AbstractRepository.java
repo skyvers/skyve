@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -29,11 +30,23 @@ import org.skyve.metadata.view.View;
 public abstract class AbstractRepository implements Repository {
 	private static AbstractRepository repository;
 
+	protected String absolutePath;
+	
+	/**
+	 * Prevent external instantiation.
+	 */
+	protected AbstractRepository(String absolutePath) {
+		this.absolutePath = absolutePath.replace('\\', '/');
+		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
+			this.absolutePath += '/';
+		}
+	}
+	
 	/**
 	 * Prevent external instantiation.
 	 */
 	protected AbstractRepository() {
-		// noop
+		this.absolutePath = UtilImpl.getAbsoluteBasePath();
 	}
 
 	public static AbstractRepository get() {
@@ -160,6 +173,9 @@ public abstract class AbstractRepository implements Repository {
 					BeanProvider.injectFields(result);
 				}
 			}
+			catch (SkyveException e) {
+				throw e;
+			}
 			catch (Exception e) {
 				throw new MetaDataException("A problem was encountered loading class " + type, e);
 			}
@@ -180,7 +196,7 @@ public abstract class AbstractRepository implements Repository {
 		}
 
 		path.setLength(0);
-		path.append(UtilImpl.getAbsoluteBasePath()).append(result).append(".jasper");
+		path.append(absolutePath).append(result).append(".jasper");
 		return path.toString();
 	}
 
@@ -203,7 +219,7 @@ public abstract class AbstractRepository implements Repository {
 		if (moduleName != null) {
 			// Check customer module folder, if we have a customer to play with
 			if (customerName != null) {
-				path.append(UtilImpl.getAbsoluteBasePath());
+				path.append(absolutePath);
 				path.append(CUSTOMERS_NAMESPACE);
 				path.append(customerName);
 				path.append('/');
@@ -219,7 +235,7 @@ public abstract class AbstractRepository implements Repository {
 			
 			// Check module folder
 			path.setLength(0);
-			path.append(UtilImpl.getAbsoluteBasePath());
+			path.append(absolutePath);
 			path.append(MODULES_NAMESPACE);
 			path.append(moduleName);
 			path.append('/');
@@ -234,7 +250,7 @@ public abstract class AbstractRepository implements Repository {
 		// Check customer folder, if we have a customer to play with
 		if (customerName != null) {
 			path.setLength(0);
-			path.append(UtilImpl.getAbsoluteBasePath());
+			path.append(absolutePath);
 			path.append(CUSTOMERS_NAMESPACE);
 			path.append(customerName);
 			path.append('/');
@@ -247,7 +263,7 @@ public abstract class AbstractRepository implements Repository {
 		}
 		
 		path.setLength(0);
-		path.append(UtilImpl.getAbsoluteBasePath());
+		path.append(absolutePath);
 		path.append(RESOURCES_NAMESPACE);
 		path.append(resourcePath);
 		return new File(path.toString());
