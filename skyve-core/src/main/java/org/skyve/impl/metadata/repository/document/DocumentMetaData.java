@@ -383,7 +383,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		}
 
 		if ((resultPersistent == null) && java.lang.Boolean.TRUE.equals(result.getParentDatabaseIndex())) {
-			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
+			throw new MetaDataException(metaDataName + " : [parentDocument.index] CANNOT be true for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();
 

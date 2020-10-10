@@ -96,6 +96,10 @@ public class LocalDesignRepository extends AbstractRepository {
 		super(absolutePath);
 	}
 
+	public LocalDesignRepository(String absolutePath, boolean loadClasses) {
+		super(absolutePath, loadClasses);
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	protected <T extends MetaData> T get(String name) {
@@ -345,8 +349,8 @@ public class LocalDesignRepository extends AbstractRepository {
 					for (File queryFile : moduleFile.listFiles()) {
 						String queryFileName = queryFile.getName();
 						if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("query file name = ").append(queryFileName).toString());
-						if (queryFileName.endsWith(".class")) {
-							String queryName = queryFileName.substring(0, queryFileName.length() - 6);
+						if (queryFileName.endsWith(".class") || queryFileName.endsWith(".java")) {
+							String queryName = queryFileName.substring(0, queryFileName.lastIndexOf('.'));
 							sb.setLength(0);
 							sb.append(moduleName).append(".queries.").append(queryName);
 							String fullyQualifiedQueryName = sb.toString();
@@ -372,8 +376,8 @@ public class LocalDesignRepository extends AbstractRepository {
 						if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
 							for (File actionFile : documentFile.listFiles()) {
 								String actionFileName = actionFile.getName();
-								if (actionFileName.endsWith(".class")) {
-									String actionName = actionFileName.substring(0, actionFileName.length() - 6);
+								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java")) {
+									String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
 									sb.setLength(0);
 									sb.append(fullyQualifiedDocumentName).append(".actions.").append(actionName);
 									String fullyQualifiedActionName = sb.toString();
@@ -404,8 +408,8 @@ public class LocalDesignRepository extends AbstractRepository {
 						else if (documentFileName.equals(IMAGES_NAME) && documentFile.isDirectory()) {
 							for (File imageFile : documentFile.listFiles()) {
 								String imageFileName = imageFile.getName();
-								if (imageFileName.endsWith(".class")) {
-									String imageName = imageFileName.substring(0, imageFileName.length() - 6);
+								if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
+									String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
 									sb.setLength(0);
 									sb.append(fullyQualifiedDocumentName).append(".images.").append(imageName);
 									String fullyQualifiedImageName = sb.toString();
@@ -424,8 +428,8 @@ public class LocalDesignRepository extends AbstractRepository {
 						else if (documentFileName.equals(MODELS_NAME) && documentFile.isDirectory()) {
 							for (File modelFile : documentFile.listFiles()) {
 								String modelFileName = modelFile.getName();
-								if (modelFileName.endsWith(".class")) {
-									String modelName = modelFileName.substring(0, modelFileName.length() - 6);
+								if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
+									String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
 									sb.setLength(0);
 									sb.append(fullyQualifiedDocumentName).append(".models.").append(modelName);
 									String fullyQualifiedModelName = sb.toString();
@@ -838,23 +842,45 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
-		return getAction(customer, document, actionName, true, runtime);
+		MetaData result = getAction(customer, document, actionName, true, runtime);
+		if (loadClasses) {
+			return (ServerSideAction<Bean>) result;
+		}
+
+		return null;
 	}
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
-		return getAction(customer, document, exportActionName, true, runtime);
+		MetaData result = getAction(customer, document, exportActionName, true, runtime);
+		if (loadClasses) {
+			return (BizExportAction) result;
+		}
+		
+		return null;
 	}
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
-		return getAction(customer, document, importActionName, true, runtime);
+		MetaData result = getAction(customer, document, importActionName, true, runtime);
+		if (loadClasses) {
+			return (BizImportAction) result;
+		}
+		
+		return null;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
-		return getAction(customer, document, downloadActionName, true, runtime);
+		MetaData result = getAction(customer, document, downloadActionName, true, runtime);
+		if (loadClasses) {
+			return (DownloadAction<Bean>) result;
+		}
+		
+		return null;
 	}
 
 	@Override

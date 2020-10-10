@@ -12,6 +12,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
@@ -31,8 +32,10 @@ public abstract class AbstractRepository implements Repository {
 	private static AbstractRepository repository;
 
 	protected String absolutePath;
+	protected boolean loadClasses = true;
 	
 	/**
+	 * Absolute path constructor
 	 * Prevent external instantiation.
 	 */
 	protected AbstractRepository(String absolutePath) {
@@ -41,8 +44,18 @@ public abstract class AbstractRepository implements Repository {
 			this.absolutePath += '/';
 		}
 	}
-	
+
 	/**
+	 * Absolute path and load classes constructor
+	 * Prevent external instantiation.
+	 */
+	protected AbstractRepository(String absolutePath, boolean loadClasses) {
+		this(absolutePath);
+		this.loadClasses = loadClasses;
+	}
+
+	/**
+	 * Default constructor
 	 * Prevent external instantiation.
 	 */
 	protected AbstractRepository() {
@@ -127,12 +140,22 @@ public abstract class AbstractRepository implements Repository {
 					// check again in case this thread was stalled by another in the same spot
 					result = classes.get(javaCodeLocation);
 					if (result == null) {
-						String className = javaCodeLocation.replace('/', '.');
-						try {
-							result = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						if (loadClasses) {
+							String className = javaCodeLocation.replace('/', '.');
+							try {
+								result = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+							}
+							catch (Exception e) {
+								throw new MetaDataException("A problem was encountered loading class " + className, e);
+							}
 						}
-						catch (Exception e) {
-							throw new MetaDataException("A problem was encountered loading class " + className, e);
+						else {
+							// Not loading classes
+							// check for a java file and return a MetaData implementation
+							// NB WidgetReference is a pretty simple MetaData implementation
+							if (new File(this.absolutePath + javaCodeLocation + ".java").exists()) {
+								result = WidgetReference.class;
+							}
 						}
 					}
 				}
