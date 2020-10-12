@@ -33,8 +33,13 @@ public class GenerateTestDataJob extends CancellableJob {
 		Persistence pers = CORE.getPersistence();
 		ControlPanelExtension bean = (ControlPanelExtension) getBean();
 		Tag tag = createOrRetrieveTag(pers, bean);
-		db = new DataBuilder().fixture(FixtureType.crud);
 		
+		// create a DataBuilder which will also populate optional references
+		db = new DataBuilder()
+				.fixture(FixtureType.crud)
+				.optional(true, true)
+				.depth(10);
+
 		int failed = 0;
 		int size = bean.getTestDocumentNames().size() * bean.getTestNumberToGenerate().intValue();
 		
