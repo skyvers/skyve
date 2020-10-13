@@ -1,4 +1,4 @@
-package modules.admin.UserDashboard.models;
+package modules.admin.SystemDashboard.models;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -12,12 +12,11 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 
-import modules.admin.ModulesUtil;
 import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
-public class UserActivityContextModel extends ChartModel<UserDashboard> {
+public class ActivityContextModel extends ChartModel<UserDashboard> {
 
 	/**
 	 * 
@@ -34,7 +33,6 @@ public class UserActivityContextModel extends ChartModel<UserDashboard> {
 		
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
-		q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
 
 		ChartBuilder cb = new ChartBuilder();
 		cb.with(q);
@@ -43,7 +41,7 @@ public class UserActivityContextModel extends ChartModel<UserDashboard> {
 		cb.top(6, OrderBy.category, SortDirection.ascending, true);
 		cb.orderBy(OrderBy.category, SortDirection.ascending);
 		
-		ChartData chartData = cb.build("My activity by context - last 14 days","Context");
+		ChartData chartData = cb.build("System activity by context - last 14 days","Context");
 		
 		pers.resetDocumentPermissionScopes();
 				
