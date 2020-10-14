@@ -65,9 +65,13 @@
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
 		
+		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
+			<displayName>This option is now a startup property found in the project JSON file.</displayName>
+			<description>Master switch to allow or disallow self registration.</description>
+		</boolean>
 		<enum name="passwordComplexityModel" required="false" deprecated="true">
 			<documentation>Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.</documentation>
+				in a future version of Skyve. Here for backwards compatibility during Restore.</documentation>
  			<displayName>Password Complexity</displayName>
  			<description>The security level/complexity model for user passwords</description>
  			<values>

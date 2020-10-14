@@ -65,6 +65,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 	/** @hidden */
 	@Deprecated
+	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	/** @hidden */
+	@Deprecated
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
@@ -240,6 +243,13 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * admin.configuration.selfRegistrationActivationExpiryHours.description
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+	/**
+	 * This option is now a startup property found in the project JSON file.
+	 * <br/>
+	 * Master switch to allow or disallow self registration.
+	 **/
+	@Deprecated
+	private Boolean allowUserSelfRegistration;
 	/**
 	 * Password Complexity
 	 * <br/>
@@ -553,6 +563,26 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public Boolean getAllowUserSelfRegistration() {
+		return allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} mutator.
+	 * @param allowUserSelfRegistration	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
+		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
+		this.allowUserSelfRegistration = allowUserSelfRegistration;
 	}
 
 	/**

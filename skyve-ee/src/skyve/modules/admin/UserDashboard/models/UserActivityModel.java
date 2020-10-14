@@ -14,6 +14,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 import modules.admin.ModulesUtil;
+import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
@@ -33,6 +34,7 @@ public class UserActivityModel extends ChartModel<UserDashboard> {
 		pers.setDocumentPermissionScopes(DocumentPermissionScope.global);
 		
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
 		q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
 
 		ChartBuilder cb = new ChartBuilder();
@@ -42,7 +44,7 @@ public class UserActivityModel extends ChartModel<UserDashboard> {
 		cb.top(14, OrderBy.category, SortDirection.descending, false);
 		cb.orderBy(OrderBy.category, SortDirection.ascending);
 		
-		ChartData chartData = cb.build("My Activity","Activity - last 14 days");
+		ChartData chartData = cb.build("My activity - last 14 days","Activity");
 		
 		pers.resetDocumentPermissionScopes();
 		
