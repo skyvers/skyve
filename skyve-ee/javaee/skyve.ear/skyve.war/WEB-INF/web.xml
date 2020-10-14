@@ -77,7 +77,7 @@
 	</context-param>
 	<context-param>
 		<param-name>org.skyve.web.faces.PRIMEFLEX</param-name>
-		<param-value>true</param-value>
+		<param-value>false</param-value>
 	</context-param>
 	<filter>
 		<filter-name>PrimeFaces FileUpload Filter</filter-name>

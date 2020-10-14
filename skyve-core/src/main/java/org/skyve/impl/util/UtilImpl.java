@@ -226,7 +226,7 @@ public class UtilImpl {
 	public static String BOOTSTRAP_EMAIL = null;
 	public static String BOOTSTRAP_PASSWORD = null;
 	
-	public static boolean PRIMEFLEX = true;
+	public static boolean PRIMEFLEX = false;
 	
 	// for skyve script
 	/**

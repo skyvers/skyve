@@ -47,19 +47,6 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 		
-/*
-		HtmlPanelGroup card = panelGroup(false, false, true, invisibleConditionName);
-		card.setStyleClass("card");
-		if (borderTitle != null) {
-			HtmlPanelGroup title = panelGroup(false, false, false, null);
-			UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-			setId(output);
-			output.setValue(borderTitle);
-			title.getChildren().add(output);
-			card.getChildren().add(title);
-		}
-		return card;
-*/
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setValueOrValueExpression(borderTitle, result::setHeader, "header", result);
 		setInvisible(result, invisibleConditionName, null);
