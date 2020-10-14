@@ -31,7 +31,7 @@ public class BeanForReport {
 	}
 
 	public static String getMessage(Bean bean, String message) {
-		return Binder.formatMessage(CORE.getPersistence().getUser().getCustomer(), message, bean);
+		return Binder.formatMessage(message, bean);
 	}
 
 	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String conditionName) {

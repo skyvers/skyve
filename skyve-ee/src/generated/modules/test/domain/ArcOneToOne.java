@@ -66,9 +66,7 @@ public class ArcOneToOne extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"ArcOneToOne",
-														this);
+			return org.skyve.util.Binder.formatMessage("ArcOneToOne", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

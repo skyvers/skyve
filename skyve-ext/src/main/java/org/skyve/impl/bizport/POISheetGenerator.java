@@ -179,7 +179,7 @@ public class POISheetGenerator {
 								case text:
 								case time:
 								case timestamp:
-									value = Binder.formatMessage(customer, String.format("{%s}", resolvedBinding), b);
+									value = Binder.formatMessage(String.format("{%s}", resolvedBinding), b);
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
 									break;
 								case decimal10:
@@ -194,9 +194,9 @@ public class POISheetGenerator {
 									break;
 								}
 								
-							} catch (Exception e) {
+							} catch (@SuppressWarnings("unused") Exception e) {
 //								Util.LOGGER.info("Putting compound expression " + f.getBindingExpression() + " with value " + Binder.formatMessage(customer, f.getBindingExpression(), b));
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
+								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(f.getBindingExpression(), b));
 							}
 						}
 

@@ -178,9 +178,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Column {columnName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("Column {columnName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

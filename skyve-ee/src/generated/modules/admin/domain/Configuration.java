@@ -98,7 +98,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The security level/complexity model for user passwords
 	 * <br/>
 	 * Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.
+				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@XmlEnum
 	public static enum PasswordComplexityModel implements Enumeration {
@@ -256,7 +256,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The security level/complexity model for user passwords
 	 * <br/>
 	 * Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.
+				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@Deprecated
 	private PasswordComplexityModel passwordComplexityModel;
@@ -351,9 +351,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Admin Setup",
-														this);
+			return org.skyve.util.Binder.formatMessage("Admin Setup", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

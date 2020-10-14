@@ -435,7 +435,7 @@ public class ValidationUtil {
 							if (! uniqueValues.add(sb.toString())) { // already exists
 								String message = null;
 								try {
-									message = BindUtil.formatMessage(customer, constraint.getMessage(), element);
+									message = BindUtil.formatMessage(constraint.getMessage(), element);
 								}
 								catch (Exception ex) {
 									ex.printStackTrace();

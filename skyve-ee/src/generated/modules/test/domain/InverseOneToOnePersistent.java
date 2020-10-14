@@ -72,9 +72,7 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Inverse One To One Persistent",
-														this);
+			return org.skyve.util.Binder.formatMessage("Inverse One To One Persistent", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

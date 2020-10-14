@@ -485,9 +485,7 @@ public class Tag extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Tag {name}",
-														this);
+			return org.skyve.util.Binder.formatMessage("Tag {name}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

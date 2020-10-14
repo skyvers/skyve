@@ -32,8 +32,8 @@ public class Binder {
 	 * @param bean
 	 * @return
 	 */
-	public static String formatMessage(Customer customer, String message, Bean... beans) {
-		return BindUtil.formatMessage(customer, message, beans);
+	public static String formatMessage(String message, Bean... beans) {
+		return BindUtil.formatMessage(message, beans);
 	}
 
 	public static String negateCondition(String condition) {

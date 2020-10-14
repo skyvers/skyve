@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -72,7 +71,7 @@ public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
-	public static String formatMessage(Customer customer, String message, Bean... beans) {
+	public static String formatMessage(String message, Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
@@ -344,7 +343,9 @@ public final class BindUtil {
 						}
 					}
 					if (result == null) {
-						result = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
+						@SuppressWarnings("unchecked")
+						Object temp = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
+						result = temp;
 					}
 				}
 			}
@@ -780,11 +781,21 @@ public final class BindUtil {
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
 
-			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
-			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
-			Object result = m.invoke(collectionOwner, element);
-			return Boolean.TRUE.equals(result);
+			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
+			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			String methodName = sb.toString();
+			
+			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
+			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
+			Method[] ms = collectionOwner.getClass().getMethods(); 
+			for (Method m : ms) {
+				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 1)) {
+					Object result = m.invoke(collectionOwner, element);
+					return Boolean.TRUE.equals(result);
+				}
+			}
+			
+			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -807,10 +818,21 @@ public final class BindUtil {
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
 
-			StringBuilder methodName = new StringBuilder(collectionName.length() + 10);
-			methodName.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
-			m.invoke(collectionOwner, Integer.valueOf(index), element);
+			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
+			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			String methodName = sb.toString();
+			
+			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
+			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
+			Method[] ms = collectionOwner.getClass().getMethods(); 
+			for (Method m : ms) {
+				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 2)) {
+					m.invoke(collectionOwner, Integer.valueOf(index), element);
+					return;
+				}
+			}
+			
+			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -832,11 +854,21 @@ public final class BindUtil {
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
 
-			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
-			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
-			Object result = m.invoke(collectionOwner, element);
-			return Boolean.TRUE.equals(result);
+			StringBuilder sb = new StringBuilder(collectionName.length() + 13);
+			sb.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
+			String methodName = sb.toString();
+			
+			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
+			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
+			Method[] ms = collectionOwner.getClass().getMethods(); 
+			for (Method m : ms) {
+				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 1)) {
+					Object result = m.invoke(collectionOwner, element);
+					return Boolean.TRUE.equals(result);
+				}
+			}
+			
+			throw new IllegalStateException("Method " + methodName + " not found on " + collectionOwner);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -1246,9 +1278,9 @@ public final class BindUtil {
 
 		// Calculate the property name, index, and key values
 		propName = name;
-		int i = propName.indexOf(PropertyUtils.INDEXED_DELIM);
+		int i = propName.indexOf('[');
 		if (i >= 0) {
-			int k = propName.indexOf(PropertyUtils.INDEXED_DELIM2);
+			int k = propName.indexOf(']');
 			try {
 				index = Integer.parseInt(propName.substring(i + 1, k));
 			}
@@ -1257,9 +1289,9 @@ public final class BindUtil {
 			}
 			propName = propName.substring(0, i);
 		}
-		int j = propName.indexOf(PropertyUtils.MAPPED_DELIM);
+		int j = propName.indexOf('(');
 		if (j >= 0) {
-			int k = propName.indexOf(PropertyUtils.MAPPED_DELIM2);
+			int k = propName.indexOf(')');
 			try {
 				key = propName.substring(j + 1, k);
 			}
@@ -1355,20 +1387,20 @@ public final class BindUtil {
 		for (int i = expression.length() - 1; i >= 0; i--) {
 			char at = expression.charAt(i);
 			switch (at) {
-			case PropertyUtils.NESTED_DELIM:
+			case '.':
 				if (bracketCount < 1) {
 					return i;
 				}
 				break;
 
-			case PropertyUtils.MAPPED_DELIM:
-			case PropertyUtils.INDEXED_DELIM:
+			case '(':
+			case '[':
 				// not bothered which
 				--bracketCount;
 				break;
 
-			case PropertyUtils.MAPPED_DELIM2:
-			case PropertyUtils.INDEXED_DELIM2:
+			case ')':
+			case ']':
 				// not bothered which
 				++bracketCount;
 				break;

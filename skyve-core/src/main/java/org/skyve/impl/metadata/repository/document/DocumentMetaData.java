@@ -368,9 +368,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		else if (bizKeyExpression != null) {
 			StringBuilder sb = new StringBuilder(128);
 			sb.append("\t\ttry {\n");
-			sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),\n");
-			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(bizKeyExpression).append("\",\n");
-			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
+			sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(\"").append(bizKeyExpression).append("\", this);\n");
 			sb.append("\t\t}\n");
 			sb.append("\t\tcatch (@SuppressWarnings(\"unused\") Exception e) {\n");
 			sb.append("\t\t\treturn \"Unknown\";\n");

@@ -317,7 +317,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		
 		// put the view title in
 		String title = Util.i18n(view.getTitle(), user.getLocale());
-		result.put("_title", BindUtil.formatMessage(user.getCustomer(), title, bean));
+		result.put("_title", BindUtil.formatMessage(title, bean));
 
 		// put the view changed/dirty flag in
 		result.put("_changed", Boolean.valueOf(UtilImpl.hasChanged(webContextToReference.getCurrentBean())));
@@ -424,7 +424,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				// replace the "{CONTEXT}" placeholder with the current webId
 				format = format.replace("{CONTEXT}", webId);
 				// now format the message
-				format = BindUtil.formatMessage(user.getCustomer(), format, aBean);
+				format = BindUtil.formatMessage(format, aBean);
 				// remove the display style if its true
 				format = format.replace("display:true;", "");
 				// change to display none if display style is false

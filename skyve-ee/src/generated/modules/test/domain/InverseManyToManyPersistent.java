@@ -75,9 +75,7 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Inverse Many To Many Persistent",
-														this);
+			return org.skyve.util.Binder.formatMessage("Inverse Many To Many Persistent", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

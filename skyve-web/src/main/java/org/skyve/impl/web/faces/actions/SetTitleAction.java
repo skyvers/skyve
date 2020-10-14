@@ -36,7 +36,7 @@ public class SetTitleAction extends FacesAction<Void> {
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
 			String title = Util.i18n(view.getTitle(), user.getLocale());
-			facesView.setTitle(Binder.formatMessage(customer, title, targetBean));
+			facesView.setTitle(Binder.formatMessage(title, targetBean));
 	    }
 		else {
         	UtilImpl.LOGGER.warning("SetTitleAction: FacesView.getBean() yields null");

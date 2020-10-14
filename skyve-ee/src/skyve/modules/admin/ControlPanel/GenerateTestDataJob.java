@@ -55,7 +55,7 @@ public class GenerateTestDataJob extends CancellableJob {
 						EXT.tag(tag.getBizId(), module.getName(), document.getName(), newTestDataItem.getBizId());
 					}
 
-					log.add(Binder.formatMessage(customer, "Succesfully created {moduleName}.{documentName} ", docName)
+					log.add(Binder.formatMessage("Succesfully created {moduleName}.{documentName} ", docName)
 							+ newTestDataItem.getBizKey());
 
 					pers.commit(false);

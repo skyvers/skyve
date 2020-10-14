@@ -124,7 +124,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 						// validate the compound Expression
 						Bean b = document.newInstance(CORE.getUser());
 						@SuppressWarnings("unused")
-						String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
+						String attempt = Binder.formatMessage(bean.getBindingExpression(), b);
 
 					} catch (@SuppressWarnings("unused") Exception e2) {
 						StringBuilder sb = new StringBuilder(64);

@@ -70,15 +70,12 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	}
 
 	public static String bizKey(User user) {
-		org.skyve.metadata.user.User mUser = CORE.getUser();
-
 		StringBuilder sb = new StringBuilder(64);
 		try {
-			Customer customer = mUser.getCustomer();
 			if (Boolean.TRUE.equals(user.getInactive())) {
 				sb.append("INACTIVE ");
 			}
-			sb.append(Binder.formatMessage(customer, "{userName} - {contact.bizKey}", user));
+			sb.append(Binder.formatMessage("{userName} - {contact.bizKey}", user));
 
 		} catch (@SuppressWarnings("unused") Exception e) {
 			sb.append("Unknown");

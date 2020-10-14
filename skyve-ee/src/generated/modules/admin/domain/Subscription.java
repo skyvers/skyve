@@ -111,9 +111,7 @@ public class Subscription extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{communication.description} for {receiverIdentifier}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{communication.description} for {receiverIdentifier}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
