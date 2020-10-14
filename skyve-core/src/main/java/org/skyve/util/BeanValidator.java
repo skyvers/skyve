@@ -169,6 +169,19 @@ public class BeanValidator {
 	}
 	
 	/**
+	 * Prepends the bindings in the messages in the exception with the given prefix.
+	 * 
+	 * @param e
+	 * @param bindingPrefix	Prefix to prepend (excluding the final '.')
+	 */
+	public static void processMessageBindings(MessageException e, String bindingPrefix) {
+		String bindingPrefixWithDot = bindingPrefix + '.';
+		for (Message m : e.getMessages()) {
+			m.setBindingPrefix(bindingPrefixWithDot);
+		}
+	}
+
+	/**
 	 * 
 	 * @param customer
 	 * @param document
