@@ -11,7 +11,6 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 
-import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -115,7 +114,7 @@ public class ImageDirective implements TemplateDirectiveModel {
 					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
 				} else {
 					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_ALT));
+							String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
 			} else if (paramName.equals(PARAM_WIDTH)) {
 				if (paramValue instanceof TemplateScalarModel) {
@@ -124,7 +123,7 @@ public class ImageDirective implements TemplateDirectiveModel {
 					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
 				} else {
 					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_ALT));
+							String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
 				}
 			} else if (paramName.equals(PARAM_CLASS)) {
 				if (!(paramValue instanceof TemplateScalarModel)) {
