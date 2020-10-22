@@ -54,6 +54,7 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
 import services.report.freemarker.DescriptionDirective;
 import services.report.freemarker.DisplayNameDirective;
+import services.report.freemarker.DynamicImageDirective;
 import services.report.freemarker.FormatDirective;
 import services.report.freemarker.ImageDirective;
 import services.report.freemarker.ResourceDirective;
@@ -115,6 +116,7 @@ public class ReportService {
 			// define shared variables for custom directives
 			cfg.setSharedVariable("description", new DescriptionDirective());
 			cfg.setSharedVariable("displayName", new DisplayNameDirective());
+			cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
 			cfg.setSharedVariable("format", new FormatDirective());
 			cfg.setSharedVariable("image", new ImageDirective());
 			cfg.setSharedVariable("resource", new ResourceDirective());
