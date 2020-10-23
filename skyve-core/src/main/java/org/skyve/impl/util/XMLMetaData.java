@@ -439,6 +439,51 @@ public class XMLMetaData {
 		}
 	}
 
+	/**
+	 * Writes the ViewMetaData to a new view.xml in the location of the
+	 * specified file. This will overwrite any existing file in that location with
+	 * the same name as specified in the metadata.
+	 * 
+	 * The view will create it's own package directory if it doesn't already exist,
+	 * and create a view.xml according to the <code>name</code> specified in the
+	 * ViewMetaData.
+	 * 
+	 * @param view The view to output to a file
+	 * @param customerOverridden Should be true if this view is a customer override, false otherwise
+	 * @param uxuiOverridden Should be true if this view is an Ux/UI override, false otherwise
+	 * @param viewDocumentDirectory The path to the document this view belongs to
+	 */
+	public static void marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden, String viewDocumentDirectory) {
+		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		StringBuilder filePath = new StringBuilder(64);
+		filePath.append(viewDocumentDirectory);
+		if ((! viewDocumentDirectory.endsWith("/")) && (! viewDocumentDirectory.endsWith("\\"))) {
+			filePath.append('/');
+		}
+		filePath.append("views/");
+		File file = new File(filePath.toString());
+		file.mkdirs();
+		filePath.append(view.getName()).append(".xml");
+		file = new File(filePath.toString());
+		Util.LOGGER.info(String.format("Attempting to write view.xml to %s", file.getPath()));
+
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+				try (OutputStreamWriter osw = new OutputStreamWriter(bos, Util.UTF8)) {
+					try (BufferedWriter bw = new BufferedWriter(osw)) {
+						String contents = marshalView(view, customerOverridden, uxuiOverridden);
+						bw.write(contents);
+						bw.flush();
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal document at " + file.getPath(), e);
+		}
+	}
+	
 	public static ViewMetaData unmarshalView(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
