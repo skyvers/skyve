@@ -152,11 +152,19 @@
 				]]>
 			</expression>
 		</condition>
-		<condition name="mapTypeGmap">
+		<condition name="mapTypeGmap" usage="view">
 			<description>True when the selected startup map type is Google Maps</description>
 			<expression>
 				<![CDATA[
-					getStartup() != null && Startup.MapType.gmap == getStartup().getMapType()
+					getStartup() != null && getStartup().isMapTypeGmap()
+				]]>
+			</expression>
+		</condition>
+		<condition name="singleTenant" usage="view">
+			<description>True when this application has a default customer specified (is single tenant)</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && getStartup().isSingleTenant()
 				]]>
 			</expression>
 		</condition>

@@ -90,10 +90,10 @@
 	        	<item>
 	        		<spacer visible="mapTypeGmap" />
 	        	</item>
-	        	<item>
+	        	<item colspan="2">
 	        		<blurb visible="mapTypeGmap">
 	        			<![CDATA[
-	        				<span style="font-size: 80%; color: #888;">
+	        				<span style="font-size: 80%; color: #888; word-wrap: break-word;">
 	        					Note: Google Maps will be in Developer Mode when used without an API 
 	        					key. To obtain a Google maps API Key, visit <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>.
 	       					</span>
@@ -153,8 +153,16 @@
 	        <column responsiveWidth="2"/>
 	        <row>
 	            <item>
-	                <checkBox binding="accountAllowUserSelfRegistration" triState="false"/>
+	                <checkBox binding="accountAllowUserSelfRegistration" triState="false" enabled="singleTenant"/>
 	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer visible="notSingleTenant" />
+	        	</item>
+	        	<item colspan="2">
+	        		<blurb visible="notSingleTenant">* Self-registration cannot be enabled for multi-tenant applications. Please specify a customer in your application json file.</blurb>
+	        	</item>
 	        </row>
 	        <row>
 	        	<item>
@@ -164,7 +172,7 @@
 	        		<blurb>
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888;">
-	        					This requires email to be configured and additional setup in Configuration -> General. 
+	        					Self-registration requires email to be configured and additional setup in Security Admin -> Configuration -> General. 
 	       					</span>
 	        			]]>
 	        		</blurb>

@@ -134,9 +134,13 @@
 		</text>
 	</attributes>
 	<conditions>
-		<condition name="mapTypeGmap">
+		<condition name="mapTypeGmap" usage="view">
 			<description>True when the selected map type is Google Maps</description>
 			<expression>MapType.gmap == getMapType()</expression>
+		</condition>
+		<condition name="singleTenant" usage="view">
+			<description>True when this application has a default customer specified (is single tenant)</description>
+			<expression>org.skyve.impl.util.UtilImpl.CUSTOMER != null</expression>
 		</condition>
 	</conditions>
 </document>
