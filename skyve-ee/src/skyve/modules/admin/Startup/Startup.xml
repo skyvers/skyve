@@ -116,6 +116,7 @@
 		<boolean name="accountAllowUserSelfRegistration" persistent="false">
 			<displayName>admin.startup.accountAllowUserSelfRegistration.displayName</displayName>
 			<description>admin.startup.accountAllowUserSelfRegistration.description</description>
+			<defaultValue>false</defaultValue>
 		</boolean>
 		
 		<!-- sms settings -->

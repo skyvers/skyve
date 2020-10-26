@@ -262,7 +262,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * admin.startup.accountAllowUserSelfRegistration.description
 	 **/
-	private Boolean accountAllowUserSelfRegistration;
+	private Boolean accountAllowUserSelfRegistration = new Boolean(false);
 	/**
 	 * Account SID
 	 **/
