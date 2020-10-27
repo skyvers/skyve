@@ -59,7 +59,9 @@
 	<body>
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
-		    	<%@include file="fragments/logo.html" %>
+		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">
+		    		<%@include file="fragments/logo.html" %>
+		    	</div>
 		    	<%@include file="fragments/noscript.html" %>
 		    	
 		        <form class="ui large form">
