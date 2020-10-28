@@ -142,7 +142,13 @@
 						<div class="inner">
 							<!-- Menu -->
 							<nav id="menu">
-								<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
+								<table style="margin: 0; padding: 0; border: 0; min-height: 109px;">
+									<tr>
+										<td style="vertical-align: middle; text-align: center;">
+											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; display: block;" />
+										</td>
+									</tr>
+								</table>
 								<h:form id="menuform" prependId="false"> 
 									<p:panelMenu model="#{menu.menu}" />
 								</h:form>
