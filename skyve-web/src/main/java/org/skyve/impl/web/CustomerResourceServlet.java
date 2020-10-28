@@ -15,6 +15,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -158,18 +159,15 @@ public class CustomerResourceServlet extends HttpServlet {
 				resourceArea = resourceArea.substring(1); // get rid of slash at front
 			}
 			
-			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+			String documentName = Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME));
 			String moduleName = null;
-			if ((documentName == null) || (documentName.length() == 0)) {
-				System.err.println("No modoc in the URL");
-			}
-			else {
+			if (documentName != null) {
 				int dotIndex = documentName.indexOf('.');
 				moduleName = documentName.substring(0, dotIndex);
 				documentName = documentName.substring(dotIndex + 1);
 			}
-			String binding = request.getParameter(AbstractWebContext.BINDING_NAME);
-			String resourceFileName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+			String binding = Util.processStringValue(request.getParameter(AbstractWebContext.BINDING_NAME));
+			String resourceFileName = Util.processStringValue(request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME));
 
 			try {
 				String imageWidthParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_WIDTH_NAME));
@@ -184,11 +182,11 @@ public class CustomerResourceServlet extends HttpServlet {
 			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				imageWidth = 0;
 				imageHeight = 0;
-				System.err.println("Width/Height is malformed in the URL");
+				Util.LOGGER.severe("Width/Height is malformed in the URL");
 			}
 			
 			if ((resourceFileName == null) || (resourceFileName.length() == 0)) {
-				System.err.println("No resource file name or data file name in the URL");
+				Util.LOGGER.severe("No resource file name or data file name in the URL");
 			}
 			else {
 				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
@@ -220,6 +218,9 @@ public class CustomerResourceServlet extends HttpServlet {
 				}
 
 				if (DownloadAreaType.content.toString().equals(resourceArea)) {
+					if ((moduleName == null) || (documentName == null)) {
+						Util.LOGGER.severe("No _doc parameter in the URL");
+					}
 					if ((user != null) && 
 							(customer != null) && 
 							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
@@ -296,7 +297,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			return resource.getLastModified();
 		} 
 		catch (Exception e) {
-			System.err.println("Problem getting the customer resource - " + e.toString());
+			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
 			e.printStackTrace();
 			return -1;
 		}
@@ -327,7 +328,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			byte[] bytes = resource.getBytes();
 			if (bytes == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
-				System.err.println(String.format("Problem getting the customer resource - %s was not found.", resource.getFileName()));
+				Util.LOGGER.severe(String.format("Problem getting the customer resource - %s was not found.", resource.getFileName()));
 				return;
 			}
 	
@@ -349,12 +350,12 @@ public class CustomerResourceServlet extends HttpServlet {
 		} 
 		catch (SecurityException e) {
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			System.err.println("Problem getting the customer resource - " + e.toString());
+			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
 			e.printStackTrace();
 		}
 		catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			System.err.println("Problem getting the customer resource - " + e.toString());
+			Util.LOGGER.severe("Problem getting the customer resource - " + e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -387,6 +388,9 @@ public class CustomerResourceServlet extends HttpServlet {
 		if (resource.isContent()) {
 			if (user == null) {
 				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, "anonymous");
+			}
+			else if ((moduleName == null) || (documentName == null) || (binding == null)) {
+				throw new DomainException("Module name, document name & binding are required to secure a content resource");
 			}
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);

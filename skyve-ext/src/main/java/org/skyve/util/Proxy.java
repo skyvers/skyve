@@ -178,7 +178,7 @@ public class Proxy {
 			proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME).set(proxy, proxied);
 		}
 		catch (Exception e) {
-			throw new DomainException("Could not deproxy " + proxy, e);
+			throw new DomainException("Could not reproxy " + proxied + " to proxy " + proxy, e);
 		}
 	}
 	

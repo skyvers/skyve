@@ -152,7 +152,7 @@ public abstract class AbstractBean implements Bean {
 			}
 		}
 		else {
-			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty");
+			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty " + originalValues);
 			return true;
 		}
 		
