@@ -52,6 +52,7 @@ import freemarker.template.TemplateNotFoundException;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
+import services.report.freemarker.ContentDirective;
 import services.report.freemarker.DescriptionDirective;
 import services.report.freemarker.DisplayNameDirective;
 import services.report.freemarker.DynamicImageDirective;
@@ -114,6 +115,7 @@ public class ReportService {
 							tcHTML));
 
 			// define shared variables for custom directives
+			cfg.setSharedVariable("content", new ContentDirective());
 			cfg.setSharedVariable("description", new DescriptionDirective());
 			cfg.setSharedVariable("displayName", new DisplayNameDirective());
 			cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
