@@ -848,7 +848,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isMapTypeGmap() {
-		return (getStartup() != null && Startup.MapType.gmap == getStartup().getMapType());
+		return (getStartup() != null && getStartup().isMapTypeGmap());
 	}
 
 	/**
@@ -858,5 +858,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when this application has a default customer specified (is single tenant)
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSingleTenant() {
+		return (getStartup() != null && getStartup().isSingleTenant());
+	}
+
+	/**
+	 * {@link #isSingleTenant} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSingleTenant() {
+		return (! isSingleTenant());
 	}
 }

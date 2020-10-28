@@ -181,7 +181,9 @@ public class XMLMetaData {
 			Document document = new SAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(CUSTOMER_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+
+			String xml = cleanup(document.asXML());
+			return xml;
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal customer " + customer.getName(), e);
@@ -623,10 +625,17 @@ public class XMLMetaData {
 				node.setQName(newQName);
 			}
 
+			// detect any empty customer elements which require children
+			if (uri.equals(CUSTOMER_NAMESPACE)) {
+				if (node.getParent() == null) {
+					removeEmptyChildElements(node, new String[] { "interceptors" });
+				}
+			}
+
 			// detect any empty module elements which require children
 			if (uri.equals(MODULE_NAMESPACE)) {
 				if (node.getParent() == null) {
-					removeEmptyChildElements(node, new String[] { "jobs", "queries" });
+					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges" });
 				}
 			}
 
