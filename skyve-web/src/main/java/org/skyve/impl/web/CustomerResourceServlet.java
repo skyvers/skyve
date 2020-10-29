@@ -185,7 +185,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				Util.LOGGER.severe("Width/Height is malformed in the URL");
 			}
 			
-			if ((resourceFileName == null) || (resourceFileName.length() == 0)) {
+			if (resourceFileName == null) {
 				Util.LOGGER.severe("No resource file name or data file name in the URL");
 			}
 			else {
