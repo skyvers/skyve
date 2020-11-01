@@ -102,6 +102,9 @@ public class Proxy {
 	 */
 	@SuppressWarnings({"unchecked", "synthetic-access"})
 	private static <T extends Object> T of(T proxied, ProxyDelegate<T> delegate, boolean proxiedTransient) {
+		if (Proxy.isProxy(proxied)) {
+			throw new IllegalArgumentException("proxied argument is a Proxy");
+		}
 		Class<?> proxiedClass = proxied.getClass();
 		Class<?> delegateClass = delegate.getClass();
 
