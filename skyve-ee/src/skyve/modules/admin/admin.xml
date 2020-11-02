@@ -242,11 +242,12 @@
 				</document>
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
+					<action name="ClearImport"/>
+					<action name="GetImportTemplate"/>
+					<action name="ResetColumns"/>
 					<action name="RunExport"/>
 					<action name="RunImport"/>
-					<action name="ResetColumns"/>
 					<action name="UploadSimpleImportDataFile"/>
-					<action name="GetImportTemplate"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
 				<document name="ModuleDocument" permission="_RU_C"/>
