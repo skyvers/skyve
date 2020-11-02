@@ -155,7 +155,7 @@
 	</vbox>
 	<vbox widgetId="columns">
 		<vbox visible="showUploadColumns" border="true" borderTitle="Configure Import Columns">
-			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" inline="true" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
 			</dataGrid>
