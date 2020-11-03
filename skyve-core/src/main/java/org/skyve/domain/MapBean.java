@@ -103,6 +103,17 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 	
 	@Override
+	public boolean hasChanged() {
+		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
+		if (bean == null) {
+			return false;
+		}
+
+		return bean.hasChanged();
+	}
+	
+	
+	@Override
 	public boolean isPersisted() {
 		return false;
 	}

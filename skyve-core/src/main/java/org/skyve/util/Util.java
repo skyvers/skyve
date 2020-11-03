@@ -63,10 +63,13 @@ public class Util {
 
 	/**
 	 * Recurse the bean to determine if anything has changed.
+	 * This is deprecated and has been moved to AbstractBean with the "changed" bean property.
+	 * This enables the method's result to be cached in Bean proxies.
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
 	 */
+	@Deprecated
 	public static boolean hasChanged(Bean bean) {
 		return UtilImpl.hasChanged(bean);
 	}
