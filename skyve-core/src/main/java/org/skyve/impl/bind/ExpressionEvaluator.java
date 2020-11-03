@@ -13,6 +13,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.Util;
 
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";
@@ -25,7 +26,7 @@ public abstract class ExpressionEvaluator {
 	public static final String TIME_EXPRESSION = "TIME";
 	public static final String DATETIME_EXPRESSION = "DATETIME";
 	public static final String TIMESTAMP_EXPRESSION = "TIMESTAMP";
-	
+	public static final String URL_EXPRESSION = "URL";
 
 	private static Map<String, ExpressionEvaluator> evaluators = new TreeMap<>();
 	private static final ExpressionEvaluator DEFAULT_EVALUATOR = new BindingExpressionEvaluator();
@@ -77,7 +78,8 @@ public abstract class ExpressionEvaluator {
 					DATE_EXPRESSION.equals(expressionWithoutPrefix) ||
 					TIME_EXPRESSION.equals(expressionWithoutPrefix) ||
 					DATETIME_EXPRESSION.equals(expressionWithoutPrefix) ||
-					TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix)) {
+					TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix) ||
+					URL_EXPRESSION.equals(expressionWithoutPrefix)) {
 				return true;
 			}
 
@@ -169,6 +171,12 @@ public abstract class ExpressionEvaluator {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
 				return result;
+			}
+			if (URL_EXPRESSION.equals(expressionWithoutPrefix)) {
+				if (bean == null) {
+					return format ? "" : null;
+				}
+				return Util.getDocumentUrl(bean);
 			}
 
 			return format ? 

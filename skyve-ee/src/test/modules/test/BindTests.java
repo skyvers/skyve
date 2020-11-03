@@ -254,6 +254,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNotEquals("", Binder.formatMessage("{TIME}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{DATETIME}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{TIMESTAMP}", bean));
+		Assert.assertEquals(Util.getDocumentUrl(bean), Binder.formatMessage("{URL}", bean));
 		
 		Assert.assertEquals("Test", Binder.formatMessage("{text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{ text }", bean));
@@ -290,6 +291,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIME}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATETIME}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIMESTAMP}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{URL}"));
 		
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{text}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{ text }"));
