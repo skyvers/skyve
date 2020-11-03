@@ -18,6 +18,9 @@ import org.skyve.metadata.user.User;
  * 
  */
 public class BeanValidator {
+	public static final String IS_REQUIRED = "is required";
+	
+	
 	/**
 	 * Disallow instantiation
 	 */

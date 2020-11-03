@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -43,7 +44,9 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.Util;
 
 public class ValidationUtil {
 	private ValidationUtil() {
@@ -109,7 +112,8 @@ public class ValidationUtil {
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				e.getMessages().add(new Message(binding, displayName +  " is required."));
+				Locale locale = user.getLocale();
+				e.getMessages().add(new Message(binding, Util.i18n(displayName, locale) + " " + Util.i18n(BeanValidator.IS_REQUIRED, locale)));
 			}
 		}
 

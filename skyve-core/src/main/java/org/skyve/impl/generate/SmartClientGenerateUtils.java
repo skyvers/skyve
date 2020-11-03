@@ -82,6 +82,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
@@ -928,7 +929,7 @@ public class SmartClientGenerateUtils {
             appendEditorProperties(result, true, pixelWidth, null, null);
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n("is required", locale))).append(".'");
+            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
             }
             if (valueMap != null) {
                 result.append(",valueMap:").append(valueMap);
@@ -1017,7 +1018,7 @@ public class SmartClientGenerateUtils {
             }
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n("is required", locale))).append(".'");
+            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
             }
             else {
                 if ("select".equals(type)) {
@@ -1293,7 +1294,7 @@ public class SmartClientGenerateUtils {
 			}
 			if (required) {
             	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n("is required", locale))).append(".'");
+            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
 			}
 			if (! canFilter) {
 				result.append(",canFilter:false");

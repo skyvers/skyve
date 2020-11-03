@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -152,6 +151,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
@@ -1159,8 +1159,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String title,
 									ListGrid grid,
 									boolean canCreateDocument,
-									boolean aggregateQuery,
-									Locale locale) {
+									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
@@ -1324,7 +1323,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		
 		List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, showFilter, result.getWidgetVar(), locale);
+        addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
         if ((canCreateDocument && createRendered) || zoomRendered) {
         	final UIComponent actionColumn = createListGridActionColumn(owningModuleName,
 									        								drivingDocumentName, 
@@ -1389,8 +1388,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo,
 											boolean showFilter,
-											String tableVar,
-											Locale locale) {
+											String tableVar) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -1704,8 +1702,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid,
-										Locale locale) {
+										boolean showGrid) {
 		if (component != null) {
 			return component;
 		}
@@ -1776,7 +1773,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			addListGridHeader(title, result);
 		}
         List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, false, result.getWidgetVar(), locale);
+        addListGridDataColumns(model, children, false, result.getWidgetVar());
 
         result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
         result.setEmptyMessage("");
@@ -3840,7 +3837,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// result.setValueExpression("required", ef.createValueExpression(required ? "true" : "false", Boolean.class));
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
-			result.setRequiredMessage(title + " is required");
+			if (title == null) {
+				result.setRequiredMessage("Value " + Util.i18n(BeanValidator.IS_REQUIRED, locale));
+			}
+			else {
+				result.setRequiredMessage(new StringBuilder(title.length() + 12).append(title).append(' ').append(Util.i18n(BeanValidator.IS_REQUIRED, locale)).toString());
+			}
 		}
 		setDisabled(result, disabled, formDisabled);
 		return result;

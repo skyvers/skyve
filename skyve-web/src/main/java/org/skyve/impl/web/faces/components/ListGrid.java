@@ -155,7 +155,6 @@ public class ListGrid extends HtmlPanelGroup {
 											model.getDescription(),
 											listGrid,
 											user.canCreateDocument(model.getDrivingDocument()),
-											aggregateQuery,
-											user.getLocale());
+											aggregateQuery);
 	}
 }
