@@ -58,4 +58,21 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 		}
 		return result;
 	}
+	
+	/**
+	 * Clear the cached details of the singleton document instance. 
+	 */
+	public static void clear(String moduleName, String documentName) {
+		String key = new StringBuilder(128).append(moduleName).append('.').append(documentName).append(CORE.getCustomer().getName()).append('.').toString();
+		INSTANCES.remove(key);
+		key = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
+		INSTANCES.remove(key);
+	}
+	
+	/**
+	 * Clear all cached details.
+	 */
+	public static void dispose() {
+		INSTANCES.clear();
+	}
 }

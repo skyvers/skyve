@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -105,6 +106,7 @@ public abstract class AbstractH2Test {
 		persistence.rollback();
 		persistence.evictAllCached();
 		persistence.evictAllSharedCache();
+		SingletonCachedBizlet.dispose();
 	}
 
 	/**
