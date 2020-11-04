@@ -197,7 +197,7 @@
 		</collection>
 		
 		<!-- Self registration activation status and code -->
-		<boolean name="activated" required="true">
+		<boolean name="activated">
 			<documentation><![CDATA[
 			By default the account will be activated.
 			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.

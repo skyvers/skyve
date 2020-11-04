@@ -98,6 +98,9 @@
 							<item>
 								<blurb><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
 							</item>
+							<item>
+								<button pixelWidth="200" action="ClearImport" />
+							</item>
 						</row>
 						<row>
 							<item>
@@ -155,7 +158,7 @@
 	</vbox>
 	<vbox widgetId="columns">
 		<vbox visible="showUploadColumns" border="true" borderTitle="Configure Import Columns">
-			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" inline="true" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
 			</dataGrid>
@@ -180,6 +183,8 @@
 	<actions>
 		<defaults />
 		<upload className="UploadSimpleImportDataFile" displayName="Upload file" visible="showUpload" inActionPanel="false" enabled="contextSet" />
+		<action className="ClearImport" displayName="Clear File" iconStyleClass="fa fa-trash-o" visible="fileExists" enabled="persisted" inActionPanel="false"
+			confirm="OK to clear the loaded file?" />
 		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
 			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
 		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />
