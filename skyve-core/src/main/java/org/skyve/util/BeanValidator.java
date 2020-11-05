@@ -18,9 +18,21 @@ import org.skyve.metadata.user.User;
  * 
  */
 public class BeanValidator {
-	public static final String IS_REQUIRED = "is required";
-	
-	
+	public static final String VALIDATION_REQUIRED_KEY = "validation.required";
+	public static final String VALIDATION_FORMAT_KEY = "validation.format";
+	public static final String VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY = "validation.collection.minCardinality.singular";
+	public static final String VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY = "validation.collection.minCardinality.plural";
+	public static final String VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY = "validation.collection.maxCardinality.singular";
+	public static final String VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY = "validation.collection.maxCardinality.plural";
+	public static final String VALIDATION_LENGTH_KEY = "validation.length";
+	public static final String VALIDATION_ACCESS_KEY = "validation.access";
+	public static final String VALIDATION_RANGE_LESS_KEY = "validation.range.less";
+	public static final String VALIDATION_RANGE_BEFORE_KEY = "validation.range.before";
+	public static final String VALIDATION_RANGE_GREATER_KEY = "validation.range.greater";
+	public static final String VALIDATION_RANGE_AFTER_KEY = "validation.range.after";
+	public static final String VALIDATION_RANGE_BETWEEN_KEY = "validation.range.between";
+	public static final String VALIDATION_PRECISION_KEY = "validation.precision";
+
 	/**
 	 * Disallow instantiation
 	 */

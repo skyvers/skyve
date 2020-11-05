@@ -105,21 +105,22 @@ public class ValidationUtil {
 			return;
 		}
 
+		Locale locale = user.getLocale();
 		String displayName = attribute.getDisplayName();
+		String localisedDisplayName = Util.i18n(attribute.getDisplayName(), locale);
 		Converter<?> converter = (attribute instanceof ConvertableField) ? 
 									((ConvertableField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
-		Object attributeValue = getAttributeValue(bean, binding);
+		Object attributeValue = getAttributeValue(bean, binding, locale);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				Locale locale = user.getLocale();
-				e.getMessages().add(new Message(binding, Util.i18n(displayName, locale) + " " + Util.i18n(BeanValidator.IS_REQUIRED, locale)));
+				e.getMessages().add(new Message(binding, Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, localisedDisplayName)));
 			}
 		}
 
 		if (converter != null) {
 			if (attributeValue != null) {
-				validateFormat(converter.getFormat(), attributeValue, binding, bean, displayName, e);
+				validateFormat(converter.getFormat(), attributeValue, binding, bean, localisedDisplayName, locale, e);
 				@SuppressWarnings("rawtypes")
 				Validator validator = converter.getValidator();
 				if (validator != null) {
@@ -137,10 +138,9 @@ public class ValidationUtil {
 					List<Bean> collectionValue = (List<Bean>) attributeValue;
 					if ((collectionValue == null) || (collectionValue.size() < min)) {
 						e.getMessages().add(new Message(binding, 
-															"At least " + min + ' ' + collection.getDisplayName() +
-																((min == 1) ? 
-																	" record is required." : 
-																	" records are required.")));
+															(min == 1) ?
+																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, locale, localisedDisplayName) :
+																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, locale, String.valueOf(min), localisedDisplayName)));
 					}
 				}
 			}
@@ -150,10 +150,9 @@ public class ValidationUtil {
 				List<Bean> collectionValue = (List<Bean>) attributeValue;
 				if ((collectionValue != null) && (collectionValue.size() > max)) {
 					e.getMessages().add(new Message(binding, 
-														"No more than " + max + ' ' + collection.getDisplayName() +
-															((max == 1) ? 
-																" record is allowed." : 
-																" records are allowed.")));
+														(max == 1) ?
+															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, locale, localisedDisplayName) :
+															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, locale, String.valueOf(max), localisedDisplayName)));
 				}
 			}
 		}
@@ -163,12 +162,12 @@ public class ValidationUtil {
 			if (attributeValue instanceof String) {
 				String stringValue = (String) attributeValue;
 				if (stringValue.length() > fieldLength) {
-					e.getMessages().add(new Message(binding, 
-														displayName + " is longer than " + fieldLength + " characters."));
+					e.getMessages().add(new Message(binding,
+														Util.i18n(BeanValidator.VALIDATION_LENGTH_KEY, locale, localisedDisplayName, String.valueOf(fieldLength))));
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
-					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, e);
+					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, locale, e);
 				}
 				TextValidator validator = text.getValidator();
 				if (validator != null) {
@@ -298,7 +297,8 @@ public class ValidationUtil {
 											Object value,
 											String binding,
 											Bean bean,
-											String displayName,
+											String localisedDisplayName,
+											Locale locale,
 											ValidationException e) {
 		if (format != null) {
 			try {
@@ -315,20 +315,19 @@ public class ValidationUtil {
 			}
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
-													displayName + " value " + value + " does not match the format " + format.getMask() + " (A = alphanumeric, L = alpha, # = numeric)"));
+													Util.i18n(BeanValidator.VALIDATION_FORMAT_KEY, locale, localisedDisplayName, (value == null) ? "" : value.toString(), format.getMask())));
 			}
 		}
 	}
 	
-	private static Object getAttributeValue(Bean bean, String binding) {
+	private static Object getAttributeValue(Bean bean, String binding, Locale locale) {
 		Object result = null;
 		try {
 			result = BindUtil.get(bean, binding);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			throw new ValidationException(new Message(binding,
-														"You do not have access.  Please contact your Biz Hub administrator."));
+			throw new ValidationException(new Message(binding, Util.i18n(BeanValidator.VALIDATION_ACCESS_KEY, locale)));
 		}
 
 		return result;

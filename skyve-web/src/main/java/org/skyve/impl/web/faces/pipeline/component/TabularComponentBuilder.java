@@ -3838,10 +3838,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
 			if (title == null) {
-				result.setRequiredMessage("Value " + Util.i18n(BeanValidator.IS_REQUIRED, locale));
+				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, "Value"));
 			}
 			else {
-				result.setRequiredMessage(new StringBuilder(title.length() + 12).append(title).append(' ').append(Util.i18n(BeanValidator.IS_REQUIRED, locale)).toString());
+				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, title));
 			}
 		}
 		setDisabled(result, disabled, formDisabled);

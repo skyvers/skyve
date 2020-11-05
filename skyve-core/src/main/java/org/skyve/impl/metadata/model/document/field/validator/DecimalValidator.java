@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
+import java.util.Locale;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -10,6 +12,8 @@ import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
+import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
@@ -49,15 +53,18 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 				if (precisionInt != scale) {
 					String message = getValidationMessage();
 					if (message == null) {
-						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName)));
+						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName, user.getLocale())));
 					}
 				}
 			}
 		}
 	}
 	
-	public final String constructPrecisionMessage(String displayName) {
-		String message = getValidationMessage();
-		return (message != null) ? message : (displayName + " does not have the right number of decimal places.");
+	public final String constructPrecisionMessage(String displayName, Locale locale) {
+		String result = Util.i18n(getValidationMessage(), locale);
+		if (result == null) {
+			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, locale, Util.i18n(displayName, locale), precision.toString());
+		}
+		return result;
 	}
 }

@@ -928,8 +928,8 @@ public class SmartClientGenerateUtils {
             }
             appendEditorProperties(result, true, pixelWidth, null, null);
             if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
+            	result.append(",bizRequired:true,requiredMessage:'");
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
             }
             if (valueMap != null) {
                 result.append(",valueMap:").append(valueMap);
@@ -1017,8 +1017,8 @@ public class SmartClientGenerateUtils {
                 result.append(",valueMap:").append(valueMap);
             }
             if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
+            	result.append(",bizRequired:true,requiredMessage:'");
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
             }
             else {
                 if ("select".equals(type)) {
@@ -1293,8 +1293,8 @@ public class SmartClientGenerateUtils {
 				result.append(",valueMap:").append(valueMap);
 			}
 			if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
-            	result.append(processString(Util.i18n(BeanValidator.IS_REQUIRED, locale))).append(".'");
+            	result.append(",bizRequired:true,requiredMessage:'");
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
 			}
 			if (! canFilter) {
 				result.append(",canFilter:false");

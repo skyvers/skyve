@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
+import java.util.Locale;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -7,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
@@ -54,43 +57,41 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 
 	@Override
 	public String constructMessage(User user, String displayName, Converter<T> converter) {
-		String message = Util.i18n(getValidationMessage(), user.getLocale());
-		if (message == null) {
-			StringBuilder sb = new StringBuilder(128);
+		Locale locale = user.getLocale();
+		String result = Util.i18n(getValidationMessage(), locale);
+		if (result == null) {
+			String localisedDisplayName = Util.i18n(displayName, locale);
 			try {
 				if (min != null) {
-					sb.append(displayName).append(" must not be ").append((min instanceof Number) ? "less than " : "before ");
-					if (converter == null) {
-						sb.append(min);
+					String minDisplay = (converter == null) ? min.toString() : converter.toDisplayValue(min);
+					if (max == null) {
+						if (min instanceof Number) {
+							result = Util.i18n(BeanValidator.VALIDATION_RANGE_LESS_KEY, locale, localisedDisplayName, minDisplay);
+						}
+						else {
+							result = Util.i18n(BeanValidator.VALIDATION_RANGE_BEFORE_KEY, locale, localisedDisplayName, minDisplay);
+						}
 					}
 					else {
-						sb.append(converter.toDisplayValue(min));
+						String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY, locale, localisedDisplayName, minDisplay, maxDisplay);
 					}
 				}
-				if (max != null) {
-					if (min != null) {
-						sb.append(" or ");
+				else if (max != null) {
+					String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
+					if (max instanceof Number) {
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_GREATER_KEY, locale, localisedDisplayName, maxDisplay);
 					}
 					else {
-						sb.append(displayName).append(" must not be ");
-					}
-				
-					sb.append((max instanceof Number) ? "greater than " : "after ");
-					if (converter == null) {
-						sb.append(max);
-					}
-					else {
-						sb.append(converter.toDisplayValue(max));
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_AFTER_KEY, locale, localisedDisplayName, maxDisplay);
 					}
 				}
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Could not call RangeValidator.constructMessage()", e);
 			}
-
-			return sb.toString();
 		}
 
-		return message;
+		return result;
 	}
 }
