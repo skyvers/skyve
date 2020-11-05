@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.user.SuperUser;
+import org.skyve.util.BeanValidator;
 
 public class LongValidatorTest {
 
@@ -34,7 +35,7 @@ public class LongValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString("less than"));
+		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_LESS_KEY));
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class LongValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString("greater than"));
+		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_GREATER_KEY));
 	}
 
 	@Test
@@ -105,8 +106,7 @@ public class LongValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString("less than"));
-		assertThat(e.getMessages().get(0).getText(), containsString("greater than"));
+		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY));
 	}
 
 	@Test
