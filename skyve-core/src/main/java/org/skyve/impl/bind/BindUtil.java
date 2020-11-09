@@ -862,9 +862,13 @@ public final class BindUtil {
 			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
 			Method[] ms = collectionOwner.getClass().getMethods(); 
 			for (Method m : ms) {
-				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 1)) {
-					Object result = m.invoke(collectionOwner, element);
-					return Boolean.TRUE.equals(result);
+				if (methodName.equals(m.getName())) {
+					Class<?>[] pts = m.getParameterTypes();
+					// Skim over remove element by index method
+					if ((pts.length == 1) && (! Integer.TYPE.equals(pts[0]))) {
+						Object result = m.invoke(collectionOwner, element);
+						return Boolean.TRUE.equals(result);
+					}
 				}
 			}
 			
