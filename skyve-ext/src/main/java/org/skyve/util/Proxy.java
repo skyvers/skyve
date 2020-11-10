@@ -205,4 +205,20 @@ public class Proxy {
 		
 		return result;
 	}
+	
+	/**
+	 * Get the delegate used with this proxy.
+	 * @param <T>
+	 * @param proxy	The proxy to get the delegate for.
+	 * @return	The delegate object.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Object> ProxyDelegate<T> getDelegate(T proxy) {
+		try {
+			return (ProxyDelegate<T>) proxy.getClass().getDeclaredField(DELEGATE_FIELD_NAME).get(proxy);
+		}
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new DomainException("Could not get delegate from proxy " + proxy, e);
+		}
+	}
 }
