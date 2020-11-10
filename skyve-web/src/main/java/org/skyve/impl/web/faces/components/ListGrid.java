@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.faces.component.FacesComponent;
@@ -69,13 +70,16 @@ public class ListGrid extends HtmlPanelGroup {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);
 	    	}
 	    	final ComponentBuilder componentBuilder = tempComponentBuilder;
-
+	    	
 			new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
 					FacesContext fc = FacesContext.getCurrentInstance();
 					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
-
+			    	componentBuilder.setManagedBeanName(managedBeanName);
+			    	componentBuilder.setUserAgentType(userAgentType);
+					User user = CORE.getUser();
+			    	componentBuilder.setLocale((user == null) ? Locale.ENGLISH : user.getLocale());
 					ListGrid.this.getChildren().add(ListGrid.generate(moduleName,
 																		documentName,
 																		queryName,
@@ -85,8 +89,6 @@ public class ListGrid extends HtmlPanelGroup {
 																		zoomRendered,
 																		zoomDisabled,
 																		filterRendered,
-																		managedBeanName,
-																		userAgentType,
 																		componentBuilder));
 				    
 					return null;
@@ -108,8 +110,6 @@ public class ListGrid extends HtmlPanelGroup {
 										Boolean zoomRendered,
 										boolean zoomDisabled,
 										Boolean filterRendered,
-										String managedBeanName,
-										UserAgentType userAgentType,
 										ComponentBuilder componentBuilder) {
 		ListModel<? extends Bean> model = null;
 		String name = null;
@@ -135,9 +135,6 @@ public class ListGrid extends HtmlPanelGroup {
 			name = modelName;
 		}
 		
-		componentBuilder.setManagedBeanName(managedBeanName);
-    	componentBuilder.setUserAgentType(userAgentType);
-
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		listGrid.setTitle(model.getDescription());
 		listGrid.setShowAdd(createRendered);

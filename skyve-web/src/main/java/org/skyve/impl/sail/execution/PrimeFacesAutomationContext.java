@@ -2,12 +2,14 @@ package org.skyve.impl.sail.execution;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 
+import org.skyve.CORE;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.View;
@@ -17,6 +19,7 @@ import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilderChain;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.user.User;
 
 public class PrimeFacesAutomationContext extends AutomationContext {
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
@@ -97,6 +100,10 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
 		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
 		cbc.setSAILManagedBean(new FacesView<>());
+		cbc.setManagedBeanName("skyve");
+		cbc.setUserAgentType(getUserAgentType());
+		User user = CORE.getUser();
+		cbc.setLocale((user == null) ? Locale.ENGLISH : user.getLocale());
 	
 		ListGrid.generate(moduleName, 
 							documentName, 
@@ -107,8 +114,6 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 							Boolean.TRUE,
 							false,
 							Boolean.TRUE,
-							"skyve",
-							getUserAgentType(),
 							cbc);
 	}
 	
