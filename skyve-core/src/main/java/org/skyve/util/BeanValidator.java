@@ -32,6 +32,7 @@ public class BeanValidator {
 	public static final String VALIDATION_RANGE_AFTER_KEY = "validation.range.after";
 	public static final String VALIDATION_RANGE_BETWEEN_KEY = "validation.range.between";
 	public static final String VALIDATION_PRECISION_KEY = "validation.precision";
+	public static final String VALIDATION_TEXT_FORMAT = "validation.text.format";
 
 	/**
 	 * Disallow instantiation
