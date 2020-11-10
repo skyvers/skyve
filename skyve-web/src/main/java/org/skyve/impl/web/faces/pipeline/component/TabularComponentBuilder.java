@@ -980,13 +980,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		mapDiv.setId(id);
 		overlay.getChildren().add(mapDivs);
 		
+		toAddTo.add(overlay);
+
+		// Add the event once mapDiv.getClientId() can be determined as it is added to the component tree
 		overlay.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
 																			binding,
 																			type,
 																			disabledConditionName,
 																			formDisabledConditionName,
 																			false));
-		toAddTo.add(overlay);
+	
 	}
 	
 	@Override
