@@ -3,11 +3,13 @@
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
-		xmlns:p="http://primefaces.org/ui"
 		dir="#{_skyveBizImport.dir}">
     <f:view encoding="UTF-8">
-		<h:head>
+		<!-- Dont use h:head coz it'll bring in themes that can screw up the device layout -->
+		<head>
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
+			<link type="text/css" rel="stylesheet" href="/foundry/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
+			<script type="text/javascript" src="/foundry/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces"></script>
 			<style>
 				html, body {
 					height: 100%;
@@ -226,9 +228,8 @@
 					$('#iframe').attr('src', $('#iframe').attr('src'));
 				}
 			</script>
-		</h:head>
-		<h:body>
-			<p:commandLink rendered="false" /> <!-- to bring in jquery lib -->
+		</head>
+		<body>
 			<div id="device" class="smartphone">
 			  <div class="content">
 			    <iframe id="iframe" src="#{skyve.baseHref}" style="width:100%;border:none;height:100%"></iframe>
@@ -240,6 +241,6 @@
 				<i class="fa fa-laptop fa-4x" onclick="clicked('laptop', 'desktop')" />
 				<i class="fa fa-desktop fa-4x" onclick="clicked('desktop', null)" />
 			</div>
-		</h:body>
+		</body>
 	</f:view>
 </html>
