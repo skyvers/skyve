@@ -89,4 +89,16 @@ public interface ExternalBackup {
 	 * @param backupName The name of the backup to delete.
 	 */
 	void deleteBackup(String backupName);
+
+	/**
+	 * @param srcBackupName The name of the backup to copy.
+	 * @param destBackupName The name of the backup to copy to.
+	 */
+	void copyBackup(String srcBackupName, String destBackupName);
+
+	/**
+	 * @param srcBackupName The name of the backup to move.
+	 * @param destBackupName The name of the backup to move to.
+	 */
+	void moveBackup(String srcBackupName, String destBackupName);
 }

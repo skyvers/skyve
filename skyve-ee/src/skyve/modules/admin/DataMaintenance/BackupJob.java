@@ -3,12 +3,14 @@ package modules.admin.DataMaintenance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Date;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.job.Job;
 import org.skyve.metadata.SortDirection;
 import org.skyve.util.FileUtil;
@@ -31,7 +33,7 @@ public class BackupJob extends Job {
 		File backupZip = null;
 		Collection<String> log = getLog();
 		String trace;
-		
+
 		Integer yearlyBackupRetention = dm.getYearlyBackupRetention();
 		int yearly = (yearlyBackupRetention != null) ? yearlyBackupRetention.intValue() : 0;
 		Integer monthlyBackupRetention = dm.getMonthlyBackupRetention();
@@ -57,7 +59,7 @@ public class BackupJob extends Job {
 			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
-		} 
+		}
 		else {
 			trace = "No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero";
 			log.add(trace);
@@ -78,6 +80,15 @@ public class BackupJob extends Job {
 			trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
 			log.add(trace);
 			Util.LOGGER.info(trace);
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				try {
+					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
+				} catch (Exception e) {
+					trace = String.format("Failed to move external backup from %s to %s", backupZip.getName(), dailyZip.getName());
+					log.add(trace);
+					Util.LOGGER.warning(trace);
+				}
+			}
 
 			// copy daily to weekly
 			if (weekly > 0) {
@@ -88,6 +99,15 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 			else {
 				trace = "No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero";
@@ -103,6 +123,15 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 			else {
 				trace = "No monthly backup taken by the BackupJob as monthlyBackupRetention in DataMaintenance is null or zero";
@@ -118,6 +147,15 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 
 			// cull daily
@@ -150,6 +188,15 @@ public class BackupJob extends Job {
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			FileUtil.delete(files[i]);
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				try {
+					ExternalBackup.getInstance().deleteBackup(files[i].getName());
+				} catch (Exception e) {
+					trace = String.format("Failed to cull external backup %s", files[i].getName());
+					log.add(trace);
+					Util.LOGGER.warning(trace);
+				}
+			}
 		}
 	}
 }
