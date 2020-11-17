@@ -10,15 +10,20 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
-	public Set<String> listBackups() {
-		return getBlobContainerClient().listBlobs().stream().map(BlobItem::getName).collect(Collectors.toSet());
+	public List<String> listBackups() {
+		final Comparator<BlobItem> byLastModifiedDate = Comparator.comparing(blobItem -> blobItem.getProperties().getLastModified());
+		return getBlobContainerClient().listBlobs().stream()
+				.sorted(byLastModifiedDate.reversed())
+				.map(BlobItem::getName)
+				.collect(Collectors.toList());
 	}
 
 	@Override

@@ -3,10 +3,11 @@ package modules.admin.DataMaintenance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
@@ -160,12 +161,15 @@ public class BackupJob extends Job {
 
 			// cull daily
 			cull(backupDir, "DAILY_", daily);
+			cull(backupDir, "DAILY_", "_PROBLEMS", daily*2);
 			// cull weekly
 			cull(backupDir, "WEEKLY_", weekly);
+			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly*2);
 			// cull monthly
 			cull(backupDir, "MONTHLY_", monthly);
+			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly*2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", yearly);
+			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly*2);
 		}
 
 		// TODO instance of communication instance in code - default settings
@@ -177,9 +181,18 @@ public class BackupJob extends Job {
 	}
 
 	private void cull(File backupDir, String prefix, int retain)
+			throws IOException {
+		cull(backupDir, prefix, "", retain);
+	}
+
+	private void cull(File backupDir, String prefix, String suffix, int retain)
 	throws IOException {
 		Collection<String> log = getLog();
-		File[] files = FileUtil.listFiles(backupDir, prefix + "\\d*\\.zip", SortDirection.descending);
+		if (suffix == null) {
+			suffix = "";
+		}
+		final String regex = prefix + "\\d*" + suffix + "\\.zip";
+		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
 
 		for (int i = retain, l = files.length; i < l; i++) {
 			String trace = String.format("Cull backup %s - retention is set to %d",
@@ -188,14 +201,28 @@ public class BackupJob extends Job {
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			FileUtil.delete(files[i]);
-			if (ExternalBackup.areExternalBackupsEnabled()) {
-				try {
-					ExternalBackup.getInstance().deleteBackup(files[i].getName());
-				} catch (Exception e) {
-					trace = String.format("Failed to cull external backup %s", files[i].getName());
+		}
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			try {
+				final ExternalBackup externalBackup = ExternalBackup.getInstance();
+				final List<String> backups = externalBackup.listBackups();
+				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex)).collect(Collectors.toList());
+				for (int i = retain, l = matchingBackups.size(); i < l; i++) {
+					String trace = String.format("Cull backup %s - retention is set to %d",
+							matchingBackups.get(i),
+							Integer.valueOf(retain));
 					log.add(trace);
-					Util.LOGGER.warning(trace);
+					Util.LOGGER.info(trace);
+					try {
+						ExternalBackup.getInstance().deleteBackup(matchingBackups.get(i));
+					} catch (Exception e) {
+						trace = String.format("Failed to cull external backup %s", matchingBackups.get(i));
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
 				}
+			} catch (Exception e) {
+				Util.LOGGER.warning("Failed to cull external backups " + e.getMessage());
 			}
 		}
 	}
