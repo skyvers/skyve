@@ -709,7 +709,8 @@ public abstract class AbstractDataFileLoader {
 							case bool:
 								operand = getStringFieldValue(fieldIndex, true);
 								if (operand != null) {
-									if ("1".equals(operand) || "-1".equals(operand) || "yes".equals(operand.toString().toLowerCase())) {
+										if ("1".equals(operand) || "-1".equals(operand) || "1.0".equals(operand)
+												|| "yes".equals(operand.toString().toLowerCase())) {
 										loadValue = Boolean.TRUE;
 									} else {
 										loadValue = Boolean.valueOf((String) operand);
