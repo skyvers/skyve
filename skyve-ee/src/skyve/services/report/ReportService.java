@@ -9,9 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,8 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xhtmlrenderer.pdf.ITextUserAgent;
@@ -32,6 +34,7 @@ import org.xhtmlrenderer.resource.XMLResource;
 import org.xml.sax.InputSource;
 
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.BaseFont;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.ConditionalTemplateConfigurationFactory;
@@ -49,6 +52,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNotFoundException;
+import groovy.text.markup.TemplateConfiguration;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
@@ -66,6 +70,7 @@ import services.report.freemarker.SqlFormatDirective;
 public class ReportService {
 
 	private Configuration cfg;
+	private static PathMatchingResourcePatternResolver resolver;
 
 	private Configuration getInstance() throws IOException, TemplateModelException {
 		if (cfg == null) {
@@ -426,22 +431,69 @@ public class ReportService {
 		return null;
 	}
 
-	private static void loadFonts(ITextRenderer renderer) throws IOException {
-		Path fontPath = Paths.get(Util.getContentDirectory(), "fonts");
-		if (fontPath.toFile().exists()) {
-			Files.list(fontPath)
-					.map(Path::toFile)
-					.filter(f -> f.getName().endsWith(".ttf"))
-					.forEach(f -> {
-						try {
-							renderer.getFontResolver().addFont(f.toString(), true);
-							Util.LOGGER.fine("Loaded font for PDF: " + f.toString());
-						} catch (DocumentException | IOException e) {
-							Util.LOGGER.warning("Error loading font file: " + f.toString());
-							e.printStackTrace();
-						}
-					});
+	/**
+	 * Searches the fonts directory on the classpath for any true type fonts.
+	 * 
+	 * @return List of *.ttf font resources found in the fonts directory
+	 * @throws IOException
+	 */
+	private static List<Resource> getFontResources() throws IOException {
+		if (resolver == null) {
+			ClassLoader classLoader = ReportService.class.getClassLoader();
+			resolver = new PathMatchingResourcePatternResolver(classLoader);
 		}
+
+		return Arrays.asList(resolver.getResources("classpath:fonts/*.ttf"));
+	}
+
+	/**
+	 * Searches the fonts/unicode directory on the classpath for any unicode true type fonts.
+	 * 
+	 * @return List of *.ttf font resources found in the fonts directory
+	 * @throws IOException
+	 */
+	private static List<Resource> getUnicodeFontResources() throws IOException {
+		if (resolver == null) {
+			ClassLoader classLoader = ReportService.class.getClassLoader();
+			resolver = new PathMatchingResourcePatternResolver(classLoader);
+		}
+
+		return Arrays.asList(resolver.getResources("classpath:fonts/unicode/*.ttf"));
+	}
+
+	/**
+	 * Attempts to automatically load any fonts found in the fonts directory found on the classpath.
+	 * 
+	 * @param renderer The PDF Renderer to embed the font into
+	 * @throws IOException
+	 */
+	private static void loadFonts(ITextRenderer renderer) throws IOException {
+		// load any fonts found on the classpath in fonts/
+		getFontResources().stream()
+				.forEach(r -> {
+					try {
+						File f = r.getFile();
+						renderer.getFontResolver().addFont(f.toString(), true);
+						Util.LOGGER.info("Loaded font for PDF: " + r.getFilename());
+					} catch (DocumentException | IOException e) {
+						Util.LOGGER.warning("Error loading font file: " + r.getFilename());
+						e.printStackTrace();
+					}
+				});
+
+		// load any unicode fonts found on the classpath in fonts/unicode/
+		getUnicodeFontResources().stream()
+				.forEach(r -> {
+					try {
+						File f = r.getFile();
+						// required to load unicode fonts
+						renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
+						Util.LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
+					} catch (DocumentException | IOException e) {
+						Util.LOGGER.warning("Error loading unicode font file: " + r.getFilename());
+						e.printStackTrace();
+					}
+				});
 	}
 
 	/**
