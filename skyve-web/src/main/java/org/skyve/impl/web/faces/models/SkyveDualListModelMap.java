@@ -64,7 +64,20 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 */
 	private void scatter(String binding) {
 		try {
-			Bean bean = view.getCurrentBean().getBean();
+			if (view == null) {
+				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
+				return;
+			}
+			BeanMapAdapter<? extends Bean> currentBean = view.getCurrentBean();
+			if (currentBean == null) {
+				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
+				return;
+			}
+			Bean bean = currentBean.getBean();
+			if (bean == null) {
+				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
+				return;
+			}
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
 
