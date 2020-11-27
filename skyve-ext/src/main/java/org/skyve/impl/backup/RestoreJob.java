@@ -67,6 +67,7 @@ public class RestoreJob extends CancellableJob {
 		try {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				deleteLocalBackup = true;
+				backup.mkdirs();
 				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
 					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
 				}
