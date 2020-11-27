@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
@@ -63,13 +64,27 @@ public abstract class AbstractRepository implements Repository {
 	}
 
 	public static AbstractRepository get() {
-		return repository;
+		AbstractRepository result = THREAD_MAP.get(Long.valueOf(Thread.currentThread().getId()));
+		if (result == null) {
+			result = repository;
+		}
+		return result;
 	}
 
 	public static void set(AbstractRepository repository) {
 		AbstractRepository.repository = repository;
 	}
 
+	private static final ConcurrentHashMap<Long, AbstractRepository> THREAD_MAP = new ConcurrentHashMap<>();
+	
+	public void setForThread() {
+		THREAD_MAP.put(Long.valueOf(Thread.currentThread().getId()), this);
+	}
+	
+	public static void removeForThread() {
+		THREAD_MAP.remove(Long.valueOf(Thread.currentThread().getId()));
+	}
+	
 	public final String ROUTER_NAME = "router";
 	public final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	public final String CUSTOMERS_NAME = "customers";
