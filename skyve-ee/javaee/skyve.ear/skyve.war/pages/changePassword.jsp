@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
@@ -23,7 +23,12 @@
 	}
 	else {
 		// Get the user
-		user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+			return;
+		}
+		user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user == null) { // if the user is not established yet (but we've logged in...)
 			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
 			return;

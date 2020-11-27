@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.skyve.cache.ConversationUtil;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -93,7 +94,8 @@ public class SkyveFilter implements Filter {
 			ConversationUtil.logSessionAndConversationsStats();
 		}
 
-		UserImpl user = (UserImpl) httpRequest.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		HttpSession session = httpRequest.getSession(false);
+		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 
 		try {
 			// It is possible that the user has not been determined for

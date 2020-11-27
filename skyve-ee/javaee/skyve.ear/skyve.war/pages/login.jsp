@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.skyve.CORE"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
@@ -16,6 +16,8 @@
 
 	// Clear the user object from the session if it exists
 	// If there is a public user set, this will ensure it doesn't get in the way.
+
+	HttpSession session = request.getSession(false);
 	if (session != null) {
 		Object user = session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null) {
@@ -89,7 +91,7 @@
 					hidden.setAttribute('name', 'username');
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
 					form.appendChild(hidden);
-					form.action = 'login';
+					form.action = 'loginAttempt';
 					return true;
 				}
 				

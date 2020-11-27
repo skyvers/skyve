@@ -18,7 +18,7 @@
 	</context-param>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>org.skyve.impl.web</param-value>
+		<param-value>org.skyve.impl.web.spring</param-value>
 	</context-param>
 	<filter>                                                                                  
 		<filter-name>springSecurityFilterChain</filter-name>                                  
@@ -365,6 +365,7 @@
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>/login</url-pattern>
+		
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>

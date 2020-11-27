@@ -1,4 +1,4 @@
-<%@ page language="java"%>
+<%@ page session="false" language="java"%>
 <%@ page import="org.skyve.util.Util"%>
 
 <%

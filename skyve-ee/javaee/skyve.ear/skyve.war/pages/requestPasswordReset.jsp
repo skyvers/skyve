@@ -1,4 +1,4 @@
-<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="java.sql.Connection"%>
@@ -23,13 +23,17 @@
 	// This is a postback, process it and move on
 	String customerValue = request.getParameter("customer");
 	String emailValue = request.getParameter("email");
-	String oldCaptcha = (String) session.getAttribute("g-recaptcha-response");
+	String oldCaptcha = null;
+	HttpSession session = request.getSession(false);
+	if (session != null) {
+		oldCaptcha = (String) session.getAttribute("g-recaptcha-response");
+	}
 	String newCaptcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY!=null);
 	
 	boolean postback = (emailValue != null) && (newCaptcha != null) && (! newCaptcha.equals(oldCaptcha));
 	if (postback) {
-		session.setAttribute("g-recaptcha-response", newCaptcha);
+		request.getSession().setAttribute("g-recaptcha-response", newCaptcha);
 		try {
 			WebUtil.requestPasswordReset(customerValue, emailValue);
 		}

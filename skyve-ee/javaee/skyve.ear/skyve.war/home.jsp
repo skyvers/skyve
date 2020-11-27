@@ -1,4 +1,4 @@
-<%@ page language="java"%>
+<%@ page session="false" language="java"%>
 <%@ page import="java.security.Principal"%>
 <%@ page import="javax.servlet.http.Cookie"%>
 <%@ page import="org.skyve.CORE"%>
@@ -116,7 +116,8 @@
 	
 	if (userName != null) { // we have a logged in user or at least 1 to assert
 		// Get the user
-		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		HttpSession session = request.getSession(false);
+		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user == null) { // if the user is not established yet (but we've logged in or have a public user...)
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
