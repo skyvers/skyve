@@ -216,7 +216,19 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
-
+	// google auth client id
+	public static String AUTHENTICATION_GOOGLE_CLIENT_ID = null;
+	// google auth secret
+	public static String AUTHENTICATION_GOOGLE_SECRET = null;
+	// facebook auth client id
+	public static String AUTHENTICATION_FACEBOOK_CLIENT_ID = null;
+	// facebook auth secret
+	public static String AUTHENTICATION_FACEBOOK_SECRET = null;
+	// github auth client id
+	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
+	// github auth secret
+	public static String AUTHENTICATION_GITHUB_SECRET = null;
+	
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	

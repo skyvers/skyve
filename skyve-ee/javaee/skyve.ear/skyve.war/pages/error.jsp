@@ -1,6 +1,7 @@
 <%@page session="false" isErrorPage="true" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
+<%@page import="org.skyve.domain.messages.SkyveException"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
@@ -10,7 +11,13 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
 	Principal p = request.getUserPrincipal();
-	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	User user = null;
+	try {
+		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	}
+	catch (SkyveException e) {
+		// The principal name is not a user in the database - continue on...
+	}
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 	if (locale == null) {
 		locale = Locale.ENGLISH;

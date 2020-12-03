@@ -14,7 +14,7 @@ import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
-import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
@@ -212,10 +212,13 @@ public class SQLMetaDataUtil {
 						}
 					}
 					if (firstRow) { // no data for this user
-						throw new DomainException("The user " + user.getName() + " does not exist.");
+						throw new org.skyve.impl.domain.messages.SecurityException("the system", "The user " + user.getName());
 					}
 				}
 			}
+		}
+		catch (SkyveException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);

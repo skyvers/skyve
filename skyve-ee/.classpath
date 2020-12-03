@@ -34,12 +34,10 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commonmark-0.10.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.2.jar" sourcepath="/Users/benpetito/.m2/repository/org/apache/commons/commons-lang3/3.2/commons-lang3-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-api-3.141.59.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-support-3.141.59.jar"/>
 	<classpathentry kind="lib" path="lib/guava-25.0-jre.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-remote-driver-3.141.59.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.0.3.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.0.3.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.0.4.RELEASE.jar"/>
@@ -150,5 +148,9 @@
 	<classpathentry kind="lib" path="lib/mockito-core-2.21.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cache-api-1.0.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-client-5.0.3.RELEASE.jar" sourcepath="/Users/mike/.m2/repository/org/springframework/security/spring-security-oauth2-client/5.0.3.RELEASE/spring-security-oauth2-client-5.0.3.RELEASE-sources.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.7.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar" sourcepath="/Users/mike/.m2/repository/org/springframework/security/spring-security-config/5.0.3.RELEASE/spring-security-config-5.0.3.RELEASE-sources.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-core-5.0.3.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -428,6 +428,12 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = number.intValue();
 		}
 		UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getBoolean("account", "allowUserSelfRegistration", account);
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = getString("account", "googleAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = getString("account", "googleAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = getString("account", "facebookAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);

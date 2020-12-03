@@ -73,6 +73,7 @@
 
 		<%@include file="fragments/favicon.html" %>
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
+		<link type="text/css" rel="stylesheet" href="javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
 	    
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
@@ -241,11 +242,32 @@
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
-		        <% if(allowRegistration && customer != null) { %>
-				<div class="ui message">
-					<%=Util.i18n("page.login.register.label.pre", locale)%> <a href="?a=e&m=admin&d=SelfRegistration"><%=Util.i18n("page.login.register.label.post", locale)%></a>
-			    </div>	        
-			    <% } %>
+		        <% if (customer != null) { %>
+					<% if (allowRegistration) { %>
+						<div class="ui message">
+							<%=Util.i18n("page.login.register.label.pre", locale)%> <a href="?a=e&m=admin&d=SelfRegistration"><%=Util.i18n("page.login.register.label.post", locale)%></a>
+					    </div>	        
+				    <% } %>
+				    <% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) { %>
+			            <div class="ui segment">
+						    <% if (UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) { %>
+								<div class="ui header">
+									<a href="oauth2/authorization/google" class="ui fluid large green submit button"><i class="fa fa-google"></i>&nbsp;&nbsp;Sign in with Google</a>
+								</div>
+							<% } %>
+						    <% if (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) { %>
+								<div class="ui header">
+									<a href="oauth2/authorization/facebook" class="ui fluid large green submit button"><i class="fa fa-facebook"></i>&nbsp;&nbsp;Sign in with Facebook</a>
+								</div>
+							<% } %>
+						    <% if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) { %>
+								<div class="ui header">
+									<a href="oauth2/authorization/github" class="ui fluid large green submit button"><i class="fa fa-github"></i>&nbsp;&nbsp;Sign in with Github</a>
+								</div>
+							<% } %>
+					    </div>
+				    <% } %>
+				<% } %>
 		    </div>
 		</div>
 	</body>
