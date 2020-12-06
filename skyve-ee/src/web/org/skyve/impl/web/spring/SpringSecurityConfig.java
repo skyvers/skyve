@@ -1,5 +1,6 @@
 package org.skyve.impl.web.spring;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -96,23 +97,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.tokenRepository(tokenRepository())
 				.and()
 			.formLogin()
-				.defaultSuccessUrl(Util.getSkyveContextUrl() + '/')
-				.loginPage(Util.getSkyveContextUrl() + "/login")
+				.defaultSuccessUrl(Util.getHomeUrl())
+				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
-				.failureUrl(Util.getSkyveContextUrl() + "/login?error")
+				.failureUrl(Util.getLoginUrl() + "?error")
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getSkyveContextUrl() + "/loggedOut")
 				.deleteCookies("JSESSIONID")
-				.and()
-			.oauth2Login()
-				.loginPage(Util.getSkyveContextUrl() + "/login")
 				.and()
 			.csrf().disable()
 			.headers()
 				.httpStrictTransportSecurity().disable()
 				.frameOptions().disable()
 				.contentTypeOptions().disable();
+
+			if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
+					(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
+					(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
+				http.oauth2Login().loginPage(Util.getLoginUrl());
+			}
 	}
 
 	@Override

@@ -98,7 +98,7 @@
 		else {
 			String queryString = request.getQueryString();
 			if (queryString == null) {
-				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "login"));
+				response.sendRedirect(response.encodeRedirectURL(Util.getLoginUrl()));
 			}
 			else {
 				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "loggedIn.jsp?" + queryString));

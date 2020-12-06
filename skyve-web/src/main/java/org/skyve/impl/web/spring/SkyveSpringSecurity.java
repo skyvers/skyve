@@ -17,6 +17,7 @@ import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
@@ -170,7 +171,12 @@ public class SkyveSpringSecurity {
 		if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) {
 			registrations.add(githubClientRegistration());
 		}
-		
+
+		// Add a dummy registration otherwise spring security will moan
+		if (registrations.isEmpty()) {
+			registrations.add(CommonOAuth2Provider.GOOGLE.getBuilder("dummy").clientId("dummy").clientSecret("dummy").build());
+		}
+
 		return new InMemoryClientRegistrationRepository(registrations);
 	}
 

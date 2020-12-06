@@ -226,6 +226,12 @@ public class Util {
 		return result.toString();
 	}
 
+	public static String getLoginUrl() {
+		StringBuilder result = new StringBuilder(128);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.AUTHENTICATION_LOGIN_URI);
+		return result.toString();
+	}
+
 	public static String getDocumentUrl(String bizModule, String bizDocument) {
 		return getDocumentUrl(bizModule, bizDocument, null);
 	}

@@ -212,16 +212,21 @@
 		accountLockoutDurationMultipleInSeconds: 10,
 		// Enables new users to register for an account when true, requires email
 		allowUserSelfRegistration: false,
+		// Where to forward to to log in
+		loginUri: "/login",
 		// For google authentication - see https://console.developers.google.com/
 		// (callback URL is <Context URL>/login/oauth2/code/google)
+		// (loginUri should be set to "/oauth2/authorization/google" for automatic login)
 		googleAuthClientId: null,
 		googleAuthSecret: null,
 		// For facebook authentication - see https://developers.facebook.com/
 		// (callback URL is <Context URL>/login/oauth2/code/facebook)
+		// (loginUri should be set to "/oauth2/authorization/facebook" for automatic login)
 		facebookAuthClientId: null,
 		facebookAuthSecret: null,
 		// For github authentication - see https://github.com/settings/applications/
 		// (callback URL is <Context URL>/login/oauth2/code/github)
+		// (loginUri should be set to "/oauth2/authorization/github" for automatic login)
 		githubAuthClientId: null,
 		githubAuthSecret: null
 	},
@@ -232,7 +237,7 @@
 		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 		devMode: true,
 		// Customer Default
-		customer: null,
+		customer: "demo",
 		// Run the jobs scheduled in the data store or not - set false for slave skyve instances
 		jobScheduler: true,
 		// Absolute path on the filesystem to the source directory where modules live 

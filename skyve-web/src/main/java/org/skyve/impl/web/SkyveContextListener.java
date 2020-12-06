@@ -427,6 +427,10 @@ public class SkyveContextListener implements ServletContextListener {
 		if (number != null) {
 			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = number.intValue();
 		}
+		value = getString("account", "loginUri", account, false);
+		if (value != null) {
+			UtilImpl.AUTHENTICATION_LOGIN_URI = value;
+		}
 		UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getBoolean("account", "allowUserSelfRegistration", account);
 		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = getString("account", "googleAuthClientId", account, false);
 		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = getString("account", "googleAuthSecret", account, false);

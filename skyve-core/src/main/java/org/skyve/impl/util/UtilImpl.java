@@ -228,6 +228,8 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
 	// github auth secret
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
+	// The Login URI to forward to
+	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
