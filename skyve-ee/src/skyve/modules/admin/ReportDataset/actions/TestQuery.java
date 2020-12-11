@@ -152,7 +152,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 					bean.setResults(queryResults.toString());
 				}
 			} catch (Exception e) {
-				throw new DomainException("Unable to create an instance of " + bean.getQuery());
+				throw new DomainException("Unable to create an instance of " + bean.getQuery() + " - " + e.getMessage(), e);
 			}
 		}
 
