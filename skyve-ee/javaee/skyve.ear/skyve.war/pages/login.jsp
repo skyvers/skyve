@@ -19,10 +19,8 @@
 
 	HttpSession session = request.getSession(false);
 	if (session != null) {
-		Object user = session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		if (user != null) {
-			session.removeAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		}
+		session.removeAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		session.invalidate();
 	}
 	
 	// Determine the locale
