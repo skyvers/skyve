@@ -226,11 +226,39 @@
 					</exclusion>
 					<exclusion>
 						<groupId>org.apache.httpcomponents</groupId>
-						<artifactId>httpcomponents-client</artifactId>
+						<artifactId>httpclient</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>org.apache.cxf</groupId>
 						<artifactId>cxf-rt-rs-client</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>edu.ucar</groupId>
+						<artifactId>cdm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>edu.ucar</groupId>
+						<artifactId>netcdf4</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>edu.ucar</groupId>
+						<artifactId>grib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>edu.ucar</groupId>
+						<artifactId>httpservices</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.sis.storage</groupId>
+						<artifactId>sis-netcdf</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.sis.core</groupId>
+						<artifactId>sis-utility</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.sis.core</groupId>
+						<artifactId>sis-metadata</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
