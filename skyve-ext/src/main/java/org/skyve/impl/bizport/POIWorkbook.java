@@ -8,16 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -37,7 +28,7 @@ import org.skyve.metadata.customer.Customer;
  * This class collects SheetData (adaption of Excel sheets).
  * The materialize() is used to populate data in the spreadsheet, for a newly created WorkbookData.
  * The write() will put the Excel format (xls or xlsx) onto the output stream given.
- * 
+ *
  * @author mike
  */
 public final class POIWorkbook implements BizPortWorkbook {
@@ -46,13 +37,13 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 	// whether we are creating or reading an xls or an xlsx
 	boolean ooxmlFormat;
-	
+
 	// Factory for creating things at the workbook level
 	CreationHelper creationHelper;
 
 	// Factory for formats
 	private DataFormat format;
-	
+
 	// different styles in use in the sheets
 	CellStyle headingStyle;
 	CellStyle foreignKeyHeadingStyle;
@@ -67,63 +58,63 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 	// Document Name, or collection binding -> sheet data
 	private Map<SheetKey, POISheet> sheets = new LinkedHashMap<>();
-	
+
 	/**
 	 * New file constructor.
 	 */
 	public POIWorkbook(boolean ooxmlFormat) {
 		this.ooxmlFormat = ooxmlFormat;
 	}
-	
+
 	/**
 	 * Existing file constructor.
-	 * 
+	 *
 	 * @param customer	The current customer (for the logged in user).
 	 * @param workbook	The workbook.
 	 */
 	public POIWorkbook(Customer customer, Workbook workbook, UploadException e) {
 		this.workbook = workbook;
 		ooxmlFormat = workbook instanceof XSSFWorkbook;
-		
+
 		setupWorkbookInfrastructure();
-		
+
 		for (int i = 0, l = workbook.getNumberOfSheets(); i < l; i++) {
 			Sheet sheet = workbook.getSheetAt(i);
 			if (workbook.isSheetHidden(i) || workbook.isSheetVeryHidden(i)) {
 				continue;
 			}
 			POISheet sheetData = new POISheet(customer, this, sheet, e);
-			
+
 			Row row = sheet.getRow(POISheet.NAME_ROW);
-			Cell moduleCell = row.getCell(POISheet.MODULE_COLUMN, Row.RETURN_BLANK_AS_NULL);
+			Cell moduleCell = row.getCell(POISheet.MODULE_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			String moduleName = (moduleCell == null) ? null : moduleCell.getStringCellValue();
-			Cell documentCell = row.getCell(POISheet.DOCUMENT_COLUMN, Row.RETURN_BLANK_AS_NULL);
+			Cell documentCell = row.getCell(POISheet.DOCUMENT_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			String documentName = documentCell == null ? null : documentCell.getStringCellValue();
-			Cell collectionCell = row.getCell(POISheet.COLLECTION_COLUMN, Row.RETURN_BLANK_AS_NULL);
+			Cell collectionCell = row.getCell(POISheet.COLLECTION_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			String binding = collectionCell == null ? null : collectionCell.getStringCellValue();
-			
+
 			SheetKey key = new SheetKey(moduleName, documentName, binding);
-			
+
 			sheets.put(key, sheetData);
 		}
 	}
-	
+
 	@Override
 	public POISheet getSheet(SheetKey key) {
 		return sheets.get(key);
 	}
-	
+
 	@Override
 	public void addSheet(SheetKey key, BizPortSheet sheet) {
 		if (workbook != null) {
 			throw new IllegalStateException("Workbook has already been materialized");
 		}
-		
+
 		if (sheets.put(key, (POISheet) sheet) != null) {
 			throw new IllegalArgumentException("Cannot add a second sheet called " + key);
 		}
 	}
-	
+
 	@Override
 	public POISheet removeSheet(SheetKey key) {
 		if (workbook != null) {
@@ -132,18 +123,18 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 		return sheets.remove(key);
 	}
-	
+
 	@Override
 	public Set<SheetKey> getSheetKeys() {
 		return sheets.keySet();
 	}
-	
+
 	@Override
 	public void materialise() {
 		workbook = ooxmlFormat ? new XSSFWorkbook() : new HSSFWorkbook();
-		
+
 		setupWorkbookInfrastructure();
-		
+
 		// create the sheets in the workbook in 1 iteration
 		for (SheetKey key : sheets.keySet()) {
 			BizPortSheet sheetData = sheets.get(key);
@@ -158,16 +149,16 @@ public final class POIWorkbook implements BizPortWorkbook {
 			sheetData.materialise(key, this, workbook.getSheet(sheetData.getTitle()));
 		}
 	}
-	
+
 	private void setupWorkbookInfrastructure() {
 		creationHelper = workbook.getCreationHelper();
 		format = workbook.createDataFormat();
-		
+
 		// Create heading style
 	    Font headingFont = workbook.createFont();
 	    headingFont.setFontHeightInPoints((short) 14);
 	    headingFont.setFontName("Arial");
-	    headingFont.setBoldweight((short) 1);
+	    headingFont.setBold(true);
 		headingStyle = workbook.createCellStyle();
 		headingStyle.setFont(headingFont);
 
@@ -175,7 +166,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		Font foreignKeyHeadingFont = workbook.createFont();
 	    foreignKeyHeadingFont.setFontHeightInPoints((short) 14);
 	    foreignKeyHeadingFont.setFontName("Arial");
-	    foreignKeyHeadingFont.setBoldweight((short) 1);
+		headingFont.setBold(true);
 	    foreignKeyHeadingFont.setUnderline(Font.U_SINGLE);
 	    foreignKeyHeadingFont.setColor(IndexedColors.BLUE.getIndex());
 		foreignKeyHeadingStyle = workbook.createCellStyle();
@@ -184,8 +175,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 		foreignKeyDescriptionStyle.setLocked(true);
 //		foreignKeyDescriptionStyle.setFillBackgroundColor(IndexedColors.YELLOW.getIndex());
 		foreignKeyDescriptionStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-		foreignKeyDescriptionStyle.setFillPattern((short) FillPatternType.SOLID_FOREGROUND.ordinal());
-		
+		foreignKeyDescriptionStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
 		dateStyle = workbook.createCellStyle();
 		dateStyle.setDataFormat(format.getFormat("m/d/yy"));
 		timeStyle = workbook.createCellStyle();
@@ -218,7 +209,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 		workbook.write(out);
 	}
-	
+
 	@Override
 	public BizPortFormat getFormat() {
 		return ooxmlFormat ? BizPortFormat.xlsx : BizPortFormat.xls;
@@ -236,10 +227,10 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 		return result.replace('/', '|');
 	}
-	
+
 	/**
 	 * Put value into POI Cell
-	 * 
+	 *
 	 * @param sheet
 	 * @param rowNum
 	 * @param colNum
@@ -247,19 +238,19 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @param value
 	 * @throws Exception
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
 
-		
+
 		//microsoft counts from 1 not 0 - so offset rows and columns by 1 to be consistent when inspecting the resulting sheet
 		XSSFCellStyle style = sheet.getWorkbook().createCellStyle();
-		style.setBorderTop((short) 6); // double lines border
-		style.setBorderBottom((short) 1); // single line border
-		
+		style.setBorderTop(BorderStyle.DOUBLE); // double lines border
+		style.setBorderBottom(BorderStyle.THIN); // single line border
+
 		XSSFFont font = sheet.getWorkbook().createFont();
 		font.setFontHeightInPoints((short) 15);
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
-		style.setFont(font);                 
-	
+		font.setBold(true);
+		style.setFont(font);
+
 		XSSFRow row = sheet.getRow(rowNum-1);
 		if(row==null){
 			row = sheet.createRow(rowNum-1);
@@ -270,7 +261,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 		}
 
 //		Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + "=" + value);
-		
+
 		if (value != null) {
 //			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NOT NULL");
 			cell.setCellType(cellType);
@@ -279,14 +270,14 @@ public final class POIWorkbook implements BizPortWorkbook {
 			}
 
 			switch (cellType) {
-			case Cell.CELL_TYPE_STRING:
+			case STRING:
 				cell.setCellValue((String) value);
 				break;
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				break;
-			case Cell.CELL_TYPE_BLANK:
+			case BLANK:
 				break;
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 			default:
 				if (value instanceof Date) {
 					CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
@@ -298,7 +289,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 					}
 					cell.setCellValue((Date) value);
 					cell.setCellStyle(cellStyle);
-					
+
 				} else if (value instanceof Number) {
 					cell.setCellValue(((Number) value).doubleValue());
 				}
@@ -307,20 +298,20 @@ public final class POIWorkbook implements BizPortWorkbook {
 		} else {
 			// empty value
 //			Util.LOGGER.info("VALUE for " + rowNum + ", " + colNum + " IS NULL with cellType " + (Cell.CELL_TYPE_NUMERIC == cellType ));
-			if(Cell.CELL_TYPE_NUMERIC == cellType && forceNumericNullToZero){
+			if(CellType.NUMERIC == cellType && forceNumericNullToZero){
 				cell.setCellValue(0.0);
-			} 
+			}
 			else {
-				cell.setCellType(Cell.CELL_TYPE_BLANK);
+				cell.setCellType(CellType.BLANK);
 			}
 		}
 	}
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, Object value) throws Exception {
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) throws Exception {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}
-	
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, int cellType, String value, boolean bold) throws Exception {
+
+	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) throws Exception {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
 	}
-	
+
 }

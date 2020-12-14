@@ -525,11 +525,13 @@
 			<artifactId>spatial4j</artifactId>
 			<version>${spatial4j.version}</version>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>
 			<version>${xmlbeans.version}</version>
 		</dependency>
+-->
 		<dependency>
 			<groupId>org.apache.ws.xmlschema</groupId>
 			<artifactId>xmlschema-core</artifactId>
