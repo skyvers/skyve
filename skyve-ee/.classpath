@@ -9,148 +9,207 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.1.jar"/>
-	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
-	<classpathentry kind="lib" path="lib/objenesis-2.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-ext.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-beanutils-1.9.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jfreechart-1.0.19.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-3.10.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/weld-se-2.4.4.Final.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcommon-1.0.23.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-core-5.4.3.Final.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commonmark-0.10.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-api-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-support-3.141.59.jar"/>
-	<classpathentry kind="lib" path="lib/guava-25.0-jre.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-remote-driver-3.141.59.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-aop-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-beans-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-core-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-expression-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jcl-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/accessors-smart-1.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/antlr-2.7.7.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/antlr-runtime-3.5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-core-0.7.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-dom-0.7.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-core-0.8.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-dom-0.8.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/asm-5.0.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/asm-commons-5.0.4.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/aspectjrt-1.6.11.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/automaton-1.11-8.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bcmail-jdk15-1.45.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bcmail-jdk15on-1.67.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bcpkix-jdk15on-1.67.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bcprov-jdk15-1.45.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bcprov-jdk15on-1.67.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/boilerpipe-1.1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/browscap-java-1.3.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/byte-buddy-1.9.10.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/bzip2-0.9.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/c3p0-0.9.5.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cache-api-1.0.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cdm-4.5.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cglib-3.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/classmate-1.3.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commonmark-0.10.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-beanutils-1.9.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.15.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-collections-3.2.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-compress-1.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-collections4-4.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-compress-1.20.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-csv-1.8.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-digester-1.8.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-io-2.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-exec-1.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-io-2.8.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.11.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-validator-1.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/concurrent-1.3.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/core-3.2.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/dd-plist-1.23.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/dec-0.1.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/dom4j-2.1.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/ecj-4.3.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/ehcache-3.8.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/elasticsearch-1.4.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/fontbox-1.8.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/ehcache-core-2.6.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/FastInfoset-1.2.15.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/fontbox-2.0.21.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/generex-1.0.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geoapi-3.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geodb-0.9.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geolatte-geom-1.4.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/grib-4.5.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/groovy-all-2.3.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/h2-1.3.173.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hatbox-1.0.b10.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-commons-annotations-5.1.0.Final.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-jcache-5.4.3.Final.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-core-5.4.3.Final.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-entitymanager-5.4.3.Final.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-jcache-5.4.3.Final.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-spatial-5.4.3.Final.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/httpclient-4.5.13.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/httpcore-4.4.13.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/httpmime-4.5.13.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/httpservices-4.5.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/icu4j-57.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/isoparser-1.0-RC-1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/isoparser-1.9.41.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/istack-commons-runtime-3.0.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/itext-2.1.7.js5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-annotations-2.1.4.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-core-2.1.4.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-databind-2.1.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackcess-3.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackcess-encrypt-3.0.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-annotations-2.11.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-core-2.11.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-databind-2.11.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jai-imageio-core-1.4.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jakarta-regexp-1.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jandex-2.0.5.Final.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/java-libpst-0.9.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/java-semver-0.9.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javassist-3.24.0-GA.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javax.activation-api-1.2.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javax.annotation-api-1.3.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javax.persistence-api-2.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jaxb-api-2.3.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jaxb-runtime-2.3.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jbig2-imageio-3.0.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jboss-logging-3.3.2.Final.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jboss-transaction-api_1.2_spec-1.1.1.Final.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jdom-1.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jempbox-1.8.4.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jhighlight-1.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jna-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jsr305-2.0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcip-annotations-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcip-annotations-1.0-1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcl-over-slf4j-1.7.28.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcommander-1.78.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jdom2-2.0.6.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jempbox-1.8.16.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jhighlight-1.0.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jmatio-1.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jna-5.6.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/joda-time-2.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/json-smart-2.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jsoup-1.13.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jul-to-slf4j-1.7.28.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/juniversalchardet-1.0.3.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jxl-2.6.10.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/junrar-7.4.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lang-tag-1.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/libphonenumber-8.10.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-analyzers-common-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-core-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-expressions-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-grouping-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-highlighter-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-join-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-memory-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-misc-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queries-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queryparser-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-sandbox-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-spatial-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-suggest-4.10.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/metadata-extractor-2.6.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/neethi-3.0.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/nekohtml-1.9.7.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-analyzers-common-4.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-core-4.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queries-4.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queryparser-4.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-sandbox-4.5.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/mail-1.4.7.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/mchange-commons-java-0.2.19.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/metadata-extractor-2.15.0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/netcdf4-4.5.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/nimbus-jose-jwt-5.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/oauth2-oidc-sdk-5.54.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/olap4j-0.9.7.309-JS-3.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pdfbox-1.8.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/openjson-1.0.12.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/opennlp-tools-1.9.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/parso-2.0.12.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pdfbox-2.0.21.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pdfbox-tools-2.0.21.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-scratchpad-3.10.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quality-check-1.3.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/preflight-2.0.21.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/protobuf-java-3.12.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/reactive-streams-1.0.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/rome-0.9.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/rome-1.15.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/rome-utils-1.15.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sentiment-analysis-parser-0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-feature-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-metadata-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-netcdf-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-referencing-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-storage-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/sis-utility-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-ext.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/slf4j-log4j12-1.7.25.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spatial4j-0.4.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-aop-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-beans-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-core-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-expression-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jcl-5.0.4.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jdbc-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-client-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-core-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-jose-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.0.3.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-tx-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.0.4.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/stax-ex-1.8.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/super-csv-2.4.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tagsoup-1.2.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/thumbnailator-0.4.8.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-core-1.5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-parsers-1.5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.1-tests.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-tika-0.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/wsdl4j-1.6.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-core-1.25.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tika-parsers-1.25.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/txw2-2.3.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/udunits-4.5.5.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/unit-api-1.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/univocity-parsers-2.8.4.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-core-0.8.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/vorbis-java-tika-0.8.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xercesImpl-2.8.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xml-apis-1.0.b2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmlschema-core-2.0.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-5.1.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpbox-2.0.21.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xmpcore-shaded-6.1.11.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/xz-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/all-themes-1.0.10.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/commons-fileupload-1.3.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/omnifaces-2.7.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-7.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-extensions-7.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-api-3.141.59.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-support-3.141.59.jar"/>
+	<classpathentry kind="lib" path="lib/weld-se-2.4.4.Final.jar"/>
 	<classpathentry kind="lib" path="lib/mockito-core-2.21.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/cache-api-1.0.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-client-5.0.3.RELEASE.jar" sourcepath="/Users/mike/.m2/repository/org/springframework/security/spring-security-oauth2-client/5.0.3.RELEASE/spring-security-oauth2-client-5.0.3.RELEASE-sources.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.7.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar" sourcepath="/Users/mike/.m2/repository/org/springframework/security/spring-security-config/5.0.3.RELEASE/spring-security-config-5.0.3.RELEASE-sources.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-core-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/guava-25.0-jre.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

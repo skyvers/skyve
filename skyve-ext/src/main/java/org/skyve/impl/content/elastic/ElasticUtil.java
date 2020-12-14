@@ -8,24 +8,24 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.common.xcontent.support.XContentMapValues;
-import org.elasticsearch.indices.IndexAlreadyExistsException;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
+//import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+//import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
+//import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+//import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+//import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+//import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequestBuilder;
+//import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+//import org.elasticsearch.client.Client;
+//import org.elasticsearch.client.transport.TransportClient;
+//import org.elasticsearch.common.settings.ImmutableSettings;
+//import org.elasticsearch.common.settings.Settings;
+//import org.elasticsearch.common.transport.InetSocketTransportAddress;
+//import org.elasticsearch.common.xcontent.XContentBuilder;
+//import org.elasticsearch.common.xcontent.XContentFactory;
+//import org.elasticsearch.common.xcontent.support.XContentMapValues;
+//import org.elasticsearch.indices.IndexAlreadyExistsException;
+//import org.elasticsearch.node.Node;
+//import org.elasticsearch.node.NodeBuilder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
@@ -35,7 +35,7 @@ public class ElasticUtil {
 	private ElasticUtil() {
 		// disallow instantiation
 	}
-	
+/*	
 	static Node localNode() {
 		Settings settings = ImmutableSettings.settingsBuilder().
 								put("http.enabled", false).
@@ -223,4 +223,5 @@ public class ElasticUtil {
 			}
 		}
 	}
+*/
 }

@@ -122,11 +122,13 @@
 			<artifactId>browscap-java</artifactId>
 			<scope>compile</scope>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<scope>compile</scope>
 		</dependency>
+-->
 		<dependency>
 			<groupId>net.coobird</groupId>
 			<artifactId>thumbnailator</artifactId>

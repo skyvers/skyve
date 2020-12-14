@@ -23,7 +23,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ESClient;
+//import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -107,7 +107,7 @@ public class ContentChecker {
             }
         }
     }
-    
+/*    
     @Deprecated
 	@SuppressWarnings("static-method")
 	public void migrateContent() throws Exception {
@@ -290,7 +290,7 @@ public class ContentChecker {
 			}
 		}
 	}
-	
+*/
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name);
@@ -301,7 +301,7 @@ public class ContentChecker {
 		}
 		return false;
 	}
-	
+/*	
 	@Deprecated
 	private static Document findDocumentForPersistentName(String tableName) {
 		Customer c = CORE.getUser().getCustomer();
@@ -319,4 +319,5 @@ public class ContentChecker {
 		}
 		return null;
 	}
+*/
 }

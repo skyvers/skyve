@@ -21,30 +21,30 @@ import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
-import org.elasticsearch.action.admin.indices.flush.FlushResponse;
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.io.stream.BytesStreamInput;
-import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.terms.TermsFacet;
-import org.elasticsearch.search.facet.terms.TermsFacet.Entry;
-import org.elasticsearch.search.highlight.HighlightField;
+//import org.elasticsearch.action.admin.indices.flush.FlushResponse;
+//import org.elasticsearch.action.get.GetRequestBuilder;
+//import org.elasticsearch.action.get.GetResponse;
+//import org.elasticsearch.action.index.IndexResponse;
+//import org.elasticsearch.action.search.SearchResponse;
+//import org.elasticsearch.action.search.SearchType;
+//import org.elasticsearch.client.Client;
+//import org.elasticsearch.common.Strings;
+//import org.elasticsearch.common.io.stream.BytesStreamInput;
+//import org.elasticsearch.common.text.Text;
+//import org.elasticsearch.common.xcontent.XContentBuilder;
+//import org.elasticsearch.common.xcontent.XContentFactory;
+//import org.elasticsearch.index.get.GetField;
+//import org.elasticsearch.index.query.FilterBuilder;
+//import org.elasticsearch.index.query.FilterBuilders;
+//import org.elasticsearch.index.query.QueryBuilder;
+//import org.elasticsearch.index.query.QueryBuilders;
+//import org.elasticsearch.node.Node;
+//import org.elasticsearch.search.SearchHit;
+//import org.elasticsearch.search.SearchHitField;
+//import org.elasticsearch.search.facet.FacetBuilders;
+//import org.elasticsearch.search.facet.terms.TermsFacet;
+//import org.elasticsearch.search.facet.terms.TermsFacet.Entry;
+//import org.elasticsearch.search.highlight.HighlightField;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
@@ -98,39 +98,42 @@ public class ElasticContentManager extends AbstractContentManager {
 	
     private static final String META_JSON = "meta.json";
     
-	private static Node node = ElasticUtil.localNode();
+//	private static Node node = ElasticUtil.localNode();
 	private static final Tika TIKA = new Tika();
 
-	private Client client = null;
+//	private Client client = null;
 	
 	public ElasticContentManager() {
-		client = ElasticUtil.localClient(node);
+//		client = ElasticUtil.localClient(node);
 	}
 	
 	@Override
 	public void init() throws Exception {
-		ElasticUtil.prepareIndex(client, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
-		ElasticUtil.prepareIndex(client, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
+//		ElasticUtil.prepareIndex(client, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
+//		ElasticUtil.prepareIndex(client, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
 	}
 
 	@Override
 	public void dispose() throws Exception {
-		ElasticUtil.close(node);
+//		ElasticUtil.close(node);
 	}
 
 	@Override
 	public void close() {
+/*
 		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
 		if (flushResponse.getFailedShards() > 0) {
 			throw new DomainException("Could not flush the Elastic attachments index to disk");
 		}
 
 		client.close();
+*/
 	}
 	
 	@Override
 	public void put(BeanContent content)
 	throws Exception {
+/*
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
 			StringBuilder text = new StringBuilder(256);
 			Map<String, String> properties = content.getProperties();
@@ -165,6 +168,7 @@ public class ElasticContentManager extends AbstractContentManager {
 									BEAN_INDEX_TYPE,
 									content.getBizId()).setSource(source).execute().actionGet();
 		}
+*/
 	}
 	
 	@Override
@@ -180,6 +184,7 @@ public class ElasticContentManager extends AbstractContentManager {
 
 	private void put(AttachmentContent attachment, boolean index, boolean store)
 	throws Exception {
+/*
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
 		
 			byte[] content = attachment.getContentBytes();
@@ -317,6 +322,7 @@ public class ElasticContentManager extends AbstractContentManager {
 				writeContentFiles(absoluteContentStoreFolderPath, attachment, content);
 			}
 		}
+*/
 	}
 
 	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, byte[] content) 
@@ -381,6 +387,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	}
 
 	private AttachmentContent getFromElastic(String contentId) throws Exception {
+/*
 		GetRequestBuilder builder = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId);
 		builder.setFields(ATTACHMENT, 
 							FILE_FILENAME,
@@ -452,6 +459,8 @@ public class ElasticContentManager extends AbstractContentManager {
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
 
 		return result;
+*/
+return null;
 	}
 
 	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath, String contentId) throws Exception {
@@ -514,14 +523,17 @@ public class ElasticContentManager extends AbstractContentManager {
 
 	@Override
 	public void remove(BeanContent content) {
+/*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + content.getBizId() + ")");
 		client.prepareDelete(BEAN_INDEX_NAME,
 								BEAN_INDEX_TYPE,
 								content.getBizId()).execute().actionGet();
+*/
 	}
 
 	@Override
 	public void remove(String contentId) throws IOException {
+/*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + contentId + ")");
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
 								ATTACHMENT_INDEX_TYPE,
@@ -553,10 +565,12 @@ public class ElasticContentManager extends AbstractContentManager {
 				}
 			}
 		}
+*/
 	}
 
 	@Override
 	public void truncate(String customerName) throws Exception {
+/*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncate(" + customerName + ")");
 		client.prepareDeleteByQuery()
 			.setIndices(ATTACHMENT_INDEX_NAME, BEAN_INDEX_NAME)
@@ -567,10 +581,12 @@ public class ElasticContentManager extends AbstractContentManager {
 		if (flushResponse.getFailedShards() > 0) {
 			throw new DomainException("Could not flush the Elastic beans and attachments index to disk");
 		}
+*/
 	}
 
 	@Override
 	public void truncateAttachments(String customerName) throws Exception {
+/*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateAttachments(" + customerName + ")");
 		client.prepareDeleteByQuery()
 			.setIndices(ATTACHMENT_INDEX_NAME)
@@ -581,10 +597,12 @@ public class ElasticContentManager extends AbstractContentManager {
 		if (flushResponse.getFailedShards() > 0) {
 			throw new DomainException("Could not flush the Elastic attachments index to disk");
 		}
+*/
 	}
 	
 	@Override
 	public void truncateBeans(String customerName) throws Exception {
+/*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateBeans(" + customerName + ")");
 		client.prepareDeleteByQuery()
 			.setIndices(BEAN_INDEX_NAME)
@@ -595,11 +613,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		if (flushResponse.getFailedShards() > 0) {
 			throw new DomainException("Could not flush the Elastic beans index to disk");
 		}
+*/
 	}
 
 	@Override
 	public SearchResults google(String search, int maxResults)
 	throws Exception {
+/*
 		QueryBuilder qb;
 		if ((search == null) || search.trim().isEmpty()) {
 			qb = QueryBuilders.matchAllQuery();
@@ -673,19 +693,19 @@ public class ElasticContentManager extends AbstractContentManager {
 					hit.setLastModified(TimeUtil.parseISODate(isoDate));
 				}
 				hit.setContentId(searchHit.getId());
-/*			
-				hit.setSource(searchHit.getSourceAsString());
-	
-				if (searchHit.getFields() != null) {
-					if (searchHit.getFields().get(FILE_CONTENT_TYPE) != null) {
-						hit.setContentType((String) searchHit.getFields().get(FILE_CONTENT_TYPE).getValue());
-					}
-				}
-	
-				if (searchHit.getSource() != null) {
-					hit.setTitle(ESUtil.getSingleStringValue(META_TITLE, searchHit.getSource()));
-				}
-*/
+
+//				hit.setSource(searchHit.getSourceAsString());
+//	
+//				if (searchHit.getFields() != null) {
+//					if (searchHit.getFields().get(FILE_CONTENT_TYPE) != null) {
+//						hit.setContentType((String) searchHit.getFields().get(FILE_CONTENT_TYPE).getValue());
+//					}
+//				}
+//	
+//				if (searchHit.getSource() != null) {
+//					hit.setTitle(ESUtil.getSingleStringValue(META_TITLE, searchHit.getSource()));
+//				}
+
 				if (searchHit.getHighlightFields() != null) {
 					for (HighlightField highlightField : searchHit.getHighlightFields().values()) {
 						Text[] fragmentsBuilder = highlightField.getFragments();
@@ -706,8 +726,10 @@ public class ElasticContentManager extends AbstractContentManager {
 		}
 
 		return results;
+*/
+return new SearchResults();
 	}
-
+/*
 	static Object fieldValue(SearchHit hit, String fieldName) {
 		SearchHitField field = hit.field(fieldName);
 		if (field != null) {
@@ -715,12 +737,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		}
 		return null;
 	}
-	
+*/	
 	@Override
 	public ContentIterable all() throws Exception {
-		return new ElasticContentIterable(client);
+//		return new ElasticContentIterable(client);
+return new ElasticContentIterable();
 	}
-
+/*
 	static List<String> complete(Client client, String query) {
 		List<String> results = new ArrayList<>();
 
@@ -740,4 +763,5 @@ public class ElasticContentManager extends AbstractContentManager {
 
 		return results;
 	}
+*/
 }

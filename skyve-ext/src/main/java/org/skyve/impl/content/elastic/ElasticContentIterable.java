@@ -1,26 +1,27 @@
 package org.skyve.impl.content.elastic;
 
-import java.text.ParseException;
-import java.util.Iterator;
+//import java.text.ParseException;
+//import java.util.Iterator;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
+//import org.elasticsearch.action.search.SearchResponse;
+//import org.elasticsearch.client.Client;
+//import org.elasticsearch.common.unit.TimeValue;
+//import org.elasticsearch.index.query.QueryBuilders;
+//import org.elasticsearch.search.SearchHit;
+//import org.elasticsearch.search.SearchHits;
 import org.skyve.content.ContentIterable;
-import org.skyve.content.SearchResult;
-import org.skyve.impl.util.TimeUtil;
-import org.skyve.impl.util.UtilImpl;
+//import org.skyve.content.SearchResult;
+//import org.skyve.impl.util.TimeUtil;
+//import org.skyve.impl.util.UtilImpl;
 
 class ElasticContentIterable implements ContentIterable {
-	private Client client = null;
-
+//	private Client client = null;
+/*
 	ElasticContentIterable(Client client) {
 		this.client = client;
 	}
-	
+*/
+/*
 	class ESIterator implements ContentIterator {
 		private Iterator<SearchHit> i = null;
 		private long totalHits = 0;
@@ -134,11 +135,12 @@ class ElasticContentIterable implements ContentIterable {
 			return totalHits;
 		}
 	}
-
+*/
 	
 	@Override
-	@SuppressWarnings("synthetic-access")
+//	@SuppressWarnings("synthetic-access")
 	public ContentIterator iterator() {
-		return new ESIterator();
+//		return new ESIterator();
+return null;
 	}
 }

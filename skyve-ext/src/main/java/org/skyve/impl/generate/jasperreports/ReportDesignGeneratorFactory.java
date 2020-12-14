@@ -1,10 +1,8 @@
 package org.skyve.impl.generate.jasperreports;
 
-import org.elasticsearch.common.Preconditions;
-
 public class ReportDesignGeneratorFactory {
     public ReportDesignGenerator getGeneratorForDesign(DesignSpecification designSpecification) {
-        Preconditions.checkNotNull(designSpecification.getDefinitionSource());
+        assert(designSpecification.getDefinitionSource() != null);
 
         switch (designSpecification.getDefinitionSource()) {
             case document:
