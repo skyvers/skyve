@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.skyve.admin.web.StartupView;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.UserAgentType;
+import org.skyve.web.UserAgentType;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
@@ -18,7 +18,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Startup;
 
-import static router.UxUiSelectors.*;
+import static router.UxUis.*;
 
 public class DefaultUxUiSelector implements UxUiSelector {
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
