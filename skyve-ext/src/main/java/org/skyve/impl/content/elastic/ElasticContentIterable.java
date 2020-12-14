@@ -1,7 +1,7 @@
 package org.skyve.impl.content.elastic;
 
-//import java.text.ParseException;
-//import java.util.Iterator;
+import java.util.Collections;
+import java.util.Iterator;
 
 //import org.elasticsearch.action.search.SearchResponse;
 //import org.elasticsearch.client.Client;
@@ -10,9 +10,7 @@ package org.skyve.impl.content.elastic;
 //import org.elasticsearch.search.SearchHit;
 //import org.elasticsearch.search.SearchHits;
 import org.skyve.content.ContentIterable;
-//import org.skyve.content.SearchResult;
-//import org.skyve.impl.util.TimeUtil;
-//import org.skyve.impl.util.UtilImpl;
+import org.skyve.content.SearchResult;
 
 class ElasticContentIterable implements ContentIterable {
 //	private Client client = null;
@@ -21,13 +19,14 @@ class ElasticContentIterable implements ContentIterable {
 		this.client = client;
 	}
 */
-/*
+
 	class ESIterator implements ContentIterator {
-		private Iterator<SearchHit> i = null;
+//		private Iterator<SearchHit> i = null;
 		private long totalHits = 0;
-		private String scrollId = null;
+//		private String scrollId = null;
 		
 		private ESIterator() {
+/*
 			@SuppressWarnings("synthetic-access")
 			SearchResponse response = client.prepareSearch()
 										.setIndices(ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.BEAN_INDEX_NAME)
@@ -51,10 +50,13 @@ class ElasticContentIterable implements ContentIterable {
 			SearchHits hits = response.getHits();
 			totalHits = hits.getTotalHits();
 			i = hits.iterator();
+*/
 		}
 
 		@Override
 		public boolean hasNext() {
+return false;
+/*
 			boolean hasNext = i.hasNext();
 
 			if ((! hasNext) && (scrollId != null)) {
@@ -77,10 +79,12 @@ class ElasticContentIterable implements ContentIterable {
 			}
 
 			return hasNext;
+*/
 		}
 
 		@Override
 		public SearchResult next() {
+/*
 			SearchHit searchHit = i.next();
 
 			String bizCustomer = (String) ElasticContentManager.fieldValue(searchHit, ElasticContentManager.BEAN_CUSTOMER_NAME);
@@ -123,6 +127,8 @@ class ElasticContentIterable implements ContentIterable {
 			hit.setContentId(searchHit.getId());
 
 			return hit;
+*/
+return null;
 		}
 
 		@Override
@@ -135,12 +141,10 @@ class ElasticContentIterable implements ContentIterable {
 			return totalHits;
 		}
 	}
-*/
 	
 	@Override
-//	@SuppressWarnings("synthetic-access")
+	@SuppressWarnings("synthetic-access")
 	public ContentIterator iterator() {
-//		return new ESIterator();
-return null;
+		return new ESIterator();
 	}
 }
