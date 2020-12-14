@@ -6,27 +6,27 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel.SailExecutor;
 import modules.admin.domain.ControlPanel.SailUserAgentType;
-import router.DefaultUxUiSelector;
+import router.UxUiSelectors;
 
 public class DownloadClientSAIL extends DownloadAction<ControlPanelExtension> {
 	private static final long serialVersionUID = 6509370665603777126L;
 
 	@Override
 	public void prepare(ControlPanelExtension bean, WebContext webContext)
-	throws Exception {
+			throws Exception {
 		bean.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
-		bean.setSailUxUi(DefaultUxUiSelector.EXTERNAL.getName());
+		bean.setSailUxUi(UxUiSelectors.EXTERNAL.getName());
 		bean.setSailUserAgentType(SailUserAgentType.desktop);
-		
+
 		new GenerateMenuSAIL().execute(bean, webContext);
 		bean.setSail(bean.getUnescapedResults());
-		
+
 		new DownloadSAIL().prepare(bean, webContext);
 	}
-	
+
 	@Override
 	public Download download(ControlPanelExtension bean, WebContext webContext)
-	throws Exception {
+			throws Exception {
 		return new DownloadSAIL().download(bean, webContext);
 	}
 }
