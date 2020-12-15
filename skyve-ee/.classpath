@@ -111,7 +111,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queryparser-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-sandbox-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/mail-1.4.7.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/mchange-commons-java-0.2.19.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/metadata-extractor-2.15.0.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/nimbus-jose-jwt-5.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/oauth2-oidc-sdk-5.54.jar"/>
@@ -124,7 +123,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/pf4j-3.1.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/preflight-2.0.21.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/protobuf-java-3.12.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/reactive-streams-1.0.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/rome-1.15.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/rome-utils-1.15.0.jar"/>
@@ -184,5 +182,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/ehcache-3.9.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/javassist-3.24.0-GA.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-2.3.2.jar" sourcepath="/Users/mike/.m2/repository/org/quartz-scheduler/quartz/2.3.2/quartz-2.3.2-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

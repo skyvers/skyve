@@ -49,7 +49,7 @@
 		<primefaces.version>7.0</primefaces.version>
 		<primefaces-extensions.version>7.0</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
-		<quartz.version>1.7.2</quartz.version>
+		<quartz.version>2.3.2</quartz.version>
 		<slf4j-api.version>1.7.25</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
 		<super-csv.version>2.4.0</super-csv.version>

@@ -5,7 +5,8 @@ import java.util.TreeMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
-import org.skyve.impl.job.AbstractSkyveJob;
+import org.quartz.Trigger.CompletedExecutionInstruction;
+import org.quartz.TriggerKey;
 
 public final class SkyveTriggerListener implements TriggerListener {
 	/**
@@ -19,9 +20,12 @@ public final class SkyveTriggerListener implements TriggerListener {
 	}
 
 	@Override
-	public synchronized void triggerComplete(Trigger trigger, JobExecutionContext context, int triggerInstructionCode) {
-		String customerName = trigger.getGroup();
-		String triggerName = trigger.getName();
+	public synchronized void triggerComplete(Trigger trigger,
+												JobExecutionContext context,
+												CompletedExecutionInstruction triggerInstructionCode) {
+		TriggerKey key = trigger.getKey();
+		String customerName = key.getGroup();
+		String triggerName = key.getName();
 
 		TreeMap<String, JobExecutionContext> jobs = runningJobs.get(customerName);
 		if (jobs != null) {
@@ -34,8 +38,9 @@ public final class SkyveTriggerListener implements TriggerListener {
 
 	@Override
 	public synchronized void triggerFired(Trigger trigger, JobExecutionContext context) {
-		String customerName = trigger.getGroup();
-		String triggerName = trigger.getName();
+		TriggerKey key = trigger.getKey();
+		String customerName = key.getGroup();
+		String triggerName = key.getName();
 		TreeMap<String, JobExecutionContext> jobs = runningJobs.get(customerName);
 		if (jobs == null) {
 			jobs = new TreeMap<>();

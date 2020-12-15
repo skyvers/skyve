@@ -6,17 +6,21 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
-import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
-import org.quartz.TriggerUtils;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -48,7 +52,7 @@ public class JobScheduler {
 		SchedulerFactory sf = new StdSchedulerFactory();
 		try {
 			JOB_SCHEDULER = sf.getScheduler();
-			JOB_SCHEDULER.addGlobalTriggerListener(SKYVE_TRIGGER_LISTENER);
+			JOB_SCHEDULER.getListenerManager().addTriggerListener(SKYVE_TRIGGER_LISTENER);
 			JOB_SCHEDULER.start();
 		}
 		catch (SchedulerException e) {
@@ -92,9 +96,10 @@ public class JobScheduler {
 	private static void addJobs(Module module)
 	throws Exception {
 		for (JobMetaData job : module.getJobs()) {
-			Class<?> jobClass = Thread.currentThread().getContextClassLoader().loadClass(job.getClassName());
-			JobDetail detail = new JobDetail(job.getName(), module.getName(), jobClass);
-			detail.setDurability(true); // remain in store even when no triggers are using it
+			@SuppressWarnings("unchecked")
+			Class<? extends Job> jobClass = (Class<? extends Job>) Thread.currentThread().getContextClassLoader().loadClass(job.getClassName());
+			// remain in store even when no triggers are using it
+			JobDetail detail = JobBuilder.newJob(jobClass).withIdentity(job.getName(), module.getName()).storeDurably().build();
 
 			JOB_SCHEDULER.addJob(detail, false);
 		}
@@ -103,30 +108,32 @@ public class JobScheduler {
 	private static void scheduleInternalJobs()
 	throws Exception {
 		// initialise the CMS in a 1 shot immediate job
-		JobDetail detail = new JobDetail("CMS Init",
-											Scheduler.DEFAULT_GROUP,
-											ContentInitJob.class);
-		detail.setDurability(false);
-		Trigger trigger = new SimpleTrigger("CMS Init Trigger",
-												Scheduler.DEFAULT_GROUP);
+		JobDetail detail = JobBuilder.newJob(ContentInitJob.class)
+										.withIdentity("CMS Init", Scheduler.DEFAULT_GROUP)
+										.storeDurably(false)
+										.build();
+		Trigger trigger = TriggerBuilder.newTrigger()
+											.forJob(detail)
+											.withIdentity("CMS Init trigger", Scheduler.DEFAULT_GROUP)
+											.startNow()
+											.build();
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
 		// Do CMS garbage collection as schedule in the CRON expression in the application properties file
-		detail = new JobDetail("CMS Garbage Collection",
-								Scheduler.DEFAULT_GROUP,
-								ContentGarbageCollectionJob.class);
-		detail.setDurability(true);
+		detail = JobBuilder.newJob(ContentGarbageCollectionJob.class)
+							.withIdentity("CMS Garbage Collection", Scheduler.DEFAULT_GROUP)
+							.storeDurably()
+							.build();
 		Date in5Minutes = new Date(System.currentTimeMillis() + 300000);
-		trigger = new CronTrigger("CMS Garbage Collection Trigger",
-									Scheduler.DEFAULT_GROUP,
-									"CMS Garbage Collection",
-									Scheduler.DEFAULT_GROUP,
-									in5Minutes, // start in 5 minutes once the CMS has settled down
-									null,
-									UtilImpl.CONTENT_GC_CRON);
+		trigger = TriggerBuilder.newTrigger()
+									.forJob(detail)
+									.withIdentity("CMS Garbage Collection Trigger", Scheduler.DEFAULT_GROUP)
+									.startAt(in5Minutes) // start in 5 minutes once the CMS has settled down
+									.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.CONTENT_GC_CRON))
+									.build();
 		try {
 			JOB_SCHEDULER.scheduleJob(detail, trigger);
-			Util.LOGGER.info("CMS Garbage Collection Job scheduled for " +trigger.getNextFireTime());
+			Util.LOGGER.info("CMS Garbage Collection Job scheduled for " + trigger.getNextFireTime());
 		}
 		catch (SchedulerException e) {
 			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
@@ -134,20 +141,19 @@ public class JobScheduler {
 
 		// Do expired conversation cache eviction as schedule in the CRON expression in the application properties file
 		if (UtilImpl.CONVERSATION_EVICT_CRON != null) {
-			detail = new JobDetail("Evict Expired Conversations",
-									Scheduler.DEFAULT_GROUP,
-									EvictConversationsJob.class);
-			detail.setDurability(true);
-			trigger = new CronTrigger("Evict Expired Conversations Trigger",
-										Scheduler.DEFAULT_GROUP,
-										"Evict Expired Conversations",
-										Scheduler.DEFAULT_GROUP,
-										in5Minutes, // start in 5 minutes once everything has settled down
-										null,
-										UtilImpl.CONVERSATION_EVICT_CRON);
+			detail = JobBuilder.newJob(EvictConversationsJob.class)
+								.withIdentity("Evict Expired Conversations", Scheduler.DEFAULT_GROUP)
+								.storeDurably()
+								.build();
+			trigger = TriggerBuilder.newTrigger()
+										.forJob(detail)
+										.withIdentity("Evict Expired Conversations Trigger", Scheduler.DEFAULT_GROUP)
+										.startAt(in5Minutes) // start in 5 minutes once everything has settled down
+										.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.CONVERSATION_EVICT_CRON))
+										.build();
 			try {
 				JOB_SCHEDULER.scheduleJob(detail, trigger);
-				Util.LOGGER.info("Evict Expired Conversations Job scheduled for " +trigger.getNextFireTime());
+				Util.LOGGER.info("Evict Expired Conversations Job scheduled for " + trigger.getNextFireTime());
 			}
 			catch (SchedulerException e) {
 				Util.LOGGER.severe("Evict Expired Conversations Job was not scheduled because - " + e.getLocalizedMessage());
@@ -171,11 +177,10 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user)
 	throws Exception {
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-		trigger.setGroup(user.getCustomer().getName());
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
+		Trigger trigger = TriggerBuilder.newTrigger()
+											.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
+											.forJob(job.getName(), job.getOwningModuleName())
+											.build();
 		scheduleJob(job, parameter, user, trigger, null);
 	}
 
@@ -190,12 +195,11 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds)
 	throws Exception {
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-		trigger.setGroup(user.getCustomer().getName());
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
-		scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
+		Trigger trigger = TriggerBuilder.newTrigger()
+											.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
+											.forJob(job.getName(), job.getOwningModuleName())
+											.build();
+		scheduleJob(job, parameter, user, trigger, Integer.valueOf(sleepAtEndInSeconds));
 	}
 	
 	/**
@@ -208,17 +212,21 @@ public class JobScheduler {
 	 */
 	public static <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId)
 	throws Exception {
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-		trigger.setVolatility(true);
+		@SuppressWarnings("unchecked")
+		Class<? extends org.quartz.Job> jobClass = (Class<? extends org.quartz.Job>) taskClass;
+		JobDetail detail = JobBuilder.newJob(jobClass)
+										.withIdentity(UUID.randomUUID().toString())
+										.storeDurably(false)
+										.build();
+		Trigger trigger = TriggerBuilder.newTrigger()
+											.withIdentity(UUID.randomUUID().toString())
+											.forJob(detail)
+											.build();
 		JobDataMap map = trigger.getJobDataMap();
 		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
 		map.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
-		JobDetail jd = new JobDetail(UUID.randomUUID().toString(), taskClass);
-		jd.setVolatility(true);
-		jd.setDurability(false);
-		
-		JOB_SCHEDULER.scheduleJob(jd, trigger);
+		JOB_SCHEDULER.scheduleJob(detail, trigger);
 	}
 	
 	/**
@@ -235,10 +243,11 @@ public class JobScheduler {
 	 */
 	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
 	throws Exception {
-		SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
+		Trigger trigger = TriggerBuilder.newTrigger()
+													.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
+													.forJob(job.getName(), job.getOwningModuleName())
+													.startAt(when)
+													.build();
 		scheduleJob(job, parameter, user, trigger, null);
 	}
 	
@@ -265,21 +274,19 @@ public class JobScheduler {
 		DateTime endTime = (sqlEndTime == null) ? null : new DateTime(sqlEndTime.getTime());
 		String cronExpression = (String) BindUtil.get(jobSchedule, "cronExpression");
 		
-		CronTrigger trigger = new CronTrigger();
-		trigger.setCronExpression(cronExpression);
-		trigger.setGroup(customer.getName());
-		trigger.setName(bizId);
-		trigger.setJobGroup(moduleName);
-		trigger.setJobName(jobName);
-		
+		TriggerBuilder<CronTrigger> tb = TriggerBuilder.newTrigger()
+														.withIdentity(bizId, customer.getName())
+														.forJob(jobName, moduleName)
+														.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression));
+
 		if (startTime != null) {
-			trigger.setStartTime(startTime);
+			tb.startAt(startTime);
 		}
 		if (endTime != null) {
-			trigger.setEndTime(endTime);
+			tb.endAt(endTime);
 		}
 		
-		scheduleJob(job, null, user, trigger, null);
+		scheduleJob(job, null, user, tb.build(), null);
 	}
 	
 	private static void scheduleJob(JobMetaData job,
@@ -288,8 +295,10 @@ public class JobScheduler {
 										Trigger trigger, 
 										Integer sleepAtEndInSeconds)
 	throws Exception {
+		Trigger mutableTrigger = trigger;
+		
 		// Add the job data
-		JobDataMap map = trigger.getJobDataMap();
+		JobDataMap map = mutableTrigger.getJobDataMap();
 		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getDisplayName());
 		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
 		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
@@ -301,8 +310,8 @@ public class JobScheduler {
 		
 		// check end time
 		Date currentTime = new Date();
-		Date triggerEndTime = trigger.getEndTime(); 
-		Date firstFireTime = trigger.getFireTimeAfter(currentTime);
+		Date triggerEndTime = mutableTrigger.getEndTime(); 
+		Date firstFireTime = mutableTrigger.getFireTimeAfter(currentTime);
 
 		if ((triggerEndTime != null) && triggerEndTime.before(currentTime)) {
 			trace.append("No scheduling required (end time = ").append(triggerEndTime).append(" of ");
@@ -311,7 +320,7 @@ public class JobScheduler {
 			// Set the first fire time (if job is scheduled and recurring)
 			if (firstFireTime != null) {
 				trace.append("Scheduled execution of ");
-				trigger.setStartTime(firstFireTime);
+				mutableTrigger = mutableTrigger.getTriggerBuilder().startAt(firstFireTime).build();
 			}
 			else {
 				trace.append("Immediate execution of ");
@@ -319,7 +328,7 @@ public class JobScheduler {
 			
 			// schedule
 			try {
-				JOB_SCHEDULER.scheduleJob(trigger);
+				JOB_SCHEDULER.scheduleJob(mutableTrigger);
 			}
 			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
 				throw new ValidationException(new Message("You are already running job " + job.getDisplayName() +
@@ -327,9 +336,11 @@ public class JobScheduler {
 			}
 		}
 		
-		trace.append(trigger.getJobGroup()).append('.').append(trigger.getJobName());
+		JobKey jobKey = mutableTrigger.getJobKey();
+		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
 		trace.append(": ").append(job.getDisplayName()).append(" with trigger ");
-		trace.append(trigger.getGroup() + '/' + trigger.getName());
+		TriggerKey key = mutableTrigger.getKey();
+		trace.append(key.getGroup() + '/' + key.getName());
 		if (firstFireTime != null) {
 			trace.append(" first at ").append(firstFireTime);
 		}
@@ -338,7 +349,7 @@ public class JobScheduler {
 
 	public static void unscheduleJob(Bean jobSchedule, Customer customer)
 	throws Exception {
-		JOB_SCHEDULER.unscheduleJob(jobSchedule.getBizId(), customer.getName());
+		JOB_SCHEDULER.unscheduleJob(new TriggerKey(jobSchedule.getBizId(), customer.getName()));
 	}
 
 	public static List<JobDescription> getCustomerRunningJobs()
@@ -348,9 +359,9 @@ public class JobScheduler {
 
 		String customerName = user.getCustomer().getName();
 
-		for (String triggerName : JOB_SCHEDULER.getTriggerNames(customerName)) {
-			Trigger trigger = JOB_SCHEDULER.getTrigger(triggerName, customerName);
-			AbstractSkyveJob job = SKYVE_TRIGGER_LISTENER.getRunningJob(customerName, trigger.getName());
+		for (TriggerKey triggerKey : JOB_SCHEDULER.getTriggerKeys(GroupMatcher.groupEquals(customerName))) {
+			Trigger trigger = JOB_SCHEDULER.getTrigger(triggerKey);
+			AbstractSkyveJob job = SKYVE_TRIGGER_LISTENER.getRunningJob(customerName, triggerKey.getName());
 			if (job != null) {
 				JobDescription jd = new JobDescription();
 				jd.setUser((User) trigger.getJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
