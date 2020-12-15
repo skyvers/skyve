@@ -9,6 +9,10 @@
 
   <xs:element name="cancel" type="tns:cancel"/>
 
+  <xs:element name="clearContext" type="tns:clearContext"/>
+
+  <xs:element name="comment" type="tns:comment"/>
+
   <xs:element name="dataEnter" type="tns:dataEnter"/>
 
   <xs:element name="dataGridEdit" type="tns:dataGridEdit"/>
@@ -59,7 +63,13 @@
 
   <xs:element name="ok" type="tns:ok"/>
 
+  <xs:element name="popContext" type="tns:popContext"/>
+
   <xs:element name="procedure" type="tns:procedure"/>
+
+  <xs:element name="pushEditContext" type="tns:pushEditContext"/>
+
+  <xs:element name="pushListContext" type="tns:pushListContext"/>
 
   <xs:element name="remove" type="tns:remove"/>
 
@@ -99,6 +109,7 @@
         <xs:element ref="tns:navigateTree"/>
         <xs:element ref="tns:navigateMap"/>
         <xs:element ref="tns:navigateCalendar"/>
+        <xs:element ref="tns:pushListContext"/>
         <xs:element ref="tns:navigateEdit"/>
         <xs:element ref="tns:navigateLink"/>
         <xs:element ref="tns:tabSelect"/>
@@ -126,7 +137,11 @@
         <xs:element ref="tns:testValue"/>
         <xs:element ref="tns:testSuccess"/>
         <xs:element ref="tns:testFailure"/>
+        <xs:element ref="tns:comment"/>
         <xs:element ref="tns:execute"/>
+        <xs:element ref="tns:pushEditContext"/>
+        <xs:element ref="tns:popContext"/>
+        <xs:element ref="tns:clearContext"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -161,8 +176,6 @@
     <xs:complexContent>
       <xs:extension base="tns:navigateList">
         <xs:sequence/>
-        <xs:attribute name="endBinding" type="xs:string"/>
-        <xs:attribute name="startBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -182,6 +195,8 @@
     <xs:complexContent>
       <xs:extension base="tns:navigateList">
         <xs:sequence/>
+        <xs:attribute name="endBinding" type="xs:string"/>
+        <xs:attribute name="startBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -365,9 +380,40 @@
     <xs:attribute name="message" type="xs:string"/>
   </xs:complexType>
 
+  <xs:simpleType name="comment">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
   <xs:simpleType name="execute">
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
+
+  <xs:complexType name="pushListContext">
+    <xs:complexContent>
+      <xs:extension base="tns:navigateList">
+        <xs:sequence/>
+        <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+        <xs:attribute name="uxui" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="pushEditContext">
+    <xs:sequence/>
+    <xs:attribute name="createView" type="xs:boolean"/>
+    <xs:attribute name="document" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+    <xs:attribute name="uxui" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="popContext">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="clearContext">
+    <xs:sequence/>
+  </xs:complexType>
 
   <xs:complexType name="interaction">
     <xs:sequence>
@@ -382,6 +428,7 @@
               <xs:element ref="tns:navigateTree"/>
               <xs:element ref="tns:navigateMap"/>
               <xs:element ref="tns:navigateCalendar"/>
+              <xs:element ref="tns:pushListContext"/>
               <xs:element ref="tns:navigateEdit"/>
               <xs:element ref="tns:navigateLink"/>
               <xs:element ref="tns:tabSelect"/>
@@ -409,7 +456,11 @@
               <xs:element ref="tns:testValue"/>
               <xs:element ref="tns:testSuccess"/>
               <xs:element ref="tns:testFailure"/>
+              <xs:element ref="tns:comment"/>
               <xs:element ref="tns:execute"/>
+              <xs:element ref="tns:pushEditContext"/>
+              <xs:element ref="tns:popContext"/>
+              <xs:element ref="tns:clearContext"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>

@@ -9,10 +9,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.context.ClearContext;
+import org.skyve.metadata.sail.language.step.context.PopContext;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -82,7 +87,12 @@ public class Procedure {
 						@XmlElementRef(type = TestValue.class),
 						@XmlElementRef(type = TestSuccess.class),
 						@XmlElementRef(type = TestFailure.class),
-						@XmlElementRef(type = Execute.class)})
+						@XmlElementRef(type = Comment.class),
+						@XmlElementRef(type = Execute.class),
+						@XmlElementRef(type = PushListContext.class),
+						@XmlElementRef(type = PushEditContext.class),
+						@XmlElementRef(type = PopContext.class),
+						@XmlElementRef(type = ClearContext.class)})
 	public List<Step> getSteps() {
 		return steps;
 	}
