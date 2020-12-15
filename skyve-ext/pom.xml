@@ -13,10 +13,6 @@
 		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
 	</build>
 
-	<properties>
-		<commonmark.version>0.10.0</commonmark.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.skyve</groupId>
@@ -56,13 +52,11 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>${commons-codec.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>${commons-io.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -78,7 +72,6 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<version>${javaee-api.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -89,7 +82,6 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>${javassist.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -137,7 +129,6 @@
 		<dependency>
 			<groupId>com.atlassian.commonmark</groupId>
 			<artifactId>commonmark</artifactId>
-			<version>${commonmark.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

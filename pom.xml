@@ -17,25 +17,20 @@
 	<properties>
 		<skyve.version>${project.version}</skyve.version>
 		<asm.version>5.0.4</asm.version>
-		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
 		<browscap.version>1.3.1</browscap.version>
 		<byte-buddy.version>1.9.10</byte-buddy.version>
-		<cglib.version>3.1</cglib.version>
-		<commons-beanutils.version>1.9.2</commons-beanutils.version>
-		<commons-codec.version>1.5</commons-codec.version>
-		<commons-collections.version>3.2.2</commons-collections.version>
-		<commons-fileupload.version>1.3.2</commons-fileupload.version>
-		<commons-io.version>2.2</commons-io.version>
-		<commons-lang3.version>3.7</commons-lang3.version>
-		<commons-validator.version>1.5.1</commons-validator.version>
+		<commonmark.version>0.10.0</commonmark.version>
+		<commons-beanutils.version>1.9.4</commons-beanutils.version>
+		<commons-codec.version>1.15</commons-codec.version>
+		<commons-fileupload.version>1.4</commons-fileupload.version>
+		<commons-io.version>2.8.0</commons-io.version>
+		<commons-lang3.version>3.11</commons-lang3.version>
+		<commons-validator.version>1.7</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
-		<ehcache.version>3.8.1</ehcache.version>
-<!--
-		<elasticsearch.version>1.4.2</elasticsearch.version>
--->
+		<ehcache.version>3.9.0</ehcache.version>
 		<geodb.version>0.9</geodb.version>
-		<h2.version>1.3.173</h2.version>
 		<gson.version>2.2.4</gson.version>
+		<h2.version>1.3.173</h2.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>
 		<hibernate-entitymanager.version>5.4.3.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.4.3.Final</hibernate-spatial.version>
@@ -43,7 +38,7 @@
 		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>6.3.1</jasperreports.version>
 		<java.version>1.8</java.version>
-		<javassist.version>3.20.0-GA</javassist.version>
+		<javassist.version>3.24.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.16.1</jts.version>
 		<lucene.version>4.10.2</lucene.version>
@@ -179,14 +174,39 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>commons-collections</groupId>
-				<artifactId>commons-collections</artifactId>
-				<version>${commons-collections.version}</version>
+				<groupId>javax</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>${javaee-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>${commons-beanutils.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-validator</groupId>
 				<artifactId>commons-validator</artifactId>
 				<version>${commons-validator.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>${commons-codec.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>${javassist.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.coobird</groupId>
@@ -199,17 +219,20 @@
 				<version>${ehcache.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.atlassian.commonmark</groupId>
+				<artifactId>commonmark</artifactId>
+				<version>${commonmark.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.blueconic</groupId>
 				<artifactId>browscap-java</artifactId>
 				<version>${browscap.version}</version>
 			</dependency>
-<!--
 			<dependency>
-				<groupId>org.elasticsearch</groupId>
-				<artifactId>elasticsearch</artifactId>
-				<version>${elasticsearch.version}</version>
+				<groupId>com.github.mifmif</groupId>
+				<artifactId>generex</artifactId>
+				<version>${generex.version}</version>
 			</dependency>
--->
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
@@ -281,11 +304,6 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jcache</artifactId>
 				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>cglib</groupId>
-				<artifactId>cglib</artifactId>
-				<version>${cglib.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ow2.asm</groupId>
@@ -363,11 +381,6 @@
 						<artifactId>castor-xml</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcmail-jdk15</artifactId>
-				<version>${bcmail-jdk15.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.primefaces.themes</groupId>
