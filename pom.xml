@@ -147,18 +147,16 @@
 	<repositories>
         <repository>
             <id>maven2</id>
-            <url>https://jcenter.bintray.com/</url>
+            <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
         <repository>
             <id>oss.sonatype.org</id>
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
         </repository>
- <!--
         <repository>
             <id>Prime Faces</id>
             <url>http://repository.primefaces.org/</url>
         </repository>
--->
         <repository>
             <id>osgeo</id>
             <url>http://download.osgeo.org/webdav/geotools/</url>
