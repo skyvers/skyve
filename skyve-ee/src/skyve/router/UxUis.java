@@ -2,7 +2,7 @@ package router;
 
 import org.skyve.metadata.router.UxUi;
 
-public class UxUiSelectors {
+public class UxUis {
 	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", "editorial", "nova-light");
 	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", "editorial", "nova-light");
 	public static final UxUi DESKTOP = UxUi.newSmartClient("desktop", "Tahoe", "casablanca");
