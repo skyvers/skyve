@@ -37,8 +37,8 @@
 		<ireport.version>4.7.0</ireport.version>
 		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>6.3.1</jasperreports.version>
-		<java.version>1.8</java.version>
-		<javassist.version>3.24.0-GA</javassist.version>
+		<java.version>11</java.version>
+		<javassist.version>3.20.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.16.1</jts.version>
 		<lucene.version>4.10.2</lucene.version>
@@ -83,6 +83,13 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>-Djava.locale.providers=COMPAT,CLDR </argLine>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
