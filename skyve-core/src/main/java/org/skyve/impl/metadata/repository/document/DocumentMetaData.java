@@ -70,8 +70,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
@@ -453,6 +451,11 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						field.setIndex(IndexType.textual);
 					}
 
+					// Set persistent attribute false for non-persistent documents
+					if (resultPersistent == null) {
+						field.setPersistent(false);
+					}
+
 					if (attribute instanceof ConvertableField) {
 						ConvertableField convertableField = (ConvertableField) attribute;
 						ConverterName converterName = convertableField.getConverterName();
@@ -700,8 +703,12 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						throw new MetaDataException(metaDataName + " : The relation [documentName] is required for relation " + relation.getName());
 					}
 
-					if (relation instanceof Association) {
-						Association association = (Association) relation;
+					if (relation instanceof AssociationImpl) {
+						AssociationImpl association = (AssociationImpl) relation;
+						// Set persistent attribute false for non-persistent documents
+						if (resultPersistent == null) {
+							association.setPersistent(false);
+						}
 						if (association.getType() == null) {
 							throw new MetaDataException(metaDataName + " : The association [type] is required for association " +
 															relation.getName());
@@ -711,8 +718,12 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 															relation.getName());
 						}
 					}
-					else if (relation instanceof Collection) {
-						Collection collection = (Collection) relation;
+					else if (relation instanceof CollectionImpl) {
+						CollectionImpl collection = (CollectionImpl) relation;
+						// Set persistent attribute false for non-persistent documents
+						if (resultPersistent == null) {
+							collection.setPersistent(false);
+						}
 						if (collection.getMinCardinality() == null) {
 							throw new MetaDataException(metaDataName + " : The collection [minCardinality] is required for collection " + 
 															relation.getName());
@@ -731,7 +742,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 								for (Ordering ordering : orderings) {
 									String by = ordering.getBy();
 									if (by.indexOf('.') >= 0) {
-										((CollectionImpl) collection).setComplexOrdering(true);
+										collection.setComplexOrdering(true);
 										break;
 									}
 								}
