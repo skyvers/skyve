@@ -72,8 +72,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					throw e;
 				}
 
-				// geneate the activation code and save the new user
-				bean.generateActivationDetailsAndSave(persistence);
+				// generate the activation code and save the new user
+				bean.getUser().generateActivationDetailsAndSave(persistence);
 
 				// Send registration email to the new user
 				sendRegistrationEmail(bean);
@@ -97,7 +97,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 		try {
 			// Send the registration email
 			CORE.getPersistence().begin();
-			bean.sendUserRegistrationEmail();
+			bean.getUser().sendUserRegistrationEmail();
 			CORE.getPersistence().commit(false);
 		} catch (Exception e) {
 			LOGGER.warn("Self Registration successful but email failed to send.", e);

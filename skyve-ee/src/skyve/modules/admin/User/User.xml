@@ -216,6 +216,11 @@
 			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
 			<description>admin.user.activationCodeCreationDateTime.description</description>
 		</dateTime>
+		<!-- needs i18n properties -->
+		<text name="activateUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>Activation Url</displayName>
+            <length>2083</length>
+        </text>
 		
 	</attributes>
 	<conditions>
@@ -294,6 +299,12 @@
 			<description>True when User Self-Registration is enabled.</description>
 			<expression>
 				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION]]>
+			</expression>
+		</condition>
+		<condition name="selfRegistrationEnabledAndUserNotActivated" usage="view">
+			<description>True when User Self-Registration is enabled and the User has not been activated.</description>
+			<expression>
+				<![CDATA[(org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (getActivated().equals(Boolean.FALSE)))]]>
 			</expression>
 		</condition>
 		<condition name="canActivateUser" usage="view">

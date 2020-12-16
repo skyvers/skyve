@@ -33,9 +33,9 @@ public class ResendActivation implements ServerSideAction<SelfRegistrationExtens
 			}
 
 			// Set activation details
-			bean.generateActivationDetailsAndSave(CORE.getPersistence());
+			bean.getUser().generateActivationDetailsAndSave(CORE.getPersistence());
 
-			bean.sendUserRegistrationEmail();
+			bean.getUser().sendUserRegistrationEmail();
 		}
 
 		return new ServerSideActionResult<>(bean);

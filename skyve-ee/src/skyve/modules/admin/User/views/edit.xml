@@ -36,7 +36,17 @@
 				</row>
 				<row>
 					<item>
-						<checkBox binding="activated" triState="false" enabled="canActivateUser" visible="selfRegistrationEnabled"/>
+						<checkBox binding="activated" triState="false" enabled="canActivateUser" visible="selfRegistrationEnabled">
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<button action="ResendActivation"/>
 					</item>
 				</row>
 			</form>
@@ -95,5 +105,6 @@
 		relativeIconFileName="shared/icons/Job.gif"/>
 		<action className="GeneratePassword" displayName="admin.user.actions.generatePassword.actionName" invisible="notSecurityAdministrator" 
 		relativeIconFileName="shared/icons/Job.gif"/>
+		<action className="ResendActivation" inActionPanel="false" visible="selfRegistrationEnabledAndUserNotActivated" displayName="Resend Activation"/>
 	</actions>
 </view>
