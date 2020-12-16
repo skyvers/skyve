@@ -517,6 +517,12 @@
 			<artifactId>jts-core</artifactId>
 			<version>${jts.version}</version>
 		</dependency>
+		<!-- remove this dependency when geodb depends on at least 1.0.b11 (which is java 9 module friendly) -->
+		<dependency>
+			<groupId>net.sourceforge.hatbox</groupId>
+			<artifactId>hatbox</artifactId>
+			<version>${hatbox.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
