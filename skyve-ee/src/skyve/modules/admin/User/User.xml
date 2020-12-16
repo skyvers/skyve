@@ -216,12 +216,10 @@
 			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
 			<description>admin.user.activationCodeCreationDateTime.description</description>
 		</dateTime>
-		<!-- needs i18n properties -->
 		<text name="activateUrl" persistent="false" audited="false" trackChanges="false">
-            <displayName>Activation Url</displayName>
-            <length>2083</length>
-        </text>
-		
+			<displayName>Activation Url</displayName>
+			<length>2083</length>
+		</text>	
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->

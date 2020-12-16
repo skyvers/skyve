@@ -4,7 +4,7 @@
 	<tabPane>
 		<tab title="admin.user.profile.tabTitle">
 			<form border="true" percentageWidth="70" responsiveWidth="12">
-				<column percentageWidth="20" responsiveWidth="4" />
+				<column percentageWidth="20" responsiveWidth="3" />
 				<column />
 				<row>
 					<item>
@@ -43,10 +43,10 @@
 				</row>
 				<row>
 					<item>
-						<spacer/>
+						<spacer visible="selfRegistrationEnabledAndUserNotActivated"/>
 					</item>
 					<item>
-						<button action="ResendActivation"/>
+						<button action="ResendActivation" pixelWidth="170"/>
 					</item>
 				</row>
 			</form>
@@ -105,6 +105,7 @@
 		relativeIconFileName="shared/icons/Job.gif"/>
 		<action className="GeneratePassword" displayName="admin.user.actions.generatePassword.actionName" invisible="notSecurityAdministrator" 
 		relativeIconFileName="shared/icons/Job.gif"/>
-		<action className="ResendActivation" inActionPanel="false" visible="selfRegistrationEnabledAndUserNotActivated" displayName="Resend Activation"/>
+		<action className="ResendActivation" inActionPanel="false" visible="selfRegistrationEnabledAndUserNotActivated" displayName="Resend Activation" iconStyleClass="fa fa-envelope-o"
+			confirm="Are you sure you wish to resend the activation email to this user? Their previous activation link will no longer work." />
 	</actions>
 </view>

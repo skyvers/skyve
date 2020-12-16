@@ -1,16 +1,17 @@
 package modules.admin.User.actions;
 
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
 
 /**
  * Resends the registration email with the activation code to the user. Used when a user
- * attempts to register an account which already exists but has not been activated.
+ * has lost or did not receive their activation email upon registration.
  */
 public class ResendActivation implements ServerSideAction<UserExtension> {
 
@@ -19,24 +20,20 @@ public class ResendActivation implements ServerSideAction<UserExtension> {
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension bean, WebContext webContext) throws Exception {
 
-		if (bean != null) {
-			if (bean.getContact() == null || bean.getContact().getName() == null) {
-//				 this came from a public page, retrieve the user
-				UserExtension user = CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME,
-						bean.getBizId());
-				
-//				if (user != null) {
-//					bean.setUser(user);
-//				}
+		if (bean != null && bean.getContact() != null) {
+			if (bean.getContact().getEmail1() == null) {
+				throw new DomainException("This user's contact does not have an email address.");
 			}
-			
+
 			// Set activation details
 			bean.generateActivationDetailsAndSave(CORE.getPersistence());
-			
 			bean.sendUserRegistrationEmail();
+
+			if (webContext != null) {
+				webContext.growl(MessageSeverity.info, "Activation email sent to " + bean.getContact().getEmail1() + ".");
+			}
 		}
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

@@ -52,8 +52,10 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					if (selfRegistrationGroup != null) {
 						bean.getUser().getGroups().add(selfRegistrationGroup);
 					} else {
-						LOGGER.error("Self registration failed because the no self registration has been set in the configuration.");
-						throw new ValidationException(new Message("Self registration cannot be completed at this time."));
+						LOGGER.error(
+								"Self registration failed because no self-registration group has been set in the configuration.");
+						throw new ValidationException(new Message(
+								"Registration cannot be completed at this time, please contact an administrator for assistance."));
 					}
 
 					// Validate

@@ -24,7 +24,6 @@ import org.skyve.util.Util;
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.Contact;
-import modules.admin.domain.SelfRegistration;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
@@ -141,7 +140,7 @@ public class UserExtension extends User {
 	public void sendUserRegistrationEmail() throws Exception {
 		Util.LOGGER.info("Sending registration email to " + this.getContact().getEmail1());
 		CommunicationUtil.sendFailSafeSystemCommunication(SELF_REGISTRATION_COMMUNICATION,
-				this.getContact().getEmail1(),
+				"{contact.email1}",
 				null,
 				SELF_REGISTRATION_SUBJECT,
 				SELF_REGISTRATION_BODY,
