@@ -206,6 +206,7 @@
 					<action name="GenerateMenuSAIL" />
 					<action name="GenerateModuleSAIL" />
 					<action name="ExecuteSAIL" />
+					<action name="DownloadResults"/>
 					<action name="DownloadSAIL" />
 					<action name="DownloadClientSAIL" />
 					<action name="ApplyStartupConfiguration" />
