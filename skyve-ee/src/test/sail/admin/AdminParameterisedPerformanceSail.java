@@ -29,6 +29,7 @@ public class AdminParameterisedPerformanceSail extends AdminSail {
 	public String password = "admin";
 	
 	@Test
+	@Override
 	public void test() throws Exception {
 		login(customer, user, password);
 		testMenuPassword();
