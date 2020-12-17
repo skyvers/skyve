@@ -260,4 +260,31 @@ public class Util {
 
 		return result.toString();
 	}
+	
+	public static String getContentUrl(String bizModule, String bizDocument, String binding, String contentId) {
+		StringBuilder result = new StringBuilder(128);
+
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append("content?_n=").append(contentId);
+		result.append("&_doc=").append(bizModule).append('.').append(bizDocument);
+		result.append("&_b=").append(binding);
+
+		return result.toString();
+	}
+	
+	public static String getResourceUrl(String bizModule, String bizDocument, String resourceFileName) {
+		StringBuilder result = new StringBuilder(128);
+
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append("resources?_n=").append(resourceFileName);
+		if ((bizModule != null) && (bizDocument != null)) {
+			result.append("&_doc=").append(bizModule).append('.').append(bizDocument);
+		}
+
+		return result.toString();
+	}
+
+	public static String getResourceUrl(String resourceFileName) {
+		return getResourceUrl(null, null, resourceFileName);
+	}
 }
