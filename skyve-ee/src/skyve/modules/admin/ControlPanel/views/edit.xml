@@ -386,7 +386,7 @@
 		<action className="GenerateMenuSAIL" displayName="admin.controlPanel.actions.generateMenuSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateMenuSail.toolTip" />
 		<action className="GenerateModuleSAIL" displayName="admin.controlPanel.actions.generateModuleSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateModuleSail.toolTip" />
 		<action className="ExecuteSAIL" displayName="admin.controlPanel.actions.executeSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.executeSail.toolTip" />
-		<download className="DownloadResults" displayName="" inActionPanel="false"/>
+		<download className="DownloadResults" displayName="admin.controlPanel.actions.downloadResults.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadResults.toolTip"/>
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
 		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
 			iconStyleClass="fa fa-exclamation" />
