@@ -110,11 +110,11 @@
 						</execution>
 					</executions>
 				</plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.5.0</version>
-                </plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.5.0</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -152,26 +152,26 @@
 	</build>
 
 	<repositories>
-        <repository>
-            <id>maven2</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>oss.sonatype.org</id>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>Prime Faces</id>
-            <url>http://repository.primefaces.org/</url>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
-        </repository>
-        <repository>
-            <id>boundlessgeo</id>
-            <url>https://repo.osgeo.org/repository/release/</url>
-        </repository>
+		<repository>
+			<id>maven2</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>oss.sonatype.org</id>
+			<url>https://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>Prime Faces</id>
+			<url>http://repository.primefaces.org/</url>
+		</repository>
+		<repository>
+			<id>osgeo</id>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+		<repository>
+			<id>boundlessgeo</id>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>
 		<repository>
 			<id>skyve</id>
 			<url>http://repo.skyve.org/repository/skyve/</url>
@@ -525,10 +525,10 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-	    		<groupId>org.jboss.weld.se</groupId>
-	    		<artifactId>weld-se</artifactId>
-	    		<version>${weld-se.version}</version>
-	    		<scope>test</scope>
+				<groupId>org.jboss.weld.se</groupId>
+				<artifactId>weld-se</artifactId>
+				<version>${weld-se.version}</version>
+				<scope>test</scope>
 			</dependency>
 
 			<!-- Runtime dependencies -->
