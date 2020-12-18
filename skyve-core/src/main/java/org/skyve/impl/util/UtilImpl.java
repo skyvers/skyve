@@ -1,5 +1,6 @@
 package org.skyve.impl.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
@@ -14,6 +15,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.json.stream.JsonParser;
+
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
@@ -25,6 +28,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.json.Minifier;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
@@ -285,11 +289,9 @@ public class UtilImpl {
 		try (Scanner scanner = new Scanner(inputStream)) {
 			json = scanner.useDelimiter("\\Z").next();
 		}
-		// Remove any C-style comments
-		String commentsPattern = "(?s)\\/\\*(?:(\\*(?!\\/))|(?:[^\\*]))*\\*\\/|[^:]\\/\\/[^\\n\\r]*(?=[\\n\\r])";
-		final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
-		final Matcher m = pattern.matcher(json);
-		json = m.replaceAll("");
+		
+		// minify the file to remove any comments
+		json = Minifier.minify(json);
 
 		return (Map<String, Object>) JSON.unmarshall(null, json);
 	}

@@ -64,4 +64,17 @@ public class UtilImplTest {
 		assertThat(api.get("twilio"), is(notNullValue()));
 		assertThat(twilio.get("defaultSendNumber"), is(notNullValue()));
 	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testReadJSONConfigFull() throws Exception {
+		// call the method under test
+		Map<String, Object> json = UtilImpl.readJSONConfig(classLoader.getResourceAsStream("json/skyve.json"));
+		
+		// verify the result
+		Map<String, Object> environment = (Map<String, Object>) json.get("environment");
+		
+		assertThat(environment, is(notNullValue()));
+		assertThat(environment.get("customer"), is(notNullValue()));
+	}
 }
