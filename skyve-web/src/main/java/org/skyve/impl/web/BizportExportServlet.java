@@ -19,7 +19,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -40,7 +39,7 @@ public class BizportExportServlet extends HttpServlet {
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
-	        		throw new ConversationEndedException();
+	        		throw new ConversationEndedException(request.getLocale());
 	        	}
 	
 	    		AbstractPersistence persistence = webContext.getConversation();
@@ -50,7 +49,7 @@ public class BizportExportServlet extends HttpServlet {
 						persistence.begin();
 						User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
 						if (user == null) {
-							throw new SessionEndedException();
+							throw new SessionEndedException(request.getLocale());
 						}
 						persistence.setUser(user);
 	

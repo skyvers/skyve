@@ -363,7 +363,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				dialect = DIALECTS.get(dialectClassName);
 				if (dialect == null) {
 					try {
-						dialect = (SkyveDialect) Class.forName(dialectClassName).newInstance();
+						dialect = (SkyveDialect) Class.forName(dialectClassName).getDeclaredConstructor().newInstance();
 						DIALECTS.put(dialectClassName, dialect);
 					}
 					catch (Exception e) {
@@ -387,6 +387,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 	
 	@Override
+	@SuppressWarnings("resource")
 	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
 		try {
 			if (dropDDLFilePath != null) {
@@ -447,7 +448,7 @@ t.printStackTrace();
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
 			}
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof StaleObjectStateException) {
 			if (bean.isPersisted()) {
@@ -459,10 +460,10 @@ t.printStackTrace();
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
 			}
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof EntityNotFoundException) {
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof DomainException) {
 			throw (DomainException) t;
@@ -934,7 +935,6 @@ t.printStackTrace();
 	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
 		new BeanVisitor(false, true, false) {
 			@Override
-			@SuppressWarnings({"synthetic-access"})
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
@@ -1574,9 +1574,7 @@ t.printStackTrace();
 	
 				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
-						throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																			" \"" + bean.getBizKey() + 
-																			"\" as it is referenced by a " + ref.getDocumentAlias());
+						throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
 					}
 				}
 			}
@@ -1653,9 +1651,7 @@ t.printStackTrace();
 	
 			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 				if (results.next()) {
-					throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																		" \"" + bean.getBizKey() + 
-																		"\" as it is referenced by a " + ref.getDocumentAlias());
+					throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
 				}
 			}
 		}
@@ -2030,7 +2026,7 @@ public void doWorkOnConnection(Session session) {
 		return ((SessionImpl) session).connection();
 	}
 	
-	private static final Integer NEW_VERSION = new Integer(0);
+	private static final Integer NEW_VERSION = Integer.valueOf(0);
 	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override

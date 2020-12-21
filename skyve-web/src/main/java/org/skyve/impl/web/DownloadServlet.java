@@ -21,7 +21,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.model.document.Document;
@@ -40,7 +39,7 @@ public class DownloadServlet extends HttpServlet {
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
-	        		throw new ConversationEndedException();
+	        		throw new ConversationEndedException(request.getLocale());
 	        	}
 	        	
 	    		AbstractPersistence persistence = webContext.getConversation();
@@ -52,7 +51,7 @@ public class DownloadServlet extends HttpServlet {
 																			request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null,
 																			true);
 						if (user == null) {
-							throw new SessionEndedException();
+							throw new SessionEndedException(request.getLocale());
 						}
 						persistence.setUser(user);
 	

@@ -183,7 +183,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 					BindUtil.set(job, "displayName", getDisplayName());
 					BindUtil.set(job, "status", status.toString());
 					BindUtil.set(job, "endTime", getEndTime());
-					BindUtil.set(job, "percentComplete", new Integer(getPercentComplete()));
+					BindUtil.set(job, "percentComplete", Integer.valueOf(getPercentComplete()));
 					BindUtil.set(job, "log", createLogDescriptionString());
 					if (bean != null) {
 						BindUtil.set(job, "beanBizId", bean.getBizId());

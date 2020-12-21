@@ -84,6 +84,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		String moduleName = getModuleName();
 		String documentName = getDocumentName();
@@ -128,6 +129,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
@@ -165,6 +167,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);

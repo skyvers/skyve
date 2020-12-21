@@ -98,7 +98,7 @@ public class ChartServlet extends HttpServlet {
 					persistence.begin();
 					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 					persistence.setUser(user);
 

@@ -54,7 +54,7 @@ public class InitialiseServlet extends HttpServlet {
 			Principal userPrincipal = request.getUserPrincipal();
 	    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 			if (user == null) {
-				throw new SessionEndedException();
+				throw new SessionEndedException(request.getLocale());
 			}
 
 			UserAgentType userAgentType = UserAgent.getType(request);

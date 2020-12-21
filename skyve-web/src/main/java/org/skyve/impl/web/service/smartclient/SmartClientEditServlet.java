@@ -128,7 +128,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	Principal userPrincipal = request.getUserPrincipal();
 			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 			    	persistence.setUser(user);
 	
@@ -1043,7 +1043,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 		
 		if (! persistentBeanToDelete.getBizLock().equals(beanToDelete.getBizLock())) {
-			throw new OptimisticLockException(customer, 
+			throw new OptimisticLockException(user, 
 												OperationType.delete, 
 												persistentBeanToDelete.getBizLock());
 		}

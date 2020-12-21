@@ -1,6 +1,6 @@
 package org.skyve.impl.domain.messages;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.domain.messages.DomainException;
@@ -8,16 +8,15 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.Message;
 
 public class ReferentialConstraintViolationException extends DomainException implements MessageException {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 4458169944531617791L;
 
-	private List<Message> messages = new ArrayList<>();
+	private static final String MESSAGE_KEY = "exception.referentialConstraintViolation";
+
+	private List<Message> messages = null;
 	
-	public ReferentialConstraintViolationException(String message) {
-		super(message);
-		messages.add(new Message(message));
+	public ReferentialConstraintViolationException(String documentAlias, String bizKey, String referencingDocumentAlias) {
+		super(MESSAGE_KEY, documentAlias, bizKey, referencingDocumentAlias);
+		messages = Collections.singletonList(new Message(getMessage()));
 	}
 
 	@Override

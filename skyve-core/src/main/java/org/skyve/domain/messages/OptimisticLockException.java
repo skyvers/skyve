@@ -1,65 +1,47 @@
 package org.skyve.domain.messages;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
-import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 
 /**
  * 
  */
 public class OptimisticLockException extends DomainException implements MessageException {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 9168437033648462795L;
 
-	/**
-	 * 
-	 */
+	private static final String UPDATE_MESSAGE_KEY = "exception.optimisticLock.update";
+	private static final String DELETE_MESSAGE_KEY = "exception.optimisticLock.delete";
+	
 	public enum OperationType {
-		/**
-		 * 
-		 */
-		update,
-		
-		/**
-		 * 
-		 */
-		delete;
+		update, delete;
 	}
 
-	private List<Message> messages = new ArrayList<>(1);
+	private List<Message> messages = null;
 	
-	public OptimisticLockException(Customer customer, OperationType operationType, OptimisticLock persistentLock) {
+	public OptimisticLockException(User user, OperationType operationType, OptimisticLock persistentLock) {
 		super("Optimistic Lock failed - updated by user " + 
 				persistentLock.getUsername() + 
 				" at " + 
-				persistentLock.getTimestamp());
+				persistentLock.getTimestamp(), false);
 
 		String timeStampDisplay = null;
 		try {
-			timeStampDisplay = customer.getDefaultTimestampConverter().toDisplayValue(new Timestamp(persistentLock.getTimestamp().getTime()));
+			timeStampDisplay = user.getCustomer().getDefaultTimestampConverter().toDisplayValue(new Timestamp(persistentLock.getTimestamp().getTime()));
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			timeStampDisplay = persistentLock.getTimestamp().toString();
 		}
 
 		if (operationType == OperationType.update) {
-			messages.add(new Message("Failed to update this information as it was updated by user " +
-										persistentLock.getUsername() + 
-										" at " + 
-										timeStampDisplay +
-										" after you looked at it.  Please re-apply your changes."));
+			messages = Collections.singletonList(new Message(Util.i18n(UPDATE_MESSAGE_KEY, user.getLocale(), persistentLock.getUsername(), timeStampDisplay)));
 		}
 		else if (operationType == OperationType.delete) {
-			messages.add(new Message("Failed to delete this information as it was updated by user " +
-										persistentLock.getUsername() + 
-										" at " + 
-										timeStampDisplay +
-										" after you looked at it.  Please review and delete if still necessary."));
+			messages = Collections.singletonList(new Message(Util.i18n(DELETE_MESSAGE_KEY, user.getLocale(), persistentLock.getUsername(), timeStampDisplay)));
 		}
 	}
 

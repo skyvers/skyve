@@ -21,11 +21,11 @@ public abstract class AbstractPersistence implements Persistence {
 		return threadLocalPersistence.get();
 	}
 
-	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<AbstractPersistence>() {
+	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>() {
 		@Override
 		protected synchronized AbstractPersistence initialValue() throws IllegalArgumentException {
 			try {
-				AbstractPersistence persistence = IMPLEMENTATION_CLASS.newInstance();
+				AbstractPersistence persistence = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 				set(persistence);
 				return persistence;
 			}

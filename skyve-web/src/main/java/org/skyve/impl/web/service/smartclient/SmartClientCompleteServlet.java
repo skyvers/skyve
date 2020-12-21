@@ -76,7 +76,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 																		(userPrincipal == null) ? null : userPrincipal.getName(),
 																		true);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 					persistence.setUser(user);
 
@@ -95,7 +95,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 
 					String webId = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME));
 			        if (webId == null) {
-			        	throw new ConversationEndedException();
+			        	throw new ConversationEndedException(request.getLocale());
 			        }
 
 			        try {

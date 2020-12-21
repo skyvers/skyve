@@ -134,7 +134,7 @@ public class SmartClientListServlet extends HttpServlet {
 			    														(userPrincipal == null) ? null : userPrincipal.getName(),
 	    																true);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 			    	persistence.setUser(user);
 	

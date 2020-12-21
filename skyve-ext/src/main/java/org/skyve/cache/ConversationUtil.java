@@ -47,7 +47,7 @@ public class ConversationUtil {
 			String currentBeanId = webId.substring(36);
 			byte[] value = getConversations().get(conversationKey);
 			if (value == null) {
-				throw new ConversationEndedException();
+				throw new ConversationEndedException(request.getLocale());
 			}
 
 			result = (AbstractWebContext) SerializationHelper.deserialize(value);
