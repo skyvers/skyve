@@ -1,0 +1,258 @@
+{
+	// Trace settings
+	trace: {
+		// XML metadata parsing
+		xml: false, 
+		// HTTP request attributes and parameters
+		http: true,
+		// queries performed
+		query: false, 
+		// MVC command debug
+		command: false,
+		// JSF inner workings
+		faces: false, 
+		// generated SQL statements
+		sql: false, 
+		// content manipulation
+		content: false, 
+		// application security denials
+		security: true, 
+		// bizlet callbacks
+		bizlet: false, 
+		// mutations in domain objects
+		dirty: false
+	},
+	// Content settings
+	content: {
+		// directory path
+		directory: "${SKYVE_CONTENT:/path/}",
+		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
+		gcCron: "0 7 0/1 1/1 * ? *", 
+		// Attachments stored on file system or inline
+		fileStorage: true
+	},
+	// Thumbnail settings
+	thumbnail: {
+		// The number of threads that are allowed to serve thumb nails at once.
+		// Too many threads can cause out of memory errors.
+		// You can calculate this as concurrentThreads * memory usage determined by targetSize below
+		// For the default of 10 concurrentThreads at 4MB the approximately max memory usage is 40MB.
+		concurrentThreads: 10,
+		// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
+		// Then it sub-samples pixels by 2, 3 etc.
+		// You can calculate the approximate max memory used per image with
+		// targetSize * 2 (double width) * targetSize * 2 (double height) * 4 (ARGB bytes per pixel) / 1024 (KB) / 1024 (MB)
+		// assuming the images are relatively square.
+		// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
+		subsamplingMinimumTargetSize: 512,
+		// Thumbnails can be stored on the file system or generated on the fly each time
+		fileStorage: true,
+		// Where to put thumbnails if fileStorage is true - defaults to <content.directory>/SKYVE_THUMBNAILS/
+		// Skyve will recreate this folder if it is deleted whilst running but if defined it must exist at startup.
+		directory: null
+	},
+	// URL settings - various SKYVE URL/URI fragments - useful for linking and mailing
+	url: {
+		// server URL
+		server: "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}",
+		// web context path
+		context: "/skyve", 
+		// home path
+		home: "/"
+	},
+	// Conversation cache settings
+	conversations: {
+		// Max conversations allowed in heap memory before being moved off-heap or to disk
+		heapSizeEntries: 1000,
+		// Max off-heap memory size - 0 indicates no usage
+		offHeapSizeMB: 128,
+		// Max disk size - 0 indicates no usage
+		diskSizeGB: 10,
+		// Number of seconds to wait until expiring a conversation from the cache
+		expiryTimeMinutes: 60,
+		// CRON Expression for Evicting Expired Conversations job - run at 12:37 - null indictes no eviction
+		evictCron: "0 37 0 1/1 * ? *"
+	},
+	// app cache definitions
+	/*caches: {
+		"exampleEHCache": {
+			type: "ehcache", // "jcache"
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 0,
+			// Max disk size - 0 indicates no usage
+			diskSizeGB: 0,
+			// Whether the cache is persistent - false indicates the cache does not survive JVM restarts
+			persistent: false,
+			// Under what conditions to expire a cache entry
+			expiryPolicy: "timeToLive", // "timeToIdle" or "eternal"
+			// Number of minutes to wait until expiring a conversation from the cache
+			expiryTimeMinutes: 1,
+			keyClass: "java.lang.String",
+			valueClass: "java.lang.String"
+		},
+		"exampleJCache": {
+			type: "jcache", // "ehcache"
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 0,
+			// Under what conditions to expire a cache entry
+			expiryPolicy: "timeToIdle", // "timeToLive" or "eternal"
+			// Number of minutes to wait until expiring a conversation from the cache
+			expiryTimeMinutes: 1,
+			keyClass: "java.lang.String",
+			valueClass: "java.lang.String"
+		}
+	},*/
+	// Datastore definitions
+	dataStores: {
+		// Skyve data store
+		"skyve": {
+			// JNDI name
+			jndi: "java:/H2Demo", 
+			// Dialect
+			dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect",
+			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout
+			oltpConnectionTimeoutInSeconds: 30,
+			// Timeout for data store connections employed when running jobs and background tasks - 0 indicates no timeout
+			asyncConnectionTimeoutInSeconds: 300
+		}
+	},
+	// Hibernate settings
+	hibernate: {
+		// Datastore hibernate uses
+		dataStore: "skyve", 
+		// Issue DDL on startup to synchronise the database schema
+		ddlSync: true, 
+		catalog: null,
+		schema: null,
+		// Format the SQL statements when logged
+		prettySql: false,
+		caches: {
+			"eternal": {
+				// Max conversations allowed in heap memory before being moved off-heap or to disk
+				heapSizeEntries: 10,
+				// Max off-heap memory size - 0 indicates no usage
+				offHeapSizeMB: 0,
+				expiryPolicy: "eternal" // "timeToLive" or "timeToIdle"
+			},
+			"reference": {
+				// Max conversations allowed in heap memory before being moved off-heap or to disk
+				heapSizeEntries: 1000,
+				// Max off-heap memory size - 0 indicates no usage
+				offHeapSizeMB: 0,
+				expiryPolicy: "timeToIdle", // "timeToLive" or "eternal"
+				// Number of minutes to wait until expiring a hibernate object from the cache
+				expiryTimeMinutes: 10
+			}
+		}
+	},
+	// Factory settings
+	factories: {
+		// Skyve persistence class
+		persistenceClass: null, 
+		// Skyve repository class
+		repositoryClass: null,
+		// Skyve content manager class
+		contentManagerClass: null
+	},
+	// SMTP Settings
+	smtp: {
+		// Mail Server URL
+		server: "localhost", 
+		// Mail Server Port
+		port: 25, 
+		// Mail Server User Name
+		uid: null, 
+		// Mail server password
+		pwd: null, 
+		// Extra Java Mail properties { "k.e.y" : "value"}
+		properties: null,
+		// Sender header value
+		sender: "mailer@skyve.org", 
+		// Set true so emails are never sent, they are logged
+		testBogusSend: false, 
+		// Test Recipient (all emails only sent to this email address)
+		testRecipient: "test@yourdomain.com"
+	},
+	// Map Settings
+	map: {
+		// gmap or leaflet
+		type: "leaflet",
+		// gmap or leafet layers to show for the map backdrop (use single-quoted strings)
+		layers: "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors'})]"
+		//layers: "google.maps.MapTypeId.ROADMAP",
+		// opening a new empty map will centre here - ie "POINT(lng lat)"
+		// centre: "POINT(0 0)",
+		// opening a new empty map will apply this zoom level - ie 1 - 19
+		// zoom: 1
+	},
+	// API Settings
+	api: {
+		//to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
+		googleMapsV3Key: null,
+		googleRecaptchaSiteKey: null,
+		ckEditorConfigFileUrl: null
+	},
+	// Account settings
+	account: {
+		// Password hashing algorithm - usually bcrypt, pbkdf2, scrypt. MD5 and SHA1 are unsalted and obsolete.
+		passwordHashingAlgorithm: "bcrypt",
+		// Number of days until a password change is required - Use null to indicate no password aging
+		passwordExpiryInDays: null,
+		// Number of previous passwords to check for duplicates - Use null to indicate no password history
+		passwordHistoryRetention: null,
+		// Number of sign in attempts until the user account is locked - Use null to indicate no account lockout
+		accountLockoutThreshold: 3,
+		// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
+		accountLockoutDurationMultipleInSeconds: 10,
+		// Enables new users to register for an account when true, requires email
+		allowUserSelfRegistration: false,
+		// Where to forward to to log in
+		loginUri: "/login",
+		// For google authentication - see https://console.developers.google.com/
+		// (callback URL is <Context URL>/login/oauth2/code/google)
+		// (loginUri should be set to "/oauth2/authorization/google" for automatic login)
+		googleAuthClientId: null,
+		googleAuthSecret: null,
+		// For facebook authentication - see https://developers.facebook.com/
+		// (callback URL is <Context URL>/login/oauth2/code/facebook)
+		// (loginUri should be set to "/oauth2/authorization/facebook" for automatic login)
+		facebookAuthClientId: null,
+		facebookAuthSecret: null,
+		// For github authentication - see https://github.com/settings/applications/
+		// (callback URL is <Context URL>/login/oauth2/code/github)
+		// (loginUri should be set to "/oauth2/authorization/github" for automatic login)
+		githubAuthClientId: null,
+		githubAuthSecret: null
+	},
+	// Environment settings
+	environment: {
+		// test, sit, uat, dev etc: null = prod
+		identifier: "local",
+		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
+		devMode: true,
+		// Customer Default
+		customer: "demo",
+		// Run the jobs scheduled in the data store or not - set false for slave skyve instances
+		jobScheduler: true,
+		// Absolute path on the filesystem to the source directory where modules live 
+		// for generating report templates and new documents via skyve script. 
+		// This must be a valid /modules directory e.g. C:/Workspace/myapp/src/main/java/modules
+		// (note that if you are running on Windows do NOT use backslashes)		
+		moduleDirectory: null,
+		// Email address for system support
+		supportEmailAddress: "support@yourdomain.com",
+		// Show Setup screen on sign in for DevOps users
+		showSetup: true
+	},
+	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
+	bootstrap: {
+		customer: "demo",
+		user: "admin",
+		email: "admin@yourdomain.com",
+		password: "admin"
+	}
+}

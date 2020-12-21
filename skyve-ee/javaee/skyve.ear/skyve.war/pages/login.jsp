@@ -235,8 +235,48 @@
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
 		            </div>
-		            
-		            <div class="ui error message">
+
+					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) { %>
+					<div class="ui segment">
+						<div class="ui grid">
+							<div class="sixteen wide column">
+								<p style="text-align: left;">Sign in with</p>
+							</div>
+							<% if (UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) { %>
+							<div class="eight wide column" style="padding-top: 0;">
+								<div class="ui fluid labeled button">
+									<div class="ui red button">
+										<i class="google icon"></i>
+									</div>
+									<a href="oauth2/authorization/google" class="ui basic red left pointing label">Google</a>
+								</div>
+							</div>
+							<% } %>
+							<% if (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) { %>
+							<div class="eight wide column" style="padding-top: 0;">
+								<div class="ui fluid labeled button">
+									<div class="ui blue button">
+										<i class="facebook f icon"></i>
+									</div>
+									<a href="oauth2/authorization/facebook" class="ui basic blue left pointing label">Facebook</a>
+								</div>
+							</div>
+							<% } %>
+							<% if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) { %>
+							<div class="eight wide column" style="padding-top: 0;">
+								<div class="ui fluid labeled button">
+									<div class="ui gray button">
+										<i class="github icon"></i>
+									</div>
+									<a href="oauth2/authorization/github" class="ui basic gray left pointing label">GitHub</a>
+								</div>
+							</div>
+							<% } %>							
+						</div>
+					</div>
+					<% } %>
+
+					<div class="ui error message">
 		            	<%-- javascript form validation is inserted here --%> 
 		            </div>
 		        </form>
@@ -245,25 +285,6 @@
 						<div class="ui message">
 							<%=Util.i18n("page.login.register.label.pre", locale)%> <a href="?a=e&m=admin&d=SelfRegistration"><%=Util.i18n("page.login.register.label.post", locale)%></a>
 					    </div>	        
-				    <% } %>
-				    <% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) { %>
-			            <div class="ui segment">
-						    <% if (UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) { %>
-								<div class="ui header">
-									<a href="oauth2/authorization/google" class="ui fluid large green submit button"><i class="fa fa-google"></i>&nbsp;&nbsp;Sign in with Google</a>
-								</div>
-							<% } %>
-						    <% if (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) { %>
-								<div class="ui header">
-									<a href="oauth2/authorization/facebook" class="ui fluid large green submit button"><i class="fa fa-facebook"></i>&nbsp;&nbsp;Sign in with Facebook</a>
-								</div>
-							<% } %>
-						    <% if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) { %>
-								<div class="ui header">
-									<a href="oauth2/authorization/github" class="ui fluid large green submit button"><i class="fa fa-github"></i>&nbsp;&nbsp;Sign in with Github</a>
-								</div>
-							<% } %>
-					    </div>
 				    <% } %>
 				<% } %>
 		    </div>

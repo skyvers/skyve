@@ -1427,6 +1427,25 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * resultsNotNull
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isResultsNotNull() {
+		return (getResults()!=null);
+	}
+
+	/**
+	 * {@link #isResultsNotNull} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotResultsNotNull() {
+		return (! isResultsNotNull());
+	}
+
+	/**
 	 * taggingGeneratedDataSelected
 	 *
 	 * @return The condition

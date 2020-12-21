@@ -241,5 +241,12 @@
 				<![CDATA[Boolean.TRUE.equals(getTestTagGeneratedData())]]>
 			</expression>
 		</condition>
+		<condition name="resultsNotNull">
+			<expression>
+				<![CDATA[
+					getResults()!=null
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>

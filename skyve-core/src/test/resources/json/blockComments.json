@@ -1,0 +1,18 @@
+{
+	// cache definitions
+	/*
+	caches: {
+		"exampleEHCache": {
+		}
+	}
+	*/
+	// API Settings
+	"api": {
+		// Twilio Settings
+		"twilio": {
+			"accountSid": "1234",
+			"authToken": "1234",
+			"defaultSendNumber": "+614555555"
+		}
+	}
+}
