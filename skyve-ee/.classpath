@@ -9,9 +9,14 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+		<attributes>
+			<attribute name="module" value="true"/>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/accessors-smart-1.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/antlr-2.7.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-core-0.8.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/apache-mime4j-dom-0.8.3.jar"/>
@@ -96,7 +101,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jul-to-slf4j-1.7.28.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/junrar-7.4.0.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lang-tag-1.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/libphonenumber-8.10.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-analyzers-common-4.5.1.jar"/>
@@ -104,10 +108,7 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queries-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queryparser-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-sandbox-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/mail-1.4.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/metadata-extractor-2.15.0.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/nimbus-jose-jwt-5.4.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/oauth2-oidc-sdk-5.54.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/olap4j-0.9.7.309-JS-3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/openjson-1.0.12.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/opennlp-tools-1.9.3.jar"/>
@@ -126,21 +127,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/slf4j-log4j12-1.7.25.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spatial4j-0.4.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-aop-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-beans-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-core-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-expression-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jcl-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jdbc-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-client-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-core-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-jose-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-tx-5.0.4.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.0.4.RELEASE.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/stax-ex-1.8.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/super-csv-2.4.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/tagsoup-1.2.1.jar"/>
@@ -176,11 +162,19 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/ehcache-3.9.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-2.3.2.jar" sourcepath="/Users/mike/.m2/repository/org/quartz-scheduler/quartz/2.3.2/quartz-2.3.2-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
-		<attributes>
-			<attribute name="module" value="true"/>
-			<attribute name="owner.project.facets" value="java"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-aop-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-beans-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-core-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-expression-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jcl-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-client-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-core-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-jose-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.4.2.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.2.11.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-saml2-service-provider-5.4.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

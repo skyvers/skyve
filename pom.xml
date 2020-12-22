@@ -64,8 +64,8 @@
 		<mockito.version>2.21.0</mockito.version>
 		<hamcrest.version>1.3</hamcrest.version>
 		<weld-se.version>2.4.4.Final</weld-se.version>
-		<spring-security.version>5.0.3.RELEASE</spring-security.version>
-		<spring.version>5.0.4.RELEASE</spring.version>
+		<spring-security.version>5.4.2</spring-security.version>
+		<spring.version>5.2.11.RELEASE</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
