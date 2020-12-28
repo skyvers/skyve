@@ -252,27 +252,27 @@ public final class BindUtil {
 		if (value != null) {
 			if (type.equals(Integer.class)) {
 				if ((! (value instanceof Integer)) && (value instanceof Number)) {
-					result = new Integer(((Number) value).intValue());
+					result = Integer.valueOf(((Number) value).intValue());
 				}
 			}
 			else if (type.equals(Long.class)) {
 				if ((! (value instanceof Long)) && (value instanceof Number)) {
-					result = new Long(((Number) value).longValue());
+					result = Long.valueOf(((Number) value).longValue());
 				}
 			}
 			else if (type.equals(Short.class)) {
 				if ((! (value instanceof Short)) && (value instanceof Number)) {
-					result = new Short(((Number) value).shortValue());
+					result = Short.valueOf(((Number) value).shortValue());
 				}
 			}
 			else if (type.equals(Float.class)) {
 				if ((! (value instanceof Float)) && (value instanceof Number)) {
-					result = new Float(((Number) value).floatValue());
+					result = Float.valueOf(((Number) value).floatValue());
 				}
 			}
 			else if (type.equals(Double.class)) {
 				if ((! (value instanceof Double)) && (value instanceof Number)) {
-					result = new Double(((Number) value).doubleValue());
+					result = Double.valueOf(((Number) value).doubleValue());
 				}
 			}
 			else if (type.equals(BigDecimal.class)) {
@@ -382,17 +382,17 @@ public final class BindUtil {
 					result = converter.fromDisplayValue(stringValue);
 				}
 				else {
-					result = new Integer(stringValue);
+					result = Integer.valueOf(stringValue);
 				}
 			}
 			else if (type.equals(Long.class)) {
-				result = new Long(stringValue);
+				result = Long.valueOf(stringValue);
 			}
 			else if (type.equals(Float.class)) {
-				result = new Float(stringValue);
+				result = Float.valueOf(stringValue);
 			}
 			else if (type.equals(Double.class)) {
-				result = new Double(stringValue);
+				result = Double.valueOf(stringValue);
 			}
 			else if (type.equals(BigDecimal.class)) {
 				result = new BigDecimal(stringValue);
