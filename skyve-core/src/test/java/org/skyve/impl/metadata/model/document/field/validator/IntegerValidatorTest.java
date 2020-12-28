@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.user.SuperUser;
-import org.skyve.util.BeanValidator;
 
 public class IntegerValidatorTest {
 
@@ -35,7 +34,7 @@ public class IntegerValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_LESS_KEY));
+		assertThat(e.getMessages().get(0).getText(), containsString(" less than "));
 	}
 
 	@Test
@@ -70,7 +69,7 @@ public class IntegerValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_GREATER_KEY));
+		assertThat(e.getMessages().get(0).getText(), containsString(" greater than "));
 	}
 
 	@Test
@@ -106,7 +105,7 @@ public class IntegerValidatorTest {
 
 		// verify the result
 		assertThat(e.getMessages().size(), is(1));
-		assertThat(e.getMessages().get(0).getText(), containsString(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY));
+		assertThat(e.getMessages().get(0).getText(), containsString(" between "));
 	}
 
 	@Test

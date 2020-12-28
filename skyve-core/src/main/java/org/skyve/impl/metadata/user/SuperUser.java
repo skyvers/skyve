@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -7,7 +8,6 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
-import org.skyve.impl.metadata.user.UserImpl;
 
 public class SuperUser extends UserImpl {
 	private static final long serialVersionUID = -6233814867322594601L;
@@ -16,6 +16,8 @@ public class SuperUser extends UserImpl {
 		RoleImpl superRole = new RoleImpl();
 		superRole.setName(SUPER_ROLE);
 		addRole(superRole);
+		setLanguageTag("EN");
+		setWebLocale(Locale.ENGLISH);
 	}
 	
 	public SuperUser(User user) {
