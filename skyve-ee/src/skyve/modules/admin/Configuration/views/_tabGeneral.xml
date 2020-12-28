@@ -5,6 +5,7 @@
 	
 	<component name="_emailNotConfiguredBanner" />
 	<component name="_backupsNotConfiguredBanner" />
+	<component name="_selfRegistrationNotConfiguredBanner" />
 	
 	<form border="true" borderTitle="admin.configuration.tabGeneral.passwordComplexity.borderTitle">
 		<column responsiveWidth="3" />

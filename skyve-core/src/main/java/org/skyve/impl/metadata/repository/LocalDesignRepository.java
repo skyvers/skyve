@@ -156,6 +156,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						}
 
 						result = new RouterMerger().mergeRouters(routers);
+						result = result.convert(ROUTER_NAME, this);
 
 						if (! UtilImpl.DEV_MODE) {
 							put(routerKey, result);
@@ -176,7 +177,8 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(absolutePath);
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-		return XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
+		final Router globalRouter = XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
+		return globalRouter.convert(ROUTER_NAME, this);
 	}
 
 	/**
@@ -192,7 +194,8 @@ public class LocalDesignRepository extends AbstractRepository {
 				sb.append(absolutePath);
 				sb.append(MODULES_NAMESPACE).append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
 				if (new File(sb.toString()).exists()) {
-					moduleRouters.add(XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this));
+					final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
+					moduleRouters.add(moduleRouter.convert(ROUTER_NAME, this));
 				}
 			}
 		}

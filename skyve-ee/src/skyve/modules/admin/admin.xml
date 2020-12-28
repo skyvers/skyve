@@ -333,6 +333,7 @@
 					<action name="New" />
 					<action name="Next" />
 					<action name="Back" />
+					<action name="ResendActivation"/>
 				</document>
 				<document name="UserCandidateContact" permission="_____" />
 				<document name="UserList" permission="_____">

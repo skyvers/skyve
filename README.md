@@ -292,7 +292,19 @@ This will prompt you for the new module name, then create a new module directory
 ```
 mvn skyve:newDocument
 ```
-This will prompt you for a module name, and the new document name, then create the new document directory and document.xml in the correct location within your project structure. Note: the new document will not pass generate domain, some required fields will be missing.
+This will prompt you for a module name, and the new document name, then create the new document directory and document.xml in the correct location within your project structure. This will also register the new document with the module.
+
+### Add Scaffolded Document
+```
+mvn skyve:newScaffoldedDocument
+```
+This performs everything Add Document does, as well as creating an edit view, Bizlet, Factory, Extension and Service classes in the correct location within your project structure.
+
+### Add Action
+```
+mvn skyve:newAction
+```
+This will prompt you for a module name, document name and action name and create an empty action ready to add business logic to. Note: the action will need to be manually added to any edit views and privileges within your module as required.
 
 ## Updating Skyve version
 To update your project with a specific Skyve version, you'll need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved. Releases are tagged, so it is typically safest to checkout the last tagged commit.

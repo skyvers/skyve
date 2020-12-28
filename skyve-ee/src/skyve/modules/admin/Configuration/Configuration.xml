@@ -145,6 +145,14 @@
 				]]>
 			</expression>
 		</condition>	
+		<condition name="selfRegistrationConfiguredEmailOrGroupNotConfigured">
+			<expression>
+				<![CDATA[
+					startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
+					(!modules.admin.Configuration.ConfigurationExtension.validSMTPHost() || userSelfRegistrationGroup == null)
+				]]>
+			</expression>
+		</condition>
 		<condition name="backupsConfigured">
 			<expression>
 				<![CDATA[
