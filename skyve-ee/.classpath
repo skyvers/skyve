@@ -175,6 +175,5 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-oauth2-jose-5.4.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.4.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.2.11.RELEASE.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-saml2-service-provider-5.4.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
