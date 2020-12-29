@@ -267,7 +267,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("", Binder.formatMessage("{el:stash['nothing']}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{el:user.attributes['nothing']}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{el:DATE}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage("{el:DATE.set(DATE.toLocalDate().plusDays(1))}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:DATE.setLocalDate(DATE.toLocalDate().plusDays(1))}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{el:TIME}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{el:DATETIME}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{el:TIMESTAMP}", bean));
