@@ -18,7 +18,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Email">
+			<form border="true" borderTitle="admin.communication.edit.contents.email.borderTitle">
 				<column />
 				<column />
 				<column />
@@ -97,7 +97,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Options">
+			<form border="true" borderTitle="admin.communication.edit.contents.options.borderTitle">
 				<column />
 				<column />
 				<column />
@@ -146,7 +146,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Calendar">
+			<form border="true" borderTitle="admin.communication.edit.attachments.calendar.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -174,7 +174,7 @@
 			</form>
 		</tab>
 		<tab title="admin.communication.edit.manage.tabTitle">
-			<form border="true" borderTitle="Configuration">
+			<form border="true" borderTitle="admin.communication.edit.manage.configuration.borderTitle">
 				<column />
 				<column />
 				<column />
@@ -194,7 +194,7 @@
 					</item>
 				</row>
 			</form>
-			<vbox border="true" borderTitle="Results" widgetId="results">
+			<vbox border="true" borderTitle="admin.communication.edit.manage.results.borderTitle" widgetId="results">
 				<hbox>
 					<form responsiveWidth="8">
 						<column />
@@ -269,7 +269,7 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="Batches" widgetId="batches">
+			<vbox border="true" borderTitle="admin.communication.edit.manage.batches.borderTitle" widgetId="batches">
 				<listGrid visible="showBatches" model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
 					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
 					<onSelectedHandlers>
