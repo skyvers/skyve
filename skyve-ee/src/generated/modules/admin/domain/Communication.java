@@ -119,7 +119,7 @@ public abstract class Communication extends AbstractPersistentBean {
 	public static final String subscriptionsPropertyName = "subscriptions";
 
 	/**
-	 * Action
+	 * admin.communicaiton.actionType.displayName
 	 **/
 	@XmlEnum
 	public static enum ActionType implements Enumeration {
@@ -197,7 +197,7 @@ public abstract class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Format
+	 * admin.communication.formatType.displayName
 	 **/
 	@XmlEnum
 	public static enum FormatType implements Enumeration {
@@ -273,23 +273,23 @@ public abstract class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Description
+	 * admin.communication.description.displayName
 	 **/
 	private String description;
 	/**
-	 * Module
+	 * admin.communication.moduleName.displayName
 	 * <br/>
-	 * Bindings used in the communication address, subject and body will be based on the selected module document.
+	 * admin.communication.moduleName.description
 	 **/
 	private String moduleName;
 	/**
-	 * Document
+	 * admin.communication.moduleName.displayName
 	 * <br/>
-	 * Bindings used in the communication address, subject and body will be based on the selected module document.
+	 * admin.communication.moduleName.description
 	 **/
 	private String documentName;
 	/**
-	 * Tag
+	 * admin.communication.tag.displayName
 	 * <br/>
 	 * <p>Tag is transient:
 			<ul><li>as good practice so that the user is forced to reconsider which
@@ -300,188 +300,175 @@ public abstract class Communication extends AbstractPersistentBean {
 	 **/
 	private Tag tag = null;
 	/**
-	 * Send to
+	 * admin.communication.toBinding.displayName
 	 * <br/>
-	 * Provide a binding which contains the email address to send to
+	 * admin.communication.toBinding.description
 	 **/
 	private String toBinding;
 	/**
-	 * To
+	 * admin.communication.sendTo.displayName
 	 * <br/>
-	 * The address to send to.
+	 * admin.communication.sendTo.description
 	 **/
 	private String sendTo;
 	/**
-	 * CC To
+	 * admin.communication.ccTo.displayName
 	 * <br/>
-	 * The address to send to.
+	 * admin.communication.ccTo.description
 	 **/
 	private String ccTo;
 	/**
-	 * To (expression)
+	 * admin.communication.sendToOverride.displayName
 	 * <br/>
-	 * The address to send to. Bindings are allowed relative to the above module document.
+	 * admin.communication.sendToOverride.description
 	 **/
 	private String sendToOverride;
 	/**
-	 * CC To (expression)
+	 * admin.communication.ccToOverride.displayName
 	 * <br/>
-	 * The address to send to. Bindings are allowed relative to the above module document.
+	 * admin.communication.ccToOverride.description
 	 **/
 	private String ccToOverride;
 	/**
-	 * From (expression)
+	 * admin.communication.sendFrom.displayName
 	 * <br/>
-	 * The address to send from. Bindings are allowed relative to the above module document.
+	 * admin.communication.sendFrom.description
 	 **/
 	private String sendFrom;
 	/**
-	 * BCC Me
+	 * admin.communication.monitorBcc.displayName
 	 * <br/>
-	 * Monitor outgoing emails by including yourself in the Bcc
+	 * admin.communication.monitorBcc.description
 	 **/
 	private Boolean monitorBcc;
 	/**
-	 * Subject (expression)
+	 * admin.communication.subject.displayName
 	 * <br/>
-	 * The subject of the communication. Bindings are allowed relative to the above module document.
+	 * admin.communication.subject.description
 	 **/
 	private String subject;
 	/**
-	 * Body (expression)
+	 * admin.communication.body.displayName
 	 * <br/>
-	 * The body of the communication.  
-			<p/>
-			Bindings are allowed relative to the above module document.
-			<p/>
-			To include images in the HTML, switch to the Source view, and embed the 64bit encoding from a site like 
-			http://www.freeformatter.com/base64-encoder.html
+	 * admin.communication.body.description
 	 **/
 	private String body;
 	/**
-	 * Results
+	 * admin.communication.results.displayName
 	 **/
 	private String results;
 	/**
-	 * Attachment 1
+	 * admin.communication.attachment1.displayName
 	 **/
 	private String attachment1;
 	/**
-	 * Attachment File Name
+	 * admin.communication.attachmentFileName1.displayName
 	 * <br/>
-	 * The file name for the attachment as it will appear to receivers.
+	 * admin.communication.attachmentFileName1.description
 	 **/
 	private String attachmentFileName1;
 	/**
-	 * Attachment 2
+	 * admin.communication.attachment2.displayName
 	 **/
 	private String attachment2;
 	/**
-	 * Attachment File Name
+	 * admin.communication.attachmentFileName2.displayName
 	 * <br/>
-	 * The file name for the attachment as it will appear to receivers.
+	 * admin.communication.attachmentFileName2.description
 	 **/
 	private String attachmentFileName2;
 	/**
-	 * Attachment 3
+	 * admin.communication.attachment3.displayName
 	 **/
 	private String attachment3;
 	/**
-	 * Attachment File Name
+	 * admin.communication.attachmentFileName3.displayName
 	 * <br/>
-	 * The file name for the attachment as it will appear to receivers.
+	 * admin.communication.attachmentFileName3.description
 	 **/
 	private String attachmentFileName3;
 	/**
-	 * Action
+	 * admin.communicaiton.actionType.displayName
 	 **/
 	private ActionType actionType;
 	/**
-	 * Format
+	 * admin.communication.formatType.displayName
 	 **/
 	private FormatType formatType;
 	/**
-	 * Selected Batch Timestamp Folder Name
+	 * admin.communication.selectedBatchTimestampFolderName.displayName
 	 **/
 	private String selectedBatchTimestampFolderName;
 	/**
-	 * Refresh Batches
+	 * admin.communication.refreshBatches.displayName
 	 **/
 	private Boolean refreshBatches = new Boolean(true);
 	/**
-	 * Untag successful documents
+	 * admin.communication.unTagSuccessful.displayName
 	 **/
 	private Boolean unTagSuccessful;
 	/**
-	 * Notify when job is complete
+	 * admin.communication.notification.displayName
 	 **/
 	private Boolean notification;
 	/**
-	 * Used for System communications
+	 * admin.communication.systemUse.displayName
 	 * <br/>
-	 * System communications can not be deleted unless the system flag is cleared first.
+	 * admin.communication.systemUse.description
 	 **/
 	private Boolean systemUse;
 	/**
-	 * UnsubscribeUrl
+	 * admin.commmunication.unsubscribe.displayName
 	 **/
 	private String unsubscribeUrl;
 	/**
-	 * Include Calendar Item
+	 * admin.communication.includeCalendar.displayName
 	 * <br/>
-	 * <b>Include Calendar Item</b>:
-				<br/>
-				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
-				<br/>
-				Check Options page for more.
+	 * admin.communication.includeCalendar.description
 	 **/
 	private Boolean includeCalendar;
 	/**
-	 * Title (expression)
+	 * admin.communication.calendarTitleExpression.displayName
 	 * <br/>
-	 * Specify the title for the calendar item as a binding expression relative to the module document.
+	 * admin.communication.calendarTitleExpression.description
 	 **/
 	private String calendarTitleExpression;
 	/**
-	 * Start Time
+	 * admin.communication.calendarStartTime.displayName
 	 **/
 	private DateTime calendarStartTime;
 	/**
-	 * End Time
+	 * admin.communication.calendarEndTime.displayName
 	 **/
 	private DateTime calendarEndTime;
 	/**
-	 * Description (expression)
+	 * admin.communication.calendarDescriptionExpression.displayName
 	 * <br/>
-	 * <b>Description (expression)</b>
-			<br/>
-			Specify a description for the calendar item as a binding expression relative to the module document.
-			<br/>
-			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
+	 * admin.communication.calendarDescriptionExpression.description
 	 **/
 	private String calendarDescriptionExpression;
 	/**
-	 * Image
+	 * admin.communication.mailImage.displayName
 	 **/
 	private String mailImage;
 	/**
-	 * Communication Template
+	 * admin.communication.template.displayName
 	 * <br/>
-	 * <em>Optional</em> Select a communication template to use for this communication.
+	 * admin.communication.template.description
 	 **/
 	private CommunicationTemplate template = null;
 	/**
-	 * File Path to batches for this communication
+	 * admin.communication.basePath.displayName
 	 **/
 	private String basePath;
 	/**
-	 * Batch
+	 * admin.communication.batch.displayName
 	 * <br/>
-	 * The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)
+	 * admin.communication.batch.description
 	 **/
 	private String batch;
 	/**
-	 * Subscriptions
+	 * admin.communication.subscriptions.displayName
 	 **/
 	private List<Subscription> subscriptions = new ArrayList<>();
 

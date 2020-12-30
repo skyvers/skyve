@@ -8,18 +8,18 @@
 	<bizKey expression="{description}" />
 	<attributes>
 		<text name="description" required="true">
-			<displayName>Description</displayName>
+			<displayName>admin.communication.description.displayName</displayName>
 			<length>250</length>
 		</text>
 		<text name="moduleName">
-			<displayName>Module</displayName>
-			<description>Bindings used in the communication address, subject and body will be based on the selected module document.</description>
+			<displayName>admin.communication.moduleName.displayName</displayName>
+			<description>admin.communication.moduleName.description</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="documentName">
-			<displayName>Document</displayName>
-			<description>Bindings used in the communication address, subject and body will be based on the selected module document.</description>
+			<displayName>admin.communication.moduleName.displayName</displayName>
+			<description>admin.communication.moduleName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
@@ -32,90 +32,82 @@
 			by normal user actions through the list functions</li></ul>
 			</p>
 			]]></documentation>
-			<displayName>Tag</displayName>
+			<displayName>admin.communication.tag.displayName</displayName>
 			<domain>variant</domain>
 			<documentName>Tag</documentName>
 		</association>
 		<text name="toBinding">
-			<displayName>Send to</displayName>
-			<description>Provide a binding which contains the email address to send to</description>
+			<displayName>admin.communication.toBinding.displayName</displayName>
+			<description>admin.communication.toBinding.description</description>
 			<length>500</length>
 		</text>
 		<text name="sendTo">
-			<displayName>To</displayName>
-			<description>The address to send to.</description>
+			<displayName>admin.communication.sendTo.displayName</displayName>
+			<description>admin.communication.sendTo.description</description>
 			<length>250</length>
 		</text>
 		<text name="ccTo">
-			<displayName>CC To</displayName>
-			<description>The address to send to.</description>
+			<displayName>admin.communication.ccTo.displayName</displayName>
+			<description>admin.communication.ccTo.description</description>
 			<length>250</length>
 		</text>
 		<text name="sendToOverride" persistent="false" trackChanges="false">
-			<displayName>To (expression)</displayName>
-			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
+			<displayName>admin.communication.sendToOverride.displayName</displayName>
+			<description>admin.communication.sendToOverride.description</description>
 			<length>250</length>
 		</text>
 		<text name="ccToOverride" persistent="false" trackChanges="false">
-			<displayName>CC To (expression)</displayName>
-			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
+			<displayName>admin.communication.ccToOverride.displayName</displayName>
+			<description>admin.communication.ccToOverride.description</description>
 			<length>250</length>
 		</text>		
 		<text name="sendFrom">
-			<displayName>From (expression)</displayName>
-			<description>The address to send from. Bindings are allowed relative to the above module document.</description>
+			<displayName>admin.communication.sendFrom.displayName</displayName>
+			<description>admin.communication.sendFrom.description</description>
 			<length>250</length>
 		</text>
 		<boolean name="monitorBcc">
-			<displayName>BCC Me</displayName>
-			<description>Monitor outgoing emails by including yourself in the Bcc</description>
+			<displayName>admin.communication.monitorBcc.displayName</displayName>
+			<description>admin.communication.monitorBcc.description</description>
 		</boolean>
 		<text name="subject">
-			<displayName>Subject (expression)</displayName>
-			<description>The subject of the communication. Bindings are allowed relative to the above module document.</description>
+			<displayName>admin.communication.subject.displayName</displayName>
+			<description>admin.communication.subject.description</description>
 			<length>250</length>
 		</text>
 		<markup name="body">
-			<displayName>Body (expression)</displayName>
-			<description><![CDATA[
-			The body of the communication.  
-			<p/>
-			Bindings are allowed relative to the above module document.
-			<p/>
-			To include images in the HTML, switch to the Source view, and embed the 64bit encoding from a site like 
-			http://www.freeformatter.com/base64-encoder.html
-			]]>
-			</description>
+			<displayName>admin.communication.body.displayName</displayName>
+			<description>admin.communication.body.description</description>
 		</markup>
 		<memo name="results" persistent="false">
-			<displayName>Results</displayName>
+			<displayName>admin.communication.results.displayName</displayName>
 		</memo>
 		<content name="attachment1">
-			<displayName>Attachment 1</displayName>
+			<displayName>admin.communication.attachment1.displayName</displayName>
 		</content>
 		<text name="attachmentFileName1">
-			<displayName>Attachment File Name</displayName>
-			<description>The file name for the attachment as it will appear to receivers.</description>
+			<displayName>admin.communication.attachmentFileName1.displayName</displayName>
+			<description>admin.communication.attachmentFileName1.description</description>
 			<length>250</length>
 		</text>
 		<content name="attachment2">
-			<displayName>Attachment 2</displayName>
+			<displayName>admin.communication.attachment2.displayName</displayName>
 		</content>
 		<text name="attachmentFileName2">
-			<displayName>Attachment File Name</displayName>
-			<description>The file name for the attachment as it will appear to receivers.</description>
+			<displayName>admin.communication.attachmentFileName2.displayName</displayName>
+			<description>admin.communication.attachmentFileName2.description</description>
 			<length>250</length>
 		</text>
 		<content name="attachment3">
-			<displayName>Attachment 3</displayName>
+			<displayName>admin.communication.attachment3.displayName</displayName>
 		</content>
 		<text name="attachmentFileName3">
-			<displayName>Attachment File Name</displayName>
-			<description>The file name for the attachment as it will appear to receivers.</description>
+			<displayName>admin.communication.attachmentFileName3.displayName</displayName>
+			<description>admin.communication.attachmentFileName3.description</description>
 			<length>250</length>
 		</text>
 		<enum name="actionType" trackChanges="false" persistent="false">
-			<displayName>Action</displayName>
+			<displayName>admin.communicaiton.actionType.displayName</displayName>
 			<values>
 				<value code="save" description="Save for bulk send" />
 				<value code="send" description="Send Immediately" />
@@ -123,93 +115,75 @@
 			</values>
 		</enum>
 		<enum name="formatType">
-			<displayName>Format</displayName>
+			<displayName>admin.communication.formatType.displayName</displayName>
 			<values>
 				<value code="email" />
 			</values>
 		</enum>
 		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false" audited="false">
-			<displayName>Selected Batch Timestamp Folder Name</displayName>
+			<displayName>admin.communication.selectedBatchTimestampFolderName.displayName</displayName>
 		</id>
 		<boolean name="refreshBatches" persistent="false" trackChanges="false" audited="false">
-			<displayName>Refresh Batches</displayName>
+			<displayName>admin.communication.refreshBatches.displayName</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="unTagSuccessful" persistent="false" trackChanges="false" audited="false">
-			<displayName>Untag successful documents</displayName>
+			<displayName>admin.communication.unTagSuccessful.displayName</displayName>
 		</boolean>
 		<boolean name="notification" persistent="false" trackChanges="false" audited="false">
-			<displayName>Notify when job is complete</displayName>
+			<displayName>admin.communication.notification.displayName</displayName>
 		</boolean>
 
 		<boolean name="systemUse">
-			<displayName>Used for System communications</displayName>
-			<description>System communications can not be deleted unless the system flag is cleared first.</description>
+			<displayName>admin.communication.systemUse.displayName</displayName>
+			<description>admin.communication.systemUse.description</description>
 		</boolean>
 		<text name="unsubscribeUrl" trackChanges="false">
-			<displayName>UnsubscribeUrl</displayName>
+			<displayName>admin.commmunication.unsubscribe.displayName</displayName>
 			<length>500</length>
 		</text>
 		<boolean name="includeCalendar">
-			<displayName>Include Calendar Item</displayName>
-			<description>
-				<![CDATA[<b>Include Calendar Item</b>:
-				<br/>
-				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
-				<br/>
-				Check Options page for more.
-				]]>
-			</description>
+			<displayName>admin.communication.includeCalendar.displayName</displayName>
+			<description>admin.communication.includeCalendar.description</description>
 		</boolean>
 		<text name="calendarTitleExpression">
-			<displayName>Title (expression)</displayName>
-			<description>Specify the title for the calendar item as a binding expression relative to the module document.</description>
+			<displayName>admin.communication.calendarTitleExpression.displayName</displayName>
+			<description>admin.communication.calendarTitleExpression.description</description>
 			<length>200</length>
 		</text>
 		<dateTime name="calendarStartTime">
-			<displayName>Start Time</displayName>
+			<displayName>admin.communication.calendarStartTime.displayName</displayName>
 		</dateTime>
 		<dateTime name="calendarEndTime">
-			<displayName>End Time</displayName>
+			<displayName>admin.communication.calendarEndTime.displayName</displayName>
 		</dateTime>
 		<text name="calendarDescriptionExpression">
-			<displayName>Description (expression)</displayName>
-			<description><![CDATA[
-			<b>Description (expression)</b>
-			<br/>
-			Specify a description for the calendar item as a binding expression relative to the module document.
-			<br/>
-			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
-			]]>
-			</description>
+			<displayName>admin.communication.calendarDescriptionExpression.displayName</displayName>
+			<description>admin.communication.calendarDescriptionExpression.description</description>
 			<length>500</length>
 		</text>
 		<content name="mailImage" persistent="false" audited="false" trackChanges="false">
-			<displayName>Image</displayName>
+			<displayName>admin.communication.mailImage.displayName</displayName>
 		</content>
 		<association name="template" type="aggregation">
-			<displayName>Communication Template</displayName>
-			<description>
-				<![CDATA[
-					<em>Optional</em> Select a communication template to use for this communication.
-				]]>
-			</description>
+			<displayName>admin.communication.template.displayName</displayName>
+			<description>admin.communication.template.description</description>
 			<domain>variant</domain>
 			<documentName>CommunicationTemplate</documentName>
 		</association>
 		
 		<text name="basePath" persistent="false" audited="false" trackChanges="false">
-			<displayName>File Path to batches for this communication</displayName>
+			<displayName>admin.communication.basePath.displayName</displayName>
 			<length>500</length>
 		</text>
 		<text name="batch" persistent="false" audited="false" trackChanges="false">
-			<displayName>Batch</displayName>
-			<description>The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)</description>
+			<displayName>admin.communication.batch.displayName</displayName>
+			<description>admin.communication.batch.description</description>
 			<length>14</length>
 		</text>
 
 		<inverseMany name="subscriptions">
-			<displayName>Subscriptions</displayName>
+			<displayName>admin.communication.subscriptions.displayName</displayName>
 			<documentName>Subscription</documentName>
 			<referenceName>communication</referenceName>
 		</inverseMany>
