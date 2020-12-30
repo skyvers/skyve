@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<component name="_emailNotConfiguredBanner" document="Configuration" />
 	<tabPane>
-		<tab title="Contents">
+		<tab title="admin.communication.edit.contents.tabTitle">
 			<form border="true">
 				<column />
 				<column />
@@ -115,7 +115,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Attachments">
+		<tab title="admin.communication.edit.attachments.tabTitle">
 			<form border="true" borderTitle="Attachments">
 				<column />
 				<column />
@@ -173,7 +173,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Manage">
+		<tab title="admin.communication.edit.manage.tabTitle">
 			<form border="true" borderTitle="Configuration">
 				<column />
 				<column />
@@ -298,7 +298,7 @@
 				</form>
 			</vbox>
 		</tab>
-		<tab title="Subscriptions" visible="persisted">
+		<tab title="admin.communication.edit.subscriptions.tabTitle" visible="persisted">
 			<listGrid continueConversation="true" query="qSubscriptions">
 				<filterParameter filterBinding="communication" operator="equal" valueBinding="bizId" />
 			</listGrid>
