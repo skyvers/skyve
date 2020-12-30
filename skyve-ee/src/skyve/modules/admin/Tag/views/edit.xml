@@ -42,7 +42,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Combinations">
+		<tab title="admin.tag.edit.combinations.tabTitle">
 			<vbox border="true" shrinkWrap="height">
 				<form>
 					<column percentageWidth="20" />
