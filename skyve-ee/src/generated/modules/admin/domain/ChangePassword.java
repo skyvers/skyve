@@ -37,24 +37,24 @@ public class ChangePassword extends AbstractTransientBean {
 	public static final String responsePropertyName = "response";
 
 	/**
-	 * Old Password
+	 * admin.changePassword.oldPassword.displayName
 	 * <br/>
-	 * Enter your old password
+	 * admin.changePassword.oldPassword.description
 	 * <br/>
 	 * The old password is not always required to change the password as the
 					self service reset password function cannot demand the user for their old password.
 	 **/
 	private String oldPassword;
 	/**
-	 * New Password
+	 * admin.changePassword.newPassword.displayName
 	 * <br/>
-	 * Enter your new password
+	 * admin.changePassword.newPassword.displayName
 	 **/
 	private String newPassword;
 	/**
-	 * Confirm Password
+	 * admin.changePassword.confirmPassword.displayName
 	 * <br/>
-	 * Re-enter your new password
+	 * admin.changePassword.confirmPassword.description
 	 **/
 	private String confirmPassword;
 	/**

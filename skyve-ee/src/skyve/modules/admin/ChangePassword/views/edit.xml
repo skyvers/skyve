@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Change Your Password" 
+<view title="admin.changePassword.edit.title" 
 		name="edit" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
@@ -41,7 +41,7 @@
 		</row>
 	</form>
 	<actions>
-		<action className="MakePasswordChange" displayName="Change Password" toolTip="Change password"
+		<action className="MakePasswordChange" displayName="admin.changePassword.actions.makePasswordChange.displayName" toolTip="admin.changePassword.actions.makePasswordChange.toolTip"
 			relativeIconFileName="icons/document/password16.png" iconStyleClass="fa fa-lock" inActionPanel="false" />
 	</actions>
 </view>
