@@ -77,7 +77,7 @@
 		</text>
 		<markup name="body">
 			<displayName>admin.communication.body.displayName</displayName>
-			<description>admin.communication.body.description</description>
+			<description><![CDATA[admin.communication.body.description]]></description>
 		</markup>
 		<memo name="results" persistent="false">
 			<displayName>admin.communication.results.displayName</displayName>
@@ -144,7 +144,7 @@
 		</text>
 		<boolean name="includeCalendar">
 			<displayName>admin.communication.includeCalendar.displayName</displayName>
-			<description>admin.communication.includeCalendar.description</description>
+			<description><![CDATA[admin.communication.includeCalendar.description]]></description>
 		</boolean>
 		<text name="calendarTitleExpression">
 			<displayName>admin.communication.calendarTitleExpression.displayName</displayName>
@@ -159,7 +159,7 @@
 		</dateTime>
 		<text name="calendarDescriptionExpression">
 			<displayName>admin.communication.calendarDescriptionExpression.displayName</displayName>
-			<description>admin.communication.calendarDescriptionExpression.description</description>
+			<description><![CDATA[admin.communication.calendarDescriptionExpression.description]]></description>
 			<length>500</length>
 		</text>
 		<content name="mailImage" persistent="false" audited="false" trackChanges="false">
@@ -167,7 +167,7 @@
 		</content>
 		<association name="template" type="aggregation">
 			<displayName>admin.communication.template.displayName</displayName>
-			<description>admin.communication.template.description</description>
+			<description><![CDATA[admin.communication.template.description]]></description>
 			<domain>variant</domain>
 			<documentName>CommunicationTemplate</documentName>
 		</association>
