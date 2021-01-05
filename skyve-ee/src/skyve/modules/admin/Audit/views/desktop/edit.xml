@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view name="edit" 
-		title="Audit" 
+		title="admin.audit.edit.title" 
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" borderTitle="Comparison">
+	<form border="true" borderTitle="admin.audit.edit.comparison.borderTitle">
         <column pixelWidth="160" responsiveWidth="12" />
         <column />
         <column pixelWidth="160" responsiveWidth="12" />
@@ -26,7 +26,7 @@
         	</item>
         </row>
 	</form>
-    <form border="true" borderTitle="Source Version Details">
+    <form border="true" borderTitle="admin.audit.edit.sourceVersionDetails.borderTitle">
         <column pixelWidth="160" responsiveWidth="12" />
         <column />
         <column pixelWidth="160" responsiveWidth="12" />
@@ -56,6 +56,6 @@
     <comparison binding="me" modelName="AuditComparisonModel" editable="false" />
     <actions>
 		<cancel />
-    	<action className="SourceVersionChanged" displayName="Do Not Expose" clientValidation="false" inActionPanel="false" />
+    	<action className="SourceVersionChanged" displayName="admin.audit.actions.sourceVersionChanged.displayName" clientValidation="false" inActionPanel="false" />
     </actions>
 </view>

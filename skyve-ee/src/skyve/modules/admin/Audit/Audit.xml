@@ -11,23 +11,23 @@
 	<bizKey expression="{operation} by {userName} at {timestamp}" />
 	<attributes>
 		<text name="auditModuleName" required="true">
-			<displayName>Module</displayName>
+			<displayName>admin.audit.auditModuleName.displayName</displayName>
 			<length>128</length>
 		</text>
 		<text name="auditDocumentName" required="true">
-			<displayName>Document</displayName>
+			<displayName>admin.audit.auditModuleName.displayName</displayName>
 			<length>128</length>
 		</text>
 		<id name="auditBizId" required="true">
-			<displayName>BizId</displayName>
+			<displayName>admin.audit.auditBizId.displayName</displayName>
 			<index>database</index>
 		</id>
 		<text name="auditBizKey" required="true">
-			<displayName>Description</displayName>
+			<displayName>admin.audit.auditBizKey.displayName</displayName>
 			<length>1024</length>
 		</text>
 		<enum name="operation" required="true">
-			<displayName>Operation</displayName>
+			<displayName>admin.audit.operator.displayName</displayName>
 			<values>
 				<value code="I" description="Insert" />
 				<value code="U" description="Update" />
@@ -35,33 +35,33 @@
 			</values>
 		</enum>
 		<timestamp name="timestamp" required="true">
-			<displayName>Timestamp</displayName>
+			<displayName>admin.audit.timestamp.displayName</displayName>
 		</timestamp>
 		<longInteger name="millis" required="true">
-			<displayName>Millis</displayName>
+			<displayName>admin.audit.millis.displayName</displayName>
 			<index>database</index>
 		</longInteger>
 		<text name="userName" required="true">
-			<displayName>User</displayName>
+			<displayName>admin.audit.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<memo name="auditDetail" required="true">
-			<displayName>Audit</displayName>
+			<displayName>admin.audit.auditDetail.displayName</displayName>
 			<index>none</index>
 		</memo>
 		<!-- The following are used to drive the edit view -->
 		<association name="sourceVersion" type="aggregation" persistent="false" required="true">
-			<displayName>Source Version To Compare</displayName>
+			<displayName>admin.audit.association.sourceVersion.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>
 		<association name="comparisonVersion" type="aggregation" persistent="false">
-			<displayName>Other Version To Compare</displayName>
+			<displayName>admin.audit.assocation.comparisonVersion.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>
 		<association name="me" type="aggregation" persistent="false">
-			<displayName>Me</displayName>
+			<displayName>admin.audit.association.me.displayName</displayName>
 			<documentName>Audit</documentName>
 		</association>
 	</attributes>

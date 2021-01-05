@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view name="edit" 
-		title="Audit" 
+		title="admin.audit.edit.title" 
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <form border="true" borderTitle="Version Details" disabled="true">
+    <form border="true" borderTitle="admin.audit.edit.versionDetails.borderTitle" disabled="true">
         <column responsiveWidth="3" />
         <column responsiveWidth="6" />
         <column />
