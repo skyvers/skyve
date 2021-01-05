@@ -7,7 +7,7 @@
 	<component name="_backupsNotConfiguredBanner" />
 	<component name="_selfRegistrationNotConfiguredBanner" />
 	
-	<form border="true" borderTitle="admin.configuration.tabGeneral.passwordComplexity.borderTitle">
+	<form border="true" borderTitle="admin.configuration.edit.general.passwordComplexity.borderTitle">
 		<column responsiveWidth="3" />
 		<column responsiveWidth="2" />
 		<column responsiveWidth="3" />
@@ -64,7 +64,7 @@
 	
 	<!-- test email has a different component for desktop and external -->
 	<component name="_testEmail" />
-	<vbox border="true" borderTitle="admin.configuration.tabGeneral.testEmail.borderTitle" shrinkWrap="height" invisible="emailConfigured">
+	<vbox border="true" borderTitle="admin.configuration.edit.general.testEmail.borderTitle" shrinkWrap="height" invisible="emailConfigured">
 		<blurb pixelHeight="20">
 			<![CDATA[<em>Email must be configured before Test Email can be used.</em>]]>
 		</blurb>
@@ -72,13 +72,13 @@
 	
 	<!-- password reset has a different component for desktop and external -->
 	<component name="_passwordReset" />
-	<vbox border="true" borderTitle="admin.configuration.tabGeneral.passwordReset.borderTitle" shrinkWrap="height" invisible="emailConfigured">
+	<vbox border="true" borderTitle="admin.configuration.edit.general.passwordReset.borderTitle" shrinkWrap="height" invisible="emailConfigured">
 		<blurb pixelHeight="20">
 			<![CDATA[<em>Email must be configured before Password Reset can be customised.</em>]]>
 		</blurb>
 	</vbox>
 	
-	<form border="true" borderTitle="admin.configuration.tabGeneral.userSelfRegistration.borderTitle">
+	<form border="true" borderTitle="admin.configuration.edit.general.userSelfRegistration.borderTitle">
 		<column responsiveWidth="3"/>
 		<column responsiveWidth="1"/>
 		<column />
@@ -101,7 +101,7 @@
 		</row>
 	</form>
 	
-	<form border="true" borderTitle="admin.configuration.tabGeneral.anonymousPublicUser.borderTitle">
+	<form border="true" borderTitle="admin.configuration.edit.general.anonymousPublicUser.borderTitle">
 		<column responsiveWidth="3"/>
 		<column />
 		<column responsiveWidth="1"/>
