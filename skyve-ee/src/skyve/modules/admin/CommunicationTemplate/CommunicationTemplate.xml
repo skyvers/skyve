@@ -7,7 +7,7 @@
     <bizKey expression="{name}"/>
     <attributes>
         <text required="true" name="name">
-            <displayName>Name</displayName>
+            <displayName>admin.communicationTemplate.name.displayName</displayName>
             <length>50</length>
         </text>
         <text name="description">
@@ -15,8 +15,8 @@
             <length>255</length>
         </text>
         <markup required="true" name="template">
-            <displayName>Template</displayName>
-            <description>Include "{body}" to designate where the body of the communication will be placed.</description>
+            <displayName>admin.communicationTemplate.template.displayName</displayName>
+            <description>admin.communicationTemplate.template.description</description>
         </markup>
     </attributes>
 </document>

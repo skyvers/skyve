@@ -35,7 +35,7 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	public static final String templatePropertyName = "template";
 
 	/**
-	 * Name
+	 * admin.communicationTemplate.name.displayName
 	 **/
 	private String name;
 	/**
@@ -43,9 +43,9 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	 **/
 	private String description;
 	/**
-	 * Template
+	 * admin.communicationTemplate.template.displayName
 	 * <br/>
-	 * Include "{body}" to designate where the body of the communication will be placed.
+	 * admin.communicationTemplate.template.description
 	 **/
 	private String template;
 
