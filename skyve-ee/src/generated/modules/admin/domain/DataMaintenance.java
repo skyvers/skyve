@@ -110,7 +110,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
-	 * Pre-Process
+	 * admin.dataMaintenance.restorePreProcess.displayName
 	 **/
 	@XmlEnum
 	public static enum RestorePreProcess implements Enumeration {
@@ -193,7 +193,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Content Option
+	 * admin.dataMaintenance.contentRestoreOption.displayName
 	 **/
 	@XmlEnum
 	public static enum ContentRestoreOption implements Enumeration {
@@ -271,7 +271,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Indexing Option
+	 * admin.dataMaintenance.restoreIndexingOption.displayName
 	 **/
 	@XmlEnum
 	public static enum RestoreIndexingOption implements Enumeration {
@@ -350,7 +350,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Option
+	 * admin.dataMaintenance.refreshOption.displayName
 	 **/
 	@XmlEnum
 	public static enum RefreshOption implements Enumeration {
@@ -427,11 +427,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Cache Evict
+	 * admin.dataMaintenance.evictOption.displayName
 	 * <br/>
-	 * <p>Whether to evict each bean after processing.</p>
-				<p>Evicting beans will free memory for large data jobs, however there may be impacts
-				if the action (processing) selected affects items that other beans may reference.</p>
+	 * admin.dataMaintenance.evictOption.description
 	 **/
 	@XmlEnum
 	public static enum EvictOption implements Enumeration {
@@ -509,127 +507,125 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Module.Document
+	 * admin.dataMaintenance.modDocName.displayName
 	 **/
 	private String modDocName;
 	/**
-	 * Confirm password
+	 * admin.dataMaintenance.confirmPassword.displayName
 	 **/
 	private String confirmPassword;
 	/**
-	 * Inject bootstrap user
+	 * admin.dataMaintenance.injectBootstrapUser.displayName
 	 **/
 	private Boolean injectBootstrapUser;
 	/**
-	 * Schema Name
+	 * admin.dataMaintenance.schemaName.displayName
 	 **/
 	private String schemaName;
 	/**
-	 * Refresh Documents
+	 * admin.dataMaintenance.collection.refreshDocuments.displayName
 	 **/
 	private List<ModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
 	/**
-	 * Notify me on completion
+	 * admin.dataMaintenance.notification.displayName
 	 **/
 	private Boolean notification;
 	/**
-	 * Script
+	 * admin.dataMaintenance.ddlScript.displayName
 	 **/
 	private String ddlScript;
 	/**
-	 * Daily Backup Retention
+	 * admin.dataMaintenance.dailyBackupRetention.displayName
 	 **/
 	private Integer dailyBackupRetention;
 	/**
-	 * Weekly Backup Retention
+	 * admin.dataMaintenance.weeklyBackupRetention.displayName
 	 **/
 	private Integer weeklyBackupRetention;
 	/**
-	 * Monthly Backup Retention
+	 * admin.dataMaintenance.monthlyBackupRetention.displayName
 	 **/
 	private Integer monthlyBackupRetention;
 	/**
-	 * Yearly Backup Retention
+	 * admin.dataMaintenance.yearlyBackupRetention.displayName
 	 **/
 	private Integer yearlyBackupRetention;
 	/**
-	 * Pre-Process
+	 * admin.dataMaintenance.restorePreProcess.displayName
 	 **/
 	private RestorePreProcess restorePreProcess;
 	/**
-	 * Content Option
+	 * admin.dataMaintenance.contentRestoreOption.displayName
 	 **/
 	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
 	/**
-	 * Indexing Option
+	 * admin.dataMaintenance.restoreIndexingOption.displayName
 	 **/
 	private RestoreIndexingOption restoreIndexingOption = RestoreIndexingOption.both;
 	/**
-	 * Selected Backup Name
+	 * admin.dataMaintenance.selectedBackupName.displayName
 	 **/
 	private String selectedBackupName;
 	/**
-	 * Selected Content Id
+	 * admin.dataMaintenance.selectedContentId.displayName
 	 **/
 	private String selectedContentId;
 	/**
-	 * Refresh Backups
+	 * admin.dataMaintenance.refreshBackups.displayName
 	 **/
 	private Boolean refreshBackups = new Boolean(true);
 	/**
-	 * Hint
+	 * admin.dataMaintenance.instructionHint.displayName
 	 **/
 	private String instructionHint;
 	/**
-	 * Refresh Content
+	 * admin.dataMaintenance.refreshContent.displayName
 	 **/
 	private Boolean refreshContent = new Boolean(true);
 	/**
-	 * Content Link
+	 * admin.dataMaintenance.contentLink.displayName
 	 **/
 	private String contentLink;
 	/**
-	 * Module
+	 * admin.dataMaintenance.auditModuleName.displayName
 	 **/
 	private String auditModuleName;
 	/**
-	 * Document
+	 * admin.dataMaintenance.auditDocumentName.displayName
 	 **/
 	private String auditDocumentName;
 	/**
-	 * Operation
+	 * admin.dataMaintenance.auditOperation.displayName
 	 **/
 	private Operation auditOperation;
 	/**
-	 * From
+	 * admin.dataMaintenance.auditTimestampStart.displayName
 	 **/
 	private Timestamp auditTimestampStart;
 	/**
-	 * To
+	 * admin.dataMaintenance.auditTimestampEnd.displayName
 	 **/
 	private Timestamp auditTimestampEnd;
 	/**
-	 * User
+	 * admin.dataMaintenance.association.auditUser.displayName
 	 **/
 	private UserProxyExtension auditUser = null;
 	/**
-	 * Found
+	 * admin.dataMaintenance.auditMatchCount.displayName
 	 **/
 	private Integer auditMatchCount;
 	/**
-	 * Status
+	 * admin.dataMaintenance.auditResponse.displayName
 	 **/
 	private String auditResponse;
 	/**
-	 * Option
+	 * admin.dataMaintenance.refreshOption.displayName
 	 **/
 	private RefreshOption refreshOption;
 	/**
-	 * Cache Evict
+	 * admin.dataMaintenance.evictOption.displayName
 	 * <br/>
-	 * <p>Whether to evict each bean after processing.</p>
-				<p>Evicting beans will free memory for large data jobs, however there may be impacts
-				if the action (processing) selected affects items that other beans may reference.</p>
+	 * admin.dataMaintenance.evictOption.description
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
 

@@ -12,55 +12,55 @@
 	<bizKey expression="Data Maintenance"/>
 	<attributes>
 		<text name="modDocName">
-			<displayName>Module.Document</displayName>
+			<displayName>admin.dataMaintenance.modDocName.displayName</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
 
 		<!-- Schema Truncation -->
 		<text name="confirmPassword" persistent="false" trackChanges="false" >
-			<displayName>Confirm password</displayName>
+			<displayName>admin.dataMaintenance.confirmPassword.displayName</displayName>
 			<length>50</length>
 		</text>
 		<boolean name="injectBootstrapUser">
-			<displayName>Inject bootstrap user</displayName>
+			<displayName>admin.dataMaintenance.injectBootstrapUser.displayName</displayName>
 		</boolean>
 		<text name="schemaName">
-			<displayName>Schema Name</displayName>
+			<displayName>admin.dataMaintenance.schemaName.displayName</displayName>
 			<length>1024</length>
 		</text>
 		
 		<!-- Data Refresh -->
 		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
-			<displayName>Refresh Documents</displayName>
+			<displayName>admin.dataMaintenance.collection.refreshDocuments.displayName</displayName>
 			<domain>constant</domain>
 			<documentName>ModuleDocument</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
 		<boolean name="notification">
-			<displayName>Notify me on completion</displayName>
+			<displayName>admin.dataMaintenance.notification.displayName</displayName>
 		</boolean>
 		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
-			<displayName>Script</displayName>
+			<displayName>admin.dataMaintenance.ddlScript.displayName</displayName>
 		</memo>		
 		
 		<!-- Backup job parameters -->
 		<integer name="dailyBackupRetention">
-			<displayName>Daily Backup Retention</displayName>
+			<displayName>admin.dataMaintenance.dailyBackupRetention.displayName</displayName>
 		</integer>
 		<integer name="weeklyBackupRetention">
-			<displayName>Weekly Backup Retention</displayName>
+			<displayName>admin.dataMaintenance.weeklyBackupRetention.displayName</displayName>
 		</integer>
 		<integer name="monthlyBackupRetention">
-			<displayName>Monthly Backup Retention</displayName>
+			<displayName>admin.dataMaintenance.monthlyBackupRetention.displayName</displayName>
 		</integer>
 		<integer name="yearlyBackupRetention">
-			<displayName>Yearly Backup Retention</displayName>
+			<displayName>admin.dataMaintenance.yearlyBackupRetention.displayName</displayName>
 		</integer>
 		
 		<!-- Restore parameters -->
 		<enum name="restorePreProcess">
-			<displayName>Pre-Process</displayName>
+			<displayName>admin.dataMaintenance.restorePreProcess.displayName</displayName>
 			<domain>constant</domain>
 			<values>
 				<value code="noProcessing" description="No Processing" />
@@ -74,7 +74,7 @@
 			</values>
 		</enum>
 		<enum name="contentRestoreOption">
-			<displayName>Content Option</displayName>
+			<displayName>admin.dataMaintenance.contentRestoreOption.displayName</displayName>
 			<defaultValue>error</defaultValue>
 			<values>
 				<value code="clearOrphanedContentIds" description="Clear Orphaned Content IDs" />
@@ -83,7 +83,7 @@
 			</values>
 		</enum>
 		<enum name="restoreIndexingOption">
-			<displayName>Indexing Option</displayName>
+			<displayName>admin.dataMaintenance.restoreIndexingOption.displayName</displayName>
 			<defaultValue>both</defaultValue>
 			<values>
 				<value code="data" description="Data" />
@@ -93,75 +93,70 @@
 			</values>
 		</enum>
 		<id name="selectedBackupName" persistent="false" trackChanges="false">
-			<displayName>Selected Backup Name</displayName>
+			<displayName>admin.dataMaintenance.selectedBackupName.displayName</displayName>
 		</id>
 		<id name="selectedContentId" persistent="false" trackChanges="false">
-			<displayName>Selected Content Id</displayName>
+			<displayName>admin.dataMaintenance.selectedContentId.displayName</displayName>
 		</id>
 		<boolean name="refreshBackups" persistent="false" trackChanges="false">
-			<displayName>Refresh Backups</displayName>
+			<displayName>admin.dataMaintenance.refreshBackups.displayName</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
-			<displayName>Hint</displayName>
+			<displayName>admin.dataMaintenance.instructionHint.displayName</displayName>
 		</memo>
 		
 		<!-- Content -->
 		<boolean name="refreshContent" persistent="false" trackChanges="false">
-			<displayName>Refresh Content</displayName>
+			<displayName>admin.dataMaintenance.refreshContent.displayName</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<memo name="contentLink" persistent="false" trackChanges="false">
-			<displayName>Content Link</displayName>
+			<displayName>admin.dataMaintenance.contentLink.displayName</displayName>
 		</memo>
 		
 		<!-- Audit Truncation -->
 		<text name="auditModuleName">
-			<displayName>Module</displayName>
+			<displayName>admin.dataMaintenance.auditModuleName.displayName</displayName>
 			<domain>constant</domain>
 			<length>128</length>
 		</text>
 		<text name="auditDocumentName">
-			<displayName>Document</displayName>
+			<displayName>admin.dataMaintenance.auditDocumentName.displayName</displayName>
 			<domain>dynamic</domain>
 			<length>128</length>
 		</text>
 		<enum name="auditOperation" documentRef="Audit" attributeRef="operation">
-			<displayName>Operation</displayName>
+			<displayName>admin.dataMaintenance.auditOperation.displayName</displayName>
 		</enum>
 		<timestamp name="auditTimestampStart">
-			<displayName>From</displayName>
+			<displayName>admin.dataMaintenance.auditTimestampStart.displayName</displayName>
 		</timestamp>
 		<timestamp name="auditTimestampEnd">
-			<displayName>To</displayName>
+			<displayName>admin.dataMaintenance.auditTimestampEnd.displayName</displayName>
 		</timestamp>
 		<association type="aggregation" name="auditUser">
-			<displayName>User</displayName>
+			<displayName>admin.dataMaintenance.association.auditUser.displayName</displayName>
 			<documentName>UserProxy</documentName>
 		</association>
 		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
-			<displayName>Found</displayName>
+			<displayName>admin.dataMaintenance.auditMatchCount.displayName</displayName>
 		</integer>
 		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
-			<displayName>Status</displayName>
+			<displayName>admin.dataMaintenance.auditResponse.displayName</displayName>
 		</memo>
 
 		<!-- Data Refresh -->
 		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
-			<displayName>Option</displayName>
+			<displayName>admin.dataMaintenance.refreshOption.displayName</displayName>
 			<values>
 				<value code="Upsert"/>
 				<value code="Save"/>
 			</values>
 		</enum>
 		<enum name="evictOption" persistent="false" trackChanges="false" audited="false">
-			<displayName>Cache Evict</displayName>
-			<description><![CDATA[
-				<p>Whether to evict each bean after processing.</p>
-				<p>Evicting beans will free memory for large data jobs, however there may be impacts
-				if the action (processing) selected affects items that other beans may reference.</p>
-				]]>
-			</description>			
+			<displayName>admin.dataMaintenance.evictOption.displayName</displayName>
+			<description>admin.dataMaintenance.evictOption.description</description>			
 			<defaultValue>bean</defaultValue>
 			<values>
 				<value code="Bean" />
