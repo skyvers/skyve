@@ -48,34 +48,34 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public static final String userPropertyName = "user";
 
 	/**
-	 * Activation Url
+	 * admin.selfRegistration.activateUrl.displayName
 	 **/
 	private String activateUrl;
 	/**
-	 * Confirm Password
+	 * admin.selfRegistration.confirmPassword.displayName
 	 * <br/>
 	 * Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.
 	 **/
 	private String confirmPassword;
 	/**
-	 * Login Url
+	 * admin.selfRegistration.loginUrl.displayName
 	 **/
 	private String loginUrl;
 	/**
-	 * Login Message
+	 * admin.selfRegistration.loginMessage.displayName
 	 * <br/>
 	 * Transient field to allow login message to be overridden
 	 **/
 	private String loginMessage;
 	/**
-	 * Registration Date
+	 * admin.selfRegistration.registrationDate.displayName
 	 * <br/>
 	 * The date and time that this self registration was completed.
 	 **/
 	private DateTime registrationDate;
 	/**
-	 * User
+	 * admin.selfRegistration.association.user.displayName
 	 * <br/>
 	 * The new user to create for this registration
 	 **/

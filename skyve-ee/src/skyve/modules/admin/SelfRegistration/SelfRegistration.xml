@@ -8,22 +8,22 @@
     <bizKey expression="{user}" />
     <attributes>
         <text name="activateUrl" persistent="false" audited="false" trackChanges="false">
-            <displayName>Activation Url</displayName>
+            <displayName>admin.selfRegistration.activateUrl.displayName</displayName>
             <length>2083</length>
         </text>
         <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
             <documentation>Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.</documentation>
-            <displayName>Confirm Password</displayName>
+            <displayName>admin.selfRegistration.confirmPassword.displayName</displayName>
             <length>30</length>
         </text>
         <text name="loginUrl" persistent="false" audited="false" trackChanges="false">
-            <displayName>Login Url</displayName>
+            <displayName>admin.selfRegistration.loginUrl.displayName</displayName>
             <length>2083</length>
         </text>
         <text name="loginMessage" persistent="false" audited="false" trackChanges="false">
             <documentation>Transient field to allow login message to be overridden</documentation>
-            <displayName>Login Message</displayName>
+            <displayName>admin.selfRegistration.loginMessage.displayName</displayName>
             <length>2000</length>
         </text>
        <!--  <boolean name="registrationEmailWasSent">
@@ -36,11 +36,11 @@
         </boolean> -->
         <dateTime name="registrationDate">
             <documentation>The date and time that this self registration was completed.</documentation>
-            <displayName>Registration Date</displayName>
+            <displayName>admin.selfRegistration.registrationDate.displayName</displayName>
         </dateTime>
         <association name="user" type="aggregation" required="true">
         	<documentation>The new user to create for this registration</documentation>
-            <displayName>User</displayName>
+            <displayName>admin.selfRegistration.association.user.displayName</displayName>
             <documentName>User</documentName>
         </association>
     </attributes>

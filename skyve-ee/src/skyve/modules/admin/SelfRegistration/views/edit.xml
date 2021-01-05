@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Register - New User" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox widgetId="postRegister" border="true" visible="registrationComplete">
 		<blurb >
@@ -23,7 +23,7 @@
 				]]>
 			</blurb>
 		</vbox>
-		<form border="true" borderTitle="User Details" >
+		<form border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle" >
 			<column responsiveWidth="2"/>
 			<column responsiveWidth="3"/>
 			<row>
@@ -71,6 +71,6 @@
 		</form>
 	</vbox>
 	<actions>
-		<action className="Register" name="Register" displayName="Register" inActionPanel="false" />
+		<action className="Register" name="Register" displayName="admin.selfRegistration.actions.register.displayName" inActionPanel="false" />
 	</actions>
 </view>
