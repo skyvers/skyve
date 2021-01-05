@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="help" title="Document Creator" iconStyleClass="fa fa-pencil-square-o" 
+<view name="help" title="admin.documentCreator.edit.title" iconStyleClass="fa fa-pencil-square-o" 
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 	xmlns="http://www.skyve.org/xml/view" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -8,100 +8,7 @@
     	<row>
     		<item>
 				<blurb>
-					<![CDATA[
-						<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
-							<div class="ui-messages-info ui-corner-all">
-								<span class="ui-messages-warn-icon"></span>
-								<ul>
-									<li role="alert" aria-atomic="true">
-										<span class="ui-messages-warn-detail">
-											The Skyve Script document creator is a developer level tool to assist
-											rapid development, and can modify project files.<br> 
-											&emsp;Ensure you have your project under source control to protect against unexpected change.
-										</span>
-									</li>
-								</ul>
-							</div>
-						</div>				
-					
-						<h2>Skyve Script Help</h2>
-						<span style="font-size: 1.1rem">
-							<p>Skyve Script uses markdown to allow developers to specify domain models in a non-technical format. 
-								By placing your markdown in the <em>Input</em> tab, the system will preview the markdown and
-								generated document when you change tab. Any errors should be highlighted in red in the <em>
-								Document Preview</em> tab.</p>
-							<p>You can use the document creator to create source files directly into place in your project,
-							however you should not attempt this unless your project is under source control - to ensure you can 
-							rollback unexpected or partial changes. Your project <code>.json</code> file contains the 
-							<code>moduleDirectory</code> setting for the absolute file path of your source directory 
-							and the document creator will use this location if specified. </p>				
-							<p>Skyve Script has a few specific syntax requirements it is looking for when generating domain models:</p>
-							<ul>
-								<li>New modules should be specified with a level 1 heading (#), followed by a space, then the module name in title case
-								<ul>
-									<li>e.g. <code># addressbook</code>
-									<li>If a specific module title is required, it can be encapsulated in single or double quotes, e.g. <code># 'Address Book'</code>
-								</ul>
-								<li>New domain models (documents), should be specified with a level 2 heading (##), followed by a space, then the document name in title case
-								<ul>
-									<li>e.g. <code>## Address</code>
-									<li>If a specific document title is required, it can be encapsulated in single or double quotes, e.g. <code>## 'My Address'</code>
-									<li>If the document is to be persisted, the persistent name should follow the document name surrounded by backticks (`), e.g. <code>## User `ADR_Address`</code>
-								</ul>
-								<li>Domain attributes (fields) should be specified as a list below the domain heading, by using a dash (-), followed by a space, then the attribute definition
-								<ul>
-									<li>Attribute definitions should start with the attribute name in camel case (no spaces, first letter lowercase, uppercase for new words), e.g. <code>firstName</code>
-									<li>Required attributes should have their name surrounded by asterisks, e.g. <code>- *firstName*</code>
-									<li>The type should follow the attribute name
-									<li>If the type is text, the length should follow the type, e.g. <code>- *firstName* text 150</code>
-									<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum ('Not Started', 'In Progress', Complete)</code>
-									<li>If a specific display name is required, it can be encapsulated in single or double quotes, e.g. <code>- 'State or Province'</code>
-								</ul>
-								<li>Associations should be specified as a list item by using a dash (-), followed by a space, then the association name in camel case, then the association document in title case
-								<ul>
-									<li>e.g. <code>- country Country</code> (assuming there IS a Country document specified in the script or already in another module
-									<li>Required associations should have their name surrounded by asterisks, e.g. <code>- *country* Country</code>
-									<li>Association type can be specified surrounded by backticks after the document name, e.g. <code>- country Country `composition`</code>
-									<li>The related document for the association can use dot notation to specify a document from another module, e.g. <code>- country general.Country</code>
-								</ul>
-								<li>Collections should be specified as a list item by using a plus (+), followed by a space, then the collection name in camel case, then the collection document in title case
-								<ul>
-									<li>e.g. <code>+ roles Role</code>
-									<li>Required collections should have their name surrounded by asterisks, e.g. <code>+ *roles* Role</code>
-									<li>Collection type can be specified surrounded by backticks after the document name, e.g. <code>+ roles Role `child`</code>
-									<li>The related document for the collection can use dot notation to specify a document from another module, e.g. <code>+ users admin.User</code>
-								</ul>
-							</ul>
-							<p>A complete module specification would then look like this:</p>
-							<pre>
-# 'Address Book'<br>
-<br>
-## Address `ADR_Address`<br>
-- addressType enum (Business,Postal,Home,Other)<br>
-- *addressLine1* text 100<br>
-- addressLine2 text 100<br>
-- addressLine3 text 100<br>
-- suburb text 50<br>
-- city text 200<br>
-- postalCode text 10<br>
-- state text 50<br>
-- *country* Country<br>
-- boundary geometry<br>
-- verified boolean<br>
-<br>
-## Country `ADR_Country`<br>
-- *name* text 100<br>
-- flag content<br>
-							</pre>
-						<p>Once your files are created:</p>
-						<ul>
-							<li>Add the new module to your <code>customer.xml</code> file</li>
-							<li>Use the Generate Domain maven target to build the module as part of your project</li>
-							<li>After deployment, add appropriate privileges to your user to be able to use the new module</li>
-							<li>Sign out and back in for the new privilege access to take effect.</li>
-						</ul>
-						</span>
-					]]>
+					<![CDATA[admin.documentCreator.help.blurb1]]>
 				</blurb>
     		</item>
     	</row>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" title="Document Creator" iconStyleClass="fa fa-pencil-square-o" 
+<view name="edit" title="admin.documentCreator.edit.title" iconStyleClass="fa fa-pencil-square-o" 
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 	xmlns="http://www.skyve.org/xml/view" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:c="http://www.skyve.org/xml/common">
     
     <tabPane>
-    	<tab title="Input">
+    	<tab title="admin.documentCreator.edit.input.tabTitle">
     		<form responsiveWidth="12" percentageWidth="100" border="true">
 		        <column percentageWidth="10" responsiveWidth="2"/>
 		        <column/>
@@ -17,22 +17,7 @@
 					</item>			        	
 		        	<item colspan="2">
 		        		<blurb>
-		        			<![CDATA[
-			<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
-				<div class="ui-messages-info ui-corner-all">
-					<span class="ui-messages-warn-icon"></span>
-					<ul>
-						<li role="alert" aria-atomic="true">
-							<span class="ui-messages-warn-detail">
-								The Skyve Script document creator is a developer level tool to assist
-								rapid development, and can modify project files.<br> 
-								&emsp;Ensure you have your project under source control to protect against unexpected change.
-							</span>
-						</li>
-					</ul>
-				</div>
-			</div>				
-		        			]]>
+		        			<![CDATA[admin.documentCreator.edit.inputBlurb1]]>
 		        		</blurb>
 		        	</item>
 		        </row>
@@ -60,20 +45,12 @@
 						<spacer/>
 					</item>
 					<item>
-						<blurb><![CDATA[
-						<p>Once your files are created:</p>
-						<ul>
-							<li>Add the new module to your <code>customer.xml</code> file</li>
-							<li>Use the Generate Domain maven target to build the module as part of your project</li>
-							<li>After deployment, add appropriate privileges to your user to be able to use the new module</li>
-							<li>Sign out and back in for the new privilege access to take effect.</li>
-						</ul>						
-						]]></blurb>
+						<blurb><![CDATA[admin.documentCreator.edit.inputBlurb2]]></blurb>
 					</item>
 				</row>
 		    </form>
     	</tab>
-    	<tab title="Markdown Preview">
+    	<tab title="admin.documentCreator.edit.markdownPreview.tabTitle">
     		<form widgetId="markdownPreview">
     			<column />
     			<row>
@@ -82,7 +59,7 @@
     				</item>
     			</row>
     		</form>
-    		<form border="true" borderTitle="Errors" visible="hasErrors">
+    		<form border="true" borderTitle="admin.documentCreator.edit.errors.tabTitle" visible="hasErrors">
     			<column />
     			<row>
     				<item>
@@ -91,7 +68,7 @@
     			</row>
     		</form>
     	</tab>
-    	<tab title="Document Preview">
+    	<tab title="admin.documentCreator.edit.documentPreview.tabTitle">
     		<form widgetId="documentPreview">
     			<column />
     			<row>
@@ -107,16 +84,16 @@
     			</row>
     		</form>
     	</tab>
-    	<tab title="Help">
+    	<tab title="admin.documentCreator.edit.help.tabTitle">
     		<component name="help" />
     	</tab>
     </tabPane>
     <actions>
         <defaults/>
         
-        <action className="Submit" clientValidation="true" displayName="Create Files" iconStyleClass="fa fa-file-code-o"
-        	confirm="Are you sure you wish to create files for this script? Any existing files will be overwritten."/>
-        <action className="UpdatePreview" displayName="Update Preview" clientValidation="true" inActionPanel="false" />
+        <action className="Submit" clientValidation="true" displayName="admin.documentCreator.actions.submit.displayName" iconStyleClass="fa fa-file-code-o"
+        	confirm="admin.documentCreator.actions.submit.confirm"/>
+        <action className="UpdatePreview" displayName="admin.documentCreator.actions.updatePreview.displayName" clientValidation="true" inActionPanel="false" />
     </actions>
     <newParameters/>
 </view>

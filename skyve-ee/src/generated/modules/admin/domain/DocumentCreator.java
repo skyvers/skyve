@@ -41,35 +41,31 @@ public class DocumentCreator extends AbstractTransientBean {
 	public static final String defaultModulePropertyName = "defaultModule";
 
 	/**
-	 * Output Location
+	 * admin.documentCreator.outputLocation.displayName
 	 * <br/>
-	 * Absolute path on the filesystem to the module source directory. 
-					E.g. c:/workspace/project/src/main/java/modules/
+	 * admin.documentCreator.outputLocation.description
 	 **/
 	private String outputLocation;
 	/**
-	 * Script
+	 * admin.documentCreator.script.displayName
 	 **/
 	private String script;
 	/**
-	 * Document Preview
+	 * admin.documentCreator.documentPreview.displayName
 	 **/
 	private String documentPreview;
 	/**
-	 * Markdown Preview
+	 * admin.documentCreator.markdownPreview.displayName
 	 **/
 	private String markdownPreview;
 	/**
-	 * Errors
+	 * admin.documentCreator.errors.displayName
 	 **/
 	private String errors;
 	/**
-	 * Default Module
+	 * admin.documentCreator.defaultModule.displayName
 	 * <br/>
-	 * <p>This allows you to add documents to an existing module already in the system 
-					without having to declare the module again in the script.</p>
-					<p>I.e. you can go straight into document declarations (<code>##</code>) and they will
-					be added to the selected module.</p>
+	 * admin.documentCreator.defaultModule.description
 	 **/
 	private String defaultModule;
 
