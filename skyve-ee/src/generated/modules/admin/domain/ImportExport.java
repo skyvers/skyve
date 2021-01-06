@@ -74,8 +74,8 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	public static enum Mode implements Enumeration {
-		adminimportExportmodeimportDatadescription("importData", "admin.importExport.mode.importData.description"),
-		adminimportExportmodeexportDatadescription("exportData", "admin.importExport.mode.exportData.description");
+		importData("importData", "Import Data"),
+		exportData("exportData", "Export Data");
 
 		private String code;
 		private String description;

@@ -11,8 +11,8 @@
 			<displayName>admin.importExport.mode.displayName</displayName>
 			<defaultValue>importData</defaultValue>
 			<values>
-				<value code="importData" description="admin.importExport.mode.importData.description" />
-				<value code="exportData" description="admin.importExport.mode.exportData.description" />
+				<value code="importData" description="Import Data" />
+				<value code="exportData" description="Export Data" />
 			</values>
 		</enum>
 		<text name="moduleName" required="true">
