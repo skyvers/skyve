@@ -43,19 +43,19 @@ public abstract class Group extends AbstractPersistentBean {
 	public static final String candidateRolesPropertyName = "candidateRoles";
 
 	/**
-	 * Group Name
+	 * admin.group.name.displayName
 	 **/
 	private String name;
 	/**
-	 * Description
+	 * admin.group.description.displayName
 	 **/
 	private String description;
 	/**
-	 * Roles
+	 * admin.group.collection.roles.displayName
 	 **/
 	private List<GroupRole> roles = new ChangeTrackingArrayList<>("roles", this);
 	/**
-	 * Candidate Roles
+	 * admin.group.candidateRoles.displayName
 	 * <br/>
 	 * Holds the possible roles that can be assigned to this group.
 	 **/
