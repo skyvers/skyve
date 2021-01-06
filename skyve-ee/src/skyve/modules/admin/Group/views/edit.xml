@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <view name="edit"
-		title="Group"
+		title="admin.group.edit.title"
 		xmlns="http://www.skyve.org/xml/view"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
 	<tabPane>
-		<tab title="Group Details">
+		<tab title="admin.group.edit.groupDetails.tabTitle">
 			<vbox >
 				<component name="_groupCreator"/>
 			</vbox>
 		</tab>
-		<tab title="Users in Group">
+		<tab title="admin.group.edit.usersInGroup.tabTitle">
 			<listGrid title="Users In Group"
 						query="qUsersInGroup"
 						continueConversation="false"

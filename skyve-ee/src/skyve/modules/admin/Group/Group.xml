@@ -12,15 +12,15 @@
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true" usage="domain">
-			<displayName>Group Name</displayName>
+			<displayName>admin.group.name.displayName</displayName>
 			<length>30</length>
 		</text>
 		<text name="description" usage="domain">
-			<displayName>Description</displayName>
+			<displayName>admin.group.description.displayName</displayName>
 			<length>255</length>
 		</text>
 		<collection name="roles" type="child" usage="domain">
-			<displayName>Roles</displayName>
+			<displayName>admin.group.collection.roles.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>GroupRole</documentName>
 			<minCardinality>1</minCardinality>
@@ -28,7 +28,7 @@
 				<order by="roleName" sort="ascending" />
 			</ordering>
 			<unique name="UniqueGroupRole">
-				<message>The role {roleName} already exists for this group.</message>
+				<message>admin.group.collection.roles.unique.message</message>
 				<fieldReferences>
 					<ref>roleName</ref>
 				</fieldReferences>
@@ -38,7 +38,7 @@
 			<documentation>
 				Holds the possible roles that can be assigned to this group.
 			</documentation>
-			<displayName>Candidate Roles</displayName>
+			<displayName>admin.group.candidateRoles.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>GroupRole</documentName>
 			<minCardinality>0</minCardinality>
