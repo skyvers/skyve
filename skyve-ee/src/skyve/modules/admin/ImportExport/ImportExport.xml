@@ -8,83 +8,77 @@
 	<bizKey expression="{moduleName}.{documentName}" />
 	<attributes>
 		<enum name="mode" required="true">
-			<displayName>Mode</displayName>
+			<displayName>admin.importExport.mode.displayName</displayName>
 			<defaultValue>importData</defaultValue>
 			<values>
-				<value code="importData" description="Import Data" />
-				<value code="exportData" description="Export Data" />
+				<value code="importData" description="admin.importExport.mode.importData.description" />
+				<value code="exportData" description="admin.importExport.mode.exportData.description" />
 			</values>
 		</enum>
 		<text name="moduleName" required="true">
-			<displayName>Module Name</displayName>
+			<displayName>admin.importExport.moduleName.displayName</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
 		<text name="documentName" required="true">
-			<displayName>Document</displayName>
+			<displayName>admin.importExport.documentName.displayName</displayName>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="importFileAbsolutePath">
-			<displayName>File Absolute Path</displayName>
+			<displayName>admin.importExport.importFileAbsolutePath.displayName</displayName>
 			<length>500</length>
 		</text>
 		<text name="importFileName">
-			<displayName>Imported File</displayName>
+			<displayName>admin.importExport.importFileName.displayName</displayName>
 			<length>200</length>
 		</text>
 		<text name="exportFileAbsolutePath">
-			<displayName>File Absolute Path</displayName>
+			<displayName>admin.importExport.exportFileAbsolutePath.displayName</displayName>
 			<length>500</length>
 		</text>
 		<memo name="results" persistent="false" audited="false" trackChanges="false">
-			<displayName>Results</displayName>
+			<displayName>admin.importExport.results.displayName</displayName>
 		</memo>
 		<boolean name="advancedMode" deprecated="true">
-			<displayName>Advanced Mode</displayName>
+			<displayName>admin.importExport.advancedMode.displayName</displayName>
 		</boolean>
 		<boolean name="columnTitlesOnly" deprecated="true">
-			<displayName>Include Titles only</displayName>
+			<displayName>admin.importExport.columnTitlesOnly.displayName</displayName>
 		</boolean>		
 		
 		<!-- Quick Import -->
 		<boolean name="fileContainsHeaders">
-			<displayName>Column Headers</displayName>
+			<displayName>admin.importExport.fileContainsHeaders.displayName</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="detailedLogging">
-			<displayName>Detailed logging</displayName>
-			<description>Include all import details row by row to server log</description>
+			<displayName>admin.importExport.detailedLogging.displayName</displayName>
+			<description>admin.importExport.detailedLogging.description</description>
 			<defaultValue><![CDATA[true]]></defaultValue>
 		</boolean>
 		<collection type="child" name="importExportColumns" ordered="true">
-			<displayName>Columns</displayName>
+			<displayName>admin.importExport.collection.importExportColumns.displayName</displayName>
 			<documentName>ImportExportColumn</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
 		<enum name="rollbackErrors">
-			<displayName>Error handling</displayName>
+			<displayName>admin.importExport.rollbackErrors.displayName</displayName>
 			<defaultValue>rollbackErrors</defaultValue>
 			<values>
-				<value code="rollbackErrors" name="rollbackErrors" description="Roll-back all if there's a problem" />
-				<value code="noRollbackErrors" name="noRollbackErrors" description="Load and save until error or complete" />
+				<value code="rollbackErrors" name="rollbackErrors" description="admin.importExport.rollbackErrors.rollbackErrors.description" />
+				<value code="noRollbackErrors" name="noRollbackErrors" description="admin.importExport.rollbackErrors.noRollbackErrors.description" />
 			</values>
 		</enum>
 		<enum name="loadType">
-			<displayName>Loading strategy</displayName>
+			<displayName>admin.importExport.loadType.displayName</displayName>
 			<description>
-				<![CDATA[
-				<p><b>Loading strategy</b></p>
-				<p><b>Create related records if they don't exist (recommended)</b>
-				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
-				<p><b>Create everything even if there might be duplicates</b>
-					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
-				]]>
+				<![CDATA[admin.importExport.loadType.description]]>
 			</description>
 			<defaultValue>createFind</defaultValue>
 			<values>
-				<value code="createFind" name="createFind" description="Create related records if they don't exist" />
-				<value code="createAll" name="createAll" description="Create everything even if there might be duplicates" />
+				<value code="createFind" name="createFind" description="admin.importExport.loadType.createFind.description" />
+				<value code="createAll" name="createAll" description="admin.importExport.loadType.createAll.description" />
 			</values>
 		</enum>
 	</attributes>

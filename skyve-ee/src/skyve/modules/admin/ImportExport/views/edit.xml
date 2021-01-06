@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Import Export" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+<view title="admin.importExport.edit.title" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox shrinkWrap="height">
-		<vbox border="true" borderTitle="Select Mode">
+		<vbox border="true" borderTitle="admin.importExport.selectMode.borderTitle">
 			<form>
 				<column responsiveWidth="2" />
 				<column />
@@ -21,7 +21,7 @@
 				</row>
 			</form>
 		</vbox>
-		<vbox border="true" borderTitle="Configure Options" widgetId="configureOptions">
+		<vbox border="true" borderTitle="admin.importExport.edit.configureOptions.borderTitle" widgetId="configureOptions">
 			<vbox>
 				<form disabled="fileExists">
 					<column responsiveWidth="2" />
@@ -33,7 +33,7 @@
 						</item>
 						<item>
 							<blurb textAlignment="left">
-									<![CDATA[<em>Select a module and document...</em>]]>
+									<![CDATA[admin.importExport.edit.configureOptions.blurb1]]>
 								</blurb>
 						</item>
 					</row>
@@ -96,7 +96,7 @@
 								<spacer />
 							</item>
 							<item>
-								<blurb><![CDATA[The file <strong><em>{importFileName}</em></strong> has been uploaded for this import - import from this file or upload a new file.]]></blurb>
+								<blurb><![CDATA[admin.importExport.edit.configureOptions.blurb2]]></blurb>
 							</item>
 							<item>
 								<button pixelWidth="200" action="ClearImport" />
@@ -157,7 +157,7 @@
 		</vbox>
 	</vbox>
 	<vbox widgetId="columns">
-		<vbox visible="showUploadColumns" border="true" borderTitle="Configure Import Columns">
+		<vbox visible="showUploadColumns" border="true" borderTitle="admin.importExport.edit.configureImportColumns.borderTitle">
 			<dataGrid binding="importExportColumns" invisible="showExpressions" inline="true" showEdit="false">
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
@@ -168,7 +168,7 @@
 				<boundColumn binding="bindingExpression" />
 			</dataGrid>
 		</vbox>
-		<vbox visible="showExport" border="true" borderTitle="Configure Export Columns">
+		<vbox visible="showExport" border="true" borderTitle="admin.importExport.edit.configureExportColumns.borderTitle">
 			<dataGrid binding="importExportColumns" invisible="showExpressions" showEdit="false">
 				<boundColumn binding="bindingName" />
 				<boundColumn binding="columnName" />
@@ -182,13 +182,13 @@
 	</vbox>
 	<actions>
 		<defaults />
-		<upload className="UploadSimpleImportDataFile" displayName="Upload file" visible="showUpload" inActionPanel="false" enabled="contextSet" />
-		<action className="ClearImport" displayName="Clear File" iconStyleClass="fa fa-trash-o" visible="fileExists" enabled="persisted" inActionPanel="false"
-			confirm="OK to clear the loaded file?" />
-		<action className="RunImport" displayName="Import data from file" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
-			confirm="OK to import data from the loaded file? (There is no undo for this action - we recommend you backup your data before proceeding.)" />
-		<action className="ResetColumns" displayName="Reset columns" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />
-		<download className="RunExport" displayName="Download Data" visible="showExport" inActionPanel="false" enabled="contextSet" />
-		<download className="GetImportTemplate" displayName="Get Template for Import" invisible="showExport" inActionPanel="false" />
+		<upload className="UploadSimpleImportDataFile" displayName="admin.importExport.actions.uploadSimpleImportDataFile.displayName" visible="showUpload" inActionPanel="false" enabled="contextSet" />
+		<action className="ClearImport" displayName="admin.importExport.actions.clearImport.displayName" iconStyleClass="fa fa-trash-o" visible="fileExists" enabled="persisted" inActionPanel="false"
+			confirm="admin.importExport.actions.clearImport.confirm" />
+		<action className="RunImport" displayName="admin.importExport.actions.runImport.displayName" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
+			confirm="admin.importExport.actions.runImport.confirm" />
+		<action className="ResetColumns" displayName="admin.importExport.actions.resetColumns.displayName" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />
+		<download className="RunExport" displayName="admin.importExport.actions.runExport.displayName" visible="showExport" inActionPanel="false" enabled="contextSet" />
+		<download className="GetImportTemplate" displayName="admin.importExport.actions.getImportTemplate.displayName" invisible="showExport" inActionPanel="false" />
 	</actions>
 </view>
