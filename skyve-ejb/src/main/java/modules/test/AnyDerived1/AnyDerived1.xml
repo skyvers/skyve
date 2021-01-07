@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="AnyDerived1" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A document that extends AnyBase.
+		]]>
+	</documentation>
+	<extends document="AnyBase" />
+	<persistent name="TEST_AnyDerived1" />
+	<singularAlias>AnyDerived1</singularAlias>
+	<pluralAlias>AnyDerived1s</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text1" required="true">
+			<displayName>Text 1</displayName>
+			<length>20</length>
+		</text>
+	</attributes>
+</document>

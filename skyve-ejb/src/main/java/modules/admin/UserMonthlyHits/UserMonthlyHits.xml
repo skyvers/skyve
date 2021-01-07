@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserMonthlyHits"
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_UserMonthlyHits" />
+	<singularAlias>User Monthly Hits</singularAlias>
+	<pluralAlias>User Monthly Hits</pluralAlias>
+	<audited>false</audited>
+	<iconStyleClass>fa fa-bar-chart</iconStyleClass>
+	<bizKey expression="{userName} - {year}/{month} = {numberOfHits}"/>
+	<attributes>
+		<text name="userName" required="true">
+			<displayName>User Name</displayName>
+			<length>254</length>
+		</text>
+		<integer name="year" required="true">
+			<displayName>Year</displayName>
+		</integer>
+		<integer name="month" required="true">
+			<displayName>Month</displayName>
+		</integer>
+		<text name="userAgentHeader">
+			<displayName>User-Agent Header</displayName>
+			<length>400</length>
+		</text>
+		<enum name="device">
+			<displayName>Device</displayName>
+			<values>
+				<value name="phone" code="P" description="Phone" />
+				<value name="tablet" code="T" description="Tablet" />
+				<value name="desktop" code="D" description="Desktop" />
+				<value name="other" code="O" description="Other" />
+			</values>
+		</enum>
+		<integer name="numberOfHits" required="true">
+			<displayName>Number Of Hits</displayName>
+		</integer>
+	</attributes>
+</document>

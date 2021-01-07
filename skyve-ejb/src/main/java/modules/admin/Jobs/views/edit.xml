@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Jobs"
+		name="edit"
+		refreshTimeInSeconds="30"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Actual">
+			<dataGrid binding="runningJobs" title="Running Jobs" showAdd="false" showEdit="false" showRemove="false">
+				<boundColumn binding="startTime" title="Start Time" />
+				<boundColumn binding="displayName" title="Name" />
+				<boundColumn binding="percentComplete" title="Percent Complete" />
+				<boundColumn binding="log" title="Log" />
+			</dataGrid>
+			<listGrid query="qCompletedJobs" title="Completed Jobs" continueConversation="false" showAdd="false" />
+		</tab>
+		<tab title="Schedule">
+			<listGrid query="qAllSchedules" title="Job Schedule" continueConversation="false" enabled="jobScheduler" />
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="Refresh" displayName="Refresh" relativeIconFileName="shared/icons/Globe.gif"/>
+		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" confirm="This will delete all completed jobs.  Are you sure?"
+		relativeIconFileName="shared/icons/Clear.gif" />
+	</actions>
+</view>

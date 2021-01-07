@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Generic" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			This document is used as the driving document for List and Tree models.
+			It has a parent document of itself so that it will work in a treeGrid.
+			Also there ara a bunch of generic columns to bind to.
+		]]>
+	</documentation>
+	<singularAlias>Generic</singularAlias>
+	<pluralAlias>Generics</pluralAlias>
+	<parentDocument>Generic</parentDocument>
+	<attributes>
+		<memo name="memo1">
+			<displayName>memo1</displayName>
+		</memo>
+		<memo name="memo2">
+			<displayName>memo2</displayName>
+		</memo>
+		<memo name="memo3">
+			<displayName>memo3</displayName>
+		</memo>
+		<memo name="memo4">
+			<displayName>memo4</displayName>
+		</memo>
+		<memo name="memo5">
+			<displayName>memo5</displayName>
+		</memo>
+		<memo name="memo6">
+			<displayName>memo6</displayName>
+		</memo>
+		<boolean name="boolean1">
+			<displayName>boolean1</displayName>
+		</boolean>
+		<boolean name="boolean2">
+			<displayName>boolean2</displayName>
+		</boolean>
+		<boolean name="boolean3">
+			<displayName>boolean3</displayName>
+		</boolean>
+		<date name="date1">
+			<displayName>date1</displayName>
+		</date>
+		<date name="date2">
+			<displayName>date2</displayName>
+		</date>
+		<date name="date3">
+			<displayName>date3</displayName>
+		</date>
+		<dateTime name="dateTime1">
+			<displayName>dateTime1</displayName>
+		</dateTime>
+		<dateTime name="dateTime2">
+			<displayName>dateTime2</displayName>
+		</dateTime>
+		<dateTime name="dateTime3">
+			<displayName>dateTime3</displayName>
+		</dateTime>
+		<time name="time1">
+			<displayName>time1</displayName>
+		</time>
+		<time name="time2">
+			<displayName>time2</displayName>
+		</time>
+		<time name="time3">
+			<displayName>time3</displayName>
+		</time>
+		<timestamp name="timestamp1">
+			<displayName>timestamp1</displayName>
+		</timestamp>
+		<timestamp name="timestamp2">
+			<displayName>timestamp2</displayName>
+		</timestamp>
+		<timestamp name="timestamp3">
+			<displayName>timestamp3</displayName>
+		</timestamp>
+		<decimal2 name="decimal21">
+			<displayName>decimal21</displayName>
+		</decimal2>
+		<decimal2 name="decimal22">
+			<displayName>decimal22</displayName>
+		</decimal2>
+		<decimal2 name="decimal23">
+			<displayName>decimal23</displayName>
+		</decimal2>
+		<decimal5 name="decimal51">
+			<displayName>decimal51</displayName>
+		</decimal5>
+		<decimal5 name="decimal52">
+			<displayName>decimal52</displayName>
+		</decimal5>
+		<decimal5 name="decimal53">
+			<displayName>decimal53</displayName>
+		</decimal5>
+		<decimal10 name="decimal101">
+			<displayName>decimal101</displayName>
+		</decimal10>
+		<decimal10 name="decimal102">
+			<displayName>decimal102</displayName>
+		</decimal10>
+		<decimal10 name="decimal103">
+			<displayName>decimal103</displayName>
+		</decimal10>
+		<integer name="integer1">
+			<displayName>integer1</displayName>
+		</integer>
+		<integer name="integer2">
+			<displayName>integer2</displayName>
+		</integer>
+		<integer name="integer3">
+			<displayName>integer3</displayName>
+		</integer>
+		<longInteger name="longInteger1">
+			<displayName>longInteger1</displayName>
+		</longInteger>
+		<longInteger name="longInteger2">
+			<displayName>longInteger2</displayName>
+		</longInteger>
+		<longInteger name="longInteger3">
+			<displayName>longInteger3</displayName>
+		</longInteger>
+		<geometry name="geometry1">
+			<displayName>geometry1</displayName>
+		</geometry>
+		<geometry name="geometry2">
+			<displayName>geometry2</displayName>
+		</geometry>
+		<geometry name="geometry3">
+			<displayName>geometry3</displayName>
+		</geometry>
+		<markup name="markup1">
+			<displayName>markup1</displayName>
+		</markup>
+		<text name="text5001">
+			<displayName>text 500 1</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5002">
+			<displayName>text 500 2</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5003">
+			<displayName>text 500 3</displayName>
+			<length>500</length>
+		</text>
+	</attributes>
+</document>

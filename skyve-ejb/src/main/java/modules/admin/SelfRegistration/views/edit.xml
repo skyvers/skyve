@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox widgetId="postRegister" border="true" visible="registrationComplete">
+		<blurb >
+			<![CDATA[
+				<div style="text-align: center">
+					<strong>Thanks for registering! Your activation email should be in your Inbox now.</strong>
+					<br/><br/>
+					<p>Click the link in your activation email to activate your new account and sign in.</p>
+					<p>If you did not receive the email, please check your spam folder.</p>
+				</div>
+			]]>
+		</blurb>
+	</vbox>
+	<vbox border="false" shrinkWrap="height" widgetId="doRegister" invisible="registrationComplete">
+		<vbox border="true" shrinkWrap="height">
+			<blurb>
+				<![CDATA[
+					<div style="width:100%;text-align:center">
+						<strong style="margin: 2px auto;">If you are an existing user, please <a href="{loginUrl}">Sign in</a>.</strong>
+					</div>
+				]]>
+			</blurb>
+		</vbox>
+		<form border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle" >
+			<column responsiveWidth="2"/>
+			<column responsiveWidth="3"/>
+			<row>
+				<item showHelp="false">
+					<default binding="user.contact.name"/>
+				</item>
+			</row>
+			<row>
+				<item required="true" showHelp="true" help="Your contact email address. This will be used to confirm your account.">
+					<default binding="user.contact.email1"/>
+				</item>
+			</row>
+			<row>
+				<item required="true" showHelp="false">
+					<password binding="user.password"/>
+				</item>
+			</row>
+			<row>
+				<item required="true" showHelp="false">
+					<password binding="confirmPassword"/>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer/>
+				</item>
+				<item>
+					<button action="Register"/>
+				</item>
+			</row>
+			<!--
+			<row>
+				<item>
+					<spacer/>
+				</item>
+				<item colspan="2">
+					<blurb>
+						<![CDATA[
+							By registering, you agree with our <a href="<insert your terms of use page here>" target="_blank"> Terms of Use</a>.
+						]]>
+					</blurb>
+				</item>
+			</row>
+			 -->
+		</form>
+	</vbox>
+	<actions>
+		<action className="Register" name="Register" displayName="admin.selfRegistration.actions.register.displayName" inActionPanel="false" />
+	</actions>
+</view>

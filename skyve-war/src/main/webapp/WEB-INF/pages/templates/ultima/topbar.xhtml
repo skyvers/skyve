@@ -1,0 +1,63 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:f="http://java.sun.com/jsf/core"
+					xmlns:h="http://java.sun.com/jsf/html"
+					xmlns:ui="http://java.sun.com/jsf/facelets"
+					xmlns:p="http://primefaces.org/ui"
+					xmlns:pu="http://primefaces.org/ultima"
+					xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<div class="topbar clearfix">
+		<div class="topbar-left" style="padding: 1px !important">
+			<table style="margin: 0; padding: 0; border: 0; height: 100%; width: 95%;">
+				<tr>
+					<td style="vertical-align: middle; text-align: center;">
+						<h:graphicImage name="images/skyve-logo-white.png" alt="logo" library="skyve" style="max-width: 90%;" />
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div class="topbar-right">
+			<c:if test="#{showMenu}">
+				<a id="menu-button" href="#">
+					<i></i>
+				</a>
+			</c:if>
+			<span class="topbar-title">
+				<p:outputPanel id="title" layout="inline">
+					#{title}
+					<p:autoUpdate />
+				</p:outputPanel>
+			</span>
+			<c:if test="#{showSwitchMode or showLogout}">
+				<a id="topbar-menu-button" href="#">
+					<i class="material-icons">menu</i>
+				</a>
+				<ul class="topbar-items">
+					<li>
+						<a href="#">
+							<span style="font-size:1.5em;" class="topbar-icon">#{user.name}</span>
+							<i style="font-size:1.5em;" class="topbar-icon fa fa-angle-down"></i>
+						</a>
+						<ul class="ultima-menu fadeInDown animated topbar-menu">
+							<c:if test="#{showSwitchMode}">
+								<li role="menuitem">
+									<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+										<i class="fa fa-share-square-o"></i>
+										<span>Switch Mode</span>
+									</p:commandLink>
+								</li>
+							</c:if>
+							<c:if test="#{showLogout}">
+								<li role="menuitem">
+									<a href="loggedOut"> 
+										<i class="fa fa-power-off"></i>
+										<span>Logout</span>
+									</a>
+								</li>
+							</c:if>
+						</ul>
+					</li>
+				</ul>
+			</c:if>
+		</div>
+	</div>
+</ui:composition>

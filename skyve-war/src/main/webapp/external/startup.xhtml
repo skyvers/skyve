@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		dir="#{skyveStartup.dir}">
+	<f:view encoding="UTF-8">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{skyveStartup.preRender}"/>
+		</f:metadata>
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyveStartup.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyveStartup}" />
+			<ui:param name="showMenu" value="false" />
+			<ui:param name="showSwitchMode" value="false" />
+			<ui:param name="showLogout" value="true" />
+			<ui:define name="body">
+				<s:conversation managedBean="skyveStartup" />
+				<h:form prependId="false">
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyveStartup}" />
+					</ui:include>
+
+					<s:view module="admin"
+								document="Startup"
+								managedBean="skyveStartup"
+								widgetId="actionPanel"
+								update="@form" />
+				
+					<div class="ui-g">
+						<h:panelGroup layout="block" styleClass="ui-g-11 rightFormLabel">
+							<p:outputLabel for="inputDontShow" value="Don't show this again:" />
+						</h:panelGroup>
+						<h:panelGroup layout="block" styleClass="ui-g-1 left">
+							<h:panelGrid columns="2" styleClass="inputComponent">
+								<p:selectBooleanCheckbox id="inputDontShow" value="#{skyveStartup.currentBean['dontShowAgain']}" />
+							</h:panelGrid>
+						</h:panelGroup>
+						<div class="ui-g-12">
+							<p><h1>Welcome to your new Skyve application.</h1></p>
+							<p>Use this page to configure your application.</p>
+							<p>Press 'Dismiss' to continue to your application and continue configuration next time you log in, or select 'Don't show this again'.</p>
+						</div>
+				    </div>
+				
+					<p:accordionPanel onTabChange="SKYVE.PF.tabChange()">
+						<p:tab title="Environment Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formEnvironment"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Mail Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formMail"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Map Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formMap"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Security Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formSecurity"
+										update="@form" />
+						</p:tab>
+						<p:tab title="Account Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formAccount"
+										update="@form" />
+						</p:tab>
+<!--
+						<p:tab title="SMS Settings">
+							<s:view module="admin"
+										document="Startup"
+										managedBean="skyveStartup"
+										widgetId="formSMS"
+										update="@form" />
+						</p:tab>
+-->
+					</p:accordionPanel>
+				</h:form>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

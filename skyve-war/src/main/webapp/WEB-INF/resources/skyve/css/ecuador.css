@@ -1,0 +1,81 @@
+@CHARSET "UTF-8";
+
+#footer-menu .footer-box span, .layout-footer .logo-container-outer {
+	padding-top: 5px;
+    text-align: center !important;
+}
+
+#topbar-appname {    
+    float: left;
+    top: 0;
+    height: 60px;
+    padding: 20px 5px;
+}
+#topbar-appname img {
+	position: absolute;
+	max-height: 36px;
+	top: 12px;
+}
+#topbar-appname .app-name {
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	left: 120px;
+	position: absolute;
+	vertical-align: middle;
+}
+
+/* keep the border on panel content for vboxes and hboxes etc */
+.ui-panel-content {
+	border-top: 1px solid #dedede !important;
+}
+
+
+
+/* data tables */
+.ui-datatable tbody td {
+	text-align: center;
+}
+
+@media (max-width: 1024px) {
+	#topbar-appname .app-name {
+		font-size: 16px;
+		left: 120px;
+	}
+	
+	.layout-wrapper .layout-topbar .logo-container {
+		display: none;
+	}
+}
+
+@media (min-width: 641px) {
+	.topbar-title {
+		font-size: 16px;
+		font-weight: bold;
+		vertical-align: middle;
+		color: white;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		position: absolute;
+		top: 30px;
+		left: 290px;
+		width: 50%;
+	}
+
+}
+@media (max-width: 640px) {
+	.topbar-title {
+		display: none;
+	}
+}
+
+.topbar-menu li a span {
+	display: inline !important;
+} 
+
+@media(max-width: 1024px) {
+	.topbar-menu-tooltip {
+		display: none !important;
+	}	
+}

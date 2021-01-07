@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveUpload.dir}">
+    <f:view encoding="#{_skyveUpload.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveUpload.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveUpload.i18n['page.fileUpload.title']}</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-panelgrid .ui-widget-content {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-panelgrid td {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-fileupload-content {
+					min-height: 200px;
+					background-image: url(images/filedrop.png);
+					background-position: right bottom;
+					background-repeat: no-repeat;
+				}
+			</style>
+		</h:head>
+		<h:body>
+			<h:form enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{_skyveUpload.context}" />
+				<h:inputHidden id="_b" value="#{_skyveUpload.binding}" />
+				<h:inputHidden id="_a" value="#{_skyveUpload.action}" />
+				<p:fileUpload fileUploadListener="#{_skyveUpload.handleFileUpload}" 
+								update="problems" 
+								oncomplete="if (top.isc) { top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH'); }" />
+			    <p:growl id="messages" showDetail="true" escape="false">
+					<p:autoUpdate />
+			    </p:growl>
+			    <p/>
+			    <h:panelGroup id="problems" >
+				    <p:dataTable value="#{_skyveUpload.problems}" var="problem" rendered="#{not empty _skyveUpload.problems}">
+						<f:facet name="header">#{_skyveUpload.i18n['page.fileUpload.problems']}</f:facet>
+						<p:column width="40" style="text-align:center">
+							<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
+							<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
+						</p:column>
+						<p:column headerText="#{_skyveUpload.i18n['page.fileUpload.where']}">
+							<span style="font-weight: bold;">#{problem.where}</span>
+						</p:column>
+						<p:column headerText="#{_skyveUpload.i18n['page.fileUpload.what']}">
+							#{problem.what}
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

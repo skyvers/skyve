@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ImportExport" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_ImportExport" />
+	<singularAlias>Import Export</singularAlias>
+	<pluralAlias>Imports Exports</pluralAlias>
+	<iconStyleClass>fa fa-cloud-upload</iconStyleClass>
+	<bizKey expression="{moduleName}.{documentName}" />
+	<attributes>
+		<enum name="mode" required="true">
+			<displayName>Mode</displayName>
+			<defaultValue>importData</defaultValue>
+			<values>
+				<value code="importData" description="Import Data" />
+				<value code="exportData" description="Export Data" />
+			</values>
+		</enum>
+		<text name="moduleName" required="true">
+			<displayName>Module Name</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<text name="documentName" required="true">
+			<displayName>Document</displayName>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="importFileAbsolutePath">
+			<displayName>File Absolute Path</displayName>
+			<length>500</length>
+		</text>
+		<text name="importFileName">
+			<displayName>Imported File</displayName>
+			<length>200</length>
+		</text>
+		<text name="exportFileAbsolutePath">
+			<displayName>File Absolute Path</displayName>
+			<length>500</length>
+		</text>
+		<memo name="results" persistent="false" audited="false" trackChanges="false">
+			<displayName>Results</displayName>
+		</memo>
+		<boolean name="advancedMode" deprecated="true">
+			<displayName>Advanced Mode</displayName>
+		</boolean>
+		<boolean name="columnTitlesOnly" deprecated="true">
+			<displayName>Include Titles only</displayName>
+		</boolean>		
+		
+		<!-- Quick Import -->
+		<boolean name="fileContainsHeaders">
+			<displayName>Column Headers</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="detailedLogging">
+			<displayName>Detailed logging</displayName>
+			<description>Include all import details row by row to server log</description>
+			<defaultValue><![CDATA[true]]></defaultValue>
+		</boolean>
+		<collection type="child" name="importExportColumns" ordered="true">
+			<displayName>Columns</displayName>
+			<documentName>ImportExportColumn</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<enum name="rollbackErrors">
+			<displayName>Error handling</displayName>
+			<defaultValue>rollbackErrors</defaultValue>
+			<values>
+				<value code="rollbackErrors" name="rollbackErrors" description="Roll-back all if there's a problem" />
+				<value code="noRollbackErrors" name="noRollbackErrors" description="Load and save until error or complete" />
+			</values>
+		</enum>
+		<enum name="loadType">
+			<displayName>Loading strategy</displayName>
+			<description>
+				<![CDATA[
+				<p><b>Loading strategy</b></p>
+				<p><b>Create related records if they don't exist (recommended)</b>
+				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+				<p><b>Create everything even if there might be duplicates</b>
+					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+				]]>
+			</description>
+			<defaultValue>createFind</defaultValue>
+			<values>
+				<value code="createFind" name="createFind" description="Create related records if they don't exist" />
+				<value code="createAll" name="createAll" description="Create everything even if there might be duplicates" />
+			</values>
+		</enum>
+	</attributes>
+	<conditions>
+		<condition name="showExport">
+			<description>Whether to show the export mode view rather than the default import</description>
+			<expression>
+				<![CDATA[
+				Mode.exportData.equals(mode)
+				]]>
+			</expression>
+		</condition>
+		<condition name="fileExists">
+			<description>Whether the upload file exists</description>
+			<expression>
+				<![CDATA[
+				Mode.importData.equals(mode) && importFileAbsolutePath!=null
+				]]>
+			</expression>
+		</condition>
+		<condition name="showUpload">
+			<description>Whether to show the upload button</description>
+			<expression>
+				<![CDATA[
+					!isShowExport() && !isFileExists()
+				]]>
+			</expression>			
+		</condition>
+		<condition name="showUploadColumns">
+			<description>Whether to show the upload columns</description>
+			<expression>
+				<![CDATA[
+					!isShowExport() && isFileExists()
+				]]>
+			</expression>			
+		</condition>
+		<condition name="showExpressions">
+			<description>Whether to show advanced binding strings</description>
+			<expression>
+				<![CDATA[
+				((ImportExportExtension) this).anyColumnHasExpression()
+				]]>
+			</expression>
+		</condition>
+		<condition name="showResults">
+			<expression>
+				<![CDATA[
+				results!=null
+				]]>
+			</expression>
+		</condition>
+		<condition name="contextSet">
+			<expression>
+				<![CDATA[
+					getModuleName()!=null && getDocumentName()!=null
+				]]>
+			</expression>
+		</condition>
+		<condition name="loadTypeCreateFind">
+			<description>The load type  - whether to normalise the input or create all records</description>
+			<expression>
+				<![CDATA[
+				!isShowExport()
+				&& LoadType.createFind.equals(loadType)
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

@@ -1,0 +1,118 @@
+@CHARSET "UTF-8";
+/*****************************
+ * Styles for the admin module
+ *****************************/
+
+/* user dashboard tiles */
+.tile {
+  padding: 5px;
+}
+.tile+.tile {
+	margin-top: 10px;
+}
+
+td > div > div.tile {
+	/* margin for SC */
+	margin-bottom: 5px;
+}
+
+.tile.delete {
+	border-left: 4px solid #f5c6cb;
+}
+.tile.delete:hover {
+	border-left: 4px solid #e77480;
+	background-color: rgba(245, 199, 203, 0.3);
+	cursor: pointer;
+}
+
+.tile.insert {
+	border-left: 4px solid #bee5eb;	
+}
+.tile.insert:hover {
+	border-left: 4px solid #48b6c7;
+	background-color: rgba(189, 228, 235, 0.3);
+	cursor: pointer;
+}
+
+.tile.update {
+	border-left: 4px solid #b8daff;	
+}
+.tile.update:hover {
+	border-left: 4px solid #61adff;
+	background-color: rgba(184, 218, 255, 0.3);
+	cursor: pointer;
+}
+
+.tile.view {
+	border-left: 4px solid #dac7ff;
+}
+.tile.view:hover {
+	border-left: 4px solid #aa80ff;
+	background-color: rgba(218, 199, 255, 0.3);
+	cursor: pointer;
+}
+
+.tile > div {
+	margin-left: 5px;
+}
+
+.tile .title {
+	color: #333;
+	text-align: left;
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+.tile .title a {
+	color: #333;
+}
+
+.tile .title .fa {
+	font-weight: 700;
+	padding-right: 4px;
+}
+.tile .title .fa-angle-up {
+	color: #004085;
+}
+.tile .title .fa-plus {
+	color: #0c5460;
+}
+.tile .title .fa-times {
+	color: #721c24;
+}
+.tile .title .fa-chevron-right {
+	color: #884dff;
+}
+
+.tile .title .fa-search-plus {
+	color: #777;
+	font-weight: 400;
+	padding-left: 8px;
+}
+
+.tile .description {
+	color: #666;
+	margin-right: 5px;
+	text-align: left;
+	font-size: 90%;
+}
+
+.tile .description .bizKey {
+	color: #333;
+}
+
+.tile .icon {
+	float: right;
+	margin-right: 5px;
+	line-height: 40px;
+	text-align: center;
+	vertical-align: middle;
+	width: 30px;
+}
+
+.tile .footer {
+	color: #777;
+	text-align: right;
+	font-size: 90%;
+	padding-left: 5px;
+}

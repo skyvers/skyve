@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pu="http://primefaces.org/ultima"
+		xmlns:o="http://omnifaces.org/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		dir="#{bean.dir}">
+	<f:view encoding="UTF-8">
+		<h:head>
+			<f:facet name="first">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+				<meta name="apple-mobile-web-app-capable" content="yes" />
+			</f:facet>
+	
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+	
+			<title>${project.description}</title>
+			<base href="#{bean.baseHref}" />
+			<!-- normally commented out for security reasons
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
+			-->	
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+<!--
+			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
+-->
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
+			<h:outputStylesheet name="css/ultima.css" library="skyve" />
+			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
+			
+			<h:outputScript name="js/nanoscroller.js" library="ultima-layout" />
+			<h:outputScript name="js/layout.js" library="ultima-layout" />
+			<h:outputScript name="js/ripple.js" library="ultima-layout" />
+			<h:outputScript name="js/swipe.js" library="ultima-layout" />
+	
+			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
+				#{bean.apiScript}
+				SKYVE.PF.establishHistory();
+			</script>
+			<ui:insert name="head" />
+		</h:head>
+	
+		<h:body styleClass="main-body layout-compact">
+			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<div class="#{showMenu ? 'layout-wrapper menu-layout-static' : 'layout-wrapper'}">
+	
+				<ui:include src="./topbar.xhtml">
+					<ui:param name="showMenu" value="#{showMenu}" />
+					<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
+					<ui:param name="showLogout" value="#{showLogout}" />
+					<ui:param name="title" value="#{bean.title}" />
+					<ui:param name="bean" value="#{bean}" />
+				</ui:include>
+	
+				<!-- Include the menu if we need to show topbar dropdown as otherwise the dropdown click event is not registered -->
+				<c:if test="#{not showMenu and (showSwitchMode or showLogout)}">
+					<pu:menu />
+				</c:if>
+
+				<h:form id="menuform" prependId="false" rendered="#{showMenu}">
+					<div class="layout-menu layout-menu-dark">
+						<div class="nano">
+							<div class="nano-content menu-scroll-content">
+								<pu:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
+							</div>
+						</div>
+					</div>
+				</h:form>
+				<div class="layout-main">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
+						<p:autoUpdate />
+					</p:messages>
+					<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
+						<p:autoUpdate />
+					</p:growl>
+					<!-- Do not establish a socket for a public user (user in session but no principal established) -->
+					<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" rendered="#{not empty request.remoteUser}" />
+					<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+					<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
+					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
+					<p:confirmDialog id="confirm" global="true">
+						<p:commandButton id="confirmCancel" 
+											value="Cancel" 
+											type="button"
+											styleClass="ui-confirmdialog-no" 
+											style="float:right;"
+											icon="fa fa-remove" />
+						<p:commandButton id="confirmOK" 
+											value="OK" 
+											type="button"
+											styleClass="ui-confirmdialog-yes" 
+											style="float:right;"
+											icon="fa fa-check" />
+					</p:confirmDialog>
+					
+					<ui:insert name="body" />
+					
+					<div class="ui-g">
+						<div class="ui-g-12">
+							<div class="footer" style="padding: 0px; margin: 0px">
+								<div class="card clearfix">
+									<span class="footer-text-left">
+										<h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
+									</span>
+									<span class="footer-text-right">
+										<span>Version ${project.version}</span>
+										<span class="ui-icon ui-icon-copyright"></span>
+										<span>All Rights Reserved</span>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	
+			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+				<f:facet name="start">
+					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
+	
+			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
+			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
+			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
+			<h:outputStylesheet name="#{'css/layout-'.concat(skyve.getThemeColour('indigo')).concat('.css')}" library="ultima-layout" />
+		</h:body>
+	</f:view>
+</html>

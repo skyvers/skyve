@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:o="http://omnifaces.org/ui"
+		dir="#{bean.dir}">
+	<f:view encoding="UTF-8">
+		<h:head>
+	        <f:facet name="first">
+	            <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+	        </f:facet>
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+			<meta http-equiv="Content-Type" content="text/html" />
+		
+			<meta name="format-detection" content="telephone=no" />
+			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+		
+			<title>${project.description}</title>
+			<base href="#{bean.baseHref}" />
+			<!-- normally commented out for security reasons
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
+			-->
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+<!--
+			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
+-->
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
+			<h:outputStylesheet name="editorial/assets/css/main.css" library="skyve" />
+			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />  
+			
+			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
+				#{bean.apiScript}
+				SKYVE.PF.establishHistory();
+			</script>
+			<style>
+				.content-header {
+					display: none;
+				}
+				.ui-panelmenu .ui-menuitem-link {
+					border-radius: 0px; !important;
+				}
+				.ui-panelmenu .ui-panelmenu-header {
+					border: none !important;
+					border-radius: 0px; !important;
+				}
+				.ui-panelmenu .ui-panelmenu-content {
+					background-color: transparent !important;
+					border: none !important;
+				}
+				.ui-datatable th {
+					font-size: larger !important;
+				}
+				.ui-datatable-data > tr {
+					text-align: center !important;
+				}
+				.ui-panel-content {
+					border-top: 1px solid #c8c8c8 !important;
+				}
+			</style>
+			<ui:insert name="head" />
+		</h:head>
+		<h:body class="is-preload">
+			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<p:ajaxStatus onstart="$('#busy').css({display:'block',top:$(window).scrollTop()+($(window).height()/2)-25});" oncomplete="$('#busy').css({display:'none'})"/>
+			<div id="busy" class="wheelOfDeath">
+				<p:graphicImage style="padding-top: 8px;" value="images/busy.gif" />
+			</div>
+			<div id="wrapper">
+				<div id="main">
+					<div class="inner">
+						<header id="header">
+							<p:outputPanel id="title" layout="inline" class="logo title">
+								#{bean.title}
+								<p:autoUpdate />
+							</p:outputPanel>
+							<ul class="icons">
+								<c:if test="#{showSwitchMode}">
+									<li>
+					            		<p:commandLink class="icon fa fa-share-square-o" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+											<span class="label">Switch Mode</span>
+										</p:commandLink>
+									</li>
+								</c:if>
+								<c:if test="#{showLogout}">
+									<li>
+										<a class="icon fa fa-power-off" href="javascript:void(0)" onclick="window.location = 'loggedOut'">
+											<span class="label">Logout</span>
+										</a>
+									</li>
+								</c:if>
+							</ul>
+						</header>
+						<section>
+							<h:form id="uxuiform" prependId="false"> 
+								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
+							</h:form>
+							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
+								<p:autoUpdate />
+							</p:messages>
+							<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false">
+								<p:autoUpdate />
+							</p:growl>
+							<!-- Do not establish a socket for a public user (user in session but no principal established) -->
+							<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { SKYVE.PF.onPushMessage(message) }" rendered="#{not empty request.remoteUser}" />
+							<!-- Need separate growl for push coz autoUpdated growl wont respond through javascript -->
+							<p:growl id="pushGrowl" widgetVar="pushGrowl" for="push" escape="false" />
+							<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
+							<p:confirmDialog id="confirm" global="true">
+								<p:commandButton id="confirmCancel" 
+													value="Cancel" 
+													type="button"
+													styleClass="ui-confirmdialog-no" 
+													style="float:right;"
+													icon="fa fa-remove" />
+								<p:commandButton id="confirmOK" 
+													value="OK" 
+													type="button"
+													styleClass="ui-confirmdialog-yes" 
+													style="float:right;"
+													icon="fa fa-check" />
+							</p:confirmDialog>
+							<ui:insert name="body" />
+						</section>
+						<!-- Footer -->
+						<footer id="footer">
+				        	<p class="copyright"><i class="fa fa-copyright"></i> All Rights Reserved</p>   
+						</footer>
+					</div>
+				</div>
+				<!-- Sidebar -->
+				<c:if test="#{showMenu}">
+					<div id="sidebar">
+						<div class="inner">
+							<!-- Menu -->
+							<nav id="menu">
+								<table style="margin: 0; padding: 0; border: 0; min-height: 109px;">
+									<tr>
+										<td style="vertical-align: middle; text-align: center;">
+											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; display: block;" />
+										</td>
+									</tr>
+								</table>
+								<h:form id="menuform" prependId="false"> 
+									<p:panelMenu model="#{menu.menu}" />
+								</h:form>
+							</nav>
+						</div>
+					</div>
+				</c:if>
+			</div>
+			<!-- Scripts -->
+			<h:outputScript name="editorial/assets/js/browser.min.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/breakpoints.min.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/util.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/main.js" library="skyve" />
+		</h:body>
+	</f:view>
+</html>

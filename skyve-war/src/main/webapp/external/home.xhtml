@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		dir="#{skyve.dir}">
+	<f:view encoding="UTF-8">
+		<f:metadata>
+			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyve.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyve.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
+		</f:metadata>
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<p:importEnum type="org.skyve.web.UserAgentType" var="UserAgentType" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyve.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyve}" />
+			<ui:param name="showMenu" value="true" />
+			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType}" />
+			<ui:param name="showLogout" value="true" />
+			<ui:define name="body">
+				<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
+				<h:form prependId="false">
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyve}" />
+					</ui:include>
+					<s:view module="#{skyve.bizModuleParameter}"
+								document="#{skyve.bizDocumentParameter}"
+								managedBean="skyve"
+								update="@form"
+								rendered="#{'e' eq skyve.webActionParameter}" />
+					<s:listGrid module="#{skyve.bizModuleParameter}"
+									query="#{skyve.queryNameParameter}"
+									managedBean="skyve"
+									update="@form"
+									rendered="#{'l' eq skyve.webActionParameter}" />
+				</h:form>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>
