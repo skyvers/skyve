@@ -7,18 +7,18 @@
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true">
-			<displayName>Report Name</displayName>
+			<displayName>admin.reportDesign.name.displayName</displayName>
 			<length>200</length>
 		</text>
 		<enum name="mode">
-			<displayName>Mode</displayName>
+			<displayName>admin.reportDesign.mode.displayName</displayName>
 			<values>
 				<value code="sql"/>
 				<value code="bean"/>
 			</values>
 		</enum>
 		<enum name="definitionSource">
-			<displayName>Definition Source</displayName>
+			<displayName>admin.reportDesign.definitionSource.displayName</displayName>
 			<values>
 				<value code="document"/>
 				<value code="view"/>
@@ -27,208 +27,198 @@
 			</values>
 		</enum>
 		<enum name="reportType">
-			<displayName>Type</displayName>
+			<displayName>admin.reportDesign.reportType.displayName</displayName>
 			<values>
 				<value code="Report"/>
 				<value code="Subreport"/>
 			</values>
 		</enum>
 		<text name="moduleName">
-			<displayName>Module</displayName>
-			<description>Report Bean Module.</description>
+			<displayName>admin.reportDesign.moduleName.displayName</displayName>
+			<description>admin.reportDesign.moduleName.description</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="documentName">
-			<displayName>Document</displayName>
-			<description>Report Bean Document.</description>
+			<displayName>admin.reportDesign.documentName.displayName</displayName>
+			<description>admin.reportDesign.documentName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="queryName">
-			<displayName>Query</displayName>
-			<description>Report Query.</description>
+			<displayName>admin.reportDesign.queryName.displayName</displayName>
+			<description>admin.reportDesign.queryName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="menuItem">
-			<displayName>Menu Item</displayName>
-			<description>Menu Item.</description>
+			<displayName>admin.reportDesign.menuItem.displayName</displayName>
+			<description>admin.reportDesign.menuItem.displayName</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="repositoryPath" >
-			<displayName>Output Path</displayName>
-			<description><![CDATA[
-			<p>The path to the place where you want jrxml files created.</p>
-			<p>Normally this will be the path to the folder where you modules are defined - e.g. C:\workspace\projectName\src\skyve\</p>
-			]]></description>
+			<displayName>admin.reportDesign.repositoryPath.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.repositoryPath.description]]></description>
 			<length>500</length>
 		</text>
 		<boolean name="saveToDocumentPackage">
-			<displayName>Save to Document Package</displayName>
-			<description><![CDATA[
-			<p>Use this if you want report files to be created in a directory structure matching the metadata repository structure.</p>
-			<p>This is useful if you want to put the reports into place ready to run.</p>
-			]]>
+			<displayName>admin.reportDesign.saveToDocumentPackage.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.saveToDocumentPackage.description]]>
 			</description>
 		</boolean>
 		<enum name="orientation" required="true">
-			<displayName>Orientation</displayName>
+			<displayName>admin.reportDesign.orientation.displayName</displayName>
 			<values>
 				<value code="Portrait"/>
 				<value code="Landscape"/>
 			</values>
 		</enum>
 		<integer name="width" required="true">
-			<displayName>Width</displayName>
+			<displayName>admin.reportDesign.width.displayName</displayName>
 		</integer>
 		<integer name="height" required="true">
-			<displayName>Height</displayName>
+			<displayName>admin.reportDesign.height.displayName</displayName>
 		</integer>
 		<integer name="leftMargin" required="true">
-			<displayName>Left Margin</displayName>
+			<displayName>admin.reportDesign.leftMargin.displayName</displayName>
 		</integer>
 		<integer name="rightMargin" required="true">
-			<displayName>Right Margin</displayName>
+			<displayName>admin.reportDesign.rightMargin.displayName</displayName>
 		</integer>
 		<integer name="topMargin" required="true">
-			<displayName>Top Margin</displayName>
+			<displayName>admin.reportDesign.topMargin.displayName</displayName>
 		</integer>
 		<integer name="bottomMargin" required="true">
-			<displayName>Bottom Margin</displayName>
+			<displayName>admin.reportDesign.bottomMargin.displayName</displayName>
 		</integer>
 		<integer name="columnWidth" required="true">
-			<displayName>Column Width</displayName>
+			<displayName>admin.reportDesign.columnWidth.displayName</displayName>
 		</integer>
 		<text name="defaultFontName">
-			<displayName>Font Name</displayName>
-			<description>Font not working? Check that you've included a font extension jar for your font in the classpath</description>
+			<displayName>admin.reportDesign.defaultFontName.displayName</displayName>
+			<description>admin.reportDesign.defaultFontName.description</description>
 			<length>100</length>
 		</text>
 		<integer name="titleFontSize">
-			<displayName>Font Size (Title)</displayName>
+			<displayName>admin.reportDesign.titleFontSize.displayName</displayName>
 		</integer>
 		<integer name="defaultFontSize">
-			<displayName>Font Size (Detail)</displayName>
+			<displayName>admin.reportDesign.defaultFontSize.displayName</displayName>
 		</integer>
 		<colour name="defaultLineColour">
-			<displayName>Default Line Colour</displayName>
+			<displayName>admin.reportDesign.defaultLineColour.displayName</displayName>
 		</colour>
 		<decimal2 name="defaultLineWidth">
-			<displayName>Default Line Pen Stroke thickness</displayName>
+			<displayName>admin.reportDesign.defaultLineWidth.displayName</displayName>
 		</decimal2>
 		<boolean name="renderLabelAsTextFields">
-			<displayName>Render Labels as TextFields</displayName>
-			<description>This option will allow labels to flow and stretch like text fields</description>
+			<displayName>admin.reportDesign.renderLabelAsTextFields.displayName</displayName>
+			<description>admin.reportDesign.renderLabelAsTextFields.description</description>
 		</boolean>
 		<boolean name="defaultBorder">
-			<displayName>Default Border</displayName>
+			<displayName>admin.reportDesign.defaultBorder.displayName</displayName>
 		</boolean>
 		<boolean name="defaultBorderTop">
-			<displayName>Default Border Top</displayName>
+			<displayName>admin.reportDesign.defaultBorderTop.displayName</displayName>
 		</boolean>
 		<boolean name="defaultBorderLeft">
-			<displayName>Default Border Left</displayName>
+			<displayName>admin.reportDesign.defaultBorderLeft.displayName</displayName>
 		</boolean>
 		<boolean name="defaultBorderBottom">
-			<displayName>Default Border Bottom</displayName>
+			<displayName>admin.reportDesign.defaultBorderBottom.displayName</displayName>
 		</boolean>
 		<boolean name="defaultBorderRight">
-			<displayName>Default Border Right</displayName>
+			<displayName>admin.reportDesign.defaultBorderRight.displayName</displayName>
 		</boolean>
 		<integer name="defaultElementHeight" required="true">
-			<displayName>Default Element Height</displayName>
+			<displayName>admin.reportDesign.defaultElementHeight.displayName</displayName>
 		</integer>
 		<boolean name="includePageNumbers">
-			<displayName>Include Page Numbers</displayName>
+			<displayName>admin.reportDesign.includePageNumbers.displayName</displayName>
 		</boolean>
 		<integer name="defaultCellTopPadding">
-			<displayName>Cell Top Padding</displayName>
+			<displayName>admin.reportDesign.defaultCellTopPadding.displayName</displayName>
 		</integer>
 		<integer name="defaultCellLeftPadding">
-			<displayName>Cell Left Padding</displayName>
+			<displayName>admin.reportDesign.defaultCellLeftPadding.displayName</displayName>
 		</integer>
 		<integer name="defaultCellBottomPadding">
-			<displayName>Cell Bottom Padding</displayName>
+			<displayName>admin.reportDesign.defaultCellBottomPadding.displayName</displayName>
 		</integer>
 		<integer name="defaultCellRightPadding">
-			<displayName>Cell Right Padding</displayName>
+			<displayName>admin.reportDesign.defaultCellRightPadding.displayName</displayName>
 		</integer>
 		<boolean name="dynamicFlow">
-			<displayName>Dynamic Flow</displayName>
-			<description><![CDATA[
-			<p><b>Dynamic Flow</b></p>
-			<p>Allow (as far as possible) page sections, bands and fields to flow as much as required 
-			to show all data.</p>
-			]]></description>
+			<displayName>admin.reportDesign.dynamicFlow.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.dynamicFlow.description]]></description>
 		</boolean>
 		<text name="bandSplitType" >
-			<displayName>Split Type</displayName>
+			<displayName>admin.reportDesign.bandSplitType.displayName</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
 		<boolean name="boldLabels">
-			<displayName>Bold Labels</displayName>
-			<description>Bold not working? Check that you've included a font extension jar for your font in the classpath</description>
+			<displayName>admin.reportDesign.boldLabels.displayName</displayName>
+			<description>admin.reportDesign.boldLabels.description</description>
 		</boolean>
 		<text name="checkBoxFontName">
-			<displayName>Checkbox FontName</displayName>
-			<description>This is the font for checkboxes - ensure the font will be on your classpath</description>
+			<displayName>admin.reportDesign.checkBoxFontName.displayName</displayName>
+			<description>admin.reportDesign.checkBoxFontName.description</description>
 			<length>200</length>
 		</text>
 		<text name="checkBoxDisplayExpression">
-			<displayName>Checkbox Display Expression</displayName>
-			<description>This is the expression to use to represent checkboxes</description>
+			<displayName>admin.reportDesign.checkBoxDisplayExpression.displayName</displayName>
+			<description>admin.reportDesign.checkBoxDisplayExpression.description</description>
 			<length>500</length>
 		</text>
 		<decimal5 name="pixelToTwip">
-			<displayName>Pixel to TWIP</displayName>
-			<description>TWIP conversion ratio for pixel-specified item sizing in views.</description>
+			<displayName>admin.reportDesign.pixelToTwip.displayName</displayName>
+			<description>admin.reportDesign.pixelToTwip.description</description>
 		</decimal5>
 		
 		<!-- section settings -->
 		<boolean name="sectionBorderTop">
-			<displayName>Border Top</displayName>
+			<displayName>admin.reportDesign.sectionBorderTop.displayName</displayName>
 		</boolean>
 		<boolean name="sectionBorderLeft">
-			<displayName>Border Left</displayName>
+			<displayName>admin.reportDesign.sectionBorderLeft.displayName</displayName>
 		</boolean>
 		<boolean name="sectionBorderRight">
-			<displayName>Border Right</displayName>
+			<displayName>admin.reportDesign.sectionBorderRight.displayName</displayName>
 		</boolean>
 		<boolean name="sectionBorderBottom">
-			<displayName>Border Bottom</displayName>
+			<displayName>admin.reportDesign.sectionBorderBottom.displayName</displayName>
 		</boolean>
 		<boolean name="sectionTitleBorderTop">
-			<displayName>Title Border Top</displayName>
+			<displayName>admin.reportDesign.sectionTitleBorderTop.displayName</displayName>
 		</boolean>
 		<boolean name="sectionTitleBorderLeft">
-			<displayName>Title Border Left</displayName>
+			<displayName>admin.reportDesign.sectionTitleBorderLeft.displayName</displayName>
 		</boolean>
 		<boolean name="sectionTitleBorderRight">
-			<displayName>Title Border Right</displayName>
+			<displayName>admin.reportDesign.sectionTitleBorderRight.displayName</displayName>
 		</boolean>
 		<boolean name="sectionTitleBorderBottom">
-			<displayName>Title Border Bottom</displayName>
+			<displayName>admin.reportDesign.sectionTitleBorderBottom.displayName</displayName>
 		</boolean>
 		<colour name="sectionTitleForeground">
-			<displayName>Title Foreground</displayName>
+			<displayName>admin.reportDesign.sectionTitleForeground.displayName</displayName>
 		</colour>
 		<colour name="sectionTitleBackground">
-			<displayName>Title Background</displayName>
+			<displayName>admin.reportDesign.sectionTitleBackground.displayName</displayName>
 		</colour>
 				
 		<memo name="jrxml" persistent="false" trackChanges="false" audited="false">
-			<displayName>Jrxml File Definition</displayName>
+			<displayName>admin.reportDesign.jrxml.displayName</displayName>
 		</memo>
 		<text name="field">
-			<displayName>Field</displayName>
-			<description>The field on which this subreport is based (if this is a subreport).</description>
+			<displayName>admin.reportDesign.field.displayName</displayName>
+			<description>admin.reportDesign.field.description</description>
 			<length>200</length>
 		</text>
 		<enum name="collectionType">
-			<displayName>Collection Type</displayName>
+			<displayName>admin.reportDesign.collectionType.displayName</displayName>
 			<values>
 				<value code="child"/>
 				<value code="aggregation"/>
@@ -240,10 +230,10 @@
 			<length>500</length>
 		</text>
 		<boolean name="verticalise">
-			<displayName>Transform horizontal containers to vertical</displayName>
+			<displayName>admin.reportDesign.verticalise.displayName</displayName>
 		</boolean>
 		<text name="labelAlignmentOverride" >
-			<displayName>Label Alignment</displayName>
+			<displayName>admin.reportDesign.labelAlignmentOverride.displayName</displayName>
 			<domain>constant</domain>
 			<length>100</length>
 		</text>
