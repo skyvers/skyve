@@ -95,7 +95,7 @@
 				<executions>
 					<execution>
 						<id>unpack</id>
-						<phase>process-resources</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>unpack</goal>
 						</goals>
