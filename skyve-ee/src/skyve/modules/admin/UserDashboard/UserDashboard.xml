@@ -9,7 +9,7 @@
 	<bizKey expression="User Dashboard"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >
-			<displayName>Current User</displayName>
+			<displayName>admin.userDashboard.association.user.displayName</displayName>
 			<documentName>User</documentName>
 		</association>
 		<collection name="favourites" type="composition">
