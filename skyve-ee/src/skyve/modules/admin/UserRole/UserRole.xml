@@ -10,7 +10,7 @@
 	<bizKey expression="{roleName}"/>
 	<attributes>
 		<text name="roleName" required="true">
-			<displayName>Role Name</displayName>
+			<displayName>admin.userRole.roleName.displayName</displayName>
 			<domain>variant</domain>
 			<length>60</length>
 		</text>

@@ -34,7 +34,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 	public static final String roleNamePropertyName = "roleName";
 
 	/**
-	 * Role Name
+	 * admin.userRole.roleName.displayName
 	 **/
 	private String roleName;
 	private UserExtension parent;
