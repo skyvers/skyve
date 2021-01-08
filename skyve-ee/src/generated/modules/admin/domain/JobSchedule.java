@@ -327,595 +327,595 @@ public class JobSchedule extends AbstractPersistentBean {
 	public static final String disabledPropertyName = "disabled";
 
 	/**
-	 * Job To Run
+	 * admin.jobSchedule.jobName.displayName
 	 **/
 	private String jobName;
 	/**
-	 * CRON Expression
+	 * admin.jobSchedule.cronExppression.displayName
 	 **/
 	private String cronExpression;
 	/**
-	 * All Minutes
+	 * admin.jobSchedule.allMinutes.displayName
 	 **/
 	private String allMinutes;
 	/**
-	 * 00
+	 * admin.jobSchedule.minute0.displayName
 	 **/
 	private Boolean minute0;
 	/**
-	 * 01
+	 * admin.jobSchedule.minute1.displayName
 	 **/
 	private Boolean minute1;
 	/**
-	 * 02
+	 * admin.jobSchedule.minute2.displayName
 	 **/
 	private Boolean minute2;
 	/**
-	 * 03
+	 * admin.jobSchedule.minute3.displayName
 	 **/
 	private Boolean minute3;
 	/**
-	 * 04
+	 * admin.jobSchedule.minute4.displayName
 	 **/
 	private Boolean minute4;
 	/**
-	 * 05
+	 * admin.jobSchedule.minute5.displayName
 	 **/
 	private Boolean minute5;
 	/**
-	 * 06
+	 * admin.jobSchedule.minute6.displayName
 	 **/
 	private Boolean minute6;
 	/**
-	 * 07
+	 * admin.jobSchedule.minute7.displayName
 	 **/
 	private Boolean minute7;
 	/**
-	 * 08
+	 * admin.jobSchedule.minute8.displayName
 	 **/
 	private Boolean minute8;
 	/**
-	 * 09
+	 * admin.jobSchedule.minute9.displayName
 	 **/
 	private Boolean minute9;
 	/**
-	 * 10
+	 * admin.jobSchedule.minute10.displayName
 	 **/
 	private Boolean minute10;
 	/**
-	 * 11
+	 * admin.jobSchedule.minute11.displayName
 	 **/
 	private Boolean minute11;
 	/**
-	 * 12
+	 * admin.jobSchedule.minute12.displayName
 	 **/
 	private Boolean minute12;
 	/**
-	 * 13
+	 * admin.jobSchedule.minute13.displayName
 	 **/
 	private Boolean minute13;
 	/**
-	 * 14
+	 * admin.jobSchedule.minute14.displayName
 	 **/
 	private Boolean minute14;
 	/**
-	 * 15
+	 * admin.jobSchedule.minute15.displayName
 	 **/
 	private Boolean minute15;
 	/**
-	 * 16
+	 * admin.jobSchedule.minute16.displayName
 	 **/
 	private Boolean minute16;
 	/**
-	 * 17
+	 * admin.jobSchedule.minute17.displayName
 	 **/
 	private Boolean minute17;
 	/**
-	 * 18
+	 * admin.jobSchedule.minute18.displayName
 	 **/
 	private Boolean minute18;
 	/**
-	 * 19
+	 * admin.jobSchedule.minute19.displayName
 	 **/
 	private Boolean minute19;
 	/**
-	 * 20
+	 * admin.jobSchedule.minute20.displayName
 	 **/
 	private Boolean minute20;
 	/**
-	 * 21
+	 * admin.jobSchedule.minute21.displayName
 	 **/
 	private Boolean minute21;
 	/**
-	 * 22
+	 * admin.jobSchedule.minute22.displayName
 	 **/
 	private Boolean minute22;
 	/**
-	 * 23
+	 * admin.jobSchedule.minute23.displayName
 	 **/
 	private Boolean minute23;
 	/**
-	 * 24
+	 * admin.jobSchedule.minute24.displayName
 	 **/
 	private Boolean minute24;
 	/**
-	 * 25
+	 * admin.jobSchedule.minute25.displayName
 	 **/
 	private Boolean minute25;
 	/**
-	 * 26
+	 * admin.jobSchedule.minute26.displayName
 	 **/
 	private Boolean minute26;
 	/**
-	 * 27
+	 * admin.jobSchedule.minute27.displayName
 	 **/
 	private Boolean minute27;
 	/**
-	 * 28
+	 * admin.jobSchedule.minute28.displayName
 	 **/
 	private Boolean minute28;
 	/**
-	 * 29
+	 * admin.jobSchedule.minute29.displayName
 	 **/
 	private Boolean minute29;
 	/**
-	 * 30
+	 * admin.jobSchedule.minute30.displayName
 	 **/
 	private Boolean minute30;
 	/**
-	 * 31
+	 * admin.jobSchedule.minute31.displayName
 	 **/
 	private Boolean minute31;
 	/**
-	 * 32
+	 * admin.jobSchedule.minute32.displayName
 	 **/
 	private Boolean minute32;
 	/**
-	 * 33
+	 * admin.jobSchedule.minute33.displayName
 	 **/
 	private Boolean minute33;
 	/**
-	 * 34
+	 * admin.jobSchedule.minute34.displayName
 	 **/
 	private Boolean minute34;
 	/**
-	 * 35
+	 * admin.jobSchedule.minute35.displayName
 	 **/
 	private Boolean minute35;
 	/**
-	 * 36
+	 * admin.jobSchedule.minute36.displayName
 	 **/
 	private Boolean minute36;
 	/**
-	 * 37
+	 * admin.jobSchedule.minute37.displayName
 	 **/
 	private Boolean minute37;
 	/**
-	 * 38
+	 * admin.jobSchedule.minute38.displayName
 	 **/
 	private Boolean minute38;
 	/**
-	 * 39
+	 * admin.jobSchedule.minute39.displayName
 	 **/
 	private Boolean minute39;
 	/**
-	 * 40
+	 * admin.jobSchedule.minute40.displayName
 	 **/
 	private Boolean minute40;
 	/**
-	 * 41
+	 * admin.jobSchedule.minute41.displayName
 	 **/
 	private Boolean minute41;
 	/**
-	 * 42
+	 * admin.jobSchedule.minute42.displayName
 	 **/
 	private Boolean minute42;
 	/**
-	 * 43
+	 * admin.jobSchedule.minute43.displayName
 	 **/
 	private Boolean minute43;
 	/**
-	 * 44
+	 * admin.jobSchedule.minute44.displayName
 	 **/
 	private Boolean minute44;
 	/**
-	 * 45
+	 * admin.jobSchedule.minute45.displayName
 	 **/
 	private Boolean minute45;
 	/**
-	 * 46
+	 * admin.jobSchedule.minute46.displayName
 	 **/
 	private Boolean minute46;
 	/**
-	 * 47
+	 * admin.jobSchedule.minute47.displayName
 	 **/
 	private Boolean minute47;
 	/**
-	 * 48
+	 * admin.jobSchedule.minute48.displayName
 	 **/
 	private Boolean minute48;
 	/**
-	 * 49
+	 * admin.jobSchedule.minute49.displayName
 	 **/
 	private Boolean minute49;
 	/**
-	 * 50
+	 * admin.jobSchedule.minute50.displayName
 	 **/
 	private Boolean minute50;
 	/**
-	 * 51
+	 * admin.jobSchedule.minute51.displayName
 	 **/
 	private Boolean minute51;
 	/**
-	 * 52
+	 * admin.jobSchedule.minute52.displayName
 	 **/
 	private Boolean minute52;
 	/**
-	 * 53
+	 * admin.jobSchedule.minute53.displayName
 	 **/
 	private Boolean minute53;
 	/**
-	 * 54
+	 * admin.jobSchedule.minute54.displayName
 	 **/
 	private Boolean minute54;
 	/**
-	 * 55
+	 * admin.jobSchedule.minute55.displayName
 	 **/
 	private Boolean minute55;
 	/**
-	 * 56
+	 * admin.jobSchedule.minute56.displayName
 	 **/
 	private Boolean minute56;
 	/**
-	 * 57
+	 * admin.jobSchedule.minute57.displayName
 	 **/
 	private Boolean minute57;
 	/**
-	 * 58
+	 * admin.jobSchedule.minute58.displayName
 	 **/
 	private Boolean minute58;
 	/**
-	 * 59
+	 * admin.jobSchedule.minute59.displayName
 	 **/
 	private Boolean minute59;
 	/**
-	 * All Hours
+	 * admin.jobSchedule.allHours.displayName
 	 **/
 	private String allHours;
 	/**
-	 * 00
+	 * admin.jobSchedule.hour0.displayName
 	 **/
 	private Boolean hour0;
 	/**
-	 * 01
+	 * admin.jobSchedule.hour1.displayName
 	 **/
 	private Boolean hour1;
 	/**
-	 * 02
+	 * admin.jobSchedule.hour2.displayName
 	 **/
 	private Boolean hour2;
 	/**
-	 * 03
+	 * admin.jobSchedule.hour3.displayName
 	 **/
 	private Boolean hour3;
 	/**
-	 * 04
+	 * admin.jobSchedule.hour4.displayName
 	 **/
 	private Boolean hour4;
 	/**
-	 * 05
+	 * admin.jobSchedule.hour5.displayName
 	 **/
 	private Boolean hour5;
 	/**
-	 * 06
+	 * admin.jobSchedule.hour6.displayName
 	 **/
 	private Boolean hour6;
 	/**
-	 * 07
+	 * admin.jobSchedule.hour7.displayName
 	 **/
 	private Boolean hour7;
 	/**
-	 * 08
+	 * admin.jobSchedule.hour8.displayName
 	 **/
 	private Boolean hour8;
 	/**
-	 * 09
+	 * admin.jobSchedule.hour9.displayName
 	 **/
 	private Boolean hour9;
 	/**
-	 * 10
+	 * admin.jobSchedule.hour10.displayName
 	 **/
 	private Boolean hour10;
 	/**
-	 * 11
+	 * admin.jobSchedule.hour11.displayName
 	 **/
 	private Boolean hour11;
 	/**
-	 * 12
+	 * admin.jobSchedule.hour12.displayName
 	 **/
 	private Boolean hour12;
 	/**
-	 * 13
+	 * admin.jobSchedule.hour13.displayName
 	 **/
 	private Boolean hour13;
 	/**
-	 * 14
+	 * admin.jobSchedule.hour14.displayName
 	 **/
 	private Boolean hour14;
 	/**
-	 * 15
+	 * admin.jobSchedule.hour15.displayName
 	 **/
 	private Boolean hour15;
 	/**
-	 * 16
+	 * admin.jobSchedule.hour16.displayName
 	 **/
 	private Boolean hour16;
 	/**
-	 * 17
+	 * admin.jobSchedule.hour17.displayName
 	 **/
 	private Boolean hour17;
 	/**
-	 * 18
+	 * admin.jobSchedule.hour18.displayName
 	 **/
 	private Boolean hour18;
 	/**
-	 * 19
+	 * admin.jobSchedule.hour19.displayName
 	 **/
 	private Boolean hour19;
 	/**
-	 * 20
+	 * admin.jobSchedule.hour20.displayName
 	 **/
 	private Boolean hour20;
 	/**
-	 * 21
+	 * admin.jobSchedule.hour21.displayName
 	 **/
 	private Boolean hour21;
 	/**
-	 * 22
+	 * admin.jobSchedule.hour22.displayName
 	 **/
 	private Boolean hour22;
 	/**
-	 * 23
+	 * admin.jobSchedule.hour23.displayName
 	 **/
 	private Boolean hour23;
 	/**
-	 * All Days
+	 * admin.jobSchedule.allDays.displayName
 	 **/
 	private String allDays;
 	/**
-	 * 01
+	 * admin.jobSchedule.day1.displayName
 	 **/
 	private Boolean day1;
 	/**
-	 * 02
+	 * admin.jobSchedule.day2.displayName
 	 **/
 	private Boolean day2;
 	/**
-	 * 03
+	 * admin.jobSchedule.day3.displayName
 	 **/
 	private Boolean day3;
 	/**
-	 * 04
+	 * admin.jobSchedule.day4.displayName
 	 **/
 	private Boolean day4;
 	/**
-	 * 05
+	 * admin.jobSchedule.day5.displayName
 	 **/
 	private Boolean day5;
 	/**
-	 * 06
+	 * admin.jobSchedule.day6.displayName
 	 **/
 	private Boolean day6;
 	/**
-	 * 07
+	 * admin.jobSchedule.day7.displayName
 	 **/
 	private Boolean day7;
 	/**
-	 * 08
+	 * admin.jobSchedule.day8.displayName
 	 **/
 	private Boolean day8;
 	/**
-	 * 09
+	 * admin.jobSchedule.day9.displayName
 	 **/
 	private Boolean day9;
 	/**
-	 * 10
+	 * admin.jobSchedule.day10.displayName
 	 **/
 	private Boolean day10;
 	/**
-	 * 11
+	 * admin.jobSchedule.day11.displayName
 	 **/
 	private Boolean day11;
 	/**
-	 * 12
+	 * admin.jobSchedule.day12.displayName
 	 **/
 	private Boolean day12;
 	/**
-	 * 13
+	 * admin.jobSchedule.day13.displayName
 	 **/
 	private Boolean day13;
 	/**
-	 * 14
+	 * admin.jobSchedule.day14.displayName
 	 **/
 	private Boolean day14;
 	/**
-	 * 15
+	 * admin.jobSchedule.day15.displayName
 	 **/
 	private Boolean day15;
 	/**
-	 * 16
+	 * admin.jobSchedule.day16.displayName
 	 **/
 	private Boolean day16;
 	/**
-	 * 17
+	 * admin.jobSchedule.day17.displayName
 	 **/
 	private Boolean day17;
 	/**
-	 * 18
+	 * admin.jobSchedule.day18.displayName
 	 **/
 	private Boolean day18;
 	/**
-	 * 19
+	 * admin.jobSchedule.day19.displayName
 	 **/
 	private Boolean day19;
 	/**
-	 * 20
+	 * admin.jobSchedule.day20.displayName
 	 **/
 	private Boolean day20;
 	/**
-	 * 21
+	 * admin.jobSchedule.day21.displayName
 	 **/
 	private Boolean day21;
 	/**
-	 * 22
+	 * admin.jobSchedule.day22.displayName
 	 **/
 	private Boolean day22;
 	/**
-	 * 23
+	 * admin.jobSchedule.day23.displayName
 	 **/
 	private Boolean day23;
 	/**
-	 * 24
+	 * admin.jobSchedule.day24.displayName
 	 **/
 	private Boolean day24;
 	/**
-	 * 25
+	 * admin.jobSchedule.day25.displayName
 	 **/
 	private Boolean day25;
 	/**
-	 * 26
+	 * admin.jobSchedule.day26.displayName
 	 **/
 	private Boolean day26;
 	/**
-	 * 27
+	 * admin.jobSchedule.day27.displayName
 	 **/
 	private Boolean day27;
 	/**
-	 * 28
+	 * admin.jobSchedule.day28.displayName
 	 **/
 	private Boolean day28;
 	/**
-	 * 29
+	 * admin.jobSchedule.day29.displayName
 	 **/
 	private Boolean day29;
 	/**
-	 * 30
+	 * admin.jobSchedule.day30.displayName
 	 **/
 	private Boolean day30;
 	/**
-	 * 31
+	 * admin.jobSchedule.day31.displayName
 	 **/
 	private Boolean day31;
 	/**
-	 * All Months
+	 * admin.jobSchedule.allMonths.displayName
 	 **/
 	private String allMonths;
 	/**
-	 * Jan
+	 * admin.jobSchedule.month1.displayName
 	 **/
 	private Boolean month1;
 	/**
-	 * Feb
+	 * admin.jobSchedule.month2.displayName
 	 **/
 	private Boolean month2;
 	/**
-	 * Mar
+	 * admin.jobSchedule.month3.displayName
 	 **/
 	private Boolean month3;
 	/**
-	 * Apr
+	 * admin.jobSchedule.month4.displayName
 	 **/
 	private Boolean month4;
 	/**
-	 * May
+	 * admin.jobSchedule.month5.displayName
 	 **/
 	private Boolean month5;
 	/**
-	 * Jun
+	 * admin.jobSchedule.month6.displayName
 	 **/
 	private Boolean month6;
 	/**
-	 * Jul
+	 * admin.jobSchedule.month7.displayName
 	 **/
 	private Boolean month7;
 	/**
-	 * Aug
+	 * admin.jobSchedule.month8.displayName
 	 **/
 	private Boolean month8;
 	/**
-	 * Sep
+	 * admin.jobSchedule.month9.displayName
 	 **/
 	private Boolean month9;
 	/**
-	 * Oct
+	 * admin.jobSchedule.month10.displayName
 	 **/
 	private Boolean month10;
 	/**
-	 * Nov
+	 * admin.jobSchedule.month11.displayName
 	 **/
 	private Boolean month11;
 	/**
-	 * Dec
+	 * admin.jobSchedule.month12.displayName
 	 **/
 	private Boolean month12;
 	/**
-	 * All Months
+	 * admin.jobSchedule.allWeekdays.displayName
 	 **/
 	private String allWeekdays;
 	/**
-	 * Sun
+	 * admin.jobSchedule.weekday1.displayName
 	 **/
 	private Boolean weekday1;
 	/**
-	 * Mon
+	 * admin.jobSchedule.weekday2.displayName
 	 **/
 	private Boolean weekday2;
 	/**
-	 * Tue
+	 * admin.jobSchedule.weekday3.displayName
 	 **/
 	private Boolean weekday3;
 	/**
-	 * Wed
+	 * admin.jobSchedule.weekday4.displayName
 	 **/
 	private Boolean weekday4;
 	/**
-	 * Thu
+	 * admin.jobSchedule.weekday5.displayName
 	 **/
 	private Boolean weekday5;
 	/**
-	 * Fri
+	 * admin.jobSchedule.weekday6.displayName
 	 **/
 	private Boolean weekday6;
 	/**
-	 * Sat
+	 * admin.jobSchedule.weekday7.displayName
 	 **/
 	private Boolean weekday7;
 	/**
-	 * Start Time
+	 * admin.jobSchedule.startTime.displayName
 	 * <br/>
-	 * When to start triggering the job.  May be left blank
+	 * admin.jobSchedule.startTime.description
 	 **/
 	private DateTime startTime;
 	/**
-	 * End Time
+	 * admin.jobSchedule.endTime.displayName
 	 * <br/>
-	 * When to finish triggering the job.  May be left blank
+	 * admin.jobSchedule.endTime.description
 	 **/
 	private DateTime endTime;
 	/**
-	 * Run As
+	 * admin.jobSchedule.association.runAs.displayName
 	 * <br/>
-	 * The user to run the job
+	 * admin.jobSchedule.association.runAs.description
 	 **/
 	private UserProxyExtension runAs = null;
 	/**
-	 * Job Scheduled Immediately
+	 * admin.jobSchedule.jobScheduledImmediately.displayName
 	 * <br/>
-	 * Whether or not the job was scheduled immediately
+	 * admin.jobSchedule.jobScheduledImmediately.description
 	 **/
 	private Boolean jobScheduledImmediately = new Boolean(false);
 	/**
-	 * Disabled
+	 * admin.jobSchedule.disabled.displayName
 	 * <br/>
 	 * Whether or not this schedule is disabled.
 	 **/

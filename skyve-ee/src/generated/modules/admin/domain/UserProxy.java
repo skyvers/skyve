@@ -45,27 +45,27 @@ public abstract class UserProxy extends AbstractPersistentBean {
 	public static final String inactivePropertyName = "inactive";
 
 	/**
-	 * User Name
+	 * admin.userProxy.userName.displayName
 	 * <br/>
 	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
 	/**
-	 * Created
+	 * admin.userProxy.createdDateTime.displayName
 	 * <br/>
-	 * The time and date when this user account was created.
+	 * admin.userProxy.createdDateTime.description
 	 **/
 	private DateTime createdDateTime;
 	/**
-	 * Contact
+	 * admin.userProxy.association.contact.displayName
 	 * <br/>
-	 * The contact details for the user.
+	 * admin.userProxy.association.contact.description
 	 **/
 	private Contact contact = null;
 	/**
-	 * Inactive
+	 * admin.userProxy.inactive.displayName
 	 * <br/>
-	 * Flag to indicate that this account has been marked as inactive and no longer in use.
+	 * admin.userProxy.inactive.description
 	 **/
 	private Boolean inactive;
 

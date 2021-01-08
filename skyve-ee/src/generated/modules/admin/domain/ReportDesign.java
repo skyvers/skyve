@@ -158,7 +158,7 @@ public class ReportDesign extends AbstractTransientBean {
 	public static final String labelAlignmentOverridePropertyName = "labelAlignmentOverride";
 
 	/**
-	 * Mode
+	 * admin.reportDesign.mode.displayName
 	 **/
 	@XmlEnum
 	public static enum Mode implements Enumeration {
@@ -235,7 +235,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * Definition Source
+	 * admin.reportDesign.definitionSource.displayName
 	 **/
 	@XmlEnum
 	public static enum DefinitionSource implements Enumeration {
@@ -314,7 +314,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * Type
+	 * admin.reportDesign.reportType.displayName
 	 **/
 	@XmlEnum
 	public static enum ReportType implements Enumeration {
@@ -391,7 +391,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * Orientation
+	 * admin.reportDesign.orientation.displayName
 	 **/
 	@XmlEnum
 	public static enum Orientation implements Enumeration {
@@ -468,7 +468,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * Collection Type
+	 * admin.reportDesign.collectionType.displayName
 	 **/
 	@XmlEnum
 	public static enum CollectionType implements Enumeration {
@@ -546,251 +546,247 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * Report Name
+	 * admin.reportDesign.name.displayName
 	 **/
 	private String name;
 	/**
-	 * Mode
+	 * admin.reportDesign.mode.displayName
 	 **/
 	private Mode mode;
 	/**
-	 * Definition Source
+	 * admin.reportDesign.definitionSource.displayName
 	 **/
 	private DefinitionSource definitionSource;
 	/**
-	 * Type
+	 * admin.reportDesign.reportType.displayName
 	 **/
 	private ReportType reportType;
 	/**
-	 * Module
+	 * admin.reportDesign.moduleName.displayName
 	 * <br/>
-	 * Report Bean Module.
+	 * admin.reportDesign.moduleName.description
 	 **/
 	private String moduleName;
 	/**
-	 * Document
+	 * admin.reportDesign.documentName.displayName
 	 * <br/>
-	 * Report Bean Document.
+	 * admin.reportDesign.documentName.description
 	 **/
 	private String documentName;
 	/**
-	 * Query
+	 * admin.reportDesign.queryName.displayName
 	 * <br/>
-	 * Report Query.
+	 * admin.reportDesign.queryName.description
 	 **/
 	private String queryName;
 	/**
-	 * Menu Item
+	 * admin.reportDesign.menuItem.displayName
 	 * <br/>
-	 * Menu Item.
+	 * admin.reportDesign.menuItem.displayName
 	 **/
 	private String menuItem;
 	/**
-	 * Output Path
+	 * admin.reportDesign.repositoryPath.displayName
 	 * <br/>
-	 * <p>The path to the place where you want jrxml files created.</p>
-			<p>Normally this will be the path to the folder where you modules are defined - e.g. C:\workspace\projectName\src\skyve\</p>
+	 * admin.reportDesign.repositoryPath.description
 	 **/
 	private String repositoryPath;
 	/**
-	 * Save to Document Package
+	 * admin.reportDesign.saveToDocumentPackage.displayName
 	 * <br/>
-	 * <p>Use this if you want report files to be created in a directory structure matching the metadata repository structure.</p>
-			<p>This is useful if you want to put the reports into place ready to run.</p>
+	 * admin.reportDesign.saveToDocumentPackage.description
 	 **/
 	private Boolean saveToDocumentPackage;
 	/**
-	 * Orientation
+	 * admin.reportDesign.orientation.displayName
 	 **/
 	private Orientation orientation;
 	/**
-	 * Width
+	 * admin.reportDesign.width.displayName
 	 **/
 	private Integer width;
 	/**
-	 * Height
+	 * admin.reportDesign.height.displayName
 	 **/
 	private Integer height;
 	/**
-	 * Left Margin
+	 * admin.reportDesign.leftMargin.displayName
 	 **/
 	private Integer leftMargin;
 	/**
-	 * Right Margin
+	 * admin.reportDesign.rightMargin.displayName
 	 **/
 	private Integer rightMargin;
 	/**
-	 * Top Margin
+	 * admin.reportDesign.topMargin.displayName
 	 **/
 	private Integer topMargin;
 	/**
-	 * Bottom Margin
+	 * admin.reportDesign.bottomMargin.displayName
 	 **/
 	private Integer bottomMargin;
 	/**
-	 * Column Width
+	 * admin.reportDesign.columnWidth.displayName
 	 **/
 	private Integer columnWidth;
 	/**
-	 * Font Name
+	 * admin.reportDesign.defaultFontName.displayName
 	 * <br/>
-	 * Font not working? Check that you've included a font extension jar for your font in the classpath
+	 * admin.reportDesign.defaultFontName.description
 	 **/
 	private String defaultFontName;
 	/**
-	 * Font Size (Title)
+	 * admin.reportDesign.titleFontSize.displayName
 	 **/
 	private Integer titleFontSize;
 	/**
-	 * Font Size (Detail)
+	 * admin.reportDesign.defaultFontSize.displayName
 	 **/
 	private Integer defaultFontSize;
 	/**
-	 * Default Line Colour
+	 * admin.reportDesign.defaultLineColour.displayName
 	 **/
 	private String defaultLineColour;
 	/**
-	 * Default Line Pen Stroke thickness
+	 * admin.reportDesign.defaultLineWidth.displayName
 	 **/
 	private Decimal2 defaultLineWidth;
 	/**
-	 * Render Labels as TextFields
+	 * admin.reportDesign.renderLabelAsTextFields.displayName
 	 * <br/>
-	 * This option will allow labels to flow and stretch like text fields
+	 * admin.reportDesign.renderLabelAsTextFields.description
 	 **/
 	private Boolean renderLabelAsTextFields;
 	/**
-	 * Default Border
+	 * admin.reportDesign.defaultBorder.displayName
 	 **/
 	private Boolean defaultBorder;
 	/**
-	 * Default Border Top
+	 * admin.reportDesign.defaultBorderTop.displayName
 	 **/
 	private Boolean defaultBorderTop;
 	/**
-	 * Default Border Left
+	 * admin.reportDesign.defaultBorderLeft.displayName
 	 **/
 	private Boolean defaultBorderLeft;
 	/**
-	 * Default Border Bottom
+	 * admin.reportDesign.defaultBorderBottom.displayName
 	 **/
 	private Boolean defaultBorderBottom;
 	/**
-	 * Default Border Right
+	 * admin.reportDesign.defaultBorderRight.displayName
 	 **/
 	private Boolean defaultBorderRight;
 	/**
-	 * Default Element Height
+	 * admin.reportDesign.defaultElementHeight.displayName
 	 **/
 	private Integer defaultElementHeight;
 	/**
-	 * Include Page Numbers
+	 * admin.reportDesign.includePageNumbers.displayName
 	 **/
 	private Boolean includePageNumbers;
 	/**
-	 * Cell Top Padding
+	 * admin.reportDesign.defaultCellTopPadding.displayName
 	 **/
 	private Integer defaultCellTopPadding;
 	/**
-	 * Cell Left Padding
+	 * admin.reportDesign.defaultCellLeftPadding.displayName
 	 **/
 	private Integer defaultCellLeftPadding;
 	/**
-	 * Cell Bottom Padding
+	 * admin.reportDesign.defaultCellBottomPadding.displayName
 	 **/
 	private Integer defaultCellBottomPadding;
 	/**
-	 * Cell Right Padding
+	 * admin.reportDesign.defaultCellRightPadding.displayName
 	 **/
 	private Integer defaultCellRightPadding;
 	/**
-	 * Dynamic Flow
+	 * admin.reportDesign.dynamicFlow.displayName
 	 * <br/>
-	 * <p><b>Dynamic Flow</b></p>
-			<p>Allow (as far as possible) page sections, bands and fields to flow as much as required 
-			to show all data.</p>
+	 * admin.reportDesign.dynamicFlow.description
 	 **/
 	private Boolean dynamicFlow;
 	/**
-	 * Split Type
+	 * admin.reportDesign.bandSplitType.displayName
 	 **/
 	private String bandSplitType;
 	/**
-	 * Bold Labels
+	 * admin.reportDesign.boldLabels.displayName
 	 * <br/>
-	 * Bold not working? Check that you've included a font extension jar for your font in the classpath
+	 * admin.reportDesign.boldLabels.description
 	 **/
 	private Boolean boldLabels;
 	/**
-	 * Checkbox FontName
+	 * admin.reportDesign.checkBoxFontName.displayName
 	 * <br/>
-	 * This is the font for checkboxes - ensure the font will be on your classpath
+	 * admin.reportDesign.checkBoxFontName.description
 	 **/
 	private String checkBoxFontName;
 	/**
-	 * Checkbox Display Expression
+	 * admin.reportDesign.checkBoxDisplayExpression.displayName
 	 * <br/>
-	 * This is the expression to use to represent checkboxes
+	 * admin.reportDesign.checkBoxDisplayExpression.description
 	 **/
 	private String checkBoxDisplayExpression;
 	/**
-	 * Pixel to TWIP
+	 * admin.reportDesign.pixelToTwip.displayName
 	 * <br/>
-	 * TWIP conversion ratio for pixel-specified item sizing in views.
+	 * admin.reportDesign.pixelToTwip.description
 	 **/
 	private Decimal5 pixelToTwip;
 	/**
-	 * Border Top
+	 * admin.reportDesign.sectionBorderTop.displayName
 	 **/
 	private Boolean sectionBorderTop;
 	/**
-	 * Border Left
+	 * admin.reportDesign.sectionBorderLeft.displayName
 	 **/
 	private Boolean sectionBorderLeft;
 	/**
-	 * Border Right
+	 * admin.reportDesign.sectionBorderRight.displayName
 	 **/
 	private Boolean sectionBorderRight;
 	/**
-	 * Border Bottom
+	 * admin.reportDesign.sectionBorderBottom.displayName
 	 **/
 	private Boolean sectionBorderBottom;
 	/**
-	 * Title Border Top
+	 * admin.reportDesign.sectionTitleBorderTop.displayName
 	 **/
 	private Boolean sectionTitleBorderTop;
 	/**
-	 * Title Border Left
+	 * admin.reportDesign.sectionTitleBorderLeft.displayName
 	 **/
 	private Boolean sectionTitleBorderLeft;
 	/**
-	 * Title Border Right
+	 * admin.reportDesign.sectionTitleBorderRight.displayName
 	 **/
 	private Boolean sectionTitleBorderRight;
 	/**
-	 * Title Border Bottom
+	 * admin.reportDesign.sectionTitleBorderBottom.displayName
 	 **/
 	private Boolean sectionTitleBorderBottom;
 	/**
-	 * Title Foreground
+	 * admin.reportDesign.sectionTitleForeground.displayName
 	 **/
 	private String sectionTitleForeground;
 	/**
-	 * Title Background
+	 * admin.reportDesign.sectionTitleBackground.displayName
 	 **/
 	private String sectionTitleBackground;
 	/**
-	 * Jrxml File Definition
+	 * admin.reportDesign.jrxml.displayName
 	 **/
 	private String jrxml;
 	/**
-	 * Field
+	 * admin.reportDesign.field.displayName
 	 * <br/>
-	 * The field on which this subreport is based (if this is a subreport).
+	 * admin.reportDesign.field.description
 	 **/
 	private String field;
 	/**
-	 * Collection Type
+	 * admin.reportDesign.collectionType.displayName
 	 **/
 	private CollectionType collectionType;
 	/**
@@ -798,11 +794,11 @@ public class ReportDesign extends AbstractTransientBean {
 	 **/
 	private String parentReportPersistentName;
 	/**
-	 * Transform horizontal containers to vertical
+	 * admin.reportDesign.verticalise.displayName
 	 **/
 	private Boolean verticalise;
 	/**
-	 * Label Alignment
+	 * admin.reportDesign.labelAlignmentOverride.displayName
 	 **/
 	private String labelAlignmentOverride;
 

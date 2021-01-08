@@ -56,17 +56,17 @@ public class Subscription extends AbstractPersistentBean {
 	public static final String preferredReceiverIdentifierPropertyName = "preferredReceiverIdentifier";
 
 	/**
-	 * Communication
+	 * admin.subscription.association.communication.displayName
 	 **/
 	private CommunicationExtension communication = null;
 	/**
-	 * Receiver
+	 * admin.subscription.receiverIdentifier.displayName
 	 * <br/>
-	 * This could be an email or sms number, or any other identifier for a delivery method
+	 * admin.subscription.receiverIdentifier.description
 	 **/
 	private String receiverIdentifier;
 	/**
-	 * Declined
+	 * admin.subscription.declined.displayName
 	 **/
 	private Boolean declined;
 	/**
@@ -77,9 +77,9 @@ public class Subscription extends AbstractPersistentBean {
 	@Deprecated
 	private FormatType formatType;
 	/**
-	 * Redirect to
+	 * admin.subscription.preferredReceiverIdentifier.displayName
 	 * <br/>
-	 * This could be an email or sms number, or any other identifier for a delivery method
+	 * admin.subscription.preferredReceiverIdentifier.description
 	 **/
 	private String preferredReceiverIdentifier;
 

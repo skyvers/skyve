@@ -46,11 +46,11 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	public static final String matchScorePropertyName = "matchScore";
 
 	/**
-	 * Contact
+	 * admin.userCandidateContact.assocation.contact.displayName
 	 **/
 	private Contact contact = null;
 	/**
-	 * Score
+	 * admin.userCandidateContact.matchScore.displayName
 	 **/
 	private Integer matchScore;
 	private UserExtension parent;

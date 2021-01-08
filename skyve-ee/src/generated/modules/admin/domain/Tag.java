@@ -96,7 +96,7 @@ public class Tag extends AbstractPersistentBean {
 	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
-	 * Operator
+	 * admin.tag.combinationsOperator.displayName
 	 **/
 	@XmlEnum
 	public static enum CombinationsOperator implements Enumeration {
@@ -174,7 +174,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Filter Operator
+	 * admin.tag.filterOperator.displayName
 	 **/
 	@XmlEnum
 	public static enum FilterOperator implements Enumeration {
@@ -252,7 +252,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Filter Action
+	 * admin.tag.filterAction.displayName
 	 **/
 	@XmlEnum
 	public static enum FilterAction implements Enumeration {
@@ -329,131 +329,129 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Name
+	 * admin.tag.name.displayName
 	 **/
 	private String name;
 	/**
-	 * Visible
+	 * admin.tag.visible.displayName
 	 **/
 	private Boolean visible;
 	/**
-	 * Operator
+	 * admin.tag.combinationsOperator.displayName
 	 **/
 	private CombinationsOperator combinationsOperator;
 	/**
-	 * Explanation
+	 * admin.tag.combinationExplanation.displayName
 	 **/
 	private String combinationExplanation;
 	/**
-	 * Total Tagged
+	 * admin.tag.totalTagged.displayName
 	 **/
 	private Long totalTagged;
 	/**
-	 * Copy to user
+	 * admin.tag.association.copyToUser.displayName
 	 **/
 	private UserProxyExtension copyToUser = null;
 	/**
-	 * Tag Name
+	 * admin.tag.copyToUserTagName.displayName
 	 **/
 	private String copyToUserTagName;
 	/**
-	 * Module
+	 * admin.tag.uploadModuleName.displayName
 	 * <br/>
-	 * The module to tag.
+	 * admin.tag.uploadModuleName.description
 	 **/
 	private String uploadModuleName;
 	/**
-	 * Document
+	 * admin.tag.uploadDocumentName.displayName
 	 * <br/>
-	 * The document to tag.
+	 * admin.tag.uploadDocumentName.displayName
 	 **/
 	private String uploadDocumentName;
 	/**
-	 * Attribute
+	 * admin.tag.attributeName.displayName
 	 * <br/>
-	 * The name of the attribute to tag.
+	 * admin.tag.attributeName.description
 	 **/
 	private String attributeName;
 	/**
-	 * Upload File has Column Headers
+	 * admin.tag.fileHasHeaders.displayName
 	 **/
 	private Boolean fileHasHeaders;
 	/**
-	 * Uploaded
+	 * admin.tag.uploaded.displayName
 	 **/
 	private Long uploaded;
 	/**
-	 * Match
+	 * admin.tag.uploadMatched.displayName
 	 **/
 	private Long uploadMatched;
 	/**
-	 * Tagged
+	 * admin.tag.uploadTagged.displayName
 	 **/
 	private Long uploadTagged;
 	/**
-	 * Filter Operator
+	 * admin.tag.filterOperator.displayName
 	 **/
 	private FilterOperator filterOperator;
 	/**
-	 * Filter Action
+	 * admin.tag.filterAction.displayName
 	 **/
 	private FilterAction filterAction;
 	/**
-	 * Module
+	 * admin.tag.actionModuleName.displayName
 	 * <br/>
-	 * The module for the tag Action.
+	 * admin.tag.actionModuleName.description
 	 **/
 	private String actionModuleName;
 	/**
-	 * Document
+	 * admin.tag.actionDocumentName.displayName
 	 * <br/>
-	 * The document for the tag Action.
+	 * admin.tag.actionDocumentName.description
 	 **/
 	private String actionDocumentName;
 	/**
-	 * Untag successful documents
+	 * admin.tag.unTagSuccessful.displayName
 	 **/
 	private Boolean unTagSuccessful;
 	/**
-	 * Notify when job is complete
+	 * admin.tag.notification.displayName
 	 **/
 	private Boolean notification;
 	/**
-	 * Column (first column is 1))
+	 * admin.tag.filterColumn.displayName
 	 **/
 	private Integer filterColumn;
 	/**
-	 * Other Tag
+	 * admin.tag.association.operandTag.displayName
 	 * <br/>
-	 * The other tag to use for the combination.
+	 * admin.tag.association.operandTag.description
 	 **/
 	private Tag operandTag = null;
 	/**
-	 * Tagged
+	 * admin.tag.operandTagCount.displayName
 	 **/
 	private Long operandTagCount;
 	/**
-	 * Condition
+	 * admin.tag.documentCondition.displayName
 	 * <br/>
-	 * The condition which must be satisfied for the tagged document, for the action to be executed.
+	 * admin.tag.documentCondition.description
 	 **/
 	private String documentCondition;
 	/**
-	 * Action
+	 * admin.tag.documentAction.displayName
 	 * <br/>
-	 * The action to be executed on the tagged document (provided the specified condition is satisfied for that document).
+	 * admin.tag.documentAction.description
 	 **/
 	private String documentAction;
 	/**
-	 * Request
+	 * admin.tag.documentActionResults.displayName
 	 **/
 	private String documentActionResults;
 	/**
-	 * Cache Evict
+	 * admin.tag.evictOption.displayName
 	 * <br/>
-	 * <p>Whether to evict each bean after processing.</p>
-				<p>Evicting beans will free memory for large data jobs, however there may be impacts
-				if the action (processing) selected affects items that other beans may reference.</p>
+	 * admin.tag.evictOption.description
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
 

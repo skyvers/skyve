@@ -39,7 +39,7 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	public static final String favouritesPropertyName = "favourites";
 
 	/**
-	 * Current User
+	 * admin.userDashboard.association.user.displayName
 	 **/
 	private UserExtension currentUser = null;
 	/**

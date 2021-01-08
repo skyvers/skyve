@@ -25,24 +25,24 @@
 	<bizKey expression="{communication.description} for {receiverIdentifier}" />
 	<attributes>
 		<association name="communication" type="aggregation" required="true">
-			<displayName>Communication</displayName>
+			<displayName>admin.subscription.association.communication.displayName</displayName>
 			<documentName>Communication</documentName>
 		</association>
 		<text name="receiverIdentifier" required="true">
-			<displayName>Receiver</displayName>
-			<description>This could be an email or sms number, or any other identifier for a delivery method</description>			
+			<displayName>admin.subscription.receiverIdentifier.displayName</displayName>
+			<description>admin.subscription.receiverIdentifier.description</description>			
 			<length>254</length>
 		</text>
 		<boolean name="declined">
-			<displayName>Declined</displayName>
+			<displayName>admin.subscription.declined.displayName</displayName>
 		</boolean>
 		<enum name="formatType" documentRef="Communication" attributeRef="formatType" deprecated="true">
 			<documentation>This feature has been deprecated</documentation>
 			<displayName>Format</displayName>
 		</enum>
 		<text name="preferredReceiverIdentifier">
-			<displayName>Redirect to</displayName>
-			<description>This could be an email or sms number, or any other identifier for a delivery method</description>			
+			<displayName>admin.subscription.preferredReceiverIdentifier.displayName</displayName>
+			<description>admin.subscription.preferredReceiverIdentifier.description</description>			
 			<length>254</length>
 		</text>
 	</attributes>

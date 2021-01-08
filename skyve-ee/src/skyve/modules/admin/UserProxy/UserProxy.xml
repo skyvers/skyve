@@ -23,22 +23,22 @@
 					Length is derived from the maximum email address length from RFC 5321
 				]]>
 			</documentation>
-			<displayName>User Name</displayName>
+			<displayName>admin.userProxy.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<dateTime name="createdDateTime">
-			<displayName>Created</displayName>
-			<description>The time and date when this user account was created.</description>
+			<displayName>admin.userProxy.createdDateTime.displayName</displayName>
+			<description>admin.userProxy.createdDateTime.description</description>
 		</dateTime>
 		<!-- If you change this association to be composed or optional, change it in admin.User document also -->
 		<association name="contact" type="aggregation" required="true">
-			<displayName>Contact</displayName>
-			<description>The contact details for the user.</description>
+			<displayName>admin.userProxy.association.contact.displayName</displayName>
+			<description>admin.userProxy.association.contact.description</description>
 			<documentName>Contact</documentName>
 		</association>
 		<boolean name="inactive">
-			<displayName>Inactive</displayName>
-			<description>Flag to indicate that this account has been marked as inactive and no longer in use.</description>
+			<displayName>admin.userProxy.inactive.displayName</displayName>
+			<description>admin.userProxy.inactive.description</description>
 		</boolean>
 	</attributes>
 </document>

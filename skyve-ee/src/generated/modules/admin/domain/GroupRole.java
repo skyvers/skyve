@@ -34,7 +34,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	public static final String roleNamePropertyName = "roleName";
 
 	/**
-	 * Role Name
+	 * admin.groupRole.roleName.displayName
 	 **/
 	private String roleName;
 	private GroupExtension parent;

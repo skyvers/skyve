@@ -45,17 +45,13 @@ public class UserList extends AbstractTransientBean {
 	 **/
 	private List<GroupExtension> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
 	/**
-	 * Invitation email addresses
+	 * admin.userList.userInvitationEmailList.displayName
 	 * <br/>
-	 * The list of emails for users to invite. 
-			<br/>
-			Users will be created with the email address as username with the assigned groups.
-			<br/>
-			Provide a list separated by either comma or semicolon.
+	 * admin.userList.userInvitationEmailList.description
 	 **/
 	private String userInvitiationEmailList;
 	/**
-	 * Bulk create with email
+	 * admin.userList.bulkCreateWithEmail.displayName
 	 **/
 	private Boolean bulkCreateWithEmail;
 
