@@ -21,11 +21,11 @@
 	<bizKey expression="Contact {contact.bizKey}"/>
 	<attributes>
 		<association name="contact" type="aggregation" persistent="false">
-			<displayName>Contact</displayName>
+			<displayName>admin.userCandidateContact.assocation.contact.displayName</displayName>
 			<documentName>Contact</documentName>
 		</association>
 		<integer name="matchScore" required="true">
-			<displayName>Score</displayName>
+			<displayName>admin.userCandidateContact.matchScore.displayName</displayName>
 			<converterName>SimplePercentage</converterName>
 		</integer>
 	</attributes>
