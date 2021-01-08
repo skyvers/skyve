@@ -26,17 +26,11 @@
 			</unique>
 		</collection>
 		<memo name="userInvitiationEmailList">
-			<displayName>Invitation email addresses</displayName>
-			<description><![CDATA[
-			The list of emails for users to invite. 
-			<br/>
-			Users will be created with the email address as username with the assigned groups.
-			<br/>
-			Provide a list separated by either comma or semicolon.
-			]]></description>
+			<displayName>admin.userList.userInvitationEmailList.displayName</displayName>
+			<description><![CDATA[admin.userList.userInvitationEmailList.description]]></description>
 		</memo>	
 		<boolean name="bulkCreateWithEmail" >
-			<displayName>Bulk create with email</displayName>
+			<displayName>admin.userList.bulkCreateWithEmail.displayName</displayName>
 		</boolean>
 	</attributes>
 	<conditions>
