@@ -158,7 +158,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	@SuppressWarnings("synthetic-access")
 	private void populateDataStructures() throws Exception {
 		// Populate Base Data Structure with Vanilla definitions
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -325,7 +324,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		derivations.put(document.getOwningModuleName() + '.' + document.getName(), document);
 	}
 
-	@SuppressWarnings("synthetic-access")
 	private void generateVanilla(final Module module) throws Exception {
 		final String moduleName = module.getName();
 
@@ -494,7 +492,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		return annotation;
 	}
 
-	@SuppressWarnings("synthetic-access")
 	private void generateOverridden(final Customer customer, final String modulesPath)
 	throws Exception {
 		// Make the orm.hbm.xml file
@@ -578,7 +575,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(Document overriddenDocument) {
 		final TreeMap<String, DomainClass> vanillaDocumentClasses = moduleDocumentVanillaClasses.get(overriddenDocument.getOwningModuleName());
 
-		@SuppressWarnings("synthetic-access")
 		TreeMap<String, AttributeType> documentProperties = vanillaDocumentClasses.get(overriddenDocument.getName()).attributes;
 		TreeMap<String, AttributeType> extraProperties = generateDocumentPropertyNames(overriddenDocument);
 		Iterator<String> i = extraProperties.keySet().iterator();
@@ -1408,7 +1404,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// and the enumeration is not defined in the enumeration target vanilla document
 				Enumeration target = enumeration.getTarget();
 				Document targetDocument = target.getOwningDocument();
-				@SuppressWarnings("synthetic-access")
 				boolean requiresExtension = forExt &&
 												(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
 				if (requiresExtension) {
@@ -1893,7 +1888,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String attributeName = attribute.getName();
 					Integer existingLength = propertyLengths.get(attributeName);
 					if ((existingLength == null) || (existingLength.intValue() < length)) {
-						propertyLengths.put(attributeName, new Integer(length));
+						propertyLengths.put(attributeName, Integer.valueOf(length));
 					}
 				}
 			}
@@ -2841,7 +2836,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\n}");
 	}
 
-	@SuppressWarnings("synthetic-access")
 	private void generateJava(Customer customer,
 								Module module,
 								Document document,
@@ -3887,20 +3881,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		final File[] generatedFiles = generatedDirectory.toFile().listFiles();
 		if (generatedFiles != null) {
 			for (File child : generatedFiles) {
-				if (child.isDirectory() && moduleNames.contains(child.getName())) {
-					final Path packagePath = generatedDirectory.resolve(child.getName()).resolve(repository.DOMAIN_NAME);
-					if (Files.exists(packagePath)) {
-						for (File domainFile : packagePath.toFile().listFiles()) {
-							domainFile.delete();
+				if (child.isDirectory()) {
+					String childName = child.getName();
+					if (moduleNames.contains(childName)) {
+						final Path packagePath = generatedDirectory.resolve(childName).resolve(repository.DOMAIN_NAME);
+						if (Files.exists(packagePath)) {
+							for (File domainFile : packagePath.toFile().listFiles()) {
+								domainFile.delete();
+							}
+						}
+						else {
+							Files.createDirectories(packagePath);
 						}
 					}
 					else {
-						Files.createDirectories(packagePath);
+						if (debug) System.out.println("Deleting unreferenced module source directory " + child.getPath());
+						deleteDirectory(child.toPath());
 					}
-				}
-				else {
-					if (debug) System.out.println("Deleting unreferenced module source directory " + child.getPath());
-					deleteDirectory(child.toPath());
 				}
 			}
 		}
