@@ -1,6 +1,10 @@
 package org.skyve.content;
 
-public interface ContentManager extends AutoCloseable {
+import org.pf4j.ExtensionPoint;
+
+public interface ContentManager extends AutoCloseable, ExtensionPoint {
+	public static final String FILE_STORE_NAME = "SKYVE_STORE";
+
 	public void put(BeanContent content) throws Exception;
 	public void put(AttachmentContent content) throws Exception;
 	public void put(AttachmentContent content, boolean index) throws Exception;

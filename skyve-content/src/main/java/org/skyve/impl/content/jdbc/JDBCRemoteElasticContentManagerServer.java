@@ -50,7 +50,7 @@ import org.skyve.util.Util;
  * 
  * @author mike
  */
-public class JDBCRemoteContentManagerServer extends ElasticContentManager {
+public class JDBCRemoteElasticContentManagerServer extends ElasticContentManager {
 	static final String CONTENT_DATA_STORE_NAME = "CONTENT";
 	static final String PUT_BEAN_FUNCTION_NAME = "PUT_BEAN";
 	static final String PUT_ATTACHMENT_FUNCTION_NAME = "PUT_ATTACHMENT";

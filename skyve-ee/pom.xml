@@ -319,58 +319,6 @@
 			<version>${generex.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<version>${tika.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-parsers</artifactId>
-			<version>${tika.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.cxf</groupId>
-					<artifactId>cxf-rt-rs-client</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>edu.ucar</groupId>
-					<artifactId>cdm</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>edu.ucar</groupId>
-					<artifactId>netcdf4</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>edu.ucar</groupId>
-					<artifactId>grib</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>edu.ucar</groupId>
-					<artifactId>httpservices</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.sis.storage</groupId>
-					<artifactId>sis-netcdf</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.sis.core</groupId>
-					<artifactId>sis-utility</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.sis.core</groupId>
-					<artifactId>sis-metadata</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>

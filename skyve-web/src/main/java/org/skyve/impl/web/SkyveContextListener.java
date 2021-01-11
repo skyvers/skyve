@@ -28,7 +28,6 @@ import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -94,6 +93,7 @@ public class SkyveContextListener implements ServletContextListener {
 			catch (Exception e) {
 				throw new FacesException(e);
 			}
+
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -368,7 +368,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 		if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS == null) {
-			AbstractContentManager.IMPLEMENTATION_CLASS = ElasticContentManager.class;
+			AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;//ElasticContentManager.class;
 		}
 		else {
 			try {

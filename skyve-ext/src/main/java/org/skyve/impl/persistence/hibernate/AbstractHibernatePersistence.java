@@ -1,7 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,8 +26,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.apache.tika.Tika;
-import org.apache.tika.exception.TikaException;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.LockMode;
@@ -61,8 +58,10 @@ import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.schema.TargetType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
+import org.skyve.EXT;
 import org.skyve.cache.CacheUtil;
 import org.skyve.content.BeanContent;
+import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -1819,7 +1818,7 @@ t.printStackTrace();
 					String fieldName = field.getName();
 					String value = BindUtil.getDisplay(customer, beanToReindex, fieldName);
 					if (AttributeType.markup.equals(type)) {
-						value = extractTextFromMarkup(value);
+						value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
 					}
 					value = Util.processStringValue(value);
 					if (value != null) {
@@ -1874,7 +1873,7 @@ t.printStackTrace();
 							String value = (state[i] == null) ? null : state[i].toString();
 							if (value != null) {
 								if (AttributeType.markup.equals(type)) {
-									value = extractTextFromMarkup(value);
+									value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
 								}
 								
 								properties.put(propertyName, value);
@@ -1885,7 +1884,7 @@ t.printStackTrace();
 						String value = (state[i] == null) ? null : state[i].toString();
 						if (value != null) {
 							if (AttributeType.markup.equals(type)) {
-								value = extractTextFromMarkup(value);
+								value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
 							}
 							
 							properties.put(propertyName, value);
@@ -1921,12 +1920,6 @@ t.printStackTrace();
 		}
 	}
 
-	private static final Tika TIKA = new Tika();
-	
-	private static String extractTextFromMarkup(String value) throws IOException, TikaException {
-		return TIKA.parseToString(new ByteArrayInputStream(value.getBytes()));
-	}
-	
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@Override
 	public void preRemove(AbstractPersistentBean bean)

@@ -25,7 +25,6 @@ import org.skyve.impl.backup.RestoreOptions.ContentOption;
 import org.skyve.impl.backup.RestoreOptions.IndexingOption;
 import org.skyve.impl.backup.RestoreOptions.PreProcess;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
@@ -379,9 +378,9 @@ public class RestoreJob extends CancellableJob {
 												AttributeType.image.equals(attributeType)) {
 										StringBuilder contentPath = new StringBuilder(128);
 										contentPath.append(backupDirectory.getAbsolutePath()).append('/');
-										contentPath.append(AbstractContentManager.FILE_STORE_NAME).append('/');
+										contentPath.append(ContentManager.FILE_STORE_NAME).append('/');
 
-										AttachmentContent content = ElasticContentManager.getFromFileSystem(contentPath, stringValue);
+										AttachmentContent content = AbstractContentManager.getFromFileSystem(contentPath, stringValue);
 										if (content == null) {
 											trace = "        Could not find file associated with " + stringValue;
 											if (ContentOption.error.equals(contentRestoreOption)) {

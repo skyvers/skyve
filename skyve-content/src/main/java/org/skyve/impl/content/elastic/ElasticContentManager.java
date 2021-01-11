@@ -65,16 +65,12 @@ public class ElasticContentManager extends AbstractContentManager {
 	static final String BEAN_INDEX_NAME = "beans";
 	static final String BEAN_INDEX_TYPE = "bean";
 
-	public static final String CONTENT = "content";
     private static final String ATTACHMENT = "attachment";
 
 	private static final String FILE = "file";
     public static final String FILE_CONTENT_TYPE = "file.content_type";
-    private static final String FILENAME = "filename";
     private static final String FILE_FILENAME = "file.filename";
     public static final String FILE_LAST_MODIFIED = "file.last_modified";
-    public static final String LAST_MODIFIED = "last_modified";
-    private static final String CONTENT_TYPE = "content_type";
     private static final String FILESIZE = "filesize";
 
     private static final String META = "meta";
@@ -87,7 +83,6 @@ public class ElasticContentManager extends AbstractContentManager {
     private static final String KEYWORDS = "keywords";
 
     private static final String BEAN = "bean";
-    private static final String ATTRIBUTE_NAME = "attribute";
     static final String BEAN_CUSTOMER_NAME = "bean." + Bean.CUSTOMER_NAME;
     static final String BEAN_MODULE_KEY = "bean." + Bean.MODULE_KEY;
     static final String BEAN_DOCUMENT_KEY = "bean." + Bean.DOCUMENT_KEY;
@@ -96,8 +91,6 @@ public class ElasticContentManager extends AbstractContentManager {
     static final String BEAN_DOCUMENT_ID = "bean." + Bean.DOCUMENT_ID;
     static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
 	
-    private static final String META_JSON = "meta.json";
-    
 //	private static Node node = ElasticUtil.localNode();
 	private static final Tika TIKA = new Tika();
 
@@ -325,57 +318,6 @@ public class ElasticContentManager extends AbstractContentManager {
 */
 	}
 
-	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, byte[] content) 
-	throws Exception {
-		String contentId = attachment.getContentId();
-		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
-		File dir = new File(absoluteContentStoreFolderPath.toString());
-		dir.mkdirs();
-		
-		Map<String, Object> meta = new TreeMap<>();
-		meta.put(FILENAME, attachment.getFileName());
-		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true));
-		meta.put(CONTENT_TYPE, attachment.getContentType());
-		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
-		meta.put(Bean.DATA_GROUP_ID, attachment.getBizDataGroupId());
-		meta.put(Bean.USER_ID, attachment.getBizUserId());
-		meta.put(Bean.MODULE_KEY, attachment.getBizModule());
-		meta.put(Bean.DOCUMENT_KEY, attachment.getBizDocument());
-		meta.put(Bean.DOCUMENT_ID, attachment.getBizId());
-		meta.put(ATTRIBUTE_NAME, attachment.getAttributeName());
-
-		File file = new File(dir, CONTENT);
-		File old = null;
-		if (file.exists()) {
-			old = new File(file.getPath() + "_old");
-			if (Files.move(file.toPath(), old.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + absoluteContentStoreFolderPath + " to " + absoluteContentStoreFolderPath + "_old before file content store operation");
-			}
-		}
-		try {
-			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content);
-				fos.flush();
-			}
-			try (FileWriter fw = new FileWriter(new File(dir, META_JSON))) {
-				fw.write(JSON.marshall(meta));
-				fw.flush();
-			}
-		}
-		catch (Exception e) {
-			if ((old != null) && old.exists()) {
-				if (Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-					throw new IOException("Could not rename " + absoluteContentStoreFolderPath + "_old to " + absoluteContentStoreFolderPath + "after file content store operation error.", e);
-				}
-			}
-			throw e;
-		}
-		// Now delete the old file after success
-		if ((old != null) && old.exists()) {
-			old.delete();
-		}
-	}
-	
 	@Override
 	public AttachmentContent get(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
@@ -461,64 +403,6 @@ public class ElasticContentManager extends AbstractContentManager {
 		return result;
 */
 return null;
-	}
-
-	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath, String contentId) throws Exception {
-		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
-		String path = absoluteContentStoreFolderPath.toString();
-
-		File dir = new File(path);
-		if (! dir.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + path + ") - Dir DNE");
-			return null;
-		}
-		File metaFile = new File(dir, META_JSON);
-		if (! metaFile.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
-			return null;
-		}
-		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(metaFile));
-
-		File file = new File(dir, CONTENT);
-		if (! file.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + file.getPath() + ") - File DNE");
-			return null;
-		}
-		
-		MimeType mimeType = null;
-		String contentType = (String) meta.get(CONTENT_TYPE);
-		if (contentType != null) {
-			mimeType = MimeType.fromContentType(contentType);
-		}
-
-		String fileName = (String) meta.get(FILENAME);
-		Date lastModified = TimeUtil.parseISODate((String) meta.get(LAST_MODIFIED));
-
-		String bizCustomer = (String) meta.get(Bean.CUSTOMER_NAME);
-		String bizModule = (String) meta.get(Bean.MODULE_KEY);
-		String bizDocument = (String) meta.get(Bean.DOCUMENT_KEY);
-		String bizDataGroupId = (String) meta.get(Bean.DATA_GROUP_ID);
-		String bizUserId = (String) meta.get(Bean.USER_ID);
-		String bizId = (String) meta.get(Bean.DOCUMENT_ID);
-		String binding = (String) meta.get(ATTRIBUTE_NAME);
-
-		AttachmentContent result = new AttachmentContent(bizCustomer,
-															bizModule,
-															bizDocument,
-															bizDataGroupId,
-															bizUserId,
-															bizId,
-															binding,
-															fileName,
-															mimeType,
-															file);
-		result.setLastModified(lastModified);
-		result.setContentType(contentType);
-		result.setContentId(contentId);
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
-
-		return result;
 	}
 
 	@Override

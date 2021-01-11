@@ -11,6 +11,7 @@
 		<module>skyve-core</module>
 		<module>skyve-ext</module>
 		<module>skyve-web</module>
+		<module>skyve-content</module>
 		<module>skyve-tools</module>
 	</modules>
 
@@ -46,7 +47,7 @@
 		<lucene.version>4.10.2</lucene.version>
 		<omnifaces.version>2.7.1</omnifaces.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
-		<pf4j.version>3.1.0</pf4j.version>
+		<pf4j.version>3.5.0</pf4j.version>
 		<poi.version>4.1.2</poi.version>
 		<primefaces.version>7.0</primefaces.version>
 		<primefaces-extensions.version>7.0</primefaces-extensions.version>
