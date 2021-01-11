@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Tag" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Tag" />
+	<singularAlias>Tag</singularAlias>
+	<pluralAlias>Tags</pluralAlias>
+	<iconStyleClass>fa fa-tag</iconStyleClass>
+	<bizKey expression="Tag {name}"/>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<length>256</length>
+		</text>
+		<boolean name="visible">
+			<displayName>Visible</displayName>
+		</boolean>
+		<enum name="combinationsOperator" persistent="false" trackChanges="false">
+			<displayName>Operator</displayName>
+			<values>
+				<value code="Union"/>
+				<value code="Except"/>
+				<value code="Intersect"/>
+			</values>
+		</enum>
+		<memo name="combinationExplanation" persistent="false" trackChanges="false">
+			<displayName>Explanation</displayName>
+		</memo>
+		<longInteger name="totalTagged" persistent="false" trackChanges="false">
+			<displayName>Total Tagged</displayName>
+		</longInteger>
+		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
+			<displayName>Copy to user</displayName>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
+		</association>
+		<text name="copyToUserTagName" persistent="false" trackChanges="false">
+			<displayName>Tag Name</displayName>
+			<length>256</length>
+		</text>
+		<text name="uploadModuleName" >
+			<displayName>Module</displayName>
+			<description>The module to tag.</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="uploadDocumentName" >
+			<displayName>Document</displayName>
+			<description>The document to tag.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="attributeName" >
+			<displayName>Attribute</displayName>
+			<description>The name of the attribute to tag.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="fileHasHeaders">
+			<displayName>Upload File has Column Headers</displayName>
+		</boolean>
+		<longInteger name="uploaded" persistent="false" trackChanges="false">
+			<displayName>Uploaded</displayName>
+		</longInteger>
+		<longInteger name="uploadMatched" persistent="false" trackChanges="false">
+			<displayName>Match</displayName>
+		</longInteger>
+		<longInteger name="uploadTagged" persistent="false" trackChanges="false">
+			<displayName>Tagged</displayName>
+		</longInteger>
+		<enum name="filterOperator">
+			<displayName>Filter Operator</displayName>
+			<values>
+				<value code="equals" description="Equals"/>
+				<value code="like" description="Like"/>
+				<value code="contains" description="Contains"/>
+			</values>
+		</enum>
+		<enum name="filterAction">
+			<displayName>Filter Action</displayName>
+			<values>
+				<value code="tag" description="Tag records that match" />
+				<value code="unTag" description="UnTag records that match"/>
+			</values>
+		</enum>
+		<text name="actionModuleName" >
+			<displayName>Module</displayName>
+			<description>The module for the tag Action.</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="actionDocumentName" >
+			<displayName>Document</displayName>
+			<description>The document for the tag Action.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="unTagSuccessful">
+			<displayName>Untag successful documents</displayName>
+		</boolean>
+		<boolean name="notification">
+			<displayName>Notify when job is complete</displayName>
+		</boolean>
+		<integer name="filterColumn">
+			<displayName>Column (first column is 1))</displayName>
+		</integer>
+		<association type="aggregation" name="operandTag" persistent="false" trackChanges="false">
+			<displayName>Other Tag</displayName>
+			<description>The other tag to use for the combination.</description>
+			<domain>dynamic</domain>
+			<documentName>Tag</documentName>
+		</association>
+		<longInteger name="operandTagCount" persistent="false" trackChanges="false">
+			<displayName>Tagged</displayName>
+		</longInteger>
+		
+		<text name="documentCondition">
+			<displayName>Condition</displayName>
+			<description>The condition which must be satisfied for the tagged document, for the action to be executed.</description>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<text name="documentAction">
+			<displayName>Action</displayName>
+			<description>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</description>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<memo name="documentActionResults" persistent="false" trackChanges="false">
+			<displayName>Request</displayName>
+		</memo>
+		<enum name="evictOption" persistent="false" trackChanges="false" audited="false" documentRef="DataMaintenance" attributeRef="evictOption">
+			<displayName>Cache Evict</displayName>
+			<description><![CDATA[
+				<p>Whether to evict each bean after processing.</p>
+				<p>Evicting beans will free memory for large data jobs, however there may be impacts
+				if the action (processing) selected affects items that other beans may reference.</p>
+				]]></description>
+			<defaultValue>bean</defaultValue>
+		</enum>		
+	</attributes>
+	<conditions>
+		<condition name="actionSet">
+			<description>Action Set</description>
+			<expression>
+				<![CDATA[getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null]]>
+			</expression>
+		</condition>
+		<condition name="attributeSet">
+			<description>Attribute Set</description>
+			<expression>
+				<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
+			</expression>
+		</condition>
+		<condition name="showExplanation">
+			<description>Whether to show the explanation</description>
+			<expression>
+				<![CDATA[getCombinationExplanation()!=null && getCombinationExplanation().trim().length()>0]]>
+			</expression>
+		</condition>
+		<condition name="allowCombination">
+			<description>Whether to allow access to the PerformCombination action button</description>
+			<expression>
+				<![CDATA[
+					combinationsOperator!=null && operandTag!=null
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

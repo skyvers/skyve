@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Staff - {contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox>
+		<hbox border="true" borderTitle="Details" shrinkWrap="height">
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<default binding="contact.name" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="contact.email1" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="contact.mobile" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="reportsTo" descriptionBinding="bizKey">
+							<filterParameter filterBinding="bizId" operator="notEqual" valueBinding="bizId" />
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="staffCode" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="dateOfBirth" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="roleTitle" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="baseOffice" />
+					</item>
+				</row>
+			</form>
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+		<hbox>
+			<vbox border="true" borderTitle="Status">
+				<form>
+					<column responsiveWidth="3" />
+					<column />
+					<row>
+						<item>
+							<combo binding="status">
+								<onChangedHandlers>
+									<rerender />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<default binding="dueBack" />
+						</item>
+					</row>
+				</form>
+				<form>
+					<column responsiveWidth="3" />
+					<column />
+					<row>
+						<item>
+							<geometryMap binding="location" type="point" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox border="true" borderTitle="My Reports">
+				<treeGrid continueConversation="true" query="qStaffForOffice" rootIdBinding="bizId" />
+			</vbox>
+		</hbox>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+</view>

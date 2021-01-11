@@ -10,14 +10,14 @@
 	<bizKey expression="Tag {name}"/>
 	<attributes>
 		<text name="name" required="true">
-			<displayName>Name</displayName>
+			<displayName>admin.tag.name.displayName</displayName>
 			<length>256</length>
 		</text>
 		<boolean name="visible">
-			<displayName>Visible</displayName>
+			<displayName>admin.tag.visible.displayName</displayName>
 		</boolean>
 		<enum name="combinationsOperator" persistent="false" trackChanges="false">
-			<displayName>Operator</displayName>
+			<displayName>admin.tag.combinationsOperator.displayName</displayName>
 			<values>
 				<value code="Union"/>
 				<value code="Except"/>
@@ -25,52 +25,52 @@
 			</values>
 		</enum>
 		<memo name="combinationExplanation" persistent="false" trackChanges="false">
-			<displayName>Explanation</displayName>
+			<displayName>admin.tag.combinationExplanation.displayName</displayName>
 		</memo>
 		<longInteger name="totalTagged" persistent="false" trackChanges="false">
-			<displayName>Total Tagged</displayName>
+			<displayName>admin.tag.totalTagged.displayName</displayName>
 		</longInteger>
 		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
-			<displayName>Copy to user</displayName>
+			<displayName>admin.tag.association.copyToUser.displayName</displayName>
 			<documentName>UserProxy</documentName>
 			<queryName>qActiveUserProxies</queryName>
 		</association>
 		<text name="copyToUserTagName" persistent="false" trackChanges="false">
-			<displayName>Tag Name</displayName>
+			<displayName>admin.tag.copyToUserTagName.displayName</displayName>
 			<length>256</length>
 		</text>
 		<text name="uploadModuleName" >
-			<displayName>Module</displayName>
-			<description>The module to tag.</description>
+			<displayName>admin.tag.uploadModuleName.displayName</displayName>
+			<description>admin.tag.uploadModuleName.description</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="uploadDocumentName" >
-			<displayName>Document</displayName>
-			<description>The document to tag.</description>
+			<displayName>admin.tag.uploadDocumentName.displayName</displayName>
+			<description>admin.tag.uploadDocumentName.displayName</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="attributeName" >
-			<displayName>Attribute</displayName>
-			<description>The name of the attribute to tag.</description>
+			<displayName>admin.tag.attributeName.displayName</displayName>
+			<description>admin.tag.attributeName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<boolean name="fileHasHeaders">
-			<displayName>Upload File has Column Headers</displayName>
+			<displayName>admin.tag.fileHasHeaders.displayName</displayName>
 		</boolean>
 		<longInteger name="uploaded" persistent="false" trackChanges="false">
-			<displayName>Uploaded</displayName>
+			<displayName>admin.tag.uploaded.displayName</displayName>
 		</longInteger>
 		<longInteger name="uploadMatched" persistent="false" trackChanges="false">
-			<displayName>Match</displayName>
+			<displayName>admin.tag.uploadMatched.displayName</displayName>
 		</longInteger>
 		<longInteger name="uploadTagged" persistent="false" trackChanges="false">
-			<displayName>Tagged</displayName>
+			<displayName>admin.tag.uploadTagged.displayName</displayName>
 		</longInteger>
 		<enum name="filterOperator">
-			<displayName>Filter Operator</displayName>
+			<displayName>admin.tag.filterOperator.displayName</displayName>
 			<values>
 				<value code="equals" description="Equals"/>
 				<value code="like" description="Like"/>
@@ -78,65 +78,61 @@
 			</values>
 		</enum>
 		<enum name="filterAction">
-			<displayName>Filter Action</displayName>
+			<displayName>admin.tag.filterAction.displayName</displayName>
 			<values>
 				<value code="tag" description="Tag records that match" />
 				<value code="unTag" description="UnTag records that match"/>
 			</values>
 		</enum>
 		<text name="actionModuleName" >
-			<displayName>Module</displayName>
-			<description>The module for the tag Action.</description>
+			<displayName>admin.tag.actionModuleName.displayName</displayName>
+			<description>admin.tag.actionModuleName.description</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="actionDocumentName" >
-			<displayName>Document</displayName>
-			<description>The document for the tag Action.</description>
+			<displayName>admin.tag.actionDocumentName.displayName</displayName>
+			<description>admin.tag.actionDocumentName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<boolean name="unTagSuccessful">
-			<displayName>Untag successful documents</displayName>
+			<displayName>admin.tag.unTagSuccessful.displayName</displayName>
 		</boolean>
 		<boolean name="notification">
-			<displayName>Notify when job is complete</displayName>
+			<displayName>admin.tag.notification.displayName</displayName>
 		</boolean>
 		<integer name="filterColumn">
-			<displayName>Column (first column is 1))</displayName>
+			<displayName>admin.tag.filterColumn.displayName</displayName>
 		</integer>
 		<association type="aggregation" name="operandTag" persistent="false" trackChanges="false">
-			<displayName>Other Tag</displayName>
-			<description>The other tag to use for the combination.</description>
+			<displayName>admin.tag.association.operandTag.displayName</displayName>
+			<description>admin.tag.association.operandTag.description</description>
 			<domain>dynamic</domain>
 			<documentName>Tag</documentName>
 		</association>
 		<longInteger name="operandTagCount" persistent="false" trackChanges="false">
-			<displayName>Tagged</displayName>
+			<displayName>admin.tag.operandTagCount.displayName</displayName>
 		</longInteger>
 		
 		<text name="documentCondition">
-			<displayName>Condition</displayName>
-			<description>The condition which must be satisfied for the tagged document, for the action to be executed.</description>
+			<displayName>admin.tag.documentCondition.displayName</displayName>
+			<description>admin.tag.documentCondition.description</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
 		<text name="documentAction">
-			<displayName>Action</displayName>
-			<description>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</description>
+			<displayName>admin.tag.documentAction.displayName</displayName>
+			<description>admin.tag.documentAction.description</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
 		<memo name="documentActionResults" persistent="false" trackChanges="false">
-			<displayName>Request</displayName>
+			<displayName>admin.tag.documentActionResults.displayName</displayName>
 		</memo>
 		<enum name="evictOption" persistent="false" trackChanges="false" audited="false" documentRef="DataMaintenance" attributeRef="evictOption">
-			<displayName>Cache Evict</displayName>
-			<description><![CDATA[
-				<p>Whether to evict each bean after processing.</p>
-				<p>Evicting beans will free memory for large data jobs, however there may be impacts
-				if the action (processing) selected affects items that other beans may reference.</p>
-				]]></description>
+			<displayName>admin.tag.evictOption.displayName</displayName>
+			<description><![CDATA[admin.tag.evictOption.description]]></description>
 			<defaultValue>bean</defaultValue>
 		</enum>		
 	</attributes>

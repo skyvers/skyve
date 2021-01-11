@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:o="http://omnifaces.org/ui"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		dir="#{desktop.dir}">
+    <f:view encoding="#{desktop.encoding}">
+		<f:metadata>
+			<f:viewParam name="a" value="#{desktop.webActionParameter}" />
+			<f:viewParam name="m" value="#{desktop.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{desktop.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{desktop.queryNameParameter}" />
+			<f:viewParam name="i" value="#{desktop.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{desktop.preRender}"/>
+		</f:metadata>
+		<h:head>
+	        <f:facet name="first">
+	            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	        </f:facet>
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+			<meta http-equiv="Content-Type" content="text/html" />
+		
+			<base href="#{desktop.baseHref}" />
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+
+			<title>${project.description}</title>
+			<!-- normally commented out for security reasons
+			<h:outputText value="#{desktop.skyveVersionComment}" escape="false" />			
+			-->
+			<link rel="stylesheet" type="text/css" href="#{desktop.cssRelativeFileNameUrl}" />
+		</h:head>
+		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+			<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { isc.BizUtil.onPushMessage(message) }" />
+			<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false" />
+			<h:form prependId="false">
+				<p:remoteCommand name="setUxUi" actionListener="#{desktop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
+			</h:form>
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="200px">
+						<td><img src="images/skyve-thick-grey.png" alt="Skyve" style="max-width: 300px;" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="50px">
+						<td><img src="images/loading.gif" /></td>
+						<td>Loading Skyve Application</td>
+					</tr>
+				</tbody>
+			</table>
+			<script type="text/javascript">
+				var isomorphicDir='#{desktop.smartClientDir}/';
+				var isc_useHighPerformanceGridTimings=false;
+				var isc_useSimpleNames=false;
+			</script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Core.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Foundation.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Containers.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Grids.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Forms.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_DataBinding.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_Calendar.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_RichTextEditor.js"></script>
+			<script type="text/javascript" src="#{desktop.smartClientDir}/skins/#{desktop.skin}/load_skin.js"></script>
+			<h:outputText value="#{desktop.localeScript}" escape="false" />
+			<script type="text/javascript" src="desktop/skyve-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			<c:if test="#{desktop.mapType eq 'gmap'}">
+				<script type="text/javascript" src="desktop/skyve-gmap-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			</c:if>
+			<c:if test="#{desktop.mapType eq 'leaflet'}">
+				<script type="text/javascript" src="desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			</c:if>
+			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
+				isc.Canvas.resizeControls(4);
+				isc.Canvas.resizeFonts(2);
+				#{desktop.menuScript} #{desktop.dataSourceScript}
+				#{desktop.apiScript}
+				#{desktop.uiScript}
+				#{desktop.bannerScript}
+			</script>
+		</h:body>
+	</f:view>
+</html>

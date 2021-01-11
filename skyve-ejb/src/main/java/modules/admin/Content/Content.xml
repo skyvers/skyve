@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Content" 
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Content</singularAlias>
+	<pluralAlias>Content</pluralAlias>
+	<attributes>
+		<text name="contentId">
+			<displayName>Content Id</displayName>
+			<length>1024</length>
+		</text>
+		<text name="customerName">
+			<displayName>Customer Name</displayName>
+			<length>1024</length>
+		</text>
+		<text name="moduleName">
+			<displayName>Module Name</displayName>
+			<length>1024</length>
+		</text>
+		<text name="documentName">
+			<displayName>Document Name</displayName>
+			<length>1024</length>
+		</text>
+		<id name="contentBizId">
+			<displayName>Content Biz Id</displayName>
+		</id>
+		<text name="attributeName">
+			<displayName>Attribute Name</displayName>
+			<length>1024</length>
+		</text>
+		<timestamp name="lastModified">
+			<displayName>Last Modified</displayName>
+		</timestamp>
+		<memo name="content">
+			<displayName>Content</displayName>
+		</memo>
+	</attributes>
+</document>

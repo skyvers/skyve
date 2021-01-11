@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveContent.dir}">
+    <f:view encoding="#{_skyveContent.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-fileupload-buttonbar {
+					text-align: center;
+				}
+				.ui-fileupload-content {
+					min-height: 200px;
+					background-image: url(images/filedrop.png);
+					background-position: right bottom;
+					background-repeat: no-repeat;
+				}
+				<!-- Place the cropper at 50% of width and matching height -->
+				.square {
+					position: relative;
+					width: 50%;
+					padding-top: 10px;
+				}
+				.square:after {
+					content: "";
+					display: block;
+					padding-bottom: 75%;
+				}
+				.content {
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					padding-left: 50%;
+				}
+			</style>
+			<link rel="stylesheet" href="croppie/croppie.css" />
+			<script src="croppie/exif-min.js"></script>
+			<script src="croppie/croppie-min.js"></script>
+			<script type="text/javascript">
+				var cropper = null;
+				var file = null;
+				var fileName = null;
+				var fileFormat = 'png';
+				<!-- Load the image into croppie, show the cropper bar, and container and hide the file upload -->
+				function editImage() {
+					if (file.type == 'image/jpeg') {
+						fileFormat = 'jpeg';
+					}
+					fileName = file.name + '.cropped.' + fileFormat;
+					$('#cropperBar').css({visibility: 'visible'});
+					$('#cropperContainer').css({visibility: 'visible'});
+					var reader = new FileReader();
+					reader.onload = function (evt) {
+						cropper.croppie('bind', {
+							url: evt.target.result
+						});
+					}
+					reader.readAsDataURL(file);
+					$('#upload').css({display: 'none'});
+				}
+				<!-- Upload the cropped image as a blob emulating an ajax form post -->
+				function uploadCropped(blob) {
+					var formData = new FormData(document.getElementById('form'));
+					formData.append('javax.faces.partial.ajax', 'true');
+					formData.append('javax.faces.partial.execute', 'upload');
+					formData.append('javax.faces.source', 'upload');
+					formData.append('javax.faces.partial.render', 'messages');
+					formData.append('upload', blob, fileName);
+
+					$.ajax({
+						type: 'POST',
+						url: 'imageUpload.xhtml',
+						data: formData,
+						processData: false,
+						contentType: false
+					}).done(function(data, status, xhr) {
+						PrimeFaces.ajax.Response.handle(data, status, xhr);
+					});
+				}
+				
+				$(document).ready(function() {
+					<!-- Add edit button to file upload panel -->
+					$('#edit').appendTo($('.ui-fileupload .ui-fileupload-buttonbar'));
+					
+					<!-- When a file is chosen, assign the file, enable the edit button, add click handlers on cancel buttons to disable edit button -->
+					$('#upload_input').on('change', function () {
+						if (this.files) {
+							if (this.files[0]) {
+								file = this.files[0];
+								PF('editButton').enable();
+
+								setTimeout(function() {
+									$('.ui-fileupload-cancel').on('click', function() {
+										PF('editButton').disable();
+									});
+								}, 500); <!-- Wait half a second for the file item to show -->
+							}
+						}
+					});
+
+					var cropperDiv = $('#cropper');
+					cropper = cropperDiv.croppie({
+						viewport: {
+							width: cropperDiv.width() - 50,
+							height: cropperDiv.height() - 50,
+							type: 'square'
+						},
+						enableExif: true,
+						enableResize: true,
+						enableOrientation: true
+					});
+				});
+			</script>
+		</h:head>
+		<h:body style="height:2000px">
+			<h:form id="form" enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
+				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
+				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
+			    <p:growl id="messages" showDetail="true" escape="false" />
+				<p:fileUpload id="upload"
+								fileUploadListener="#{_skyveContent.handleFileUpload}" 
+								accept="image/*"
+								update="messages"
+								multiple="false"
+								fileLimit="1"
+								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}"
+								uploadIcon="fa fa-upload"
+								cancelIcon="fa fa-ban" />
+				<!-- This button is moved into the upload button bar on document load -->
+				<p:button id="edit" widgetVar="editButton" type="button" disabled="true" icon="fa fa-pencil" value="Edit" title="Crop &amp; rotate the uploaded image" onclick="editImage();return false" />
+				<!-- The cropperBar and cropperContainer are shown when the edit button is pressed. They are hidden so that we can still get their dimensions -->
+				<div id="cropperBar" style="visibility:hidden" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
+					<p:button id="crop" type="button" icon="fa fa-upload" value="Upload" title="Upload Cropped Image" onclick="cropper.croppie('result', {type: 'blob', size: 'original', format: fileFormat}).then(function(blob) {uploadCropped(blob)});return false" />
+					<p:button id="cancel" type="button" icon="fa fa-ban" value="Cancel" title="Cancel editing" onclick="location.reload(); return false" />
+				</div>
+				<div id="cropperContainer" style="visibility:hidden;display:flex">
+					<div class="square">
+						<div id="cropper" class="content" />
+					</div>
+					<div style="width:25%;padding-right:10px" />
+					<div style="display:flex;flex-direction:column;justify-content:center">
+						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-left" title="Rotate Left" onclick="cropper.croppie('rotate',90);return false" />
+						<p:button style="margin-bottom:10px" type="button" icon="fa fa-rotate-right" title="Rotate Right" onclick="cropper.croppie('rotate',-90);return false" />
+					</div>
+				</div>
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

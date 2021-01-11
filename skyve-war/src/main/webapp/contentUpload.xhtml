@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveContent.dir}">
+    <f:view encoding="#{_skyveContent.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-panelgrid .ui-widget-content {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-panelgrid td {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-fileupload-content {
+					min-height: 200px;
+					background-image: url(images/filedrop.png);
+					background-position: right bottom;
+					background-repeat: no-repeat;
+				}
+			</style>
+		</h:head>
+		<h:body>
+			<h:form enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
+				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
+				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
+				<p:fileUpload fileUploadListener="#{_skyveContent.handleFileUpload}" 
+								allowTypes="/(\.|\/)(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)).+$/i"
+								update="messages"
+								multiple="false"
+								fileLimit="1"
+								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}" />
+			    <p:growl id="messages" showDetail="true" escape="false" />
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

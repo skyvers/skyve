@@ -43,27 +43,27 @@ public class Snapshot extends AbstractPersistentBean {
 	public static final String copyToUserSnapshotNamePropertyName = "copyToUserSnapshotName";
 
 	/**
-	 * Module
+	 * admin.snapshot.moduleName.displayName
 	 **/
 	private String moduleName;
 	/**
-	 * Query
+	 * admin.snapshot.queryName.displayName
 	 **/
 	private String queryName;
 	/**
-	 * Name
+	 * admin.snapshot.name.displayName
 	 **/
 	private String name;
 	/**
-	 * Snapshot Code
+	 * admin.snapshot.snapshot.displayName
 	 **/
 	private String snapshot;
 	/**
-	 * Copy to user
+	 * admin.snapshot.association.copyToUser.displayName
 	 **/
 	private UserProxyExtension copyToUser = null;
 	/**
-	 * Snapshot Name for Copy
+	 * admin.snapshot.copyToUserSnapshotName.displayName
 	 **/
 	private String copyToUserSnapshotName;
 

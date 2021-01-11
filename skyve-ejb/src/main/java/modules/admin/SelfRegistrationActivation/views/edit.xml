@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Welcome {user.contact.name}" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form visible="showSuccess" border="true" borderTitle="Account Activated Successfully">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%; text-align:center">
+							<h4 style="margin: 2px auto;">
+								<p>Congratulations {user.contact.name}! Your account is now active.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a> with the email address {user.contact.email1}.</p>
+							</h4>
+						</div>
+						<div style="width:100%; text-align:center; text-size: 120%;">
+							<a href="{loginUrl}">Sign in</a>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showAlready" border="true" borderTitle="Account Previously Activated">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<strong style="margin: 2px auto;">
+								<p>Welcome {user.contact.name} - you have already activated your account.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+							</strong>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showExpired" border="true" borderTitle="Your activation code has expired">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<strong style="margin: 2px auto;">
+								<p>Sorry, that code is no longer valid.</p>
+								<p>Please <a href="{loginUrl}">Sign in</a> or Register again to request a new activation email.</p>
+							</strong>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<form visible="showFailure" border="true" borderTitle="Invalid Access">
+		<column/>
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="width:100%;text-align:center">
+							<strong style="margin: 2px auto;">
+								<p>Sorry, that link is not recognised. Please check the link and try again.</p>
+								<p>Return to <a href="{loginUrl}">Sign in</a>.</p>
+							</strong>
+						</div>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+    <actions>
+    </actions>
+    <newParameters/>
+</view>

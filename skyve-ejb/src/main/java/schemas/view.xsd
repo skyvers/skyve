@@ -1,0 +1,2083 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:element name="action" type="tns:customAction"/>
+
+  <xs:element name="actionReference" type="tns:actionReference"/>
+
+  <xs:element name="actions" type="tns:actions"/>
+
+  <xs:element name="add" type="tns:addAction"/>
+
+  <xs:element name="blurb" type="tns:blurb"/>
+
+  <xs:element name="boundColumn" type="tns:dataGridBoundColumn"/>
+
+  <xs:element name="button" type="tns:button"/>
+
+  <xs:element name="cancel" type="tns:cancelAction"/>
+
+  <xs:element name="chart" type="tns:chart"/>
+
+  <xs:element name="chartBuilderMetaData" type="tns:chartBuilderMetaData"/>
+
+  <xs:element name="checkBox" type="tns:checkBox"/>
+
+  <xs:element name="checkMembership" type="tns:checkMembership"/>
+
+  <xs:element name="colourPicker" type="tns:colourPicker"/>
+
+  <xs:element name="combo" type="tns:combo"/>
+
+  <xs:element name="comparison" type="tns:comparison"/>
+
+  <xs:element name="component" type="tns:component"/>
+
+  <xs:element name="componentNameMap" type="tns:componentNameMap"/>
+
+  <xs:element name="containerColumn" type="tns:dataGridContainerColumn"/>
+
+  <xs:element name="contentImage" type="tns:contentImage"/>
+
+  <xs:element name="contentLink" type="tns:contentLink"/>
+
+  <xs:element name="contentReference" type="tns:contentReference"/>
+
+  <xs:element name="dataGrid" type="tns:dataGrid"/>
+
+  <xs:element name="dataRepeater" type="tns:dataRepeater"/>
+
+  <xs:element name="default" type="tns:defaultWidget"/>
+
+  <xs:element name="defaultListViewReference" type="tns:defaultListViewReference"/>
+
+  <xs:element name="defaults" type="tns:defaultsAction"/>
+
+  <xs:element name="delete" type="tns:deleteAction"/>
+
+  <xs:element name="dialogButton" type="tns:dialogButton"/>
+
+  <xs:element name="download" type="tns:downloadAction"/>
+
+  <xs:element name="dynamicImage" type="tns:dynamicImage"/>
+
+  <xs:element name="editViewReference" type="tns:editViewReference"/>
+
+  <xs:element name="export" type="tns:bizExportAction"/>
+
+  <xs:element name="externalReference" type="tns:externalReference"/>
+
+  <xs:element name="form" type="tns:form"/>
+
+  <xs:element name="formRow" type="tns:formRow"/>
+
+  <xs:element name="geometry" type="tns:geometry"/>
+
+  <xs:element name="geometryMap" type="tns:geometryMap"/>
+
+  <xs:element name="hbox" type="tns:HBox"/>
+
+  <xs:element name="html" type="tns:html"/>
+
+  <xs:element name="implicitActionReference" type="tns:implicitActionReference"/>
+
+  <xs:element name="import" type="tns:bizImportAction"/>
+
+  <xs:element name="inject" type="tns:inject"/>
+
+  <xs:element name="injectBinding" type="tns:injectBinding"/>
+
+  <xs:element name="item" type="tns:formItem"/>
+
+  <xs:element name="label" type="tns:label"/>
+
+  <xs:element name="link" type="tns:link"/>
+
+  <xs:element name="listGrid" type="tns:listGrid"/>
+
+  <xs:element name="listMembership" type="tns:listMembership"/>
+
+  <xs:element name="listRepeater" type="tns:listRepeater"/>
+
+  <xs:element name="lookup" type="tns:lookup"/>
+
+  <xs:element name="lookupDescription" type="tns:lookupDescription"/>
+
+  <xs:element name="lookupDescriptionColumn" type="tns:lookupDescriptionColumn"/>
+
+  <xs:element name="map" type="tns:map"/>
+
+  <xs:element name="new" type="tns:newAction"/>
+
+  <xs:element name="noBucket" type="tns:noBucketMetaData"/>
+
+  <xs:element name="numericMultipleBucket" type="tns:numericMultipleBucketMetaData"/>
+
+  <xs:element name="numericRangeBucket" type="tns:numericRangeBucketMetaData"/>
+
+  <xs:element name="ok" type="tns:okAction"/>
+
+  <xs:element name="order" type="tns:chartBuilderOrderMetaData"/>
+
+  <xs:element name="password" type="tns:password"/>
+
+  <xs:element name="print" type="tns:printAction"/>
+
+  <xs:element name="progressBar" type="tns:progressBar"/>
+
+  <xs:element name="queryListViewReference" type="tns:queryListViewReference"/>
+
+  <xs:element name="radio" type="tns:radio"/>
+
+  <xs:element name="range" type="tns:numericRangeMetaData"/>
+
+  <xs:element name="remove" type="tns:removeAction"/>
+
+  <xs:element name="report" type="tns:reportAction"/>
+
+  <xs:element name="reportReference" type="tns:reportReference"/>
+
+  <xs:element name="rerender" type="tns:rerenderEventAction"/>
+
+  <xs:element name="resourceReference" type="tns:resourceReference"/>
+
+  <xs:element name="richText" type="tns:richText"/>
+
+  <xs:element name="save" type="tns:saveAction"/>
+
+  <xs:element name="server" type="tns:serverSideActionEventAction"/>
+
+  <xs:element name="setDisabled" type="tns:setDisabledEventAction"/>
+
+  <xs:element name="setInvisible" type="tns:setInvisibleEventAction"/>
+
+  <xs:element name="slider" type="tns:slider"/>
+
+  <xs:element name="spacer" type="tns:spacer"/>
+
+  <xs:element name="spinner" type="tns:spinner"/>
+
+  <xs:element name="staticImage" type="tns:staticImage"/>
+
+  <xs:element name="tab" type="tns:tab"/>
+
+  <xs:element name="tabPane" type="tns:tabPane"/>
+
+  <xs:element name="temporalBucket" type="tns:temporalBucketMetaData"/>
+
+  <xs:element name="textArea" type="tns:textArea"/>
+
+  <xs:element name="textField" type="tns:textField"/>
+
+  <xs:element name="textLengthBucket" type="tns:textLengthBucketMetaData"/>
+
+  <xs:element name="textStartsWithBucket" type="tns:textStartsWithBucketMetaData"/>
+
+  <xs:element name="toggleDisabled" type="tns:toggleDisabledEventAction"/>
+
+  <xs:element name="toggleVisibility" type="tns:toggleVisibilityEventAction"/>
+
+  <xs:element name="top" type="tns:chartBuilderTopMetaData"/>
+
+  <xs:element name="treeGrid" type="tns:treeGrid"/>
+
+  <xs:element name="upload" type="tns:uploadAction"/>
+
+  <xs:element name="vbox" type="tns:VBox"/>
+
+  <xs:element name="view" type="tns:view"/>
+
+  <xs:element name="zoomOut" type="tns:zoomOutAction"/>
+
+  <xs:complexType name="widgetReference">
+    <xs:choice>
+      <xs:element ref="tns:contentImage"/>
+      <xs:element ref="tns:contentLink"/>
+      <xs:element ref="tns:checkBox"/>
+      <xs:element ref="tns:colourPicker"/>
+      <xs:element ref="tns:combo"/>
+      <xs:element ref="tns:geometry"/>
+      <xs:element ref="tns:html"/>
+      <xs:element ref="tns:lookupDescription"/>
+      <xs:element ref="tns:password"/>
+      <xs:element ref="tns:radio"/>
+      <xs:element ref="tns:richText"/>
+      <xs:element ref="tns:slider"/>
+      <xs:element ref="tns:spinner"/>
+      <xs:element ref="tns:textArea"/>
+      <xs:element ref="tns:textField"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="contentImage">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="inputWidget" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractBound" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="contentLink">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="parameters" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="parameter" type="tns:parameterImpl" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="parameterImpl">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="valueBinding" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="checkBox">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="triState" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="changeableInputWidget" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:focusableInputWidget">
+        <xs:sequence>
+          <xs:element name="onChangedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="focusableInputWidget" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onFocusHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onBlurHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rerenderEventAction">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="clientValidation" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="serverSideActionEventAction">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="action" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="setDisabledEventAction">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="setInvisibleEventAction">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="toggleDisabledEventAction">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="toggleVisibilityEventAction">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="colourPicker" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="combo" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="geometry">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="html">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
+        <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescription">
+    <xs:complexContent>
+      <xs:extension base="tns:lookup">
+        <xs:sequence>
+          <xs:element name="dropDown" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="column" type="tns:lookupDescriptionColumn" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="descriptionBinding" type="xs:string" use="required"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="lookup">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onPickedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onClearedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onAddedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="query" type="xs:string"/>
+        <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
+        <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
+        <xs:attribute name="disableClear" type="xs:string"/>
+        <xs:attribute name="enableClear" type="xs:string"/>
+        <xs:attribute name="disablePick" type="xs:string"/>
+        <xs:attribute name="enablePick" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionColumn">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="filterable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="filterParameterImpl" final="extension restriction">
+    <xs:sequence/>
+    <xs:attribute name="filterBinding" type="xs:string" use="required"/>
+    <xs:attribute name="operator" type="ns1:filterOperator" use="required"/>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="valueBinding" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="password">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="radio" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="vertical" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="richText">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
+        <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
+        <xs:attribute name="minPixelHeight" type="xs:int" use="required"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="slider">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="min" type="xs:double"/>
+        <xs:attribute name="max" type="xs:double"/>
+        <xs:attribute name="numberOfDiscreteValues" type="xs:int"/>
+        <xs:attribute name="roundingPrecision" type="xs:int"/>
+        <xs:attribute name="vertical" type="xs:boolean"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="spinner">
+    <xs:complexContent>
+      <xs:extension base="tns:textField">
+        <xs:sequence/>
+        <xs:attribute name="min" type="xs:double"/>
+        <xs:attribute name="max" type="xs:double"/>
+        <xs:attribute name="step" type="xs:double"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="textField">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="keyboardType" type="tns:keyboardType"/>
+        <xs:attribute name="complete" type="tns:completeType"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="textArea">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="wrap" type="xs:boolean"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="keyboardType" type="tns:keyboardType"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="view">
+    <xs:complexContent>
+      <xs:extension base="tns:container">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:actions" minOccurs="0"/>
+          <xs:element name="newParameters" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="parameter" type="tns:viewParameter" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="iconStyleClass" type="xs:string"/>
+        <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
+        <xs:attribute name="helpRelativeFileName" type="xs:string"/>
+        <xs:attribute name="helpURL" type="xs:string"/>
+        <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
+        <xs:attribute name="refreshIf" type="xs:string"/>
+        <xs:attribute name="refreshAction" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="container" abstract="true">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:staticImage"/>
+        <xs:element ref="tns:vbox"/>
+        <xs:element ref="tns:hbox"/>
+        <xs:element ref="tns:form"/>
+        <xs:element ref="tns:tabPane"/>
+        <xs:element ref="tns:button"/>
+        <xs:element ref="tns:chart"/>
+        <xs:element ref="tns:map"/>
+        <xs:element ref="tns:dynamicImage"/>
+        <xs:element ref="tns:dialogButton"/>
+        <xs:element ref="tns:label"/>
+        <xs:element ref="tns:blurb"/>
+        <xs:element ref="tns:link"/>
+        <xs:element ref="tns:spacer"/>
+        <xs:element ref="tns:listMembership"/>
+        <xs:element ref="tns:checkMembership"/>
+        <xs:element ref="tns:comparison"/>
+        <xs:element ref="tns:dataGrid"/>
+        <xs:element ref="tns:listGrid"/>
+        <xs:element ref="tns:treeGrid"/>
+        <xs:element ref="tns:dataRepeater"/>
+        <xs:element ref="tns:listRepeater"/>
+        <xs:element ref="tns:inject"/>
+        <xs:element ref="tns:component"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="actions">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:add"/>
+        <xs:element ref="tns:export"/>
+        <xs:element ref="tns:import"/>
+        <xs:element ref="tns:cancel"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:defaults"/>
+        <xs:element ref="tns:delete"/>
+        <xs:element ref="tns:new"/>
+        <xs:element ref="tns:ok"/>
+        <xs:element ref="tns:remove"/>
+        <xs:element ref="tns:report"/>
+        <xs:element ref="tns:save"/>
+        <xs:element ref="tns:download"/>
+        <xs:element ref="tns:upload"/>
+        <xs:element ref="tns:zoomOut"/>
+        <xs:element ref="tns:print"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="widgetId" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="addAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="positionableAction" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="inActionPanel" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractAction" abstract="true">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="displayName" type="xs:string"/>
+    <xs:attribute name="toolTip" type="xs:string"/>
+    <xs:attribute name="relativeIconFileName" type="xs:string"/>
+    <xs:attribute name="iconStyleClass" type="xs:string"/>
+    <xs:attribute name="confirm" type="xs:string"/>
+    <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="bizExportAction">
+    <xs:complexContent>
+      <xs:extension base="tns:classAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="classAction" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+        <xs:attribute name="className" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="validatableAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+        <xs:attribute name="clientValidation" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="bizImportAction">
+    <xs:complexContent>
+      <xs:extension base="tns:classAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="cancelAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="customAction">
+    <xs:complexContent>
+      <xs:extension base="tns:classAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="defaultsAction" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="deleteAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="newAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="okAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="removeAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="reportAction">
+    <xs:complexContent>
+      <xs:extension base="tns:parameterizableAction">
+        <xs:sequence/>
+        <xs:attribute name="documentName" type="xs:string" use="required"/>
+        <xs:attribute name="listReport" type="xs:boolean"/>
+        <xs:attribute name="modelName" type="xs:string"/>
+        <xs:attribute name="moduleName" type="xs:string" use="required"/>
+        <xs:attribute name="queryName" type="xs:string"/>
+        <xs:attribute name="reportFormat" type="ns1:reportFormat"/>
+        <xs:attribute name="reportName" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="parameterizableAction" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence>
+          <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="saveAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="downloadAction">
+    <xs:complexContent>
+      <xs:extension base="tns:classAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="uploadAction">
+    <xs:complexContent>
+      <xs:extension base="tns:classAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="zoomOutAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="printAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewParameter">
+    <xs:sequence/>
+    <xs:attribute name="boundTo" type="xs:string" use="required"/>
+    <xs:attribute name="fromBinding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="staticImage">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="relativeFile" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="VBox">
+    <xs:complexContent>
+      <xs:extension base="tns:container">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="border" type="xs:boolean"/>
+        <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="pixelMemberPadding" type="xs:int"/>
+        <xs:attribute name="pixelPadding" type="xs:int"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
+        <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="xl" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="HBox">
+    <xs:complexContent>
+      <xs:extension base="tns:container">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="border" type="xs:boolean"/>
+        <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="pixelMemberPadding" type="xs:int"/>
+        <xs:attribute name="pixelPadding" type="xs:int"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
+        <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="xl" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="form" final="extension restriction">
+    <xs:sequence>
+      <xs:element name="column" type="tns:formColumn" form="qualified" maxOccurs="unbounded"/>
+      <xs:element name="row" type="tns:formRow" form="qualified" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="widgetId" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="border" type="xs:boolean"/>
+    <xs:attribute name="borderTitle" type="xs:string"/>
+    <xs:attribute name="defaultLabelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="formColumn">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="formRow">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+      <xs:element ref="tns:item" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="formItem">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+      <xs:choice>
+        <xs:element ref="tns:default"/>
+        <xs:element ref="tns:contentImage"/>
+        <xs:element ref="tns:contentLink"/>
+        <xs:element ref="tns:button"/>
+        <xs:element ref="tns:dialogButton"/>
+        <xs:element ref="tns:geometry"/>
+        <xs:element ref="tns:geometryMap"/>
+        <xs:element ref="tns:html"/>
+        <xs:element ref="tns:label"/>
+        <xs:element ref="tns:blurb"/>
+        <xs:element ref="tns:progressBar"/>
+        <xs:element ref="tns:checkBox"/>
+        <xs:element ref="tns:colourPicker"/>
+        <xs:element ref="tns:combo"/>
+        <xs:element ref="tns:radio"/>
+        <xs:element ref="tns:lookup"/>
+        <xs:element ref="tns:lookupDescription"/>
+        <xs:element ref="tns:password"/>
+        <xs:element ref="tns:richText"/>
+        <xs:element ref="tns:slider"/>
+        <xs:element ref="tns:spacer"/>
+        <xs:element ref="tns:spinner"/>
+        <xs:element ref="tns:staticImage"/>
+        <xs:element ref="tns:link"/>
+        <xs:element ref="tns:textArea"/>
+        <xs:element ref="tns:textField"/>
+        <xs:element ref="tns:inject"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="colspan" type="xs:int"/>
+    <xs:attribute name="help" type="xs:string"/>
+    <xs:attribute name="align" type="tns:horizontalAlignment"/>
+    <xs:attribute name="label" type="xs:string"/>
+    <xs:attribute name="labelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="required" type="xs:boolean"/>
+    <xs:attribute name="rowspan" type="xs:int"/>
+    <xs:attribute name="showHelp" type="xs:boolean"/>
+    <xs:attribute name="showLabel" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="defaultWidget">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="button">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="action" type="xs:string" use="required"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="dialogButton">
+    <xs:sequence>
+      <xs:element name="parameters" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="displayName" type="xs:string" use="required"/>
+    <xs:attribute name="dialogName" type="xs:string"/>
+    <xs:attribute name="command" type="xs:string"/>
+    <xs:attribute name="dialogWidth" type="xs:int"/>
+    <xs:attribute name="dialogHeight" type="xs:int"/>
+    <xs:attribute name="modalDialog" type="xs:boolean"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+    <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="geometryMap">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onChangedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:geometryInputType"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="label">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="value" type="xs:string"/>
+        <xs:attribute name="for" type="xs:string"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="formatted" type="xs:boolean"/>
+        <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="blurb">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="progressBar">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="spacer">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="link">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element ref="tns:actionReference"/>
+        <xs:element ref="tns:contentReference"/>
+        <xs:element ref="tns:defaultListViewReference"/>
+        <xs:element ref="tns:editViewReference"/>
+        <xs:element ref="tns:externalReference"/>
+        <xs:element ref="tns:implicitActionReference"/>
+        <xs:element ref="tns:queryListViewReference"/>
+        <xs:element ref="tns:reportReference"/>
+        <xs:element ref="tns:resourceReference"/>
+      </xs:choice>
+      <xs:element name="target" type="tns:referenceTarget" form="qualified" minOccurs="0"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="value" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="actionReference">
+    <xs:sequence/>
+    <xs:attribute name="action" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="contentReference">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="defaultListViewReference">
+    <xs:sequence/>
+    <xs:attribute name="documentName" type="xs:string" use="required"/>
+    <xs:attribute name="moduleName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="editViewReference">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence/>
+        <xs:attribute name="documentName" type="xs:string" use="required"/>
+        <xs:attribute name="moduleName" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="externalReference">
+    <xs:sequence/>
+    <xs:attribute name="href" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="implicitActionReference">
+    <xs:sequence/>
+    <xs:attribute name="implicitActionName" type="tns:implicitActionName" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="queryListViewReference">
+    <xs:sequence/>
+    <xs:attribute name="query" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="reportReference">
+    <xs:sequence>
+      <xs:element name="parameters" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="documentName" type="xs:string" use="required"/>
+    <xs:attribute name="format" type="ns1:reportFormat"/>
+    <xs:attribute name="moduleName" type="xs:string" use="required"/>
+    <xs:attribute name="reportName" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="resourceReference">
+    <xs:sequence/>
+    <xs:attribute name="relativeFile" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="referenceTarget">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type" type="tns:referenceTargetType" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="inject">
+    <xs:sequence>
+      <xs:element name="script" type="xs:string" form="qualified"/>
+      <xs:element name="accept" type="tns:injectBinding" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="injectBinding">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence/>
+        <xs:attribute name="readOnly" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="tabPane" final="extension restriction">
+    <xs:sequence>
+      <xs:element ref="tns:tab" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="widgetId" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+    <xs:attribute name="selectedTabIndexBinding" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="tab" final="extension restriction">
+    <xs:complexContent>
+      <xs:extension base="tns:container">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="icon16x16RelativeFileName" type="xs:string"/>
+        <xs:attribute name="iconStyleClass" type="xs:string"/>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="chart">
+    <xs:sequence>
+      <xs:element name="model" type="tns:chartBuilderMetaData" form="qualified" minOccurs="0"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type" type="tns:chartType" use="required"/>
+    <xs:attribute name="modelName" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderMetaData">
+    <xs:sequence>
+      <xs:choice>
+        <xs:element ref="tns:noBucket"/>
+        <xs:element ref="tns:numericMultipleBucket"/>
+        <xs:element ref="tns:numericRangeBucket"/>
+        <xs:element ref="tns:temporalBucket"/>
+        <xs:element ref="tns:textLengthBucket"/>
+        <xs:element ref="tns:textStartsWithBucket"/>
+      </xs:choice>
+      <xs:element ref="tns:top" minOccurs="0"/>
+      <xs:element ref="tns:order" minOccurs="0"/>
+      <xs:element name="JFreeChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:element name="primeFacesChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="title" type="xs:string"/>
+    <xs:attribute name="label" type="xs:string" use="required"/>
+    <xs:attribute name="moduleName" type="xs:string" use="required"/>
+    <xs:attribute name="documentName" type="xs:string"/>
+    <xs:attribute name="queryName" type="xs:string"/>
+    <xs:attribute name="categoryBinding" type="xs:string" use="required"/>
+    <xs:attribute name="valueBinding" type="xs:string" use="required"/>
+    <xs:attribute name="valueFunction" type="tns:aggregateFunction"/>
+  </xs:complexType>
+
+  <xs:complexType name="noBucketMetaData">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="numericMultipleBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="multiple" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="numericRangeBucketMetaData">
+    <xs:sequence>
+      <xs:element ref="tns:range" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="numericRangeMetaData">
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+
+  <xs:complexType name="temporalBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="type" type="tns:temporalBucketType" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="textLengthBucketMetaData">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="textStartsWithBucketMetaData">
+    <xs:sequence/>
+    <xs:attribute name="caseSensitive" type="xs:boolean" use="required"/>
+    <xs:attribute name="length" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderTopMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:chartBuilderOrderMetaData">
+        <xs:sequence/>
+        <xs:attribute name="includeOthers" type="xs:boolean" use="required"/>
+        <xs:attribute name="top" type="xs:int" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="chartBuilderOrderMetaData">
+    <xs:sequence/>
+    <xs:attribute name="by" type="tns:orderBy" use="required"/>
+    <xs:attribute name="sort" type="ns1:sortDirection" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="map">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="modelName" type="xs:string" use="required"/>
+    <xs:attribute name="loading" type="tns:loadingType"/>
+    <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
+    <xs:attribute name="showRefreshControls" type="xs:boolean"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="dynamicImage">
+    <xs:sequence>
+      <xs:element name="parameters" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="imageInitialPixelWidth" type="xs:int"/>
+    <xs:attribute name="imageInitialPixelHeight" type="xs:int"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listMembership">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="onChangedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                  <xs:element ref="tns:toggleDisabled"/>
+                  <xs:element ref="tns:toggleVisibility"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="membersHeading" type="xs:string"/>
+        <xs:attribute name="candidatesHeading" type="xs:string"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="checkMembership">
+    <xs:complexContent>
+      <xs:extension base="tns:changeableInputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="comparison">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="modelName" type="xs:string"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataGrid">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractDataWidget">
+        <xs:sequence>
+          <xs:choice maxOccurs="unbounded">
+            <xs:element ref="tns:boundColumn"/>
+            <xs:element ref="tns:containerColumn"/>
+          </xs:choice>
+          <xs:element name="onAddedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onRemovedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onSelectedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="inline" type="xs:boolean"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="wrap" type="xs:boolean"/>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+        <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
+        <xs:attribute name="disableZoom" type="xs:string"/>
+        <xs:attribute name="enableZoom" type="xs:string"/>
+        <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
+        <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="enableRemove" type="xs:string"/>
+        <xs:attribute name="showAdd" type="xs:boolean"/>
+        <xs:attribute name="showZoom" type="xs:boolean"/>
+        <xs:attribute name="showEdit" type="xs:boolean"/>
+        <xs:attribute name="showRemove" type="xs:boolean"/>
+        <xs:attribute name="showDeselect" type="xs:boolean"/>
+        <xs:attribute name="selectedIdBinding" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractDataWidget" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence/>
+        <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="title" type="xs:string"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
+        <xs:attribute name="sm" type="xs:int"/>
+        <xs:attribute name="md" type="xs:int"/>
+        <xs:attribute name="lg" type="xs:int"/>
+        <xs:attribute name="xl" type="xs:int"/>
+        <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="minPixelWidth" type="xs:int"/>
+        <xs:attribute name="maxPixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="percentageHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridBoundColumn">
+    <xs:complexContent>
+      <xs:extension base="tns:dataGridColumn">
+        <xs:sequence>
+          <xs:element name="input" type="tns:widgetReference" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="binding" type="xs:string"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridColumn" abstract="true">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="title" type="xs:string"/>
+    <xs:attribute name="alignment" type="tns:horizontalAlignment"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridContainerColumn">
+    <xs:complexContent>
+      <xs:extension base="tns:dataGridColumn">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:link"/>
+            <xs:element ref="tns:contentImage"/>
+            <xs:element ref="tns:staticImage"/>
+            <xs:element ref="tns:dynamicImage"/>
+            <xs:element ref="tns:blurb"/>
+            <xs:element ref="tns:label"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="listGrid">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractListWidget">
+        <xs:sequence>
+          <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onDeletedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onSelectedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+        <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
+        <xs:attribute name="disableZoom" type="xs:string"/>
+        <xs:attribute name="enableZoom" type="xs:string"/>
+        <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
+        <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="enableRemove" type="xs:string"/>
+        <xs:attribute name="showAdd" type="xs:boolean"/>
+        <xs:attribute name="showZoom" type="xs:boolean"/>
+        <xs:attribute name="showEdit" type="xs:boolean"/>
+        <xs:attribute name="showRemove" type="xs:boolean"/>
+        <xs:attribute name="showDeselect" type="xs:boolean"/>
+        <xs:attribute name="showFilter" type="xs:boolean"/>
+        <xs:attribute name="showSummary" type="xs:boolean"/>
+        <xs:attribute name="showExport" type="xs:boolean"/>
+        <xs:attribute name="showChart" type="xs:boolean"/>
+        <xs:attribute name="showSnap" type="xs:boolean"/>
+        <xs:attribute name="showTag" type="xs:boolean"/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
+        <xs:attribute name="selectedIdBinding" type="xs:string"/>
+        <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractListWidget" abstract="true">
+    <xs:sequence>
+      <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="title" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="postRefresh" type="xs:string"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
+    <xs:attribute name="sm" type="xs:int"/>
+    <xs:attribute name="md" type="xs:int"/>
+    <xs:attribute name="lg" type="xs:int"/>
+    <xs:attribute name="xl" type="xs:int"/>
+    <xs:attribute name="percentageWidth" type="xs:int"/>
+    <xs:attribute name="minPixelWidth" type="xs:int"/>
+    <xs:attribute name="maxPixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="percentageHeight" type="xs:int"/>
+    <xs:attribute name="minPixelHeight" type="xs:int"/>
+    <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="treeGrid">
+    <xs:complexContent>
+      <xs:extension base="tns:listGrid">
+        <xs:sequence/>
+        <xs:attribute name="rootIdBinding" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataRepeater">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractDataWidget">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:boundColumn"/>
+            <xs:element ref="tns:containerColumn"/>
+          </xs:choice>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="showColumnHeaders" type="xs:boolean"/>
+        <xs:attribute name="showGrid" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="listRepeater">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractListWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="showColumnHeaders" type="xs:boolean"/>
+        <xs:attribute name="showGrid" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="component">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="names" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="tns:componentNameMap" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="module" type="xs:string"/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="componentNameMap">
+    <xs:sequence/>
+    <xs:attribute name="fromComponent" type="xs:string" use="required"/>
+    <xs:attribute name="mappedTo" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="viewType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="create"/>
+      <xs:enumeration value="edit"/>
+      <xs:enumeration value="pick"/>
+      <xs:enumeration value="params"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="horizontalAlignment">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="left"/>
+      <xs:enumeration value="centre"/>
+      <xs:enumeration value="right"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="geometryInputType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="point"/>
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="polygon"/>
+      <xs:enumeration value="pointAndLine"/>
+      <xs:enumeration value="pointAndPolygon"/>
+      <xs:enumeration value="lineAndPolygon"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="keyboardType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="numeric"/>
+      <xs:enumeration value="tel"/>
+      <xs:enumeration value="decimal"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="search"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="completeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="previous"/>
+      <xs:enumeration value="suggest"/>
+      <xs:enumeration value="constrain"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="shrinkWrap">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="width"/>
+      <xs:enumeration value="height"/>
+      <xs:enumeration value="both"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="verticalAlignment">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="middle"/>
+      <xs:enumeration value="top"/>
+      <xs:enumeration value="bottom"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="implicitActionName">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DEFAULTS"/>
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="Save"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Remove"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Download"/>
+      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Print"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="referenceTargetType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="self"/>
+      <xs:enumeration value="blankFrame"/>
+      <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="chartType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="line"/>
+      <xs:enumeration value="lineArea"/>
+      <xs:enumeration value="bar"/>
+      <xs:enumeration value="horizontalBar"/>
+      <xs:enumeration value="radar"/>
+      <xs:enumeration value="pie"/>
+      <xs:enumeration value="doughnut"/>
+      <xs:enumeration value="polarArea"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="temporalBucketType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dayMonthYear"/>
+      <xs:enumeration value="day"/>
+      <xs:enumeration value="month"/>
+      <xs:enumeration value="year"/>
+      <xs:enumeration value="monthYear"/>
+      <xs:enumeration value="hour"/>
+      <xs:enumeration value="hourDay"/>
+      <xs:enumeration value="hourDayMonth"/>
+      <xs:enumeration value="minuteHour"/>
+      <xs:enumeration value="secondMinuteHour"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="aggregateFunction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Min"/>
+      <xs:enumeration value="Max"/>
+      <xs:enumeration value="Sum"/>
+      <xs:enumeration value="Count"/>
+      <xs:enumeration value="Avg"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="orderBy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="category"/>
+      <xs:enumeration value="value"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="loadingType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="eager"/>
+      <xs:enumeration value="lazy"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

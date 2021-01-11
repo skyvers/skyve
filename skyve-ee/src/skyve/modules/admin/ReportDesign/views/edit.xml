@@ -3,12 +3,12 @@
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		name="edit" 
-		title="Report Design">
+		title="admin.reportDesign.edit.title">
 	<tabPane>
-		<tab title="General">
+		<tab title="admin.reportDesign.edit.general.tabTitle">
 			<hbox shrinkWrap="height">
 				<vbox>
-					<form border="true" borderTitle="Report Definition">
+					<form border="true" borderTitle="admin.reportDesign.edit.reportDefinition.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<row>
@@ -97,7 +97,7 @@
 							</item>
 						</row>
 					</form>
-					<form border="true" borderTitle="Subreport Definition">
+					<form border="true" borderTitle="admin.reportDesign.edit.subreportDefinition.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<column responsiveWidth="4" />
@@ -113,7 +113,7 @@
 					</form>
 				</vbox>
 				<vbox>
-					<form border="true" borderTitle="Report Setup">
+					<form border="true" borderTitle="admin.reportDesign.edit.reportSetup.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<column responsiveWidth="4" />
@@ -160,7 +160,7 @@
 							</item>
 						</row>
 					</form>
-					<form border="true" borderTitle="Page Setup">
+					<form border="true" borderTitle="admin.reportDesign.edit.pageSetup.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<column responsiveWidth="4" />
@@ -219,7 +219,7 @@
 							</item>
 						</row>
 					</form>
-					<form border="true" borderTitle="Section Override">
+					<form border="true" borderTitle="admin.reportDesign.edit.sectionOverride.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<column responsiveWidth="4" />
@@ -265,7 +265,7 @@
 							</item>
 						</row>
 					</form>
-					<form border="true" borderTitle="Cell Setup">
+					<form border="true" borderTitle="admin.reportDesign.edit.cellSetup.borderTitle">
 						<column responsiveWidth="4" />
 						<column />
 						<column responsiveWidth="4" />
@@ -312,7 +312,7 @@
 							</item>
 						</row>
 					</form>
-					<form border="true" borderTitle="Checkboxes">
+					<form border="true" borderTitle="admin.reportDesign.edit.checkboxes.borderTitle">
 						<column />
 						<column />
 						<row>
@@ -329,7 +329,7 @@
 				</vbox>
 			</hbox>
 		</tab>
-		<tab title="JRXML">
+		<tab title="admin.reportDesign.edit.jrxml.tabTitle">
 			<form>
 				<column responsiveWidth="2" />
 				<column />
@@ -343,8 +343,8 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action className="GenerateDefault" displayName="Generate Default" confirm="OK to Generate? All data will be cleared first." iconStyleClass="fa fa-bolt"/>
-		<download className="Preview" displayName="Preview" iconStyleClass="fa fa-print"/>
+		<action className="GenerateDefault" displayName="admin.reportDesign.actions.generateDefault.displayName" confirm="OK to Generate? All data will be cleared first." iconStyleClass="fa fa-bolt"/>
+		<download className="Preview" displayName="admin.reportDesign.actions.preview.displayName" iconStyleClass="fa fa-print"/>
 	</actions>
 	<newParameters />
 </view>

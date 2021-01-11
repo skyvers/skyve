@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		dir="#{adminUnsubscribe.dir}">
+	<f:view encoding="UTF-8">
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />
+		<f:metadata>
+			<f:viewParam name="i" value="#{adminUnsubscribe.bizIdParameter}" />
+			<f:viewParam name="c" value="#{adminUnsubscribe.bizCustomerParameter}" />
+			<f:event type="preRenderView" listener="#{adminUnsubscribe.preRender}" />
+		</f:metadata>
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(adminUnsubscribe.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{adminUnsubscribe}" />
+			<ui:param name="showMenu" value="false" />
+			<ui:param name="showSwitchMode" value="false" />
+			<ui:param name="showLogout" value="false" />
+			<ui:define name="body">
+				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty adminUnsubscribe.user}">
+					<h1 style="text-align: center"><h:outputText escape="false" value="#{adminUnsubscribe.i18n['page.public.noPublicUser']}" /></h1>
+				</h:panelGroup>
+				<h:panelGroup rendered="#{not empty adminUnsubscribe.user and adminUnsubscribe.success}">
+					<h1 style="text-align: center">#{adminUnsubscribe.i18n['page.unsubscribe.success']}</h1>
+				</h:panelGroup>
+				<h:panelGroup rendered="#{not empty adminUnsubscribe.user and not adminUnsubscribe.success}">
+					<h1 style="text-align: center">#{adminUnsubscribe.i18n['page.unsubscribe.error']}</h1>
+				</h:panelGroup>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

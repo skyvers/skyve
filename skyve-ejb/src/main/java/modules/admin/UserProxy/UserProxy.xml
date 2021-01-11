@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserProxy"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A proxy version of the admin.User (without roles and groups etc) used for referencing.
+		]]>
+	</documentation>
+	<persistent name="ADM_SecurityUser">
+		<cache>reference</cache>
+	</persistent>
+	<singularAlias>User</singularAlias>
+	<pluralAlias>Users</pluralAlias>
+	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
+	<bizKey expression="{userName} - {contact.bizKey}" />
+	<attributes>
+		<text name="userName" required="true">
+			<documentation>
+				<![CDATA[
+					Length is derived from the maximum email address length from RFC 5321
+				]]>
+			</documentation>
+			<displayName>User Name</displayName>
+			<length>254</length>
+		</text>
+		<dateTime name="createdDateTime">
+			<displayName>Created</displayName>
+			<description>The time and date when this user account was created.</description>
+		</dateTime>
+		<!-- If you change this association to be composed or optional, change it in admin.User document also -->
+		<association name="contact" type="aggregation" required="true">
+			<displayName>Contact</displayName>
+			<description>The contact details for the user.</description>
+			<documentName>Contact</documentName>
+		</association>
+		<boolean name="inactive">
+			<displayName>Inactive</displayName>
+			<description>Flag to indicate that this account has been marked as inactive and no longer in use.</description>
+		</boolean>
+	</attributes>
+</document>

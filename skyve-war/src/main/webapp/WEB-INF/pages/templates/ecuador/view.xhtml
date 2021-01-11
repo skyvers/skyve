@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:o="http://omnifaces.org/ui"
+		dir="#{bean.dir}">
+	<f:view encoding="UTF-8">
+		<ui:composition template="./template.xhtml">
+			<ui:param name="showMenu" value="#{showMenu}" />
+			<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
+			<ui:param name="showLogout" value="#{showLogout}" />
+			<ui:param name="bean" value="#{bean}" />
+			<ui:define name="head">
+				<h:outputScript library="primefaces" name="moment/moment.js" />
+				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
+				<ui:insert name="head" />
+			</ui:define>
+			<ui:define name="body">
+				<ui:insert name="body" />
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

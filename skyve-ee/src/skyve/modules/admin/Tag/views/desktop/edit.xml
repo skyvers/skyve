@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Details">
+		<tab title="admin.tag.edit.details.tabTitle">
 			<form border="true">
 				<column percentageWidth="20" />
 				<column />
@@ -19,7 +19,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Copy">
+			<form border="true" borderTitle="admin.tag.edit.copy.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -43,7 +43,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Combinations">
+		<tab title="admin.tag.edit.combinations.tabTitle">
 			<vbox border="true" shrinkWrap="height">
 				<form>
 					<column percentageWidth="20" />
@@ -116,8 +116,8 @@
 				</form>
 			</vbox>
 		</tab>
-		<tab title="Load">
-			<form border="true" borderTitle="Context">
+		<tab title="admin.tag.edit.load.tabTitle">
+			<form border="true" borderTitle="admin.tag.edit.context.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -156,7 +156,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Match" >
+			<form border="true" borderTitle="admin.tag.edit.match.borderTitle" >
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -190,7 +190,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Load">
+			<form border="true" borderTitle="admin.tag.edit.load.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -219,8 +219,8 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="Action">
-			<form border="true" borderTitle="Context">
+		<tab title="admin.tag.edit.action.tabTitle">
+			<form border="true" borderTitle="admin.tag.edit.context.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -243,7 +243,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Action">
+			<form border="true" borderTitle="admin.tag.edit.action.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -268,7 +268,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Notification">
+			<form border="true" borderTitle="admin.tag.edit.notification.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -278,7 +278,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="Perform">
+			<form border="true" borderTitle="admin.tag.edit.perform.borderTitle">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -300,23 +300,23 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
+		<action className="PrepareExplanation" displayName="admin.tag.actions.prepareExplanation" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
 			clientValidation="false" iconStyleClass="fa fa-search"/>
-		<action className="PerformCombination" displayName="Perform Combination" inActionPanel="false"
-			clientValidation="false" toolTip="Perform the selected combination operation." confirm="Ok to perform the combination?"
+		<action className="PerformCombination" displayName="admin.tag.actions.performCombination.displayName" inActionPanel="false"
+			clientValidation="false" toolTip="admin.tag.actions.performCombination.toolTip" confirm="Ok to perform the combination?"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" enabled="allowCombination"/>
-		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
-			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
+		<action className="CopyTagToUser" displayName="admin.tag.actions.copyTagToUser.displayName" inActionPanel="false" clientValidation="false"
+			toolTip="admin.tag.actions.copyTagToUser.toolTip" confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
 
-		<action className="Clear" displayName="Clear Tag" inActionPanel="false" toolTip="Clear tagged records."
+		<action className="Clear" displayName="admin.tag.actions.clear.displayName" inActionPanel="false" toolTip="admin.tag.actions.clear.toolTip"
 			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete" />
-		<action className="TagAll" displayName="Tag All" inActionPanel="false" toolTip="Tag all instances of this document."
+		<action className="TagAll" displayName="admin.tag.actions.tagAll.displayName" inActionPanel="false" toolTip="admin.tag.actions.tagAll.toolTip"
 			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" iconStyleClass="fa fa-step-forward"/>
-		<upload className="UploadTagCriteria" displayName="Upload Tag Criteria" inActionPanel="false"
-			toolTip="Upload criteria for tagging records" disabled="notAttributeSet" />
+		<upload className="UploadTagCriteria" displayName="admin.tag.actions.uploadTagCriteria.displayName" inActionPanel="false"
+			toolTip="admin.tag.actions.uploadTagCriteria.toolTip" disabled="notAttributeSet" />
 
-		<action className="BulkDocumentAction" displayName="Run Tag Action Job" inActionPanel="false"
-			toolTip="Perform the selected document action for all applicable tagged records." confirm="Ok to perform the action for this document type?"
+		<action className="BulkDocumentAction" displayName="admin.tag.actions.bulkDocumentAction.displayName" inActionPanel="false"
+			toolTip="admin.tag.actions.bulkDocumentAction.toolTip" confirm="Ok to perform the action for this document type?"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-delete"/>
 
 	</actions>

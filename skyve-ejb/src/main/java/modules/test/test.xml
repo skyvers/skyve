@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="test" title="Test" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>list</homeRef>
+	<homeDocument>AllAttributesPersistent</homeDocument>
+	<documents>
+		<document ref="AllAttributesPersistent" />
+		<document ref="AllAttributesEmbedded" />
+		<document ref="AllAttributesRequiredPersistent" />
+		<document ref="AnyBase" />
+		<document ref="AnyDerived1" />
+		<document ref="AnyDerived2" />
+		<document ref="ArcOneToMany" />
+		<document ref="ArcOneToOne" />
+		<document ref="Hierarchical" />
+		<document ref="InjectedDocument" />
+		<document ref="InverseManyToManyPersistent" />
+		<document ref="InverseOneToManyPersistent" />
+		<document ref="InverseOneToOnePersistent" />
+		<document ref="MappedBase" />
+		<document ref="MappedExtensionJoinedStrategy" />
+		<document ref="MappedExtensionSingleStrategy" />
+		<document ref="MappedSubclassedJoinedStrategy" />
+		<document ref="MappedSubclassedSingleStrategy" />
+		<document ref="UniqueConstraintNonNullable" />
+		<document ref="UniqueConstraintNullable" />
+	</documents>
+	<menu />
+	<queries>
+		<query name="qH" documentName="Hierarchical">
+			<description>Test Hierarchical Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qHPoly" documentName="Hierarchical" polymorphic="true">
+			<description>Test Hierarchical Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMB" documentName="MappedBase">
+			<description>Test MappedBase Document</description>
+			<columns>
+				<column binding="text" sortable="false" filterable="false" editable="false" />
+			</columns>
+		</query>
+		<query name="qMEJS" documentName="MappedExtensionJoinedStrategy">
+			<description>Test MappedExtensionJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMEJSNotPoly" documentName="MappedExtensionJoinedStrategy" polymorphic="false">
+			<description>Test MappedExtensionJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMESS" documentName="MappedExtensionSingleStrategy">
+			<description>Test MappedExtensionSingleStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMSJS" documentName="MappedSubclassedJoinedStrategy">
+			<description>Test MappedSubclassedJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMSSS" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qMetaDataQueryColumnBinding" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<columns>
+				<column binding="text">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{TEST}</filterExpression>
+				</column>
+			</columns>
+		</query>
+		<query name="qMetaDataQueryFromAndFilterBinding" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<from>{test.MappedSubclassedSingleStrategy} as bean</from>
+			<filter>
+				bean.text = {TEST}
+			</filter>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</query>
+		<query name="qExpressionQuery" documentName="AllAttributesPersistent">
+			<description>Test qExpressionQueryProjected</description>
+			<columns>
+				<column displayName="Projected Unsorted" editable="false" filterable="false">
+					<name>pu</name>
+					<expression>
+						<![CDATA[
+							pu
+						]]>
+					</expression>
+				</column>
+				<column displayName="Not Projected Unsorted" editable="false" filterable="false">
+					<name>npu</name>
+					<projected>false</projected>
+					<expression>
+						<![CDATA[
+							npu
+						]]>
+					</expression>
+				</column>
+				<column displayName="Projected Sorted" editable="false" filterable="false" sortOrder="ascending">
+					<name>ps</name>
+					<expression>
+						<![CDATA[
+							ps
+						]]>
+					</expression>
+				</column>
+				<column displayName="Not Projected Sorted" editable="false" filterable="false" sortOrder="descending">
+					<name>nps</name>
+					<projected>false</projected>
+					<expression>
+						<![CDATA[
+							nps
+						]]>
+					</expression>
+				</column>
+			</columns>
+		</query>
+		<query name="qAssociations" documentName="AllAttributesPersistent">
+			<description>Test Associations and association of association work</description>
+			<columns>
+				<column binding="aggregatedAssociation" displayName="aggregatedAssociation" />
+				<column binding="aggregatedAssociation.aggregatedAssociation" displayName="aggregatedAssociation.aggregatedAssociation" />
+			</columns>
+		</query>
+	</queries>
+</module>

@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -10,9 +10,13 @@
 	<modules>
 		<module>skyve-core</module>
 		<module>skyve-ext</module>
+		<module>skyve-ear</module>
+		<module>skyve-war</module>
 		<module>skyve-web</module>
 		<module>skyve-content</module>
 		<module>skyve-tools</module>
+		<module>skyve-ejb</module>
+		<module>skyve-maven-plugin</module>
 	</modules>
 
 	<properties>
@@ -97,6 +101,7 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
 					</configuration>
@@ -180,6 +185,12 @@
 			<url>http://repo.skyve.org/repository/skyve/</url>
 		</repository>
 	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>skyve</id>
+			<url>https://repo.skyve.org/repository/skyve/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<dependencyManagement>
 		<dependencies>

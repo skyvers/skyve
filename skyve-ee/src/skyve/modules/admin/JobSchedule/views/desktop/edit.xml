@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Jobs" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view"
+<view title="admin.jobSchedule.edit.title" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox pixelPadding="10">
-		<form border="true" borderTitle="Job Details" percentageWidth="60">
+		<form border="true" borderTitle="admin.jobSchedule.edit.jobDetails.borderTitle" percentageWidth="60">
 			<column percentageWidth="20" />
 			<column percentageWidth="40" />
 			<row>
@@ -14,7 +14,7 @@
 				</item>
 			</row>
 		</form>
-		<vbox border="true" borderTitle="When To Execute" shrinkWrap="height" percentageWidth="60">
+		<vbox border="true" borderTitle="admin.jobSchedule.edit.whenToExecute.displayName" shrinkWrap="height" percentageWidth="60">
 			<form>
 				<column pixelWidth="100" />
 				<column />
@@ -26,7 +26,7 @@
 				</row>
 			</form>
 			<hbox>
-				<vbox border="true" borderTitle="Minutes" pixelWidth="200" pixelMemberPadding="10">
+				<vbox border="true" borderTitle="admin.jobSchedule.edit.minutes.borderTitle" pixelWidth="200" pixelMemberPadding="10">
 					<form>
 						<column />
 						<row>
@@ -252,7 +252,7 @@
 						</row>
 					</form>
 				</vbox>
-				<vbox border="true" borderTitle="Hours" pixelWidth="80">
+				<vbox border="true" borderTitle="admin.jobSchedule.edit.hours.borderTitle" pixelWidth="80">
 					<form>
 						<column />
 						<row>
@@ -364,7 +364,7 @@
 						</row>
 					</form>
 				</vbox>
-				<vbox border="true" borderTitle="Days" pixelWidth="160">
+				<vbox border="true" borderTitle="admin.jobSchedule.edit.days.borderTitle" pixelWidth="160">
 					<form>
 						<column />
 						<row>
@@ -497,7 +497,7 @@
 						</row>
 					</form>
 				</vbox>
-				<vbox border="true" borderTitle="Months" pixelWidth="60">
+				<vbox border="true" borderTitle="admin.jobSchedule.edit.months.borderTitle" pixelWidth="60">
 					<form>
 						<column />
 						<row>
@@ -571,7 +571,7 @@
 						</row>
 					</form>
 				</vbox>
-				<vbox border="true" borderTitle="Weekdays" pixelWidth="60">
+				<vbox border="true" borderTitle="admin.jobSchedule.edit.weekdays.borderTitle" pixelWidth="60">
 					<form>
 						<column />
 						<row>
@@ -622,7 +622,7 @@
 				</vbox>
 			</hbox>
 		</vbox>
-		<form percentageWidth="60" border="true" borderTitle="Date Range To Execute">
+		<form percentageWidth="60" border="true" borderTitle="admin.jobSchedule.edit.dateRangeToExecute.borderTitle">
 			<column percentageWidth="20" />
 			<column />
 			<column percentageWidth="20" />
@@ -642,7 +642,7 @@
 		<save disabled="scheduledImmediately" visible="jobScheduler" />
 		<cancel />
 		<delete disabled="scheduledImmediately" visible="jobScheduler" />
-		<action className="RunJobNow" displayName="Schedule Job for Now" inActionPanel="true" 
+		<action className="RunJobNow" displayName="admin.jobSchedule.actions.runJobNow.displayName" inActionPanel="true" 
 			confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
 			clientValidation="false"

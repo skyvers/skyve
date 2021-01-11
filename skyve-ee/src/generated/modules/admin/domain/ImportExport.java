@@ -70,7 +70,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	public static final String loadTypePropertyName = "loadType";
 
 	/**
-	 * Mode
+	 * admin.importExport.mode.displayName
 	 **/
 	@XmlEnum
 	public static enum Mode implements Enumeration {
@@ -147,12 +147,12 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Error handling
+	 * admin.importExport.rollbackErrors.displayName
 	 **/
 	@XmlEnum
 	public static enum RollbackErrors implements Enumeration {
-		rollbackErrors("rollbackErrors", "Roll-back all if there's a problem"),
-		noRollbackErrors("noRollbackErrors", "Load and save until error or complete");
+		rollbackErrors("rollbackErrors", "admin.importExport.rollbackErrors.rollbackErrors.description"),
+		noRollbackErrors("noRollbackErrors", "admin.importExport.rollbackErrors.noRollbackErrors.description");
 
 		private String code;
 		private String description;
@@ -224,18 +224,14 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Loading strategy
+	 * admin.importExport.loadType.displayName
 	 * <br/>
-	 * <p><b>Loading strategy</b></p>
-				<p><b>Create related records if they don't exist (recommended)</b>
-				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
-				<p><b>Create everything even if there might be duplicates</b>
-					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+	 * admin.importExport.loadType.description
 	 **/
 	@XmlEnum
 	public static enum LoadType implements Enumeration {
-		createFind("createFind", "Create related records if they don't exist"),
-		createAll("createAll", "Create everything even if there might be duplicates");
+		createFind("createFind", "admin.importExport.loadType.createFind.description"),
+		createAll("createAll", "admin.importExport.loadType.createAll.description");
 
 		private String code;
 		private String description;
@@ -307,69 +303,65 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Mode
+	 * admin.importExport.mode.displayName
 	 **/
 	private Mode mode = Mode.importData;
 	/**
-	 * Module Name
+	 * admin.importExport.moduleName.displayName
 	 **/
 	private String moduleName;
 	/**
-	 * Document
+	 * admin.importExport.documentName.displayName
 	 **/
 	private String documentName;
 	/**
-	 * File Absolute Path
+	 * admin.importExport.importFileAbsolutePath.displayName
 	 **/
 	private String importFileAbsolutePath;
 	/**
-	 * Imported File
+	 * admin.importExport.importFileName.displayName
 	 **/
 	private String importFileName;
 	/**
-	 * File Absolute Path
+	 * admin.importExport.exportFileAbsolutePath.displayName
 	 **/
 	private String exportFileAbsolutePath;
 	/**
-	 * Results
+	 * admin.importExport.results.displayName
 	 **/
 	private String results;
 	/**
-	 * Advanced Mode
+	 * admin.importExport.advancedMode.displayName
 	 **/
 	@Deprecated
 	private Boolean advancedMode;
 	/**
-	 * Include Titles only
+	 * admin.importExport.columnTitlesOnly.displayName
 	 **/
 	@Deprecated
 	private Boolean columnTitlesOnly;
 	/**
-	 * Column Headers
+	 * admin.importExport.fileContainsHeaders.displayName
 	 **/
 	private Boolean fileContainsHeaders = new Boolean(true);
 	/**
-	 * Detailed logging
+	 * admin.importExport.detailedLogging.displayName
 	 * <br/>
-	 * Include all import details row by row to server log
+	 * admin.importExport.detailedLogging.description
 	 **/
 	private Boolean detailedLogging = new Boolean(true);
 	/**
-	 * Columns
+	 * admin.importExport.collection.importExportColumns.displayName
 	 **/
 	private List<ImportExportColumn> importExportColumns = new ChangeTrackingArrayList<>("importExportColumns", this);
 	/**
-	 * Error handling
+	 * admin.importExport.rollbackErrors.displayName
 	 **/
 	private RollbackErrors rollbackErrors = RollbackErrors.rollbackErrors;
 	/**
-	 * Loading strategy
+	 * admin.importExport.loadType.displayName
 	 * <br/>
-	 * <p><b>Loading strategy</b></p>
-				<p><b>Create related records if they don't exist (recommended)</b>
-				<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
-				<p><b>Create everything even if there might be duplicates</b>
-					<br/><i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+	 * admin.importExport.loadType.description
 	 **/
 	private LoadType loadType = LoadType.createFind;
 

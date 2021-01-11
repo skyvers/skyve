@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		dir="#{skyvePublic.dir}">
+	<f:view encoding="UTF-8">
+		<f:metadata>
+			<f:viewParam name="a" value="#{skyvePublic.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyvePublic.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyvePublic.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyvePublic.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyvePublic.bizIdParameter}" />
+			<f:viewParam name="c" value="#{skyvePublic.bizCustomerParameter}" />
+			<f:event type="preRenderView" listener="#{skyvePublic.preRender}"/>
+		</f:metadata>
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyvePublic.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyvePublic}" />
+			<ui:param name="showMenu" value="false" />
+			<ui:param name="showSwitchMode" value="false" />
+			<ui:param name="showLogout" value="false" />
+			<ui:define name="body">
+				<s:conversation managedBean="skyvePublic" />
+				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyvePublic.user}">
+					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyvePublic.i18n['page.public.noPublicUser']}" /></h1>
+				</h:panelGroup>
+				<h:form prependId="false" rendered="#{not empty skyvePublic.user}">
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyvePublic}" />
+					</ui:include>
+					<s:view module="#{skyvePublic.bizModuleParameter}"
+								document="#{skyvePublic.bizDocumentParameter}"
+								managedBean="skyvePublic"
+								update="@form" />
+				</h:form>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveBizImport.dir}">
+    <f:view encoding="#{_skyveBizImport.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_skyveBizImport.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveBizImport.i18n['page.bizImport.title']}</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-panelgrid .ui-widget-content {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-panelgrid td {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-fileupload-content {
+					min-height: 200px;
+					background-image: url(images/filedrop.png);
+					background-position: right bottom;
+					background-repeat: no-repeat;
+				}
+			</style>
+		</h:head>
+		<h:body>
+			<h:form enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
+				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
+				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
+				<p:fileUpload fileUploadListener="#{_skyveBizImport.handleFileUpload}" 
+								allowTypes="/(\.|\/)(XLS|XLSX)$/i"
+								update="messages problems" 
+								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
+			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
+			    <p/>
+			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">
+					<f:facet name="header">#{_skyveBizImport.i18n['page.bizImport.problems']}</f:facet>
+					<p:column width="40" style="text-align:center">
+						<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
+						<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
+					</p:column>
+					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.where']}">
+						<span style="font-weight: bold;">#{problem.where}</span>
+					</p:column>
+					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.what']}">
+						#{problem.what}
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

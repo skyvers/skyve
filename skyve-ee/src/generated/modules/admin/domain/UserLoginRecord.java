@@ -40,15 +40,15 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	public static final String failedPropertyName = "failed";
 
 	/**
-	 * User Name
+	 * admin.userLoginRecord.userName.displayName
 	 **/
 	private String userName;
 	/**
-	 * Login Date/Time
+	 * admin.userLoginRecord.loginDateTime.displayName
 	 **/
 	private DateTime loginDateTime;
 	/**
-	 * Failed
+	 * admin.userLoginRecord.failed.displayName
 	 **/
 	private Boolean failed;
 

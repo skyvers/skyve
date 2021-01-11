@@ -10,31 +10,27 @@
 	<bizKey expression="Column {columnName}"/>
 	<attributes>
 		<text name="columnName" required="true">
-			<displayName>Column Title</displayName>
+			<displayName>admin.importExportColumn.columnName.displayName</displayName>
 			<length>500</length>
 		</text>
 		<text name="bindingName" >
-			<displayName>Binding</displayName>
+			<displayName>admin.importExportColumn.bindingName.displayName</displayName>
 			<domain>dynamic</domain>
 			<length>200</length>
 		</text>
 		<text name="bindingExpression" >
-			<displayName>Expression</displayName>
-			<description><![CDATA[
-			<strong>An expression using bindings relative to the document.</strong>
-			For exports, you can use compound expressions using bindings and literals, for example:
-			<i>{name} ({mobile})</i>
-			]]></description>
+			<displayName>admin.importExportColumn.bindingExpression.displayName</displayName>
+			<description><![CDATA[admin.importExportColumn.bindingExpression.description]]></description>
 			<length>500</length>
 		</text>
 		<enum name="loadAction" >
 			<displayName>Action</displayName>
 			<values>
-				<value code="set" name="setValue" description="Set value"/>
-				<value code="equals" name="lookupEquals" description="Find exact match"/>
-				<value code="like" name="lookupLike" description="Find like match"/>
-				<value code="contains" name="lookupContains" description="Find matches containing this value"/>
-				<value code="confirm" name="confirmValue" description="Fail if not found"/>
+				<value code="set" name="setValue" description="admin.importExportColumn.loadAction.set.description"/>
+				<value code="equals" name="lookupEquals" description="admin.importExportColumn.loadAction.equals.description"/>
+				<value code="like" name="lookupLike" description="admin.importExportColumn.loadAction.like.description"/>
+				<value code="contains" name="lookupContains" description="admin.importExportColumn.loadAction.contains.description"/>
+				<value code="confirm" name="confirmValue" description="admin.importExportColumn.loadAction.confirm.description"/>
 			</values>
 		</enum>
 	</attributes>

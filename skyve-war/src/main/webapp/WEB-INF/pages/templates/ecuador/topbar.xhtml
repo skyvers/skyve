@@ -1,0 +1,54 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:f="http://java.sun.com/jsf/core"
+					xmlns:h="http://java.sun.com/jsf/html"
+					xmlns:ui="http://java.sun.com/jsf/facelets"
+					xmlns:p="http://primefaces.org/ui"
+					xmlns:pt="http://primefaces.org/ecuador"
+					xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<div class="layout-topbar">
+        <a href="#" id="topbar-menu-button">
+            <i class="fa fa-angle-left arrow"></i>
+            <i class="fa fa-angle-up mobile"></i>
+        </a>
+
+        <div id="topbar-appname">
+            <span class="app-name">
+            	<p:outputPanel id="title" layout="inline">
+            		#{title}
+            		<p:autoUpdate />
+           		</p:outputPanel>
+       		</span>
+        </div>
+        
+        <!-- <div class="logo-container">
+        	<p:graphicImage name="images/skyve-logo-white.png" library="skyve" />
+        </div> -->
+
+		<c:if test="#{showSwitchMode or showLogout}">
+	        <a id="topbar-profile-menu-button" href="#">
+	            <span>#{user.name}</span>
+	            <!-- <p:graphicImage name="images/avatar.png" library="ecuador-layout" styleClass="topbar-profile" /> -->
+	            <i class="fa fa-angle-down"></i>
+	        </a>
+	
+	        <ul id="topbar-usermenu">
+				<c:if test="#{showSwitchMode}">
+					<li>
+						<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
+							<i class="fa fa-share-square-o"></i>
+							<span class="topbar-item-name">Switch Mode</span>
+						</p:commandLink>
+					</li>
+				</c:if>
+				<c:if test="#{showLogout}">
+		        	<li>
+		        		<a href="javascript:void(0)" onclick="window.location = 'loggedOut'">
+							<i class="fa fa-power-off"></i>
+							<span class="topbar-item-name">Logout</span>
+						</a>
+					</li>
+				</c:if>
+	        </ul>
+	    </c:if>
+    </div>
+</ui:composition>

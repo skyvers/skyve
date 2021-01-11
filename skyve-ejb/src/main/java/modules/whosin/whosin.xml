@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="whosin" title="Who's In?" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>list</homeRef>
+	<homeDocument>Office</homeDocument>
+	<jobs>
+		<job name="jLoadDemoData" displayName="Load Demonstration Data" className="modules.whosin.LoadDemonstrationDataJob" />
+	</jobs>
+	<documents>
+		<document ref="Office" />
+		<document ref="Staff" defaultQueryName="qStaff"/>
+		<document ref="MyStatus" />
+
+		<document ref="Contact" moduleRef="admin" />
+		<document ref="User" moduleRef="admin" />
+	</documents>
+	<roles>
+		<role name="Manager">
+			<description>Manages offices and staff.</description>
+			<privileges>
+				<document name="Office" permission="CRUDC" />
+				<document name="Staff" permission="CRUDC" />
+				<document name="MyStatus" permission="_____" />
+			</privileges>
+		</role>
+		<role name="StaffMember">
+			<description>A staff member.</description>
+			<privileges>
+				<document name="Office" permission="_R__C" />
+				<document name="Staff" permission="_RU_C" />
+				<document name="MyStatus" permission="_____" >
+					<action name="UpdateMyStatus"/>
+				</document>				
+			</privileges>
+		</role>
+	</roles>
+	<menu>
+		<edit name="My Status" document="MyStatus">
+			<role name="StaffMember" />
+		</edit>
+		<list name="Offices" document="Office">
+			<uxui name="desktop" />
+			<uxui name="tablet"/>
+			<uxui name="external"/>
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</list>
+		<list name="All Staff" query="qStaff">
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</list>
+		<tree name="Organisation Structure" query="qStaff" >
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</tree>
+		<map name="Staff Locations" document="Staff" geometryBinding="location" >
+			<uxui name="desktop" />
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</map>
+	</menu>
+	<queries>
+		<query name="qStaff" documentName="Staff">
+			<description>All Staff</description>
+			<columns>
+				<content display="thumbnail" binding="contact.image" displayName="Image"
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
+				<column binding="contact.name" sortOrder="ascending"/>
+				<column binding="roleTitle" />
+				<column binding="status" />
+				<column binding="contact.mobile" />
+				<column binding="dueBack" />
+				<column binding="baseOffice.bizKey"/>
+				<column binding="location" hidden="true"/>
+			</columns>
+		</query>
+		<query name="qStaffForOffice" documentName="Staff">
+			<description>Staff based at this office</description>
+			<columns>
+				<content display="thumbnail" binding="contact.image" displayName="Image"
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
+				<column binding="contact.name" sortOrder="ascending"/>
+				<column binding="status" />
+			</columns>
+		</query>
+	</queries>
+</module>

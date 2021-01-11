@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.user.create.title" name="create" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox shrinkWrap="height">
+		<vbox visible="confirmContact">
+			<component name="_confirmContact">
+				<names>
+					<name fromComponent="Check" mappedTo="Check" />
+					<name fromComponent="New" mappedTo="New" />
+				</names>
+			</component>
+		</vbox>
+		<vbox visible="confirmUserNameAndPassword">
+			<component name="_confirmUsernameAndPassword">
+				<names>
+					<name fromComponent="Back" mappedTo="Back" />
+					<name fromComponent="Next" mappedTo="Next" />
+				</names>
+			</component>
+		</vbox>
+		<vbox visible="confirmGroupMemberships">
+			<component name="_confirmGroupMemberships">
+				<names>
+					<name fromComponent="Back" mappedTo="Back" />
+					<name fromComponent="Next" mappedTo="Next" />
+				</names>
+			</component>
+		</vbox>
+	</vbox>
+	<actions>
+		<cancel/>
+		<action className="New" displayName="admin.user.newUser.actions.newContact.actionName" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fa fa-user-plus"/>
+		<action className="Check" displayName="admin.user.newUser.actions.check.actionName" inActionPanel="false" iconStyleClass="fa fa-search"/>
+		<action className="Back" displayName="admin.user.newUser.actions.back.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
+		<action className="Next" displayName="admin.user.newUser.actions.next.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
+		<save visible="confirmGroupMemberships"/>
+		<zoomOut visible="confirmGroupMemberships"/>
+	</actions>
+</view>

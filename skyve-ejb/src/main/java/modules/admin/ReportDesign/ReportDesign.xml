@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportDesign" xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Report Design</singularAlias>
+	<pluralAlias>Report Designs</pluralAlias>
+	<iconStyleClass>fa fa-file-pdf-o</iconStyleClass>
+	<bizKey expression="{name}"/>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Report Name</displayName>
+			<length>200</length>
+		</text>
+		<enum name="mode">
+			<displayName>Mode</displayName>
+			<values>
+				<value code="sql"/>
+				<value code="bean"/>
+			</values>
+		</enum>
+		<enum name="definitionSource">
+			<displayName>Definition Source</displayName>
+			<values>
+				<value code="document"/>
+				<value code="view"/>
+				<value code="query"/>
+				<value code="list"/>
+			</values>
+		</enum>
+		<enum name="reportType">
+			<displayName>Type</displayName>
+			<values>
+				<value code="Report"/>
+				<value code="Subreport"/>
+			</values>
+		</enum>
+		<text name="moduleName">
+			<displayName>Module</displayName>
+			<description>Report Bean Module.</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="documentName">
+			<displayName>Document</displayName>
+			<description>Report Bean Document.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="queryName">
+			<displayName>Query</displayName>
+			<description>Report Query.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="menuItem">
+			<displayName>Menu Item</displayName>
+			<description>Menu Item.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="repositoryPath" >
+			<displayName>Output Path</displayName>
+			<description><![CDATA[
+			<p>The path to the place where you want jrxml files created.</p>
+			<p>Normally this will be the path to the folder where you modules are defined - e.g. C:\workspace\projectName\src\skyve\</p>
+			]]></description>
+			<length>500</length>
+		</text>
+		<boolean name="saveToDocumentPackage">
+			<displayName>Save to Document Package</displayName>
+			<description><![CDATA[
+			<p>Use this if you want report files to be created in a directory structure matching the metadata repository structure.</p>
+			<p>This is useful if you want to put the reports into place ready to run.</p>
+			]]>
+			</description>
+		</boolean>
+		<enum name="orientation" required="true">
+			<displayName>Orientation</displayName>
+			<values>
+				<value code="Portrait"/>
+				<value code="Landscape"/>
+			</values>
+		</enum>
+		<integer name="width" required="true">
+			<displayName>Width</displayName>
+		</integer>
+		<integer name="height" required="true">
+			<displayName>Height</displayName>
+		</integer>
+		<integer name="leftMargin" required="true">
+			<displayName>Left Margin</displayName>
+		</integer>
+		<integer name="rightMargin" required="true">
+			<displayName>Right Margin</displayName>
+		</integer>
+		<integer name="topMargin" required="true">
+			<displayName>Top Margin</displayName>
+		</integer>
+		<integer name="bottomMargin" required="true">
+			<displayName>Bottom Margin</displayName>
+		</integer>
+		<integer name="columnWidth" required="true">
+			<displayName>Column Width</displayName>
+		</integer>
+		<text name="defaultFontName">
+			<displayName>Font Name</displayName>
+			<description>Font not working? Check that you've included a font extension jar for your font in the classpath</description>
+			<length>100</length>
+		</text>
+		<integer name="titleFontSize">
+			<displayName>Font Size (Title)</displayName>
+		</integer>
+		<integer name="defaultFontSize">
+			<displayName>Font Size (Detail)</displayName>
+		</integer>
+		<colour name="defaultLineColour">
+			<displayName>Default Line Colour</displayName>
+		</colour>
+		<decimal2 name="defaultLineWidth">
+			<displayName>Default Line Pen Stroke thickness</displayName>
+		</decimal2>
+		<boolean name="renderLabelAsTextFields">
+			<displayName>Render Labels as TextFields</displayName>
+			<description>This option will allow labels to flow and stretch like text fields</description>
+		</boolean>
+		<boolean name="defaultBorder">
+			<displayName>Default Border</displayName>
+		</boolean>
+		<boolean name="defaultBorderTop">
+			<displayName>Default Border Top</displayName>
+		</boolean>
+		<boolean name="defaultBorderLeft">
+			<displayName>Default Border Left</displayName>
+		</boolean>
+		<boolean name="defaultBorderBottom">
+			<displayName>Default Border Bottom</displayName>
+		</boolean>
+		<boolean name="defaultBorderRight">
+			<displayName>Default Border Right</displayName>
+		</boolean>
+		<integer name="defaultElementHeight" required="true">
+			<displayName>Default Element Height</displayName>
+		</integer>
+		<boolean name="includePageNumbers">
+			<displayName>Include Page Numbers</displayName>
+		</boolean>
+		<integer name="defaultCellTopPadding">
+			<displayName>Cell Top Padding</displayName>
+		</integer>
+		<integer name="defaultCellLeftPadding">
+			<displayName>Cell Left Padding</displayName>
+		</integer>
+		<integer name="defaultCellBottomPadding">
+			<displayName>Cell Bottom Padding</displayName>
+		</integer>
+		<integer name="defaultCellRightPadding">
+			<displayName>Cell Right Padding</displayName>
+		</integer>
+		<boolean name="dynamicFlow">
+			<displayName>Dynamic Flow</displayName>
+			<description><![CDATA[
+			<p><b>Dynamic Flow</b></p>
+			<p>Allow (as far as possible) page sections, bands and fields to flow as much as required 
+			to show all data.</p>
+			]]></description>
+		</boolean>
+		<text name="bandSplitType" >
+			<displayName>Split Type</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<boolean name="boldLabels">
+			<displayName>Bold Labels</displayName>
+			<description>Bold not working? Check that you've included a font extension jar for your font in the classpath</description>
+		</boolean>
+		<text name="checkBoxFontName">
+			<displayName>Checkbox FontName</displayName>
+			<description>This is the font for checkboxes - ensure the font will be on your classpath</description>
+			<length>200</length>
+		</text>
+		<text name="checkBoxDisplayExpression">
+			<displayName>Checkbox Display Expression</displayName>
+			<description>This is the expression to use to represent checkboxes</description>
+			<length>500</length>
+		</text>
+		<decimal5 name="pixelToTwip">
+			<displayName>Pixel to TWIP</displayName>
+			<description>TWIP conversion ratio for pixel-specified item sizing in views.</description>
+		</decimal5>
+		
+		<!-- section settings -->
+		<boolean name="sectionBorderTop">
+			<displayName>Border Top</displayName>
+		</boolean>
+		<boolean name="sectionBorderLeft">
+			<displayName>Border Left</displayName>
+		</boolean>
+		<boolean name="sectionBorderRight">
+			<displayName>Border Right</displayName>
+		</boolean>
+		<boolean name="sectionBorderBottom">
+			<displayName>Border Bottom</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderTop">
+			<displayName>Title Border Top</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderLeft">
+			<displayName>Title Border Left</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderRight">
+			<displayName>Title Border Right</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderBottom">
+			<displayName>Title Border Bottom</displayName>
+		</boolean>
+		<colour name="sectionTitleForeground">
+			<displayName>Title Foreground</displayName>
+		</colour>
+		<colour name="sectionTitleBackground">
+			<displayName>Title Background</displayName>
+		</colour>
+				
+		<memo name="jrxml" persistent="false" trackChanges="false" audited="false">
+			<displayName>Jrxml File Definition</displayName>
+		</memo>
+		<text name="field">
+			<displayName>Field</displayName>
+			<description>The field on which this subreport is based (if this is a subreport).</description>
+			<length>200</length>
+		</text>
+		<enum name="collectionType">
+			<displayName>Collection Type</displayName>
+			<values>
+				<value code="child"/>
+				<value code="aggregation"/>
+				<value code="composition"/>
+			</values>
+		</enum>
+		<text name="parentReportPersistentName">
+			<displayName>Parent Report Persistent Name</displayName>
+			<length>500</length>
+		</text>
+		<boolean name="verticalise">
+			<displayName>Transform horizontal containers to vertical</displayName>
+		</boolean>
+		<text name="labelAlignmentOverride" >
+			<displayName>Label Alignment</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

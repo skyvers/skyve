@@ -1,0 +1,43 @@
+@CHARSET "UTF-8";
+
+/* page header */
+h2 {
+	text-align: center !important;
+}
+
+/* data tables */
+.ui-datatable tbody td {
+	text-align: center;
+}
+
+@media (min-width: 641px) {
+	.topbar-title {
+		font-size: 16px;
+		font-weight: bold;
+		vertical-align: middle;
+		color: white;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		position: absolute;
+		top: 30px;
+		left: 290px;
+		width: 50%;
+	}
+
+}
+@media (max-width: 640px) {
+	.topbar-title {
+		display: none;
+	}
+}
+
+.topbar-menu li a span {
+	display: inline !important;
+} 
+
+@media(max-width: 1024px) {
+	.topbar-menu-tooltip {
+		display: none !important;
+	}	
+}
