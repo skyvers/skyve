@@ -10,7 +10,6 @@ import org.skyve.EXT;
 import org.skyve.cache.CacheUtil;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -50,6 +49,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@BeforeClass
+	@SuppressWarnings("resource")
 	public static void beforeClass() throws Exception {
 		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
@@ -76,7 +76,7 @@ public abstract class AbstractH2Test {
 	@SuppressWarnings("static-method")
 	public void beforeBase() throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
-		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;//NoOpContentManager.class;
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;

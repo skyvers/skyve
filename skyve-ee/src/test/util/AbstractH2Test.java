@@ -49,6 +49,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@BeforeClass
+	@SuppressWarnings("resource")
 	public static void beforeClass() throws Exception {
 		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
