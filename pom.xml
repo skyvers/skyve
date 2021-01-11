@@ -15,6 +15,7 @@
 		<module>skyve-web</module>
 		<module>skyve-tools</module>
 		<module>skyve-ejb</module>
+		<module>skyve-maven-plugin</module>
 	</modules>
 
 	<properties>

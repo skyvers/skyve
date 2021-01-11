@@ -25,7 +25,7 @@
 			<plugin>
 				<groupId>org.skyve</groupId>
 				<artifactId>skyve-maven-plugin</artifactId>
-				<version>1.30</version>
+				<version>${skyve.version}</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.skyve</groupId>
