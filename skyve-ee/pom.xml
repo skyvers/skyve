@@ -306,6 +306,10 @@
 					<groupId>edu.ucar</groupId>
 					<artifactId>netcdf</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-compress</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
