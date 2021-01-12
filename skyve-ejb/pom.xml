@@ -435,8 +435,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
-			<!-- Needs to be compile scoped as InjectedDocumentBizlet relies on it. -->
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>

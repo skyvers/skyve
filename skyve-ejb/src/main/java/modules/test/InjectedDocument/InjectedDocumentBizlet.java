@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.repository.Repository;
@@ -24,15 +23,4 @@ public class InjectedDocumentBizlet extends Bizlet<InjectedDocumentExtension> {
 	public Map<String, Object> s;
 	@Inject
 	public Repository r;
-	
-	
-	@Override
-	public InjectedDocumentExtension newInstance(InjectedDocumentExtension test) throws Exception {
-		Assert.assertNotNull(test.p);
-		Assert.assertNotNull(test.c);
-		Assert.assertNotNull(test.u);
-		Assert.assertNotNull(test.s);
-		Assert.assertNotNull(test.r);
-		return test;
-	}
 }
