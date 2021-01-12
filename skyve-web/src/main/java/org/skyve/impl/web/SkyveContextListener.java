@@ -366,18 +366,9 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
+		// Can't load the class here as it may not be available to this class loader - it could be in the add-in.
+		// So we load it in the init method.		
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
-		if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS == null) {
-			AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;//ElasticContentManager.class;
-		}
-		else {
-			try {
-				AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Class.forName(UtilImpl.SKYVE_CONTENT_MANAGER_CLASS);
-			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
-			}
-		}
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);

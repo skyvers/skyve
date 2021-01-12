@@ -37,6 +37,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
+import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -584,8 +585,13 @@ public class EXT {
 	}
 
 	// Not a CDI provider as it is auto-closeable 
+	@SuppressWarnings("resource")
 	public static ContentManager newContentManager() {
-		return DefaultAddInManager.get().getExtension(ContentManager.class);
+		ContentManager result = DefaultAddInManager.get().getExtension(ContentManager.class);
+		if (result == null) {
+			result = AbstractContentManager.get();
+		}
+		return result;
 	}
 
 	public static AddInManager getAddInManager() {

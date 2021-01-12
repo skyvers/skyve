@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
@@ -75,15 +76,19 @@ final class BackupUtil {
 		user.setName("backup");
 		AbstractPersistence.get().setUser(user);
 		
-		try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
-			cm.init();
+		try (ContentManager cm = EXT.newContentManager()) {
+			@SuppressWarnings("resource")
+			AbstractContentManager acm = (AbstractContentManager) cm;
+			acm.init();
 			Thread.sleep(2000);
 		}
 	}
 	
 	static void finalise() throws Exception {
-		try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
-			cm.dispose();
+		try (ContentManager cm = EXT.newContentManager()) {
+			@SuppressWarnings("resource")
+			AbstractContentManager acm = (AbstractContentManager) cm;
+			acm.dispose();
 			Thread.sleep(2000);
 		}
 		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
