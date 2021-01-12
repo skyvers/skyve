@@ -64,13 +64,13 @@ public class ReportServlet extends HttpServlet {
 
 	public static final String REPORT_PATH = "/report";
 	public static final String EXPORT_PATH = "/export";
-	
+
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		doGet(request, response);
 	}
-	
+
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
@@ -84,7 +84,7 @@ public class ReportServlet extends HttpServlet {
 					throw new SessionEndedException(request.getLocale());
 				}
 				persistence.setUser(user);
-		
+
 				String path = request.getServletPath();
 				if (REPORT_PATH.equals(path)) {
 					doReport(request, response);
@@ -134,7 +134,7 @@ public class ReportServlet extends HttpServlet {
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
-			
+
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
@@ -175,7 +175,7 @@ public class ReportServlet extends HttpServlet {
 					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
-					final ListModel<Bean> listModel = getDocumentQueryListModel(module, documentOrQueryOrModelName);
+					final ListModel<Bean> listModel = ReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
 					jasperPrint = ReportUtil.runReport(user,
 							document,
 							reportName,
@@ -228,8 +228,8 @@ public class ReportServlet extends HttpServlet {
 
     	return params;
 	}
-	
-	private static void pumpOutReportFormat(byte[] bytes, 
+
+	private static void pumpOutReportFormat(byte[] bytes,
 												JasperPrint jasperPrint,
 												ReportFormat format,
 												String fileNameNoSuffix,
@@ -312,14 +312,14 @@ public class ReportServlet extends HttpServlet {
 		}
 
 		response.setContentLength(bytes.length);
-		
+
 		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
 		response.setHeader("Cache-Control", "cache");
         response.setHeader("Pragma", "cache");
         response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
 		// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
 		response.setHeader("Accept-Ranges", "bytes");
-        
+
 		try (ServletOutputStream outputStream = response.getOutputStream()) {
 			outputStream.write(bytes);
 			outputStream.flush();
@@ -334,7 +334,7 @@ public class ReportServlet extends HttpServlet {
 				User user = persistence.getUser();
 				Customer customer = user.getCustomer();
 				AbstractRepository repository = AbstractRepository.get();
-	
+
 				String valuesParam = request.getParameter("values");
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info(valuesParam);
 				if (valuesParam == null) {
@@ -343,7 +343,7 @@ public class ReportServlet extends HttpServlet {
 					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(Util.UTF8));
 					return;
 				}
-	
+
 				@SuppressWarnings("unchecked")
 				Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, valuesParam);
 				String module_QueryOrModel = (String) values.get("ds");
@@ -358,13 +358,13 @@ public class ReportServlet extends HttpServlet {
 					Document document = module.getDocument(customer, documentName);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
 					model = repository.getListModel(customer, document, modelName, true);
-					
+
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
-					
+
 					drivingDocument = model.getDrivingDocument();
 				}
 				else {
@@ -412,14 +412,14 @@ public class ReportServlet extends HttpServlet {
 				}
 
 				JasperPrint jasperPrint = null;
-				
+
 				try (AutoClosingIterable<Bean> iterable = model.iterate()) {
 					JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
-		
+
 					ReportDesignParameters designParams = new ReportDesignParameters();
 					designParams.setReportFormat(ReportFormat.valueOf((String) values.get("reportFormat")));
 					designParams.setReportStyle(ReportStyle.valueOf((String) values.get("style")));
-		
+
 					designParams.setPageWidth(((Number) values.get("width")).intValue());
 					designParams.setPageHeight(((Number) values.get("height")).intValue());
 					designParams.setPaginated(Boolean.TRUE.equals(values.get("isPaginated")));
@@ -430,7 +430,7 @@ public class ReportServlet extends HttpServlet {
 					designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
 					designParams.setBottomMargin(((Number) values.get("left")).intValue());
 					designParams.setRightMargin(((Number) values.get("right")).intValue());
-		
+
 					@SuppressWarnings("unchecked")
 					List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
 					for (Map<String, Object> column : columns) {
@@ -459,25 +459,25 @@ public class ReportServlet extends HttpServlet {
 
 					final JasperReportRenderer reportRenderer = new JasperReportRenderer(designParams);
 					JasperReport jasperReport = reportRenderer.getReport();
-		
+
 					Map<String, Object> params = new TreeMap<>();
 					StringBuilder sb = new StringBuilder(256);
 					sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
 					sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
 					params.put("RESOURCE_DIR", sb.toString());
 					params.put("TITLE", model.getDescription());
-					
+
 					jasperPrint = JasperFillManager.fillReport(jasperReport,
-																params, 
+																params,
 																dataSource);
 				}
-			
+
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ReportFormat format = ReportFormat.valueOf((String) values.get("reportFormat"));
 				ReportUtil.runReport(jasperPrint, format, baos);
-				
+
 				pumpOutReportFormat(baos.toByteArray(),
-										jasperPrint, 
+										jasperPrint,
 										format,
 										(String) values.get("fileNameNoSuffix"),
 										request.getSession(),
@@ -499,20 +499,5 @@ public class ReportServlet extends HttpServlet {
 				persistence.commit(true);
 			}
 		}
-	}
-
-	public static DocumentQueryListModel<Bean> getDocumentQueryListModel(Module module, String documentOrQueryOrModelName) {
-		final Customer customer = CORE.getCustomer();
-		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
-		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
-		}
-		if (query == null) {
-			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
-		}
-		final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-		queryModel.setQuery(query);
-
-		return queryModel;
 	}
 }

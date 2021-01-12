@@ -147,6 +147,11 @@
 			<version>${primefaces.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.primefaces.themes</groupId>
+			<artifactId>all-themes</artifactId>
+			<version>${primefaces-allthemes.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>primefaces-extensions</artifactId>
 			<version>${primefaces-extensions.version}</version>

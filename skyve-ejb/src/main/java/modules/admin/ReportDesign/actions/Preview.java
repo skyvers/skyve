@@ -21,8 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.skyve.impl.web.ReportServlet.getDocumentQueryListModel;
-
 public class Preview extends DownloadAction<ReportDesign> {
 
 	private static final long serialVersionUID = -8203773871581974793L;
@@ -31,9 +29,9 @@ public class Preview extends DownloadAction<ReportDesign> {
 	public void prepare(ReportDesign bean, WebContext webContext)
 	throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public Download download(ReportDesign bean, WebContext webContext) throws Exception {
 		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
@@ -58,7 +56,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 			final String queryName = designSpecification.getQueryName();
 			final String documentName = designSpecification.getDocumentName();
 			final String documentOrQueryOrModelName = queryName != null ? queryName : documentName;
-			final ListModel<Bean> listModel = getDocumentQueryListModel(module, documentOrQueryOrModelName);
+			final ListModel<Bean> listModel = ReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
 			ReportUtil.runReport(reportRenderer.getReport(),
 					user,
 					parameters,
