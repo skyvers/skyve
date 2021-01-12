@@ -85,14 +85,19 @@ public class DefaultAddInManager implements AddInManager {
 	}
 	
 	public void stop() {
-		plugInManager.stopPlugins();
+		if (plugInManager != null) {
+			plugInManager.stopPlugins();
+			plugInManager = null;
+		}
 	}
 	
 	@Override
 	public <T extends Object> T getExtension(Class<T> type) {
-		List<T> extensions = plugInManager.getExtensions(type);
-		if ((extensions != null) && (! extensions.isEmpty())) {
-			return extensions.get(0);
+		if (plugInManager != null) {
+			List<T> extensions = plugInManager.getExtensions(type);
+			if ((extensions != null) && (! extensions.isEmpty())) {
+				return extensions.get(0);
+			}
 		}
 		
 		return null;

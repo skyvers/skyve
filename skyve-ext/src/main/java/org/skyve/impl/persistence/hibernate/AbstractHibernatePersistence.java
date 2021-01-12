@@ -1818,7 +1818,10 @@ t.printStackTrace();
 					String fieldName = field.getName();
 					String value = BindUtil.getDisplay(customer, beanToReindex, fieldName);
 					if (AttributeType.markup.equals(type)) {
-						value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
+						TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+						if (extractor != null) {
+							value = extractor.extractTextFromMarkup(value);
+						}
 					}
 					value = Util.processStringValue(value);
 					if (value != null) {
@@ -1873,7 +1876,10 @@ t.printStackTrace();
 							String value = (state[i] == null) ? null : state[i].toString();
 							if (value != null) {
 								if (AttributeType.markup.equals(type)) {
-									value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
+									TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+									if (extractor != null) {
+										value = extractor.extractTextFromMarkup(value);
+									}
 								}
 								
 								properties.put(propertyName, value);
@@ -1884,7 +1890,10 @@ t.printStackTrace();
 						String value = (state[i] == null) ? null : state[i].toString();
 						if (value != null) {
 							if (AttributeType.markup.equals(type)) {
-								value = EXT.getAddInManager().getExtension(TextExtractor.class).extractTextFromMarkup(value);
+								TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+								if (extractor != null) {
+									value = extractor.extractTextFromMarkup(value);
+								}
 							}
 							
 							properties.put(propertyName, value);
