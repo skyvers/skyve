@@ -53,7 +53,7 @@ import org.skyve.util.Util;
  */
 public final class POISheet implements BizPortSheet {
 	private static final String INVALID_CELL_TYPE_MESSAGE_KEY = "bizport.invalidCellType";
-	
+
 	// Rows 0, 1 and 2 hold sheet metadata and the title Row.
 	private static final int START_ROW = 3;
 
@@ -754,7 +754,6 @@ public final class POISheet implements BizPortSheet {
             descriptionCell = row.createCell(descriptionColumn);
         }
 
-        descriptionCell.setCellType(CellType.FORMULA);
         StringBuilder formula = new StringBuilder(50);
         formula.append("VLOOKUP(");
         formula.append(new CellReference(row.getRowNum(), keyColumn).formatAsString());
