@@ -145,7 +145,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.skyve</groupId>
-			<artifactId>skyve-web</artifactId>
+			<artifactId>skyve-ext</artifactId>
 			<version>${skyve.version}</version>
 		</dependency>
 
@@ -570,6 +570,12 @@
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-firefox-driver</artifactId>
 			<version>3.141.59</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
