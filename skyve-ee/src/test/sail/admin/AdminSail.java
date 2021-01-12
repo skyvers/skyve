@@ -2,12 +2,14 @@ package sail.admin;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import util.sail.BrowserConfiguration;
 import util.sail.Devices;
 import util.sail.PrimeFacesTest;
 
+@Ignore("only run when necessary - more like an integration test")
 public class AdminSail extends PrimeFacesTest {
 
 	private String pathToChromeDriver = "/C:/Windows/chromedriver.exe";
