@@ -60,12 +60,6 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.skyve</groupId>
-			<artifactId>skyve-ext</artifactId>
-			<version>${skyve.version}</version>
-		</dependency>
-
 		<!-- This is a copy/paste of skyve/pom.xml dependencies -->
 		<dependency>
 			<groupId>javax</groupId>
