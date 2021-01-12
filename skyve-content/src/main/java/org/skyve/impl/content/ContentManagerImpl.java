@@ -12,7 +12,7 @@ public class ContentManagerImpl extends AbstractContentManager {
 	private AbstractContentManager delegate() {
 		if (delegate == null) {
 			if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
-				AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class; // TODO replace with storage content manager when written
+				AbstractContentManager.IMPLEMENTATION_CLASS = FileSystemContentManager.class;
 			}
 			delegate = AbstractContentManager.get();
 		}
