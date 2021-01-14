@@ -145,11 +145,6 @@
 			<version>${commons-fileupload.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>${gson.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
 			<version>${primefaces.version}</version>

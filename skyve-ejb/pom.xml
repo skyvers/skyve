@@ -178,6 +178,21 @@
 			<artifactId>hatbox</artifactId>
 			<version>${hatbox.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+			<version>${spring-security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+			<version>${spring-security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring-security.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -203,6 +218,7 @@
 			<version>${reactive-streams.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
 
 		<!-- Test dependencies -->
 		<dependency>
