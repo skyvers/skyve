@@ -132,7 +132,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					// and guess a binding
 					// prefer a like match on Display Name
 					boolean bindingFound = false;
-					for (Attribute a : document.getAttributes()) {
+					for (Attribute a : document.getAllAttributes()) {
 						if (a.getDisplayName().equalsIgnoreCase(columnName)) {
 							newCol.setBindingName(a.getName());
 							bindingFound = true;
@@ -141,10 +141,21 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					}
 					if (!bindingFound) {
 						// attempt a close match on binding name
-						for (Attribute a : document.getAttributes()) {
+						for (Attribute a : document.getAllAttributes()) {
 							String cleanColName = Binder.toJavaInstanceIdentifier(columnName);
 							if (a.getName().equalsIgnoreCase(cleanColName)) {
 								newCol.setBindingName(a.getName());
+								bindingFound = true;
+								break;
+							}
+						}
+					}
+					if (!bindingFound) {
+						// attempt a close match on description
+						for (Attribute a : document.getAllAttributes()) {
+							if (a.getDescription().equalsIgnoreCase(columnName)) {
+								newCol.setBindingName(a.getName());
+								bindingFound = true;
 								break;
 							}
 						}
