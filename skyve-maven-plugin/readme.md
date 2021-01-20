@@ -1,0 +1,15 @@
+- No dependency in skyve except normal sub-module.
+- Included in pom template in skyve-create for use by downstream projects.
+- Uses @Mojo annotation on each class that is a goal.
+    - No manifest of mojos, just scans for @Mojo annotations.
+- @Parameter annotation on member variables to expose Mojo/Goals parameters
+    - Populated with matching parameter in configuration block in plugin definition.
+- GenerateDomainConfig classes encapsulates a grouping of parameters
+    - Maps to a complex type element in the configuration block in the plugin definition.
+- Most paths take absolute or relative paths
+    - if relative, then tack on the project dir
+- Assemble mojo delegates to skyve-create for
+    - clearBeforeAssemble
+    - assemble
+- NewScaffoldedDocumentMojo
+    - Will change if Skyve API changes as it creates Bizlet and Extension classes for the document.
