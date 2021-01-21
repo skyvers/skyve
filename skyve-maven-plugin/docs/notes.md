@@ -1,0 +1,23 @@
+# Skyve Maven Plugin Development Notes
+
+- No dependency in skyve except normal sub-module.
+- Included in pom template in skyve-create for use by downstream projects.
+- Plugin version is in sync with Skyve version, uses same maven property.
+- Uses `@Mojo` annotation on each class that is a goal.
+    - No manifest of mojos, just scans for `@Mojo` annotations.
+- `@Parameter` annotation on member variables to expose Mojo/Goals parameters
+    - Populated with matching parameter in `configuration` block in plugin definition.
+- `GenerateDomainConfig` class encapsulates a grouping of parameters
+    - Maps to a complex type element in the configuration block in the plugin definition.
+- As many paramters as possible have a default value, only a few are required
+- Most paths take absolute or relative paths
+    - performs a check to see if it is absolute
+    - if relative, then tack on the project dir
+- Assemble mojo delegates to skyve-create for
+    - clearBeforeAssemble
+    - assemble
+    - assemble can take a parameter to take a template project directory parameter if assembling from a template instead of Skyve (because the project structure is different to the base Skyve project, and the path is different)
+- plugin creates a `SkyveProject` instance (from Skyve Create) for the project directory given to the plugin so that it can manipulate the project
+- prompting the user handled in the AbstractSkyve mojo, e.g. asking for module name (`getDefaultOrPrompt` helper method)
+- NewScaffoldedDocumentMojo
+    - Will need to change if Skyve API changes as it creates Bizlet and Extension classes for the document.
