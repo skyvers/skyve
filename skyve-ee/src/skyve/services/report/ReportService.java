@@ -469,31 +469,36 @@ public class ReportService {
 	 */
 	private static void loadFonts(ITextRenderer renderer) throws IOException {
 		// load any fonts found on the classpath in fonts/
-		getFontResources().stream()
-				.forEach(r -> {
-					try {
-						File f = r.getFile();
-						renderer.getFontResolver().addFont(f.toString(), true);
-						Util.LOGGER.info("Loaded font for PDF: " + r.getFilename());
-					} catch (DocumentException | IOException e) {
-						Util.LOGGER.warning("Error loading font file: " + r.getFilename());
-						e.printStackTrace();
-					}
-				});
+		try {
+			getFontResources().stream()
+					.forEach(r -> {
+						try {
+							File f = r.getFile();
+							renderer.getFontResolver().addFont(f.toString(), true);
+							Util.LOGGER.info("Loaded font for PDF: " + r.getFilename());
+						} catch (DocumentException | IOException e) {
+							Util.LOGGER.warning("Error loading font file: " + r.getFilename());
+							e.printStackTrace();
+						}
+					});
 
-		// load any unicode fonts found on the classpath in fonts/unicode/
-		getUnicodeFontResources().stream()
-				.forEach(r -> {
-					try {
-						File f = r.getFile();
-						// required to load unicode fonts
-						renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
-						Util.LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
-					} catch (DocumentException | IOException e) {
-						Util.LOGGER.warning("Error loading unicode font file: " + r.getFilename());
-						e.printStackTrace();
-					}
-				});
+			// load any unicode fonts found on the classpath in fonts/unicode/
+			getUnicodeFontResources().stream()
+					.forEach(r -> {
+						try {
+							File f = r.getFile();
+							// required to load unicode fonts
+							renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
+							Util.LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
+						} catch (DocumentException | IOException e) {
+							Util.LOGGER.warning("Error loading unicode font file: " + r.getFilename());
+							e.printStackTrace();
+						}
+					});
+		} catch (FileNotFoundException fnfe) {
+			// fonts directory not defined or empty
+			Util.LOGGER.warning("Error loading fonts for report: " + fnfe.getMessage());
+		}
 	}
 
 	/**
