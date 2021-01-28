@@ -21,7 +21,6 @@
 			<outputDirectory>lib</outputDirectory>
 			<excludes>
 				<exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
-				<exclude>*:skyve-*</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
