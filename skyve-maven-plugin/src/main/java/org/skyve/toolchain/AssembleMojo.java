@@ -46,10 +46,12 @@ public class AssembleMojo extends AbstractMojo {
                 throw new IOException(String.format("Skyve directory %s does not exist.", skyveDir));
             }
 
-            final File templateFile = new File(templateDir);
-            // if relative convert to absolute.
-            if (!templateFile.isAbsolute()) {
-                templateDir = project.getBasedir().toPath().resolve(templateDir).toString();
+            if (templateDir != null) {
+                final File templateFile = new File(templateDir);
+                // if relative convert to absolute.
+                if (!templateFile.isAbsolute()) {
+                    templateDir = project.getBasedir().toPath().resolve(templateDir).toString();
+                }
             }
 
             final SkyveProject.SkyveProjectCreator creator = new SkyveProject.SkyveProjectCreator()
@@ -58,10 +60,12 @@ public class AssembleMojo extends AbstractMojo {
                     .customerName(customer)
                     .skyveDirectory(skyveDir);
 
-            // Assemble from a project instead of Skyve.
-            if (new File(templateDir).exists()) {
-                creator.skyveDirectory(templateDir);
-                creator.copyFromProject(true);
+            if (templateDir != null) {
+                // Assemble from a project instead of Skyve.
+                if (new File(templateDir).exists()) {
+                    creator.skyveDirectory(templateDir);
+                    creator.copyFromProject(true);
+                }
             }
 
             final SkyveProject me = creator.initialise();
