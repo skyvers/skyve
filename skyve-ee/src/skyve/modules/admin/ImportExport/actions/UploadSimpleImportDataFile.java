@@ -153,7 +153,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					if (!bindingFound) {
 						// attempt a close match on description
 						for (Attribute a : document.getAllAttributes()) {
-							if (a.getDescription().equalsIgnoreCase(columnName)) {
+							if (a.getDescription() != null && a.getDescription().equalsIgnoreCase(columnName)) {
 								newCol.setBindingName(a.getName());
 								bindingFound = true;
 								break;
