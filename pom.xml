@@ -48,7 +48,7 @@
 		<javassist.version>3.20.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.16.1</jts.version>
-		<lucene.version>4.10.2</lucene.version>
+		<lucene.version>8.7.0</lucene.version>
 		<omnifaces.version>2.7.1</omnifaces.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.5.0</pf4j.version>
@@ -255,58 +255,6 @@
 				<version>${generex.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-core</artifactId>
-				<version>${tika.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-parsers</artifactId>
-				<version>${tika.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>com.google.guava</groupId>
-						<artifactId>guava</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.httpcomponents</groupId>
-						<artifactId>httpclient</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.cxf</groupId>
-						<artifactId>cxf-rt-rs-client</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>edu.ucar</groupId>
-						<artifactId>cdm</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>edu.ucar</groupId>
-						<artifactId>netcdf4</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>edu.ucar</groupId>
-						<artifactId>grib</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>edu.ucar</groupId>
-						<artifactId>httpservices</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.sis.storage</groupId>
-						<artifactId>sis-netcdf</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.sis.core</groupId>
-						<artifactId>sis-utility</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.sis.core</groupId>
-						<artifactId>sis-metadata</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>${hibernate.version}</version>
@@ -401,6 +349,10 @@
 						<groupId>org.codehaus.castor</groupId>
 						<artifactId>castor-xml</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.apache.lucene</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -433,79 +385,6 @@
 				<artifactId>omnifaces</artifactId>
 				<version>${omnifaces.version}</version>
 			</dependency>
-<!--
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-analyzers-common</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-core</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-expressions</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-grouping</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-highlighter</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-join</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-memory</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-misc</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-queries</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-queryparser</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-sandbox</artifactId>
-				<version>${lucene.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>jakarta-regexp</groupId>
-						<artifactId>jakarta-regexp</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-spatial</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-suggest</artifactId>
-				<version>${lucene.version}</version>
-			</dependency>
--->
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi</artifactId>
@@ -516,13 +395,6 @@
 				<artifactId>spatial4j</artifactId>
 				<version>${spatial4j.version}</version>
 			</dependency>
-<!--
-			<dependency>
-				<groupId>org.apache.xmlbeans</groupId>
-				<artifactId>xmlbeans</artifactId>
-				<version>${xmlbeans.version}</version>
-			</dependency>
--->
 			<dependency>
 				<groupId>org.apache.ws.xmlschema</groupId>
 				<artifactId>xmlschema-core</artifactId>

@@ -1,12 +1,15 @@
 package org.skyve.impl.content;
 
 import java.io.File;
+import java.util.UUID;
 
+import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
+import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 
@@ -21,7 +24,16 @@ public class FileSystemContentManager extends AbstractContentManager {
 
 	@Override
 	public void put(AttachmentContent attachment, boolean index) throws Exception {
+		TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+		if (extractor != null) {
+			extractor.sniffContentType(attachment);
+		}
+		
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
+			String contentId = attachment.getContentId();
+			if (contentId == null) {
+				attachment.setContentId(UUID.randomUUID().toString());
+			}
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
 			byte[] content = attachment.getContentBytes();

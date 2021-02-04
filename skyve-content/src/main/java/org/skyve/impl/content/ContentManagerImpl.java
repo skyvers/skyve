@@ -1,18 +1,22 @@
 package org.skyve.impl.content;
 
+import org.pf4j.Extension;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
+import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResults;
+import org.skyve.impl.content.lucene.LuceneContentManager;
 import org.skyve.impl.util.UtilImpl;
 
+@Extension(points = {ContentManager.class})
 public class ContentManagerImpl extends AbstractContentManager {
 	private AbstractContentManager delegate;
 	
 	private AbstractContentManager delegate() {
 		if (delegate == null) {
 			if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
-				AbstractContentManager.IMPLEMENTATION_CLASS = FileSystemContentManager.class;
+				AbstractContentManager.IMPLEMENTATION_CLASS = LuceneContentManager.class;
 			}
 			delegate = AbstractContentManager.get();
 		}

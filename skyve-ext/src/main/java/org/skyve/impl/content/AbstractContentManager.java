@@ -28,11 +28,15 @@ import org.skyve.impl.content.AbstractContentManager;
 public abstract class AbstractContentManager implements ContentManager {
     public static final String META_JSON = "meta.json";
 	public static final String CONTENT = "content";
+	public static final String CONTENT_ID = "id";
     protected static final String CONTENT_TYPE = "content_type";
     protected static final String FILENAME = "filename";
     public static final String LAST_MODIFIED = "last_modified";
-    protected static final String ATTRIBUTE_NAME = "attribute";
+    public static final String ATTRIBUTE_NAME = "attribute";
+    protected static final String ATTACHMENT = "attachment";
+	protected static final String CLUSTER_NAME = "SKYVE_CONTENT";
 
+    
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	
 	public static AbstractContentManager get() {
