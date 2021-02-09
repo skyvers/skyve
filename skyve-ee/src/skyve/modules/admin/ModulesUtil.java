@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -1130,18 +1129,12 @@ public class ModulesUtil {
 	 * @throws Exception
 	 */
 	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) throws Exception {
-		
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
-		q.getFilter().addLike(attributeName, value + "%");
+		if (value != null) {
+			q.getFilter().addLike(attributeName, value + "%");
+		}
 		q.addBoundProjection(attributeName, attributeName);
 		q.setDistinct(true);
-		
-		List<Bean> potentialMatches = q.projectedResults();
-		List<String> results = new ArrayList<>();
-		results.addAll(potentialMatches.stream()
-				.map(t -> (String) Binder.get(t, attributeName))
-				.collect(Collectors.toList()));
-		return results;
+		return q.scalarResults(String.class);
 	}
-	
 }

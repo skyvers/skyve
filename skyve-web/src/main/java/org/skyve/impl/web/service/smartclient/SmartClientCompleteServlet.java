@@ -6,8 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
@@ -31,11 +29,13 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.JSON;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 /**
@@ -111,16 +111,32 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				    		bean = (Bean) BindUtil.get(bean, formBinding);
 				    	}
 
-						// Get the parent bean and adjust the attribute name accordingly
+				    	// if attributeName is compound, get the parent bean and adjust the attributeName
+				    	// prefer the module and document name determination polymorphically from the bean, otherwise use the metadata
 				    	int lastDotIndex = attributeName.lastIndexOf('.');
 						if (lastDotIndex >= 0) {
+							Bean formBean = bean;
 							bean = (Bean) BindUtil.get(bean, attributeName.substring(0, lastDotIndex));
-							attributeName = attributeName.substring(lastDotIndex + 1);
+							if (bean == null) { // no bean so use metadata
+								Module module = customer.getModule(formBean.getBizModule());
+								document = module.getDocument(customer, formBean.getBizDocument());
+								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+								document = target.getDocument();
+								attribute = target.getAttribute(); // could be null for an implicit attribute
+								attributeName = attributeName.substring(lastDotIndex + 1);
+							}
+							else {
+								attributeName = attributeName.substring(lastDotIndex + 1);
+								Module module = customer.getModule(bean.getBizModule());
+								document = module.getDocument(customer, bean.getBizDocument());
+								attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+							}
 						}
-
-						Module module = customer.getModule(bean.getBizModule());
-						document = module.getDocument(customer, bean.getBizDocument());
-						attribute = document.getAttribute(attributeName);
+						else {
+							Module module = customer.getModule(bean.getBizModule());
+							document = module.getDocument(customer, bean.getBizDocument());
+							attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+						}
 					}
 					catch (Exception e) {
 						throw new ServletException("Mal-formed URL", e);
@@ -141,29 +157,44 @@ public class SmartClientCompleteServlet extends HttpServlet {
 							throw new SecurityException("read this data", user.getName());
 						}
 						
-						StringBuilder bizQL = new StringBuilder(128);
-						bizQL.append("select count(distinct bean.").append(attributeName);
-						bizQL.append(") as totalRows from {").append(document.getOwningModuleName()).append('.');
-						bizQL.append(document.getName()).append("} as bean");
-						if (value != null) {
-							bizQL.append(" where bean.").append(attributeName).append(" like '%").append(value).append("%'");
+						long totalRows = 0L;
+						List<Object> values = Collections.emptyList();
+
+						Persistent persistent = document.getPersistent();
+						String persistentName = (persistent == null) ? null : persistent.getName();
+						if (persistentName != null) { // persistent document
+							if ((attribute == null) || // implicit attribute or
+									attribute.isPersistent()) { // explicit and persistent attribute
+								String moduleName = document.getOwningModuleName();
+								String documentName = document.getName();
+								DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
+								StringBuilder sb = new StringBuilder(128);
+								q.addExpressionProjection(sb.append("count(distinct bean.").append(attributeName).append(')').toString(), "totalRows");
+								if (value != null) {
+									sb.setLength(0);
+									q.getFilter().addLike(attributeName, sb.append('%').append(value).append('%').toString());
+								}
+								Number count = q.scalarResult(Number.class);
+								if (count != null) {
+									totalRows = count.longValue();
+								}
+								
+								if (totalRows > 0) {
+									q = persistence.newDocumentQuery(moduleName, documentName);
+									q.addBoundProjection(attributeName, "value");
+									q.setDistinct(true);
+									if (value != null) {
+										sb.setLength(0);
+										q.getFilter().addLike(attributeName, sb.append('%').append(value).append('%').toString());
+									}
+									// NB return Object as the type could be anything
+									values = q.setFirstResult(startRow)
+												.setMaxResults(endRow - startRow)
+												.scalarResults(Object.class);
+								}
+							}
 						}
-						Bean total = persistence.newBizQL(bizQL.toString()).projectedResult();
-						long totalRows = ((Number) BindUtil.get(total, "totalRows")).longValue();
-
-						bizQL.setLength(0);
-						bizQL.append("select distinct bean.").append(attributeName);
-						bizQL.append(" as value from {").append(document.getOwningModuleName()).append('.');
-						bizQL.append(document.getName()).append("} as bean");
-						if (value != null) {
-							bizQL.append(" where bean.").append(attributeName).append(" like '%").append(value).append("%'");
-						}
-
-						List<Bean> values = persistence.newBizQL(bizQL.toString())
-														.setFirstResult(startRow)
-														.setMaxResults(endRow - startRow)
-														.projectedResults();
-
+						
 						StringBuilder message = new StringBuilder(1024);
 						message.append("{\"response\":{");
 						message.append("\"status\":0,");
@@ -172,11 +203,14 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						message.append(Math.min(totalRows, endRow));
 						message.append(",\"totalRows\":");
 						message.append(totalRows);
-						message.append(",\"data\":");
-						Set<String> propertyNames = new TreeSet<>();
-						propertyNames.add("value");
-						message.append(JSON.marshall(customer, values, propertyNames));
-						message.append("}}");
+						message.append(",\"data\":[");
+						if (! values.isEmpty()) {
+							for (Object result : values) {
+								message.append("{value:\"").append(result).append("\"},");
+							}
+							message.setLength(message.length() - 1); // remove last comma
+						}
+						message.append("]}}");
 						pw.append(message);
 					}
 					else {
