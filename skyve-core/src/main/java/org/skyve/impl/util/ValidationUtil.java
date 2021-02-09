@@ -83,6 +83,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw e;
 		}
 	}
@@ -327,6 +328,7 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw new ValidationException(new Message(binding, Util.i18n(BeanValidator.VALIDATION_ACCESS_KEY, locale)));
 		}
 
@@ -375,6 +377,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw e;
 		}
 	}
@@ -458,10 +461,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw ve;
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}
