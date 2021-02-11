@@ -48,7 +48,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/icu4j-57.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/istack-commons-runtime-3.0.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/itext-2.1.7.js5.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jakarta-regexp-1.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jandex-2.0.5.Final.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/java-semver-0.9.0.jar"/>
@@ -65,11 +64,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-core-1.16.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/libphonenumber-8.10.7.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-analyzers-common-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-core-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queries-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-queryparser-4.5.1.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/lucene-sandbox-4.5.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/olap4j-0.9.7.309-JS-3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/reactive-streams-1.0.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
