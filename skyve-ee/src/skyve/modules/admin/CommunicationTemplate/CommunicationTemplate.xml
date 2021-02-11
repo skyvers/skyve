@@ -16,7 +16,8 @@
         </text>
         <markup required="true" name="template">
             <displayName>Template</displayName>
-            <description>Include "{body}" to designate where the body of the communication will be placed.</description>
+            <description><![CDATA[Include "{body}" to designate where the body of the communication will be placed.]]></description>
+            <defaultValue><![CDATA[<p>{body}</p>]]></defaultValue>
         </markup>
     </attributes>
 </document>

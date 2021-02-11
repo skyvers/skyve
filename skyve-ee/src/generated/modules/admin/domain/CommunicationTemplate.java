@@ -47,7 +47,7 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	 * <br/>
 	 * Include "{body}" to designate where the body of the communication will be placed.
 	 **/
-	private String template;
+	private String template = "<p>{body}</p>";
 
 	@Override
 	@XmlTransient

@@ -22,7 +22,7 @@
 		<document ref="Audit" defaultQueryName="qAudits" />
 		<document ref="ChangePassword" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
-		<document ref="CommunicationTemplate" />
+		<document ref="CommunicationTemplate" defaultQueryName="qCommunicationTemplate"/>
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
@@ -681,9 +681,17 @@
 				<column binding="description" sortOrder="ascending" />
 				<column binding="documentName" />
 				<column binding="subject" />
+				<column binding="template"/>
 			</columns>
 		</query>
-		<query name="qSubscriptions" documentName="Subscription">
+		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
+			<description>Communications</description>
+			<columns>
+				<column binding="name" sortOrder="ascending"/>
+				<column binding="description" />
+				<column binding="template"/>
+			</columns>
+		</query>		<query name="qSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />
