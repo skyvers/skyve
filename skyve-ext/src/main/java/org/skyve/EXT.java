@@ -589,6 +589,9 @@ public class EXT {
 	public static ContentManager newContentManager() {
 		ContentManager result = DefaultAddInManager.get().getExtension(ContentManager.class);
 		if (result == null) {
+			if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
+				throw new DomainException("No content manager addin detected and \"factories.contentManagerClass\" is not defined in the Skyve configuration");
+			}
 			result = AbstractContentManager.get();
 		}
 		return result;
