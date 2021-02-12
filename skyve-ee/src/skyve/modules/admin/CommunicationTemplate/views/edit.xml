@@ -16,11 +16,18 @@
         <row>
             <item showLabel="true">
 				<html binding="template" pixelHeight="300" pixelWidth="800" />
-            </item>
-        </row>
-    </form>
-    <actions>
-        <defaults/>
-    </actions>
-    <newParameters/>
+			</item>
+		</row>
+	</form>
+	<vbox border="true"
+		borderTitle="Communications using this template">
+		<listGrid query="qCommunications" continueConversation="true">
+			<filterParameter operator="equal"
+				filterBinding="template" valueBinding="bizId" />
+		</listGrid>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+	<newParameters />
 </view>

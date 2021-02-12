@@ -986,6 +986,7 @@ public class SmartClientListServlet extends HttpServlet {
 					result = BindUtil.fromString(customer, converter, type, valueString, false);
 				}
 				catch (Exception e1) {
+					Util.LOGGER.warning("Could not format " + valueString + " as type " + type + " with converter " + converter + ". See the following stack traces below");
 					e.printStackTrace();
 					e1.printStackTrace();
 					if (valueBinding == null) {

@@ -2823,10 +2823,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			def.setTitle(title);
 		}
-		boolean required = isCurrentWidgetRequired();
-		if (required) {
-			def.setRequired(required);
-		}
+		def.setRequired(isCurrentWidgetRequired());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);

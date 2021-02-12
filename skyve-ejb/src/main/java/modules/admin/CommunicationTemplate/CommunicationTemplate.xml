@@ -17,6 +17,7 @@
         <markup required="true" name="template">
             <displayName>admin.communicationTemplate.template.displayName</displayName>
             <description>admin.communicationTemplate.template.description</description>
+            <defaultValue><![CDATA[<p>{body}</p>]]></defaultValue>
         </markup>
     </attributes>
 </document>

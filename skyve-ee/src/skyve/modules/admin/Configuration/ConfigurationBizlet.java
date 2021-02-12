@@ -7,14 +7,12 @@ import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
-import modules.admin.ModulesUtil;
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.Startup.StartupExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
 import modules.admin.domain.User;
-import modules.admin.domain.UserProxy;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
 
@@ -25,12 +23,9 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		ConfigurationExtension result = super.newInstance(bean);
 
 		// Set the user name and email to the logged in user (if logged in)
-		if (result.getEmailFrom() == null) {
-			UserProxy user = ModulesUtil.currentAdminUserProxy();
-			if (user != null) {
-				Contact contact = user.getContact();
-				result.setEmailFrom(contact.getEmail1());
-			}
+		if (result.getStartup() == null) {
+			result.setStartup(Startup.newInstance());
+			result.setEmailFrom(result.getStartup().getMailSender());
 		}
 
 		if (result.getPasswordMinLength() == null) {

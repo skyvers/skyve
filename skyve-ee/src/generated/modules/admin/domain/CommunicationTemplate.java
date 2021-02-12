@@ -47,7 +47,7 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	 * <br/>
 	 * admin.communicationTemplate.template.description
 	 **/
-	private String template;
+	private String template = "<p>{body}</p>";
 
 	@Override
 	@XmlTransient
