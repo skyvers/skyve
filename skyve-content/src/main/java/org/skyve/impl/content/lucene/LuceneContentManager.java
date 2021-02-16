@@ -314,66 +314,69 @@ public class LuceneContentManager extends FileSystemContentManager {
 	public SearchResults google(String search, int maxResults) throws Exception {
 		SearchResults results = new SearchResults();
 		
-		try (IndexReader reader = DirectoryReader.open(directory)) {
-			IndexSearcher searcher = new IndexSearcher(reader);
-			QueryParser parser = new QueryParser(CONTENT, analyzer);
-			Query query = parser.parse(search);
-			TopDocs hits = searcher.search(query, maxResults);
-
-			Formatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");
-	        
-			// It scores text fragments by the number of unique query terms found
-			// Basically the matching score in layman terms
-			QueryScorer scorer = new QueryScorer(query);
-	         
-			// used to markup highlighted terms found in the best sections of a text
-			Highlighter highlighter = new Highlighter(formatter, scorer);
-	         
-			// It breaks text up into same-size texts but does not split up spans
-			Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 10);
-	         
-			highlighter.setTextFragmenter(fragmenter);
-	         
-			//results.setSearchTimeInSecs(Integer.toString((int) (searchResponse.getTookInMillis() / 1000)));
-			//results.setSuggestion(search);
-
-			List<SearchResult> resultList = results.getResults();
-			StringBuilder excerpt = new StringBuilder(256);
-			// Iterate over found results
-			for (int i = 0, l = hits.scoreDocs.length; i < l; i++) {
-				int docid = hits.scoreDocs[i].doc;
-				Document document = searcher.doc(docid);
-				 
-				// Get stored text from found document
-				String text = document.get(CONTENT);
-				 
-				// Create token stream
-			    Fields vectors = reader.getTermVectors(docid);
-				try (TokenStream stream = TokenSources.getTokenStream(CONTENT, vectors, text, analyzer, -1)) {
-					// Get highlighted text fragments
-					String[] fragments = highlighter.getBestFragments(stream, text, 10);
-					excerpt.setLength(0);
-					for (String fragment : fragments) {
-						excerpt.append(' ').append(fragment);
+		String term = UtilImpl.processStringValue(search);
+		if ((term != null) && (maxResults > 0)) {
+			try (IndexReader reader = DirectoryReader.open(directory)) {
+				IndexSearcher searcher = new IndexSearcher(reader);
+				QueryParser parser = new QueryParser(CONTENT, analyzer);
+				Query query = parser.parse(term);
+				TopDocs hits = searcher.search(query, maxResults);
+	
+				Formatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");
+		        
+				// It scores text fragments by the number of unique query terms found
+				// Basically the matching score in layman terms
+				QueryScorer scorer = new QueryScorer(query);
+		         
+				// used to markup highlighted terms found in the best sections of a text
+				Highlighter highlighter = new Highlighter(formatter, scorer);
+		         
+				// It breaks text up into same-size texts but does not split up spans
+				Fragmenter fragmenter = new SimpleSpanFragmenter(scorer, 10);
+		         
+				highlighter.setTextFragmenter(fragmenter);
+		         
+				//results.setSearchTimeInSecs(Integer.toString((int) (searchResponse.getTookInMillis() / 1000)));
+				//results.setSuggestion(search);
+	
+				List<SearchResult> resultList = results.getResults();
+				StringBuilder excerpt = new StringBuilder(256);
+				// Iterate over found results
+				for (int i = 0, l = hits.scoreDocs.length; i < l; i++) {
+					int docid = hits.scoreDocs[i].doc;
+					Document document = searcher.doc(docid);
+					 
+					// Get stored text from found document
+					String text = document.get(CONTENT);
+					 
+					// Create token stream
+				    Fields vectors = reader.getTermVectors(docid);
+					try (TokenStream stream = TokenSources.getTokenStream(CONTENT, vectors, text, analyzer, -1)) {
+						// Get highlighted text fragments
+						String[] fragments = highlighter.getBestFragments(stream, text, 10);
+						excerpt.setLength(0);
+						for (String fragment : fragments) {
+							excerpt.append(' ').append(fragment);
+						}
 					}
+					
+					SearchResult result = new SearchResult();
+					result.setAttributeName(document.get(ATTRIBUTE_NAME));
+					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
+					result.setBizId(document.get(Bean.DOCUMENT_ID));
+					result.setBizUserId(document.get(Bean.USER_ID));
+					result.setContentId(document.get(CONTENT_ID));
+					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
+					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
+					result.setExcerpt(excerpt.toString());
+					String lastModified = document.get(LAST_MODIFIED);
+					if (lastModified != null) {
+						result.setLastModified(new Date(Long.parseLong(lastModified)));
+					}
+					result.setModuleName(document.get(Bean.MODULE_KEY));
+					result.setScore((int) (hits.scoreDocs[i].score * 100.0));
+					resultList.add(result);
 				}
-				
-				SearchResult result = new SearchResult();
-				result.setAttributeName(document.get(ATTRIBUTE_NAME));
-				result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-				result.setBizId(document.get(Bean.DOCUMENT_ID));
-				result.setBizUserId(document.get(Bean.USER_ID));
-				result.setContentId(document.get(CONTENT_ID));
-				result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
-				result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
-				result.setExcerpt(excerpt.toString());
-				String lastModified = document.get(LAST_MODIFIED);
-				if (lastModified != null) {
-					result.setLastModified(new Date(Long.parseLong(lastModified)));
-				}
-				result.setModuleName(document.get(Bean.MODULE_KEY));
-				result.setScore((int) (hits.scoreDocs[i].score * 100.0));
-				resultList.add(result);
 			}
 		}
 		

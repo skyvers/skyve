@@ -96,7 +96,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            row.put("doc", document.getSingularAlias());
 				            row.put(Bean.BIZ_KEY, (bean != null) ? bean.getBizKey() : null);
 				            row.put("excerpt", result.getExcerpt());
-				            row.put("score", new Integer(result.getScore()));
+				            row.put("score", Integer.valueOf(result.getScore()));
 		                    url.setLength(0);
 		                    url.append("?m=");
 		                    url.append(moduleName).append("&d=").append(documentName);
@@ -151,7 +151,10 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 			throw new ServletException("Could not search the content repository", e);
 		}
 		finally {
-			persistence.commit(true);
+			// This can be null here if EXT.newContentManager fails
+			if (persistence != null) {
+				persistence.commit(true);
+			}
 		}
     }
 }
