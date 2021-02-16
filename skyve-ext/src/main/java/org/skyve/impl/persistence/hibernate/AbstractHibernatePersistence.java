@@ -1881,8 +1881,9 @@ t.printStackTrace();
 										value = extractor.extractTextFromMarkup(value);
 									}
 								}
-								
-								properties.put(propertyName, value);
+								if (value != null) {
+									properties.put(propertyName, value);
+								}
 							}
 						}
 					}
@@ -1895,8 +1896,9 @@ t.printStackTrace();
 									value = extractor.extractTextFromMarkup(value);
 								}
 							}
-							
-							properties.put(propertyName, value);
+							if (value != null) {
+								properties.put(propertyName, value);
+							}
 						}
 					}
 				}

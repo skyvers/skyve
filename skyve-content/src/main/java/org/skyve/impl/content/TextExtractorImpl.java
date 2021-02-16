@@ -6,7 +6,6 @@ import java.util.logging.Level;
 
 import org.pf4j.Extension;
 import org.apache.tika.Tika;
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -20,17 +19,27 @@ public class TextExtractorImpl implements TextExtractor {
 	private static final Tika TIKA = new Tika();
 	
 	@Override
-	public String extractTextFromMarkup(String markup) throws Exception {
-		return TIKA.parseToString(new ByteArrayInputStream(markup.getBytes()));
+	public String extractTextFromMarkup(String markup) {
+		String result = null;
+		try {
+			result = TIKA.parseToString(new ByteArrayInputStream(markup.getBytes()));
+		}
+		catch (Exception e) {
+			UtilImpl.LOGGER.log(Level.SEVERE, 
+									"TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA",
+									e);
+		}
+		return result;
 	}
 	
 	@Override
-	public String extractTextFromContent(AttachmentContent content) throws Exception {
+	public String extractTextFromContent(AttachmentContent content) {
 		StringBuilder result = new StringBuilder(102400);
 
-		try (InputStream contentStream = content.getContentStream()) {
-			Metadata metadata = new Metadata();
-			try {
+		try {
+			try (InputStream contentStream = content.getContentStream()) {
+				Metadata metadata = new Metadata();
+
 				// Set the maximum length of strings returned by the parseToString method, -1 sets no limit
 				String text = Util.processStringValue(TIKA.parseToString(contentStream, metadata, 100000));
 				if (text != null) {
@@ -63,32 +72,37 @@ public class TextExtractorImpl implements TextExtractor {
 					result.append(keywords);
 				}
 			}
-			catch (TikaException e) {
-				UtilImpl.LOGGER.log(Level.SEVERE, 
-										"ElasticContentManager.put(): Attachment could not be parsed by TIKA and so has not been textually indexed",
-										e);
-			}
+		}
+		catch (Exception e) {
+			UtilImpl.LOGGER.log(Level.SEVERE, 
+									"TextExtractorImpl.extractTextFromContent(): Attachment could not be extracted by TIKA",
+									e);
 		}
 		
 		return result.toString();
 	}
 	
 	@Override
-	public void sniffContentType(AttachmentContent attachment) throws Exception {
+	public void sniffContentType(AttachmentContent attachment) {
 		// Sniff content type if necessary
 		String contentType = attachment.getContentType();
 		if (contentType == null) {
-			byte[] content = attachment.getContentBytes();
-			String fileName = attachment.getFileName();
-			if (fileName == null) {
-				contentType = TIKA.detect(content);
+			try {
+				byte[] content = attachment.getContentBytes();
+				String fileName = attachment.getFileName();
+				if (fileName == null) {
+					contentType = TIKA.detect(content);
+				}
+				else {
+					contentType = TIKA.detect(content, fileName);
+				}
+				attachment.setContentType(contentType);
 			}
-			else {
-				contentType = TIKA.detect(content, fileName);
+			catch (Exception e) {
+				UtilImpl.LOGGER.log(Level.SEVERE, 
+										"TextExtractorImpl.sniffContentType(): Attachment could not be sniffed by TIKA",
+										e);
 			}
-			attachment.setContentType(contentType);
 		}
 	}
-	
-	
 }
