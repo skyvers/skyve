@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="javaee/skyve.ear/apps.jar" path="src/skyve"/>
-	<classpathentry kind="src" path="src/test/resources"/>
-	<classpathentry kind="src" path="src/generatedTest"/>
-	<classpathentry kind="src" output="javaee/skyve.ear/skyve.war/WEB-INF/classes" path="src/web"/>
-	<classpathentry excluding="resources/" kind="src" path="src/test"/>
-	<classpathentry kind="src" output="javaee/skyve.ear/apps.jar" path="src/generated"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
 		<attributes>
 			<attribute name="module" value="true"/>
-			<attribute name="owner.project.facets" value="java"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
