@@ -30,7 +30,7 @@ public class ProcessCommunicationForTagJob extends Job {
 
 		Communication communication = (Communication) getBean();
 		Persistence pers = CORE.getPersistence();
-
+		
 		if (communication.getActionType() != null) {
 
 			// get relevant document to action
@@ -54,7 +54,7 @@ public class ProcessCommunicationForTagJob extends Job {
 					switch (communication.getActionType()) {
 					case saveForBulkSend:
 
-						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null, pb);
+						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Saved OK");
 
 						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
@@ -63,12 +63,12 @@ public class ProcessCommunicationForTagJob extends Job {
 						break;
 					case testBindingsAndOutput:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, ResponseMode.EXPLICIT, null, pb);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Tested OK");
 						break;
 					case sendImmediately:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null, pb);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Sent OK");
 						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
 							EXT.untag(communication.getTag().getBizId(), pb);
@@ -93,9 +93,9 @@ public class ProcessCommunicationForTagJob extends Job {
 			}
 			setPercentComplete(100);
 			log.add("Finished Processing Communication Action for Tagged Items Job at " + new Date());
-
+			
 			if (Boolean.TRUE.equals(communication.getNotification())) {
-
+				
 				// send email notification for completion of Job
 				try {
 					CommunicationUtil.sendFailSafeSystemCommunication(CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_NOTIFICATION, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY, ResponseMode.SILENT, null, communication);

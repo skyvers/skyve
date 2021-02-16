@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="{currentUser.contact.name}" name="edit" xmlns="http://www.skyve.org/xml/view"
+<view title="User Dashboard" name="edit" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox >
 		<hbox>
@@ -10,11 +10,11 @@
 					]]>
 				</script>
 			</inject>
-			<vbox border="true" borderTitle="Favourites - click to ...">
+			<vbox border="true" borderTitle="admin.userDashboard.edit.favourites.borderTitle">
 				<listRepeater model="FavouritesModel"/>
 			</vbox>
 		
-			<form responsiveWidth="6" border="true" borderTitle="My Details">
+			<form responsiveWidth="6" border="true" borderTitle="admin.userDashboard.edit.myDetails.borderTitle">
 				<column responsiveWidth="3" />
 				<column />
 				<row>
@@ -48,17 +48,17 @@
 			</form>
 		</hbox>
 	</vbox>
-	<hbox border="true" borderTitle="My Activity" minPixelHeight="400">
+	<hbox border="true" borderTitle="admin.userDashboard.edit.myActivity.borderTitle" minPixelHeight="400">
 		<chart type="line" modelName="UserActivityModel"/>
 		<chart type="pie" modelName="UserActivityContextModel"/>
 	</hbox>
-	<vbox border="true" borderTitle="My Jobs">
+	<vbox border="true" borderTitle="admin.userDashboard.edit.myJobs.borderTitle">
 		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true">
 			<filterParameter filterBinding="bizUserId" operator="equal" valueBinding="currentUser.bizId"/>
 		</listGrid>
 	</vbox>			
 	<actions>
-		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
+		<action className="UpdateMyDetails" displayName="admin.userDashboard.actions.save.displayName" toolTip="admin.userDashboard.actions.save.toolTip" relativeIconFileName="actions/Save.gif"
 			iconStyleClass="fa fa-save"
 			inActionPanel="false" />
 	</actions>

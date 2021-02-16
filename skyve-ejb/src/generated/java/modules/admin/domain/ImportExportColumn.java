@@ -50,11 +50,11 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	 **/
 	@XmlEnum
 	public static enum LoadAction implements Enumeration {
-		setValue("set", "Set value"),
-		lookupEquals("equals", "Find exact match"),
-		lookupLike("like", "Find like match"),
-		lookupContains("contains", "Find matches containing this value"),
-		confirmValue("confirm", "Fail if not found");
+		setValue("set", "admin.importExportColumn.loadAction.set.description"),
+		lookupEquals("equals", "admin.importExportColumn.loadAction.equals.description"),
+		lookupLike("like", "admin.importExportColumn.loadAction.like.description"),
+		lookupContains("contains", "admin.importExportColumn.loadAction.contains.description"),
+		confirmValue("confirm", "admin.importExportColumn.loadAction.confirm.description");
 
 		private String code;
 		private String description;
@@ -126,19 +126,17 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	}
 
 	/**
-	 * Column Title
+	 * admin.importExportColumn.columnName.displayName
 	 **/
 	private String columnName;
 	/**
-	 * Binding
+	 * admin.importExportColumn.bindingName.displayName
 	 **/
 	private String bindingName;
 	/**
-	 * Expression
+	 * admin.importExportColumn.bindingExpression.displayName
 	 * <br/>
-	 * <strong>An expression using bindings relative to the document.</strong>
-			For exports, you can use compound expressions using bindings and literals, for example:
-			<i>{name} ({mobile})</i>
+	 * admin.importExportColumn.bindingExpression.description
 	 **/
 	private String bindingExpression;
 	/**

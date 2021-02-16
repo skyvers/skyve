@@ -26,7 +26,7 @@
 			</item>
 		</row>
 	</form>
-	<form border="true" borderTitle="Copy">
+	<form border="true" borderTitle="admin.snapshot.edit.copy.borderTitle">
 		<column percentageWidth="20" />
 		<column />
 		<column />
@@ -46,8 +46,8 @@
 	</form>
 	<actions>
 		<defaults />
-		<action className="CopySnapshotToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
-			toolTip="Create a copy of this snapshot for another user." confirm="Ok to copy?" 
+		<action className="CopySnapshotToUser" displayName="admin.snapshot.actions.copySnapshotToUser.displayName" inActionPanel="false" clientValidation="false"
+			toolTip="admin.snapshot.actions.copySnapshotToUser.toolTip" confirm="Ok to copy?" 
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
 	</actions>
 	<newParameters />

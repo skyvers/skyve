@@ -21,6 +21,7 @@ import static router.UxUis.*;
 
 public class DefaultUxUiSelector implements UxUiSelector {
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
+
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);
@@ -44,7 +45,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator") && UtilImpl.SHOW_SETUP) {
 			// check the user has not already dismissed the startup page this session
 			Object dismissed = session != null ? session.getAttribute(DISMISS_STARTUP) : null;
-			if (!Boolean.TRUE.equals(dismissed)) {
+			if (! Boolean.TRUE.equals(dismissed)) {
 				Util.LOGGER.info("ROUTING TO STARTUP");
 				return STARTUP;
 			}

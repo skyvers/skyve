@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Users" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.userList.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Users">
+		<tab title="admin.userList.edit.users.tabTitle">
 			<listGrid continueConversation="false" query="qUsers"></listGrid>
 		</tab>
-		<tab title="Invite Users">
+		<tab title="admin.userList.edit.inviteUsers.tabTitle">
 			<component document="Configuration" name="_emailNotConfiguredBanner" />
-			<vbox border="true" borderTitle="User Invitations" >
+			<vbox border="true" borderTitle="admin.userList.edit.userInvitations.borderTitle" >
 				<form>
 					<column />
 					<row>
 						<item>
-							<blurb>1. To invite users, select which permission group(s) to add them to.</blurb>
+							<blurb>admin.userList.edit.blurb1</blurb>
 						</item>
 					</row>
 				</form>
@@ -23,7 +23,7 @@
 					<column />
 					<row>
 						<item>
-							<blurb>2. Then enter the email addresses of the new users.</blurb>
+							<blurb>admin.userList.edit.blurb2</blurb>
 						</item>
 					</row>
 				</form>
@@ -48,9 +48,9 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="InviteUsers" displayName="Create and Invite Users" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+		<action className="InviteUsers" displayName="admin.userList.actions.inviteUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
 			confirm="Ok to create users and send each user an invitation?" />
-		<action className="CreateUsers" displayName="Create Users (no invitation)" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+		<action className="CreateUsers" displayName="admin.userList.actions.createUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
 			confirm="Ok to create the users (no invitation email will be sent)?" />
 	</actions>
 </view>

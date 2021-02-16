@@ -2,7 +2,6 @@ package modules.admin.User.actions;
 
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
-import org.junit.Ignore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
@@ -11,7 +10,6 @@ import util.AbstractActionTest;
  * Generated - local changes will be overwritten.
  * Extend {@link AbstractActionTest} to create your own tests for this action.
  */
-@Ignore
 public class ResendActivationTest extends AbstractActionTest<UserExtension, ResendActivation> {
 
 	@Override

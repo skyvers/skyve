@@ -50,7 +50,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 
 	/**
 	 * Copy fields from conceptual specification to this report design
-	 *
+	 * 
 	 * @param spec
 	 * @return
 	 */
@@ -133,23 +133,23 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 
 	/**
 	 * copy fields from conceptual specification to this report design
-	 *
+	 * 
 	 * @param spec
 	 * @return
 	 */
 	public static DesignSpecification specificationFromDesignBean(ReportDesign spec) throws Exception {
 
 		DesignSpecification result = new DesignSpecification();
-
+		
 		result.setName(spec.getName());
 		if (spec.getMode() != null) {
-			result.setMode(DesignSpecification.Mode.valueOf(spec.getMode().name()));
+			result.setMode(org.skyve.impl.generate.jasperreports.DesignSpecification.Mode.valueOf(spec.getMode().name()));
 		}
 		if (spec.getDefinitionSource() != null) {
-			result.setDefinitionSource(DesignSpecification.DefinitionSource.valueOf(spec.getDefinitionSource().name()));
+			result.setDefinitionSource(org.skyve.impl.generate.jasperreports.DesignSpecification.DefinitionSource.valueOf(spec.getDefinitionSource().name()));
 		}
 		if (spec.getReportType() != null) {
-			result.setReportType(DesignSpecification.ReportType.valueOf(spec.getReportType().name()));
+			result.setReportType(org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType.valueOf(spec.getReportType().name()));
 			Util.LOGGER.info("SPEC REPORT TYPE IS " + result.getReportType().toString());
 		}
 		result.setModuleName(spec.getModuleName());
@@ -158,7 +158,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		result.setRepositoryPath(spec.getRepositoryPath());
 		result.setSaveToDocumentPackage(spec.getSaveToDocumentPackage());
 		if (spec.getOrientation() != null) {
-			result.setOrientation(DesignSpecification.Orientation.valueOf(spec.getOrientation().name()));
+			result.setOrientation(org.skyve.impl.generate.jasperreports.DesignSpecification.Orientation.valueOf(spec.getOrientation().name()));
 		}
 		result.setWidth(spec.getWidth());
 		result.setHeight(spec.getHeight());
@@ -209,7 +209,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 					break;
 				}
 			}
-
+			
 		}
 		if (spec.getCollectionType() != null) {
 			result.setCollectionType(org.skyve.metadata.model.document.Collection.CollectionType.valueOf(spec.getCollectionType().name()));
@@ -223,7 +223,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		return result;
 	}
 
-
+	
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 

@@ -11,14 +11,14 @@
 	<bizKey expression="{userName} @ {loginDateTime}"/>
 	<attributes>
 		<text name="userName" required="true" usage="domain">
-			<displayName>User Name</displayName>
+			<displayName>admin.userLoginRecord.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<dateTime name="loginDateTime" required="true" usage="domain">
-			<displayName>Login Date/Time</displayName>
+			<displayName>admin.userLoginRecord.loginDateTime.displayName</displayName>
 		</dateTime>
 		<boolean name="failed" required="true" usage="domain">
-			<displayName>Failed</displayName>
+			<displayName>admin.userLoginRecord.failed.displayName</displayName>
 		</boolean>
 	</attributes>
 </document>

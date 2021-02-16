@@ -10,30 +10,30 @@
 	<bizKey expression="{name} for {queryName} in module {moduleName}"/>
 	<attributes>
 		<text name="moduleName" required="true">
-			<displayName>Module</displayName>
+			<displayName>admin.snapshot.moduleName.displayName</displayName>
 			<domain>variant</domain>
 			<length>100</length>
 		</text>
 		<text name="queryName" required="true">
-			<displayName>Query</displayName>
+			<displayName>admin.snapshot.queryName.displayName</displayName>
 			<domain>dynamic</domain>
 			<length>100</length>
 		</text>
 		<text name="name" required="true">
-			<displayName>Name</displayName>
+			<displayName>admin.snapshot.name.displayName</displayName>
 			<length>256</length>
 		</text>
 		<memo name="snapshot" required="true">
-			<displayName>Snapshot Code</displayName>
+			<displayName>admin.snapshot.snapshot.displayName</displayName>
 			<index>none</index>
 		</memo>
 		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
-			<displayName>Copy to user</displayName>
+			<displayName>admin.snapshot.association.copyToUser.displayName</displayName>
 			<documentName>UserProxy</documentName>
 			<queryName>qActiveUserProxies</queryName>
 		</association>
 		<text name="copyToUserSnapshotName" persistent="false" trackChanges="false">
-			<displayName>Snapshot Name for Copy</displayName>
+			<displayName>admin.snapshot.copyToUserSnapshotName.displayName</displayName>
 			<length>256</length>
 		</text>
 	</attributes>

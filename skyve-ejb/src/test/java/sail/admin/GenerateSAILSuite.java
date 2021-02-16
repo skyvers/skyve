@@ -12,7 +12,6 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -36,11 +35,11 @@ import modules.admin.domain.User;
 public class GenerateSAILSuite extends Job {
 
 	/**
-	 *
+	 * 
 	 */
 	private static final long serialVersionUID = -783434573979058287L;
-
-
+	
+	
 	private static String baseSailXMLPath = "C:/_/skyve/skyve-ee/src/test/sail/";
 
 	@Override
@@ -111,12 +110,12 @@ public class GenerateSAILSuite extends Job {
 
 	}
 
-
+	
 	private static String marshalSAIL(Automation automation) throws Exception{
 		JAXBContext SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
 		Schema SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
-
+		
 		Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
@@ -126,15 +125,15 @@ public class GenerateSAILSuite extends Job {
 		marshaller.marshal(automation, sos);
 		return sos.toString();
 	}
-
+	
 	/*
 	 * returns a JAXP 1.3 schema by parsing the specified resource.
 	 */
-	private static Schema getSchema(String schemaFileName)
+	private static Schema getSchema(String schemaFileName) 
 	throws JAXBException {
 		SchemaFactory sf = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
 		try {
-			return sf.newSchema(new StreamSource(ClassLoader.getSystemResourceAsStream(schemaFileName)));
+			return sf.newSchema(new File(schemaFileName));
 		}
 		catch (SAXException se) {
 			// this can only happen if there's a deployment error and the resource is missing.

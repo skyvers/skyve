@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -48,9 +47,9 @@ import modules.admin.domain.UserProxy;
  * Utility methods applicable across application modules.
  * <p>
  * This class is provided as part of Skyve
- *
+ * 
  * @author robert.brown
- *
+ * 
  */
 public class ModulesUtil {
 
@@ -122,7 +121,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns a calendar day of the week
-	 *
+	 * 
 	 * @param weekDay
 	 *        - the day of the week (DayOfWeek)
 	 * @return - the day of the week as a Calendar.day (int)
@@ -157,7 +156,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns a day of the week from a Calendar day
-	 *
+	 * 
 	 * @param calendarDay
 	 *        - the number of the day (int)
 	 * @return - the DayOfWeek (DayOfWeek)
@@ -210,7 +209,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the number of periods of specified frequency which occur in the
 	 * calendar year.
-	 *
+	 * 
 	 * @param frequency
 	 *        - the specified frequency (OccurrenceFrequency)
 	 * @return - the number of times the specified frequency occurs in a
@@ -240,7 +239,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the number of periods which occur in a calendar year.
-	 *
+	 * 
 	 * @param period
 	 *        - the time period (OccurrencePeriod)
 	 * @return - the number of times the period occurs within a calendar year
@@ -265,7 +264,7 @@ public class ModulesUtil {
 
 	/**
 	 * Adds a time frequency to a given date.
-	 *
+	 * 
 	 * @param frequency
 	 *        - the frequency to add
 	 * @param date
@@ -316,7 +315,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the last day of the month in which the specified date occurs.
-	 *
+	 * 
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the last day of the month in which the specified
@@ -349,7 +348,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the last day of the year in which the specified date occurs.
-	 *
+	 * 
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the last day of the year in which the specified
@@ -384,7 +383,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date of the first day of the month in which the specified
 	 * date occurs.
-	 *
+	 * 
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the first day of that month
@@ -411,7 +410,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date of the first day of the year in which the specified date
 	 * occurs.
-	 *
+	 * 
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the first day of that year
@@ -437,7 +436,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date which occurs after the specified date, given the number
 	 * of days to add.
-	 *
+	 * 
 	 * @param date
 	 *        - the specified date
 	 * @param daysToAdd
@@ -547,8 +546,8 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the current session/conversation user as an Admin module User
-	 *
-	 * @return The current {@link UserExtension}
+	 * 
+	 * @return The current {@link modules.admin.User.UserExtension}
 	 */
 	public static UserExtension currentAdminUser() {
 		UserExtension result = null;
@@ -567,7 +566,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the current session/conversation user as an Admin module UserProxy
-	 *
+	 * 
 	 * @return The current {@link modules.admin.domain.UserProxy}
 	 */
 	public static UserProxyExtension currentAdminUserProxy() {
@@ -609,7 +608,7 @@ public class ModulesUtil {
 	 * attempts to find the Maximum existing value currently extant in the field
 	 * and increments that. Otherwise, the value returned is incremented and
 	 * updated DocumentNumber value for the specified combination.
-	 *
+	 * 
 	 * @param prefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
@@ -722,7 +721,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
-	 *
+	 * 
 	 * @param suppliedPrefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
@@ -730,7 +729,7 @@ public class ModulesUtil {
 	 *        - the number to increment
 	 * @param numberLength
 	 *        - the minimum length of the number when specified as a string
-	 *
+	 *        
 	 * @return - the next number
 	 */
 	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {
@@ -847,18 +846,18 @@ public class ModulesUtil {
 	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
 		return (val == null ? ifNullValue : val);
 	}
-
+	
 	/** returns null if zero - for reports or data import/export */
 	public static Decimal10 coalesce(Decimal10 val, Decimal10 ifNullValue) {
 		return (val == null ? ifNullValue : val);
-	}
+	}	
 
 	/**
 	 * Replaces the value found in the bean for the binding string provided,
 	 * e.g. if the bean has a binding of contact.name, for which the
 	 * displayNames of those bindings are Contact.FullName , then get the value
 	 * of that binding from the bean provided.
-	 *
+	 * 
 	 * @param bean
 	 *        - the bean relevant for the binding
 	 * @param replacementString
@@ -992,7 +991,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns whether the user has access to the specified module
-	 *
+	 * 
 	 * @param moduleName
 	 * @return
 	 */
@@ -1011,7 +1010,7 @@ public class ModulesUtil {
 
 	/**
 	 * Generic bizport export method.
-	 *
+	 * 
 	 * @param moduleName
 	 *        - the module to be exported
 	 * @param documentName
@@ -1118,10 +1117,10 @@ public class ModulesUtil {
 		Persistent p = document.getPersistent();
 		return p.getPersistentIdentifier();
 	}
-
+	
 	/**
 	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
-	 *
+	 * 
 	 * @param moduleName
 	 * @param documentName
 	 * @param attributeName
@@ -1130,18 +1129,12 @@ public class ModulesUtil {
 	 * @throws Exception
 	 */
 	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) throws Exception {
-
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
-		q.getFilter().addLike(attributeName, value + "%");
+		if (value != null) {
+			q.getFilter().addLike(attributeName, value + "%");
+		}
 		q.addBoundProjection(attributeName, attributeName);
 		q.setDistinct(true);
-
-		List<Bean> potentialMatches = q.projectedResults();
-		List<String> results = new ArrayList<>();
-		results.addAll(potentialMatches.stream()
-				.map(t -> (String) Binder.get(t, attributeName))
-				.collect(Collectors.toList()));
-		return results;
+		return q.scalarResults(String.class);
 	}
-
 }

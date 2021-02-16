@@ -43,9 +43,9 @@ public class ThemeCharter {
 	private static final String NO_DATA_AVAILABLE = "No data available";
 	private static final Color WHITE = new Color(255, 255, 255);
 	private static final Color BLACK = new Color(0, 0, 0);
-
+    
 	private String sql;
-
+	
 	private String themeFontName;
 	private int themeLegendFontSize;
 	private int themeTitleFontSize;
@@ -74,7 +74,7 @@ public class ThemeCharter {
 			"#FFA6D2",
 			"#E3E3AD"
 	};
-
+	
 	public Color getThemeBaseColour() {
 		return themeBaseColour;
 	}
@@ -82,7 +82,7 @@ public class ThemeCharter {
 	public void setThemeBaseColour(Color themeBaseColour) {
 		this.themeBaseColour = themeBaseColour;
 	}
-
+	
 	public String[] getColourPalette() {
 		return colourPalette;
 	}
@@ -189,16 +189,16 @@ public class ThemeCharter {
 		public enum Colouriser {
 			SINGLE_COLOUR, MULTI_COLOUR
 		}
-
+		
 		private int redDiff;
 		private int greenDiff;
 		private int blueDiff;
 		private Colouriser colouriser = Colouriser.SINGLE_COLOUR;
 		private int currentColourIndex = 0;
-
+		
 		private Color current;
 		private String[] palette;
-
+		
 		public Colouriser getColouriser() {
 			return colouriser;
 		}
@@ -238,8 +238,8 @@ public class ThemeCharter {
 		public void setBlueDiff(int blueDiff) {
 			this.blueDiff = blueDiff;
 		}
-
-		public SectionColouriser(Color baseColour, int columnCount, Colouriser colouriser, String[] palette) {
+		
+		public SectionColouriser(Color baseColour, int columnCount, SectionColouriser.Colouriser colouriser, String[] palette) {
 			this.current = baseColour;
 			this.colouriser = colouriser;
 			this.palette = palette;
@@ -542,7 +542,7 @@ public class ThemeCharter {
 
 		return null;
 	}
-
+	
 	private static String labelReference(Integer columnIndex) {
 		return "{" + columnIndex.toString() + "}";
 	}
@@ -550,10 +550,10 @@ public class ThemeCharter {
 	/**
 	 * A Fabulator is an ordered coloured list of string-bigint combinations,
 	 * typically to represent comparative totals
-	 *
+	 * 
 	 * List<Object[]> objects is the tupleResults() returned from SQL similar to
 	 * "select name, count(*) from a group by name"
-	 *
+	 * 
 	 * @param width
 	 * @param height
 	 * @param objects
