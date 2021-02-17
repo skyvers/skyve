@@ -120,7 +120,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(extensionClassName)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get(SkyveFixture.class)).addMember("types", "$T.$L", SkyveFixture.FixtureType.class, SkyveFixture.FixtureType.crud).build())
-                .addStatement("return new $T().factoryBuild($T.MODULE_NAME, $T.DOCUMENT_NAME)", DataBuilder.class, extensionClassName, extensionClassName)
+                .addStatement("return new $T().fixture($L).factoryBuild($T.MODULE_NAME, $T.DOCUMENT_NAME)", DataBuilder.class, SkyveFixture.FixtureType.crud, extensionClassName, extensionClassName)
                 .build();
 
         final TypeSpec documentFactory = TypeSpec.classBuilder(factoryName)
