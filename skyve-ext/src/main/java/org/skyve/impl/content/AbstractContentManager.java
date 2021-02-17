@@ -126,7 +126,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		
 		Map<String, Object> meta = new TreeMap<>();
 		meta.put(FILENAME, attachment.getFileName());
-		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true));
+		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true));
 		meta.put(CONTENT_TYPE, attachment.getContentType());
 		meta.put(Bean.CUSTOMER_NAME, attachment.getBizCustomer());
 		meta.put(Bean.DATA_GROUP_ID, attachment.getBizDataGroupId());

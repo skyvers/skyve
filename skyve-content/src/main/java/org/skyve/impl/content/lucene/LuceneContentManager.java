@@ -4,14 +4,12 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
@@ -52,6 +50,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.content.TextExtractorImpl;
+import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
 // If we want to use multiple indices for beans and attachments like elastic we will need 
@@ -148,7 +147,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		document.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));
 
 		// Last modified
-		document.add(new LongPoint(LAST_MODIFIED, System.currentTimeMillis()));
+		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
 			
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
 		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizId), document);
@@ -156,11 +155,12 @@ public class LuceneContentManager extends FileSystemContentManager {
 	
 	@Override
 	public void put(AttachmentContent attachment, boolean index) throws Exception {
-		put(attachment, index, true);
+		// NB Call super first coz this sets the content ID and last modified date.
 		super.put(attachment, index);
+		putIndex(attachment, index);
 	}
 	
-	private static void put(AttachmentContent attachment, boolean index, boolean store) throws Exception {
+	private static void putIndex(AttachmentContent attachment, boolean index) throws Exception {
 		String bizId = attachment.getBizId();
 
 		Document document = new Document();
@@ -204,13 +204,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 		if (fileName != null) {
 			document.add(new StringField(FILENAME, fileName, Store.YES));
 		}
-		Date lastModified = attachment.getLastModified();
-		if (lastModified != null) {
-			document.add(new LongPoint(LAST_MODIFIED, lastModified.getTime()));
-		}
+		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true)));
 
 		// Doc as binary attachment, inlined
-		if (store && (! UtilImpl.CONTENT_FILE_STORAGE)) {
+		if (! UtilImpl.CONTENT_FILE_STORAGE) {
 			byte[] bytes = attachment.getContentBytes();
 			if (bytes != null) {
 				document.add(new StoredField(ATTACHMENT, bytes));
@@ -219,15 +216,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): " + bizId);
 		String contentId = attachment.getContentId();
-		if (contentId == null) {
-			contentId = UUID.randomUUID().toString();
-			document.add(new StringField(CONTENT_ID, contentId, Store.YES));
-			writer.addDocument(document);
-			attachment.setContentId(contentId);
-		}
-		else {
-			writer.updateDocument(new Term(CONTENT_ID, contentId), document);
-		}
+		// Even if existing, add the content ID to the document as it could be a re-index
+		document.add(new StringField(CONTENT_ID, contentId, Store.YES));
+		// delete if exists and re-add
+		writer.updateDocument(new Term(CONTENT_ID, contentId), document);
 	}
 	
 	@Override
@@ -256,11 +248,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 				mimeType = MimeType.fromContentType(contentType);
 			}
 			String fileName = document.get(FILENAME);
-			Date lastModified = null;
-			String lastModifiedText = document.get(LAST_MODIFIED);
-			if (lastModifiedText != null) {
-				lastModified = new Date(Long.parseLong(lastModifiedText));
-			}
+			Date lastModified = TimeUtil.parseISODate(document.get(LAST_MODIFIED));
 			String bizCustomer = document.get(Bean.CUSTOMER_NAME);
 			String bizModule = document.get(Bean.MODULE_KEY);
 			String bizDocument = document.get(Bean.DOCUMENT_KEY);
@@ -290,7 +278,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			result.setLastModified(lastModified);
 			result.setContentType(contentType);
 			result.setContentId(contentId);
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.get(" + contentId + "): exists");
 			return result;
 		}
 	}
@@ -303,6 +291,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	@Override
 	public void remove(String contentId) throws Exception {
 		writer.deleteDocuments(new Term(CONTENT_ID, contentId));
+		super.remove(contentId);
 	}
 	
 	@Override
@@ -369,10 +358,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
 					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
 					result.setExcerpt(excerpt.toString());
-					String lastModified = document.get(LAST_MODIFIED);
-					if (lastModified != null) {
-						result.setLastModified(new Date(Long.parseLong(lastModified)));
-					}
+					result.setLastModified(TimeUtil.parseISODate(document.get(LAST_MODIFIED)));
 					result.setModuleName(document.get(Bean.MODULE_KEY));
 					result.setScore((int) (hits.scoreDocs[i].score * 100.0));
 					resultList.add(result);
@@ -406,6 +392,6 @@ public class LuceneContentManager extends FileSystemContentManager {
 	
 	@Override
 	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
-		put(attachment, index, false);
+		putIndex(attachment, index);
 	}
 }

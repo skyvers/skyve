@@ -22,7 +22,7 @@ public class TextExtractorImpl implements TextExtractor {
 	public String extractTextFromMarkup(String markup) {
 		String result = null;
 		try {
-			result = TIKA.parseToString(new ByteArrayInputStream(markup.getBytes()));
+			result = UtilImpl.processStringValue(TIKA.parseToString(new ByteArrayInputStream(markup.getBytes())));
 		}
 		catch (Exception e) {
 			UtilImpl.LOGGER.log(Level.SEVERE, 
@@ -49,7 +49,7 @@ public class TextExtractorImpl implements TextExtractor {
 				// Meta data
 				// Title
 				String title = metadata.get(TikaCoreProperties.TITLE);
-				if (title == null) {
+				if (title != null) {
 					if (result.length() > 0) {
 						result.append(". ");
 					}
@@ -79,7 +79,7 @@ public class TextExtractorImpl implements TextExtractor {
 									e);
 		}
 		
-		return result.toString();
+		return (result.length() == 0) ? null : result.toString();
 	}
 	
 	@Override

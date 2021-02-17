@@ -1,7 +1,6 @@
 package org.skyve.impl.content.lucene;
 
 import java.io.IOException;
-import java.util.Date;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -15,6 +14,7 @@ import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.util.TimeUtil;
 
 public class LuceneContentIterable implements ContentIterable {
 	private Directory directory = null;
@@ -31,7 +31,6 @@ public class LuceneContentIterable implements ContentIterable {
 		private IndexSearcher searcher = null;
 		private ScoreDoc[] scoreDocs = null;
 		private int index = 0;
-		private ScoreDoc after = null;
 		
 		private LuceneContentIterator() {
 			try {
@@ -46,7 +45,7 @@ public class LuceneContentIterable implements ContentIterable {
 		
 		@Override
 		public SearchResult next() {
-			if ((scoreDocs != null) && (scoreDocs.length > (index + 1))) {
+			if ((scoreDocs != null) && (scoreDocs.length > index)) {
 				int doc = scoreDocs[index++].doc;
 				try {
 					Document document = reader.document(doc);
@@ -59,14 +58,11 @@ public class LuceneContentIterable implements ContentIterable {
 					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
 					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
 					result.setExcerpt(document.get(AbstractContentManager.CONTENT));
-					String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
-					if (lastModified != null) {
-						result.setLastModified(new Date(Long.parseLong(lastModified)));
-					}
+					result.setLastModified(TimeUtil.parseISODate(document.get(AbstractContentManager.LAST_MODIFIED)));
 					result.setModuleName(document.get(Bean.MODULE_KEY));
 					return result;
 				}
-				catch (IOException e) {
+				catch (Exception e) {
 					throw new DomainException("Cannot get the document " + doc + " from the content index", e);
 				}
 			}
@@ -84,8 +80,8 @@ public class LuceneContentIterable implements ContentIterable {
 				}
 				index = 0;
 			}
-			else if (scoreDocs.length == (index + 1)) { // exhausted this page
-				after = scoreDocs[index];
+			else if (scoreDocs.length == index) { // exhausted this page
+				final ScoreDoc after = scoreDocs[index - 1]; // get the last one searched in the last page
 				try {
 					scoreDocs = searcher.searchAfter(after, new MatchAllDocsQuery(), PAGE_SIZE).scoreDocs;
 				}
@@ -95,7 +91,16 @@ public class LuceneContentIterable implements ContentIterable {
 				index = 0;
 			}
 
-			return scoreDocs.length > (index + 1);
+			boolean more = scoreDocs.length > index;
+			if ((! more) && (reader != null)) {
+				try {
+					reader.close();
+				}
+				catch (IOException e) {
+					throw new DomainException("Cannot close the reader from the content index", e);
+				}
+			}
+			return more;
 		}
 		
 		@Override
