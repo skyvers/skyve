@@ -52,9 +52,16 @@ public class LuceneContentIterable implements ContentIterable {
 					SearchResult result = new SearchResult();
 					result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
 					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					result.setBizId(document.get(Bean.DOCUMENT_ID));
+					String contentId = document.get(AbstractContentManager.CONTENT_ID);
+					result.setContentId(contentId);
+					String bizId = document.get(Bean.DOCUMENT_ID);
+					if (contentId == null) { // bean content
+						result.setBizId(bizId.substring(0, bizId.length() - 1));
+					}
+					else { // attachment content
+						result.setBizId(bizId);
+					}
 					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
 					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
 					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
 					result.setExcerpt(document.get(AbstractContentManager.CONTENT));

@@ -48,6 +48,7 @@ import org.skyve.content.SearchResults;
 import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ManyResultsException;
+import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.content.TextExtractorImpl;
 import org.skyve.impl.util.TimeUtil;
@@ -56,7 +57,11 @@ import org.skyve.impl.util.UtilImpl;
 // If we want to use multiple indices for beans and attachments like elastic we will need 
 // 2 dirs underneath CONTENT/SKYVE_CONTENT/ and 2 writer instances
 // Use a MultiReader instance to read from 2 indexes at once
+// At the moment the content ID is appended with '~' if its a bean content. Nothing is appended for attachments.
+// This makes document updating work when there is both attachments and bean content in the same Skyve bean.
 public class LuceneContentManager extends FileSystemContentManager {
+	static final char BEAN_CONTENT_SUFFIX = '~';
+	
 	private static Directory directory;
 	private static Analyzer analyzer;
 	private static IndexWriter writer;
@@ -105,7 +110,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	
 	@Override
 	public void put(BeanContent content) throws Exception {
-		String bizId = content.getBizId();
+		String bizContentId = content.getBizId() + BEAN_CONTENT_SUFFIX;
 		
 		StringBuilder text = new StringBuilder(256);
 		Map<String, String> properties = content.getProperties();
@@ -144,13 +149,13 @@ public class LuceneContentManager extends FileSystemContentManager {
 		if (bizDocument != null) {
 			document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
 		}
-		document.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));
+		document.add(new StringField(Bean.DOCUMENT_ID, bizContentId, Store.YES));
 
 		// Last modified
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
 			
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
-		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizId), document);
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizContentId);
+		writer.updateDocument(new Term(Bean.DOCUMENT_ID, bizContentId), document);
 	}
 	
 	@Override
@@ -285,7 +290,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	
 	@Override
 	public void remove(BeanContent content) throws Exception {
-		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, content.getBizId()));
+		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, content.getBizId() + BEAN_CONTENT_SUFFIX));
 	}
 	
 	@Override
@@ -352,9 +357,16 @@ public class LuceneContentManager extends FileSystemContentManager {
 					SearchResult result = new SearchResult();
 					result.setAttributeName(document.get(ATTRIBUTE_NAME));
 					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					result.setBizId(document.get(Bean.DOCUMENT_ID));
+					String contentId = document.get(AbstractContentManager.CONTENT_ID);
+					result.setContentId(contentId);
+					String bizId = document.get(Bean.DOCUMENT_ID);
+					if (contentId == null) { // bean content
+						result.setBizId(bizId.substring(0, bizId.length() - 1));
+					}
+					else { // attachment content
+						result.setBizId(bizId);
+					}
 					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setContentId(document.get(CONTENT_ID));
 					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
 					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
 					result.setExcerpt(excerpt.toString());

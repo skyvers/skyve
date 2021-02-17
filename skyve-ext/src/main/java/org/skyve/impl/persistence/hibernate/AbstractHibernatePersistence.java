@@ -1804,6 +1804,7 @@ t.printStackTrace();
 	@Override
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
+		TextExtractor extractor = null; // lazily instantiated
 		BeanContent content = new BeanContent(beanToReindex);
 		Map<String, String> properties = content.getProperties();
 		Customer customer = user.getCustomer();
@@ -1818,7 +1819,9 @@ t.printStackTrace();
 					String fieldName = field.getName();
 					String value = BindUtil.getDisplay(customer, beanToReindex, fieldName);
 					if (AttributeType.markup.equals(type)) {
-						TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+						if (extractor == null) {
+							extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+						}
 						if (extractor != null) {
 							value = extractor.extractTextFromMarkup(value);
 						}
@@ -1850,6 +1853,7 @@ t.printStackTrace();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToIndex.getBizModule());
 		Document document = module.getDocument(customer, beanToIndex.getBizDocument());
+		TextExtractor extractor = null; // lazily instantiated
 
 		String oldBizDataGroupId = beanToIndex.getBizDataGroupId();
 		String oldBizUserId = beanToIndex.getBizUserId();
@@ -1876,7 +1880,9 @@ t.printStackTrace();
 							String value = (state[i] == null) ? null : state[i].toString();
 							if (value != null) {
 								if (AttributeType.markup.equals(type)) {
-									TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+									if (extractor == null) {
+										extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+									}
 									if (extractor != null) {
 										value = extractor.extractTextFromMarkup(value);
 									}
@@ -1891,7 +1897,9 @@ t.printStackTrace();
 						String value = (state[i] == null) ? null : state[i].toString();
 						if (value != null) {
 							if (AttributeType.markup.equals(type)) {
-								TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+								if (extractor == null) {
+									extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+								}
 								if (extractor != null) {
 									value = extractor.extractTextFromMarkup(value);
 								}
