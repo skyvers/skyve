@@ -158,11 +158,11 @@ public class ContentModel extends ListModel<DataMaintenance> {
 						String contentId = hit.getContentId();
 						Date lastModified = hit.getLastModified();
 						Map<String, Object> properties = new TreeMap<>();
-						properties.put(Bean.DOCUMENT_ID, contentId);
+						properties.put(Bean.DOCUMENT_ID, (contentId != null) ? contentId : bizId);
 						properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, lastModified));
 						properties.put(PersistentBean.TAGGED_NAME, null);
 						properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-						properties.put(Bean.BIZ_KEY, contentId);
+						properties.put(Bean.BIZ_KEY, "Content");
 						properties.put(Content.attributeNamePropertyName, hit.getAttributeName());
 						properties.put(Content.contentBizIdPropertyName, bizId);
 						properties.put(Content.contentIdPropertyName, contentId);
