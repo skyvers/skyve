@@ -269,6 +269,9 @@
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-ejb</artifactId>
 			<version>${skyve.version}</version>
+			<!-- import its dependencies but don't include the skyve-ejb.jar -->
+			<scope>import</scope>
+			<type>pom</type>
 		</dependency>
 
 		<!-- Test dependencies -->
