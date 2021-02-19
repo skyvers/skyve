@@ -19,26 +19,36 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		File backup = new File(String.format("%sbackup_%s%s%s",
-												Util.getContentDirectory(),
-												customerName,
-												File.separator,
-												bean.getSelectedBackupName()));
-		if (backup.exists()) {
-			Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
-			if (ExternalBackup.areExternalBackupsEnabled()) {
-				ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
-			} else {
-				FileUtil.delete(backup);
-			}
-			Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
-		}
-		else {
-			Util.LOGGER.info("Backup " + backup.getAbsolutePath() + " no longer exists");
-		}
+		
+		// delete external backup if enabled
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					String backupName = bean.getSelectedBackupName();
+					if (ExternalBackup.getInstance().exists(backupName)) {
+						Util.LOGGER.info("Deleting backup " + backupName);
+						ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
+						Util.LOGGER.info("Deleted backup " + backupName);
+					} else {
+						Util.LOGGER.info("Backup " + backupName + " no longer exists");
+					}
+				} else {
+					// delete from local content
+					File backup = new File(String.format("%sbackup_%s%s%s",
+							Util.getContentDirectory(),
+							customerName,
+							File.separator,
+							bean.getSelectedBackupName()));
+					if (backup.exists()) {
+						Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
+						FileUtil.delete(backup);
+						Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
+					} else {
+						Util.LOGGER.info("Backup " + backup.getAbsolutePath() + " no longer exists");
+					}
+				}
 
-		bean.setSelectedBackupName(null); // deselect the deleted backup
-		bean.setRefreshBackups(Boolean.TRUE);
+				// deselect the deleted backup
+				bean.setSelectedBackupName(null);
+				bean.setRefreshBackups(Boolean.TRUE);
 
 		return new ServerSideActionResult<>(bean);
 	}
