@@ -12,7 +12,6 @@ import org.apache.tika.metadata.TikaCoreProperties;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
 
 @Extension(points = {TextExtractor.class})
 public class TextExtractorImpl implements TextExtractor {
@@ -21,13 +20,16 @@ public class TextExtractorImpl implements TextExtractor {
 	@Override
 	public String extractTextFromMarkup(String markup) {
 		String result = null;
-		try {
-			result = UtilImpl.processStringValue(TIKA.parseToString(new ByteArrayInputStream(markup.getBytes())));
-		}
-		catch (Exception e) {
-			UtilImpl.LOGGER.log(Level.SEVERE, 
-									"TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA",
-									e);
+		String processedMarkup = UtilImpl.processStringValue(markup);
+		if (processedMarkup != null) {
+			try {
+				result = UtilImpl.processStringValue(TIKA.parseToString(new ByteArrayInputStream(processedMarkup.getBytes())));
+			}
+			catch (Exception e) {
+				UtilImpl.LOGGER.log(Level.SEVERE, 
+										"TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA",
+										e);
+			}
 		}
 		return result;
 	}
@@ -41,7 +43,7 @@ public class TextExtractorImpl implements TextExtractor {
 				Metadata metadata = new Metadata();
 
 				// Set the maximum length of strings returned by the parseToString method, -1 sets no limit
-				String text = Util.processStringValue(TIKA.parseToString(contentStream, metadata, 100000));
+				String text = UtilImpl.processStringValue(TIKA.parseToString(contentStream, metadata, 100000));
 				if (text != null) {
 					result.append(text);
 				}
@@ -90,13 +92,15 @@ public class TextExtractorImpl implements TextExtractor {
 			try {
 				byte[] content = attachment.getContentBytes();
 				String fileName = attachment.getFileName();
-				if (fileName == null) {
-					contentType = TIKA.detect(content);
+				if (content != null) {
+					if (fileName == null) {
+						contentType = TIKA.detect(content);
+					}
+					else {
+						contentType = TIKA.detect(content, fileName);
+					}
+					attachment.setContentType(contentType);
 				}
-				else {
-					contentType = TIKA.detect(content, fileName);
-				}
-				attachment.setContentType(contentType);
 			}
 			catch (Exception e) {
 				UtilImpl.LOGGER.log(Level.SEVERE, 
