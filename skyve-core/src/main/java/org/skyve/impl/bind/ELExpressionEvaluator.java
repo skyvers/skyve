@@ -7,6 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 class ELExpressionEvaluator extends ExpressionEvaluator {
 	static final String PREFIX = "el";
@@ -29,5 +32,12 @@ class ELExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	public String formatWithoutPrefix(String expression, Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefix(expression, bean));
+	}
+	
+	@Override
+	public boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+		// TODO investigate validating the EL.
+		// The least I can try is creating a bean
+		return true;
 	}
 }

@@ -25,14 +25,10 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
+	private static final long serialVersionUID = 3350398188234057554L;
 	public static final String EXPRESSION = "expression...";
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3350398188234057554L;
-
-	List<DomainValue> bindings = null;
+	private List<DomainValue> bindings = null;
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, ImportExportColumn bean) throws Exception {
@@ -50,7 +46,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				Module module = customer.getModule(bean.getParent().getModuleName());
 				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
-				for (Attribute a : document.getAttributes()) {
+				for (Attribute a : document.getAllAttributes()) {
 
 					// exclude unimplemented types - some of these can be handled later
 					if (!AttributeType.collection.equals(a.getAttributeType())
@@ -124,7 +120,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 						// validate the compound Expression
 						Bean b = document.newInstance(CORE.getUser());
 						@SuppressWarnings("unused")
-						String attempt = Binder.formatMessage(customer, bean.getBindingExpression(), b);
+						String attempt = Binder.formatMessage(bean.getBindingExpression(), b);
 
 					} catch (@SuppressWarnings("unused") Exception e2) {
 						StringBuilder sb = new StringBuilder(64);

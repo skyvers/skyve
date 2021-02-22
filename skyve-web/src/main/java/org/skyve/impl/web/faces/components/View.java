@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.components;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.faces.component.FacesComponent;
@@ -13,7 +14,6 @@ import javax.faces.context.FacesContext;
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -31,6 +31,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {
@@ -145,14 +146,17 @@ public class View extends HtmlPanelGroup {
         Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
         Repository repository = CORE.getRepository();
 
-    	componentBuilder.setManagedBeanName(managedBeanName);
+        Locale locale = user.getLocale();
+        componentBuilder.setManagedBeanName(managedBeanName);
     	componentBuilder.setProcess(process);
     	componentBuilder.setUpdate(update);
     	componentBuilder.setUserAgentType(userAgentType);
+    	componentBuilder.setLocale(locale);
     	layoutBuilder.setManagedBeanName(managedBeanName);
     	layoutBuilder.setProcess(process);
     	layoutBuilder.setUpdate(update);
     	layoutBuilder.setUserAgentType(userAgentType);
+    	layoutBuilder.setLocale(locale);
 
     	FacesViewRenderer fvr = null;
         org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit.toString());

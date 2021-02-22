@@ -12,12 +12,12 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
+import org.skyve.web.UserAgentType;
 
 public class WebStatsUtil {
 	private static final String YEAR_FORMAT = "yyyy";

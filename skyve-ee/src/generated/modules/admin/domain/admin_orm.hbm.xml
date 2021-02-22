@@ -125,6 +125,7 @@
 		<property name="passwordResetEmailBody" type="text" />
 		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
 		<property name="selfRegistrationActivationExpiryHours" />
+		<property name="allowUserSelfRegistration" />
 		<property name="passwordComplexityModel" length="7">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>

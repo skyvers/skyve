@@ -47,7 +47,7 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	 * <br/>
 	 * Include "{body}" to designate where the body of the communication will be placed.
 	 **/
-	private String template;
+	private String template = "<p>{body}</p>";
 
 	@Override
 	@XmlTransient
@@ -77,9 +77,7 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{name}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{name}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

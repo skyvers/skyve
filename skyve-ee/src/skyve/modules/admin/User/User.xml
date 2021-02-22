@@ -197,7 +197,7 @@
 		</collection>
 		
 		<!-- Self registration activation status and code -->
-		<boolean name="activated" required="true">
+		<boolean name="activated">
 			<documentation><![CDATA[
 			By default the account will be activated.
 			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
@@ -216,7 +216,10 @@
 			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
 			<description>admin.user.activationCodeCreationDateTime.description</description>
 		</dateTime>
-		
+		<text name="activateUrl" persistent="false" audited="false" trackChanges="false">
+			<displayName>Activation Url</displayName>
+			<length>2083</length>
+		</text>	
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->
@@ -294,6 +297,12 @@
 			<description>True when User Self-Registration is enabled.</description>
 			<expression>
 				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION]]>
+			</expression>
+		</condition>
+		<condition name="selfRegistrationEnabledAndUserNotActivated" usage="view">
+			<description>True when User Self-Registration is enabled and the User has not been activated.</description>
+			<expression>
+				<![CDATA[(org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (getActivated().equals(Boolean.FALSE)))]]>
 			</expression>
 		</condition>
 		<condition name="canActivateUser" usage="view">

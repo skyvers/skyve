@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.skyve.CORE;
@@ -98,7 +98,7 @@ public class POISheetGenerator {
 
 	/**
 	 * Add a field to the list of expected fields
-	 * 
+	 *
 	 * @param dff
 	 * @throws Exception
 	 */
@@ -108,7 +108,7 @@ public class POISheetGenerator {
 
 	/**
 	 * Add a field to the list of expected fields
-	 * 
+	 *
 	 * @param fieldTitle
 	 * @param binding
 	 */
@@ -117,7 +117,7 @@ public class POISheetGenerator {
 	}
 
 	public Download getDownload() throws Exception {
-		
+
 		Download result= null;
 
 		if (moduleName != null && documentName != null) {
@@ -137,12 +137,12 @@ public class POISheetGenerator {
 			if (!Boolean.FALSE.equals(columnTitles)) {
 				// export column titles
 				for (DataFileExportField f : fields) {
-					POIWorkbook.putPOICellValue(sheet, rowNum, colNum++, Cell.CELL_TYPE_STRING, f.getFieldTitle(), true);
+					POIWorkbook.putPOICellValue(sheet, rowNum, colNum++, CellType.STRING, f.getFieldTitle(), true);
 				}
 			}
 
 			if (!Boolean.TRUE.equals(columnTitlesOnly)) {
-				
+
 				// export values
 				DocumentQuery q = pers.newDocumentQuery(moduleName, documentName);
 				List<Bean> beans = q.beanResults();
@@ -150,7 +150,7 @@ public class POISheetGenerator {
 				for (Bean b : beans) {
 					rowNum++;
 					colNum = 1;
-					
+
 					for (DataFileExportField f : fields) {
 
 						// attempt to find attribute with the binding
@@ -159,7 +159,7 @@ public class POISheetGenerator {
 						if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
 							resolvedBinding = f.getBindingExpression().substring(1, f.getBindingExpression().length() - 1);
 						}
-						
+
 						if (resolvedBinding != null) {
 							try {
 								TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
@@ -179,8 +179,8 @@ public class POISheetGenerator {
 								case text:
 								case time:
 								case timestamp:
-									value = Binder.formatMessage(customer, String.format("{%s}", resolvedBinding), b);
-									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, value);
+									value = Binder.formatMessage(String.format("{%s}", resolvedBinding), b);
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, value);
 									break;
 								case decimal10:
 								case decimal2:
@@ -188,15 +188,15 @@ public class POISheetGenerator {
 								case integer:
 								case longInteger:
 									value = Binder.get(b, resolvedBinding); //allow excel to interpret from type
-									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_NUMERIC, value);
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.NUMERIC, value);
 									break;
 								default:
 									break;
 								}
-								
-							} catch (Exception e) {
+
+							} catch (@SuppressWarnings("unused") Exception e) {
 //								Util.LOGGER.info("Putting compound expression " + f.getBindingExpression() + " with value " + Binder.formatMessage(customer, f.getBindingExpression(), b));
-								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, Cell.CELL_TYPE_STRING, Binder.formatMessage(customer, f.getBindingExpression(), b));
+								POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(f.getBindingExpression(), b));
 							}
 						}
 
@@ -204,8 +204,8 @@ public class POISheetGenerator {
 					}
 				}
 			}
-			
-			
+
+
 			//autosize columns
 			for(int i=0;i<colNum;i++) {
 				sheet.autoSizeColumn(i);
@@ -214,12 +214,12 @@ public class POISheetGenerator {
 			//construct the Download
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				wb.write(baos); // write changes
-				
+
 				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 				result = new Download(downloadName, bais , MimeType.xlsx);
 			}
 		}
-		
+
 		return result;
 	}
 }

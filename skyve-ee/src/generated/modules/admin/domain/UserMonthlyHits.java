@@ -178,9 +178,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{userName} - {year}/{month} = {numberOfHits}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{userName} - {year}/{month} = {numberOfHits}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

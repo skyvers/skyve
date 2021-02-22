@@ -368,9 +368,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		else if (bizKeyExpression != null) {
 			StringBuilder sb = new StringBuilder(128);
 			sb.append("\t\ttry {\n");
-			sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),\n");
-			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(bizKeyExpression).append("\",\n");
-			sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
+			sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(\"").append(bizKeyExpression).append("\", this);\n");
 			sb.append("\t\t}\n");
 			sb.append("\t\tcatch (@SuppressWarnings(\"unused\") Exception e) {\n");
 			sb.append("\t\t\treturn \"Unknown\";\n");
@@ -383,7 +381,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		}
 
 		if ((resultPersistent == null) && java.lang.Boolean.TRUE.equals(result.getParentDatabaseIndex())) {
-			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
+			throw new MetaDataException(metaDataName + " : [parentDocument.index] CANNOT be true for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();
 

@@ -15,7 +15,7 @@
 <%@ page import="org.skyve.impl.persistence.AbstractPersistence"%>
 <%@ page import="org.skyve.impl.web.AbstractWebContext"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
-<%@ page import="org.skyve.impl.web.UserAgentType"%>
+<%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 <%@ page import="org.skyve.impl.util.SQLMetaDataUtil"%>

@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 
@@ -11,8 +12,8 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.web.UserAgentType;
 
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
@@ -71,6 +72,16 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	@Override
+	public void setLocale(Locale locale) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setLocale(locale);
+		// Now set the state on all builders in the chain
+		for (LayoutBuilder builder : builders) {
+			builder.setLocale(locale);
+		}
+	}
+	
 	@Override
 	public UIComponent viewLayout(UIComponent component) {
 		UIComponent result = component;

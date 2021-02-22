@@ -1,21 +1,24 @@
 package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
+import org.skyve.CORE;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
+import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 @FacesComponent(Map.COMPONENT_TYPE)
 public class Map extends HtmlPanelGroup {
@@ -52,6 +55,8 @@ public class Map extends HtmlPanelGroup {
 
 					componentBuilder.setManagedBeanName(managedBeanName);
 			    	componentBuilder.setUserAgentType(userAgentType);
+			    	User user = CORE.getUser();
+			    	componentBuilder.setLocale((user == null) ? Locale.ENGLISH : user.getLocale());
 
 			    	Map.this.getChildren().add(generate(moduleName,
 															queryName,

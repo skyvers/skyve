@@ -3,7 +3,6 @@ package org.skyve.domain.messages;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
@@ -26,7 +25,7 @@ public class Message {
 	 * Formatted message constructor.
 	 */
 	public Message(String text, Bean... beans) {
-		this(Binder.formatMessage(CORE.getCustomer(), text, beans));
+		this(Binder.formatMessage(text, beans));
 	}
 
 	/**
@@ -44,7 +43,7 @@ public class Message {
 	 * Formatted message convenience constructor for 1 binding.
 	 */
 	public Message(String binding, String text, Bean... beans) {
-		this(binding, Binder.formatMessage(CORE.getCustomer(), text, beans));
+		this(binding, Binder.formatMessage(text, beans));
 	}
 
 	/**
@@ -64,7 +63,7 @@ public class Message {
 	 * Multiple binding formatted message constructor.
 	 */
 	public Message(String[] bindings, String text, Bean... beans) {
-		this(bindings, Binder.formatMessage(CORE.getCustomer(), text, beans));
+		this(bindings, Binder.formatMessage(text, beans));
 	}
 
 	/**

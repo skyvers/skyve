@@ -1262,7 +1262,6 @@ t.printStackTrace();
 		String owningModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
-		Customer customer = user.getCustomer();
 
 		try {
 			for (UniqueConstraint constraint : document.getAllUniqueConstraints()) {
@@ -1344,7 +1343,7 @@ t.printStackTrace();
 								(persistent && (! first.getBizId().equals(bean.getBizId())))) { // updating, and 1 exists that is not this ID
 							String message = null;
 							try {
-								message = BindUtil.formatMessage(customer, constraint.getMessage(), bean);
+								message = BindUtil.formatMessage(constraint.getMessage(), bean);
 							}
 							catch (Exception e) {
 								e.printStackTrace();

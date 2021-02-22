@@ -661,9 +661,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Data Maintenance",
-														this);
+			return org.skyve.util.Binder.formatMessage("Data Maintenance", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

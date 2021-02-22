@@ -87,9 +87,7 @@ public class UserToken extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{userName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{userName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

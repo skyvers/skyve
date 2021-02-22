@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="System Dashboard" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.systemDashboard.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox minPixelHeight="300">
 		<vbox border="true" borderTitle="System Activity" percentageHeight="100">
-			<chart type="line">
-		        <model title="System Activity" 
-		        		label="Activity - last 14 days"
-		                moduleName="admin"
-		                documentName="Audit" 
-		                categoryBinding="timestamp" 
-		                valueBinding="bizId" 
-		                valueFunction="Count">
-		            <temporalBucket type="dayMonthYear" />
-		            <top includeOthers="false" sort="descending" top="14" by="category"/>
-		            <order by="category" sort="ascending" />
-		        </model>
-			</chart>
+			<chart type="line" modelName="ActivityModel"/>
 		</vbox>
 		<vbox border="true" borderTitle="System Status" percentageHeight="100">
 			<dataRepeater binding="status">
@@ -27,32 +15,8 @@
 		</vbox>
 	</hbox>
 	<hbox border="true" borderTitle="Activity Breakdown" minPixelHeight="400">
-		<chart type="pie" >
-	        <model title="Activity By Context"
-	        		label="Numbers of Audits"
-	                moduleName="admin"
-	                documentName="Audit" 
-	                categoryBinding="auditDocumentName" 
-	                valueBinding="bizId" 
-	                valueFunction="Count">
-	             <noBucket/>
-	             <top sort="ascending" top="6" by="category" includeOthers="true"/>
-	            <order by="category" sort="ascending" />
-	        </model>
-		</chart>
-		<chart type="bar" >
-	          <model title="Activity By User" 
-	          		  label="Count of activity"
-	                  moduleName="admin"
-	                  documentName="Audit" 
-	                  categoryBinding="userName" 
-	                  valueBinding="bizId" 
-	                  valueFunction="Count">
-	                  <noBucket/>
-	              <top sort="ascending" top="7" by="category" includeOthers="true"/>
-	              <order by="category" sort="ascending" />
-	          </model>
-		</chart>
+		<chart type="pie" modelName="ActivityContextModel"/>
+		<chart type="bar" modelName="ActivityModel"/>
 	</hbox>
 	<vbox border="true" borderTitle="System Jobs">
 		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />

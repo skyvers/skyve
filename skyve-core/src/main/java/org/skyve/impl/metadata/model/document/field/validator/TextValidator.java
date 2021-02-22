@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
+import java.util.Locale;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -19,6 +21,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
@@ -154,7 +157,11 @@ public class TextValidator extends FieldValidator<String> {
 
 	@Override
 	public String constructMessage(User user, String displayName, Converter<String> converter) {
-		String message = Util.i18n(getValidationMessage(), user.getLocale());
-		return (message != null) ? message : (displayName + " is not formatted correctly.");
+		Locale locale = user.getLocale();
+		String message = Util.i18n(getValidationMessage(), locale);
+		if (message != null) {
+			return message;
+		}
+		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, locale, Util.i18n(displayName, locale));
 	}
 }

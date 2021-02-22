@@ -8,7 +8,6 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -32,6 +31,7 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.web.UserAgentType;
 
 public class Generator {
 /*

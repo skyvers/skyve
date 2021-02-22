@@ -21,13 +21,13 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.job.Job;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.web.UserAgentType;
 import org.xml.sax.SAXException;
 
 import modules.admin.domain.User;

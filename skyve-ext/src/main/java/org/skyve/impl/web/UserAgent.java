@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.domain.messages.DomainException;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 import com.blueconic.browscap.BrowsCapField;
 import com.blueconic.browscap.Capabilities;

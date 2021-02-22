@@ -23,9 +23,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
 
 public abstract class AbstractBean implements Bean {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5241897716950549433L;
 
 	// Holds the old (replaced) values when a setter is called.
@@ -67,7 +64,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public final boolean isChanged() {
+	public boolean isChanged() {
 		Customer customer = null;
 		Module module = null;
 		Document document = null;
@@ -152,7 +149,7 @@ public abstract class AbstractBean implements Bean {
 			}
 		}
 		else {
-			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty");
+			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty " + originalValues);
 			return true;
 		}
 		
@@ -160,8 +157,14 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public final boolean isNotChanged() {
+	public boolean isNotChanged() {
 		return ! isChanged();
+	}
+	
+	@Override
+	@SuppressWarnings("deprecation")
+	public boolean hasChanged() {
+		return UtilImpl.hasChanged(this);
 	}
 	
 	@SuppressWarnings("static-method")
@@ -212,12 +215,12 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public final boolean isPersisted() {
+	public boolean isPersisted() {
 		return AbstractPersistence.get().isPersisted(this);
 	}
 
 	@Override
-	public final boolean isNotPersisted() {
+	public boolean isNotPersisted() {
 		return (! AbstractPersistence.get().isPersisted(this));
 	}
 

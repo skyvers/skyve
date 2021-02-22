@@ -119,9 +119,7 @@ public class Job extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Job {displayName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("Job {displayName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

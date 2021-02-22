@@ -33,11 +33,11 @@ public class UtilTests extends AbstractSkyveTest {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 
 		test.originalValues().clear();
-		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
+		Assert.assertFalse("Should not have changed", test.hasChanged());
 
 		test.setText("TEST");
 
-		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+		Assert.assertTrue("Should have changed", test.hasChanged());
 	}
 
 	@Test
@@ -50,11 +50,11 @@ public class UtilTests extends AbstractSkyveTest {
 		test.getComposedAssociation().originalValues().clear();
 		test.getEmbeddedAssociation().originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
+		Assert.assertFalse("Should not have changed", test.hasChanged());
 
 		test.getAggregatedAssociation().setText("TEST");
 
-		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+		Assert.assertTrue("Should have changed", test.hasChanged());
 	}
 
 	@Test
@@ -65,11 +65,11 @@ public class UtilTests extends AbstractSkyveTest {
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
+		Assert.assertFalse("Should not have changed", test.hasChanged());
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+		Assert.assertTrue("Should have changed", test.hasChanged());
 	}
 
 	@Test
@@ -80,12 +80,12 @@ public class UtilTests extends AbstractSkyveTest {
 		test.originalValues().clear();
 		element.originalValues().clear();
 
-		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
-		Assert.assertFalse("Should not have changed", Util.hasChanged(element));
+		Assert.assertFalse("Should not have changed", test.hasChanged());
+		Assert.assertFalse("Should not have changed", element.hasChanged());
 
 		test.getAggregatedCollection().add(element);
 
-		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+		Assert.assertTrue("Should have changed", test.hasChanged());
 	}
 
 	@Test
@@ -96,11 +96,11 @@ public class UtilTests extends AbstractSkyveTest {
 
 		test = p.save(test);
 
-		Assert.assertFalse("Should not have changed", Util.hasChanged(test));
+		Assert.assertFalse("Should not have changed", test.hasChanged());
 
 		test.getAggregatedCollection().get(0).setText("TEST");
 
-		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+		Assert.assertTrue("Should have changed", test.hasChanged());
 	}
 
 	@Test

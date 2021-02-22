@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
@@ -43,7 +44,9 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.Util;
 
 public class ValidationUtil {
 	private ValidationUtil() {
@@ -80,6 +83,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw e;
 		}
 	}
@@ -102,20 +106,22 @@ public class ValidationUtil {
 			return;
 		}
 
+		Locale locale = user.getLocale();
 		String displayName = attribute.getDisplayName();
+		String localisedDisplayName = Util.i18n(attribute.getDisplayName(), locale);
 		Converter<?> converter = (attribute instanceof ConvertableField) ? 
 									((ConvertableField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
-		Object attributeValue = getAttributeValue(bean, binding);
+		Object attributeValue = getAttributeValue(bean, binding, locale);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				e.getMessages().add(new Message(binding, displayName +  " is required."));
+				e.getMessages().add(new Message(binding, Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, localisedDisplayName)));
 			}
 		}
 
 		if (converter != null) {
 			if (attributeValue != null) {
-				validateFormat(converter.getFormat(), attributeValue, binding, bean, displayName, e);
+				validateFormat(converter.getFormat(), attributeValue, binding, bean, localisedDisplayName, locale, e);
 				@SuppressWarnings("rawtypes")
 				Validator validator = converter.getValidator();
 				if (validator != null) {
@@ -133,10 +139,9 @@ public class ValidationUtil {
 					List<Bean> collectionValue = (List<Bean>) attributeValue;
 					if ((collectionValue == null) || (collectionValue.size() < min)) {
 						e.getMessages().add(new Message(binding, 
-															"At least " + min + ' ' + collection.getDisplayName() +
-																((min == 1) ? 
-																	" record is required." : 
-																	" records are required.")));
+															(min == 1) ?
+																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, locale, localisedDisplayName) :
+																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, locale, String.valueOf(min), localisedDisplayName)));
 					}
 				}
 			}
@@ -146,10 +151,9 @@ public class ValidationUtil {
 				List<Bean> collectionValue = (List<Bean>) attributeValue;
 				if ((collectionValue != null) && (collectionValue.size() > max)) {
 					e.getMessages().add(new Message(binding, 
-														"No more than " + max + ' ' + collection.getDisplayName() +
-															((max == 1) ? 
-																" record is allowed." : 
-																" records are allowed.")));
+														(max == 1) ?
+															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, locale, localisedDisplayName) :
+															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, locale, String.valueOf(max), localisedDisplayName)));
 				}
 			}
 		}
@@ -159,12 +163,12 @@ public class ValidationUtil {
 			if (attributeValue instanceof String) {
 				String stringValue = (String) attributeValue;
 				if (stringValue.length() > fieldLength) {
-					e.getMessages().add(new Message(binding, 
-														displayName + " is longer than " + fieldLength + " characters."));
+					e.getMessages().add(new Message(binding,
+														Util.i18n(BeanValidator.VALIDATION_LENGTH_KEY, locale, localisedDisplayName, String.valueOf(fieldLength))));
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
-					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, e);
+					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, locale, e);
 				}
 				TextValidator validator = text.getValidator();
 				if (validator != null) {
@@ -294,7 +298,8 @@ public class ValidationUtil {
 											Object value,
 											String binding,
 											Bean bean,
-											String displayName,
+											String localisedDisplayName,
+											Locale locale,
 											ValidationException e) {
 		if (format != null) {
 			try {
@@ -311,20 +316,20 @@ public class ValidationUtil {
 			}
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
-													displayName + " value " + value + " does not match the format " + format.getMask() + " (A = alphanumeric, L = alpha, # = numeric)"));
+													Util.i18n(BeanValidator.VALIDATION_FORMAT_KEY, locale, localisedDisplayName, (value == null) ? "" : value.toString(), format.getMask())));
 			}
 		}
 	}
 	
-	private static Object getAttributeValue(Bean bean, String binding) {
+	private static Object getAttributeValue(Bean bean, String binding, Locale locale) {
 		Object result = null;
 		try {
 			result = BindUtil.get(bean, binding);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			throw new ValidationException(new Message(binding,
-														"You do not have access.  Please contact your Biz Hub administrator."));
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
+			throw new ValidationException(new Message(binding, Util.i18n(BeanValidator.VALIDATION_ACCESS_KEY, locale)));
 		}
 
 		return result;
@@ -372,6 +377,7 @@ public class ValidationUtil {
 		}
 
 		if (! e.getMessages().isEmpty()) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw e;
 		}
 	}
@@ -435,7 +441,7 @@ public class ValidationUtil {
 							if (! uniqueValues.add(sb.toString())) { // already exists
 								String message = null;
 								try {
-									message = BindUtil.formatMessage(customer, constraint.getMessage(), element);
+									message = BindUtil.formatMessage(constraint.getMessage(), element);
 								}
 								catch (Exception ex) {
 									ex.printStackTrace();
@@ -455,10 +461,12 @@ public class ValidationUtil {
 			}
 		}
 		catch (UniqueConstraintViolationException ve) {
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw ve;
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
+			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
 			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}

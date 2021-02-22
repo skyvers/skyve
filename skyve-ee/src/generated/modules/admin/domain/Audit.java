@@ -220,9 +220,7 @@ public class Audit extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{operation} by {userName} at {timestamp}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{operation} by {userName} at {timestamp}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

@@ -1488,7 +1488,12 @@ isc.BizListGrid.addMethods({
 				me._chartButton.setDisabled(me._config.isTree || me._dataSource.ID.contains('__'));
 				
 				if (! me._config.isTree) {
-					me.showMember(me._summaryGrid);
+					if ((me.showSummary === undefined) || (me.showSummary == null) || me.showSummary) {
+						me.showMember(me._summaryGrid);
+					}
+					else {
+						me.hideMember(me._summaryGrid);
+					}
 				}
 			}
 		}

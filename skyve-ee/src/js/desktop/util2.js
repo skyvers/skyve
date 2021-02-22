@@ -415,6 +415,7 @@ isc.BizUtil.addClassMethods({
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
+				httpMethod: 'GET',
 				actionURL: SKYVE.Util.CONTEXT_URL + "smartgen" + "?_mod=" + moduleName  + "&_doc=" + documentName,
 				callback: function(rpcResponse, data, rpcRequest) {
 					// create the document entry structure

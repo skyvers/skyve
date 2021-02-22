@@ -1,6 +1,7 @@
 package org.skyve.util;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -27,6 +28,11 @@ public class ProxyDelegate <T extends Object> implements Serializable {
 	 * @throws Throwable
 	 */
 	public Object invoke(T proxy, T proxied, Method method, Object[] args) throws Throwable {
-		return method.invoke(proxied, args);
+		try {
+			return method.invoke(proxied, args);
+		}
+		catch (InvocationTargetException e) {
+			throw e.getCause();
+		}
 	}
 }

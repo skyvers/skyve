@@ -65,6 +65,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 	/** @hidden */
 	@Deprecated
+	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+	/** @hidden */
+	@Deprecated
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
@@ -95,7 +98,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The security level/complexity model for user passwords
 	 * <br/>
 	 * Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.
+				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@XmlEnum
 	public static enum PasswordComplexityModel implements Enumeration {
@@ -241,12 +244,19 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
 	/**
+	 * This option is now a startup property found in the project JSON file.
+	 * <br/>
+	 * Master switch to allow or disallow self registration.
+	 **/
+	@Deprecated
+	private Boolean allowUserSelfRegistration;
+	/**
 	 * Password Complexity
 	 * <br/>
 	 * The security level/complexity model for user passwords
 	 * <br/>
 	 * Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.
+				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@Deprecated
 	private PasswordComplexityModel passwordComplexityModel;
@@ -341,9 +351,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Admin Setup",
-														this);
+			return org.skyve.util.Binder.formatMessage("Admin Setup", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
@@ -553,6 +561,26 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} accessor.
+	 * @return	The value.
+	 **/
+	@Deprecated
+	public Boolean getAllowUserSelfRegistration() {
+		return allowUserSelfRegistration;
+	}
+
+	/**
+	 * {@link #allowUserSelfRegistration} mutator.
+	 * @param allowUserSelfRegistration	The new value.
+	 **/
+	@Deprecated
+	@XmlElement
+	public void setAllowUserSelfRegistration(Boolean allowUserSelfRegistration) {
+		preset(allowUserSelfRegistrationPropertyName, allowUserSelfRegistration);
+		this.allowUserSelfRegistration = allowUserSelfRegistration;
 	}
 
 	/**
@@ -820,7 +848,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isMapTypeGmap() {
-		return (getStartup() != null && Startup.MapType.gmap == getStartup().getMapType());
+		return (getStartup() != null && getStartup().isMapTypeGmap());
 	}
 
 	/**
@@ -830,5 +858,44 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * selfRegistrationConfiguredEmailOrGroupNotConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelfRegistrationConfiguredEmailOrGroupNotConfigured() {
+		return (startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
+					(!modules.admin.Configuration.ConfigurationExtension.validSMTPHost() || userSelfRegistrationGroup == null));
+	}
+
+	/**
+	 * {@link #isSelfRegistrationConfiguredEmailOrGroupNotConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelfRegistrationConfiguredEmailOrGroupNotConfigured() {
+		return (! isSelfRegistrationConfiguredEmailOrGroupNotConfigured());
+	}
+
+	/**
+	 * True when this application has a default customer specified (is single tenant)
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSingleTenant() {
+		return (getStartup() != null && getStartup().isSingleTenant());
+	}
+
+	/**
+	 * {@link #isSingleTenant} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSingleTenant() {
+		return (! isSingleTenant());
 	}
 }

@@ -181,7 +181,13 @@ public class MockApplication extends Application {
 			return new HtmlPanelGrid();
 		}
 		else if (HtmlPanelGroup.COMPONENT_TYPE.equals(componentType)) {
-			return new HtmlPanelGroup();
+			// Override getClientId() as Map components need DIV client IDs to attach Javascript to.
+			return new HtmlPanelGroup() {
+				@Override
+				public String getClientId() {
+					return "MOCKED:" + getId();
+				}
+			};
 		}
 		else if (InputMask.COMPONENT_TYPE.equals(componentType)) {
 			return new InputMask();

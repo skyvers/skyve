@@ -63,111 +63,123 @@ public class RestoreJob extends CancellableJob {
 												customerName,
 												File.separator,
 												selectedBackupName));
-		if (ExternalBackup.areExternalBackupsEnabled()) {
-			ExternalBackup.getInstance().downloadBackup(selectedBackupName, new FileOutputStream(backup));
-			backup.deleteOnExit();
-		}
-		if (! backup.exists()) {
-			trace = "Backup " + backup.getAbsolutePath() + " does not exist.";
+		boolean deleteLocalBackup = false;
+		try {
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				deleteLocalBackup = true;
+				backup.mkdirs();
+				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
+					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
+				}
+			}
+			if (! backup.exists()) {
+				trace = "Backup " + backup.getAbsolutePath() + " does not exist.";
+				log.add(trace);
+				Util.LOGGER.warning(trace);
+				return;
+			}
+
+			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
+
+			String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
+			File extractDir = new File(backup.getParentFile(), extractDirName);
+			trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
 			log.add(trace);
-			Util.LOGGER.warning(trace);
-			return;
-		}
+			Util.LOGGER.info(trace);
+			if (extractDir.exists()) {
+				trace = String.format("    %s already exists - delete it.", extractDir.getAbsolutePath());
+				log.add(trace);
+				Util.LOGGER.info(trace);
+				FileUtil.delete(extractDir);
+				trace = String.format("    %s deleted.", extractDir.getAbsolutePath());
+				log.add(trace);
+				Util.LOGGER.info(trace);
+			}
+			FileUtil.extractZipArchive(backup, extractDir);
+			trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
+			log.add(trace);
+			Util.LOGGER.info(trace);
+			setPercentComplete(50);
 
-		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
+			PreProcess restorePreProcess = options.getPreProcess();
+			ContentOption contrentRestoreOption =  options.getContentOption();
 
-		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
-		File extractDir = new File(backup.getParentFile(), extractDirName);
-		trace = String.format("Extract %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
-		log.add(trace);
-		Util.LOGGER.info(trace);
-		if (extractDir.exists()) {
-			trace = String.format("    %s already exists - delete it.", extractDir.getAbsolutePath());
+			boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
+			if (truncateDatabase) {
+				trace = "Truncate " + ((UtilImpl.SCHEMA == null) ? "default" : UtilImpl.SCHEMA) + " schema";
+				log.add(trace);
+				Util.LOGGER.info(trace);
+			}
+			Truncate.truncate(UtilImpl.SCHEMA, truncateDatabase, true);
+
+			boolean createUsingBackup = false;
+			boolean ddlSync = false;
+			if (PreProcess.createUsingBackup.equals(restorePreProcess)) {
+				createUsingBackup = true;
+				DDL.create(new File(extractDir, "create.sql"), true);
+				ddlSync = true;
+			}
+			else if (PreProcess.createUsingMetadata.equals(restorePreProcess)) {
+				DDL.create(null, true);
+				ddlSync = true;
+			}
+			else if (PreProcess.dropUsingBackupAndCreateUsingBackup.equals(restorePreProcess)) {
+				createUsingBackup = true;
+				DDL.drop(new File(extractDir, "drop.sql"), true);
+				DDL.create(new File(extractDir, "create.sql"), true);
+				ddlSync = true;
+			}
+			else if (PreProcess.dropUsingBackupAndCreateUsingMetadata.equals(restorePreProcess)) {
+				DDL.drop(new File(extractDir, "drop.sql"), true);
+				DDL.create(null, true);
+				ddlSync = true;
+			}
+			else if (PreProcess.dropUsingMetadataAndCreateUsingBackup.equals(restorePreProcess)) {
+				createUsingBackup = true;
+				DDL.drop(null, true);
+				DDL.create(new File(extractDir, "create.sql"), true);
+				ddlSync = true;
+			}
+			else if (PreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(restorePreProcess)) {
+				DDL.drop(null, true);
+				DDL.create(null, true);
+				ddlSync = true;
+			}
+
+			trace = "Restore " + extractDirName;
+			log.add(trace);
+			Util.LOGGER.info(trace);
+			IndexingOption indexingOption = options.getIndexingOption();
+			restore(extractDirName, createUsingBackup, contrentRestoreOption, indexingOption);
+			if (ddlSync) {
+				trace = "DDL Sync";
+				log.add(trace);
+				Util.LOGGER.info(trace);
+				DDL.sync(true);
+			}
+			if (IndexingOption.both.equals(indexingOption) || IndexingOption.data.equals(indexingOption)) {
+				trace = "Reindex textual indexes.";
+				log.add(trace);
+				Util.LOGGER.info(trace);
+				execute(new ReindexBeansJob());
+			}
+			trace = "Delete extracted folder " + extractDir.getAbsolutePath();
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			FileUtil.delete(extractDir);
-			trace = String.format("    %s deleted.", extractDir.getAbsolutePath());
+			trace = "DONE";
 			log.add(trace);
 			Util.LOGGER.info(trace);
-		}
-		FileUtil.extractZipArchive(backup, extractDir);
-		trace = String.format("Extracted %s to %s", backup.getAbsolutePath(), extractDir.getAbsolutePath());
-		log.add(trace);
-		Util.LOGGER.info(trace);
-		setPercentComplete(50);
+			setPercentComplete(100);
 
-		PreProcess restorePreProcess = options.getPreProcess();
-		ContentOption contrentRestoreOption =  options.getContentOption();
-
-		boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
-		if (truncateDatabase) {
-			trace = "Truncate " + ((UtilImpl.SCHEMA == null) ? "default" : UtilImpl.SCHEMA) + " schema";
-			log.add(trace);
-			Util.LOGGER.info(trace);
+			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+		} finally {
+			if (deleteLocalBackup) {
+				if (!backup.delete()) {
+					Util.LOGGER.warning("Failed to delete local backup " + backup.getAbsolutePath());
+				}
+			}
 		}
-		Truncate.truncate(UtilImpl.SCHEMA, truncateDatabase, true);
-
-		boolean createUsingBackup = false;
-		boolean ddlSync = false;
-		if (PreProcess.createUsingBackup.equals(restorePreProcess)) {
-			createUsingBackup = true;
-			DDL.create(new File(extractDir, "create.sql"), true);
-			ddlSync = true;
-		}
-		else if (PreProcess.createUsingMetadata.equals(restorePreProcess)) {
-			DDL.create(null, true);
-			ddlSync = true;
-		}
-		else if (PreProcess.dropUsingBackupAndCreateUsingBackup.equals(restorePreProcess)) {
-			createUsingBackup = true;
-			DDL.drop(new File(extractDir, "drop.sql"), true);
-			DDL.create(new File(extractDir, "create.sql"), true);
-			ddlSync = true;
-		}
-		else if (PreProcess.dropUsingBackupAndCreateUsingMetadata.equals(restorePreProcess)) {
-			DDL.drop(new File(extractDir, "drop.sql"), true);
-			DDL.create(null, true);
-			ddlSync = true;
-		}
-		else if (PreProcess.dropUsingMetadataAndCreateUsingBackup.equals(restorePreProcess)) {
-			createUsingBackup = true;
-			DDL.drop(null, true);
-			DDL.create(new File(extractDir, "create.sql"), true);
-			ddlSync = true;
-		}
-		else if (PreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(restorePreProcess)) {
-			DDL.drop(null, true);
-			DDL.create(null, true);
-			ddlSync = true;
-		}
-
-		trace = "Restore " + extractDirName;
-		log.add(trace);
-		Util.LOGGER.info(trace);
-		IndexingOption indexingOption = options.getIndexingOption();
-		restore(extractDirName, createUsingBackup, contrentRestoreOption, indexingOption);
-		if (ddlSync) {
-			trace = "DDL Sync";
-			log.add(trace);
-			Util.LOGGER.info(trace);
-			DDL.sync(true);
-		}
-		if (IndexingOption.both.equals(indexingOption) || IndexingOption.data.equals(indexingOption)) {
-			trace = "Reindex textual indexes.";
-			log.add(trace);
-			Util.LOGGER.info(trace);
-			execute(new ReindexBeansJob());
-		}
-		trace = "Delete extracted folder " + extractDir.getAbsolutePath();
-		log.add(trace);
-		Util.LOGGER.info(trace);
-		FileUtil.delete(extractDir);
-		trace = "DONE";
-		log.add(trace);
-		Util.LOGGER.info(trace);
-		setPercentComplete(100);
-
-		EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
 	}
 
 	private void restore(String extractDirName,

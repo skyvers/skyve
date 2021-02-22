@@ -4,13 +4,16 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
@@ -29,21 +32,59 @@ import org.skyve.metadata.view.View;
 public abstract class AbstractRepository implements Repository {
 	private static AbstractRepository repository;
 
+	protected String absolutePath;
+	protected boolean loadClasses = true;
+	
 	/**
+	 * Absolute path constructor
+	 * Prevent external instantiation.
+	 */
+	protected AbstractRepository(String absolutePath) {
+		this.absolutePath = absolutePath.replace('\\', '/');
+		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
+			this.absolutePath += '/';
+		}
+	}
+
+	/**
+	 * Absolute path and load classes constructor
+	 * Prevent external instantiation.
+	 */
+	protected AbstractRepository(String absolutePath, boolean loadClasses) {
+		this(absolutePath);
+		this.loadClasses = loadClasses;
+	}
+
+	/**
+	 * Default constructor
 	 * Prevent external instantiation.
 	 */
 	protected AbstractRepository() {
-		// noop
+		this.absolutePath = UtilImpl.getAbsoluteBasePath();
 	}
 
 	public static AbstractRepository get() {
-		return repository;
+		AbstractRepository result = THREAD_MAP.get(Long.valueOf(Thread.currentThread().getId()));
+		if (result == null) {
+			result = repository;
+		}
+		return result;
 	}
 
 	public static void set(AbstractRepository repository) {
 		AbstractRepository.repository = repository;
 	}
 
+	private static final ConcurrentHashMap<Long, AbstractRepository> THREAD_MAP = new ConcurrentHashMap<>();
+	
+	public void setForThread() {
+		THREAD_MAP.put(Long.valueOf(Thread.currentThread().getId()), this);
+	}
+	
+	public static void removeForThread() {
+		THREAD_MAP.remove(Long.valueOf(Thread.currentThread().getId()));
+	}
+	
 	public final String ROUTER_NAME = "router";
 	public final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	public final String CUSTOMERS_NAME = "customers";
@@ -114,12 +155,22 @@ public abstract class AbstractRepository implements Repository {
 					// check again in case this thread was stalled by another in the same spot
 					result = classes.get(javaCodeLocation);
 					if (result == null) {
-						String className = javaCodeLocation.replace('/', '.');
-						try {
-							result = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						if (loadClasses) {
+							String className = javaCodeLocation.replace('/', '.');
+							try {
+								result = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+							}
+							catch (Exception e) {
+								throw new MetaDataException("A problem was encountered loading class " + className, e);
+							}
 						}
-						catch (Exception e) {
-							throw new MetaDataException("A problem was encountered loading class " + className, e);
+						else {
+							// Not loading classes
+							// check for a java file and return a MetaData implementation
+							// NB WidgetReference is a pretty simple MetaData implementation
+							if (new File(this.absolutePath + javaCodeLocation + ".java").exists()) {
+								result = WidgetReference.class;
+							}
 						}
 					}
 				}
@@ -160,6 +211,9 @@ public abstract class AbstractRepository implements Repository {
 					BeanProvider.injectFields(result);
 				}
 			}
+			catch (SkyveException e) {
+				throw e;
+			}
 			catch (Exception e) {
 				throw new MetaDataException("A problem was encountered loading class " + type, e);
 			}
@@ -180,7 +234,7 @@ public abstract class AbstractRepository implements Repository {
 		}
 
 		path.setLength(0);
-		path.append(UtilImpl.getAbsoluteBasePath()).append(result).append(".jasper");
+		path.append(absolutePath).append(result).append(".jasper");
 		return path.toString();
 	}
 
@@ -203,7 +257,7 @@ public abstract class AbstractRepository implements Repository {
 		if (moduleName != null) {
 			// Check customer module folder, if we have a customer to play with
 			if (customerName != null) {
-				path.append(UtilImpl.getAbsoluteBasePath());
+				path.append(absolutePath);
 				path.append(CUSTOMERS_NAMESPACE);
 				path.append(customerName);
 				path.append('/');
@@ -219,7 +273,7 @@ public abstract class AbstractRepository implements Repository {
 			
 			// Check module folder
 			path.setLength(0);
-			path.append(UtilImpl.getAbsoluteBasePath());
+			path.append(absolutePath);
 			path.append(MODULES_NAMESPACE);
 			path.append(moduleName);
 			path.append('/');
@@ -234,7 +288,7 @@ public abstract class AbstractRepository implements Repository {
 		// Check customer folder, if we have a customer to play with
 		if (customerName != null) {
 			path.setLength(0);
-			path.append(UtilImpl.getAbsoluteBasePath());
+			path.append(absolutePath);
 			path.append(CUSTOMERS_NAMESPACE);
 			path.append(customerName);
 			path.append('/');
@@ -247,7 +301,7 @@ public abstract class AbstractRepository implements Repository {
 		}
 		
 		path.setLength(0);
-		path.append(UtilImpl.getAbsoluteBasePath());
+		path.append(absolutePath);
 		path.append(RESOURCES_NAMESPACE);
 		path.append(resourcePath);
 		return new File(path.toString());

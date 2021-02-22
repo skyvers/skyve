@@ -50,12 +50,24 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 				Util.getContentDirectory(),
 				CORE.getUser().getCustomerName(),
 				File.separator,
-				selectedBackupName));;
-		if (ExternalBackup.areExternalBackupsEnabled()) {
-			ExternalBackup.getInstance().downloadBackup(selectedBackupName, new FileOutputStream(backup));
-			backup.deleteOnExit();
-		}
+				selectedBackupName));
 
-		return new Download(selectedBackupName, new FileInputStream(backup), MimeType.zip);
+		boolean deleteLocalBackup = false;
+		try {
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				deleteLocalBackup = true;
+				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
+					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
+				}
+			}
+
+			return new Download(selectedBackupName, new FileInputStream(backup), MimeType.zip);
+		} finally {
+			if (deleteLocalBackup) {
+				if (!backup.delete()) {
+					Util.LOGGER.warning("Failed to delete local backup " + backup.getAbsolutePath());
+				}
+			}
+		}
 	}
 }

@@ -65,9 +65,13 @@
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
 		
+		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
+			<displayName>This option is now a startup property found in the project JSON file.</displayName>
+			<description>Master switch to allow or disallow self registration.</description>
+		</boolean>
 		<enum name="passwordComplexityModel" required="false" deprecated="true">
 			<documentation>Replaced by password length and complexity booleans. To be removed 
-				in a future version of Skyve. Here for backwards compatability during Restore.</documentation>
+				in a future version of Skyve. Here for backwards compatibility during Restore.</documentation>
  			<displayName>Password Complexity</displayName>
  			<description>The security level/complexity model for user passwords</description>
  			<values>
@@ -141,6 +145,14 @@
 				]]>
 			</expression>
 		</condition>	
+		<condition name="selfRegistrationConfiguredEmailOrGroupNotConfigured">
+			<expression>
+				<![CDATA[
+					startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
+					(!modules.admin.Configuration.ConfigurationExtension.validSMTPHost() || userSelfRegistrationGroup == null)
+				]]>
+			</expression>
+		</condition>
 		<condition name="backupsConfigured">
 			<expression>
 				<![CDATA[
@@ -148,11 +160,19 @@
 				]]>
 			</expression>
 		</condition>
-		<condition name="mapTypeGmap">
+		<condition name="mapTypeGmap" usage="view">
 			<description>True when the selected startup map type is Google Maps</description>
 			<expression>
 				<![CDATA[
-					getStartup() != null && Startup.MapType.gmap == getStartup().getMapType()
+					getStartup() != null && getStartup().isMapTypeGmap()
+				]]>
+			</expression>
+		</condition>
+		<condition name="singleTenant" usage="view">
+			<description>True when this application has a default customer specified (is single tenant)</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && getStartup().isSingleTenant()
 				]]>
 			</expression>
 		</condition>

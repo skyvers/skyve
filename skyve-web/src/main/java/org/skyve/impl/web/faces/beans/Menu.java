@@ -26,7 +26,6 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -37,6 +36,7 @@ import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 @ManagedBean

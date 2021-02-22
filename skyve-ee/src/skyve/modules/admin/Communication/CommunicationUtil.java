@@ -112,8 +112,8 @@ public class CommunicationUtil {
 		if (sendFromExpression == null) {
 			sendFrom = ConfigurationExtension.defaultSMTPSender();
 		} else {
-			// resolve biding expression
-			sendFrom = Binder.formatMessage(customer, sendFromExpression, specificBeans);
+			// resolve binding expression
+			sendFrom = Binder.formatMessage(sendFromExpression, specificBeans);
 		}
 
 		// handle addressee with optional override
@@ -677,7 +677,7 @@ public class CommunicationUtil {
 				result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
 				result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
 			}
-			result = Binder.formatMessage(customer, result, beans);
+			result = Binder.formatMessage(result, beans);
 		}
 		return result;
 	}

@@ -76,6 +76,10 @@ public class RunImport implements ServerSideAction<ImportExport> {
 							moreCells = false;
 							break;
 						}
+
+						// strip any line breaks or tabs in the column name
+						columnName = columnName.replace("\n", "").replace("\t", "");
+
 						if (!columnName.equals(bean.getImportExportColumns().get(i).getColumnName())) {
 							StringBuilder sb = new StringBuilder();
 							sb.append("The column title ").append(bean.getImportExportColumns().get(i).getColumnName());

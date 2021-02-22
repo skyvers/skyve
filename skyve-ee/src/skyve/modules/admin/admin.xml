@@ -22,7 +22,7 @@
 		<document ref="Audit" defaultQueryName="qAudits" />
 		<document ref="ChangePassword" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
-		<document ref="CommunicationTemplate" />
+		<document ref="CommunicationTemplate" defaultQueryName="qCommunicationTemplate"/>
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
@@ -251,11 +251,12 @@
 				</document>
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
+					<action name="ClearImport"/>
+					<action name="GetImportTemplate"/>
+					<action name="ResetColumns"/>
 					<action name="RunExport"/>
 					<action name="RunImport"/>
-					<action name="ResetColumns"/>
 					<action name="UploadSimpleImportDataFile"/>
-					<action name="GetImportTemplate"/>
 				</document>
 				<document name="ImportExportColumn" permission="CRUDC"/>
 				<document name="ModuleDocument" permission="_RU_C"/>
@@ -365,6 +366,7 @@
 					<action name="New" />
 					<action name="Next" />
 					<action name="Back" />
+					<action name="ResendActivation"/>
 				</document>
 				<document name="UserCandidateContact" permission="_____" />
 				<document name="UserList" permission="_____">
@@ -728,9 +730,17 @@
 				<column binding="description" sortOrder="ascending" />
 				<column binding="documentName" />
 				<column binding="subject" />
+				<column binding="template"/>
 			</columns>
 		</query>
-		<query name="qSubscriptions" documentName="Subscription">
+		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
+			<description>Communications</description>
+			<columns>
+				<column binding="name" sortOrder="ascending"/>
+				<column binding="description" />
+				<column binding="template"/>
+			</columns>
+		</query>		<query name="qSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />

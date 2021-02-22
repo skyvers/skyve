@@ -66,9 +66,7 @@ public abstract class InjectedDocument extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{text}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{text}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

@@ -89,11 +89,11 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 							result = Binder.getDisplay(CORE.getUser().getCustomer(), bean, binding.substring(1, lastCharIndex));
 						}
 						else {
-							result = Binder.formatMessage(CORE.getUser().getCustomer(), binding, bean);
+							result = Binder.formatMessage(binding, bean);
 						}
 					}
 					else {
-						result = Binder.formatMessage(CORE.getUser().getCustomer(), binding, bean);
+						result = Binder.formatMessage(binding, bean);
 					}
 				}
 				else {

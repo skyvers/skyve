@@ -3,8 +3,8 @@ package org.skyve.impl.backup;
 import org.skyve.impl.util.UtilImpl;
 
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An interface that defines common backup functionality and can be used to implement a variety of backup strategies
@@ -20,7 +20,11 @@ public interface ExternalBackup {
 	 */
 	@SuppressWarnings("unchecked")
 	static Map<String, Object> getProperties() {
-		return (Map<String, Object>) UtilImpl.CONFIGURATION.get("backup");
+		if (UtilImpl.CONFIGURATION != null) {
+			return (Map<String, Object>) UtilImpl.CONFIGURATION.get("backup");
+		}
+
+		return null;
 	}
 
 	/**
@@ -60,9 +64,9 @@ public interface ExternalBackup {
 	}
 
 	/**
-	 * @return A list of all the backups.
+	 * @return A list of all the backups sorted by modified time descending.
 	 */
-	Set<String> listBackups();
+	List<String> listBackups();
 
 	/**
 	 * @param backupName The name of the backup to check the existence for.
@@ -85,4 +89,16 @@ public interface ExternalBackup {
 	 * @param backupName The name of the backup to delete.
 	 */
 	void deleteBackup(String backupName);
+
+	/**
+	 * @param srcBackupName The name of the backup to copy.
+	 * @param destBackupName The name of the backup to copy to.
+	 */
+	void copyBackup(String srcBackupName, String destBackupName);
+
+	/**
+	 * @param srcBackupName The name of the backup to move.
+	 * @param destBackupName The name of the backup to move to.
+	 */
+	void moveBackup(String srcBackupName, String destBackupName);
 }

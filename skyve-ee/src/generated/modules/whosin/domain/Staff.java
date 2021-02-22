@@ -236,9 +236,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{contact.name} ({contact.mobile})",
-														this);
+			return org.skyve.util.Binder.formatMessage("{contact.name} ({contact.mobile})", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

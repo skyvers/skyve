@@ -70,9 +70,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{roleName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{roleName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

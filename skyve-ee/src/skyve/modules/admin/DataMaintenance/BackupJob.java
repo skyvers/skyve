@@ -6,9 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.job.Job;
 import org.skyve.metadata.SortDirection;
 import org.skyve.util.FileUtil;
@@ -31,7 +34,7 @@ public class BackupJob extends Job {
 		File backupZip = null;
 		Collection<String> log = getLog();
 		String trace;
-		
+
 		Integer yearlyBackupRetention = dm.getYearlyBackupRetention();
 		int yearly = (yearlyBackupRetention != null) ? yearlyBackupRetention.intValue() : 0;
 		Integer monthlyBackupRetention = dm.getMonthlyBackupRetention();
@@ -57,7 +60,7 @@ public class BackupJob extends Job {
 			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
-		} 
+		}
 		else {
 			trace = "No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero";
 			log.add(trace);
@@ -78,6 +81,15 @@ public class BackupJob extends Job {
 			trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
 			log.add(trace);
 			Util.LOGGER.info(trace);
+			if (ExternalBackup.areExternalBackupsEnabled()) {
+				try {
+					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
+				} catch (Exception e) {
+					trace = String.format("Failed to move external backup from %s to %s", backupZip.getName(), dailyZip.getName());
+					log.add(trace);
+					Util.LOGGER.warning(trace);
+				}
+			}
 
 			// copy daily to weekly
 			if (weekly > 0) {
@@ -88,6 +100,15 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 			else {
 				trace = "No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero";
@@ -103,6 +124,15 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 			else {
 				trace = "No monthly backup taken by the BackupJob as monthlyBackupRetention in DataMaintenance is null or zero";
@@ -118,16 +148,28 @@ public class BackupJob extends Job {
 				log.add(trace);
 				Util.LOGGER.info(trace);
 				FileUtil.copy(dailyZip, copy);
+				if (ExternalBackup.areExternalBackupsEnabled()) {
+					try {
+						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
 			}
 
 			// cull daily
 			cull(backupDir, "DAILY_", daily);
+			cull(backupDir, "DAILY_", "_PROBLEMS", daily*2);
 			// cull weekly
 			cull(backupDir, "WEEKLY_", weekly);
+			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly*2);
 			// cull monthly
 			cull(backupDir, "MONTHLY_", monthly);
+			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly*2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", yearly);
+			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly*2);
 		}
 
 		// TODO instance of communication instance in code - default settings
@@ -139,9 +181,18 @@ public class BackupJob extends Job {
 	}
 
 	private void cull(File backupDir, String prefix, int retain)
+			throws IOException {
+		cull(backupDir, prefix, "", retain);
+	}
+
+	private void cull(File backupDir, String prefix, String suffix, int retain)
 	throws IOException {
 		Collection<String> log = getLog();
-		File[] files = FileUtil.listFiles(backupDir, prefix + "\\d*\\.zip", SortDirection.descending);
+		if (suffix == null) {
+			suffix = "";
+		}
+		final String regex = prefix + "\\d*" + suffix + "\\.zip";
+		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
 
 		for (int i = retain, l = files.length; i < l; i++) {
 			String trace = String.format("Cull backup %s - retention is set to %d",
@@ -150,6 +201,29 @@ public class BackupJob extends Job {
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			FileUtil.delete(files[i]);
+		}
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			try {
+				final ExternalBackup externalBackup = ExternalBackup.getInstance();
+				final List<String> backups = externalBackup.listBackups();
+				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex)).collect(Collectors.toList());
+				for (int i = retain, l = matchingBackups.size(); i < l; i++) {
+					String trace = String.format("Cull backup %s - retention is set to %d",
+							matchingBackups.get(i),
+							Integer.valueOf(retain));
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					try {
+						ExternalBackup.getInstance().deleteBackup(matchingBackups.get(i));
+					} catch (Exception e) {
+						trace = String.format("Failed to cull external backup %s", matchingBackups.get(i));
+						log.add(trace);
+						Util.LOGGER.warning(trace);
+					}
+				}
+			} catch (Exception e) {
+				Util.LOGGER.warning("Failed to cull external backups " + e.getMessage());
+			}
 		}
 	}
 }

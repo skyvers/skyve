@@ -4,18 +4,26 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.sas.BlobContainerSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
-	public Set<String> listBackups() {
-		return getBlobContainerClient().listBlobs().stream().map(BlobItem::getName).collect(Collectors.toSet());
+	public List<String> listBackups() {
+		final Comparator<BlobItem> byLastModifiedDate = Comparator.comparing(blobItem -> blobItem.getProperties().getLastModified());
+		return getBlobContainerClient().listBlobs().stream()
+				.sorted(byLastModifiedDate.reversed())
+				.map(BlobItem::getName)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -50,6 +58,21 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		}
 
 		return blobContainerClient;
+	}
+
+	@Override
+	public void copyBackup(String srcBackupName, String destBackupName) {
+		final BlobContainerSasPermission permission = new BlobContainerSasPermission();
+		permission.setReadPermission(true);
+		final String sas = getBlobContainerClient().generateSas(new BlobServiceSasSignatureValues(OffsetDateTime.now().plusMinutes(10), permission));
+		final String srcBlobUrl = getBlobContainerClient().getBlobClient(srcBackupName).getBlobUrl();
+		getBlobContainerClient().getBlobClient(destBackupName).copyFromUrl(srcBlobUrl + "?" + sas);
+	}
+
+	@Override
+	public void moveBackup(String srcBackupName, String destBackupName) {
+		copyBackup(srcBackupName, destBackupName);
+		deleteBackup(srcBackupName);
 	}
 
 	private String getConnectionString() {

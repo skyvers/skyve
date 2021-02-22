@@ -26,6 +26,7 @@ import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.service.smartclient.SmartClientEditServlet;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -80,8 +81,10 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 					throw new SecurityException(bizDocument + " in module " + bizModule, user.getName());
 				}
 				
+				// No bizId or not a persistent document
 				String bizId = facesView.getBizIdParameter();
-				if (bizId == null) {
+				Persistent persistent = document.getPersistent();
+				if ((bizId == null) || (persistent == null) || (persistent.getName() == null)) {
 					// No security check is required as we are at the top of the conversation
 					// If the user doesn't have create privilege, it will be stopped in SaveAction.
 					bean = document.newInstance(user);

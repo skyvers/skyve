@@ -401,9 +401,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{moduleName}.{documentName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{moduleName}.{documentName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

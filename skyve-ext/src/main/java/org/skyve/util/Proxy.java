@@ -102,6 +102,9 @@ public class Proxy {
 	 */
 	@SuppressWarnings({"unchecked", "synthetic-access"})
 	private static <T extends Object> T of(T proxied, ProxyDelegate<T> delegate, boolean proxiedTransient) {
+		if (Proxy.isProxy(proxied)) {
+			throw new IllegalArgumentException("proxied argument is a Proxy");
+		}
 		Class<?> proxiedClass = proxied.getClass();
 		Class<?> delegateClass = delegate.getClass();
 
@@ -178,7 +181,7 @@ public class Proxy {
 			proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME).set(proxy, proxied);
 		}
 		catch (Exception e) {
-			throw new DomainException("Could not deproxy " + proxy, e);
+			throw new DomainException("Could not reproxy " + proxied + " to proxy " + proxy, e);
 		}
 	}
 	
@@ -201,5 +204,21 @@ public class Proxy {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Get the delegate used with this proxy.
+	 * @param <T>
+	 * @param proxy	The proxy to get the delegate for.
+	 * @return	The delegate object.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Object> ProxyDelegate<T> getDelegate(T proxy) {
+		try {
+			return (ProxyDelegate<T>) proxy.getClass().getDeclaredField(DELEGATE_FIELD_NAME).get(proxy);
+		}
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new DomainException("Could not get delegate from proxy " + proxy, e);
+		}
 	}
 }

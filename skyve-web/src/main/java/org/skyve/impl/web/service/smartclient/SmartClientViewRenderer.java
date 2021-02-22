@@ -127,7 +127,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
 
-	protected SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+	public SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
 		super(user, module, document, view);
 		this.noCreateView = noCreateView;
 	}
@@ -2823,10 +2823,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			def.setTitle(title);
 		}
-		boolean required = isCurrentWidgetRequired();
-		if (required) {
-			def.setRequired(required);
-		}
+		def.setRequired(isCurrentWidgetRequired());
 		String help = getCurrentWidgetHelp();
 		if (help != null) {
 			def.setHelpText(help);

@@ -218,23 +218,23 @@ public class BindTests extends AbstractSkyveTest {
 	public void testFormatMessage() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test");
-		Assert.assertEquals("Test", Binder.formatMessage(c, "Test", aap));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{text}", aap));
-		Assert.assertEquals("TestTest", Binder.formatMessage(c, "{text}{text}", aap));
+		Assert.assertEquals("Test", Binder.formatMessage("Test", aap));
+		Assert.assertEquals("Test", Binder.formatMessage("{text}", aap));
+		Assert.assertEquals("TestTest", Binder.formatMessage("{text}{text}", aap));
 		// Test escapes
-		Assert.assertEquals("{text}Test", Binder.formatMessage(c, "\\{text\\}{text}", aap));
-		Assert.assertEquals("{textTest", Binder.formatMessage(c, "\\{text{text}", aap));
-		Assert.assertEquals("text}Test", Binder.formatMessage(c, "text\\}{text}", aap));
-		Assert.assertEquals("{text", Binder.formatMessage(c, "\\{text", aap));
+		Assert.assertEquals("{text}Test", Binder.formatMessage("\\{text\\}{text}", aap));
+		Assert.assertEquals("{textTest", Binder.formatMessage("\\{text{text}", aap));
+		Assert.assertEquals("text}Test", Binder.formatMessage("text\\}{text}", aap));
+		Assert.assertEquals("{text", Binder.formatMessage("\\{text", aap));
 		aap.setText("{text}");
 		// Test '{' and '}' are left in tact when they are part of the value substituted
-		Assert.assertEquals("{text}{text}", Binder.formatMessage(c, "{text}{text}", aap));
+		Assert.assertEquals("{text}{text}", Binder.formatMessage("{text}{text}", aap));
 	}
 	
 	@Test(expected = MetaDataException.class)
 	public void testDanglingMessageFormat() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
-		Assert.assertEquals("{text", Binder.formatMessage(c, "{text", aap));
+		Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
 	}
 	
 	@Test
@@ -244,38 +244,82 @@ public class BindTests extends AbstractSkyveTest {
 		CORE.getStash().put("text", "Test");
 		CORE.getUser().getAttributes().put("text", "Test");
 		
-		Assert.assertEquals("TestUser", Binder.formatMessage(c, "{USER}", bean));
-		Assert.assertEquals("TestUser", Binder.formatMessage(c, "{USERID}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{USERNAME}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{DATAGROUPID}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{CONTACTID}", bean));
-		Assert.assertEquals("bizhub", Binder.formatMessage(c, "{CUSTOMER}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{DATE}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{TIME}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{DATETIME}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{TIMESTAMP}", bean));
+		Assert.assertEquals("TestUser", Binder.formatMessage("{USER}", bean));
+		Assert.assertEquals("TestUser", Binder.formatMessage("{USERID}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{USERNAME}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{DATAGROUPID}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{CONTACTID}", bean));
+		Assert.assertEquals("bizhub", Binder.formatMessage("{CUSTOMER}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{DATE}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{TIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{DATETIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{TIMESTAMP}", bean));
+		Assert.assertEquals(Util.getDocumentUrl(bean), Binder.formatMessage("{URL}", bean));
 		
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{text}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{ text }", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean:text}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean: text }", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{bean : text }", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:bean.text}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:stash['text']}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{el:user.attributes['text']}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{el:stash['nothing']}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{el:user.attributes['nothing']}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATE}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATE.set(DATE.toLocalDate().plusDays(1))}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:TIME}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:DATETIME}", bean));
-		Assert.assertNotEquals("", Binder.formatMessage(c, "{el:TIMESTAMP}", bean));
-		Assert.assertEquals("some.non-existent.key", Binder.formatMessage(c, "{i18n:some.non-existent.key}", bean));
-		Assert.assertEquals("Yes", Binder.formatMessage(c, "{role:admin.BasicUser}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{stash:text}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{stash:nothing}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage(c, "{user:text}", bean));
-		Assert.assertEquals("", Binder.formatMessage(c, "{user:nothing}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{ text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{bean: text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{bean : text }", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{el:stash['text']}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{el:user.attributes['text']}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{el:stash['nothing']}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{el:user.attributes['nothing']}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:DATE}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:DATE.set(DATE.toLocalDate().plusDays(1))}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:TIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:DATETIME}", bean));
+		Assert.assertNotEquals("", Binder.formatMessage("{el:TIMESTAMP}", bean));
+		Assert.assertEquals("some.non-existent.key", Binder.formatMessage("{i18n:some.non-existent.key}", bean));
+		Assert.assertEquals("Yes", Binder.formatMessage("{role:admin.BasicUser}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{stash:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{stash:nothing}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{user:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{user:nothing}", bean));
+	}
+	
+	@Test
+	public void testExpressionValidation() throws Exception {
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USER}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USERID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{USERNAME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATAGROUPID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{CONTACTID}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{CUSTOMER}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATE}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{DATETIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{TIMESTAMP}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{URL}"));
 		
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{ text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean: text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean : text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:bean.text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:stash['text']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:user.attributes['text']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:stash['nothing']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:user.attributes['nothing']}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATE}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATE.set(DATE.toLocalDate().plusDays(1))}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:TIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:DATETIME}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:TIMESTAMP}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{i18n:some.non-existent.key}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{role:admin.BasicUser}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{stash:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{stash:nothing}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{user:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{user:nothing}"));
+		
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "}"));
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{}"));
+		Assert.assertFalse(BindUtil.messageExpressionsAreValid(c, m, aapd, "{text\\}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{{text}"));
 	}
 }

@@ -262,7 +262,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * admin.startup.accountAllowUserSelfRegistration.description
 	 **/
-	private Boolean accountAllowUserSelfRegistration;
+	private Boolean accountAllowUserSelfRegistration = new Boolean(false);
 	/**
 	 * Account SID
 	 **/
@@ -691,5 +691,24 @@ public abstract class Startup extends AbstractTransientBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when this application has a default customer specified (is single tenant)
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSingleTenant() {
+		return (org.skyve.impl.util.UtilImpl.CUSTOMER != null);
+	}
+
+	/**
+	 * {@link #isSingleTenant} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSingleTenant() {
+		return (! isSingleTenant());
 	}
 }

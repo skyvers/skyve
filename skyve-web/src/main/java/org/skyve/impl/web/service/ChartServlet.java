@@ -24,7 +24,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
@@ -57,6 +56,7 @@ import org.skyve.metadata.view.model.chart.TextStartsWithBucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 /**
  * Chart Servlet - supplies map data to a map display.

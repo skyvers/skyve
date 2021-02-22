@@ -2,7 +2,7 @@ package org.skyve.impl.generate.pwa;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
-import org.skyve.impl.web.UserAgentType;
+import org.skyve.web.UserAgentType;
 
 public abstract class AbstractRenderer {
 	protected static final Integer ONE_HUNDRED = Integer.valueOf(100);

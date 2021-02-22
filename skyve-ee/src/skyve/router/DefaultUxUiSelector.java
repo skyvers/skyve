@@ -9,7 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.skyve.admin.web.StartupView;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.UserAgentType;
+import org.skyve.web.UserAgentType;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
@@ -18,12 +18,9 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Startup;
 
+import static router.UxUis.*;
+
 public class DefaultUxUiSelector implements UxUiSelector {
-	public static final UxUi PHONE = UxUi.newPrimeFaces("phone", "editorial", "nova-light");
-	public static final UxUi TABLET = UxUi.newPrimeFaces("tablet", "editorial", "nova-light");
-	public static final UxUi DESKTOP = UxUi.newSmartClient("desktop", "Tahoe", "casablanca");
-	public static final UxUi EXTERNAL = UxUi.newPrimeFaces("external", "editorial", "nova-light");
-	public static final UxUi STARTUP = UxUi.newPrimeFaces("startup", "editorial", "nova-light");
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
 		uxuis.put(PHONE.getName(), PHONE);
@@ -32,7 +29,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 		uxuis.put(EXTERNAL.getName(), EXTERNAL);
 		uxuis.put(STARTUP.getName(), STARTUP);
 	}
-	
+
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
 		// public pages are destined for external UX/UI always
@@ -66,8 +63,9 @@ public class DefaultUxUiSelector implements UxUiSelector {
 				return PHONE;
 			case tablet:
 				return TABLET;
-			case desktop:
-				return DESKTOP;
+			// uncomment to use Smart Client by default for desktop user agents
+			//case desktop:
+			//return DESKTOP;
 			default:
 				return EXTERNAL;
 		}

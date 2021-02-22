@@ -73,6 +73,7 @@
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
 	    
 	    <%@include file="fragments/styles.html" %>
+	    <%@include file="fragments/backgroundImage.html" %>
 		
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
@@ -165,7 +166,9 @@
 
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
-		    	<%@include file="fragments/logo.html" %>
+		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">
+		    		<%@include file="fragments/logo.html" %>
+		    	</div>
 		    	
             	<%@include file="fragments/noscript.html" %>
 		        <% if (loginError) { %>

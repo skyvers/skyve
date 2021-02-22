@@ -165,9 +165,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Activation",
-														this);
+			return org.skyve.util.Binder.formatMessage("Activation", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

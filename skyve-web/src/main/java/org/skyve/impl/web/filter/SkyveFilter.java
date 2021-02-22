@@ -17,7 +17,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 public class SkyveFilter implements Filter {

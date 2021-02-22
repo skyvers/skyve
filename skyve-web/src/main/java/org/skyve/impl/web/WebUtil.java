@@ -215,10 +215,10 @@ public class WebUtil {
 				Document d = m.getDocument(c, SQLMetaDataUtil.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
-				subject = Binder.formatMessage(c, subject, firstUser);
+				subject = Binder.formatMessage(subject, firstUser);
 				String body = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
 				body = body.replace("{url}", Util.getSkyveContextUrl());
-				body = Binder.formatMessage(c, body, firstUser);
+				body = Binder.formatMessage(body, firstUser);
 				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
 				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}

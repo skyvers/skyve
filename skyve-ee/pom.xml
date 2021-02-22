@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>5.0.2-SNAPSHOT</version>
+		<version>6.0.3</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -305,6 +305,10 @@
 				<exclusion>
 					<groupId>edu.ucar</groupId>
 					<artifactId>netcdf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-compress</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

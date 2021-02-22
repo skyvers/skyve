@@ -41,7 +41,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
@@ -50,6 +49,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.web.UserAgentType;
 
 /**
  * Delegates to a list of other builders that actually produce the components.
@@ -108,6 +108,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setUserAgentType(userAgentType);
+		}
+	}
+	
+	@Override
+	public void setLocale(Locale locale) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setLocale(locale);
+		// Now set the state on all builders in the chain
+		for (ComponentBuilder builder : builders) {
+			builder.setLocale(locale);
 		}
 	}
 	
@@ -475,8 +485,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean canCreateDocument,
-									boolean aggregateQuery,
-									Locale locale) {
+									boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -488,8 +497,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										title,
 										listGrid,
 										canCreateDocument,
-										aggregateQuery,
-										locale);
+										aggregateQuery);
 		}
 		return result;
 	}
@@ -503,8 +511,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										List<Parameter> parameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid,
-										Locale locale) {
+										boolean showGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listRepeater(result,
@@ -515,8 +522,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											parameters,
 											title,
 											showColumnHeaders,
-											showGrid,
-											locale);
+											showGrid);
 		}
 		return result;
 	}

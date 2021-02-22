@@ -6,19 +6,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Hyperlink;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
@@ -54,7 +46,7 @@ import org.skyve.util.Binder.TargetMetaData;
  * Rows can be added to the sheet and rows are added and moved using a composite key structure.
  * Usually (unless overridden) the key is of the form "module.document.bizId".
  * The sheet has a cursor which represents the current row.
- * 
+ *
  * @author msands
  */
 public final class POISheet implements BizPortSheet {
@@ -74,41 +66,41 @@ public final class POISheet implements BizPortSheet {
 	static final int DOCUMENT_COLUMN = 1;
 	// Row 0, Col 2 optionally holds the collection attribute name, if this is a collection sheet.
 	static final int COLLECTION_COLUMN = 2;
-	
+
 	// Keeps track of the next validation column to use for range values
 	// this number is decremented as domain values are added
 	private static int validationColumn = 255;
 
 	// My WorkbookData parent
 	private POIWorkbook parent;
-	
+
 	// the sheet backing this sheet data
 	Sheet sheet;
 
 	// The title of the sheet (as per the tab)
 	private String title;
-	
+
 	// the drawing patriarch to draw to this sheet.
 	// this is used to create tooltips
 	private Drawing drawing;
-	
+
 	// the index to the next row number to append
 	// The next index to use if a column definition is added.
 	private int nextRow = START_ROW;
-	
+
 	// the current row
 	// The row that the cursor is currently on
 	private Row currentRow;
-	
+
 	// the column information, keyed by binding
 	// allows easy lookup of column metadata.
 	private LinkedHashMap<String, BizPortColumn> columns = new LinkedHashMap<>();
 
 	// the data index - row key to row number
-	// allows easy lookup of data by the sheet key 
+	// allows easy lookup of data by the sheet key
 	// v(default is bizId for document sheets, ownerId + '#|' + elementId for collection sheets)
 	private SortedMap<String, Integer> indices = new TreeMap<>();
-		
+
 	/**
 	 * New File constructor
 	 * This constructor is used when creating a new Excel sheet.
@@ -119,30 +111,30 @@ public final class POISheet implements BizPortSheet {
 
 	/**
 	 * Existing file constructor.
-	 * This constructor is used when creating a sheet in-memory representation 
+	 * This constructor is used when creating a sheet in-memory representation
 	 * from an existing Excel file.
-	 * 
+	 *
 	 * @param sheet	The excel worksheet.
 	 */
 	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, UploadException problems) {
 		title = sheet.getSheetName();
-		
+
 		// get the columns in the sheet (row 2 is binding, row 3 is titles)
 		Row nameRow = sheet.getRow(NAME_ROW);
-		Cell moduleCell = nameRow.getCell(MODULE_COLUMN, Row.RETURN_BLANK_AS_NULL);
-		Cell documentCell = nameRow.getCell(DOCUMENT_COLUMN, Row.RETURN_BLANK_AS_NULL);
-		Cell collectionCell = nameRow.getCell(COLLECTION_COLUMN, Row.RETURN_BLANK_AS_NULL);
+		Cell moduleCell = nameRow.getCell(MODULE_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		Cell documentCell = nameRow.getCell(DOCUMENT_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		Cell collectionCell = nameRow.getCell(COLLECTION_COLUMN, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		String moduleName = (moduleCell == null) ? null : moduleCell.getStringCellValue();
 		String documentName = (documentCell == null) ? null : documentCell.getStringCellValue();
 		String collectionBinding = (collectionCell == null) ? null : collectionCell.getStringCellValue();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
-		
+
 		Row bindingRow = sheet.getRow(BINDING_ROW);
 		Row titleRow = sheet.getRow(TITLE_ROW);
 		for (int i = 0, l = bindingRow.getLastCellNum(); i < l; i++) {
 			// don't process rows that aren't bound.
-			Cell bindingCell = bindingRow.getCell(i, Row.RETURN_BLANK_AS_NULL);
+			Cell bindingCell = bindingRow.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			if (bindingCell == null) {
 				continue;
 			}
@@ -150,20 +142,20 @@ public final class POISheet implements BizPortSheet {
 			if (binding == null) {
 				continue;
 			}
-			
+
 			// create column metadata for the current column
-			Cell titleCell = titleRow.getCell(i, Row.RETURN_BLANK_AS_NULL);
+			Cell titleCell = titleRow.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			Comment cellComment = (titleCell == null) ? null : titleCell.getCellComment();
 			BizPortColumn column = new BizPortColumn((titleCell == null) ? binding : titleCell.getStringCellValue(),
 														(cellComment == null) ? null : cellComment.getString().getString());
 			column.setIndex(i);
 
-			// if we are working with a document sheet, determine if we need to setup the 
+			// if we are working with a document sheet, determine if we need to setup the
 			// column's "referencedSheet" property
 			if (collectionBinding == null) { // have a document sheet
 				if (ChildBean.PARENT_NAME.equals(binding)) { // cater for the parent binding
 					Document parentDocument = document.getParentDocument(customer);
-					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), 
+					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(),
 															parentDocument.getName()));
 				}
 				else { // check if we are dealing with a reference
@@ -172,7 +164,7 @@ public final class POISheet implements BizPortSheet {
 					if (attribute instanceof Reference) {
 						Reference reference = (Reference) attribute;
 						Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
-						column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(), 
+						column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
 																referenceDocument.getName()));
 					}
 				}
@@ -186,7 +178,7 @@ public final class POISheet implements BizPortSheet {
 					else { // compound binding
 						Module drivingModule = customer.getModule(moduleName);
 						Document drivingDocument = module.getDocument(customer, documentName);
-						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
 																				drivingModule,
 																				drivingDocument,
 																				collectionBinding);
@@ -198,22 +190,22 @@ public final class POISheet implements BizPortSheet {
 				else { // element ID
 					Module drivingModule = customer.getModule(moduleName);
 					Document drivingDocument = module.getDocument(customer, documentName);
-					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+					TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
 																			drivingModule,
 																			drivingDocument,
 																			collectionBinding);
 					Reference reference = (Reference) target.getAttribute();
 					Document referenceDocument = drivingModule.getDocument(customer, reference.getDocumentName());
-					column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(), 
+					column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
 															referenceDocument.getName()));
 				}
 			}
 			addColumn(binding, column);
 		}
-		
+
 		this.parent = parent;
 		this.sheet = sheet;
-		
+
 		// index the data in the sheet, using column 0 for document, column 0 and 1 for collections
 		currentRow = sheet.getRow(nextRow);
 		if (currentRow != null) { // we have data to index
@@ -245,15 +237,15 @@ public final class POISheet implements BizPortSheet {
 				}
 			}
 		}
-		
+
 		// reset
 		nextRow = START_ROW - 1;
 	}
-	
+
 	/**
 	 * This method is called by WorkbookData to materialize each sheet within the workbook.
 	 * Once a sheet has been materialized, no structural changes to the sheet are allowed.
-	 * 
+	 *
 	 * @param key	The key of the sheet (module.document/relative binding.collection)
 	 * @param parent	The pure Excel workbook that owns this sheet.
 	 * @param sheet	The pure Excel worksheet that backs this sheet in-memoty representation.
@@ -266,59 +258,59 @@ public final class POISheet implements BizPortSheet {
 		this.sheet = sheet;
 		this.sheet.createFreezePane(0, 3);
 		drawing = sheet.createDrawingPatriarch();
-		
+
 		// Row 0 - module name in cell 0, document name or binding in cell 1
 		// Row 1 - column bindings
 		// Row 2 - Column Headings
 
 		Row nameRow = sheet.createRow(NAME_ROW);
 		nameRow.setZeroHeight(true);
-		Cell cell = nameRow.createCell(MODULE_COLUMN, Cell.CELL_TYPE_STRING);
+		Cell cell = nameRow.createCell(MODULE_COLUMN, CellType.STRING);
 		cell.setCellValue(key.getModuleName());
-		cell = nameRow.createCell(DOCUMENT_COLUMN, Cell.CELL_TYPE_STRING);
+		cell = nameRow.createCell(DOCUMENT_COLUMN, CellType.STRING);
 		cell.setCellValue(key.getDocumentName());
-		cell = nameRow.createCell(COLLECTION_COLUMN, Cell.CELL_TYPE_STRING);
+		cell = nameRow.createCell(COLLECTION_COLUMN, CellType.STRING);
 		cell.setCellValue(key.getCollectionBinding());
-		
+
 		Row bindingRow = sheet.createRow(BINDING_ROW);
 		bindingRow.setZeroHeight(true);
 		Row titleRow = sheet.createRow(TITLE_ROW);
-		
+
 		// for each column
 		int i = 0;
 		for (String columnBinding : columns.keySet()) {
 			BizPortColumn column = columns.get(columnBinding);
-			
+
 			// set the column indices now we are materialising
 			column.setIndex(i);
-			
+
 			// Put in the column binding
-			cell = bindingRow.createCell(i, Cell.CELL_TYPE_STRING);
+			cell = bindingRow.createCell(i, CellType.STRING);
 			cell.setCellValue(columnBinding);
-			
+
 			// Put in column title
-			cell = titleRow.createCell(i, Cell.CELL_TYPE_STRING);
+			cell = titleRow.createCell(i, CellType.STRING);
 			cell.setCellValue(column.getTitle());
-			
+
 			SheetKey referencedSheetKey = column.getReferencedSheet();
 			if (referencedSheetKey != null) {
 				POISheet referencedSheet = parent.getSheet(referencedSheetKey);
 				if (referencedSheet != null) { // not struck out by exclusions
-					Hyperlink link = parent.creationHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+					Hyperlink link = parent.creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
 					link.setAddress("'" + referencedSheet.getTitle() + "'!A3");
 					cell.setHyperlink(link);
 					cell.setCellStyle(parent.foreignKeyHeadingStyle);
 
 					// TODO Make the bizkey column
 					i++;
-					Cell titleCell = titleRow.createCell(i, Cell.CELL_TYPE_STRING);
+					Cell titleCell = titleRow.createCell(i, CellType.STRING);
 					titleCell.setCellValue(column.getTitle() + " Description");
-					createCellComment(titleCell, 
+					createCellComment(titleCell,
 										"The business description of the related record.  " +
 											"This value is NOT uploaded but allows a referential description within the spreadsheet.");
 					titleCell.setCellStyle(parent.headingStyle);
 
-					// Apply a template formula to the first data row so the user can 
+					// Apply a template formula to the first data row so the user can
 					// still copy it down if there is no data.
 					Row firstDataRow = sheet.getRow(TITLE_ROW + 1);
 					if (firstDataRow == null) {
@@ -333,17 +325,17 @@ public final class POISheet implements BizPortSheet {
 			else {
 				cell.setCellStyle(parent.headingStyle);
 			}
-			
+
 			// Set the column comment if applicable
 			createCellComment(cell, column.getComment());
-			
+
 			// Set the range values if necessary
 			String[] rangeValues = column.getRangeValues();
-			
+
 			// TODO use the min and max values
-//			Object minValue = column.getMinValue(); 
+//			Object minValue = column.getMinValue();
 //			Object maxValue = column.getMaxValue();
-			
+
 			if (! parent.ooxmlFormat) { // old school
 				if (rangeValues != null) {
 					setRangeValues(rangeValues, i);
@@ -355,9 +347,9 @@ public final class POISheet implements BizPortSheet {
 					case dateTime:
 					case time:
 					case timestamp:
-						DVConstraint dateConstraint = DVConstraint.createDateConstraint(DataValidationConstraint.OperatorType.IGNORED, 
-																							"01/01/1900", 
-																							"31/12/2999", 
+						DVConstraint dateConstraint = DVConstraint.createDateConstraint(DataValidationConstraint.OperatorType.IGNORED,
+																							"01/01/1900",
+																							"31/12/2999",
 																							"d/M/yy");
 						HSSFDataValidation dateValidation = new HSSFDataValidation(addresslist, dateConstraint);
 						dateValidation.setSuppressDropDownArrow(true);
@@ -371,8 +363,8 @@ public final class POISheet implements BizPortSheet {
 					case longInteger:
 // TODO look at string length and date ValidationTypes
 						DVConstraint longConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.INTEGER,
-																							DataValidationConstraint.OperatorType.BETWEEN, 
-																							Integer.toString(Integer.MIN_VALUE), 
+																							DataValidationConstraint.OperatorType.BETWEEN,
+																							Integer.toString(Integer.MIN_VALUE),
 																							Integer.toString(Integer.MAX_VALUE));
 						HSSFDataValidation longValidation = new HSSFDataValidation(addresslist, longConstraint);
 						longValidation.setSuppressDropDownArrow(true);
@@ -386,8 +378,8 @@ public final class POISheet implements BizPortSheet {
 					case decimal5:
 					case decimal10:
 						DVConstraint floatConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.DECIMAL,
-																								DataValidationConstraint.OperatorType.BETWEEN, 
-																								Integer.toString(Integer.MIN_VALUE), 
+																								DataValidationConstraint.OperatorType.BETWEEN,
+																								Integer.toString(Integer.MIN_VALUE),
 																								Integer.toString(Integer.MAX_VALUE));
 						HSSFDataValidation floatValidation = new HSSFDataValidation(addresslist, floatConstraint);
 						floatValidation.setSuppressDropDownArrow(true);
@@ -421,10 +413,10 @@ public final class POISheet implements BizPortSheet {
 		    cell.setCellComment(commentBox);
 		}
 	}
-	
+
 	/**
 	 * Set the range values for an entire column within the current sheet.
-	 * 
+	 *
 	 * @param rangeValues	The range values to set.
 	 * @param columnIndex	The index of the column (starts with 0 index).
 	 */
@@ -444,7 +436,7 @@ public final class POISheet implements BizPortSheet {
 		CellRangeAddress validationListVals = new CellRangeAddress(START_ROW, rangeValues.length + START_ROW, validationColumn, validationColumn);
 		StringBuilder sb = new StringBuilder(validationListVals.formatAsString());
 		String validationListValsExpression = sb.insert(0, '$').insert(3, '$').insert(6, '$').insert(9, '$').toString();
-		
+
 		// Create the constraint
 		DVConstraint constraint = DVConstraint.createFormulaListConstraint(validationListValsExpression);
 
@@ -458,7 +450,7 @@ public final class POISheet implements BizPortSheet {
 
 		validationColumn--;
 	}
-	
+
 	@Override
 	public BizPortColumn addColumn(String columnBinding, BizPortColumn column) {
 		if (sheet != null) {
@@ -474,31 +466,31 @@ public final class POISheet implements BizPortSheet {
 		}
 		return columns.remove(columnBinding);
 	}
-	
+
 	@Override
 	public BizPortColumn getColumn(String columnBinding) {
 		return columns.get(columnBinding);
 	}
-	
+
 	@Override
 	public Set<String> getColumnBindings() {
 		return columns.keySet();
 	}
-	
+
 	@Override
 	public boolean moveToRow(Object... rowKey) {
 		if (sheet == null) {
 			throw new IllegalStateException("This workbook data has not been materialized");
 		}
-		
+
 		Integer index = indices.get(buildRowKey(rowKey));
 		if (index != null) {
 			currentRow = sheet.getRow(index.intValue());
 		}
-		
+
 		return (index != null);
 	}
-	
+
 	@Override
 	public void addRow(Object... rowKey) {
         if (sheet == null) {
@@ -513,10 +505,10 @@ public final class POISheet implements BizPortSheet {
         nextRow++;
 		indices.put(buildRowKey(rowKey), new Integer(nextRow));
 	}
-	
+
 	/**
 	 * Append the key components together to make a string key.
-	 * 
+	 *
 	 * @param rowKey	The key components.
 	 * @return	The key string.
 	 */
@@ -536,7 +528,7 @@ public final class POISheet implements BizPortSheet {
 
 		return result;
 	}
-	
+
 	@Override
 	public boolean nextRow() {
 		int lastRow = sheet.getLastRowNum();
@@ -544,15 +536,15 @@ public final class POISheet implements BizPortSheet {
 		while ((currentRow == null) && (nextRow <= lastRow)) {
 			currentRow = sheet.getRow(++nextRow);
 		}
-		
+
 		return (nextRow <= lastRow);
 	}
-	
+
 	private String getCurrentRowExcelRef(BizPortColumn column) {
 		StringBuilder ref = new StringBuilder(64);
 		ref.append(getTitle()).append('!');
 		if ((currentRow != null) && (column != null)) {
-			ref.append(new CellReference(currentRow.getRowNum(), 
+			ref.append(new CellReference(currentRow.getRowNum(),
 											column.getIndex()).formatAsString());
 		}
 		else {
@@ -561,17 +553,17 @@ public final class POISheet implements BizPortSheet {
 
 		return ref.toString();
 	}
-	
+
 	@Override
-	public void addErrorAtCurrentRow(UploadException problems, 
-										BizPortColumn column, 
+	public void addErrorAtCurrentRow(UploadException problems,
+										BizPortColumn column,
 										String message) {
 		problems.addError(new Problem(message, getCurrentRowExcelRef(column)));
 	}
-	
+
 	@Override
-	public void addWarningAtCurrentRow(UploadException problems, 
-										BizPortColumn column, 
+	public void addWarningAtCurrentRow(UploadException problems,
+										BizPortColumn column,
 										String message) {
 		problems.addWarning(new Problem(message, getCurrentRowExcelRef(column)));
 	}
@@ -581,14 +573,14 @@ public final class POISheet implements BizPortSheet {
 		nextRow = START_ROW - 1;
 		currentRow = null;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getValue(String columnBinding, 
+	public <T> T getValue(String columnBinding,
 							AttributeType attributeType,
 							UploadException problems) {
 		T result = null;
-		
+
 		if (sheet == null) {
 			throw new IllegalStateException("This workbook data has not been materialized");
 		}
@@ -599,11 +591,11 @@ public final class POISheet implements BizPortSheet {
 		if (currentRow == null) {
 			throw new IllegalStateException("No current row.  Use moveToRow() or addRow() or next() first.");
 		}
-		
-		Cell cell = currentRow.getCell(column.getIndex(), Row.RETURN_BLANK_AS_NULL);
+
+		Cell cell = currentRow.getCell(column.getIndex(), Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		if (cell != null) {
 			switch (cell.getCellType()) {
-			case Cell.CELL_TYPE_STRING:
+			case STRING:
 				if (AttributeType.text.equals(attributeType) ||
 						AttributeType.enumeration.equals(attributeType) ||
 						AttributeType.association.equals(attributeType) ||
@@ -616,21 +608,21 @@ public final class POISheet implements BizPortSheet {
 				}
 				else {
 					addErrorAtCurrentRow(problems,
-											column, 
+											column,
 											"Type should be " + attributeType + " but the corresponding Excel cell is a String");
 				}
 				break;
-			case Cell.CELL_TYPE_BOOLEAN:
+			case BOOLEAN:
 				if (AttributeType.bool.equals(attributeType)) {
 					result = (T) (cell.getBooleanCellValue() ? Boolean.TRUE : Boolean.FALSE);
 				}
 				else {
-					addErrorAtCurrentRow(problems, 
-											column, 
+					addErrorAtCurrentRow(problems,
+											column,
 											"Type should be " + attributeType + " but the corresponding Excel cell is a Boolean");
 				}
 				break;
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell)) {
 					Date date = cell.getDateCellValue();
 					if (date != null) {
@@ -647,8 +639,8 @@ public final class POISheet implements BizPortSheet {
 							result = (T) new Timestamp(date.getTime());
 						}
 						else {
-							addErrorAtCurrentRow(problems, 
-													column, 
+							addErrorAtCurrentRow(problems,
+													column,
 													"Type should be " + attributeType + " but the corresponding Excel cell is a Date.");
 						}
 					}
@@ -679,8 +671,8 @@ public final class POISheet implements BizPortSheet {
 						result = (T) NumberToTextConverter.toText(cell.getNumericCellValue());
 					}
 					else {
-						addErrorAtCurrentRow(problems, 
-												column, 
+						addErrorAtCurrentRow(problems,
+												column,
 												"Type should be " + attributeType + " but the corresponding Excel cell is Numeric.");
 					}
 				}
@@ -688,10 +680,10 @@ public final class POISheet implements BizPortSheet {
 			default:
 			}
 		}
-		
-		return result; 
+
+		return result;
 	}
-	
+
 	@Override
 	public void setValue(String columnBinding, Object value) {
 		if (sheet == null) {
@@ -704,8 +696,8 @@ public final class POISheet implements BizPortSheet {
 		if (currentRow == null) {
 			throw new IllegalStateException("No current row.  Use moveToOrAppendRow() first.");
 		}
-		
-		Cell cell = currentRow.getCell(column.getIndex(), Row.RETURN_BLANK_AS_NULL);
+
+		Cell cell = currentRow.getCell(column.getIndex(), Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		if (cell == null) { // not created yet
 			cell = currentRow.createCell(column.getIndex());
 		}
@@ -738,7 +730,7 @@ public final class POISheet implements BizPortSheet {
 		else if (value instanceof Boolean) {
 			cell.setCellValue(((Boolean) value).booleanValue());
 		}
-		
+
 		// if this column is a foreign key or parent key, setup the description for it
 		SheetKey referencedSheetKey = column.getReferencedSheet();
 		if (referencedSheetKey != null) {
@@ -748,17 +740,17 @@ public final class POISheet implements BizPortSheet {
 			}
 		}
 	}
-	
+
 	// Place a formula like =VLOOKUP(Q4, Model!$A$4:$B$65535, 2, FALSE)
 	// to enable the bizkey of the reference sheets to be displayed
 	private void applyLookupFormula(Row row, int keyColumn, String referencedSheetTitle) {
 	    int descriptionColumn = keyColumn + 1;
-	    Cell descriptionCell = row.getCell(descriptionColumn, Row.RETURN_BLANK_AS_NULL);
+	    Cell descriptionCell = row.getCell(descriptionColumn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (descriptionCell == null) { // not created yet
             descriptionCell = row.createCell(descriptionColumn);
         }
 
-        descriptionCell.setCellType(Cell.CELL_TYPE_FORMULA);
+        descriptionCell.setCellType(CellType.FORMULA);
         StringBuilder formula = new StringBuilder(50);
         formula.append("VLOOKUP(");
         formula.append(new CellReference(row.getRowNum(), keyColumn).formatAsString());

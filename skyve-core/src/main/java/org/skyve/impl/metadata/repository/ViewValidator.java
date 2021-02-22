@@ -324,9 +324,9 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateMessageBindings(String message, 
-											String widgetIdentifier,
-											String description) {
+	private void validateMessageExpressions(String message, 
+												String widgetIdentifier,
+												String description) {
 		if (message != null) {
 			Module testModule = module;
 			Document testDocument = document;
@@ -340,7 +340,7 @@ class ViewValidator extends ViewVisitor {
 					testModule = customer.getModule(testDocument.getOwningModuleName());
 				}
 			}
-			if (! BindUtil.messageBindingsAreValid(customer, testModule, testDocument, message)) {
+			if (! BindUtil.messageExpressionsAreValid(customer, testModule, testDocument, message)) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 												" has " + description + " containing malformed binding expressions.");
 			}
@@ -776,7 +776,7 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(form.getDisabledConditionName(), formIdentifier);
 		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
 		validateSize(form, formIdentifier);
-		validateMessageBindings(form.getBorderTitle(), formIdentifier, "borderTitle");
+		validateMessageExpressions(form.getBorderTitle(), formIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -989,7 +989,7 @@ class ViewValidator extends ViewVisitor {
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(hbox, boxIdentifier);
 		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
-		validateMessageBindings(hbox.getBorderTitle(), boxIdentifier, "borderTitle");
+		validateMessageExpressions(hbox.getBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -1024,7 +1024,7 @@ class ViewValidator extends ViewVisitor {
 		if (markup == null) {
 			throw new MetaDataException(blurbIdentifier + " in " + viewIdentifier + " has no markup specified.");
 		}
-		validateMessageBindings(blurb.getMarkup(), blurbIdentifier, "markup");
+		validateMessageExpressions(blurb.getMarkup(), blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 		validateSize(blurb, blurbIdentifier);
 	}
@@ -1050,7 +1050,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							labelIdentifier);
-		validateMessageBindings(label.getValue(), labelIdentifier, "a value");
+		validateMessageExpressions(label.getValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
 		validateSize(label, labelIdentifier);
 	}
@@ -1713,7 +1713,7 @@ class ViewValidator extends ViewVisitor {
 		String tabIdentifier = "Tab " + tab.getTitle();
 		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
 		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
-		validateMessageBindings(tab.getTitle(), tabIdentifier, "title");
+		validateMessageExpressions(tab.getTitle(), tabIdentifier, "title");
 	}
 
 	@Override
@@ -1806,12 +1806,12 @@ class ViewValidator extends ViewVisitor {
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(vbox, boxIdentifier);
 		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
-		validateMessageBindings(vbox.getBorderTitle(), boxIdentifier, "borderTitle");
+		validateMessageExpressions(vbox.getBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
 	public void visitView() {
-		validateMessageBindings(view.getTitle(), viewIdentifier, "a title");
+		validateMessageExpressions(view.getTitle(), viewIdentifier, "a title");
 
 		List<ViewParameter> parameters = view.getParameters();
 		if (parameters != null) {

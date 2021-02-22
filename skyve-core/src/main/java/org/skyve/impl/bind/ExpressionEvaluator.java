@@ -10,6 +10,10 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.util.Util;
 
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";
@@ -22,7 +26,7 @@ public abstract class ExpressionEvaluator {
 	public static final String TIME_EXPRESSION = "TIME";
 	public static final String DATETIME_EXPRESSION = "DATETIME";
 	public static final String TIMESTAMP_EXPRESSION = "TIMESTAMP";
-	
+	public static final String URL_EXPRESSION = "URL";
 
 	private static Map<String, ExpressionEvaluator> evaluators = new TreeMap<>();
 	private static final ExpressionEvaluator DEFAULT_EVALUATOR = new BindingExpressionEvaluator();
@@ -56,80 +60,123 @@ public abstract class ExpressionEvaluator {
 		return process(expression, bean, false);
 	}
 
+	public static boolean validate(String expression) {
+		return validate(expression, null, null, null);
+	}
+	
+	public static boolean validate(String expression, Customer customer, Module module, Document document) {
+		int colonIndex = expression.indexOf(':');
+		if (colonIndex < 0) {
+			String expressionWithoutPrefix = expression.trim();
+
+			if (USER_EXPRESSION.equals(expressionWithoutPrefix) ||
+					USERID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					USERNAME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATAGROUPID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					CONTACTID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					CUSTOMER_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATE_EXPRESSION.equals(expressionWithoutPrefix) ||
+					TIME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATETIME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix) ||
+					URL_EXPRESSION.equals(expressionWithoutPrefix)) {
+				return true;
+			}
+
+			return DEFAULT_EVALUATOR.validateWithoutPrefix(expressionWithoutPrefix, customer, module, document);
+		}
+		
+		String prefix = expression.substring(0, colonIndex).trim();
+		String expressionWithoutPrefix = expression.substring(colonIndex + 1).trim();
+
+		ExpressionEvaluator eval = evaluators.get(prefix);
+		if (eval == null) {
+			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+		}
+		
+		return eval.validateWithoutPrefix(expressionWithoutPrefix, customer, module, document);
+	}
+	
 	private static Object process(String expression, Bean bean, boolean format) {
 		int colonIndex = expression.indexOf(':');
 		if (colonIndex < 0) {
 			String expressionWithoutPrefix = expression.trim();
 
-			if (USER_EXPRESSION.equals(expression)) {
+			if (USER_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getName();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (USERID_EXPRESSION.equals(expression)) {
+			if (USERID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getId();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (USERNAME_EXPRESSION.equals(expression)) {
+			if (USERNAME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getContactName();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (DATAGROUPID_EXPRESSION.equals(expression)) {
+			if (DATAGROUPID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getDataGroupId();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (CONTACTID_EXPRESSION.equals(expression)) {
+			if (CONTACTID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getContactId();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (CUSTOMER_EXPRESSION.equals(expression)) {
+			if (CUSTOMER_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getCustomer().getName();
 				if (format) {
 					return (result == null) ? "" : result;
 				}
 				return result;
 			}
-			if (DATE_EXPRESSION.equals(expression)) {
+			if (DATE_EXPRESSION.equals(expressionWithoutPrefix)) {
 				DateOnly result = new DateOnly();
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
 				return result;
 			}
-			if (TIME_EXPRESSION.equals(expression)) {
+			if (TIME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				TimeOnly result = new TimeOnly();
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
 				return result;
 			}
-			if (DATETIME_EXPRESSION.equals(expression)) {
+			if (DATETIME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				DateTime result = new DateTime();
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
 				return result;
 			}
-			if (TIMESTAMP_EXPRESSION.equals(expression)) {
+			if (TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix)) {
 				Timestamp result = new Timestamp();
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
 				return result;
+			}
+			if (URL_EXPRESSION.equals(expressionWithoutPrefix)) {
+				if (bean == null) {
+					return format ? "" : null;
+				}
+				return Util.getDocumentUrl(bean);
 			}
 
 			return format ? 
@@ -147,7 +194,8 @@ public abstract class ExpressionEvaluator {
 		
 		return format ? eval.formatWithoutPrefix(expressionWithoutPrefix, bean) : eval.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
 	}
-		
+	
 	public abstract String formatWithoutPrefix(String expression, Bean bean);
 	public abstract Object evaluateWithoutPrefix(String expression, Bean bean);
+	public abstract boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document);
 }

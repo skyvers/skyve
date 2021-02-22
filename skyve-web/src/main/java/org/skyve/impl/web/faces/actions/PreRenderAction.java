@@ -10,13 +10,13 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 public class PreRenderAction<T extends Bean> extends FacesAction<Void> {

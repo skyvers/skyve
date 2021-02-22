@@ -150,7 +150,8 @@ SKYVE.PF = function() {
 			var sessionHistory = getSessionHistory();
 			if (sessionHistory.length == 0) {
 				var url = window.location.href;
-				if (url.match(/.*a\=e.*/)) {
+				if (url.match(/.*[\?|\&]a\=e.*/) ||
+						url.match(/.*[\?|\&]a\=e\&.*/)) {
 					var referrer = document.referrer;
 					if ((! referrer) || (referrer == '') || (referrer == url)) {
 						referrer = SKYVE.Util.CONTEXT_URL;
@@ -202,10 +203,34 @@ SKYVE.PF = function() {
 			var historyChanged = false;
 			for (var i = 0; i < sessionHistory.length; i++) {
 				var url = sessionHistory[i];
-				if ((url.indexOf('a=e') > 0) && 
-						(url.indexOf('m=' + bizModule) > 0) && 
-						(url.indexOf('d=' + bizDocument) > 0) &&
-						(url.indexOf('i=') < 0)) {
+				
+				// NB can't just use indexOf() here - the entire URL parameter must match
+				var tokens = url.split(/\?|\&/);
+				var moduleParameterToken = 'm=' + bizModule;
+				var documentParameterToken = 'd=' + bizDocument;
+				var actionParameterFound = false;
+				var moduleParameterFound = false;
+				var documentParameterFound = false;
+				var bizIdParameterFound = false;
+				for (var j = 0; j < tokens.length; j++) {
+					var token = tokens[j];
+					if (token == 'a=e') {
+						actionParameterFound = true;
+					}
+					else if (token == moduleParameterToken) {
+						moduleParameterFound = true;
+					}
+					else if (token == documentParameterToken) {
+						documentParameterFound = true;
+					}
+					else if (token.startsWith('i=')) {
+						bizIdParameterFound = true;
+					}
+				}
+				if (actionParameterFound && 
+						moduleParameterFound && 
+						documentParameterFound &&
+						bizIdParameterFound) {
 					url += '&i=' + bizId;
 					sessionHistory[i] = url;
 					historyChanged = true;

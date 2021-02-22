@@ -28,9 +28,9 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * For untyped (non Bean) access to data file values
-	 * 
+	 *
 	 * DOES NOT SUPPORT HIERARCHICHAL UPLOAD
-	 * 
+	 *
 	 * @param file
 	 * @param sheetIndex
 	 * @throws Exception
@@ -46,7 +46,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		workbook = WorkbookFactory.create(fileInputStream);
 		sheet = workbook.getSheetAt(sheetIndex);
-	
+
 		// set values
 		this.pers = CORE.getPersistence();
 		this.user = pers.getUser();
@@ -65,9 +65,9 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * Simple constructor - assumes most common usage as defaults
-	 * 
+	 *
 	 * DOES NOT SUPPORT HIERARCHICHAL UPLOAD
-	 * 
+	 *
 	 * @param moduleName
 	 *            - the module
 	 * @param documentName
@@ -119,7 +119,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		if (row == null) {
 			return true;
 		}
-		
+
 		boolean foundNonEmpty = false;
 		for (DataFileField field : fields) {
 			if(field.getIndex()==null){
@@ -133,7 +133,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				Util.LOGGER.info(getWhere(field.getIndex().intValue()) + " No value was found at this location.");
 			}
 		}
-		
+
 		return !foundNonEmpty;
 	}
 
@@ -149,7 +149,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * Wrapper to get a numeric value from the spreadsheet cell.
-	 * 
+	 *
 	 * @param row
 	 * @param col
 	 * @return the numeric value
@@ -157,7 +157,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	private Double getNumericValueFromCell(int col, boolean emptyAsZero) throws Exception {
 		Double result = Double.valueOf(0);
 
-		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
+		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		try {
 			if (cell != null) {
 				//handle empty string more robustly
@@ -192,7 +192,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * Wrapper to get a string value from the spreadsheet cell.
-	 * 
+	 *
 	 * @param row
 	 * @param col
 	 * @return The String Value of the cell
@@ -201,34 +201,34 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		String result = null;
 
 		if (row != null) {
-			Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
+			Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			DataFormatter df = new DataFormatter();
 
 			if (cell != null) {
 				// try to interpret whatever we find as a String
 				switch (cell.getCellType()) {
-				case Cell.CELL_TYPE_BOOLEAN:
-				case Cell.CELL_TYPE_NUMERIC:
-				case Cell.CELL_TYPE_BLANK:
-				case Cell.CELL_TYPE_ERROR:
+				case BOOLEAN:
+				case NUMERIC:
+				case BLANK:
+				case ERROR:
 					result = df.formatCellValue(cell);
 					break;
-				case Cell.CELL_TYPE_FORMULA:
+				case FORMULA:
 					switch (cell.getCachedFormulaResultType()) {
-					case Cell.CELL_TYPE_NUMERIC:
+					case NUMERIC:
 						if (DateUtil.isCellDateFormatted(cell)) {
 							result = cell.getDateCellValue().toString();
 						} else {
 							result = df.formatCellValue(cell);
 						}
 						break;
-					case Cell.CELL_TYPE_STRING:
+					case STRING:
 					default:
 						result = cell.getRichStringCellValue().toString().trim();
 						break;
 					}
 					break;
-				case Cell.CELL_TYPE_STRING:
+				case STRING:
 				default:
 					result = cell.getStringCellValue().trim();
 					break;
@@ -246,14 +246,14 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * Wrapper to get a date value from the spreadsheet cell.
-	 * 
+	 *
 	 * @param row
 	 * @param col
 	 * @return The Date Value of the cell
 	 */
 	private Date getDateValueFromCell(int col) throws Exception {
 		Date result = null;
-		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
+		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		try {
 			if (cell != null) {
 				result = cell.getDateCellValue();
@@ -282,7 +282,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 	/**
 	 * Construct the excel column name from a column number (e.g. 27 = "AA")
-	 * 
+	 *
 	 * @param number
 	 *            - assumes first column is 0
 	 * @return
@@ -298,35 +298,35 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		}
 		return sb.reverse().toString();
 	}
-	
+
 	/**
 	 * Gets a description of the type of value for the cell
-	 * 
+	 *
 	 * @param cell
 	 * @return
 	 */
 	private static String getPOICellTypeDescription(Cell cell){
 		String result = "unknown";
 		switch (cell.getCellType()) {
-		case Cell.CELL_TYPE_BOOLEAN:
+		case BOOLEAN:
 			result = "Boolean";
 			break;
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			result = "Numeric";
 			break;
-		case Cell.CELL_TYPE_BLANK:
+		case BLANK:
 			result = "Blank";
 			break;
-		case Cell.CELL_TYPE_ERROR:
+		case ERROR:
 			result = "Error";
 			break;
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 			result = "Formula";
 			switch (cell.getCachedFormulaResultType()) {
-			case Cell.CELL_TYPE_NUMERIC:
+			case NUMERIC:
 				result = "Numeric "+ result;
 				break;
-			case Cell.CELL_TYPE_STRING:
+			case STRING:
 				result= "String " + result;
 				break;
 			default:
@@ -334,7 +334,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				break;
 			}
 			break;
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			result = "String";
 			break;
 		default:

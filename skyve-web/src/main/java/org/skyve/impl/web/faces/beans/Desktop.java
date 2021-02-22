@@ -23,7 +23,6 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.metadata.customer.Customer;
@@ -39,6 +38,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 @ManagedBean
@@ -178,7 +178,7 @@ public class Desktop extends Harness {
     	result.append("\"><tr height=\"46px\"><td width=\"1%\">{icon}</td>");
     	result.append("<td><div class=\"titleBar\">{title}</div></td>");
     	result.append("<td width=\"10%\" align=\"right\">");
-    	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
+		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"fa fa-2x fa-share-square-o\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"fa fa-2x fa-search\"></i></a></td>");

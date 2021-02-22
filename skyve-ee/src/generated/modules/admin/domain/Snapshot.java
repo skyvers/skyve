@@ -95,9 +95,7 @@ public class Snapshot extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{name} for {queryName} in module {moduleName}",
-														this);
+			return org.skyve.util.Binder.formatMessage("{name} for {queryName} in module {moduleName}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

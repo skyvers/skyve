@@ -38,7 +38,10 @@ public class UserDashboardExtension extends UserDashboard {
 	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
 	private static final int TILE_COUNT_LIMIT = 6;
 	private final Set<Tile> tiles = new HashSet<>();
-
+	
+	// used for 14 day dashboard calculations
+	public static final Long TWO_WEEKS_AGO = new Long(System.currentTimeMillis() - 1209600000L);
+  
 	@Inject
 	private transient Persistence persistence;
 
@@ -122,6 +125,7 @@ public class UserDashboardExtension extends UserDashboard {
 	private List<Bean> popularUpdates(UserExtension filterUser) {
 
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());
@@ -149,6 +153,7 @@ public class UserDashboardExtension extends UserDashboard {
 	 */
 	private List<Bean> recentInsertDocuments(UserExtension filterUser) {
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
 		q.getFilter().addEquals(Audit.operationPropertyName, Operation.insert);
 		q.getFilter().addNotEquals(Audit.auditModuleNamePropertyName, Audit.MODULE_NAME);
 		if (filterUser != null) {
@@ -412,6 +417,7 @@ public class UserDashboardExtension extends UserDashboard {
 	private List<Bean> recentUpdates(UserExtension filterUser) {
 
 		DocumentQuery q = persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		q.getFilter().addGreaterThan(Audit.millisPropertyName, TWO_WEEKS_AGO);
 		q.getFilter().addNotEquals(Audit.operationPropertyName, Operation.delete);
 		if (filterUser != null) {
 			q.getFilter().addEquals(Audit.userNamePropertyName, filterUser.getUserName());

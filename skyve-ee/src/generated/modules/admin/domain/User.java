@@ -112,6 +112,8 @@ public abstract class User extends AbstractPersistentBean {
 	public static final String activationCodePropertyName = "activationCode";
 	/** @hidden */
 	public static final String activationCodeCreationDateTimePropertyName = "activationCodeCreationDateTime";
+	/** @hidden */
+	public static final String activateUrlPropertyName = "activateUrl";
 
 	/**
 	 * Wizard State
@@ -468,6 +470,10 @@ public abstract class User extends AbstractPersistentBean {
 	 * admin.user.activationCodeCreationDateTime.description
 	 **/
 	private DateTime activationCodeCreationDateTime;
+	/**
+	 * Activation Url
+	 **/
+	private String activateUrl;
 
 	@Override
 	@XmlTransient
@@ -1255,6 +1261,23 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * {@link #activateUrl} accessor.
+	 * @return	The value.
+	 **/
+	public String getActivateUrl() {
+		return activateUrl;
+	}
+
+	/**
+	 * {@link #activateUrl} mutator.
+	 * @param activateUrl	The new value.
+	 **/
+	@XmlElement
+	public void setActivateUrl(String activateUrl) {
+		this.activateUrl = activateUrl;
+	}
+
+	/**
 	 * Allows administrators to manually activate users when User Self-Registration is enabled.
 	 *
 	 * @return The condition
@@ -1463,6 +1486,25 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	public boolean isNotSelfRegistrationEnabled() {
 		return (! isSelfRegistrationEnabled());
+	}
+
+	/**
+	 * True when User Self-Registration is enabled and the User has not been activated.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelfRegistrationEnabledAndUserNotActivated() {
+		return ((org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (getActivated().equals(Boolean.FALSE))));
+	}
+
+	/**
+	 * {@link #isSelfRegistrationEnabledAndUserNotActivated} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelfRegistrationEnabledAndUserNotActivated() {
+		return (! isSelfRegistrationEnabledAndUserNotActivated());
 	}
 
 	/**

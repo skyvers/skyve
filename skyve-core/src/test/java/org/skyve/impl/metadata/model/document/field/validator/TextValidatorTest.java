@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field.validator;
 import static org.junit.Assert.fail;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class TextValidatorTest {
 		user.setWebLocale(Locale.getDefault());
 	}
 
-	@Test
+	@Test(expected = MissingResourceException.class)
 	public void testValidateEmailInvalid() throws Exception {
 		// setup the test data
 		validator.setType(ValidatorType.email);
@@ -82,7 +83,7 @@ public class TextValidatorTest {
 		}
 	}
 
-	@Test
+	@Test(expected = MissingResourceException.class)
 	public void testValidateUrlInvalid() {
 		// setup the test data
 		validator.setType(ValidatorType.url);

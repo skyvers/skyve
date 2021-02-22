@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.el.MethodExpression;
@@ -222,8 +221,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String title,
 											ListGrid listGrid,
 											boolean canCreateDocument,
-											boolean aggregateQuery,
-											Locale locale);
+											boolean aggregateQuery);
 
 	/*
 	 * List Repeater is just like a list grid but...
@@ -242,8 +240,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												List<Parameter> parameters,
 												String title,
 												boolean showColumnHeaders,
-												boolean showGrid,
-												Locale locale);
+												boolean showGrid);
 
 	public abstract UIComponent map(UIComponent component, 
 										MapDisplay map,

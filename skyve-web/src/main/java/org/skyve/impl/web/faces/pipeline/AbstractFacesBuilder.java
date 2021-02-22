@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline;
 
+import java.util.Locale;
+
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
@@ -14,9 +16,9 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.web.UserAgentType;
 
 public abstract class AbstractFacesBuilder {
 	protected static final Integer ONE_HUNDRED = Integer.valueOf(100);
@@ -40,6 +42,7 @@ public abstract class AbstractFacesBuilder {
 	protected String process = "@form";
 	protected String update = "@(form)";
 	protected UserAgentType userAgentType;
+	protected Locale locale;
 	
 	public void setManagedBeanName(String managedBeanName) {
 		if (managedBeanName != null) {
@@ -67,6 +70,9 @@ public abstract class AbstractFacesBuilder {
 	}
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
+	}
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 	
 	protected void setId(UIComponent component, String widgetId) {

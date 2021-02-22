@@ -1,7 +1,7 @@
 package org.skyve.impl.sail.execution;
 
-import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.web.UserAgentType;
 
 public class AutomationContext {
 	private String moduleName;
