@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StoredField;
@@ -69,7 +69,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	@Override
 	public void init() throws Exception {
 		directory = FSDirectory.open(Paths.get(UtilImpl.CONTENT_DIRECTORY, CLUSTER_NAME));
-		analyzer = new StandardAnalyzer();
+		analyzer = new EnglishAnalyzer();
 		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		iwc.setRAMBufferSizeMB(128.0);
@@ -174,6 +174,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			String text = extractor.extractTextFromContent(attachment);
 			if (text != null) {
 				document.add(new TextField(CONTENT, text, Store.YES)); // needs to be stored for excerpt generation
+
 			}
 		}
 		

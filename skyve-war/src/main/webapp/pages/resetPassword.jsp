@@ -3,6 +3,7 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 
+<%@ page import="org.primefaces.shaded.owasp.encoder.Encode"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
@@ -121,7 +122,7 @@
 		    	<%@include file="fragments/noscript.html" %>
 		    	
 		    	<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
-					<input type="hidden" name="t" value="<%=passwordResetToken%>">
+					<input type="hidden" name="t" value="<%=Encode.forHtmlAttribute(passwordResetToken)%>" />
 		    	
 		    		<div class="ui segment">
 			    		<div class="ui header">
@@ -130,13 +131,13 @@
 		    			<div class="field">
 		                    <div class="ui left icon input">
 		                        <i class="lock icon"></i>
-		                        <input type="password" name="<%=newPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>">
+		                        <input type="password" name="<%=newPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>" />
 		                    </div>
 		                </div>
 		                <div class="field">
 		                    <div class="ui left icon input">
 		                        <i class="lock icon"></i>
-		                        <input type="password" name="<%=confirmPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.confirmPassword.label", locale)%>">
+		                        <input type="password" name="<%=confirmPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.confirmPassword.label", locale)%>" />
 		                    </div>
 		                </div>
 		                <div class="field">
