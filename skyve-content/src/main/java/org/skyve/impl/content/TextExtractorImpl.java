@@ -6,6 +6,8 @@ import java.util.logging.Level;
 
 import org.pf4j.Extension;
 import org.apache.tika.Tika;
+import org.apache.tika.language.detect.LanguageDetector;
+import org.apache.tika.language.detect.LanguageResult;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -108,5 +110,14 @@ public class TextExtractorImpl implements TextExtractor {
 										e);
 			}
 		}
+	}
+	
+	@Override
+	public String sniffLanguage(String text) {
+		LanguageResult result = LanguageDetector.getDefaultLanguageDetector().detect(text);
+		if (result != null) {
+			return result.getLanguage();
+		}
+		return null;
 	}
 }
