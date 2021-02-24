@@ -67,6 +67,7 @@
 				<document name="Communication" permission="_R__G"/>
 				<document name="CommunicationTemplate" permission="_R__G"/>
 				<document name="Configuration" permission="_R__C" />				
+				<document name="DocumentNumber" permission="CRU_C" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="SelfRegistration" permission="_____">
 					<action name="Register" />
