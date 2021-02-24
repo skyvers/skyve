@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+                    
+    
+    
+    
+    <wb-module deploy-name="skyve-ear-7.0.0">
+                                        
         
-    <wb-module deploy-name="skyve-ear-7.0.0-SNAPSHOT">
-                
+        
+        
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                
+                                        
+        
+        
+        
         <wb-resource deploy-path="/" source-path="/src/main/application" tag="defaultRootSource"/>
         <dependent-module archiveName="apps.jar" deploy-path="/" handle="module:/resource/skyve-ejb/skyve-ejb">
             <dependency-type>uses</dependency-type>
@@ -11,10 +20,10 @@
         <dependent-module archiveName="skyve.war" deploy-path="/" handle="module:/resource/skyve-war/skyve-war">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-7.0.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-7.0.0.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-7.0.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-7.0.0.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="commons-beanutils-1.9.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar">
@@ -141,9 +150,6 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="geodb-0.9.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/opengeo/geodb/0.9/geodb-0.9.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="h2-1.1.118.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/h2database/h2/1.1.118/h2-1.1.118.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="jasperreports-6.3.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/sf/jasperreports/jasperreports/6.3.1/jasperreports-6.3.1.jar">
@@ -326,7 +332,13 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-            
-    </wb-module>
+                                    
     
+    
+    
+    </wb-module>
+                
+
+
+
 </project-modules>
