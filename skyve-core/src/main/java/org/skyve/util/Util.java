@@ -4,6 +4,7 @@ import java.awt.ComponentOrientation;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -102,13 +103,18 @@ public class Util {
 		String result = key;
 
 		if ((key != null) && (locale != null)) {
-			ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
-			if (bundle.containsKey(key)) {
-				result = bundle.getString(key);
+			try {
+				ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
+				if (bundle.containsKey(key)) {
+					result = bundle.getString(key);
+				}
+	
+				if ((values != null) && (values.length > 0)) {
+					result = MessageFormat.format(result, (Object[]) values);
+				}
 			}
-
-			if ((values != null) && (values.length > 0)) {
-				result = MessageFormat.format(result, (Object[]) values);
+			catch (@SuppressWarnings("unused") MissingResourceException e) {
+				LOGGER.warning("Could not find bundle \"resources.i18n\"");
 			}
 		}
 
