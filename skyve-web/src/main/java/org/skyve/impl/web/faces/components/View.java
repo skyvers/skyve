@@ -52,7 +52,7 @@ public class View extends HtmlPanelGroup {
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
 	    		tempComponentBuilder = (classString != null) ? 
-	    								(ComponentBuilder) Class.forName(classString).newInstance() :
+	    								(ComponentBuilder) Class.forName(classString).getDeclaredConstructor().newInstance() :
     									new SkyveComponentBuilderChain();
 	    	}
 	    	catch (Exception e) {
@@ -62,7 +62,7 @@ public class View extends HtmlPanelGroup {
 	    	LayoutBuilder tempLayoutBuilder = null;
 	    	try {
 	    		tempLayoutBuilder = (classString != null) ? 
-										(LayoutBuilder) Class.forName(classString).newInstance() :
+										(LayoutBuilder) Class.forName(classString).getDeclaredConstructor().newInstance() :
 										new ResponsiveLayoutBuilder();
 	    	}
 	    	catch (Exception e) {

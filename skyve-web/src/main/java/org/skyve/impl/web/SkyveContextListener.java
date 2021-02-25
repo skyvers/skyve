@@ -186,6 +186,17 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
+		// Add-ins settings
+		Map<String, Object> addins = getObject(null, "addins", properties, false);
+		if (addins != null) {
+			UtilImpl.ADDINS_DIRECTORY = getString("addins", "directory", addins, false);
+			if (UtilImpl.ADDINS_DIRECTORY != null) {
+				// clean up the add-ins directory path
+				UtilImpl.ADDINS_DIRECTORY = cleanupDirectory(UtilImpl.ADDINS_DIRECTORY);
+				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
+			}
+		}
+		
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {

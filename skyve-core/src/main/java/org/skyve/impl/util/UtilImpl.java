@@ -96,6 +96,9 @@ public class UtilImpl {
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
 
+	// Where to look for add-ins - defaults to <content.directory>/addins/
+	public static String ADDINS_DIRECTORY = null;
+
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
 	// You can calculate this as concurrentThreads * memory usage determined by targetSize below
@@ -403,7 +406,6 @@ public class UtilImpl {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
-		@SuppressWarnings("synthetic-access")
 		ChangedBeanVisitor cbv = new ChangedBeanVisitor();
 		cbv.visit(document, bean, customer);
 		return cbv.isChanged();

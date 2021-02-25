@@ -22,19 +22,26 @@ public class DefaultAddInManager implements AddInManager {
 	}
 	
 	public void start() {
-		plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.CONTENT_DIRECTORY, "addins"));
+		if (UtilImpl.ADDINS_DIRECTORY == null) {
+			UtilImpl.LOGGER.info("Add-Ins directory = " + UtilImpl.CONTENT_DIRECTORY + "addins/");
+			plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.CONTENT_DIRECTORY, "addins"));
+		}
+		else {
+			UtilImpl.LOGGER.info("Add-Ins directory = " + UtilImpl.ADDINS_DIRECTORY);
+			plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.ADDINS_DIRECTORY));
+		}
 		plugInManager.loadPlugins();
 		plugInManager.startPlugins();
 		
 		for (PluginWrapper plugin : plugInManager.getStartedPlugins()) {
-			System.out.println("Plugin " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " has started.");
+			UtilImpl.LOGGER.info("Add-in " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " has started.");
 			for (Class<?> extension : plugInManager.getExtensionClasses(plugin.getPluginId())) {
-				System.out.println("    Extension " + extension + " has been registered.");
+				UtilImpl.LOGGER.info("    Extension " + extension + " has been registered.");
 			}
 		}
 
 		for (PluginWrapper plugin : plugInManager.getUnresolvedPlugins()) {
-			System.out.println("Plugin " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " is unresolved.");
+			UtilImpl.LOGGER.warning("Add-in " + plugin.getPluginId() + " : " + plugin.getDescriptor() + " is unresolved.");
 		}
 	}
 	
