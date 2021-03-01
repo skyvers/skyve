@@ -1,9 +1,9 @@
 package org.skyve.domain.types.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class DD_MMM_YYYY_HH_MI_SSTest {
 		formatter = new DD_MMM_YYYY_HH_MI_SS();
 	}
 
-	@Test(expected = ParseException.class)
+	@Test(expected = DateTimeParseException.class)
 	public void testFromDisplayValueInvalidFormat() throws Exception {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
