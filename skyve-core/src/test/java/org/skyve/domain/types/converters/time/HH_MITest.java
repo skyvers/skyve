@@ -3,7 +3,7 @@ package org.skyve.domain.types.converters.time;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.time.format.DateTimeParseException;
+import java.text.ParseException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class HH_MITest {
 		formatter = new HH_MI();
 	}
 
-	@Test(expected = DateTimeParseException.class)
+	@Test(expected = ParseException.class)
 	public void testFromDisplayValueInvalidFormat() throws Exception {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));

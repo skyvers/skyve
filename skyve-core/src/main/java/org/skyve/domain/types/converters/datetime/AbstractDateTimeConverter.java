@@ -1,12 +1,6 @@
 package org.skyve.domain.types.converters.datetime;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
-
+import org.skyve.CORE;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 
@@ -21,15 +15,17 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws Exception {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
-		LocalDateTime localDateTime = LocalDateTime.parse(displayValue, formatter);
-		return new DateTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+		// DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
+		// LocalDateTime localDateTime = LocalDateTime.parse(displayValue, formatter);
+		// return new DateTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+		return new DateTime(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
 	}
 
 	@Override
 	public String toDisplayValue(DateTime value) throws Exception {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
-		LocalDateTime localTime = Instant.ofEpochMilli(value.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-		return formatter.format(localTime);
+		// DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
+		// LocalDateTime localTime = Instant.ofEpochMilli(value.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+		// return formatter.format(localTime);
+		return CORE.getDateFormat(getPattern()).format(value);
 	}
 }

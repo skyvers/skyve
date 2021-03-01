@@ -3,7 +3,7 @@ package org.skyve.domain.types.converters.datetime;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.time.format.DateTimeParseException;
+import java.text.ParseException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class MM_DD_YYYY_HH_MITest {
 		formatter = new MM_DD_YYYY_HH_MI();
 	}
 
-	@Test(expected = DateTimeParseException.class)
+	@Test(expected = ParseException.class)
 	public void testFromDisplayValueInvalidFormat() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));
@@ -42,7 +42,7 @@ public class MM_DD_YYYY_HH_MITest {
 	/**
 	 * Note: This formatter cannot parse PM times. See {@link MM_DD_YYYY_HH24_MI} instead.
 	 */
-	@Test(expected = DateTimeParseException.class)
+	@Test(expected = ParseException.class)
 	public void testFromDisplayValuePM() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));

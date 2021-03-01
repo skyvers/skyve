@@ -2,6 +2,7 @@ package org.skyve;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.SortedMap;
 
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -94,7 +95,7 @@ public class CORE {
 	 * @return A date format.
 	 */
 	public static SimpleDateFormat getDateFormat(String formatString) {
-		SimpleDateFormat result = new SimpleDateFormat(formatString);
+		SimpleDateFormat result = new SimpleDateFormat(formatString, Locale.ENGLISH);
 		result.setLenient(false);
 		return result;
 	}
