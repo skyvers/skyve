@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.ModulesUtil;
 import modules.admin.domain.Configuration;
@@ -17,6 +18,7 @@ public class ConfigurationBizletTest extends AbstractH2Test {
 
 	@Before
 	public void setup() throws Exception {
+		UtilImpl.SMTP_SENDER = "test@test.com";
 		bizlet = new ConfigurationBizlet();
 		configuration = Configuration.newInstance();
 	}
