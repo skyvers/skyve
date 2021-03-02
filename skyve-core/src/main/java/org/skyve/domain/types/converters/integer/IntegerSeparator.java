@@ -15,7 +15,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	@Override
 	public Integer fromDisplayValue(String displayValue) throws Exception {
 		String result = displayValue.replace(",", "");
-		return new Integer(Integer.parseInt(result));
+		return Integer.valueOf(Integer.parseInt(result));
 	}
 
 	@Override

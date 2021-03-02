@@ -14,7 +14,7 @@ public class SimplePercentage implements Converter<Integer> {
 	@Override
 	public Integer fromDisplayValue(String displayValue) throws Exception {
 		displayValue.replace("%", "");
-		return new Integer(displayValue);
+		return Integer.valueOf(displayValue);
 	}
 
 	@Override

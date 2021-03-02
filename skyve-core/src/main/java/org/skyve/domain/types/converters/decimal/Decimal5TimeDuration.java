@@ -43,7 +43,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 		decimalValue = decimalValue.subtract(new BigDecimal(hours));
 		decimalValue = decimalValue.multiply(Decimal5.SIXTY.bigDecimalValue(), MATH_CONTEXT);
 		decimalValue = decimalValue.round(new MathContext(0, RoundingMode.HALF_UP));
-		int minutesValue = (new Integer(decimalValue.intValue())).intValue();
+		int minutesValue = (Integer.valueOf(decimalValue.intValue())).intValue();
 
 		// handle round up to 60 minutes
 		if (minutesValue == 60) {
@@ -61,7 +61,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 			sign = "-";
 		}
 
-		String minutes = new Integer(Math.abs(minutesValue)).toString();
+		String minutes = Integer.valueOf(Math.abs(minutesValue)).toString();
 		if (minutes.length() == 1) {
 			minutes = '0' + minutes;
 		}
