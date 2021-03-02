@@ -3,6 +3,8 @@ package org.skyve.nlp.cron;
 import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 
+import org.skyve.CORE;
+
 import com.ibm.icu.util.Calendar;
 
 public class CronExpression {
@@ -263,7 +265,7 @@ public class CronExpression {
 				if (monthSetPattern.matcher(getMonth()).matches()) {
 					Calendar c = Calendar.getInstance();
 					c.set(Calendar.MONTH, Integer.valueOf(getMonth()) - 1);
-					SimpleDateFormat sdf = new SimpleDateFormat("MMMM");
+					SimpleDateFormat sdf = CORE.getDateFormat("MMMM");
 					if(!getDayNumber().equals("*")) {
 						b.append(" of ");
 					}
