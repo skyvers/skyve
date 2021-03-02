@@ -1,7 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,8 +26,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.apache.tika.Tika;
-import org.apache.tika.exception.TikaException;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.LockMode;
@@ -61,8 +58,10 @@ import org.hibernate.tool.hbm2ddl.SchemaUpdate;
 import org.hibernate.tool.schema.TargetType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
+import org.skyve.EXT;
 import org.skyve.cache.CacheUtil;
 import org.skyve.content.BeanContent;
+import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -363,7 +362,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				dialect = DIALECTS.get(dialectClassName);
 				if (dialect == null) {
 					try {
-						dialect = (SkyveDialect) Class.forName(dialectClassName).newInstance();
+						dialect = (SkyveDialect) Class.forName(dialectClassName).getDeclaredConstructor().newInstance();
 						DIALECTS.put(dialectClassName, dialect);
 					}
 					catch (Exception e) {
@@ -387,6 +386,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 	
 	@Override
+	@SuppressWarnings("resource")
 	public final void generateDDL(String dropDDLFilePath, String createDDLFilePath, String updateDDLFilePath) {
 		try {
 			if (dropDDLFilePath != null) {
@@ -447,7 +447,7 @@ t.printStackTrace();
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
 			}
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof StaleObjectStateException) {
 			if (bean.isPersisted()) {
@@ -459,10 +459,10 @@ t.printStackTrace();
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
 			}
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof EntityNotFoundException) {
-			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
+			throw new OptimisticLockException(user, operationType, bean.getBizLock());
 		}
 		else if (t instanceof DomainException) {
 			throw (DomainException) t;
@@ -934,7 +934,6 @@ t.printStackTrace();
 	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
 		new BeanVisitor(false, true, false) {
 			@Override
-			@SuppressWarnings({"synthetic-access"})
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
@@ -1574,9 +1573,7 @@ t.printStackTrace();
 	
 				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
-						throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																			" \"" + bean.getBizKey() + 
-																			"\" as it is referenced by a " + ref.getDocumentAlias());
+						throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
 					}
 				}
 			}
@@ -1653,9 +1650,7 @@ t.printStackTrace();
 	
 			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 				if (results.next()) {
-					throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
-																		" \"" + bean.getBizKey() + 
-																		"\" as it is referenced by a " + ref.getDocumentAlias());
+					throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
 				}
 			}
 		}
@@ -1809,6 +1804,7 @@ t.printStackTrace();
 	@Override
 	public void reindex(PersistentBean beanToReindex)
 	throws Exception {
+		TextExtractor extractor = null; // lazily instantiated
 		BeanContent content = new BeanContent(beanToReindex);
 		Map<String, String> properties = content.getProperties();
 		Customer customer = user.getCustomer();
@@ -1823,7 +1819,12 @@ t.printStackTrace();
 					String fieldName = field.getName();
 					String value = BindUtil.getDisplay(customer, beanToReindex, fieldName);
 					if (AttributeType.markup.equals(type)) {
-						value = extractTextFromMarkup(value);
+						if (extractor == null) {
+							extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+						}
+						if (extractor != null) {
+							value = extractor.extractTextFromMarkup(value);
+						}
 					}
 					value = Util.processStringValue(value);
 					if (value != null) {
@@ -1852,6 +1853,7 @@ t.printStackTrace();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToIndex.getBizModule());
 		Document document = module.getDocument(customer, beanToIndex.getBizDocument());
+		TextExtractor extractor = null; // lazily instantiated
 
 		String oldBizDataGroupId = beanToIndex.getBizDataGroupId();
 		String oldBizUserId = beanToIndex.getBizUserId();
@@ -1878,10 +1880,16 @@ t.printStackTrace();
 							String value = (state[i] == null) ? null : state[i].toString();
 							if (value != null) {
 								if (AttributeType.markup.equals(type)) {
-									value = extractTextFromMarkup(value);
+									if (extractor == null) {
+										extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+									}
+									if (extractor != null) {
+										value = extractor.extractTextFromMarkup(value);
+									}
 								}
-								
-								properties.put(propertyName, value);
+								if (value != null) {
+									properties.put(propertyName, value);
+								}
 							}
 						}
 					}
@@ -1889,10 +1897,16 @@ t.printStackTrace();
 						String value = (state[i] == null) ? null : state[i].toString();
 						if (value != null) {
 							if (AttributeType.markup.equals(type)) {
-								value = extractTextFromMarkup(value);
+								if (extractor == null) {
+									extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
+								}
+								if (extractor != null) {
+									value = extractor.extractTextFromMarkup(value);
+								}
 							}
-							
-							properties.put(propertyName, value);
+							if (value != null) {
+								properties.put(propertyName, value);
+							}
 						}
 					}
 				}
@@ -1925,12 +1939,6 @@ t.printStackTrace();
 		}
 	}
 
-	private static final Tika TIKA = new Tika();
-	
-	private static String extractTextFromMarkup(String value) throws IOException, TikaException {
-		return TIKA.parseToString(new ByteArrayInputStream(value.getBytes()));
-	}
-	
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@Override
 	public void preRemove(AbstractPersistentBean bean)
@@ -2030,7 +2038,7 @@ public void doWorkOnConnection(Session session) {
 		return ((SessionImpl) session).connection();
 	}
 	
-	private static final Integer NEW_VERSION = new Integer(0);
+	private static final Integer NEW_VERSION = Integer.valueOf(0);
 	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override

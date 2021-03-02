@@ -18,7 +18,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
-import org.elasticsearch.common.Preconditions;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -399,13 +398,13 @@ public class RestService {
 								@PathParam("mimeType") String mimeType,
 								String encodedContent) {
 		try {
-			Preconditions.checkNotNull(customer);
-			Preconditions.checkNotNull(module);
-			Preconditions.checkNotNull(document);
-			Preconditions.checkNotNull(id);
-			Preconditions.checkNotNull(attributeName);
-			Preconditions.checkNotNull(mimeType);
-			Preconditions.checkNotNull(encodedContent);
+			assert(customer != null);
+			assert(module != null);
+			assert(document != null);
+			assert(id != null);
+			assert(attributeName != null);
+			assert(mimeType != null);
+			assert(encodedContent != null);
 
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();

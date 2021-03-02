@@ -2,9 +2,14 @@ package org.skyve.domain.messages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -13,19 +18,25 @@ public class Message {
 	private List<String> bindings = new ArrayList<>();
 	private String text;
 
+	private static String i18n(String message) {
+		User u = (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) ? null : CORE.getUser();
+		Locale l = (u == null) ? Locale.ENGLISH : u.getLocale();
+		return Util.i18n(message, l);
+	}
+	
 	/**
 	 * Message constructor.
 	 * @param text	The message text
 	 */
 	public Message(String text) {
-		this.text = text;
+		this.text = i18n(text);
 	}
 	
 	/**
 	 * Formatted message constructor.
 	 */
 	public Message(String text, Bean... beans) {
-		this(Binder.formatMessage(text, beans));
+		this.text = Binder.formatMessage(i18n(text), beans);
 	}
 
 	/**
@@ -35,7 +46,7 @@ public class Message {
 	 * @param text
 	 */
 	public Message(String binding, String text) {
-		this.text = text;
+		this.text = i18n(text);
 		bindings.add(binding);
 	}
 
@@ -43,7 +54,8 @@ public class Message {
 	 * Formatted message convenience constructor for 1 binding.
 	 */
 	public Message(String binding, String text, Bean... beans) {
-		this(binding, Binder.formatMessage(text, beans));
+		this.text = Binder.formatMessage(i18n(text), beans);
+		bindings.add(binding);
 	}
 
 	/**
@@ -52,7 +64,7 @@ public class Message {
 	 * @param text
 	 */
 	public Message(String[] bindings, String text) {
-		this.text = text;
+		this.text = i18n(text);
 
 		for (String binding : bindings) {
 			this.bindings.add(binding);
@@ -63,7 +75,11 @@ public class Message {
 	 * Multiple binding formatted message constructor.
 	 */
 	public Message(String[] bindings, String text, Bean... beans) {
-		this(bindings, Binder.formatMessage(text, beans));
+		this.text = Binder.formatMessage(i18n(text), beans);
+
+		for (String binding : bindings) {
+			this.bindings.add(binding);
+		}
 	}
 
 	/**

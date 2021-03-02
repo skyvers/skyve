@@ -77,11 +77,11 @@ public class TimeOnly extends Date {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 
-	public TimeOnly set(LocalDateTime date) {
-		return set(date.toLocalTime());
+	public TimeOnly setLocalDateTime(LocalDateTime date) {
+		return setLocalTime(date.toLocalTime());
 	}
 	
-	public TimeOnly set(LocalTime time) {
+	public TimeOnly setLocalTime(LocalTime time) {
 		TimeUtil.setTime(this, time.getHour(), time.getMinute(), time.getSecond());
 		return this; // for EL or method chaining
 	}

@@ -17,6 +17,11 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 
 	@Override
+	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+		// no-op
+	}
+	
+	@Override
 	public AttachmentContent get(String id) throws Exception {
 		// no-op
 		return null;
@@ -73,5 +78,4 @@ public class NoOpContentManager extends AbstractContentManager {
 	public void dispose() throws Exception {
 		// no-op
 	}
-
 }

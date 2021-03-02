@@ -64,7 +64,7 @@ public class SmartClientTagServlet extends HttpServlet {
 																		(userPrincipal == null) ? null : userPrincipal.getName(),
 																		true);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 					Customer customer = user.getCustomer();
 	

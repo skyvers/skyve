@@ -1,12 +1,5 @@
 /bin
 /target
-/content
-/javaee/skyve.ear/apps.jar
-/javaee/skyve.ear/lib
-/javaee/skyve.ear/skyve.war/WEB-INF/lib
-/javaee/skyve.ear/skyve.war/WEB-INF/classes
-/javaee/skyve.ear.deployed
-/javaee/skyve-ds.xml.deployed
 /lib
 /libs.zip
 /src/js/desktop/skyve.js

@@ -41,7 +41,7 @@ public class SessionFilter extends AbstractRestFilter {
 																	(userPrincipal == null) ? null : userPrincipal.getName(),
 																	true);
 				if (user == null) {
-			    	error(persistence, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException().getLocalizedMessage());
+			    	error(persistence, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
 			    	return;
 				}
 				persistence.setUser(user);

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>6.0.3</version>
+		<version>7.0.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-web</artifactId>
 
@@ -68,11 +68,25 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.themes</groupId>
+			<artifactId>all-themes</artifactId>
+			<scope>compile</scope>
+		</dependency>
 
-		
 		<!-- test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -85,4 +99,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
 </project>

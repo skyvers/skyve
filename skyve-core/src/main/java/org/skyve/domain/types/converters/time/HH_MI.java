@@ -1,24 +1,15 @@
 package org.skyve.domain.types.converters.time;
 
-import org.skyve.CORE;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
+import org.skyve.domain.types.converters.datetime.AbstractTimeConverter;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class HH_MI implements Converter<TimeOnly> {
+public class HH_MI extends AbstractTimeConverter implements Converter<TimeOnly> {
+
 	private static final String PATTERN = "hh:mm a";
-
-	@Override
-	public TimeOnly fromDisplayValue(String displayValue) throws Exception {
-		return new TimeOnly(CORE.getDateFormat(PATTERN).parse(displayValue).getTime());
-	}
-
-	@Override
-	public String toDisplayValue(TimeOnly value) throws Exception {
-		return CORE.getDateFormat(PATTERN).format(value);
-	}
 
 	@Override
 	public AttributeType getAttributeType() {
@@ -33,5 +24,10 @@ public class HH_MI implements Converter<TimeOnly> {
 	@Override
 	public Validator<TimeOnly> getValidator() {
 		return null;
+	}
+
+	@Override
+	public String getPattern() {
+		return PATTERN;
 	}
 }

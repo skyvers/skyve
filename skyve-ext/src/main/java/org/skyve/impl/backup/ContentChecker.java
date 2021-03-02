@@ -1,39 +1,19 @@
 package org.skyve.impl.backup;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.tika.Tika;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.content.MimeType;
-import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ESClient;
-import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.util.FileUtil;
-import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +59,7 @@ public class ContentChecker {
                                                     LOGGER.error("Detected missing content {} for field name {} for table {}", stringValue, name, table.name);
 
                                                     // Construct what would be the file path.
-                                                    final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
+                                                    final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
                                                     final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
                                                     AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, true);
                                                     final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();
@@ -107,7 +87,7 @@ public class ContentChecker {
             }
         }
     }
-    
+/*    
     @Deprecated
 	@SuppressWarnings("static-method")
 	public void migrateContent() throws Exception {
@@ -290,7 +270,7 @@ public class ContentChecker {
 			}
 		}
 	}
-	
+*/
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name);
@@ -301,7 +281,7 @@ public class ContentChecker {
 		}
 		return false;
 	}
-	
+/*	
 	@Deprecated
 	private static Document findDocumentForPersistentName(String tableName) {
 		Customer c = CORE.getUser().getCustomer();
@@ -319,4 +299,5 @@ public class ContentChecker {
 		}
 		return null;
 	}
+*/
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
@@ -29,6 +30,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 
 /**
@@ -44,6 +46,8 @@ import org.skyve.util.Binder.TargetMetaData;
  * @author mike
  */
 public class StandardLoader {
+	private static final String REFERENCED_ROW_DNE_MESSAGE_KEY = "bizport.referencedRowDoesNotExist";
+
 	private BizPortWorkbook workbook;
 	
 	// The exception that will be thrown at the end of processing if any messages are present
@@ -416,7 +420,7 @@ public class StandardLoader {
 			if (foreignKeyBean == null) {
 				sheet.addErrorAtCurrentRow(problems, 
 											foreignKeyColumn, 
-											"The row referenced for " + associationBinding + " does not exist in the " + foreignKeySheet.getTitle() + " sheet. Check that the ID you have entered matches the ID of the row in the " + foreignKeySheet.getTitle() + " sheet.");
+											Util.i18n(REFERENCED_ROW_DNE_MESSAGE_KEY, CORE.getUser().getLocale(), associationBinding, foreignKeySheet.getTitle(), foreignKeySheet.getTitle()));
 				continue;
 			}
 

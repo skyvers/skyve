@@ -11,7 +11,6 @@ import java.io.ObjectStreamException;
 import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
-import org.skyve.content.MimeType;
 import org.skyve.util.FileUtil;
 
 public class AttachmentContent extends Content {
@@ -251,7 +250,9 @@ public class AttachmentContent extends Content {
 	
 	public final byte[] getContentBytes() throws IOException {
 		if (bytes == null) {
-			bytes = FileUtil.getFileBytes(getContentStream());
+			try (InputStream is = getContentStream()) {
+				bytes = FileUtil.getFileBytes(is);
+			}
 		}
 		
 		return bytes;

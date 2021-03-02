@@ -33,7 +33,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -194,7 +193,7 @@ public class BackupJob extends CancellableJob {
 																value = "";
 															}
 															else {
-																value = new Long(date.getTime());
+																value = Long.valueOf(date.getTime());
 															}
 														}
 														else if (AttributeType.time.equals(attributeType)) {
@@ -203,7 +202,7 @@ public class BackupJob extends CancellableJob {
 																value = "";
 															}
 															else {
-																value = new Long(time.getTime());
+																value = Long.valueOf(time.getTime());
 															}
 														}
 														else if (AttributeType.dateTime.equals(attributeType) ||
@@ -213,7 +212,7 @@ public class BackupJob extends CancellableJob {
 																value = "";
 															}
 															else {
-																value = new Long(timestamp.getTime());
+																value = Long.valueOf(timestamp.getTime());
 															}
 														}
 														else if (AttributeType.decimal2.equals(attributeType) ||
@@ -233,7 +232,7 @@ public class BackupJob extends CancellableJob {
 																value = "";
 															}
 															else {
-																value = new Integer(intValue);
+																value = Integer.valueOf(intValue);
 															}
 															// bizVersion is mandatory
 															if ("".equals(value) &&
@@ -250,7 +249,7 @@ public class BackupJob extends CancellableJob {
 																value = "";
 															}
 															else {
-																value = new Long(longValue);
+																value = Long.valueOf(longValue);
 															}
 														}
 														else if (AttributeType.content.equals(attributeType) ||
@@ -273,7 +272,7 @@ public class BackupJob extends CancellableJob {
 																										name,
 																										stringValue));
 																		// See if the content file exists
-																		final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
+																		final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
 																		final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
 																		AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
 																		final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
@@ -285,8 +284,8 @@ public class BackupJob extends CancellableJob {
 																	}
 																	else {
 																		StringBuilder contentPath = new StringBuilder(256);
-																		contentPath.append(directory.getAbsolutePath()).append('/').append(AbstractContentManager.FILE_STORE_NAME).append('/');
-																		ElasticContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																		contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
+																		AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
 																	}
 																}
 																catch (Exception e) {

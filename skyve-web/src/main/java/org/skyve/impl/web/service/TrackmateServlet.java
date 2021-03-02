@@ -139,7 +139,7 @@ public class TrackmateServlet extends HttpServlet {
 				// ends up as 500 error
 				User user = WebUtil.processUserPrincipalForRequest(request, principal.toString(), false);
 				if (user == null) {
-					throw new SessionEndedException();
+					throw new SessionEndedException(request.getLocale());
 				}
 				persistence.setUser(user);
 
@@ -296,7 +296,7 @@ public class TrackmateServlet extends HttpServlet {
 					// - ends up as 500 error
 					User user = WebUtil.processUserPrincipalForRequest(request, principal.toString(), false);
 					if (user == null) {
-						throw new SessionEndedException();
+						throw new SessionEndedException(request.getLocale());
 					}
 					persistence.setUser(user);
 

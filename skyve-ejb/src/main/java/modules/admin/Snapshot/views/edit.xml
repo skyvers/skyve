@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit" title="{name}" icon32x32RelativeFileName="icons/document/snapshot32.png" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" >
+		<column percentageWidth="10" />
+		<column />
+		<column />
+		<row>
+			<item>
+				<combo binding="moduleName" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="queryName" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="name" />
+			</item>
+		</row>
+		<row>
+			<item colspan="2">
+				<textArea binding="snapshot" pixelHeight="200" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="admin.snapshot.edit.copy.borderTitle">
+		<column percentageWidth="20" />
+		<column />
+		<column />
+		<row>
+			<item>
+				<default binding="copyToUser" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<button action="CopySnapshotToUser" pixelWidth="200" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<defaults />
+		<action className="CopySnapshotToUser" displayName="admin.snapshot.actions.copySnapshotToUser.displayName" inActionPanel="false" clientValidation="false"
+			toolTip="admin.snapshot.actions.copySnapshotToUser.toolTip" confirm="Ok to copy?" 
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
+	</actions>
+	<newParameters />
+</view>
+

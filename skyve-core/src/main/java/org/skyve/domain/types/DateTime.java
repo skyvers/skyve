@@ -72,12 +72,12 @@ public class DateTime extends Date {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 
-	public DateTime set(LocalDate date) {
+	public DateTime setLocalDate(LocalDate date) {
 		setTime(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 		return this; // for EL or method chaining
 	}
 
-	public DateTime set(LocalDateTime date) {
+	public DateTime setLocalDateTime(LocalDateTime date) {
 		setTime(date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 		TimeUtil.clearMillisecondComponent(this);
 		return this; // for EL or method chaining

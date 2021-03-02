@@ -338,7 +338,7 @@ public abstract class AbstractDataFileLoader {
 	public void setFieldOffset(int offset) {
 		for (DataFileField fld : fields) {
 			if (fld.getIndex() == null) {
-				fld.setIndex(new Integer(0));
+				fld.setIndex(Integer.valueOf(0));
 			}
 			fld.setIndex(fld.getIndex().intValue() + offset);
 		}
@@ -435,7 +435,7 @@ public abstract class AbstractDataFileLoader {
 	 * @throws Exception
 	 */
 	public String getWhere(int index) throws Exception {
-		return getWhere(new Integer(index));
+		return getWhere(Integer.valueOf(index));
 	}
 
 	/**
@@ -673,15 +673,15 @@ public abstract class AbstractDataFileLoader {
 							if (displayValue != null && displayValue.trim().length() > 0) {
 								try {
 									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
-								} catch (Exception e) {
+								} catch (@SuppressWarnings("unused") Exception e) {
 									Util.LOGGER.info("Loading String value " + displayValue + " using Skyve converter " + field.getConverter().toString() + " FAILED");
 								}
 								
-								if(loadValue==null) {
+								if (loadValue == null) {
 									try {	
-										Date  d = 	getDateFieldValue(fieldIndex);
+										Date d = getDateFieldValue(fieldIndex);
 										loadValue = new DateTime(d);
-									} catch (Exception e) {
+									} catch (@SuppressWarnings("unused") Exception e) {
 										Util.LOGGER.info("Loading String value " + displayValue + " using default conversion FAILED");
 									}
 								}
@@ -784,7 +784,7 @@ public abstract class AbstractDataFileLoader {
 							case integer:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
-									loadValue = new Integer(((Double) operand).intValue());
+									loadValue = Integer.valueOf(((Double) operand).intValue());
 									if (debugMode) {
 										Util.LOGGER.info("Integer field value " + loadValue);
 									}
@@ -793,7 +793,7 @@ public abstract class AbstractDataFileLoader {
 							case longInteger:
 								operand = getNumericFieldValue(fieldIndex, treatEmptyNumericAsZero);
 								if (operand != null) {
-									loadValue = new Long(((Double) operand).longValue());
+									loadValue = Long.valueOf(((Double) operand).longValue());
 									if (debugMode) {
 										Util.LOGGER.info("Long field value " + loadValue);
 									}

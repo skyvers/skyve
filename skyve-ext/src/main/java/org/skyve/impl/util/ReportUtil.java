@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.jasperreports.SkyveDataSource;
@@ -15,7 +16,10 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
@@ -48,7 +52,7 @@ public final class ReportUtil {
 	private ReportUtil() {
 		// disallow instantiation
 	}
-	
+
 	public static JasperPrint runBeanReport(User user,
 												Document document,
 												String reportName,
@@ -72,8 +76,8 @@ public final class ReportUtil {
 	}
 
 	public static JasperPrint runReport(User user,
-											Document document, 
-											String reportName, 
+											Document document,
+											String reportName,
 											Map<String, Object> parameters,
 											Bean bean,
 											ReportFormat format,
@@ -260,11 +264,11 @@ public final class ReportUtil {
 		parameters.put("MODULE_RESOURCE_DIR", sb.toString());
 		int lastFileSeparator = result.lastIndexOf('/');
 		parameters.put("SUBREPORT_DIR", result.substring(0, lastFileSeparator + 1));
-		
+
 		return result;
 	}
-	
-	public static void runReport(JasperPrint jasperPrint, 
+
+	public static void runReport(JasperPrint jasperPrint,
 									ReportFormat format,
 									OutputStream out)
 	throws Exception {
@@ -340,5 +344,20 @@ public final class ReportUtil {
 		}
 
 		return exporter;
+	}
+
+	public static DocumentQueryListModel<Bean> getDocumentQueryListModel(Module module, String documentOrQueryOrModelName) {
+		final Customer customer = CORE.getCustomer();
+		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+		if (query == null) {
+			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+		}
+		if (query == null) {
+			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+		}
+		final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
+		queryModel.setQuery(query);
+
+		return queryModel;
 	}
 }

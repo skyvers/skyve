@@ -63,12 +63,12 @@ public class DateOnly extends Date {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
-	public DateOnly set(LocalDate date) {
+	public DateOnly setLocalDate(LocalDate date) {
 		setTime(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 		return this; // for EL or method chaining
 	}
 
-	public DateOnly set(LocalDateTime date) {
+	public DateOnly setLocalDateTime(LocalDateTime date) {
 		setTime(date.toLocalDate().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 		return this; // for EL or method chaining
 	}

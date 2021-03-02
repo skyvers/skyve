@@ -28,7 +28,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
 /**
- * This test depends on the schemas being up to data from skyve-ee/src/skyve/schemas into
+ * This test depends on the schemas being up to date from skyve-ee/src/skyve/schemas into
  * src/test/resources/schemas in this project.
  */
 public class XMLMetaDataTest {

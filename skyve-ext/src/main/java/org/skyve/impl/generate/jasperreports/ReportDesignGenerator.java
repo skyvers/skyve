@@ -2,7 +2,6 @@ package org.skyve.impl.generate.jasperreports;
 
 import java.util.HashMap;
 
-import org.elasticsearch.common.Preconditions;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
@@ -19,8 +18,8 @@ public abstract class ReportDesignGenerator {
     }
 
     public DesignSpecification populateDesign(DesignSpecification design) {
-        Preconditions.checkArgument(design.getModuleName() != null);
-        Preconditions.checkArgument(design.getDocumentName() != null);
+        assert(design.getModuleName() != null);
+        assert(design.getDocumentName() != null);
 
         design.setJoins(new HashMap<>());
         design.setJoinAlias(new HashMap<>());

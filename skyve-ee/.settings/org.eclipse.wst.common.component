@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+            
+    
     <wb-module deploy-name="skyve-ee">
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/skyve"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/web"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/generatedTest"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resources"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/generated"/>
+        <wb-resource deploy-path="/" source-path="/src/main/resources"/>
+                        
+        
         <property name="java-output-path" value="/skyve-ee/bin"/>
+                        
+        
         <property name="context-root" value="skyve-ee"/>
+                    
+    
     </wb-module>
+        
+
 </project-modules>

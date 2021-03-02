@@ -11,8 +11,6 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
@@ -25,6 +23,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.json.Minifier;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
@@ -59,8 +58,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "34";
-	public static final String SKYVE_VERSION = "6.0.3";
+	public static final String WEB_RESOURCE_FILE_VERSION = "36";
+	public static final String SKYVE_VERSION = "7.0.3-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -96,6 +95,9 @@ public class UtilImpl {
 
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
+
+	// Where to look for add-ins - defaults to <content.directory>/addins/
+	public static String ADDINS_DIRECTORY = null;
 
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
@@ -216,7 +218,21 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
-
+	// google auth client id
+	public static String AUTHENTICATION_GOOGLE_CLIENT_ID = null;
+	// google auth secret
+	public static String AUTHENTICATION_GOOGLE_SECRET = null;
+	// facebook auth client id
+	public static String AUTHENTICATION_FACEBOOK_CLIENT_ID = null;
+	// facebook auth secret
+	public static String AUTHENTICATION_FACEBOOK_SECRET = null;
+	// github auth client id
+	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
+	// github auth secret
+	public static String AUTHENTICATION_GITHUB_SECRET = null;
+	// The Login URI to forward to
+	public static String AUTHENTICATION_LOGIN_URI = "/login";
+	
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	
@@ -271,11 +287,9 @@ public class UtilImpl {
 		try (Scanner scanner = new Scanner(inputStream)) {
 			json = scanner.useDelimiter("\\Z").next();
 		}
-		// Remove any C-style comments
-		String commentsPattern = "(?s)\\/\\*(?:(\\*(?!\\/))|(?:[^\\*]))*\\*\\/|[^:]\\/\\/[^\\n\\r]*(?=[\\n\\r])";
-		final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
-		final Matcher m = pattern.matcher(json);
-		json = m.replaceAll("");
+		
+		// minify the file to remove any comments
+		json = Minifier.minify(json);
 
 		return (Map<String, Object>) JSON.unmarshall(null, json);
 	}
@@ -392,7 +406,6 @@ public class UtilImpl {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
-		@SuppressWarnings("synthetic-access")
 		ChangedBeanVisitor cbv = new ChangedBeanVisitor();
 		cbv.visit(document, bean, customer);
 		return cbv.isChanged();

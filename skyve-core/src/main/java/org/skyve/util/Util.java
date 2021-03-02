@@ -4,6 +4,7 @@ import java.awt.ComponentOrientation;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -102,13 +103,18 @@ public class Util {
 		String result = key;
 
 		if ((key != null) && (locale != null)) {
-			ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
-			if (bundle.containsKey(key)) {
-				result = bundle.getString(key);
+			try {
+				ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
+				if (bundle.containsKey(key)) {
+					result = bundle.getString(key);
+				}
+	
+				if ((values != null) && (values.length > 0)) {
+					result = MessageFormat.format(result, (Object[]) values);
+				}
 			}
-
-			if ((values != null) && (values.length > 0)) {
-				result = MessageFormat.format(result, (Object[]) values);
+			catch (@SuppressWarnings("unused") MissingResourceException e) {
+				LOGGER.warning("Could not find bundle \"resources.i18n\"");
 			}
 		}
 
@@ -226,6 +232,12 @@ public class Util {
 		return result.toString();
 	}
 
+	public static String getLoginUrl() {
+		StringBuilder result = new StringBuilder(128);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.AUTHENTICATION_LOGIN_URI);
+		return result.toString();
+	}
+
 	public static String getDocumentUrl(String bizModule, String bizDocument) {
 		return getDocumentUrl(bizModule, bizDocument, null);
 	}
@@ -253,5 +265,32 @@ public class Util {
 		result.append("?a=g&m=").append(bizModule).append("&q=").append(queryName);
 
 		return result.toString();
+	}
+	
+	public static String getContentUrl(String bizModule, String bizDocument, String binding, String contentId) {
+		StringBuilder result = new StringBuilder(128);
+
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append("content?_n=").append(contentId);
+		result.append("&_doc=").append(bizModule).append('.').append(bizDocument);
+		result.append("&_b=").append(binding);
+
+		return result.toString();
+	}
+	
+	public static String getResourceUrl(String bizModule, String bizDocument, String resourceFileName) {
+		StringBuilder result = new StringBuilder(128);
+
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append("resources?_n=").append(resourceFileName);
+		if ((bizModule != null) && (bizDocument != null)) {
+			result.append("&_doc=").append(bizModule).append('.').append(bizDocument);
+		}
+
+		return result.toString();
+	}
+
+	public static String getResourceUrl(String resourceFileName) {
+		return getResourceUrl(null, null, resourceFileName);
 	}
 }

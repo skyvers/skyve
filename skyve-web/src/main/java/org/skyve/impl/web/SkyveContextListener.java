@@ -28,7 +28,6 @@ import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -94,6 +93,7 @@ public class SkyveContextListener implements ServletContextListener {
 			catch (Exception e) {
 				throw new FacesException(e);
 			}
+
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -186,6 +186,17 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
+		// Add-ins settings
+		Map<String, Object> addins = getObject(null, "addins", properties, false);
+		if (addins != null) {
+			UtilImpl.ADDINS_DIRECTORY = getString("addins", "directory", addins, false);
+			if (UtilImpl.ADDINS_DIRECTORY != null) {
+				// clean up the add-ins directory path
+				UtilImpl.ADDINS_DIRECTORY = cleanupDirectory(UtilImpl.ADDINS_DIRECTORY);
+				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
+			}
+		}
+		
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {
@@ -341,7 +352,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
-					AbstractRepository.set((AbstractRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).newInstance());
+					AbstractRepository.set((AbstractRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).getDeclaredConstructor().newInstance());
 				}
 				catch (Exception e) {
 					throw new IllegalStateException("Could not create factories.repositoryClass " + UtilImpl.SKYVE_REPOSITORY_CLASS, e);
@@ -366,18 +377,9 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
+		// Can't load the class here as it may not be available to this class loader - it could be in the add-in.
+		// So we load it in the init method.		
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
-		if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS == null) {
-			AbstractContentManager.IMPLEMENTATION_CLASS = ElasticContentManager.class;
-		}
-		else {
-			try {
-				AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Class.forName(UtilImpl.SKYVE_CONTENT_MANAGER_CLASS);
-			}
-			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
-			}
-		}
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
@@ -427,7 +429,17 @@ public class SkyveContextListener implements ServletContextListener {
 		if (number != null) {
 			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = number.intValue();
 		}
+		value = getString("account", "loginUri", account, false);
+		if (value != null) {
+			UtilImpl.AUTHENTICATION_LOGIN_URI = value;
+		}
 		UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getBoolean("account", "allowUserSelfRegistration", account);
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = getString("account", "googleAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = getString("account", "googleAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = getString("account", "facebookAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);

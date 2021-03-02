@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportDesign" xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Report Design</singularAlias>
+	<pluralAlias>Report Designs</pluralAlias>
+	<iconStyleClass>fa fa-file-pdf-o</iconStyleClass>
+	<bizKey expression="{name}"/>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>admin.reportDesign.name.displayName</displayName>
+			<length>200</length>
+		</text>
+		<enum name="mode">
+			<displayName>admin.reportDesign.mode.displayName</displayName>
+			<values>
+				<value code="sql"/>
+				<value code="bean"/>
+			</values>
+		</enum>
+		<enum name="definitionSource">
+			<displayName>admin.reportDesign.definitionSource.displayName</displayName>
+			<values>
+				<value code="document"/>
+				<value code="view"/>
+				<value code="query"/>
+				<value code="list"/>
+			</values>
+		</enum>
+		<enum name="reportType">
+			<displayName>admin.reportDesign.reportType.displayName</displayName>
+			<values>
+				<value code="Report"/>
+				<value code="Subreport"/>
+			</values>
+		</enum>
+		<text name="moduleName">
+			<displayName>admin.reportDesign.moduleName.displayName</displayName>
+			<description>admin.reportDesign.moduleName.description</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="documentName">
+			<displayName>admin.reportDesign.documentName.displayName</displayName>
+			<description>admin.reportDesign.documentName.description</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="queryName">
+			<displayName>admin.reportDesign.queryName.displayName</displayName>
+			<description>admin.reportDesign.queryName.description</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="menuItem">
+			<displayName>admin.reportDesign.menuItem.displayName</displayName>
+			<description>admin.reportDesign.menuItem.displayName</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="repositoryPath" >
+			<displayName>admin.reportDesign.repositoryPath.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.repositoryPath.description]]></description>
+			<length>500</length>
+		</text>
+		<boolean name="saveToDocumentPackage">
+			<displayName>admin.reportDesign.saveToDocumentPackage.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.saveToDocumentPackage.description]]>
+			</description>
+		</boolean>
+		<enum name="orientation" required="true">
+			<displayName>admin.reportDesign.orientation.displayName</displayName>
+			<values>
+				<value code="Portrait"/>
+				<value code="Landscape"/>
+			</values>
+		</enum>
+		<integer name="width" required="true">
+			<displayName>admin.reportDesign.width.displayName</displayName>
+		</integer>
+		<integer name="height" required="true">
+			<displayName>admin.reportDesign.height.displayName</displayName>
+		</integer>
+		<integer name="leftMargin" required="true">
+			<displayName>admin.reportDesign.leftMargin.displayName</displayName>
+		</integer>
+		<integer name="rightMargin" required="true">
+			<displayName>admin.reportDesign.rightMargin.displayName</displayName>
+		</integer>
+		<integer name="topMargin" required="true">
+			<displayName>admin.reportDesign.topMargin.displayName</displayName>
+		</integer>
+		<integer name="bottomMargin" required="true">
+			<displayName>admin.reportDesign.bottomMargin.displayName</displayName>
+		</integer>
+		<integer name="columnWidth" required="true">
+			<displayName>admin.reportDesign.columnWidth.displayName</displayName>
+		</integer>
+		<text name="defaultFontName">
+			<displayName>admin.reportDesign.defaultFontName.displayName</displayName>
+			<description>admin.reportDesign.defaultFontName.description</description>
+			<length>100</length>
+		</text>
+		<integer name="titleFontSize">
+			<displayName>admin.reportDesign.titleFontSize.displayName</displayName>
+		</integer>
+		<integer name="defaultFontSize">
+			<displayName>admin.reportDesign.defaultFontSize.displayName</displayName>
+		</integer>
+		<colour name="defaultLineColour">
+			<displayName>admin.reportDesign.defaultLineColour.displayName</displayName>
+		</colour>
+		<decimal2 name="defaultLineWidth">
+			<displayName>admin.reportDesign.defaultLineWidth.displayName</displayName>
+		</decimal2>
+		<boolean name="renderLabelAsTextFields">
+			<displayName>admin.reportDesign.renderLabelAsTextFields.displayName</displayName>
+			<description>admin.reportDesign.renderLabelAsTextFields.description</description>
+		</boolean>
+		<boolean name="defaultBorder">
+			<displayName>admin.reportDesign.defaultBorder.displayName</displayName>
+		</boolean>
+		<boolean name="defaultBorderTop">
+			<displayName>admin.reportDesign.defaultBorderTop.displayName</displayName>
+		</boolean>
+		<boolean name="defaultBorderLeft">
+			<displayName>admin.reportDesign.defaultBorderLeft.displayName</displayName>
+		</boolean>
+		<boolean name="defaultBorderBottom">
+			<displayName>admin.reportDesign.defaultBorderBottom.displayName</displayName>
+		</boolean>
+		<boolean name="defaultBorderRight">
+			<displayName>admin.reportDesign.defaultBorderRight.displayName</displayName>
+		</boolean>
+		<integer name="defaultElementHeight" required="true">
+			<displayName>admin.reportDesign.defaultElementHeight.displayName</displayName>
+		</integer>
+		<boolean name="includePageNumbers">
+			<displayName>admin.reportDesign.includePageNumbers.displayName</displayName>
+		</boolean>
+		<integer name="defaultCellTopPadding">
+			<displayName>admin.reportDesign.defaultCellTopPadding.displayName</displayName>
+		</integer>
+		<integer name="defaultCellLeftPadding">
+			<displayName>admin.reportDesign.defaultCellLeftPadding.displayName</displayName>
+		</integer>
+		<integer name="defaultCellBottomPadding">
+			<displayName>admin.reportDesign.defaultCellBottomPadding.displayName</displayName>
+		</integer>
+		<integer name="defaultCellRightPadding">
+			<displayName>admin.reportDesign.defaultCellRightPadding.displayName</displayName>
+		</integer>
+		<boolean name="dynamicFlow">
+			<displayName>admin.reportDesign.dynamicFlow.displayName</displayName>
+			<description><![CDATA[admin.reportDesign.dynamicFlow.description]]></description>
+		</boolean>
+		<text name="bandSplitType" >
+			<displayName>admin.reportDesign.bandSplitType.displayName</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<boolean name="boldLabels">
+			<displayName>admin.reportDesign.boldLabels.displayName</displayName>
+			<description>admin.reportDesign.boldLabels.description</description>
+		</boolean>
+		<text name="checkBoxFontName">
+			<displayName>admin.reportDesign.checkBoxFontName.displayName</displayName>
+			<description>admin.reportDesign.checkBoxFontName.description</description>
+			<length>200</length>
+		</text>
+		<text name="checkBoxDisplayExpression">
+			<displayName>admin.reportDesign.checkBoxDisplayExpression.displayName</displayName>
+			<description>admin.reportDesign.checkBoxDisplayExpression.description</description>
+			<length>500</length>
+		</text>
+		<decimal5 name="pixelToTwip">
+			<displayName>admin.reportDesign.pixelToTwip.displayName</displayName>
+			<description>admin.reportDesign.pixelToTwip.description</description>
+		</decimal5>
+		
+		<!-- section settings -->
+		<boolean name="sectionBorderTop">
+			<displayName>admin.reportDesign.sectionBorderTop.displayName</displayName>
+		</boolean>
+		<boolean name="sectionBorderLeft">
+			<displayName>admin.reportDesign.sectionBorderLeft.displayName</displayName>
+		</boolean>
+		<boolean name="sectionBorderRight">
+			<displayName>admin.reportDesign.sectionBorderRight.displayName</displayName>
+		</boolean>
+		<boolean name="sectionBorderBottom">
+			<displayName>admin.reportDesign.sectionBorderBottom.displayName</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderTop">
+			<displayName>admin.reportDesign.sectionTitleBorderTop.displayName</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderLeft">
+			<displayName>admin.reportDesign.sectionTitleBorderLeft.displayName</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderRight">
+			<displayName>admin.reportDesign.sectionTitleBorderRight.displayName</displayName>
+		</boolean>
+		<boolean name="sectionTitleBorderBottom">
+			<displayName>admin.reportDesign.sectionTitleBorderBottom.displayName</displayName>
+		</boolean>
+		<colour name="sectionTitleForeground">
+			<displayName>admin.reportDesign.sectionTitleForeground.displayName</displayName>
+		</colour>
+		<colour name="sectionTitleBackground">
+			<displayName>admin.reportDesign.sectionTitleBackground.displayName</displayName>
+		</colour>
+				
+		<memo name="jrxml" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.reportDesign.jrxml.displayName</displayName>
+		</memo>
+		<text name="field">
+			<displayName>admin.reportDesign.field.displayName</displayName>
+			<description>admin.reportDesign.field.description</description>
+			<length>200</length>
+		</text>
+		<enum name="collectionType">
+			<displayName>admin.reportDesign.collectionType.displayName</displayName>
+			<values>
+				<value code="child"/>
+				<value code="aggregation"/>
+				<value code="composition"/>
+			</values>
+		</enum>
+		<text name="parentReportPersistentName">
+			<displayName>Parent Report Persistent Name</displayName>
+			<length>500</length>
+		</text>
+		<boolean name="verticalise">
+			<displayName>admin.reportDesign.verticalise.displayName</displayName>
+		</boolean>
+		<text name="labelAlignmentOverride" >
+			<displayName>admin.reportDesign.labelAlignmentOverride.displayName</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

@@ -22,7 +22,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * @param message
 	 */
 	public UniqueConstraintViolationException(Document document, String constraintName, String message) {
-		super(message);
+		super(message, false);
 		messages.add(new Message(message));
 		this.document = document;
 		this.constraintName = constraintName;
@@ -40,7 +40,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 												String binding,
 												String message) {
 		super("Constraint " + constraintName + " in document " + document.getOwningModuleName() + "." + document.getName() +
-				" is violated with message :- " + message);
+				" is violated with message :- " + message, false);
 		messages.add(new Message(binding, message));
 		this.document = document;
 		this.constraintName = constraintName;

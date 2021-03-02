@@ -1,24 +1,15 @@
 package org.skyve.domain.types.converters.timestamp;
 
-import org.skyve.CORE;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
+import org.skyve.domain.types.converters.datetime.AbstractTimestampConverter;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-public class DD_MMM_YYYY_HH_MI_SS implements Converter<Timestamp> {
+public class DD_MMM_YYYY_HH_MI_SS extends AbstractTimestampConverter implements Converter<Timestamp> {
+
 	private static final String PATTERN = "dd-MMM-yyyy hh:mm:ss a";
-
-	@Override
-	public Timestamp fromDisplayValue(String displayValue) throws Exception {
-		return new Timestamp(CORE.getDateFormat(PATTERN).parse(displayValue).getTime());
-	}
-
-	@Override
-	public String toDisplayValue(Timestamp value) throws Exception {
-		return CORE.getDateFormat(PATTERN).format(value);
-	}
 
 	@Override
 	public AttributeType getAttributeType() {
@@ -33,5 +24,10 @@ public class DD_MMM_YYYY_HH_MI_SS implements Converter<Timestamp> {
 	@Override
 	public Validator<Timestamp> getValidator() {
 		return null;
+	}
+
+	@Override
+	public String getPattern() {
+		return PATTERN;
 	}
 }

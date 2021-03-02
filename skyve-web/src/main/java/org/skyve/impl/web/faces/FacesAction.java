@@ -183,7 +183,6 @@ public abstract class FacesAction<T> {
 				final MutableBoolean assignedResult = new MutableBoolean(result);
 				data.visitTree(VisitContext.createVisitContext(fc), new VisitCallback() {
 					@Override
-				    @SuppressWarnings("synthetic-access")
 				    public VisitResult visit(VisitContext context, UIComponent target) {
 				    	if (target instanceof UIInput) {
 							// NB ensure && operator doesn't short circuit by putting the function call as the first argument

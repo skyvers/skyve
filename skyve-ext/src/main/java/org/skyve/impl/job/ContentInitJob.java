@@ -4,6 +4,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.skyve.EXT;
+import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 
@@ -17,8 +18,8 @@ public class ContentInitJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
-		try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
-			cm.init();
+		try (ContentManager cm = EXT.newContentManager()) {
+			((AbstractContentManager) cm).init();
 		}
 		catch (Exception e) {
 			UtilImpl.LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");

@@ -15,6 +15,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.skyve.CORE;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
@@ -40,6 +41,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 
 /**
  * Sets up a sheet with a number of columns in it.
@@ -50,6 +52,8 @@ import org.skyve.util.Binder.TargetMetaData;
  * @author msands
  */
 public final class POISheet implements BizPortSheet {
+	private static final String INVALID_CELL_TYPE_MESSAGE_KEY = "bizport.invalidCellType";
+
 	// Rows 0, 1 and 2 hold sheet metadata and the title Row.
 	private static final int START_ROW = 3;
 
@@ -82,7 +86,7 @@ public final class POISheet implements BizPortSheet {
 
 	// the drawing patriarch to draw to this sheet.
 	// this is used to create tooltips
-	private Drawing drawing;
+	private Drawing<? extends Shape> drawing;
 
 	// the index to the next row number to append
 	// The next index to use if a column definition is added.
@@ -212,12 +216,12 @@ public final class POISheet implements BizPortSheet {
 			if (collectionBinding == null) { // have a document sheet
 				String id = getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 				if (id != null) {
-					indices.put(id, new Integer(nextRow));
+					indices.put(id, Integer.valueOf(nextRow));
 				}
 				while (nextRow()) {
 					id = getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 					if (id != null) {
-						indices.put(id, new Integer(nextRow));
+						indices.put(id, Integer.valueOf(nextRow));
 					}
 				}
 			}
@@ -226,13 +230,13 @@ public final class POISheet implements BizPortSheet {
 				String ownerId = getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
 				String elementId = getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
 				if ((ownerId != null) && (elementId != null)) {
-					indices.put(ownerId + elementId, new Integer(nextRow));
+					indices.put(ownerId + elementId, Integer.valueOf(nextRow));
 				}
 				while (nextRow()) {
 					ownerId = getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
 					elementId = getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
 					if ((ownerId != null) && (elementId != null)) {
-						indices.put(ownerId + elementId, new Integer(nextRow));
+						indices.put(ownerId + elementId, Integer.valueOf(nextRow));
 					}
 				}
 			}
@@ -250,7 +254,7 @@ public final class POISheet implements BizPortSheet {
 	 * @param parent	The pure Excel workbook that owns this sheet.
 	 * @param sheet	The pure Excel worksheet that backs this sheet in-memoty representation.
 	 */
-	@SuppressWarnings({"incomplete-switch", "static-access"})
+	@SuppressWarnings("incomplete-switch")
 	void materialise(SheetKey key,
 						@SuppressWarnings("hiding") POIWorkbook parent,
 						@SuppressWarnings("hiding") Sheet sheet) {
@@ -503,7 +507,7 @@ public final class POISheet implements BizPortSheet {
             currentRow = sheet.createRow(nextRow);
         }
         nextRow++;
-		indices.put(buildRowKey(rowKey), new Integer(nextRow));
+		indices.put(buildRowKey(rowKey), Integer.valueOf(nextRow));
 	}
 
 	/**
@@ -609,7 +613,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											"Type should be " + attributeType + " but the corresponding Excel cell is a String");
+											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "String"));
 				}
 				break;
 			case BOOLEAN:
@@ -619,7 +623,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											"Type should be " + attributeType + " but the corresponding Excel cell is a Boolean");
+											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Boolean"));
 				}
 				break;
 			case NUMERIC:
@@ -641,16 +645,16 @@ public final class POISheet implements BizPortSheet {
 						else {
 							addErrorAtCurrentRow(problems,
 													column,
-													"Type should be " + attributeType + " but the corresponding Excel cell is a Date.");
+													Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Date"));
 						}
 					}
 				}
 				else {
 					if (AttributeType.integer.equals(attributeType)) {
-						result = (T) new Integer((int) cell.getNumericCellValue());
+						result = (T) Integer.valueOf((int) cell.getNumericCellValue());
 					}
 					else if (AttributeType.longInteger.equals(attributeType)) {
-						result = (T) new Long((long) cell.getNumericCellValue());
+						result = (T) Long.valueOf((long) cell.getNumericCellValue());
 					}
 					else if (AttributeType.decimal2.equals(attributeType)) {
 						result = (T) new Decimal2(cell.getNumericCellValue());
@@ -673,7 +677,7 @@ public final class POISheet implements BizPortSheet {
 					else {
 						addErrorAtCurrentRow(problems,
 												column,
-												"Type should be " + attributeType + " but the corresponding Excel cell is Numeric.");
+												Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Numeric"));
 					}
 				}
 				break;
@@ -750,7 +754,6 @@ public final class POISheet implements BizPortSheet {
             descriptionCell = row.createCell(descriptionColumn);
         }
 
-        descriptionCell.setCellType(CellType.FORMULA);
         StringBuilder formula = new StringBuilder(50);
         formula.append("VLOOKUP(");
         formula.append(new CellReference(row.getRowNum(), keyColumn).formatAsString());

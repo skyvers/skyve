@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>6.0.3</version>
+		<version>7.0.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 
@@ -12,10 +12,6 @@
 		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
 	</build>
-
-	<properties>
-		<commonmark.version>0.10.0</commonmark.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -56,19 +52,29 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>${commons-codec.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>${commons-io.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.opengeo</groupId>
 			<artifactId>geodb</artifactId>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.jasperreports</groupId>
@@ -78,7 +84,6 @@
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<version>${javaee-api.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -89,7 +94,6 @@
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>${javassist.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -113,18 +117,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tika</groupId>
-			<artifactId>tika-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.blueconic</groupId>
 			<artifactId>browscap-java</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -135,7 +129,6 @@
 		<dependency>
 			<groupId>com.atlassian.commonmark</groupId>
 			<artifactId>commonmark</artifactId>
-			<version>${commonmark.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

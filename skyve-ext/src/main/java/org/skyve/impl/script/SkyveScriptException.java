@@ -15,6 +15,18 @@ public class SkyveScriptException extends SkyveException {
 		this.type = type;
 	}
 
+	public SkyveScriptException(final ExceptionType type, final String message, final int lineNumber, String... i18nValues) {
+		super(message, i18nValues);
+		this.lineNumber = lineNumber;
+		this.type = type;
+	}
+
+	public SkyveScriptException(final ExceptionType type, final String message, final int lineNumber, boolean i18n) {
+		super(message, i18n);
+		this.lineNumber = lineNumber;
+		this.type = type;
+	}
+
 	public int getLineNumber() {
 		return lineNumber;
 	}

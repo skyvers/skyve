@@ -10,7 +10,7 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.impl.content.elastic.ElasticContentManager;
+import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
@@ -30,9 +30,9 @@ public class ReindexAttachmentsJob extends CancellableJob {
 			connection.setAutoCommit(false);
 
 			try (ContentManager cm = EXT.newContentManager()) {
-				ElasticContentManager ecm;
-				if (cm instanceof ElasticContentManager) {
-					ecm = (ElasticContentManager) cm;
+				AbstractContentManager acm;
+				if (cm instanceof AbstractContentManager) {
+					acm = (AbstractContentManager) cm;
 				}
 				else {
 					return;
@@ -82,7 +82,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 													boolean index = ((indexType == null) || 
 																		IndexType.textual.equals(indexType) ||
 																		IndexType.both.equals(indexType));
-													ecm.reindex(content, index);
+													acm.reindex(content, index);
 												}
 											}
 											catch (Exception e) {

@@ -64,7 +64,7 @@ public class DeleteAction extends FacesAction<Void> {
 		}
 		
 		if (! persistentBeanToDelete.getBizLock().equals(beanToDelete.getBizLock())) {
-			throw new OptimisticLockException(customer, 
+			throw new OptimisticLockException(user, 
 												OperationType.delete, 
 												persistentBeanToDelete.getBizLock());
 		}
