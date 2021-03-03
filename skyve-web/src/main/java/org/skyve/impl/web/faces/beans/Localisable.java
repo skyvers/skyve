@@ -47,7 +47,6 @@ public abstract class Localisable implements Serializable {
 		public String get(final Object key) {
 			return new FacesAction<String>() {
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public String callback() throws Exception {
 					String result = Util.i18n((String) key, (locale == null) ? Locale.ENGLISH : locale);
 					if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("I18nMapAdapter.get " + key + " = " + result);

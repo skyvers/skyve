@@ -60,7 +60,6 @@ public class Menu extends Harness {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
@@ -103,7 +102,6 @@ public class Menu extends Harness {
 			private Stack<Submenu> subs = new Stack<>();
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
 											Module menuModule,
 											boolean open) {
@@ -116,14 +114,13 @@ public class Menu extends Harness {
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				DefaultSubMenu sub = new DefaultSubMenu(group.getName());
+				DefaultSubMenu sub = new DefaultSubMenu(Util.i18n(group.getName(), getLocale()));
 				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderCalendarItem(CalendarItem item,
 											Module menuModule,
 											Module itemModule,
@@ -135,7 +132,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderEditItem(EditItem item,
 										Module menuModule,
 										Module itemModule,
@@ -146,7 +142,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderLinkItem(LinkItem item,
 										Module menuModule,
 										boolean relative,
@@ -155,7 +150,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderListItem(ListItem item,
 										Module menuModule,
 										Module itemModule,
@@ -167,7 +161,6 @@ public class Menu extends Harness {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderMapItem(MapItem item,
 										Module menuModule,
 										Module itemModule,
@@ -179,7 +172,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderTreeItem(TreeItem item,
 										Module menuModule,
 										Module itemModule,
@@ -204,13 +196,13 @@ public class Menu extends Harness {
 		return result;
 	}
 
-	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
-																		String iconStyleClass,
-																		Module menuModule,
-																		Module itemModule,
-																		String itemQueryName,
-																		String itemAbsoluteHref) {
-		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass);
+	private org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
+																String iconStyleClass,
+																Module menuModule,
+																Module itemModule,
+																String itemQueryName,
+																String itemAbsoluteHref) {
+		DefaultMenuItem result = new DefaultMenuItem(Util.i18n(item.getName(), getLocale()), iconStyleClass);
 		result.setAjax(false);
 		result.setHref("#");
 		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));

@@ -86,7 +86,6 @@ public class Desktop extends Harness {
         if (! fc.isPostback()) {
         	new FacesAction<Void>() {
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public Void callback() throws Exception {
 					AbstractPersistence persistence = AbstractPersistence.get();
 			    	UserImpl user = (UserImpl) persistence.getUser();
