@@ -52,7 +52,7 @@
 		<chart type="line" modelName="UserActivityModel"/>
 		<chart type="pie" modelName="UserActivityContextModel"/>
 	</hbox>
-	<vbox border="true" borderTitle="admin.userDashboard.edit.myJobs.borderTitle">
+	<vbox border="true" borderTitle="admin.userDashboard.edit.myJobs.borderTitle" visible="canReadJobs">
 		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true">
 			<filterParameter filterBinding="bizUserId" operator="equal" valueBinding="currentUser.bizId"/>
 		</listGrid>

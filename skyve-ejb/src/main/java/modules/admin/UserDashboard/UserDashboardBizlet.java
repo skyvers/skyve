@@ -7,10 +7,6 @@ import modules.admin.domain.UserDashboard;
 
 public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4267161840200612498L;
 
 	@Override
@@ -20,5 +16,4 @@ public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 
 		return bean;
 	}
-
 }

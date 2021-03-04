@@ -167,4 +167,23 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	public Generic removeFavouritesElement(int index) {
 		return favourites.remove(index);
 	}
+
+	/**
+	 * True if the logged in user has permission to read jobs
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanReadJobs() {
+		return (((UserDashboardExtension)this).canReadJobs());
+	}
+
+	/**
+	 * {@link #isCanReadJobs} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanReadJobs() {
+		return (! isCanReadJobs());
+	}
 }

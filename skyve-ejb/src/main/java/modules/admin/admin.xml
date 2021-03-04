@@ -92,6 +92,9 @@
 				<document name="Contact" permission="CRUDU" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="User" permission="_RU_U" />
+				<document name="UserDashboard" permission="CR__U">
+					<action name="UpdateMyDetails" />
+				</document>
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 		</role>
@@ -383,6 +386,7 @@
 			<role name="AppUser" />
 		</edit>
 		<edit document="UserDashboard" name="User Dashboard">
+			<role name="AppUser" />
 			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="Contacts">
