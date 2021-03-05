@@ -144,7 +144,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            		}
 	            	}
             	}
-            	result.add(new SelectItem(value, domainValue.getDescription()));
+            	result.add(new SelectItem(value, Util.i18n(domainValue.getDescription())));
             }
         }
         else {

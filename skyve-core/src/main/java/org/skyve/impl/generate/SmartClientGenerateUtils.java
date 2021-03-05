@@ -258,7 +258,6 @@ public class SmartClientGenerateUtils {
 		protected boolean triStateCheckBox = false;
 		protected TargetMetaData target;
 		
-		@SuppressWarnings("synthetic-access")
 		protected SmartClientAttributeDefinition(User user,
 													Customer customer, 
 													Module module,
@@ -464,7 +463,7 @@ public class SmartClientGenerateUtils {
 				Converter<?> converter = null;
 				if (bindingAttribute instanceof LengthField) {
 					LengthField field = (LengthField) bindingAttribute;
-					length = new Integer(field.getLength());
+					length = Integer.valueOf(field.getLength());
 				}
 				else if (bindingAttribute instanceof ConvertableField) {
 					ConvertableField field = (ConvertableField) bindingAttribute;
@@ -1703,10 +1702,10 @@ public class SmartClientGenerateUtils {
 
 		if (! config) {
 			toAppendTo.append("{name:'bizTagged',title:'");
-			toAppendTo.append(processString(Util.i18n("Tag", locale), false, true));
+			toAppendTo.append(processString(Util.i18n("ui.tag", locale), false, true));
 			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
 			toAppendTo.append("{name:'bizFlagComment',title:'");
-			toAppendTo.append(processString(Util.i18n("Flag", locale), false, true));
+			toAppendTo.append(processString(Util.i18n("ui.flag", locale), false, true));
 			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		

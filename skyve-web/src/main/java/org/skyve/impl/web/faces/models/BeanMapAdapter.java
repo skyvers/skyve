@@ -68,9 +68,8 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 	 */
 	@Override
 	public Object get(final Object key) {
-		return new FacesAction<Object>() {
+		return new FacesAction<>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Object callback() throws Exception {
 //				if (delegate.containsKey(key)) {
 //					result = delegate.get(key);
@@ -174,7 +173,6 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 	private void set(final String binding, final Object value) {
 		new FacesAction<Void>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Void callback() throws Exception {
 				Object processedValue = value;
 				if (value instanceof BeanMapAdapter<?>) {

@@ -8,6 +8,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
@@ -97,14 +98,22 @@ public class Util {
 	}
 
 	/**
-	 * Internationalises a string and performs message formatting on tokens like {0}, {1} etc.
+	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
+	 */
+	public static String i18n(String key, String... values) {
+		User u = CORE.getUser();
+		return i18n(key, (u == null) ? null : u.getLocale(), values);
+	}
+	
+	/**
+	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
 	public static String i18n(String key, Locale locale, String... values) {
 		String result = key;
 
-		if ((key != null) && (locale != null)) {
+		if (key != null) {
 			try {
-				ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
+				ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", (locale == null) ? Locale.ENGLISH : locale);
 				if (bundle.containsKey(key)) {
 					result = bundle.getString(key);
 				}
