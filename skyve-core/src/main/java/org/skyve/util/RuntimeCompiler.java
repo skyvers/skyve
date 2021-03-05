@@ -115,7 +115,6 @@ public class RuntimeCompiler {
 	/**
 	 * Create a java source file object from the code ready to compile.
 	 */
-	@SuppressWarnings("synthetic-access")
 	public static JavaFileObject javaSource(String fullyQualifiedClassName, String code) {
 		JavaFileObject result = null;
 		try {
@@ -129,7 +128,6 @@ public class RuntimeCompiler {
 	/**
 	 * Create a java class file object to compile to.
 	 */
-	@SuppressWarnings("synthetic-access")
 	public static InMemoryJavaClassFileObject javaClass(String fullyQualifiedClassName) {
 		InMemoryJavaClassFileObject result = null;
 		try {
@@ -161,7 +159,6 @@ public class RuntimeCompiler {
 									String... classPath) throws IOException {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-		@SuppressWarnings("synthetic-access")
 		ExceptionProducingDiagnosticListener diagnosticListener = new ExceptionProducingDiagnosticListener();
 		try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 			// Specify classpath and classes output folder
@@ -175,7 +172,6 @@ public class RuntimeCompiler {
 									String classesFolder,
 									String... classPath) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		@SuppressWarnings("synthetic-access")
 		ExceptionProducingDiagnosticListener diagnosticListener = new ExceptionProducingDiagnosticListener();
 		Iterable<String> options = Arrays.asList("-sourcepath", sourceFolder, "-d", classesFolder, "-cp", Arrays.asList(classPath).stream().collect(Collectors.joining(File.pathSeparator)));
 		JavaCompiler.CompilationTask task = compiler.getTask(null, null, diagnosticListener, options, null, null);
@@ -219,10 +215,9 @@ public class RuntimeCompiler {
 		InMemoryClassLoader result = new InMemoryClassLoader();
 		
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		@SuppressWarnings("synthetic-access")
 		ExceptionProducingDiagnosticListener diagnosticListener = new ExceptionProducingDiagnosticListener();
 		try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
-			try (ForwardingJavaFileManager<JavaFileManager> forwardingFileManager = new ForwardingJavaFileManager<JavaFileManager>(fileManager) {
+			try (ForwardingJavaFileManager<JavaFileManager> forwardingFileManager = new ForwardingJavaFileManager<>(fileManager) {
 				@Override
 				public JavaFileObject getJavaFileForOutput(Location location,
 															String className,
@@ -230,7 +225,6 @@ public class RuntimeCompiler {
 															FileObject sibling) throws IOException {
 					// Only for default package and module classes
 					if ((className.indexOf('.') < 0) || className.startsWith("modules.")) {
-						@SuppressWarnings("synthetic-access")
 						InMemoryJavaClassFileObject javaClass = new InMemoryJavaClassFileObject(className);
 						result.putClass(className, javaClass);
 						return javaClass;

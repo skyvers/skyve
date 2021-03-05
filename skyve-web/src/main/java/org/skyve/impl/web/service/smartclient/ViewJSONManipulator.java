@@ -137,7 +137,6 @@ class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processActionReference(ActionReference reference) {
 			htmlGuts.append("javascript:").append(generateWidgetId());
 			htmlGuts.append("._view.doAction('").append(reference.getActionName()).append("',false,'");
@@ -146,7 +145,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processContentReference(ContentReference reference) {
 			String binding = reference.getBinding();
 			
@@ -160,7 +158,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processEditViewReference(EditViewReference reference) {
 			String binding = reference.getBinding();
 			htmlGuts.append(org.skyve.util.Util.getDocumentUrl(reference.getModuleName(),
@@ -171,13 +168,11 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processExternalReference(ExternalReference reference) {
 			htmlGuts.append(reference.getHref());
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processImplicitActionReference(ImplicitActionReference reference) {
 			ImplicitActionName implicitAction = reference.getImplicitActionName();
 
@@ -194,7 +189,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processReportReference(ReportReference reference) {
 			htmlGuts.append("report.rpt?_format=").append(reference.getFormat()).append("&_id={bizId}");
 			htmlGuts.append("&_n=").append(reference.getReportName());
@@ -215,7 +209,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processResourceReference(ResourceReference reference) {
 			htmlGuts.append("resources?").append(AbstractWebContext.DOCUMENT_NAME).append("={bizModule}.{bizDocument}&");
 			htmlGuts.append(AbstractWebContext.REPORT_NAME).append('=').append(reference.getRelativeFile());
@@ -278,7 +271,6 @@ class ViewJSONManipulator extends ViewVisitor {
 	private int createIdCounter = 0;
 
 	// HrefProcessor - takes a Reference and appends a suitable href in htmlGuts
-	@SuppressWarnings("synthetic-access")
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 

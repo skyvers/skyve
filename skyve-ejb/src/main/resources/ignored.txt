@@ -1,0 +1,1 @@
+Nothing exists in this folder - delete this file if something is placed in here and committed to git.
