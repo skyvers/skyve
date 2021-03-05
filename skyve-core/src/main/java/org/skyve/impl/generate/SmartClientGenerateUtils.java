@@ -1400,19 +1400,18 @@ public class SmartClientGenerateUtils {
 		return sb.toString();
 	}
 
-	public static Map<String, String> getConstantDomainValueMap(User user,
+	public static Map<String, String> getConstantDomainValueMap(CustomerImpl customer,
 																	Document document,
 																	Attribute attribute,
 																	boolean runtime) {
-		Locale locale = user.getLocale();
-		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) user.getCustomer(), 
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, 
 																				DomainType.constant, 
 																				attribute, 
 																				null,
 																				runtime);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
-			result.put(value.getCode(), processString(Util.i18n(value.getDescription(), locale)));
+			result.put(value.getCode(), processString(Util.i18n(value.getDescription())));
 		}
 		
 		return result;
