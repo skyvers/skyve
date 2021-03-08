@@ -117,8 +117,10 @@ public class CommunicationUtil {
 		}
 
 		// handle addressee with optional override
-		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
-		if (communication.getSendToOverride() != null) {
+		String sendTo = null;
+		if (communication.getSendToOverride() == null) {
+			sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
+		} else {
 			sendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
 		}
 		List<String> sendToAddresses = resolveAndValidateEmailAddressList(communication, sendTo, responseMode, communicationDocument, subscriptionDocument);

@@ -687,7 +687,7 @@
 				<column binding="description" sortOrder="ascending" />
 				<column binding="documentName" />
 				<column binding="subject" />
-				<column binding="template"/>
+				<column binding="template.bizKey"/>
 			</columns>
 		</query>
 		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
