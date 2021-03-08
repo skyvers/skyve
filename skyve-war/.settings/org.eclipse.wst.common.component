@@ -23,16 +23,16 @@
         
         
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <dependent-module archiveName="skyve-ee-7.0.3.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ee/skyve-ee">
+        <dependent-module archiveName="skyve-ee-7.0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ee/skyve-ee">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-web-7.0.3.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-web/skyve-web">
+        <dependent-module archiveName="skyve-web-7.0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-web/skyve-web">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-7.0.3.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-7.0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-7.0.3.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-7.0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
                                                 
