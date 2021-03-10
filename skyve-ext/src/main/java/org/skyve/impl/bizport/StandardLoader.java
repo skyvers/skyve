@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.skyve.CORE;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
@@ -420,7 +419,7 @@ public class StandardLoader {
 			if (foreignKeyBean == null) {
 				sheet.addErrorAtCurrentRow(problems, 
 											foreignKeyColumn, 
-											Util.i18n(REFERENCED_ROW_DNE_MESSAGE_KEY, CORE.getUser().getLocale(), associationBinding, foreignKeySheet.getTitle(), foreignKeySheet.getTitle()));
+											Util.i18n(REFERENCED_ROW_DNE_MESSAGE_KEY, associationBinding, foreignKeySheet.getTitle(), foreignKeySheet.getTitle()));
 				continue;
 			}
 

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -101,7 +102,8 @@ public class Util {
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
 	public static String i18n(String key, String... values) {
-		User u = CORE.getUser();
+		// NB Don't attempt to get a user unless persistence has been initialised
+		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
 		return i18n(key, (u == null) ? null : u.getLocale(), values);
 	}
 	
@@ -130,8 +132,14 @@ public class Util {
 		return result;
 	}
 
+	public static boolean isRTL() {
+		// NB Don't attempt to get a user unless persistence has been initialised
+		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
+		return isRTL((u == null) ? null : u.getLocale());
+	}
+
 	public static boolean isRTL(Locale locale) {
-		return (!ComponentOrientation.getOrientation(locale).isLeftToRight());
+		return (locale != null) && (! ComponentOrientation.getOrientation(locale).isLeftToRight());
 	}
 
 	public static int UTF8Length(CharSequence sequence) {

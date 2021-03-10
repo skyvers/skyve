@@ -1452,7 +1452,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// Create the column
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			setId(column, null);
-			column.setHeaderText(Util.i18n(displayName, locale));
+			column.setHeaderText(Util.i18n(displayName));
 			column.setPriority(columnPriority);
 			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
@@ -3841,10 +3841,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
 			if (title == null) {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, "Value"));
+				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, "Value"));
 			}
 			else {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, title));
+				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title));
 			}
 		}
 		setDisabled(result, disabled, formDisabled);

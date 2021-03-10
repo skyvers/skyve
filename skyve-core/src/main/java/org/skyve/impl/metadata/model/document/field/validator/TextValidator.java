@@ -1,7 +1,5 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import java.util.Locale;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -157,11 +155,10 @@ public class TextValidator extends FieldValidator<String> {
 
 	@Override
 	public String constructMessage(User user, String displayName, Converter<String> converter) {
-		Locale locale = user.getLocale();
-		String message = Util.i18n(getValidationMessage(), locale);
+		String message = Util.i18n(getValidationMessage());
 		if (message != null) {
 			return message;
 		}
-		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, locale, Util.i18n(displayName, locale));
+		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, Util.i18n(displayName));
 	}
 }

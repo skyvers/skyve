@@ -28,11 +28,12 @@ public class SuperUser extends UserImpl {
     	setDataGroupId(user.getDataGroupId());
     	setHomeModuleName(user.getHomeModuleName());
     	setId(user.getId());
-    	setLanguageTag(user.getLanguageTag());
     	setName(user.getName());
     	setPasswordHash(user.getPasswordHash());
     	setPasswordChangeRequired(user.isPasswordChangeRequired());
-    	setWebLocale(user.getLocale());
+    	Locale locale = user.getLocale();
+    	setLanguageTag(user.getLanguageTag());
+    	setWebLocale((locale == null) ? Locale.ENGLISH : locale);
 	}
 
 	@Override

@@ -20,7 +20,6 @@ import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
@@ -87,11 +86,10 @@ public class Desktop extends Harness {
         	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					AbstractPersistence persistence = AbstractPersistence.get();
-			    	UserImpl user = (UserImpl) persistence.getUser();
+			    	UserImpl user = (UserImpl) CORE.getUser();
 			    	Customer customer = user.getCustomer();
 			    	
-			    	initialise(customer, user, fc.getExternalContext().getRequestLocale());
+			    	initialise();
 					createLocaleScriptIfRequired();
 
 			    	String bizModule = getBizModuleParameter();
@@ -191,7 +189,7 @@ public class Desktop extends Harness {
 	}
 
 	private void createLocaleScriptIfRequired() {
-		Locale locale = getLocale();
+		Locale locale = CORE.getUser().getLocale();
 		String language = locale.getLanguage();
 		String country = locale.getCountry();
 
@@ -347,28 +345,28 @@ public class Desktop extends Harness {
 		result.append("',[");
 
 		// render each module menu
-		new MenuRenderer(uxui, getLocale(), chosenModuleName) {
+		new MenuRenderer(uxui, chosenModuleName) {
 			@Override
 			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
 				result.append("{name:'");
 				result.append(menuModule.getName());
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getTitle(), getLocale())));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getTitle())));
 				result.append("',");
 			}
 			
 			@Override
 			public void renderMenuRoot(Menu menu, Module menuModule) {
 				result.append("root:{name:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getName(), getLocale())));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getName())));
 				result.append("',sub:[");
 			}
 			
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				result.append("{desc:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName(), locale)));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName())));
 				result.append("', sub:[");
 			}
 			
@@ -489,7 +487,7 @@ public class Desktop extends Harness {
 				if ((icon16 != null) || (iconStyleClass != null)) {
 					result.append("<span> &nbsp;</span>");
 				}
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(name, locale))).append('\'');
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(name))).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
 				}

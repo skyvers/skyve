@@ -4,16 +4,14 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
 
-import modules.admin.Communication.CommunicationBizlet;
-import modules.admin.Subscription.SubscriptionBizlet;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.PublicFacesView;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.Persistence;
+
+import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Subscription.SubscriptionBizlet;
 
 @RequestScoped
 @ManagedBean(name = "adminUnsubscribe")
@@ -33,21 +31,16 @@ public class UnsubscribeView extends PublicFacesView<Bean> {
 		
 		new FacesAction<Void>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
-					Persistence p = CORE.getPersistence();
-					UserImpl internalUser = (UserImpl) p.getUser();
-					if (internalUser != null) { // NB not necessarily logged in
-						Customer customer = internalUser.getCustomer();
-						initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
-					}
+					initialise();
 					
 					String bizCustomer = getBizCustomerParameter();
 					String communicationId = getBizIdParameter();
 					String receiverIdentifier = fc.getExternalContext().getRequestParameterMap().get("r");
 
+					Persistence p = CORE.getPersistence();
 					boolean communicationExists = CommunicationBizlet.anonymouslyCommunicationExists(p, bizCustomer, communicationId);
 					if (communicationExists) {
 

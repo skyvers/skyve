@@ -1,14 +1,13 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.util.Locale;
 import java.util.Set;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.skyve.CORE;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -105,8 +104,16 @@ public abstract class Harness extends Localisable {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
-	public final void initialise(Customer customer, UserImpl user, Locale requestLocale) {
-		super.initialise(user, requestLocale);
+	@Override
+	public final void initialise() {
+		super.initialise();
+
+		User user = CORE.getUser();
+		if (user == null) {
+			return;
+		}
+		
+		Customer customer = user.getCustomer();
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");

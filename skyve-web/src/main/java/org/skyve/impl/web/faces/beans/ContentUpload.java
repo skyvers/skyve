@@ -19,7 +19,6 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -46,9 +45,7 @@ public class ContentUpload extends Localisable {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				Persistence p = CORE.getPersistence();
-				UserImpl internalUser = (UserImpl) p.getUser();
-				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				initialise();
 				
 				return null;
 			}

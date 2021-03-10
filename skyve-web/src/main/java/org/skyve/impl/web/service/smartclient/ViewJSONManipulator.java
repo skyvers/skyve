@@ -308,7 +308,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		String title = Util.i18n(view.getTitle(), user.getLocale());
+		String title = Util.i18n(view.getTitle());
 		result.put("_title", BindUtil.formatMessage(title, bean));
 
 		// put the view changed/dirty flag in

@@ -1,8 +1,5 @@
 package modules.admin.SystemDashboard;
 
-import java.util.Locale;
-
-import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
@@ -21,77 +18,76 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 	public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 
 		// generate status information for display
-		Locale locale = CORE.getUser().getLocale();
-		String valTrue = Util.i18n("ui.true.valueIconStyleClass", locale);
-		String valFalse = Util.i18n("ui.false.valueIconStyleClass", locale);
-		String valDisabled = Util.i18n("ui.disabled.value", locale);
-		String valNo = Util.i18n("ui.no.value", locale);
-		String valUnavailable = Util.i18n("ui.unavailable.value", locale);
+		String valTrue = Util.i18n("ui.true.valueIconStyleClass");
+		String valFalse = Util.i18n("ui.false.valueIconStyleClass");
+		String valDisabled = Util.i18n("ui.disabled.value");
+		String valNo = Util.i18n("ui.no.value");
+		String valUnavailable = Util.i18n("ui.unavailable.value");
 
 		// session count
 		Generic sessionCount = Generic.newInstance();
-		sessionCount.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.sessionCount", locale)));
+		sessionCount.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.sessionCount")));
 		sessionCount.setText5001(formatStringValueHTML(Integer.toString(ConversationUtil.getSessionCount()), ""));
 		bean.getStatus().add(sessionCount);
 
 		// email configuration
 		Generic emailConfig = Generic.newInstance();
-		emailConfig.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.emailConfigured", locale)));
+		emailConfig.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.emailConfigured")));
 		emailConfig.setText5001(formatBooleanHTML(ConfigurationExtension.validSMTPHost(), valTrue, valFalse,
-				Util.i18n("admin.systemDashboard.status.itemLabel.emailConfigured.suggestion", locale)));
+				Util.i18n("admin.systemDashboard.status.itemLabel.emailConfigured.suggestion")));
 		bean.getStatus().add(emailConfig);
 
 		// backups configured
 		Generic backupConfig = Generic.newInstance();
-		backupConfig.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.backupsConfigured", locale)));
+		backupConfig.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.backupsConfigured")));
 		backupConfig.setText5001(formatBooleanHTML(ConfigurationExtension.validBackupConfiguration(), valTrue, valFalse,
-				Util.i18n("admin.systemDashboard.status.itemLabel.backupsConfigured.suggestion", locale)));
+				Util.i18n("admin.systemDashboard.status.itemLabel.backupsConfigured.suggestion")));
 		bean.getStatus().add(backupConfig);
 
 		final boolean jobScheduler = UtilImpl.JOB_SCHEDULER;
 
 		// backup job scheduled
 		Generic backupScheduled = Generic.newInstance();
-		backupScheduled.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled", locale)));
+		backupScheduled.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled")));
 		if (jobScheduler) {
 			backupScheduled.setText5001(formatBooleanHTML(ConfigurationExtension.validBackupSchedule(), valTrue, valFalse,
-					Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled.suggestion", locale)));
+					Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled.suggestion")));
 		} else {
 			backupScheduled.setText5001(formatStringValueHTML(valUnavailable,
-					Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled.suggestion", locale)));
+					Util.i18n("admin.systemDashboard.status.itemLabel.backupsScheduled.suggestion")));
 		}
 		bean.getStatus().add(backupScheduled);
 
 		// job scheduler enabled
 		Generic schedulerEnabled = Generic.newInstance();
-		schedulerEnabled.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.jobSchedulerEnabled", locale)));
+		schedulerEnabled.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.jobSchedulerEnabled")));
 		schedulerEnabled.setText5001(jobScheduler ? formatBooleanHTML(true, valTrue, valFalse, "")
 				: formatStringValueHTML(valDisabled,
-						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion", locale)));
+						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion")));
 		bean.getStatus().add(schedulerEnabled);
 
 		// self registration activated
 		ConfigurationExtension config = Configuration.newInstance();
 		Generic selfRegConfigured = Generic.newInstance();
-		selfRegConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured", locale)));
+		selfRegConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured")));
 		selfRegConfigured.setText5001((config.validSelfRegistration() ? formatBooleanHTML(true, valTrue, valFalse, "")
 				: formatStringValueHTML(valNo,
-						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion", locale))));
+						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion"))));
 		bean.getStatus().add(selfRegConfigured);
 
 		// anonymous user configured
 		Generic anonymousUserConfigured = Generic.newInstance();
-		anonymousUserConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured", locale)));
+		anonymousUserConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured")));
 		anonymousUserConfigured.setText5001((config.validAnonymousPublicUser() ? formatBooleanHTML(true, valTrue, valFalse, "")
 				: formatStringValueHTML(valNo,
-						Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured.suggestion", locale))));
+						Util.i18n("admin.systemDashboard.status.itemLabel.anonymousPublicUserConfigured.suggestion"))));
 		bean.getStatus().add(anonymousUserConfigured);
 
 		// Password self-reset configured
 		Generic passwordSelfResetConfigured = Generic.newInstance();
-		passwordSelfResetConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured", locale)));
+		passwordSelfResetConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured")));
 		passwordSelfResetConfigured.setText5001(formatBooleanHTML(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null, valTrue, valFalse,
-				Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured.suggestion", locale)));
+				Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured.suggestion")));
 		bean.getStatus().add(passwordSelfResetConfigured);
 
 		return super.newInstance(bean);

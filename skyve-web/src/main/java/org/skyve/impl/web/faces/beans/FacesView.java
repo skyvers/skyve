@@ -565,6 +565,7 @@ public class FacesView<T extends Bean> extends Harness {
 		return result.toString();
  	}
 
+	@SuppressWarnings("static-method")
 	public List<SelectItem> getSelectItems(String moduleName,
 											String documentName,
 											String binding,

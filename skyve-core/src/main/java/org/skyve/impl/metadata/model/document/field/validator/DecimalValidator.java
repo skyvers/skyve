@@ -1,7 +1,5 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import java.util.Locale;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -53,17 +51,17 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 				if (precisionInt != scale) {
 					String message = getValidationMessage();
 					if (message == null) {
-						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName, user.getLocale())));
+						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName)));
 					}
 				}
 			}
 		}
 	}
 	
-	public final String constructPrecisionMessage(String displayName, Locale locale) {
-		String result = Util.i18n(getValidationMessage(), locale);
+	public final String constructPrecisionMessage(String displayName) {
+		String result = Util.i18n(getValidationMessage());
 		if (result == null) {
-			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, locale, Util.i18n(displayName, locale), precision.toString());
+			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, Util.i18n(displayName), precision.toString());
 		}
 		return result;
 	}

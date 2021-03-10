@@ -81,7 +81,7 @@ public class InitialiseServlet extends HttpServlet {
 										final StringBuilder json) {
 		json.append("[");
 		
-		new MenuRenderer(uxui, user.getLocale(), chosenModuleName) {
+		new MenuRenderer(uxui, chosenModuleName) {
 			private void appendItem(MenuItem item, String iconStyleClass, Module itemModule, String function, String ref) {
 				json.append("{\"label\":\"").append(item.getName());
 				if (iconStyleClass != null) {

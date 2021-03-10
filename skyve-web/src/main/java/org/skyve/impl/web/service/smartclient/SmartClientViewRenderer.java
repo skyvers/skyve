@@ -1052,7 +1052,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String title = widget.getTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(title))).append("',");
 		}
 		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
@@ -1197,7 +1197,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String title = widget.getTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(title))).append("',");
 		}
 		if ((relation instanceof Collection) && 
 				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {

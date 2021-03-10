@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.faces.component.FacesComponent;
@@ -63,7 +62,7 @@ public class ListGrid extends HtmlPanelGroup {
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
 	    		tempComponentBuilder = (classString != null) ? 
-	    								(ComponentBuilder) Class.forName(classString).newInstance() :
+	    								(ComponentBuilder) Class.forName(classString).getConstructor().newInstance() :
 	    									new SkyveComponentBuilderChain();
 	    	}
 	    	catch (Exception e) {
@@ -78,8 +77,6 @@ public class ListGrid extends HtmlPanelGroup {
 					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 			    	componentBuilder.setManagedBeanName(managedBeanName);
 			    	componentBuilder.setUserAgentType(userAgentType);
-					User user = CORE.getUser();
-			    	componentBuilder.setLocale((user == null) ? Locale.ENGLISH : user.getLocale());
 					ListGrid.this.getChildren().add(ListGrid.generate(moduleName,
 																		documentName,
 																		queryName,

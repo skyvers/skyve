@@ -23,11 +23,8 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -63,11 +60,7 @@ public class Menu extends Harness {
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
-					AbstractPersistence persistence = AbstractPersistence.get();
-					UserImpl internalUser = (UserImpl) persistence.getUser();
-					Customer customer = internalUser.getCustomer();
-
-					initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
+					initialise();
 					
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
 					UserAgentType userAgentType = UserAgent.getType(request);
@@ -98,7 +91,7 @@ public class Menu extends Harness {
 		MenuModel result = new DefaultMenuModel();
 
 		// render each module menu
-		new MenuRenderer(uxui, getLocale(), bizModule) {
+		new MenuRenderer(uxui, bizModule) {
 			private Stack<Submenu> subs = new Stack<>();
 			
 			@Override
@@ -114,7 +107,7 @@ public class Menu extends Harness {
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				DefaultSubMenu sub = new DefaultSubMenu(Util.i18n(group.getName(), getLocale()));
+				DefaultSubMenu sub = new DefaultSubMenu(Util.i18n(group.getName()));
 				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
@@ -196,13 +189,13 @@ public class Menu extends Harness {
 		return result;
 	}
 
-	private org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
-																String iconStyleClass,
-																Module menuModule,
-																Module itemModule,
-																String itemQueryName,
-																String itemAbsoluteHref) {
-		DefaultMenuItem result = new DefaultMenuItem(Util.i18n(item.getName(), getLocale()), iconStyleClass);
+	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
+																		String iconStyleClass,
+																		Module menuModule,
+																		Module itemModule,
+																		String itemQueryName,
+																		String itemAbsoluteHref) {
+		DefaultMenuItem result = new DefaultMenuItem(Util.i18n(item.getName()), iconStyleClass);
 		result.setAjax(false);
 		result.setHref("#");
 		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));

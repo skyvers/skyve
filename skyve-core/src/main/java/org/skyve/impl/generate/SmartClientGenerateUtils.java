@@ -2,7 +2,6 @@ package org.skyve.impl.generate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -243,7 +242,6 @@ public class SmartClientGenerateUtils {
 
 	protected static class SmartClientAttributeDefinition {
         protected SmartClientLookupDefinition lookup;
-        protected Locale locale;
 		protected String name;
 		protected String title;
 		protected String type = "text";
@@ -262,12 +260,10 @@ public class SmartClientGenerateUtils {
 													Customer customer, 
 													Module module,
 													Document document,
-													Locale locale,
 													String binding,
 													String name,
 													boolean runtime,
 													boolean isQueryColumn) {
-			this.locale = locale;
 			this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 			title = this.name;
 
@@ -302,12 +298,12 @@ public class SmartClientGenerateUtils {
 				if (domainType != null) {
 					// constant domain types
 					if (DomainType.constant.equals(domainType)) {
-						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale, runtime);
+						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
 					}
 					else { // variant or dynamic
 						// if this is an enumeration on a query column defn, ensure the filter has all values
 						if (isQueryColumn && bindingAttribute.getAttributeType() == AttributeType.enumeration) {
-							valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale, runtime);
+							valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
 						}
 						// this valueMap will be replaced in client logic but this defn ensures that the
 						// select widget doesn't try to use the form's data source to get values when opened
@@ -824,15 +820,14 @@ public class SmartClientGenerateUtils {
                                             InputWidget widget,
                                             String dataGridBindingOverride,
                                             boolean runtime) {
-            super(user,
-        			customer,
-                    module, 
-                    document, 
-                    user.getLocale(),
-                    (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
-            		null,
-            		runtime,
-            		false);
+			super(user,
+					customer,
+					module,
+					document,
+					(dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
+					null,
+					runtime,
+					false);
             // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 			if ("enum".equals(type)) {
 				type = "text";
@@ -916,7 +911,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(Util.i18n(title, locale)));
+            result.append(processString(Util.i18n(title)));
             result.append("',type:'");
             result.append(type).append('\'');
             if (defaultValueJavascriptExpression != null) {
@@ -928,7 +923,7 @@ public class SmartClientGenerateUtils {
             appendEditorProperties(result, true, pixelWidth, null, null);
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
             }
             if (valueMap != null) {
                 result.append(",valueMap:").append(valueMap);
@@ -1000,7 +995,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(Util.i18n(title, locale)));
+            result.append(processString(Util.i18n(title)));
             result.append("',type:'");
             result.append(type);
             if (editorType != null) {
@@ -1017,7 +1012,7 @@ public class SmartClientGenerateUtils {
             }
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
             }
             else {
                 if ("select".equals(type)) {
@@ -1041,8 +1036,8 @@ public class SmartClientGenerateUtils {
 			
 		    if (helpText != null) {
 				result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
-				result.append(processString(Util.i18n(helpText, locale), false, true));
-				result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(processString(Util.i18n(title, locale))).append("'})}}]");
+				result.append(processString(Util.i18n(helpText), false, true));
+				result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(processString(Util.i18n(title))).append("'})}}]");
 			}
 
 		    if (lookup != null) {
@@ -1096,7 +1091,6 @@ public class SmartClientGenerateUtils {
 					customer, 
 					module,
 					document,
-					(user == null) ? null : user.getLocale(),
 					column.getBinding(),
 					column.getName(),
 					runtime,
@@ -1272,7 +1266,7 @@ public class SmartClientGenerateUtils {
 			result.append("name:'");
 			result.append(name);
 			result.append("',title:'");
-			result.append(processString(Util.i18n(title, locale)));
+			result.append(processString(Util.i18n(title)));
 			result.append("',type:'");
 			result.append(type);
 			if (editorType != null) {
@@ -1293,7 +1287,7 @@ public class SmartClientGenerateUtils {
 			}
 			if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, locale, Util.i18n(title, locale)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
 			}
 			if (! canFilter) {
 				result.append(",canFilter:false");
@@ -1376,7 +1370,6 @@ public class SmartClientGenerateUtils {
 	private static String getConstantDomainValueMapString(Customer customer,
 															Document document,
 															Attribute attribute,
-															Locale locale,
 															boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 
@@ -1388,7 +1381,7 @@ public class SmartClientGenerateUtils {
 		sb.append('{');
 		for (DomainValue value : values) {
 			sb.append('\'').append(processString(value.getCode())).append("':'");
-			sb.append(processString(Util.i18n(value.getDescription(), locale))).append("',");
+			sb.append(processString(Util.i18n(value.getDescription()))).append("',");
 		}
 		if (values.isEmpty()) { // no values
 			sb.append('}');
@@ -1633,8 +1626,6 @@ public class SmartClientGenerateUtils {
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
-		Locale locale = user.getLocale();
-		
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 		
@@ -1696,15 +1687,15 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");
-		toAppendTo.append(processString(Util.i18n(description, locale)));
+		toAppendTo.append(processString(Util.i18n(description)));
 		toAppendTo.append("',fields:[");
 
 		if (! config) {
 			toAppendTo.append("{name:'bizTagged',title:'");
-			toAppendTo.append(processString(Util.i18n("ui.tag", locale), false, true));
+			toAppendTo.append(processString(Util.i18n("ui.tag"), false, true));
 			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
 			toAppendTo.append("{name:'bizFlagComment',title:'");
-			toAppendTo.append(processString(Util.i18n("ui.flag", locale), false, true));
+			toAppendTo.append(processString(Util.i18n("ui.flag"), false, true));
 			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		

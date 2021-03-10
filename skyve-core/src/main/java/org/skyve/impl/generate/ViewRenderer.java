@@ -2,7 +2,6 @@ package org.skyve.impl.generate;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
 
 import org.skyve.CORE;
@@ -91,8 +90,6 @@ import org.skyve.util.Util;
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
-	// The locale to render for
-	protected Locale locale;
 
 	// Stack of containers sent in to render methods
 	private Stack<Container> currentContainers = new Stack<>();
@@ -106,7 +103,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	protected ViewRenderer(User user, Module module, Document document, View view) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view);
 		this.user = user;
-		locale = user.getLocale();
 	}
 
 	private String viewIcon16x16Url;
@@ -156,7 +152,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
-		String title = Util.i18n(tab.getTitle(), locale);
+		String title = Util.i18n(tab.getTitle());
 		String icon16x16Url = iconToUrl(tab.getIcon16x16RelativeFileName());
 		renderAttributes.push(icon16x16Url);
 		renderAttributes.push(title);
@@ -176,7 +172,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
-		String borderTitle = Util.i18n(vbox.getBorderTitle(), locale);
+		String borderTitle = Util.i18n(vbox.getBorderTitle());
 		renderAttributes.push(borderTitle);
 		renderVBox(borderTitle, vbox);
 		currentContainers.push(vbox);
@@ -194,7 +190,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
-		String borderTitle = Util.i18n(hbox.getBorderTitle(), locale);
+		String borderTitle = Util.i18n(hbox.getBorderTitle());
 		renderAttributes.push(borderTitle);
 		renderHBox(borderTitle, hbox);
 		currentContainers.push(hbox);
@@ -219,7 +215,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		currentForm = form;
-		currentFormBorderTitle = Util.i18n(form.getBorderTitle(), locale);
+		currentFormBorderTitle = Util.i18n(form.getBorderTitle());
 		currentFormColumnIndex = 0;
 		renderForm(currentFormBorderTitle, form);
 	}
@@ -378,8 +374,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetRequired = required;
 			}
 		}
-		currentWidgetLabel = Util.i18n(currentWidgetLabel, locale);
-		currentWidgetHelp = Util.i18n(currentWidgetHelp, locale);
+		currentWidgetLabel = Util.i18n(currentWidgetLabel);
+		currentWidgetHelp = Util.i18n(currentWidgetHelp);
 		if (currentFormItem != null) {
 			Boolean showLabel = currentFormItem.getShowLabel();
 			currentWidgetShowLabel = (showLabel == null) ? showsLabelByDefault : showLabel.booleanValue();
@@ -436,8 +432,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String displayName = action.getDisplayName();
 		// Note that the " " result is for SC
 		actionLabel = (displayName == null) ? 
-						((implicitName == null) ? " " : Util.i18n(implicitName.getDisplayName(), locale)) :
-							Util.i18n(displayName, locale);
+						((implicitName == null) ? " " : Util.i18n(implicitName.getDisplayName())) :
+							Util.i18n(displayName);
 		String relativeIconFileName = action.getRelativeIconFileName();
 		actionIconStyleClass = action.getIconStyleClass();
 		actionConfirmationText = action.getConfirmationText();
@@ -634,12 +630,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 
 		actionIconUrl = iconToUrl(relativeIconFileName);
-		actionToolTip = Util.i18n(action.getToolTip(), locale);
+		actionToolTip = Util.i18n(action.getToolTip());
 		if (actionConfirmationParam != null) {
-			actionConfirmationText = Util.i18n(actionConfirmationText, locale, actionConfirmationParam);
+			actionConfirmationText = Util.i18n(actionConfirmationText, actionConfirmationParam);
 		}
 		else {
-			actionConfirmationText = Util.i18n(actionConfirmationText, locale);
+			actionConfirmationText = Util.i18n(actionConfirmationText);
 		}
 		
 		return true;
@@ -751,7 +747,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
-		String label = Util.i18n(button.getDisplayName(), locale);
+		String label = Util.i18n(button.getDisplayName());
 		if (currentFormItem != null) {
 			renderFormDialogButton(label, button);
 		}
@@ -812,7 +808,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, link.showsLabelByDefault());
-		String value = Util.i18n(link.getValue(), locale);
+		String value = Util.i18n(link.getValue());
 		if (currentFormItem != null) {
 			renderFormLink(value, link);
 		}
@@ -831,7 +827,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, blurb.showsLabelByDefault());
-		String markup = Util.i18n(blurb.getMarkup(), locale);
+		String markup = Util.i18n(blurb.getMarkup());
 		if (currentFormItem != null) {
 			renderFormBlurb(markup, blurb);
 		}
@@ -862,7 +858,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 		else {
 			preProcessWidget(true, label.showsLabelByDefault());
-			value = Util.i18n(value, locale);
+			value = Util.i18n(value);
 			currentTarget = null;
 		}
 		if (currentFormItem != null) {
@@ -909,7 +905,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private boolean currentListWidgetAggregateQuery;
 	
 	private void preProcessListWidget(AbstractListWidget widget) {
-		currentTabularTitle = Util.i18n(widget.getTitle(), locale);
+		currentTabularTitle = Util.i18n(widget.getTitle());
 
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
@@ -1037,7 +1033,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(grid.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
-		currentTabularTitle = Util.i18n(grid.getTitle(), locale);
+		currentTabularTitle = Util.i18n(grid.getTitle());
 		currentDataWidget = grid;
 		renderDataGrid(currentTabularTitle, grid);
 	}
@@ -1059,7 +1055,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(repeater.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
-		currentTabularTitle = Util.i18n(repeater.getTitle(), locale);
+		currentTabularTitle = Util.i18n(repeater.getTitle());
 		currentDataWidget = repeater;
 		renderDataRepeater(currentTabularTitle, repeater);
 	}
@@ -1093,7 +1089,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		if (currentColumnTitle == null) {
 			currentColumnTitle = currentWidgetLabel;
 		}
-		currentColumnTitle = Util.i18n(currentColumnTitle, locale);
+		currentColumnTitle = Util.i18n(currentColumnTitle);
 		currentBoundColumn = column;
 		if (currentDataWidget instanceof DataGrid) {
 			renderDataGridBoundColumn(currentColumnTitle, column);
@@ -1128,7 +1124,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
-		currentColumnTitle = Util.i18n(column.getTitle(), locale);
+		currentColumnTitle = Util.i18n(column.getTitle());
 		currentContainerColumn = column;
 		if (currentDataWidget instanceof DataGrid) {
 			renderDataGridContainerColumn(currentColumnTitle, column);
@@ -1273,7 +1269,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(link.getBinding(), link.showsLabelByDefault());
-		String value = Util.i18n(link.getValue(), locale);
+		String value = Util.i18n(link.getValue());
 		if (currentBoundColumn != null) {
 			renderBoundColumnContentLink(value, link);
 		}
@@ -1305,8 +1301,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(membership.getBinding(), false);
-		listMembershipCandidatesHeading = Util.i18n(membership.getCandidatesHeading(), locale);
-		listMembershipMembersHeading = Util.i18n(membership.getMembersHeading(), locale);
+		listMembershipCandidatesHeading = Util.i18n(membership.getCandidatesHeading());
+		listMembershipMembersHeading = Util.i18n(membership.getMembersHeading());
 		renderListMembership(listMembershipCandidatesHeading,
 								listMembershipMembersHeading,
 								membership);
@@ -2043,7 +2039,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 																true);
 		LinkedHashMap<String, String> result = new LinkedHashMap<>(values.size());
 		for (DomainValue value : values) {
-			result.put(value.getCode(), Util.i18n(value.getDescription(), locale));
+			result.put(value.getCode(), Util.i18n(value.getDescription()));
 		}
 		
 		return result;

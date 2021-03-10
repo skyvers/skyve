@@ -28,7 +28,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -60,9 +59,7 @@ public class FileUpload extends Localisable {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				Persistence p = CORE.getPersistence();
-				UserImpl internalUser = (UserImpl) p.getUser();
-				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				initialise();
 				
 				return null;
 			}
@@ -158,6 +155,7 @@ public class FileUpload extends Localisable {
 				// do nothing
 			}
 			try{
+				@SuppressWarnings("resource")
 				UploadAction.UploadedFile bizFile = 
 						new UploadAction.UploadedFile(FilenameUtils.getName(file.getFileName()),
 														file.getInputstream(),
