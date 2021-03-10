@@ -16,7 +16,6 @@ public class SuperUser extends UserImpl {
 		RoleImpl superRole = new RoleImpl();
 		superRole.setName(SUPER_ROLE);
 		addRole(superRole);
-		setLanguageTag("EN");
 		setWebLocale(Locale.ENGLISH);
 	}
 	
