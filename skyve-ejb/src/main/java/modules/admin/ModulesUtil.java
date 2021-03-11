@@ -707,7 +707,7 @@ public class ModulesUtil {
 	 */
 	public static Integer getNextDocumentNumber(String moduleName, String documentName, String fieldName) {
 
-		return new Integer(Integer.parseInt(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
+		return Integer.valueOf(Integer.parseInt(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
@@ -716,7 +716,7 @@ public class ModulesUtil {
      */
     public static Long getNextLongDocumentNumber(String moduleName, String documentName, String fieldName) {
 
-        return new Long(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
+		return Long.valueOf(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
     }
 
 	/**
@@ -736,7 +736,7 @@ public class ModulesUtil {
 
 		String newNumber = "";
 		String nonNumeric = lastNumber;
-		Integer value = new Integer(1);
+		Integer value = Integer.valueOf(1);
 		String prefix;
 		if (suppliedPrefix != null) {
 			prefix = suppliedPrefix;
@@ -752,18 +752,18 @@ public class ModulesUtil {
 				String numberPart = lastNumber.substring(parts[0].length(), lastNumber.length());
 				nonNumeric = lastNumber.substring(0, parts[0].length());
 
-				value = new Integer(Integer.parseInt(numberPart) + 1);
+				value = Integer.valueOf(Integer.parseInt(numberPart) + 1);
 
 				// cater for purely numeric prefix
 			} else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$") && !"0".equals(lastNumber)) {
 				int len = prefix.length();
-				value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
+				value = Integer.valueOf(Integer.parseInt(lastNumber.substring(len)) + 1);
 				nonNumeric = prefix;
 
 				// cater for numeric only
 			} else if (lastNumber.matches("^\\d+$")) {
 				nonNumeric = prefix;
-				value = new Integer(Integer.parseInt(lastNumber) + 1);
+				value = Integer.valueOf(Integer.parseInt(lastNumber) + 1);
 			}
 		} else {
 			nonNumeric = prefix;
