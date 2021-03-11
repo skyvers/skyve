@@ -51,7 +51,7 @@ public abstract class Localisable implements Serializable {
 			return new FacesAction<String>() {
 				@Override
 				public String callback() throws Exception {
-					String result = Util.i18n((String) key, (locale == null) ? Locale.ENGLISH : locale);
+					String result = Util.i18n((String) key, locale);
 					if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("I18nMapAdapter.get " + key + " = " + result);
 					return result;
 				}
