@@ -39,14 +39,14 @@ public class JSONReader {
 
 	private static Map<Character, Character> escapes = new HashMap<>();
 	static {
-		escapes.put(new Character('"'), new Character('"'));
-		escapes.put(new Character('\\'), new Character('\\'));
-		escapes.put(new Character('/'), new Character('/'));
-		escapes.put(new Character('b'), new Character('\b'));
-		escapes.put(new Character('f'), new Character('\f'));
-		escapes.put(new Character('n'), new Character('\n'));
-		escapes.put(new Character('r'), new Character('\r'));
-		escapes.put(new Character('t'), new Character('\t'));
+		escapes.put(Character.valueOf('"'), Character.valueOf('"'));
+		escapes.put(Character.valueOf('\\'), Character.valueOf('\\'));
+		escapes.put(Character.valueOf('/'), Character.valueOf('/'));
+		escapes.put(Character.valueOf('b'), Character.valueOf('\b'));
+		escapes.put(Character.valueOf('f'), Character.valueOf('\f'));
+		escapes.put(Character.valueOf('n'), Character.valueOf('\n'));
+		escapes.put(Character.valueOf('r'), Character.valueOf('\r'));
+		escapes.put(Character.valueOf('t'), Character.valueOf('\t'));
 	}
 
 	private User user;
@@ -376,7 +376,7 @@ public class JSONReader {
 		}
 
 		String s = buf.toString();
-		return isFloatingPoint ? new BigDecimal(s) : new Long(s);
+		return isFloatingPoint ? new BigDecimal(s) : Long.valueOf(s);
 		// ? (length < 17) ? (Object)Double.valueOf(s) : new BigDecimal(s)
 		// : (length < 19) ? (Object)Long.valueOf(s) : new BigInteger(s);
 	}
@@ -400,7 +400,7 @@ public class JSONReader {
 					add(unicode());
 				}
 				else {
-					Object value = escapes.get(new Character(c));
+					Object value = escapes.get(Character.valueOf(c));
 					if (value != null) {
 						add(((Character) value).charValue());
 					}
