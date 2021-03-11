@@ -4,8 +4,10 @@ import java.awt.ComponentOrientation;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.skyve.CORE;
@@ -102,10 +104,22 @@ public class Util {
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
 	public static String i18n(String key, String... values) {
+		if (key == null) {
+			return null;
+		}
+		
 		// NB Don't attempt to get a user unless persistence has been initialised
 		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
 		return i18n(key, (u == null) ? null : u.getLocale(), values);
 	}
+	
+	// language code -> (key -> string)
+	// Use of this map is WAY faster than using ResourceBundle which sux arse.
+	// This map is synchronized on during the put but reads are left free.
+	// The usage of this map is almost always read.
+	// The map is keyed on language code because there are less language codes than locales.
+	// NB Make the map volatile to ensure it is readable by multiple threads.
+	private static volatile Map<String, Map<String, String>> I18N_PROPERTIES = new TreeMap<>();
 	
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
@@ -115,9 +129,25 @@ public class Util {
 
 		if (key != null) {
 			try {
-				ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", (locale == null) ? Locale.ENGLISH : locale);
-				if (bundle.containsKey(key)) {
-					result = bundle.getString(key);
+				Locale l = (locale == null) ? Locale.ENGLISH : locale;
+				String lang = l.getLanguage();
+				Map<String, String> properties = I18N_PROPERTIES.get(lang);
+				if (properties == null) {
+					synchronized (I18N_PROPERTIES) {
+						properties = I18N_PROPERTIES.get(lang);
+						if (properties == null) {
+							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l);
+							properties = new TreeMap<>();
+							for (String bundleKey : bundle.keySet()) {
+								properties.put(bundleKey, bundle.getString(key));
+							}
+							I18N_PROPERTIES.put(lang, properties);
+						}
+					}
+				}
+				result = properties.get(key);
+				if (result == null) {
+					result = key;
 				}
 	
 				if ((values != null) && (values.length > 0)) {

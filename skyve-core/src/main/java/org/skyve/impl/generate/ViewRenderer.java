@@ -1,6 +1,5 @@
 package org.skyve.impl.generate;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -69,9 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -2030,20 +2027,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	
 	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
-
-	protected LinkedHashMap<String, String> getLocalisedConstantDomainValueMap(Attribute attribute) {
-		List<DomainValue> values = document.getDomainValues(customer, 
-																DomainType.constant, 
-																attribute, 
-																null,
-																true);
-		LinkedHashMap<String, String> result = new LinkedHashMap<>(values.size());
-		for (DomainValue value : values) {
-			result.put(value.getCode(), Util.i18n(value.getDescription()));
-		}
-		
-		return result;
-	}
 
 	public static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 

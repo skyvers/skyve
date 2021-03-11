@@ -1381,7 +1381,7 @@ public class SmartClientGenerateUtils {
 		sb.append('{');
 		for (DomainValue value : values) {
 			sb.append('\'').append(processString(value.getCode())).append("':'");
-			sb.append(processString(Util.i18n(value.getDescription()))).append("',");
+			sb.append(processString(value.getDescription())).append("',");
 		}
 		if (values.isEmpty()) { // no values
 			sb.append('}');
@@ -1404,7 +1404,7 @@ public class SmartClientGenerateUtils {
 																				runtime);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
-			result.put(value.getCode(), processString(Util.i18n(value.getDescription())));
+			result.put(value.getCode(), processString(value.getDescription()));
 		}
 		
 		return result;

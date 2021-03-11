@@ -2830,9 +2830,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(title);
+		result.setValue(Util.i18n(title));
 		result.setIcon(iconStyleClass);
-		result.setTitle(tooltip);
+		result.setTitle(Util.i18n(tooltip));
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
@@ -3083,9 +3083,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(title);
+		result.setValue(Util.i18n(title));
 		result.setIcon(iconStyleClass);
-		result.setTitle(tooltip);
+		result.setTitle(Util.i18n(tooltip));
 
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setInvisible(result, invisible, null);
@@ -3137,9 +3137,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
-		uploadButton.setValue(title);
+		uploadButton.setValue(Util.i18n(title));
 		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
-		uploadButton.setTitle(tooltip);
+		uploadButton.setTitle(Util.i18n(tooltip));
 		uploadButton.setType("button");
 		setSize(uploadButton, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
@@ -3192,8 +3192,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(title);
-		result.setTitle(tooltip);
+		result.setValue(Util.i18n(title));
+		result.setTitle(Util.i18n(tooltip));
 
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setDisabled(result, disabled, formDisabled);
@@ -3227,8 +3227,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(title);
-		result.setTitle(tooltip);
+		result.setValue(Util.i18n(title));
+		result.setTitle(Util.i18n(tooltip));
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
@@ -3291,8 +3291,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String invisible, 
 								String target) {
 		Button result = button(icon, styleClass, style);
-		result.setValue(value);
-		result.setTitle(title);
+		result.setValue(Util.i18n(value));
+		result.setTitle(Util.i18n(title));
 		result.setValueExpression("href", ef.createValueExpression(elc, href, String.class));
 		result.setTarget(target);
 
@@ -3854,7 +3854,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private void setConfirmation(UIComponentBase component, String confirmationText) {
 		if (confirmationText != null) {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
-			confirm.setMessage(confirmationText);
+			confirm.setMessage(Util.i18n(confirmationText));
 			confirm.setEscape(false);
 			component.addClientBehavior("click", confirm);
 		}

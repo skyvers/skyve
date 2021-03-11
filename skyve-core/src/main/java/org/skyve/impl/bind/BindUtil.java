@@ -500,7 +500,7 @@ public final class BindUtil {
 					String codeValue = value.toString();
 					for (DomainValue domainValue : domainValues) {
 						if (domainValue.getCode().equals(codeValue)) {
-							result = Util.i18n(domainValue.getDescription());
+							result = domainValue.getDescription();
 							found = true;
 							break;
 						}

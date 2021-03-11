@@ -742,7 +742,7 @@ class ViewJSONManipulator extends ViewVisitor {
     																			attribute, 
     																			null,
     																			true)) {
-                    values.put(domainValue.getCode(), Util.i18n(domainValue.getDescription()));
+                    values.put(domainValue.getCode(), domainValue.getDescription());
                 }
                 valueMaps.put(safeBinding, values);
             }
@@ -779,7 +779,7 @@ class ViewJSONManipulator extends ViewVisitor {
                 
 				if (domainValues != null) {
 					for (DomainValue domainValue : domainValues) {
-	                    values.put(domainValue.getCode(), Util.i18n(domainValue.getDescription()));
+	                    values.put(domainValue.getCode(), domainValue.getDescription());
 					}
 	                valueMaps.put(safeBinding, values);
 				}
