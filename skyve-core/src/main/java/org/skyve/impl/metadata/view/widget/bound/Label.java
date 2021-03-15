@@ -18,7 +18,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
+import org.skyve.util.Util;
 
 /**
  * If a label width/height is not specified, it sizes to fit its contents.
@@ -75,6 +75,10 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	
 	public String getValue() {
 		return value;
+	}
+	
+	public String getLocalisedValue() {
+		return Util.i18n(value);
 	}
 
 	@XmlAttribute(required = false)

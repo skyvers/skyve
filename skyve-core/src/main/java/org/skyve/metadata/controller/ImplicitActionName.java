@@ -3,6 +3,7 @@ package org.skyve.metadata.controller;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.util.Util;
 
 /**
  * Actions implicit to skyve.
@@ -110,5 +111,9 @@ public enum ImplicitActionName {
 	 */
 	public String getDisplayName() {
 		return displayName;
+	}
+	
+	public String getLocalisedDisplayName() {
+		return Util.i18n(displayName);
 	}
 }

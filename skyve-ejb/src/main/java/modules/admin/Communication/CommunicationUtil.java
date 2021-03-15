@@ -268,8 +268,8 @@ public class CommunicationUtil {
 						if (Boolean.TRUE.equals(subscription.getDeclined())) {
 							StringBuilder msg = new StringBuilder(128);
 							if (subscription.getFormatType() == null || c.getFormatType().equals(subscription.getFormatType())) {
-								msg.append(communicationDoc.getSingularAlias()).append(" prevented because the recipient ");
-								msg.append(address).append(" has a ").append(subscriptionDoc.getSingularAlias());
+								msg.append(communicationDoc.getLocalisedSingularAlias()).append(" prevented because the recipient ");
+								msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
 								msg.append(" set ").append(Subscription.declinedPropertyName);
 								if (subscription.getFormatType() != null) {
 									msg.append(" for ").append(subscription.getFormatType().toDescription());

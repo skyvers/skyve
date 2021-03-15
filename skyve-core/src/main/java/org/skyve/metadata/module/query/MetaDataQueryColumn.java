@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SortDirection;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -14,6 +15,10 @@ public interface MetaDataQueryColumn extends NamedMetaData {
 	 * @return
 	 */
 	public String getDisplayName();
+	
+	public default String getLocalisedDisplayName() {
+		return Util.i18n(getDisplayName());
+	}
 	
 	/**
 	 * 

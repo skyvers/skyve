@@ -279,19 +279,19 @@ public class SmartClientGenerateUtils {
 
 				if (binding.endsWith(Bean.BIZ_KEY)) {
 					if (bindingDocument != null) {
-						title = bindingDocument.getSingularAlias();
+						title = bindingDocument.getLocalisedSingularAlias();
 					}
 					else {
-						title = DocumentImpl.getBizKeyAttribute().getDisplayName();
+						title = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
 					}
 				}
 				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
-					title = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
+					title = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
 				}
 			}
 			
 			if ((bindingDocument != null) && (bindingAttribute != null)) {
-				title = bindingAttribute.getDisplayName();
+				title = bindingAttribute.getLocalisedDisplayName();
 				required = bindingAttribute.isRequired();
 
 				DomainType domainType = bindingAttribute.getDomainType();
@@ -911,7 +911,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(Util.i18n(title)));
+            result.append(processString(title));
             result.append("',type:'");
             result.append(type).append('\'');
             if (defaultValueJavascriptExpression != null) {
@@ -923,7 +923,7 @@ public class SmartClientGenerateUtils {
             appendEditorProperties(result, true, pixelWidth, null, null);
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
             }
             if (valueMap != null) {
                 result.append(",valueMap:").append(valueMap);
@@ -960,7 +960,7 @@ public class SmartClientGenerateUtils {
 			super(user, customer, module, document, widget, null, runtime);
 			Attribute attribute = target.getAttribute();
 			if (attribute != null) {
-				helpText = attribute.getDescription();
+				helpText = attribute.getLocalisedDescription();
 				if (AttributeType.time.equals(attribute.getAttributeType())) {
 					textAlign = HorizontalAlignment.right;
 				}
@@ -995,7 +995,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(Util.i18n(title)));
+            result.append(processString(title));
             result.append("',type:'");
             result.append(type);
             if (editorType != null) {
@@ -1012,7 +1012,7 @@ public class SmartClientGenerateUtils {
             }
             if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
             }
             else {
                 if ("select".equals(type)) {
@@ -1036,8 +1036,8 @@ public class SmartClientGenerateUtils {
 			
 		    if (helpText != null) {
 				result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
-				result.append(processString(Util.i18n(helpText), false, true));
-				result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(processString(Util.i18n(title))).append("'})}}]");
+				result.append(processString(helpText, false, true));
+				result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(processString(title)).append("'})}}]");
 			}
 
 		    if (lookup != null) {
@@ -1095,7 +1095,7 @@ public class SmartClientGenerateUtils {
 					column.getName(),
 					runtime,
 					true);
-			String displayName = column.getDisplayName();
+			String displayName = column.getLocalisedDisplayName();
 			if (displayName != null) {
 				title = displayName;
 			}
@@ -1266,7 +1266,7 @@ public class SmartClientGenerateUtils {
 			result.append("name:'");
 			result.append(name);
 			result.append("',title:'");
-			result.append(processString(Util.i18n(title)));
+			result.append(processString(title));
 			result.append("',type:'");
 			result.append(type);
 			if (editorType != null) {
@@ -1287,7 +1287,7 @@ public class SmartClientGenerateUtils {
 			}
 			if (required) {
             	result.append(",bizRequired:true,requiredMessage:'");
-            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, Util.i18n(title)))).append('\'');
+            	result.append(processString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
 			}
 			if (! canFilter) {
 				result.append(",canFilter:false");
@@ -1558,7 +1558,7 @@ public class SmartClientGenerateUtils {
 											null,
 											false,
 											modelName,
-											model.getDescription(),
+											model.getLocalisedDescription(),
 											model.getColumns(),
 											null, 
 											null, 
@@ -1599,7 +1599,7 @@ public class SmartClientGenerateUtils {
 											query.getName(), 
 											query.isAggregate(),
 											null, 
-											query.getDescription(),
+											query.getLocalisedDescription(),
 											query.getColumns(),
 											dataSourceIDOverride, 
 											forLookup, 
@@ -1687,7 +1687,7 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");
-		toAppendTo.append(processString(Util.i18n(description)));
+		toAppendTo.append(processString(description));
 		toAppendTo.append("',fields:[");
 
 		if (! config) {

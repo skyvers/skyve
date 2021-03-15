@@ -105,8 +105,7 @@ public class ValidationUtil {
 			return;
 		}
 
-		String displayName = attribute.getDisplayName();
-		String localisedDisplayName = Util.i18n(attribute.getDisplayName());
+		String localisedDisplayName = attribute.getLocalisedDisplayName();
 		Converter<?> converter = (attribute instanceof ConvertableField) ? 
 									((ConvertableField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
@@ -123,7 +122,7 @@ public class ValidationUtil {
 				@SuppressWarnings("rawtypes")
 				Validator validator = converter.getValidator();
 				if (validator != null) {
-					validator.validate(user, attributeValue, binding, displayName, converter, e);
+					validator.validate(user, attributeValue, binding, localisedDisplayName, converter, e);
 				}
 			}
 		}
@@ -166,11 +165,11 @@ public class ValidationUtil {
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
-					validateFormat(format.getFormat(), stringValue, binding, bean, displayName, e);
+					validateFormat(format.getFormat(), stringValue, binding, bean, localisedDisplayName, e);
 				}
 				TextValidator validator = text.getValidator();
 				if (validator != null) {
-					validator.validate(user, stringValue, binding, displayName, (Converter<String>) converter, e);
+					validator.validate(user, stringValue, binding, localisedDisplayName, (Converter<String>) converter, e);
 				}
 			}
 		}
@@ -179,7 +178,7 @@ public class ValidationUtil {
 			IntegerValidator validator = integer.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof Integer) {
-					validator.validate(user, (Integer) attributeValue, binding, displayName, (Converter<Integer>) converter, e);
+					validator.validate(user, (Integer) attributeValue, binding, localisedDisplayName, (Converter<Integer>) converter, e);
 				}
 			}
 		}
@@ -188,7 +187,7 @@ public class ValidationUtil {
 			LongValidator validator = integer.getValidator();
 			if (validator != null) {
 				if (attributeValue instanceof Long) {
-					validator.validate(user, (Long) attributeValue, binding, displayName, (Converter<Long>) converter, e);
+					validator.validate(user, (Long) attributeValue, binding, localisedDisplayName, (Converter<Long>) converter, e);
 				}
 			}
 		}
@@ -200,7 +199,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(java.util.Date) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<java.util.Date>) converter,
 										e);
 				}
@@ -214,7 +213,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(java.util.Date) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<java.util.Date>) converter,
 										e);
 				}
@@ -228,7 +227,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(java.util.Date) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<java.util.Date>) converter,
 										e);
 				}
@@ -242,7 +241,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(java.util.Date) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<java.util.Date>) converter,
 										e);
 				}
@@ -256,7 +255,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(org.skyve.domain.types.Decimal2) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<Decimal>) converter,
 										e);
 				}
@@ -270,7 +269,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(org.skyve.domain.types.Decimal5) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<Decimal>) converter,
 										e);
 				}
@@ -284,7 +283,7 @@ public class ValidationUtil {
 					validator.validate(user,
 										(org.skyve.domain.types.Decimal10) attributeValue,
 										binding,
-										displayName,
+										localisedDisplayName,
 										(Converter<Decimal>) converter,
 										e);
 				}

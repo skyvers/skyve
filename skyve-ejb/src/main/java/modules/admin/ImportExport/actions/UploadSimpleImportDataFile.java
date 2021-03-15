@@ -63,7 +63,9 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 						throw new Exception("The previous upload of this file can't be removed.");
 					}
 				}
-				Files.copy(file.getInputStream(), Paths.get(importFile.getAbsolutePath()));
+				try (InputStream is = file.getInputStream()) {
+					Files.copy(is, Paths.get(importFile.getAbsolutePath()));
+				}
 				bean.setImportFileName(file.getFileName());
 				bean.setImportFileAbsolutePath(importFile.getAbsolutePath());
 
@@ -124,7 +126,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				// create a new import export column config row for each column in the spreadsheet
 				ImportExportColumn newCol = ImportExportColumn.newInstance();
 				newCol.setParent(bean);
-				newCol.setBizOrdinal(new Integer(i)); // preserve load order
+				newCol.setBizOrdinal(Integer.valueOf(i)); // preserve load order
 				bean.getImportExportColumns().add(newCol);
 				if (Boolean.TRUE.equals(bean.getFileContainsHeaders())) {
 					newCol.setColumnName(columnName);
@@ -133,7 +135,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					// prefer a like match on Display Name
 					boolean bindingFound = false;
 					for (Attribute a : document.getAllAttributes()) {
-						if (a.getDisplayName().equalsIgnoreCase(columnName)) {
+						if (a.getLocalisedDisplayName().equalsIgnoreCase(columnName)) {
 							newCol.setBindingName(a.getName());
 							bindingFound = true;
 							break;
@@ -153,7 +155,8 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					if (!bindingFound) {
 						// attempt a close match on description
 						for (Attribute a : document.getAllAttributes()) {
-							if (a.getDescription() != null && a.getDescription().equalsIgnoreCase(columnName)) {
+							String localisedDescription = a.getLocalisedDescription();
+							if ((localisedDescription) != null && localisedDescription.equalsIgnoreCase(columnName)) {
 								newCol.setBindingName(a.getName());
 								bindingFound = true;
 								break;

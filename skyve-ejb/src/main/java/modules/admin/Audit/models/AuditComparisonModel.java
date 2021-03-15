@@ -46,7 +46,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 			am = c.getModule(sourceVersion.getAuditModuleName());
 			ad = am.getDocument(c, sourceVersion.getAuditDocumentName());
 		}
-		catch (Exception e) {
+		catch (@SuppressWarnings("unused") Exception e) {
 			// either the module or document is now inaccessible or no longer exists
 		}
 		
@@ -75,7 +75,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						referenceDocument = (reference == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
 					}
 				}
-				catch (MetaDataException e) {
+				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// couldn't resolve the binding; we'll continue on but it'll just be a node with the attribute names as audited
 				}
 				bindingToNodes.put(binding, createNode(c, reference, referenceDocument, sourceValues, deleted));
@@ -109,7 +109,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 							Document referenceDocument = (am == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
 							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
 						}
-						catch (MetaDataException e) {
+						catch (@SuppressWarnings("unused") MetaDataException e) {
 							bindingToNodes.put(binding, createNode(c, null, null, compareValues, true));
 						}
 					}
@@ -154,17 +154,17 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		result.setBizId((String) values.remove(Bean.DOCUMENT_ID));
 		String description = (String) values.remove(Bean.BIZ_KEY);
 		if (description == null) {
-			description = (referenceDocument == null) ? "" : referenceDocument.getSingularAlias();
+			description = (referenceDocument == null) ? "" : referenceDocument.getLocalisedSingularAlias();
 		}
 		result.setBusinessKeyDescription(description);
 
 		if (owningReference == null) {
 			result.setReferenceName(null);
-			result.setRelationshipDescription((referenceDocument == null) ? "" : referenceDocument.getSingularAlias());
+			result.setRelationshipDescription((referenceDocument == null) ? "" : referenceDocument.getLocalisedSingularAlias());
 		}
 		else {
 			result.setReferenceName(owningReference.getName());
-			result.setRelationshipDescription(owningReference.getDisplayName());
+			result.setRelationshipDescription(owningReference.getLocalisedDisplayName());
 		}
 		result.setMutation(deleted ? Mutation.deleted:  Mutation.added);
 		result.setDocument(referenceDocument);
@@ -196,7 +196,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, name);
 					attribute = (tmd == null) ? null : tmd.getAttribute();
 				}
-				catch (MetaDataException e) {
+				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// nothing to do here - The document no longer has the given attribute
 				}
 			}
@@ -206,7 +206,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				property.setWidget(new TextField());
 			}
 			else { // attribute exists
-				property.setTitle(attribute.getDisplayName());
+				property.setTitle(attribute.getLocalisedDisplayName());
 				property.setWidget(attribute.getDefaultInputWidget());
 
 				Class<?> type = null;
@@ -252,7 +252,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, propertyName);
 						attribute = (tmd == null) ? null : tmd.getAttribute();
 					}
-					catch (MetaDataException e) {
+					catch (@SuppressWarnings("unused") MetaDataException e) {
 						// nothing to do here - The document no longer has the given attribute
 					}
 				}

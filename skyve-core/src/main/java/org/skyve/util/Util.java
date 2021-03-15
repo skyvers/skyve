@@ -139,8 +139,9 @@ public class Util {
 							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l);
 							properties = new TreeMap<>();
 							for (String bundleKey : bundle.keySet()) {
-								properties.put(bundleKey, bundle.getString(key));
+								properties.put(bundleKey, bundle.getString(bundleKey));
 							}
+							ResourceBundle.clearCache();
 							I18N_PROPERTIES.put(lang, properties);
 						}
 					}

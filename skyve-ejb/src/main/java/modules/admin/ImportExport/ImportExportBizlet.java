@@ -35,7 +35,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 			return result;
 		}
@@ -54,7 +54,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 				}
 			}
 			return result;
@@ -125,7 +125,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				default:
 					ImportExportColumn col = ImportExportColumn.newInstance();
 					col.setBindingName(a.getName());
-					col.setColumnName(a.getDisplayName());
+					col.setColumnName(a.getLocalisedDisplayName());
 					columns.add(col);
 					break;
 				}

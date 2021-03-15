@@ -15,6 +15,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
@@ -31,6 +32,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
@@ -905,7 +907,7 @@ public class ModulesUtil {
 					Document document = module.getDocument(customer, b.getBizDocument());
 
 					for (Attribute attribute : document.getAllAttributes()) {
-						if (attribute.getDisplayName().equals(a)) {
+						if (attribute.getLocalisedDisplayName().equals(a)) {
 							found = true;
 							if (binding.toString().length() > 0) {
 								binding.append('.').append(attribute.getName());
@@ -1048,7 +1050,15 @@ public class ModulesUtil {
 			// filter for this project if provided
 			query.getFilter().addEquals(Bean.DOCUMENT_ID, b.getBizId());
 		}
-		bgBean.generateData(result, query.beanIterable());
+		try (AutoClosingIterable<Bean> i = query.beanIterable()) {
+			bgBean.generateData(result, i);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 
 		return result;
 	}

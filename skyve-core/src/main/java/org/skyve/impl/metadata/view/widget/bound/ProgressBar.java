@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
 // TODO Implement the rendering of this
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)

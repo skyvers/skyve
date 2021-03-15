@@ -285,13 +285,13 @@ public abstract class AbstractDataFileLoader {
 				field.setBinding(newBinding);
 				field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
 				if (debugMode) {
-					Util.LOGGER.info("Finalising field for association " + attr.getDisplayName());
+					Util.LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
 				}
 			} else {
 				// default
 				field.setAttribute(attr);
 				if (debugMode) {
-					Util.LOGGER.info("Finalising field for scalar " + attr.getDisplayName());
+					Util.LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
 				}
 			}
 
@@ -300,7 +300,7 @@ public abstract class AbstractDataFileLoader {
 				log.append("Field added for binding ").append(field.getBinding());
 				if (field.getAttribute() != null) {
 					log.append(" evaluates to ").append(moduleName).append('.').append(documentName);
-					log.append('.').append(field.getAttribute().getName()).append(" (").append(field.getAttribute().getDisplayName())
+					log.append('.').append(field.getAttribute().getName()).append(" (").append(field.getAttribute().getLocalisedDisplayName())
 							.append(')');
 				}
 				if (field.getConverter() != null) {
@@ -581,9 +581,9 @@ public abstract class AbstractDataFileLoader {
 				}
 			} else {
 				// throw an error
-				what.append("The ").append(drivingDoc.getSingularAlias());
+				what.append("The ").append(drivingDoc.getLocalisedSingularAlias());
 				what.append(" '").append(loadValue.toString()).append("'");
-				what.append(" doesn't match any existing ").append(drivingDoc.getPluralAlias()).append(".");
+				what.append(" doesn't match any existing ").append(drivingDoc.getLocalisedPluralAlias()).append(".");
 
 				throw new Exception(what.toString());
 			}
@@ -693,7 +693,7 @@ public abstract class AbstractDataFileLoader {
 							}
 						} catch (Exception e) {
 							what.append(" The value ");
-							what.append("'").append(field.getAttribute().getDisplayName()).append("'");
+							what.append("'").append(field.getAttribute().getLocalisedDisplayName()).append("'");
 							what.append(" is invalid");
 							what.append(" (using Converter " + field.getConverter().getClass().getSimpleName()).append(").");
 							if (e.getMessage() != null) {
@@ -827,7 +827,7 @@ public abstract class AbstractDataFileLoader {
 							// handle the operand - by default - just attempt to set the value in the binding
 							if (field.isRequired() && loadValue == null) {
 								what.append(" A value is required for '");
-								what.append(field.getAttribute().getDisplayName());
+								what.append(field.getAttribute().getLocalisedDisplayName());
 								what.append("' but no value was found.");
 								throw new Exception(what.toString());
 							}
@@ -839,7 +839,7 @@ public abstract class AbstractDataFileLoader {
 							String operandRawValue = getStringFieldValue(fieldIndex, true);
 							if (operandRawValue == null) {
 								what.append(" A value was expected for ");
-								what.append("'").append(field.getAttribute().getDisplayName()).append("'");
+								what.append("'").append(field.getAttribute().getLocalisedDisplayName()).append("'");
 								what.append(" but no value was found.");
 								Problem problem = new Problem(what.toString(), getWhere(fieldIndex).toString());
 								exception.addWarning(problem);
@@ -849,7 +849,7 @@ public abstract class AbstractDataFileLoader {
 								what.append(" The value '");
 								what.append(operandRawValue);
 								what.append("' found for '");
-								what.append(field.getAttribute().getDisplayName());
+								what.append(field.getAttribute().getLocalisedDisplayName());
 								what.append("' is invalid or the wrong type.");
 								if (e.getMessage() != null) {
 									what.append(e.getMessage());
@@ -883,7 +883,7 @@ public abstract class AbstractDataFileLoader {
 								if (debugMode) {
 									Util.LOGGER.info("FIND " + field.getLoadAction().name() + " for " + field.getBinding());
 								}
-								debugFilter.append(field.getAttribute().getDisplayName());
+								debugFilter.append(field.getAttribute().getLocalisedDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
 								case LOOKUP_EQUALS:

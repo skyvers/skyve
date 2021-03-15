@@ -273,7 +273,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
-		String label = currentFormItem.getLabel();
+		String label = currentFormItem.getLocalisedLabel();
 		if (label == null) {
 			label = widgetLabel;
 		}

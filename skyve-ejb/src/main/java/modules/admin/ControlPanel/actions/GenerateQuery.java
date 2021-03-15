@@ -46,9 +46,9 @@ public class GenerateQuery implements ServerSideAction<ControlPanelExtension> {
 
 			sb.append("<documentQuery name=\"").append(queryName).append("\"");
 			sb.append(" documentName=\"").append(document.getName()).append("\">\n");
-			sb.append("\t<displayName>").append(document.getSingularAlias()).append("</displayName>\n");
+			sb.append("\t<displayName>").append(document.getLocalisedSingularAlias()).append("</displayName>\n");
 			if (document.getDescription() != null) {
-				sb.append("\t<description>").append(document.getDescription()).append("</description>\n");
+				sb.append("\t<description>").append(document.getLocalisedDescription()).append("</description>\n");
 			}
 			sb.append("\t<columns>\n");
 

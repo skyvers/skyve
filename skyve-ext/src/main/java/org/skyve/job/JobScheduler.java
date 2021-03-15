@@ -299,7 +299,7 @@ public class JobScheduler {
 		
 		// Add the job data
 		JobDataMap map = mutableTrigger.getJobDataMap();
-		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getDisplayName());
+		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getLocalisedDisplayName());
 		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
 		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
 		if (sleepAtEndInSeconds != null) {
@@ -331,14 +331,14 @@ public class JobScheduler {
 				JOB_SCHEDULER.scheduleJob(mutableTrigger);
 			}
 			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
-				throw new ValidationException(new Message("You are already running job " + job.getDisplayName() +
+				throw new ValidationException(new Message("You are already running job " + job.getLocalisedDisplayName() +
 															".  Look in the jobs list for more information."));
 			}
 		}
 		
 		JobKey jobKey = mutableTrigger.getJobKey();
 		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
-		trace.append(": ").append(job.getDisplayName()).append(" with trigger ");
+		trace.append(": ").append(job.getLocalisedDisplayName()).append(" with trigger ");
 		TriggerKey key = mutableTrigger.getKey();
 		trace.append(key.getGroup() + '/' + key.getName());
 		if (firstFireTime != null) {

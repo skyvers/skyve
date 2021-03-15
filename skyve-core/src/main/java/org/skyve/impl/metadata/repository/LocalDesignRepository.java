@@ -911,7 +911,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				factoryClass = getJavaClass(null, String.format("modules.%s.%s.%sFactory", moduleName, documentName, documentName));
 			}
 			if (factoryClass != null) {
-				result = factoryClass.newInstance();
+				result = factoryClass.getConstructor().newInstance();
 			}
 		}
 		catch (@SuppressWarnings("unused") MetaDataException e) {

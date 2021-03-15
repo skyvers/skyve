@@ -1411,7 +1411,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String binding = queryColumn.getBinding();
 
 			// Sort out a display name and filter facet
-			String displayName = queryColumn.getDisplayName();
+			String displayName = queryColumn.getLocalisedDisplayName();
 			UIComponent specialFilterComponent = null;
 			AttributeType attributeType = null;
 			if (binding != null) {
@@ -1421,22 +1421,22 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				if (binding.endsWith(Bean.BIZ_KEY)) {
 					if (displayName == null) {
 						if (bindingDocument != null) {
-							displayName = bindingDocument.getSingularAlias();
+							displayName = bindingDocument.getLocalisedSingularAlias();
 						}
 						else {
-							displayName = DocumentImpl.getBizKeyAttribute().getDisplayName();
+							displayName = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
 						}
 					}
 				}
 				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 					if (displayName == null) {
-						displayName = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
+						displayName = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
 					}
 				}
 				else if (bindingAttribute != null) {
 					attributeType = bindingAttribute.getAttributeType();
 					if (displayName == null) {
-						displayName = bindingAttribute.getDisplayName();
+						displayName = bindingAttribute.getLocalisedDisplayName();
 					}
 					if (showFilter && 
 							(projectedQueryColumn != null) &&
@@ -1452,7 +1452,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// Create the column
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			setId(column, null);
-			column.setHeaderText(Util.i18n(displayName));
+			column.setHeaderText(displayName);
 			column.setPriority(columnPriority);
 			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
@@ -2371,12 +2371,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		ImplicitActionName name = action.getImplicitName();
 		if (ImplicitActionName.Download.equals(name)) {
 			return downloadLink(value,
-									action.getToolTip(),
+									action.getLocalisedToolTip(),
 									action.getName(),
 									dataWidgetBinding,
 									dataWidgetVar, 
 									link.getPixelWidth(), 
-									action.getConfirmationText(),
+									action.getLocalisedConfirmationText(),
 									action.getDisabledConditionName(), 
 									null,
 									action.getInvisibleConditionName(),
@@ -2385,7 +2385,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		return actionLink(value,
-							action.getToolTip(),
+							action.getLocalisedToolTip(),
 							null,
 							action.getName(),
 							false,
@@ -2394,7 +2394,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							link.getPixelWidth(),
 							null,
 							action.getClientValidation(),
-							action.getConfirmationText(),
+							action.getLocalisedConfirmationText(),
 							action.getDisabledConditionName(),
 							null,
 							action.getInvisibleConditionName(),
@@ -2408,14 +2408,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return reportButton(action.getDisplayName(), 
+		return reportButton(action.getLocalisedDisplayName(), 
 								action.getIconStyleClass(),
-								action.getToolTip(), 
+								action.getLocalisedToolTip(), 
 								action.getParameters(), 
 								null,
 								null,
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								action.getLocalisedConfirmationText(),
 								action.getDisabledConditionName(), 
 								null,
 								action.getInvisibleConditionName());
@@ -2432,15 +2432,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 		Map<String, String> properties = action.getProperties();
 
-		return downloadButton(action.getDisplayName(), 
+		return downloadButton(action.getLocalisedDisplayName(), 
 								action.getIconStyleClass(),
-								action.getToolTip(), 
+								action.getLocalisedToolTip(), 
 								dataWidgetBinding,
 								dataWidgetVar,
 								action.getName(), 
 								null,
 								null,
-								action.getConfirmationText(),
+								action.getLocalisedConfirmationText(),
 								action.getDisabledConditionName(), 
 								null,
 								action.getInvisibleConditionName(),
@@ -2454,14 +2454,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return uploadButton(action.getDisplayName(), 
+		return uploadButton(action.getLocalisedDisplayName(), 
 								action.getIconStyleClass(),
-								action.getToolTip(), 
+								action.getLocalisedToolTip(), 
 								action.getName(), 
 								null,
 								null,
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								action.getLocalisedConfirmationText(),
 								action.getDisabledConditionName(), 
 								null,
 								action.getInvisibleConditionName());
@@ -2481,7 +2481,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Map<String, String> properties = action.getProperties();
 		return actionButton(title,
 								action.getIconStyleClass(),
-								action.getToolTip(),
+								action.getLocalisedToolTip(),
 								name,
 								action.getName(),
 								false,
@@ -2490,7 +2490,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								action.getClientValidation(),
-								action.getConfirmationText(),
+								action.getLocalisedConfirmationText(),
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -2830,9 +2830,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(Util.i18n(title));
+		result.setValue(title);
 		result.setIcon(iconStyleClass);
-		result.setTitle(Util.i18n(tooltip));
+		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
@@ -3083,9 +3083,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
-		result.setValue(Util.i18n(title));
+		result.setValue(title);
 		result.setIcon(iconStyleClass);
-		result.setTitle(Util.i18n(tooltip));
+		result.setTitle(tooltip);
 
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setInvisible(result, invisible, null);
@@ -3137,9 +3137,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
-		uploadButton.setValue(Util.i18n(title));
+		uploadButton.setValue(title);
 		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
-		uploadButton.setTitle(Util.i18n(tooltip));
+		uploadButton.setTitle(tooltip);
 		uploadButton.setType("button");
 		setSize(uploadButton, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
@@ -3192,8 +3192,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(Util.i18n(title));
-		result.setTitle(Util.i18n(tooltip));
+		result.setValue(title);
+		result.setTitle(tooltip);
 
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setDisabled(result, disabled, formDisabled);
@@ -3227,8 +3227,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
-		result.setValue(Util.i18n(title));
-		result.setTitle(Util.i18n(tooltip));
+		result.setValue(title);
+		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
@@ -3291,8 +3291,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String invisible, 
 								String target) {
 		Button result = button(icon, styleClass, style);
-		result.setValue(Util.i18n(value));
-		result.setTitle(Util.i18n(title));
+		result.setValue(value);
+		result.setTitle(title);
 		result.setValueExpression("href", ef.createValueExpression(elc, href, String.class));
 		result.setTarget(target);
 
@@ -3854,7 +3854,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private void setConfirmation(UIComponentBase component, String confirmationText) {
 		if (confirmationText != null) {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
-			confirm.setMessage(Util.i18n(confirmationText));
+			confirm.setMessage(confirmationText);
 			confirm.setEscape(false);
 			component.addClientBehavior("click", confirm);
 		}

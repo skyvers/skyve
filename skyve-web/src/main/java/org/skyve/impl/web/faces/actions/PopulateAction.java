@@ -33,14 +33,14 @@ public class PopulateAction extends FacesAction<Void> {
 			Module m = c.getModule(bizModule);
 			Document d = m.getDocument(c, bizDocument);
 			ListModel<Bean> lm = CORE.getRepository().getListModel(c, d, queryName, true);
-			facesView.setTitle(lm.getDescription());
+			facesView.setTitle(lm.getLocalisedDescription());
 			facesView.setModelName(queryName);
 			facesView.setQueryNameParameter(null);
 		}
 		else {
 			MetaDataQueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 			facesView.setBizDocumentParameter(query.getDocumentName());
-			facesView.setTitle(query.getDescription());
+			facesView.setTitle(query.getLocalisedDescription());
 		}
 		
 		return null;

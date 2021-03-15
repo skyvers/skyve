@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
-import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"editable", "keyboardType", "complete", "pixelWidth", "properties"})

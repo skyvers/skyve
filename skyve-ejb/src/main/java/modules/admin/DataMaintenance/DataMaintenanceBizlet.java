@@ -39,7 +39,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 					ModuleDocument doc = ModuleDocument.newInstance();
 					doc.setModuleName(m.getName());
 					doc.setDocumentName(d.getName());
-					doc.setModDocName(String.format("%s.%s", m.getTitle(), d.getSingularAlias()));
+					doc.setModDocName(String.format("%s.%s", m.getLocalisedTitle(), d.getLocalisedSingularAlias()));
 					result.getRefreshDocuments().add(doc);
 				}
 			}
@@ -60,7 +60,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 					Document d = m.getDocument(c, k);
 					if (d.getPersistent() != null) {
 						result.add(new DomainValue(String.format("%s.%s", m.getName(), k), 
-													String.format("%s.%s", m.getTitle(), d.getSingularAlias())));
+													String.format("%s.%s", m.getLocalisedTitle(), d.getLocalisedSingularAlias())));
 					}
 				}
 			}
@@ -70,7 +70,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			result = new ArrayList<>();
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
-				result.add(new DomainValue(m.getName(), m.getTitle()));
+				result.add(new DomainValue(m.getName(), m.getLocalisedTitle()));
 			}
 			Collections.sort(result, new DomainValueSortByDescription());			
 		}
@@ -145,7 +145,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			for (String k : m.getDocumentRefs().keySet()) {
 				Document d = m.getDocument(c, k);
 				if (d.getPersistent() != null) {
-					result.add(new DomainValue(d.getName(), d.getSingularAlias()));
+					result.add(new DomainValue(d.getName(), d.getLocalisedSingularAlias()));
 				}
 			}
 

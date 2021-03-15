@@ -17,14 +17,10 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"focusActions", "blurActions"})
 public abstract class FocusableInputWidget extends InputWidget implements Focusable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5764377627372873764L;
 
 	private List<EventAction> focusActions = new ArrayList<>();

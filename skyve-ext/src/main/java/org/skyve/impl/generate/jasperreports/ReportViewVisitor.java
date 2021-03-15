@@ -640,7 +640,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		super(customer, module, document, view);
 		this.reportDesignGenerator = reportDesignGenerator;
 		detailBands = new ArrayList<>();
-		viewTitle = view.getTitle();
+		viewTitle = view.getLocalisedTitle();
 	}
 
 	/**
@@ -909,7 +909,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	public void visitDataWidget(AbstractDataWidget widget) {
 		Util.LOGGER.info("DATA GRID WITH BINDING" + widget.getBinding());
 		addContainer(widget.getWidgetId()
-				, widget.getTitle()
+				, widget.getLocalisedTitle()
 				, (widget.getTitle()==null?Boolean.FALSE: Boolean.TRUE)
 				, widget.getPixelWidth()
 				, widget.getPercentageWidth()
@@ -1234,7 +1234,7 @@ public class ReportViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitTab(Tab arg0, boolean arg1, boolean arg2) {
-		addContainer(null, arg0.getTitle(), Boolean.TRUE, null, null, null, Boolean.FALSE, ContainerType.tab, arg0.getInvisibleConditionName());
+		addContainer(null, arg0.getLocalisedTitle(), Boolean.TRUE, null, null, null, Boolean.FALSE, ContainerType.tab, arg0.getInvisibleConditionName());
 	}
 
 	@Override

@@ -219,7 +219,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 			StringBuilder sb = new StringBuilder();
 			if (loadedRows > 0) {
 				sb.append("Successfully loaded ").append(loadedRows).append(" rows. ");
-				sb.append(created).append(' ').append(document.getPluralAlias()).append(" created.");
+				sb.append(created).append(' ').append(document.getLocalisedPluralAlias()).append(" created.");
 			} else {
 				sb.append("Import unsuccessful. Try again.");
 			}

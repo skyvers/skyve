@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -80,12 +81,20 @@ public interface Attribute extends NamedMetaData {
 	 */
 	public String getDisplayName();
 	
+	public default String getLocalisedDisplayName() {
+		return Util.i18n(getDisplayName());
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
 	public String getDescription();
 	
+	public default String getLocalisedDescription() {
+		return Util.i18n(getDescription());
+	}
+
 	/**
 	 * 
 	 * @return

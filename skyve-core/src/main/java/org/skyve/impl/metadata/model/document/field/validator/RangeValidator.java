@@ -54,10 +54,9 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	}
 
 	@Override
-	public String constructMessage(User user, String displayName, Converter<T> converter) {
-		String result = Util.i18n(getValidationMessage());
+	public String constructMessage(User user, String localisedDisplayName, Converter<T> converter) {
+		String result = getLocalisedValidationMessage();
 		if (result == null) {
-			String localisedDisplayName = Util.i18n(displayName);
 			try {
 				if (min != null) {
 					String minDisplay = (converter == null) ? min.toString() : converter.toDisplayValue(min);

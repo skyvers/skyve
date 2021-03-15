@@ -36,7 +36,6 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
@@ -352,21 +351,21 @@ public class Desktop extends Harness {
 				result.append(menuModule.getName());
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getTitle())));
+				result.append(SmartClientGenerateUtils.processString(menuModule.getLocalisedTitle()));
 				result.append("',");
 			}
 			
 			@Override
 			public void renderMenuRoot(Menu menu, Module menuModule) {
 				result.append("root:{name:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(menuModule.getName())));
+				result.append(SmartClientGenerateUtils.processString(menuModule.getName()));
 				result.append("',sub:[");
 			}
 			
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				result.append("{desc:'");
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName())));
+				result.append(SmartClientGenerateUtils.processString(group.getLocalisedName()));
 				result.append("', sub:[");
 			}
 			
@@ -379,7 +378,7 @@ public class Desktop extends Harness {
 											String icon16,
 											String iconStyleClass) {
 				result.append("{name:'").append(itemQueryName);
-				renderItem(item.getName(), icon16, iconStyleClass, null, "cal", itemModule, itemDocument);
+				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "cal", itemModule, itemDocument);
 			}
 			
 			@Override
@@ -390,7 +389,7 @@ public class Desktop extends Harness {
 										String icon16,
 										String iconStyleClass) {
 				result.append("{name:'").append(itemDocument.getName());
-				renderItem(item.getName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
+				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
 			}
 			
 			@Override
@@ -399,7 +398,7 @@ public class Desktop extends Harness {
 										boolean relative,
 										String absoluteHref) {
 				result.append("{name:'").append(absoluteHref);
-				renderItem(item.getName(), null, null, null, "link", null, null);
+				renderItem(item.getLocalisedName(), null, null, null, "link", null, null);
 			}
 			
 			@Override
@@ -418,7 +417,7 @@ public class Desktop extends Harness {
 				else {
 					result.append(itemQueryName);
 				}
-				renderItem(item.getName(),
+				renderItem(item.getLocalisedName(),
 							icon16,
 							iconStyleClass,
 							item.isAutoPopulate() ? "{}" : "{autoPopulate:false}",
@@ -444,7 +443,7 @@ public class Desktop extends Harness {
 				else {
 					result.append(itemQueryName).append('_').append(item.getGeometryBinding());
 				}
-				renderItem(item.getName(), icon16, iconStyleClass, null, "map", itemModule, itemDocument);
+				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "map", itemModule, itemDocument);
 			}
 			
 			@Override
@@ -463,7 +462,7 @@ public class Desktop extends Harness {
 				else {
 					result.append(itemQueryName);
 				}
-				renderItem(item.getName(),
+				renderItem(item.getLocalisedName(),
 							icon16,
 							iconStyleClass, 
 							item.isAutoPopulate() ? "{}" : "{autoPopulate:false}",
@@ -487,7 +486,7 @@ public class Desktop extends Harness {
 				if ((icon16 != null) || (iconStyleClass != null)) {
 					result.append("<span> &nbsp;</span>");
 				}
-				result.append(SmartClientGenerateUtils.processString(Util.i18n(name))).append('\'');
+				result.append(SmartClientGenerateUtils.processString(name)).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
 				}

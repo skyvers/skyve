@@ -31,7 +31,7 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 			Module module = customer.getModule(bean.getModuleName());
 			
 			for (QueryDefinition query : module.getMetadataQueries()) {
-				result.add(new DomainValue(query.getName(), query.getDescription()));
+				result.add(new DomainValue(query.getName(), query.getLocalisedDescription()));
 			}
 		}
 
@@ -46,7 +46,7 @@ public class SnapshotBizlet extends Bizlet<Snapshot> {
 		Customer customer = CORE.getUser().getCustomer();
 		if (Snapshot.moduleNamePropertyName.equals(attributeName)) {
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 		}
 

@@ -16,7 +16,6 @@ import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "containerColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"widgets"})

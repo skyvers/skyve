@@ -17,6 +17,7 @@ import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
@@ -71,6 +72,10 @@ public abstract class AbstractListWidget implements RelativeSize, Filterable, In
 
 	public String getTitle() {
 		return title;
+	}
+	
+	public String getLocalisedTitle() {
+		return Util.i18n(title);
 	}
 
 	@XmlAttribute(required = false)

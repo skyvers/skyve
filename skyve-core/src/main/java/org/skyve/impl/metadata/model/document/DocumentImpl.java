@@ -105,7 +105,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
 		Class<T> beanClass = getBeanClass(customer);
-		T result = beanClass.newInstance();
+		T result = beanClass.getConstructor().newInstance();
 		
 		// Inject any dependencies
 		result = BeanProvider.injectFields(result);

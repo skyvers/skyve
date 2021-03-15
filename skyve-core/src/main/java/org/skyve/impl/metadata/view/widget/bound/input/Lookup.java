@@ -32,7 +32,6 @@ import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,

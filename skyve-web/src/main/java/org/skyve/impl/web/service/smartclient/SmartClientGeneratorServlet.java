@@ -188,7 +188,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					}
 				}
 				
-				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(Util.i18n(document.getSingularAlias())));
+				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getLocalisedSingularAlias()));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 

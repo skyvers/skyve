@@ -270,9 +270,8 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 
 		filterAndSort();
 		
-		return new AutoClosingIterable<Bean>() {
+		return new AutoClosingIterable<>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Iterator<Bean> iterator() {
 				return rows.iterator();
 			}

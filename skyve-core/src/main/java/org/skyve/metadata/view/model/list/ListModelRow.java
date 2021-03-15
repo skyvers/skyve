@@ -78,6 +78,7 @@ public class ListModelRow extends MapBean {
 	}
 
 	private String bizKey;
+	@Override
 	public String getBizKey() {
 		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
 			return (String) get(Bean.BIZ_KEY);

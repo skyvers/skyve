@@ -323,7 +323,7 @@ public class UserDashboardExtension extends UserDashboard {
 		String action;
 		String actionClass = null;
 		String iconClass = (document.getIconStyleClass() == null ? DEFAULT_ICON_CLASS : document.getIconStyleClass());
-		String singularAlias = document.getSingularAlias();
+		String singularAlias = document.getLocalisedSingularAlias();
 
 
 		Tile.Operation tileOperation = Tile.Operation.view;

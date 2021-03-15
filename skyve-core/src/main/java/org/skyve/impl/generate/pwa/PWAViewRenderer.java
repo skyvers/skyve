@@ -719,7 +719,6 @@ public class PWAViewRenderer extends ViewRenderer {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
 /* TODO we need the dataWidget binding to make this call
 				Action action = obtainActionForActionReference(reference, customer, module, document, dataWidgetBinding, cr.userAgentType);
@@ -752,7 +751,7 @@ public class PWAViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderLabel(String value, Label label) {
-		String ultimateValue = label.getValue();
+		String ultimateValue = label.getLocalisedValue();
 		String binding = label.getBinding();
 		if ((ultimateValue == null) && (binding == null)) { // using the Label.for attribute
 			ultimateValue = "Label";
@@ -929,7 +928,7 @@ public class PWAViewRenderer extends ViewRenderer {
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
-				alias = module.getDocument(customer, targetRelation.getDocumentName()).getSingularAlias();
+				alias = module.getDocument(customer, targetRelation.getDocumentName()).getLocalisedSingularAlias();
 			}
 		}
 
@@ -1774,7 +1773,7 @@ public class PWAViewRenderer extends ViewRenderer {
 														dataWidgetVar,
 														action,
 														null,
-														action.getDisplayName()));
+														label));
 				}
 			}
 		}
@@ -1797,9 +1796,9 @@ public class PWAViewRenderer extends ViewRenderer {
 						toolbarLayout.addChild(cr.upload(null, action));
 					}
 					else {
-						String displayName = action.getDisplayName();
+						String displayName = action.getLocalisedDisplayName();
 						if (displayName == null) {
-							displayName = name.getDisplayName();
+							displayName = name.getLocalisedDisplayName();
 						}
 						toolbarLayout.addChild(cr.action(null,
 															dataWidgetBinding,

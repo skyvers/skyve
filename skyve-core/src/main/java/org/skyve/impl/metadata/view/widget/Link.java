@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.util.Util;
 
 /**
  * The link can be used to link to a web page.
@@ -91,6 +92,10 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 		return value;
 	}
 
+	public String getLocalisedValue() {
+		return Util.i18n(value);
+	}
+	
 	@XmlAttribute(required = false)
 	public void setValue(String value) {
 		this.value = UtilImpl.processStringValue(value);

@@ -101,7 +101,7 @@ public class ReactNativeEditView extends ReactComponent {
 	private void addNavigationOptions(FileWriter fw, View view, String startingIndent) throws IOException {
 		fw.append(startingIndent).append("const navigation = useNavigation();\n");
 		fw.append(startingIndent).append("navigation.setOptions({\n");
-		fw.append(startingIndent).append("\ttitle: '").append(view.getTitle()).append("'").append(",\n");
+		fw.append(startingIndent).append("\ttitle: '").append(view.getLocalisedTitle()).append("'").append(",\n");
 		fw.append(startingIndent).append("});\n");
 		fw.write("\n");
 	}

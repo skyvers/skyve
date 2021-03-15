@@ -133,7 +133,7 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 		
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
-		listGrid.setTitle(model.getDescription());
+		listGrid.setTitle(model.getDescription()); // no localisation here as listGrid.getLocalisedTitle() would be called
 		listGrid.setShowAdd(createRendered);
 		listGrid.setDisabledConditionName(String.valueOf(createDisabled));
 		listGrid.setShowZoom(zoomRendered);
@@ -146,7 +146,7 @@ public class ListGrid extends HtmlPanelGroup {
 											name,
 											model,
 											null,
-											model.getDescription(),
+											model.getLocalisedDescription(),
 											listGrid,
 											user.canCreateDocument(model.getDrivingDocument()),
 											aggregateQuery);

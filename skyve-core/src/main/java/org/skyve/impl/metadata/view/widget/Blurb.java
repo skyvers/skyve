@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.util.Util;
 
 /**
  * If a label width/height is not specified, it sizes to fit its contents.
@@ -65,6 +66,10 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 		return markup;
 	}
 
+	public String getLocalisedMarkup() {
+		return Util.i18n(markup);
+	}
+	
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setMarkup(String markup) {

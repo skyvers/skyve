@@ -128,7 +128,6 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -308,8 +307,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		String title = Util.i18n(view.getTitle());
-		result.put("_title", BindUtil.formatMessage(title, bean));
+		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
 
 		// put the view changed/dirty flag in
 		result.put("_changed", Boolean.valueOf(webContextToReference.getCurrentBean().hasChanged()));
@@ -1103,10 +1101,10 @@ class ViewJSONManipulator extends ViewVisitor {
 									blurb.getPixelHeight(),
 									blurb.getTextAlignment(),
 									blurb.getInvisibleConditionName());
-			htmlGuts.append('>').append(blurb.getMarkup()).append("</div>");
+			htmlGuts.append('>').append(blurb.getLocalisedMarkup()).append("</div>");
 		}
 		else {
-			String markup = blurb.getMarkup();
+			String markup = blurb.getLocalisedMarkup();
 			if (BindUtil.messageIsBound(markup)) { // has a binding expression
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
@@ -1146,7 +1144,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				htmlGuts.append('{').append(binding).append('}');
 			}
 			else {
-				String value = label.getValue();
+				String value = label.getLocalisedValue();
 				if (value != null) {
 					htmlGuts.append(value);
 				}
@@ -1157,7 +1155,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append("</span>");
 		}
 		else {
-			String value = label.getValue();
+			String value = label.getLocalisedValue();
 			boolean boundValue = (value != null) && BindUtil.messageIsBound(value);
 			if (boundValue) { // has a binding expression
 				if (parentVisible && visible(label)) {
@@ -1215,7 +1213,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			}
 		}
 			
-		String value = link.getValue();
+		String value = link.getLocalisedValue();
 		if (value != null) {
 			htmlGuts.append(">").append(value).append("</a>");
 		}

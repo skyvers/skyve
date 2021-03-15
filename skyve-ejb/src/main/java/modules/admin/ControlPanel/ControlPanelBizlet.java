@@ -77,7 +77,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 			return result;
 		}
@@ -109,7 +109,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 						
 						if(!alreadySelected) {
 							// only add persistent documents
-							results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+							results.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 						}
 					}
 				}

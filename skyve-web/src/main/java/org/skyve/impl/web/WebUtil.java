@@ -339,7 +339,7 @@ public class WebUtil {
 														bizId),
 										e);
 				throw new MetaDataException(String.format("Failed to resolve this %s.", 
-															referenceDocument.getSingularAlias()),
+															referenceDocument.getLocalisedSingularAlias()),
 												e);
 				
 			}
@@ -349,7 +349,7 @@ public class WebUtil {
 		}
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
-																		referenceDocument.getSingularAlias())));
+																		referenceDocument.getLocalisedSingularAlias())));
 		}
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 

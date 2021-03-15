@@ -12,7 +12,7 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
@@ -69,6 +69,10 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 
 	public String getTitle() {
 		return title;
+	}
+	
+	public String getLocalisedTitle() {
+		return Util.i18n(title);
 	}
 
 	@XmlAttribute(required = false)

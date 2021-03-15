@@ -88,7 +88,7 @@ public class TextValidator extends FieldValidator<String> {
 	public void validate(User user,
 							String value,
 							String binding,
-							String displayName,
+							String localisedDisplayName,
 							Converter<String> converter,
 							ValidationException e) {
 		if (value != null) {
@@ -148,17 +148,17 @@ public class TextValidator extends FieldValidator<String> {
 			}
 			
 			if (! valid) {
-				e.getMessages().add(new Message(binding, constructMessage(user, displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(user, localisedDisplayName, converter)));
 			}
 		}
 	}
 
 	@Override
-	public String constructMessage(User user, String displayName, Converter<String> converter) {
-		String message = Util.i18n(getValidationMessage());
+	public String constructMessage(User user, String localisedDisplayName, Converter<String> converter) {
+		String message = getLocalisedValidationMessage();
 		if (message != null) {
 			return message;
 		}
-		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, Util.i18n(displayName));
+		return Util.i18n(BeanValidator.VALIDATION_TEXT_FORMAT, localisedDisplayName);
 	}
 }

@@ -160,7 +160,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			Set<String> moduleNames = user.getAccessibleModuleNames();
 			List<DomainValue> result = new ArrayList<>();
 			for (String moduleName : moduleNames) {
-				result.add(new DomainValue(moduleName, customer.getModule(moduleName).getTitle()));
+				result.add(new DomainValue(moduleName, customer.getModule(moduleName).getLocalisedTitle()));
 			}
 
 			return result;
@@ -184,17 +184,17 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				for (Role role : module.getRoles()) {
 
 					String roleName = role.getName();
-					String roleDescription = role.getDescription();
+					String roleDescription = role.getLocalisedDescription();
 
 					if (roleDescription != null) {
 						if (roleDescription.length() > 50) {
 							roleDescription = roleDescription.substring(0, 47) + "...";
 						}
 						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
-								String.format("%s - %s (%s)", module.getTitle(), roleName, roleDescription)));
+								String.format("%s - %s (%s)", module.getLocalisedTitle(), roleName, roleDescription)));
 					} else {
 						result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName),
-								String.format("%s - %s", module.getTitle(), roleName)));
+								String.format("%s - %s", module.getLocalisedTitle(), roleName)));
 					}
 				}
 			}

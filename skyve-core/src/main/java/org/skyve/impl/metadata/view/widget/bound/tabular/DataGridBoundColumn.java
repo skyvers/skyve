@@ -10,7 +10,6 @@ import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,

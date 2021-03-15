@@ -142,7 +142,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				}
 				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl(repository);
 
-				String queryTitle = "All " + document.getPluralAlias();
+				String queryTitle = "All " + document.getLocalisedPluralAlias();
 				query.setDescription(queryTitle);
 				query.setName(documentName);
 				query.setDocumentName(documentName);

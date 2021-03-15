@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Interface;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -46,17 +47,29 @@ public interface Model extends NamedMetaData {
 	 */
 	public String getPluralAlias();
 
+	public default String getLocalisedPluralAlias() {
+		return Util.i18n(getPluralAlias());
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
 	public String getSingularAlias();
 
+	public default String getLocalisedSingularAlias() {
+		return Util.i18n(getSingularAlias());
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
 	public String getDescription();
+	
+	public default String getLocalisedDescription() {
+		return Util.i18n(getDescription());
+	}
 	
 	/**
 	 * 

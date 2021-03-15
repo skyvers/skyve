@@ -17,6 +17,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
@@ -45,6 +46,10 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 		return title;
 	}
 
+	public String getLocalisedTitle() {
+		return Util.i18n(title);
+	}
+	
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);

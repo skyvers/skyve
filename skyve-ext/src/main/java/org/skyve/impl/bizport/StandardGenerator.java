@@ -76,7 +76,6 @@ public final class StandardGenerator {
 		new BeanVisitor(true, false, false) {
 			// processBean can be null as we are visiting ALL
 			@Override
-			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document processDocument,
 										Document owningDocument,
@@ -136,7 +135,6 @@ public final class StandardGenerator {
 			private Bean topBean;
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
@@ -254,7 +252,7 @@ public final class StandardGenerator {
 	 */
 	private void generateAndAddDocumentSheet(Document currentDocument, BizPortWorkbook workbook) 
 	throws Exception {
-		BizPortSheet sheet = new POISheet(currentDocument.getSingularAlias());
+		BizPortSheet sheet = new POISheet(currentDocument.getLocalisedSingularAlias());
 
 		// ID column
 		BizPortColumn column = new BizPortColumn("ID",
@@ -277,7 +275,7 @@ public final class StandardGenerator {
 			// Leave collections and biz keys out of it
 			if (! ((attribute instanceof Collection) || Bean.BIZ_KEY.equals(name))) {
 				if (AttributeType.association.equals(type)) {
-					column = new BizPortColumn(attribute.getDisplayName() + " ID", attribute.getDescription(), type);
+					column = new BizPortColumn(attribute.getLocalisedDisplayName() + " ID", attribute.getLocalisedDescription(), type);
 					Association association = (Association) attribute;
 					Module owningModule = customer.getModule(currentDocument.getOwningModuleName());
 					Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
@@ -285,7 +283,7 @@ public final class StandardGenerator {
 															associationDocument.getName()));
 				}
 				else {
-					column = new BizPortColumn(attribute.getDisplayName(), attribute.getDescription(), type);
+					column = new BizPortColumn(attribute.getLocalisedDisplayName(), attribute.getLocalisedDescription(), type);
 				}
 
 				if (DomainType.constant.equals(attribute.getDomainType())) {
@@ -293,7 +291,7 @@ public final class StandardGenerator {
 						bizlet = AbstractRepository.get().getBizlet(customer, currentDocument, true);
 					}
 					if (bizlet == null) { // metadata has an error
-						bizlet = new Bizlet<Bean>() {
+						bizlet = new Bizlet<>() {
 							private static final long serialVersionUID = 5302965331084582623L;
 						};
 					}
@@ -315,8 +313,9 @@ public final class StandardGenerator {
 			}
 			else {
 				Document parentDocument = currentDocument.getParentDocument(customer);
-				column = new BizPortColumn(parentDocument.getSingularAlias() + " ID (Parent)",
-												"The 'Parent' link of the relationship.  Populate this with " + parentDocument.getSingularAlias() + " IDs.", 
+				String localisedSingularAlias = parentDocument.getSingularAlias();
+				column = new BizPortColumn(localisedSingularAlias + " ID (Parent)",
+												"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.", 
 												AttributeType.text);
 				column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
 				sheet.addColumn(ChildBean.PARENT_NAME, column);
@@ -346,18 +345,20 @@ public final class StandardGenerator {
 												Collection collection,
 												Document collectionDocument,
 												BizPortWorkbook workbook) {
-		BizPortSheet sheet = new POISheet(collection.getDisplayName());
+		BizPortSheet sheet = new POISheet(collection.getLocalisedDisplayName());
 
 		// Owner ID column
-		BizPortColumn column = new BizPortColumn(owningDocument.getSingularAlias() + " ID (From)",
-													"The 'From' link of the relationship.  Populate this with " + owningDocument.getSingularAlias() + " IDs.",
+		String localisedSingularAlias = owningDocument.getLocalisedSingularAlias();
+		BizPortColumn column = new BizPortColumn(localisedSingularAlias + " ID (From)",
+													"The 'From' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.",
 													AttributeType.text);
 		column.setReferencedSheet(new SheetKey(owningDocument.getOwningModuleName(), owningDocument.getName()));
 		sheet.addColumn(PersistentBean.OWNER_COLUMN_NAME, column);
 
 		// Element ID column
-		column = new BizPortColumn(collectionDocument.getSingularAlias() + " ID (To)",
-									"The 'To' link of the relationship.  Populate this with " + collectionDocument.getSingularAlias() + " IDs.",
+		localisedSingularAlias = collectionDocument.getLocalisedSingularAlias();
+		column = new BizPortColumn(localisedSingularAlias + " ID (To)",
+									"The 'To' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.",
 									AttributeType.text);
 		column.setReferencedSheet(new SheetKey(collectionDocument.getOwningModuleName(), collectionDocument.getName()));
 		sheet.addColumn(PersistentBean.ELEMENT_COLUMN_NAME, column);

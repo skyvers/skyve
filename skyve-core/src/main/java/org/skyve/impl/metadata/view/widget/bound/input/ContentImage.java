@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,

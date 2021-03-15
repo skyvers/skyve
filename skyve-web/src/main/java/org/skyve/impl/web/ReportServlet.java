@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -57,9 +56,6 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public static final String REPORT_PATH = "/report";
@@ -465,7 +461,7 @@ public class ReportServlet extends HttpServlet {
 					sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
 					sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
 					params.put("RESOURCE_DIR", sb.toString());
-					params.put("TITLE", model.getDescription());
+					params.put("TITLE", model.getLocalisedDescription());
 
 					jasperPrint = JasperFillManager.fillReport(jasperReport,
 																params,

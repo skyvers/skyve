@@ -233,7 +233,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		Customer customer = pers.getUser().getCustomer();
 		if (ReportDesign.moduleNamePropertyName.equals(attributeName)) {
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 		}
 
@@ -252,7 +252,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 			Module module = customer.getModule(bean.getModuleName());
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
-				result.add(new DomainValue(document.getName(), document.getDescription()));
+				result.add(new DomainValue(document.getName(), document.getLocalisedDescription()));
 			}
 		}
 
@@ -265,7 +265,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 					.map(q -> (MetaDataQueryDefinition) q)
 					.collect(Collectors.toList());
 			for (QueryDefinition queryDefinition : documentQueries) {
-				result.add(new DomainValue(queryDefinition.getName(), queryDefinition.getDescription()));
+				result.add(new DomainValue(queryDefinition.getName(), queryDefinition.getLocalisedDescription()));
 			}
 		}
 

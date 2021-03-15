@@ -45,7 +45,6 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.util.Util;
 
 public class ReactNativeComponentRenderer extends ComponentRenderer {
 	public static final String REACT_NATIVE_IMPORT = "react-native";
@@ -137,7 +136,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(Util.i18n(action.getDisplayName())).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return label(component, "actionButton");
 	}
 
@@ -146,7 +145,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(Util.i18n(action.getDisplayName())).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return label(component, "reportButton");
 	}
 
@@ -159,7 +158,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		//imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(Util.i18n(action.getDisplayName())).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return label(component, "downloadButton");
 	}
 
@@ -549,7 +548,7 @@ System.out.println("action column " + current);
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		if (ImplicitActionName.Cancel.equals(name)) {
-			output.append("<Button label=\"").append(Util.i18n(title)).append("\" onClick={(e) => this.props.history.goBack()} />");
+			output.append("<Button label=\"").append(title).append("\" onClick={(e) => this.props.history.goBack()} />");
 		}
 		else {
 			output.append("action " + name);

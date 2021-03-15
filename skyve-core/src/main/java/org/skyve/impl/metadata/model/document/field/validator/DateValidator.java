@@ -20,7 +20,7 @@ public class DateValidator extends RangeValidator<Date> {
 	public void validate(User user, 
 							Date value,
 							String binding,
-							String displayName,
+							String localisedDisplayName,
 							Converter<Date> converter,
 							ValidationException e) {
 		if (value != null) {
@@ -28,7 +28,7 @@ public class DateValidator extends RangeValidator<Date> {
 			Date max = getMax();
 			if (((min != null) && value.before(min)) ||
 					((max != null) && value.after(max))) {
-				e.getMessages().add(new Message(binding, constructMessage(user, displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(user, localisedDisplayName, converter)));
 			}
 		}
 	}

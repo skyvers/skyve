@@ -776,7 +776,7 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(form.getDisabledConditionName(), formIdentifier);
 		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
 		validateSize(form, formIdentifier);
-		validateMessageExpressions(form.getBorderTitle(), formIdentifier, "borderTitle");
+		validateMessageExpressions(form.getLocalisedBorderTitle(), formIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -989,7 +989,7 @@ class ViewValidator extends ViewVisitor {
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(hbox, boxIdentifier);
 		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
-		validateMessageExpressions(hbox.getBorderTitle(), boxIdentifier, "borderTitle");
+		validateMessageExpressions(hbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -1024,7 +1024,7 @@ class ViewValidator extends ViewVisitor {
 		if (markup == null) {
 			throw new MetaDataException(blurbIdentifier + " in " + viewIdentifier + " has no markup specified.");
 		}
-		validateMessageExpressions(blurb.getMarkup(), blurbIdentifier, "markup");
+		validateMessageExpressions(blurb.getLocalisedMarkup(), blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 		validateSize(blurb, blurbIdentifier);
 	}
@@ -1050,7 +1050,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							labelIdentifier);
-		validateMessageExpressions(label.getValue(), labelIdentifier, "a value");
+		validateMessageExpressions(label.getLocalisedValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
 		validateSize(label, labelIdentifier);
 	}
@@ -1659,7 +1659,6 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processContentReference(ContentReference reference) {
 				String widgetidentifier = linkIdentifier + " with a content reference";
 				if (dataWidgetBinding != null) {
@@ -1713,7 +1712,7 @@ class ViewValidator extends ViewVisitor {
 		String tabIdentifier = "Tab " + tab.getTitle();
 		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
 		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
-		validateMessageExpressions(tab.getTitle(), tabIdentifier, "title");
+		validateMessageExpressions(tab.getLocalisedTitle(), tabIdentifier, "title");
 	}
 
 	@Override
@@ -1806,12 +1805,12 @@ class ViewValidator extends ViewVisitor {
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(vbox, boxIdentifier);
 		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
-		validateMessageExpressions(vbox.getBorderTitle(), boxIdentifier, "borderTitle");
+		validateMessageExpressions(vbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
 	public void visitView() {
-		validateMessageExpressions(view.getTitle(), viewIdentifier, "a title");
+		validateMessageExpressions(view.getLocalisedTitle(), viewIdentifier, "a title");
 
 		List<ViewParameter> parameters = view.getParameters();
 		if (parameters != null) {

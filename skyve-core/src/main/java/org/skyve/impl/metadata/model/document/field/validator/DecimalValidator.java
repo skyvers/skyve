@@ -33,7 +33,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 	public void validate(User user,
 							Decimal value,
 							String binding,
-							String displayName,
+							String localisedDisplayName,
 							Converter<Decimal> converter,
 							ValidationException e) {
 		if (value != null) {
@@ -42,7 +42,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 			Decimal max = getMax();
 			if (((min != null) && (value.compareTo(min) < 0)) ||
 					((max != null) && (value.compareTo(max) > 0))) {
-				e.getMessages().add(new Message(binding, constructMessage(user, displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(user, localisedDisplayName, converter)));
 				addedCustomerValidationMessage = (getValidationMessage() != null);
 			}
 			if ((! addedCustomerValidationMessage) && (precision != null)) {
@@ -51,17 +51,17 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 				if (precisionInt != scale) {
 					String message = getValidationMessage();
 					if (message == null) {
-						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName)));
+						e.getMessages().add(new Message(binding, constructPrecisionMessage(localisedDisplayName)));
 					}
 				}
 			}
 		}
 	}
 	
-	public final String constructPrecisionMessage(String displayName) {
-		String result = Util.i18n(getValidationMessage());
+	public final String constructPrecisionMessage(String localisedDisplayName) {
+		String result = getLocalisedValidationMessage();
 		if (result == null) {
-			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, Util.i18n(displayName), precision.toString());
+			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, localisedDisplayName, precision.toString());
 		}
 		return result;
 	}

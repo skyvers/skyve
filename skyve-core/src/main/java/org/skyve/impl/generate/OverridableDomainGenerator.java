@@ -3461,8 +3461,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Generate/Include UML doc
 		contents.append("\n/**");
-		contents.append("\n * ").append(document.getSingularAlias());
-		String doc = document.getDescription();
+		contents.append("\n * ").append(document.getLocalisedSingularAlias());
+		String doc = document.getLocalisedDescription();
 		if (doc != null) {
 			contents.append("\n * <br/>");
 			contents.append("\n * ").append(doc);
@@ -3641,8 +3641,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {
 		toAppendTo.append("\t/**\n");
-		toAppendTo.append("\t * ").append(attribute.getDisplayName()).append('\n');
-		String doc = attribute.getDescription();
+		toAppendTo.append("\t * ").append(attribute.getLocalisedDisplayName()).append('\n');
+		String doc = attribute.getLocalisedDescription();
 		if (doc != null) {
 			toAppendTo.append("\t * <br/>\n");
 			toAppendTo.append("\t * ").append(doc).append("\n");

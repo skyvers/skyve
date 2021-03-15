@@ -98,7 +98,8 @@ public class DoctorUtil {
 	public static void renderModule(Customer customer, Module module, PrintStream out) throws Exception {
 
 		// Create title page
-		DocHeader header = new DocHeader(module.getTitle());
+		String localisedTitle = module.getLocalisedTitle();
+		DocHeader header = new DocHeader(localisedTitle);
 //		header.setRibbonBarLocation("ribbonBar.jpg"); // TODO
 		out.println(header.toHTML());
 
@@ -133,13 +134,13 @@ public class DoctorUtil {
 		if (!module.getDocumentRefs().keySet().isEmpty()) {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfDocuments"));
 			table.setTitle("Module Documents");
-			table.getHtmlContent().add("The module " + module.getTitle() + " has the following documents defined:");
+			table.getHtmlContent().add("The module " + localisedTitle + " has the following documents defined:");
 			table.setHeaderValues("Document", "Description", "Documentation");
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
 				// document.getName()
-				table.setRowValues(document.getName(), document.getDescription(), document.getDocumentation());
+				table.setRowValues(document.getName(), document.getLocalisedDescription(), document.getDocumentation());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -148,13 +149,13 @@ public class DoctorUtil {
 		if (!module.getMetadataQueries().isEmpty()) {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfQueries"));
 			table.setTitle("Queries");
-			table.getHtmlContent().add("The module " + module.getTitle() + " has the following queries defined:");
+			table.getHtmlContent().add("The module " + localisedTitle + " has the following queries defined:");
 			table.setHeaderValues("Query", "Driving Document", "Description", "Documentation");
 
 			for (QueryDefinition q : module.getMetadataQueries()) {
 				table.setRowValues(q.getName(),
 									(q instanceof MetaDataQueryDefinition) ? ((MetaDataQueryDefinition) q).getDocumentName() : null, 
-									q.getDescription(),
+									q.getLocalisedDescription(),
 									q.getDocumentation());
 			}
 			out.println(table.toHTML(true));
@@ -164,10 +165,10 @@ public class DoctorUtil {
 		if (!module.getRoles().isEmpty()) {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfRoles"));
 			table.setTitle("Roles");
-			table.getHtmlContent().add("The module " + module.getTitle() + " has the following roles defined:");
+			table.getHtmlContent().add("The module " + localisedTitle + " has the following roles defined:");
 			table.setHeaderValues("Field", "Description", "Doumentation");
 			for (Role r : module.getRoles()) {
-				table.setRowValues(r.getName(), r.getDescription(), r.getDocumentation());
+				table.setRowValues(r.getName(), r.getLocalisedDescription(), r.getDocumentation());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -179,7 +180,7 @@ public class DoctorUtil {
 			table.getHtmlContent().add("The module " + module.getName() + " has the following off-line jobs defined.");
 			table.setHeaderValues("Name", "Job", "Class");
 			for (JobMetaData j : module.getJobs()) {
-				table.setRowValues(j.getName(), j.getDisplayName(), j.getClassName());
+				table.setRowValues(j.getName(), j.getLocalisedDisplayName(), j.getClassName());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -241,8 +242,8 @@ public class DoctorUtil {
 
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));
 		title.setSectionType(SectionType.SubChapter);
-		title.setSectionTitle(document.getPluralAlias());
-		title.getHtmlContent().add(document.getDescription());
+		title.setSectionTitle(document.getLocalisedPluralAlias());
+		title.getHtmlContent().add(document.getLocalisedDescription());
 		title.getHtmlContent().add("<p/>");
 		if (document.getParentDocumentName() != null) {
 			title.getHtmlContent().add(document.getName() + " is a child of " + document.getParentDocumentName());
@@ -281,8 +282,8 @@ public class DoctorUtil {
 								}
 							}
 						}
-						catch (Exception e) {
-							System.out.println(String.format("cannot get domain values for module %s, document %s & attribute %s. This can occur when a database is required to determine the values. ",
+						catch (@SuppressWarnings("unused") Exception e) {
+							System.err.println(String.format("cannot get domain values for module %s, document %s & attribute %s. This can occur when a database is required to determine the values. ",
 																module.getName(), document.getName(), attribute.getName()));
 						}
 					}
@@ -295,12 +296,12 @@ public class DoctorUtil {
 					String size = (fieldLen==0?"":Integer.toString(fieldLen));
 					UsageType usage = attribute.getUsage();
 					table.setRowValues(attribute.getName(), 
-										attribute.getDisplayName(),
+										attribute.getLocalisedDisplayName(),
 										attribute.getAttributeType().toString(),
 										size,
 										String.valueOf(attribute.isRequired()),
 										String.valueOf(attribute.isPersistent()),
-										attribute.getDescription(),
+										attribute.getLocalisedDescription(),
 										attribute.getDocumentation(),
 										valueList.toHTML(),
 										(usage == null) ? null : usage.toString(),
@@ -319,11 +320,11 @@ public class DoctorUtil {
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
 				UsageType usage = reference.getUsage();
-				table.setRowValues(reference.getDisplayName(), 
+				table.setRowValues(reference.getLocalisedDisplayName(), 
 									reference.getAttributeType().toString(), 
 									reference.getDocumentName(), 
 									String.valueOf(reference.isRequired()), 
-									reference.getDescription(), 
+									reference.getLocalisedDescription(), 
 									reference.getDocumentation(), 
 									(usage == null) ? null : usage.toString(),
 									String.valueOf(reference.isDeprecated()));
@@ -362,13 +363,13 @@ public class DoctorUtil {
 					}
 					Attribute a = getAttributeFromFieldName(document, r);
 					if (a != null) {
-						s.append(a.getDisplayName());
+						s.append(a.getLocalisedDisplayName());
 					} else {
 						s.append(r);
 					}
 				}
 				table.setRowValues(u.getName(), 
-									u.getDescription(),
+									u.getLocalisedDescription(),
 									u.getScope().toString(),
 									s.toString());
 			}
@@ -417,7 +418,7 @@ public class DoctorUtil {
 		else if (q instanceof BizQLDefinition) {
 			section.setSectionTitle("BizQL Query " + q.getName());
 		}
-		section.getHtmlContent().add(q.getDescription());
+		section.getHtmlContent().add(q.getLocalisedDescription());
 		section.getHtmlContent().add(q.getDocumentation());
 		out.println(section.toHTML());
 
@@ -439,7 +440,7 @@ public class DoctorUtil {
 				}
 				Attribute a = getAttributeFromFieldName(d, name);
 				if (a != null) {
-					binding = a.getDisplayName();
+					binding = a.getLocalisedDisplayName();
 				} else {
 					binding = name;
 				}
@@ -447,7 +448,7 @@ public class DoctorUtil {
 					expression = ((MetaDataQueryProjectedColumn) c).getExpression();
 				}
 				
-				table.setRowValues(binding, c.getDisplayName(), expression, c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
+				table.setRowValues(binding, c.getLocalisedDisplayName(), expression, c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
 			}
 			out.println(table.toHTML(true));
 		}
@@ -474,7 +475,7 @@ public class DoctorUtil {
 		// Priveleges List
 		DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), r.getName() + "roleDocumentList"));
 		table.setTitle("Document Priveleges");
-		table.getHtmlContent().add(r.getDescription());
+		table.getHtmlContent().add(r.getLocalisedDescription());
 		table.getHtmlContent().add(r.getDocumentation());
 		table.getHtmlContent().add("The role " + r.getName() + " has the following privileges:");
 
@@ -561,7 +562,7 @@ public class DoctorUtil {
 		for (Attribute a : d.getAttributes()) {
 			if (f.equals(a.getName())) {
 				result = a;
-				System.out.println("found attribute " + result.getDisplayName());
+				System.out.println("found attribute " + result.getLocalisedDisplayName());
 				break;
 			}
 		}
@@ -621,7 +622,7 @@ public class DoctorUtil {
 				overview.print("&nbsp;<a href=\"modules/");
 				overview.print(module.getName());
 				overview.print("/domain/package-summary.html\">");
-				overview.print(module.getTitle());
+				overview.print(module.getLocalisedTitle());
 				overview.println("</a><br/>");
 
 				try (PrintStream ps = new PrintStream(new FileOutputStream(args[0] + 
@@ -630,7 +631,7 @@ public class DoctorUtil {
 																			repository.DOMAIN_NAME + 
 																			"/package.html"))) {
 					ps.println("<html><head/><body>");
-					ps.append("<p>").append((module.getDocumentation() != null) ? module.getDocumentation() : module.getTitle()).append("</p><style>");
+					ps.append("<p>").append((module.getDocumentation() != null) ? module.getDocumentation() : module.getLocalisedTitle()).append("</p><style>");
 					ps.println("body { font-family : Verdana, Arial; font-size:85%; }");
 					ps.println("/* Page title */");
 					ps.println(".pageHeader { border : 1px solid; border-color:#DDDDDD; font-size: 140%; font-weight: bold; color: #000000;	margin-bottom: 20px; text-wrap: normal; word-wrap: break-word; }");

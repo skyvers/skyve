@@ -63,7 +63,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
 
 /**
  * Provides utilities for getting and setting simple and compound bean properties.
