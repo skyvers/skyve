@@ -136,12 +136,12 @@ public class Util {
 					synchronized (I18N_PROPERTIES) {
 						properties = I18N_PROPERTIES.get(lang);
 						if (properties == null) {
-							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l);
+							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
 							properties = new TreeMap<>();
 							for (String bundleKey : bundle.keySet()) {
 								properties.put(bundleKey, bundle.getString(bundleKey));
 							}
-							ResourceBundle.clearCache();
+							ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
 							I18N_PROPERTIES.put(lang, properties);
 						}
 					}
