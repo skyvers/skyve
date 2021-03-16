@@ -1595,6 +1595,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormPassword(Password password) {
 		preProcessFormItem(password, "password");
 		size(password, null, code);
+		// Security settings
+		code.append("autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
 		disabled(password.getDisabledConditionName(), code);
 		invisible(password.getInvisibleConditionName(), code);
 	}

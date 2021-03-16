@@ -2517,6 +2517,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
+		
+		// Security settings
+		result.setAutocomplete("off");
+		Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
+		passThroughAttributes.put("spellcheck", "false");
+		passThroughAttributes.put("autocapitalize", "none");
+		passThroughAttributes.put("autocorrect", "none");
+		
 		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
