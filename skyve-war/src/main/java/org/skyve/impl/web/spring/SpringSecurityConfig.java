@@ -93,6 +93,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Only allow get and post methods by default
 				.anyRequest().denyAll()
 				.and()
+			.sessionManagement()
+				.sessionFixation().changeSessionId()
+				.and()
 			.rememberMe()
 				.key("remember")
 				.tokenValiditySeconds(1209600)
