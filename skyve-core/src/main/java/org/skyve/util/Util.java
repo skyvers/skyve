@@ -148,7 +148,12 @@ public class Util {
 				}
 				result = properties.get(key);
 				if (result == null) {
-					result = key;
+					if ((lang != null) && (! lang.equals(Locale.ENGLISH.getLanguage()))) {
+						result = i18n(key, Locale.ENGLISH, values);
+					}
+					if (result == null) {
+						result = key;
+					}
 				}
 	
 				if ((values != null) && (values.length > 0)) {
