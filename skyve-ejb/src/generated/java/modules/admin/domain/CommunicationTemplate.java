@@ -24,28 +24,33 @@ public class CommunicationTemplate extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "CommunicationTemplate";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String templatePropertyName = "template";
 
 	/**
-	 * admin.communicationTemplate.name.displayName
+	 * Name
 	 **/
 	private String name;
+
 	/**
 	 * Description
 	 **/
 	private String description;
+
 	/**
-	 * admin.communicationTemplate.template.displayName
+	 * Template
 	 * <br/>
-	 * admin.communicationTemplate.template.description
+	 * Include "{body}" to designate where the body of the communication will be placed.
 	 **/
 	private String template = "<p>{body}</p>";
 

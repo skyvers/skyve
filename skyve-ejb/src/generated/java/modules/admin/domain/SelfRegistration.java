@@ -31,51 +31,62 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "SelfRegistration";
 
 	/** @hidden */
 	public static final String activateUrlPropertyName = "activateUrl";
+
 	/** @hidden */
 	public static final String confirmPasswordPropertyName = "confirmPassword";
+
 	/** @hidden */
 	public static final String loginUrlPropertyName = "loginUrl";
+
 	/** @hidden */
 	public static final String loginMessagePropertyName = "loginMessage";
+
 	/** @hidden */
 	public static final String registrationDatePropertyName = "registrationDate";
+
 	/** @hidden */
 	public static final String userPropertyName = "user";
 
 	/**
-	 * admin.selfRegistration.activateUrl.displayName
+	 * Activation Url
 	 **/
 	private String activateUrl;
+
 	/**
-	 * admin.selfRegistration.confirmPassword.displayName
+	 * Confirm Password
 	 * <br/>
 	 * Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.
 	 **/
 	private String confirmPassword;
+
 	/**
-	 * admin.selfRegistration.loginUrl.displayName
+	 * Login Url
 	 **/
 	private String loginUrl;
+
 	/**
-	 * admin.selfRegistration.loginMessage.displayName
+	 * Login Message
 	 * <br/>
 	 * Transient field to allow login message to be overridden
 	 **/
 	private String loginMessage;
+
 	/**
-	 * admin.selfRegistration.registrationDate.displayName
+	 * Registration Date
 	 * <br/>
 	 * The date and time that this self registration was completed.
 	 **/
 	private DateTime registrationDate;
+
 	/**
-	 * admin.selfRegistration.association.user.displayName
+	 * User
 	 * <br/>
 	 * The new user to create for this registration
 	 **/
@@ -203,9 +214,9 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * {@link #registrationDate} mutator.
 	 * @param registrationDate	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setRegistrationDate(DateTime registrationDate) {
 		preset(registrationDatePropertyName, registrationDate);
 		this.registrationDate = registrationDate;

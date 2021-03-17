@@ -24,15 +24,19 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "DocumentNumber";
 
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String sequenceNamePropertyName = "sequenceName";
+
 	/** @hidden */
 	public static final String documentNumberPropertyName = "documentNumber";
 
@@ -42,18 +46,21 @@ public class DocumentNumber extends AbstractPersistentBean {
 	 * The name of the module.
 	 **/
 	private String moduleName;
+
 	/**
 	 * Document Name
 	 * <br/>
 	 * The name of the document.
 	 **/
 	private String documentName;
+
 	/**
 	 * Sequence
 	 * <br/>
 	 * The name of the field or sequence.
 	 **/
 	private String sequenceName;
+
 	/**
 	 * Number
 	 * <br/>

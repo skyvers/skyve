@@ -28,13 +28,16 @@ public class UserList extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserList";
 
 	/** @hidden */
 	public static final String userInvitationGroupsPropertyName = "userInvitationGroups";
+
 	/** @hidden */
 	public static final String userInvitiationEmailListPropertyName = "userInvitiationEmailList";
+
 	/** @hidden */
 	public static final String bulkCreateWithEmailPropertyName = "bulkCreateWithEmail";
 
@@ -44,14 +47,20 @@ public class UserList extends AbstractTransientBean {
 	 * The collection of groups that invited users are assigned.
 	 **/
 	private List<GroupExtension> userInvitationGroups = new ChangeTrackingArrayList<>("userInvitationGroups", this);
+
 	/**
-	 * admin.userList.userInvitationEmailList.displayName
+	 * Invitation email addresses
 	 * <br/>
-	 * admin.userList.userInvitationEmailList.description
+	 * The list of emails for users to invite. 
+<br/>
+Users will be created with the email address as username with the assigned groups.
+<br/>
+Provide a list separated by either comma or semicolon.
 	 **/
 	private String userInvitiationEmailList;
+
 	/**
-	 * admin.userList.bulkCreateWithEmail.displayName
+	 * Bulk create with email
 	 **/
 	private Boolean bulkCreateWithEmail;
 

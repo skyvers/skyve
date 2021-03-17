@@ -33,15 +33,19 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ImportExportColumn";
 
 	/** @hidden */
 	public static final String columnNamePropertyName = "columnName";
+
 	/** @hidden */
 	public static final String bindingNamePropertyName = "bindingName";
+
 	/** @hidden */
 	public static final String bindingExpressionPropertyName = "bindingExpression";
+
 	/** @hidden */
 	public static final String loadActionPropertyName = "loadAction";
 
@@ -126,27 +130,31 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	}
 
 	/**
-	 * admin.importExportColumn.columnName.displayName
+	 * Column Title
 	 **/
 	private String columnName;
+
 	/**
-	 * admin.importExportColumn.bindingName.displayName
+	 * Binding Name
 	 **/
 	private String bindingName;
+
 	/**
-	 * admin.importExportColumn.bindingExpression.displayName
+	 * Expression
 	 * <br/>
-	 * admin.importExportColumn.bindingExpression.description
+	 * <strong>An expression using bindings relative to the document.</strong>
+For exports, you can use compound expressions using bindings and literals, for example: <i>{name} ({mobile})</i>
 	 **/
 	private String bindingExpression;
+
 	/**
 	 * Action
 	 **/
 	private LoadAction loadAction;
+
 	private ImportExportExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient

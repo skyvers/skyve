@@ -2098,61 +2098,61 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (reference.isTrackChanges()) {
 				imports.add("org.skyve.impl.domain.ChangeTrackingArrayList");
 				attributes.append(" = new ChangeTrackingArrayList<>(\"");
-				attributes.append(name).append("\", this);\n");
+				attributes.append(name).append("\", this);\n\n");
 			}
 			else {
 				imports.add("java.util.ArrayList");
-				attributes.append(" = new ArrayList<>();\n");
+				attributes.append(" = new ArrayList<>();\n\n");
 			}
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\t@XmlElement");
-			methods.append("\n\tpublic List<").append(referenceClassName).append("> get").append(methodName).append("() {\n");
+			methods.append("\t@XmlElement\n");
+			methods.append("\tpublic List<").append(referenceClassName).append("> get").append(methodName).append("() {\n");
 			methods.append("\t\treturn ").append(name).append(";\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// Mapped Accessor method
 			accessorJavadoc(reference, methods, true);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic ").append(referenceClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\tpublic ").append(referenceClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// Mapped Mutator method
 			mutatorJavadoc(reference, methods, true);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic void set").append(methodName);
+			methods.append("\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(referenceClassName).append(" element) {\n");
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
 			// NB no need to set the parent here as this method does not add any elements ever
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// collection add
 			collectionJavadoc(name, methods, true, false);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic boolean add").append(methodName);
+			methods.append("\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
 				String referenceParentDocumentName = referenceDocument.getParentDocumentName();
@@ -2181,17 +2181,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				methods.append("\t\treturn ").append(name).append(".add(element);\n");
 			}
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection indexed add
 			collectionJavadoc(name, methods, true, true);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("\tpublic void add").append(methodName);
 			methods.append("Element(int index, ").append(referenceClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
 			if (CollectionType.child.equals(type)) {
@@ -2208,17 +2208,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				methods.append("this);\n");
 			}
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection remove
 			collectionJavadoc(name, methods, false, false);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic boolean remove").append(methodName);
+			methods.append("\tpublic boolean remove").append(methodName);
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
@@ -2233,17 +2233,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				methods.append("\t\treturn ").append(name).append(".remove(element);\n");
 			}
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection indexed remove
 			collectionJavadoc(name, methods, false, true);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic ").append(referenceClassName).append(" remove").append(methodName);
+			methods.append("\tpublic ").append(referenceClassName).append(" remove").append(methodName);
 			methods.append("Element(int index) {\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\t").append(referenceClassName).append(" result = ").append(name).append(".remove(index);\n");
@@ -2258,7 +2258,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				methods.append("\t\treturn ").append(name).append(".remove(index);\n");
 			}
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 		}
 		else { // this is an association Attribute
 			attributeJavadoc(reference, attributes);
@@ -2270,30 +2270,30 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				attributes.append("transient ");
 			}
 			attributes.append(referenceClassName).append(" ").append(name);
-			attributes.append(" = null;\n");
+			attributes.append(" = null;\n\n");
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic ").append(referenceClassName).append(" get").append(methodName).append("() {\n");
+			methods.append("\tpublic ").append(referenceClassName).append(" get").append(methodName).append("() {\n");
 			methods.append("\t\treturn ").append(name).append(";\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// Mutator method
 			mutatorJavadoc(reference, methods, false);
 			if (overriddenReference) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\t@XmlElement");
-			methods.append("\n\tpublic void set").append(methodName).append('(');
+			methods.append("\t@XmlElement\n");
+			methods.append("\tpublic void set").append(methodName).append('(');
 			methods.append(referenceClassName).append(' ').append(name).append(") {\n");
 			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
 			if (reference.isTrackChanges()) {
@@ -2309,7 +2309,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
-				methods.append("\t\t\t}\n");
+				methods.append("\t\t\t}\n\n");
 			}
 			else if (inverse != null) {
 				if (InverseRelationship.oneToOne.equals(inverse.getRelationship())) {
@@ -2345,15 +2345,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			}
 			methods.append("\t\t}\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// if 1 to 1 inverse add null methods
 			if (inverse != null) {
 				InverseRelationship relationship = inverse.getRelationship();
 				if (relationship != InverseRelationship.manyToMany) { // 1:1 or 1:many
-					methods.append("\n\tpublic void null").append(methodName).append("() {\n");
+					methods.append("\tpublic void null").append(methodName).append("() {\n");
 					methods.append("\t\tthis.").append(name).append(" = null;\n");
-					methods.append("\t}\n");
+					methods.append("\t}\n\n");
 				}
 			}
 		}
@@ -2423,33 +2423,33 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				attributes.append("transient ");
 			}
 			attributes.append("List<").append(propertyClassName).append("> ").append(name);
-			attributes.append(" = new ArrayList<>();\n");
+			attributes.append(" = new ArrayList<>();\n\n");
 		}
 		else {
 			attributes.append("\tprivate ");
 			if (tranzient) {
 				attributes.append("transient ");
 			}
-			attributes.append(propertyClassName).append(" ").append(name).append(";\n");
+			attributes.append(propertyClassName).append(" ").append(name).append(";\n\n");
 		}
 
 		// Accessor method
 		accessorJavadoc(inverse, methods, false);
 		if (overriddenInverse) { // method in base class
-			methods.append("\n\t@Override");
+			methods.append("\t@Override\n");
 		}
 		if (deprecated) {
-			methods.append("\n\t@Deprecated");
+			methods.append("\t@Deprecated\n");
 		}
-		methods.append("\n\t@XmlElement");
+		methods.append("\t@XmlElement\n");
 		if (toMany) {
-			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
+			methods.append("\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
 		}
 		else {
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
+			methods.append("\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
 		}
 		methods.append("\t\treturn ").append(name).append(";\n");
-		methods.append("\t}\n");
+		methods.append("\t}\n\n");
 
 		String inverseMethodName = Character.toUpperCase(inverseReferenceName.charAt(0)) + inverseReferenceName.substring(1);
 
@@ -2457,38 +2457,38 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// Mapped Accessor method
 			accessorJavadoc(inverse, methods, true);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// Mapped Mutator method
 			mutatorJavadoc(inverse, methods, true);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic void set").append(methodName);
+			methods.append("\tpublic void set").append(methodName);
 			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\tsetElementById(").append(name).append(", element);\n");
 			// NB no need to set the parent here as this method does not add any elements ever
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// collection add
 			collectionJavadoc(name, methods, true, false);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic boolean add").append(methodName);
+			methods.append("\tpublic boolean add").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
 			if (many) {
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
@@ -2506,17 +2506,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("this);\n");
 			methods.append("\t\treturn result;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection indexed add
 			collectionJavadoc(name, methods, true, true);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic void add").append(methodName);
+			methods.append("\tpublic void add").append(methodName);
 			methods.append("Element(int index, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
 			if (many) {
@@ -2529,17 +2529,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection remove
 			collectionJavadoc(name, methods, false, false);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic boolean remove").append(methodName);
+			methods.append("\tpublic boolean remove").append(methodName);
 			methods.append("Element(").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
 			methods.append("\t\tif (result) {\n");
@@ -2551,17 +2551,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\t\t}\n");
 			methods.append("\t\treturn result;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// collection indexed remove
 			collectionJavadoc(name, methods, false, true);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" remove").append(methodName);
+			methods.append("\tpublic ").append(propertyClassName).append(" remove").append(methodName);
 			methods.append("Element(int index) {\n");
 			methods.append("\t\t").append(propertyClassName).append(" result = ").append(name).append(".remove(index);\n");
 			if (many) {
@@ -2571,18 +2571,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tresult.null").append(inverseMethodName).append("();\n");
 			}
 			methods.append("\t\treturn result;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 		}
 		else {
 			// Mutator method
 			mutatorJavadoc(inverse, methods, false);
 			if (overriddenInverse) { // method in base class
-				methods.append("\n\t@Override");
+				methods.append("\t@Override\n");
 			}
 			if (deprecated) {
-				methods.append("\n\t@Deprecated");
+				methods.append("\t@Deprecated\n");
 			}
-			methods.append("\n\tpublic void set").append(methodName).append("(");
+			methods.append("\tpublic void set").append(methodName).append("(");
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
 			methods.append("\t\tif (this.").append(name).append(" != ").append(name).append(") {\n");
 			methods.append("\t\t\t").append(propertyClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
@@ -2608,12 +2608,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			methods.append("\t\t\t}\n");
 			methods.append("\t\t}\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 			
 			// Add null method
-			methods.append("\n\tpublic void null").append(methodName).append("() {\n");
+			methods.append("\tpublic void null").append(methodName).append("() {\n");
 			methods.append("\t\tthis.").append(name).append(" = null;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 		}
 	}
 
@@ -2874,21 +2874,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			imports.add("org.skyve.domain.messages.DomainException");
 
 			statics.append("\t/** @hidden */\n");
-			statics.append("\tpublic static final String MODULE_NAME = \"").append(module.getName()).append("\";\n");
+			if (baseDocumentName != null) {
+				statics.append("\t@SuppressWarnings(\"hiding\")\n");
+			}
+			statics.append("\tpublic static final String MODULE_NAME = \"").append(module.getName()).append("\";\n\n");
 			statics.append("\t/** @hidden */\n");
+			if (baseDocumentName != null) {
+				statics.append("\t@SuppressWarnings(\"hiding\")\n");
+			}
 			statics.append("\tpublic static final String DOCUMENT_NAME = \"").append(document.getName()).append("\";\n\n");
 
-			methods.append("\n\t@Override");
+			methods.append("\t@Override");
 			methods.append("\n\t@XmlTransient");
 			methods.append("\n\tpublic String getBizModule() {\n");
 			methods.append("\t\treturn ").append(documentName).append(".MODULE_NAME;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
-			methods.append("\n\t@Override");
+			methods.append("\t@Override");
 			methods.append("\n\t@XmlTransient");
 			methods.append("\n\tpublic String getBizDocument() {\n");
 			methods.append("\t\treturn ").append(documentName).append(".DOCUMENT_NAME;\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			// Check for Extension class defined and alter the class returned accordingly
 			if (domainExtensionClassExists) {
@@ -2899,10 +2905,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													.append('.')
 													.append(documentName)
 													.append("Extension").toString());
-				methods.append("\n\tpublic static ").append(documentName).append("Extension newInstance() {\n");
+				methods.append("\tpublic static ").append(documentName).append("Extension newInstance() {\n");
 			}
 			else {
-				methods.append("\n\tpublic static ").append(documentName).append(" newInstance() {\n");
+				methods.append("\tpublic static ").append(documentName).append(" newInstance() {\n");
 			}
 			methods.append("\t\ttry {\n");
 			methods.append("\t\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
@@ -2913,23 +2919,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\tcatch (Exception e) {\n");
 			methods.append("\t\t\tthrow new DomainException(e);\n");
 			methods.append("\t\t}\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 
 			String bizKeyMethodCode = ((DocumentImpl) document).getBizKeyMethodCode();
 			if (bizKeyMethodCode != null) {
-				methods.append("\n\t@Override");
+				methods.append("\t@Override");
 				methods.append("\n\t@XmlTransient");
 				methods.append("\n\tpublic String getBizKey() {\n");
 				methods.append(bizKeyMethodCode).append("\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 			}
 
-			methods.append("\n\t@Override");
+			methods.append("\t@Override");
 			methods.append("\n\tpublic boolean equals(Object o) {\n");
 			methods.append("\t\treturn ((o instanceof ").append(documentName);
 			methods.append(") && \n\t\t\t\t\tthis.getBizId().equals(((");
 			methods.append(documentName).append(") o).getBizId()));\n");
-			methods.append("\t}\n");
+			methods.append("\t}\n\n");
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
@@ -2952,7 +2958,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					statics.append("\t@Deprecated\n");
 				}
 				statics.append("\tpublic static final String ").append(name).append("PropertyName = \"");
-				statics.append(attribute.getName()).append("\";\n");
+				statics.append(attribute.getName()).append("\";\n\n");
 
 				// Generate imports
 
@@ -3040,8 +3046,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (AttributeType.bool.equals(type) ||
 							AttributeType.integer.equals(type) ||
 							AttributeType.longInteger.equals(type)) {
-						attributes.append(" = new ").append(propertySimpleClassName);
-						attributes.append('(').append(defaultValue).append(')');
+						attributes.append(" = ").append(propertySimpleClassName).append(".valueOf(");
+						attributes.append(defaultValue).append(')');
 					}
 					else if (AttributeType.colour.equals(type) ||
 								AttributeType.markup.equals(type) ||
@@ -3057,7 +3063,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						attributes.append("(\"").append(defaultValue).append("\")");
 					}
 				}
-				attributes.append(";\n");
+				attributes.append(";\n\n");
 
 				// Accessor method
 				accessorJavadoc(attribute, methods, false);
@@ -3065,14 +3071,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						(baseDocumentName != null) && // base class exists
 						(documentClass != null) &&
 						documentClass.attributes.containsKey(name)) { // method in base class
-					methods.append("\n\t@Override");
+					methods.append("\t@Override\n");
 				}
 				if (deprecated) {
-					methods.append("\n\t@Deprecated");
+					methods.append("\t@Deprecated\n");
 				}
-				methods.append("\n\tpublic ").append(propertySimpleClassName).append(" get").append(methodName).append("() {\n");
+				methods.append("\tpublic ").append(propertySimpleClassName).append(" get").append(methodName).append("() {\n");
 				methods.append("\t\treturn ").append(name).append(";\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Mutator method
 				mutatorJavadoc(attribute, methods, false);
@@ -3080,67 +3086,67 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						(baseDocumentName != null) && // base class exists
 						(documentClass != null) &&
 						documentClass.attributes.containsKey(name)) { // method in base class
-					methods.append("\n\t@Override");
+					methods.append("\t@Override\n");
 				}
 				if (deprecated) {
-					methods.append("\n\t@Deprecated");
+					methods.append("\t@Deprecated\n");
 				}
+				methods.append("\t@XmlElement\n");
 				if (AttributeType.date.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateOnlyMapper");
-					methods.append("\n\t@XmlSchemaType(name = \"date\")");
-					methods.append("\n\t@XmlJavaTypeAdapter(DateOnlyMapper.class)");
+					methods.append("\t@XmlSchemaType(name = \"date\")\n");
+					methods.append("\t@XmlJavaTypeAdapter(DateOnlyMapper.class)\n");
 				}
 				else if (AttributeType.time.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimeOnlyMapper");
-					methods.append("\n\t@XmlSchemaType(name = \"time\")");
-					methods.append("\n\t@XmlJavaTypeAdapter(TimeOnlyMapper.class)");
+					methods.append("\t@XmlSchemaType(name = \"time\")\n");
+					methods.append("\t@XmlJavaTypeAdapter(TimeOnlyMapper.class)\n");
 				}
 				else if (AttributeType.dateTime.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateTimeMapper");
-					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
-					methods.append("\n\t@XmlJavaTypeAdapter(DateTimeMapper.class)");
+					methods.append("\t@XmlSchemaType(name = \"dateTime\")\n");
+					methods.append("\t@XmlJavaTypeAdapter(DateTimeMapper.class)\n");
 				}
 				else if (AttributeType.timestamp.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimestampMapper");
-					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
-					methods.append("\n\t@XmlJavaTypeAdapter(TimestampMapper.class)");
+					methods.append("\t@XmlSchemaType(name = \"dateTime\")\n");
+					methods.append("\t@XmlJavaTypeAdapter(TimestampMapper.class)\n");
 				}
 				else if (AttributeType.decimal2.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal2Mapper");
-					methods.append("\n\t@XmlJavaTypeAdapter(Decimal2Mapper.class)");
+					methods.append("\t@XmlJavaTypeAdapter(Decimal2Mapper.class)\n");
 				}
 				else if (AttributeType.decimal5.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal5Mapper");
-					methods.append("\n\t@XmlJavaTypeAdapter(Decimal5Mapper.class)");
+					methods.append("\t@XmlJavaTypeAdapter(Decimal5Mapper.class)\n");
 				}
 				else if (AttributeType.decimal10.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal10Mapper");
-					methods.append("\n\t@XmlJavaTypeAdapter(Decimal10Mapper.class)");
+					methods.append("\t@XmlJavaTypeAdapter(Decimal10Mapper.class)\n");
 				}
 				else if (AttributeType.geometry.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.GeometryMapper");
-					methods.append("\n\t@XmlJavaTypeAdapter(GeometryMapper.class)");
+					methods.append("\t@XmlJavaTypeAdapter(GeometryMapper.class)\n");
 				}
-				methods.append("\n\t@XmlElement");
-				methods.append("\n\tpublic void set").append(methodName).append('(');
+				methods.append("\tpublic void set").append(methodName).append('(');
 				methods.append(propertySimpleClassName).append(' ').append(name).append(") {\n");
 				if (attribute.isTrackChanges()) {
 					methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
 				}
 				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 			}
 		}
 
@@ -3154,15 +3160,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String parentPackageName = parentDocument.getOwningModuleName();
 			parentPackagePath = new StringBuilder(128).append("modules.")
 														.append(parentPackageName)
-														.append(".domain.").toString();
+														.append(".domain").toString();
 			parentClassName = parentDocumentName;
 			String parentDocumentModulePath = repository.MODULES_NAMESPACE + parentPackageName;
 			if (domainExtensionClassExists(parentDocumentModulePath, parentDocumentName)) {
 				parentPackagePath = new StringBuilder(128).append("modules.")
 															.append(parentPackageName)
 															.append('.')
-															.append(parentDocumentName)
-															.append('.').toString();
+															.append(parentDocumentName).toString();
 				parentClassName += "Extension";
 			}
 
@@ -3175,7 +3180,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				imports.add("org.skyve.persistence.Persistence");
 			}
 			else {
-				imports.add(parentPackagePath + parentClassName);
+				if (! parentPackagePath.equals(packagePath)) {
+					imports.add(parentPackagePath + '.' + parentClassName);
+				}
 				imports.add("org.skyve.domain.ChildBean");
 			}
 
@@ -3213,10 +3220,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													.append("Extension").toString());
 			}
 			else {
-				imports.add(new StringBuilder(128).append("modules.")
-													.append(baseDocument.getOwningModuleName())
-													.append(".domain.")
-													.append(baseDocumentName).toString());
+				String basePackgePath = new StringBuilder(128).append("modules.")
+																.append(baseDocument.getOwningModuleName())
+																.append(".domain").toString();
+				if (! basePackgePath.equals(packagePath)) {
+					imports.add(basePackgePath + '.' + baseDocumentName);
+				}
 			}
 		}
 
@@ -3251,7 +3260,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (description == null) {
 						description = conditionName;
 					}
-					methods.append("\n\t/**");
+					methods.append("\t/**");
 					String doc = condition.getDescription();
 					boolean nothingDocumented = true;
 					if (doc != null) {
@@ -3279,9 +3288,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																.append(conditionName.substring(1)).toString();
 					methods.append("\n\tpublic boolean ").append(methodName).append("() {")
 							.append("\n\t\treturn (").append(condition.getExpression()).append(");")
-							.append("\n\t}\n");
+							.append("\n\t}\n\n");
 
-					methods.append("\n\t/**")
+					methods.append("\t/**")
 							.append("\n\t * {@link #").append(methodName).append("} negation.")
 							.append("\n\t *")
 							.append("\n\t * @return The negated condition")
@@ -3293,7 +3302,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							.append(conditionName.substring(1)).append("() {")
 							.append("\n\t\treturn (! is").append(Character.toUpperCase(conditionName.charAt(0)))
 							.append(conditionName.substring(1)).append("());")
-							.append("\n\t}\n");
+							.append("\n\t}\n\n");
 				}
 			}
 		}
@@ -3309,21 +3318,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				attributes.append("\tprivate String bizParentId;\n\n");
 
 				// Accessor method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\tpublic String getBizParentId() {\n");
 				methods.append("\t\treturn bizParentId;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Mutator method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\t@XmlElement\n");
 				methods.append("\tpublic void setBizParentId(String bizParentId) {\n");
 				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, bizParentId);\n");
 				methods.append("\t\tthis.bizParentId = bizParentId;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Traversal method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\tpublic ").append(documentName);
 				if (domainExtensionClassExists) {
 					methods.append("Extension");
@@ -3341,10 +3350,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\tresult = q.retrieveBean();\n");
 				methods.append("\t\t}\n\n");
 				methods.append("\t\treturn result;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Traversal method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\t@XmlTransient\n");
 				methods.append("\tpublic List<").append(documentName);
 				if (domainExtensionClassExists) {
@@ -3355,16 +3364,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());\n");
 				methods.append("\t\treturn q.beanResults();\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 			}
 			else {
 				attributes.append("\tprivate ").append(parentClassName).append(" parent;\n\n");
 
 				// Accessor method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\tpublic ").append(parentClassName).append(" getParent() {\n");
 				methods.append("\t\treturn parent;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Determine the corresponding child collection
 				String childCollectionMethodName = null;
@@ -3395,7 +3404,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				
 				// Mutator method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\t@XmlElement\n");
 				methods.append("\tpublic void setParent(");
 				methods.append(parentClassName).append(" parent) {\n");
@@ -3433,25 +3442,25 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					throw new MetaDataException("Child Document " + module.getName() + '.' + documentName + " defines a parent document of " + 
 													parentDocumentName + " but " + parentDocumentName + " has no child collection or embedded association to its child document");
 				}
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// BizOrdinal property
 				imports.add("org.skyve.domain.Bean");
 				attributes.append("\tprivate Integer bizOrdinal;\n\n");
 
 				// Accessor method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\tpublic Integer getBizOrdinal() {\n");
 				methods.append("\t\treturn bizOrdinal;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 
 				// Mutator method
-				methods.append("\n\t@Override\n");
+				methods.append("\t@Override\n");
 				methods.append("\t@XmlElement\n");
 				methods.append("\tpublic void setBizOrdinal(Integer bizOrdinal) {\n");
 				methods.append("\t\tpreset(Bean.ORDINAL_NAME, bizOrdinal);\n");
 				methods.append("\t\tthis.bizOrdinal = ").append(" bizOrdinal;\n");
-				methods.append("\t}\n");
+				methods.append("\t}\n\n");
 			}
 		}
 
@@ -3596,12 +3605,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("\t */\n");
 		contents.append("\tprivate static final long serialVersionUID = 1L;\n\n");
 
-		contents.append(statics).append("\n");
+		if (statics.length() > 0) {
+			contents.append(statics);
+		}
 		if (enums.length() > 0) {
 			contents.append(enums);
 		}
 		contents.append(attributes);
-		contents.append(methods);
+		if (methods.length() > 0) {
+			contents.append(methods, 0, methods.length() - 1); // don't include last \n
+		}
 
 		contents.append("}\n");
 	}
@@ -3656,7 +3669,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private static void accessorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
-		toAppendTo.append("\n\t/**\n");
+		toAppendTo.append("\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} accessor.\n");
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
@@ -3665,11 +3678,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		else {
 			toAppendTo.append("\t * @return\tThe value.\n");
 		}
-		toAppendTo.append("\t **/");
+		toAppendTo.append("\t **/\n");
 	}
 
 	private static void mutatorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
-		toAppendTo.append("\n\t/**\n");
+		toAppendTo.append("\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} mutator.\n");
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
@@ -3678,12 +3691,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		else {
 			toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value.\n");
 		}
-		toAppendTo.append("\t **/");
+		toAppendTo.append("\t **/\n");
 	}
 
 
 	private static void collectionJavadoc(String attributeName, StringBuilder toAppendTo, boolean add, boolean indexed) {
-		toAppendTo.append("\n\t/**\n");
+		toAppendTo.append("\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attributeName).append(add ? "} add.\n" : "} remove.\n");
 		if (indexed) {
 			toAppendTo.append("\t * @param index\tThe index in the list to ").append(add ? "add" : "remove");
@@ -3695,7 +3708,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		else if (! indexed) {
 			toAppendTo.append("\t * @param element\tThe element to remove.\n");
 		}
-		toAppendTo.append("\t **/");
+		toAppendTo.append("\t **/\n");
 	}
 
 	/**

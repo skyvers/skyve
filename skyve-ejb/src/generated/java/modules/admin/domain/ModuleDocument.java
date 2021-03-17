@@ -28,15 +28,19 @@ public class ModuleDocument extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ModuleDocument";
 
 	/** @hidden */
 	public static final String includePropertyName = "include";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
 
@@ -46,18 +50,21 @@ public class ModuleDocument extends AbstractTransientBean {
 	 * Used to indicate if this document is to be included when refreshing as part of DataMaintenance.
 	 **/
 	private Boolean include;
+
 	/**
 	 * Module Name
 	 * <br/>
 	 * The name of the module.
 	 **/
 	private String moduleName;
+
 	/**
 	 * Document Name
 	 * <br/>
 	 * The name of the document.
 	 **/
 	private String documentName;
+
 	/**
 	 * Document Name
 	 * <br/>

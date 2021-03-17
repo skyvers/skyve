@@ -28,23 +28,31 @@ public class Content extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Content";
 
 	/** @hidden */
 	public static final String contentIdPropertyName = "contentId";
+
 	/** @hidden */
 	public static final String customerNamePropertyName = "customerName";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String contentBizIdPropertyName = "contentBizId";
+
 	/** @hidden */
 	public static final String attributeNamePropertyName = "attributeName";
+
 	/** @hidden */
 	public static final String lastModifiedPropertyName = "lastModified";
+
 	/** @hidden */
 	public static final String contentPropertyName = "content";
 
@@ -52,30 +60,37 @@ public class Content extends AbstractTransientBean {
 	 * Content Id
 	 **/
 	private String contentId;
+
 	/**
 	 * Customer Name
 	 **/
 	private String customerName;
+
 	/**
 	 * Module Name
 	 **/
 	private String moduleName;
+
 	/**
 	 * Document Name
 	 **/
 	private String documentName;
+
 	/**
 	 * Content Biz Id
 	 **/
 	private String contentBizId;
+
 	/**
 	 * Attribute Name
 	 **/
 	private String attributeName;
+
 	/**
 	 * Last Modified
 	 **/
 	private Timestamp lastModified;
+
 	/**
 	 * Content
 	 **/
@@ -238,9 +253,9 @@ public class Content extends AbstractTransientBean {
 	 * {@link #lastModified} mutator.
 	 * @param lastModified	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setLastModified(Timestamp lastModified) {
 		preset(lastModifiedPropertyName, lastModified);
 		this.lastModified = lastModified;

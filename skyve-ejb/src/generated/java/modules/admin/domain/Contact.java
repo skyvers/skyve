@@ -30,24 +30,29 @@ public class Contact extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Contact";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String contactTypePropertyName = "contactType";
+
 	/** @hidden */
 	public static final String email1PropertyName = "email1";
+
 	/** @hidden */
 	public static final String mobilePropertyName = "mobile";
+
 	/** @hidden */
 	public static final String imagePropertyName = "image";
 
 	/**
-	 * admin.contact.contactType.displayName
+	 * Contact Type
 	 * <br/>
-	 * admin.contact.contactType.description
+	 * Whether this contact is a person or an organisation.
 	 **/
 	@XmlEnum
 	public static enum ContactType implements Enumeration {
@@ -124,25 +129,29 @@ public class Contact extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.contact.name.displayName
+	 * Name
 	 **/
 	private String name;
+
 	/**
-	 * admin.contact.contactType.displayName
+	 * Contact Type
 	 * <br/>
-	 * admin.contact.contactType.description
+	 * Whether this contact is a person or an organisation.
 	 **/
 	private ContactType contactType;
+
 	/**
-	 * admin.contact.email1.displayName
+	 * Email
 	 **/
 	private String email1;
+
 	/**
-	 * admin.contact.mobile.displayName
+	 * Mobile
 	 **/
 	private String mobile;
+
 	/**
-	 * admin.contact.image.displayName
+	 * Image
 	 **/
 	private String image;
 

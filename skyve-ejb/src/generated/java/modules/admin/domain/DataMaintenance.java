@@ -45,72 +45,102 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "DataMaintenance";
 
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
+
 	/** @hidden */
 	public static final String confirmPasswordPropertyName = "confirmPassword";
+
 	/** @hidden */
 	public static final String injectBootstrapUserPropertyName = "injectBootstrapUser";
+
 	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
+
 	/** @hidden */
 	public static final String refreshDocumentsPropertyName = "refreshDocuments";
+
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
+
 	/** @hidden */
 	public static final String ddlScriptPropertyName = "ddlScript";
+
 	/** @hidden */
 	public static final String dailyBackupRetentionPropertyName = "dailyBackupRetention";
+
 	/** @hidden */
 	public static final String weeklyBackupRetentionPropertyName = "weeklyBackupRetention";
+
 	/** @hidden */
 	public static final String monthlyBackupRetentionPropertyName = "monthlyBackupRetention";
+
 	/** @hidden */
 	public static final String yearlyBackupRetentionPropertyName = "yearlyBackupRetention";
+
 	/** @hidden */
 	public static final String restorePreProcessPropertyName = "restorePreProcess";
+
 	/** @hidden */
 	public static final String contentRestoreOptionPropertyName = "contentRestoreOption";
+
 	/** @hidden */
 	public static final String restoreIndexingOptionPropertyName = "restoreIndexingOption";
+
 	/** @hidden */
 	public static final String selectedBackupNamePropertyName = "selectedBackupName";
+
 	/** @hidden */
 	public static final String selectedContentIdPropertyName = "selectedContentId";
+
 	/** @hidden */
 	public static final String refreshBackupsPropertyName = "refreshBackups";
+
 	/** @hidden */
 	public static final String instructionHintPropertyName = "instructionHint";
+
 	/** @hidden */
 	public static final String refreshContentPropertyName = "refreshContent";
+
 	/** @hidden */
 	public static final String contentLinkPropertyName = "contentLink";
+
 	/** @hidden */
 	public static final String auditModuleNamePropertyName = "auditModuleName";
+
 	/** @hidden */
 	public static final String auditDocumentNamePropertyName = "auditDocumentName";
+
 	/** @hidden */
 	public static final String auditOperationPropertyName = "auditOperation";
+
 	/** @hidden */
 	public static final String auditTimestampStartPropertyName = "auditTimestampStart";
+
 	/** @hidden */
 	public static final String auditTimestampEndPropertyName = "auditTimestampEnd";
+
 	/** @hidden */
 	public static final String auditUserPropertyName = "auditUser";
+
 	/** @hidden */
 	public static final String auditMatchCountPropertyName = "auditMatchCount";
+
 	/** @hidden */
 	public static final String auditResponsePropertyName = "auditResponse";
+
 	/** @hidden */
 	public static final String refreshOptionPropertyName = "refreshOption";
+
 	/** @hidden */
 	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
-	 * admin.dataMaintenance.restorePreProcess.displayName
+	 * Pre-Process
 	 **/
 	@XmlEnum
 	public static enum RestorePreProcess implements Enumeration {
@@ -193,7 +223,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.dataMaintenance.contentRestoreOption.displayName
+	 * Content Option
 	 **/
 	@XmlEnum
 	public static enum ContentRestoreOption implements Enumeration {
@@ -271,7 +301,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.dataMaintenance.restoreIndexingOption.displayName
+	 * Indexing Option
 	 **/
 	@XmlEnum
 	public static enum RestoreIndexingOption implements Enumeration {
@@ -350,7 +380,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.dataMaintenance.refreshOption.displayName
+	 * Option
 	 **/
 	@XmlEnum
 	public static enum RefreshOption implements Enumeration {
@@ -427,9 +457,10 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.dataMaintenance.evictOption.displayName
+	 * Cache Evict
 	 * <br/>
-	 * admin.dataMaintenance.evictOption.description
+	 * <p>Whether to evict each bean after processing.</p>
+<p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	@XmlEnum
 	public static enum EvictOption implements Enumeration {
@@ -507,125 +538,155 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.dataMaintenance.modDocName.displayName
+	 * Module.Document
 	 **/
 	private String modDocName;
+
 	/**
-	 * admin.dataMaintenance.confirmPassword.displayName
+	 * Confirm password
 	 **/
 	private String confirmPassword;
+
 	/**
-	 * admin.dataMaintenance.injectBootstrapUser.displayName
+	 * Inject bootstrap user
 	 **/
 	private Boolean injectBootstrapUser;
+
 	/**
-	 * admin.dataMaintenance.schemaName.displayName
+	 * Schema Name
 	 **/
 	private String schemaName;
+
 	/**
-	 * admin.dataMaintenance.collection.refreshDocuments.displayName
+	 * Refresh Documents
 	 **/
 	private List<ModuleDocument> refreshDocuments = new ChangeTrackingArrayList<>("refreshDocuments", this);
+
 	/**
-	 * admin.dataMaintenance.notification.displayName
+	 * Notify me on completion
 	 **/
 	private Boolean notification;
+
 	/**
-	 * admin.dataMaintenance.ddlScript.displayName
+	 * Script
 	 **/
 	private String ddlScript;
+
 	/**
-	 * admin.dataMaintenance.dailyBackupRetention.displayName
+	 * Daily Backup Retention
 	 **/
 	private Integer dailyBackupRetention;
+
 	/**
-	 * admin.dataMaintenance.weeklyBackupRetention.displayName
+	 * Weekly Backup Retention
 	 **/
 	private Integer weeklyBackupRetention;
+
 	/**
-	 * admin.dataMaintenance.monthlyBackupRetention.displayName
+	 * Monthly Backup Retention
 	 **/
 	private Integer monthlyBackupRetention;
+
 	/**
-	 * admin.dataMaintenance.yearlyBackupRetention.displayName
+	 * Yearly Backup Retention
 	 **/
 	private Integer yearlyBackupRetention;
+
 	/**
-	 * admin.dataMaintenance.restorePreProcess.displayName
+	 * Pre-Process
 	 **/
 	private RestorePreProcess restorePreProcess;
+
 	/**
-	 * admin.dataMaintenance.contentRestoreOption.displayName
+	 * Content Option
 	 **/
 	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
+
 	/**
-	 * admin.dataMaintenance.restoreIndexingOption.displayName
+	 * Indexing Option
 	 **/
 	private RestoreIndexingOption restoreIndexingOption = RestoreIndexingOption.both;
+
 	/**
-	 * admin.dataMaintenance.selectedBackupName.displayName
+	 * Selected Backup Name
 	 **/
 	private String selectedBackupName;
+
 	/**
-	 * admin.dataMaintenance.selectedContentId.displayName
+	 * Selected Content Id
 	 **/
 	private String selectedContentId;
+
 	/**
-	 * admin.dataMaintenance.refreshBackups.displayName
+	 * Refresh Backups
 	 **/
-	private Boolean refreshBackups = new Boolean(true);
+	private Boolean refreshBackups = Boolean.valueOf(true);
+
 	/**
 	 * admin.dataMaintenance.instructionHint.displayName
 	 **/
 	private String instructionHint;
+
 	/**
-	 * admin.dataMaintenance.refreshContent.displayName
+	 * Refresh Content
 	 **/
-	private Boolean refreshContent = new Boolean(true);
+	private Boolean refreshContent = Boolean.valueOf(true);
+
 	/**
-	 * admin.dataMaintenance.contentLink.displayName
+	 * Content Link
 	 **/
 	private String contentLink;
+
 	/**
-	 * admin.dataMaintenance.auditModuleName.displayName
+	 * Module
 	 **/
 	private String auditModuleName;
+
 	/**
-	 * admin.dataMaintenance.auditDocumentName.displayName
+	 * Document
 	 **/
 	private String auditDocumentName;
+
 	/**
-	 * admin.dataMaintenance.auditOperation.displayName
+	 * Operation
 	 **/
 	private Operation auditOperation;
+
 	/**
-	 * admin.dataMaintenance.auditTimestampStart.displayName
+	 * From
 	 **/
 	private Timestamp auditTimestampStart;
+
 	/**
-	 * admin.dataMaintenance.auditTimestampEnd.displayName
+	 * To
 	 **/
 	private Timestamp auditTimestampEnd;
+
 	/**
-	 * admin.dataMaintenance.association.auditUser.displayName
+	 * User
 	 **/
 	private UserProxyExtension auditUser = null;
+
 	/**
-	 * admin.dataMaintenance.auditMatchCount.displayName
+	 * Found
 	 **/
 	private Integer auditMatchCount;
+
 	/**
-	 * admin.dataMaintenance.auditResponse.displayName
+	 * Status
 	 **/
 	private String auditResponse;
+
 	/**
-	 * admin.dataMaintenance.refreshOption.displayName
+	 * Option
 	 **/
 	private RefreshOption refreshOption;
+
 	/**
-	 * admin.dataMaintenance.evictOption.displayName
+	 * Cache Evict
 	 * <br/>
-	 * admin.dataMaintenance.evictOption.description
+	 * <p>Whether to evict each bean after processing.</p>
+<p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
 
@@ -1130,9 +1191,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #auditTimestampStart} mutator.
 	 * @param auditTimestampStart	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setAuditTimestampStart(Timestamp auditTimestampStart) {
 		preset(auditTimestampStartPropertyName, auditTimestampStart);
 		this.auditTimestampStart = auditTimestampStart;
@@ -1150,9 +1211,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #auditTimestampEnd} mutator.
 	 * @param auditTimestampEnd	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setAuditTimestampEnd(Timestamp auditTimestampEnd) {
 		preset(auditTimestampEndPropertyName, auditTimestampEnd);
 		this.auditTimestampEnd = auditTimestampEnd;

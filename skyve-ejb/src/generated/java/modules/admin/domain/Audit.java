@@ -37,31 +37,43 @@ public class Audit extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Audit";
 
 	/** @hidden */
 	public static final String auditModuleNamePropertyName = "auditModuleName";
+
 	/** @hidden */
 	public static final String auditDocumentNamePropertyName = "auditDocumentName";
+
 	/** @hidden */
 	public static final String auditBizIdPropertyName = "auditBizId";
+
 	/** @hidden */
 	public static final String auditBizKeyPropertyName = "auditBizKey";
+
 	/** @hidden */
 	public static final String operationPropertyName = "operation";
+
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
+
 	/** @hidden */
 	public static final String millisPropertyName = "millis";
+
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String auditDetailPropertyName = "auditDetail";
+
 	/** @hidden */
 	public static final String sourceVersionPropertyName = "sourceVersion";
+
 	/** @hidden */
 	public static final String comparisonVersionPropertyName = "comparisonVersion";
+
 	/** @hidden */
 	public static final String mePropertyName = "me";
 
@@ -144,51 +156,62 @@ public class Audit extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.audit.auditModuleName.displayName
+	 * Module
 	 **/
 	private String auditModuleName;
+
 	/**
-	 * admin.audit.auditModuleName.displayName
+	 * Module
 	 **/
 	private String auditDocumentName;
+
 	/**
-	 * admin.audit.auditBizId.displayName
+	 * BizId
 	 **/
 	private String auditBizId;
+
 	/**
-	 * admin.audit.auditBizKey.displayName
+	 * Description
 	 **/
 	private String auditBizKey;
+
 	/**
 	 * admin.audit.operator.displayName
 	 **/
 	private Operation operation;
+
 	/**
-	 * admin.audit.timestamp.displayName
+	 * Timestamp
 	 **/
 	private Timestamp timestamp;
+
 	/**
-	 * admin.audit.millis.displayName
+	 * Millis
 	 **/
 	private Long millis;
+
 	/**
-	 * admin.audit.userName.displayName
+	 * User
 	 **/
 	private String userName;
+
 	/**
-	 * admin.audit.auditDetail.displayName
+	 * Audit
 	 **/
 	private String auditDetail;
+
 	/**
-	 * admin.audit.association.sourceVersion.displayName
+	 * Source Version To Compare
 	 **/
 	private Audit sourceVersion = null;
+
 	/**
 	 * admin.audit.assocation.comparisonVersion.displayName
 	 **/
 	private Audit comparisonVersion = null;
+
 	/**
-	 * admin.audit.association.me.displayName
+	 * Me
 	 **/
 	private Audit me = null;
 
@@ -335,9 +358,9 @@ public class Audit extends AbstractPersistentBean {
 	 * {@link #timestamp} mutator.
 	 * @param timestamp	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;

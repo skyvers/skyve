@@ -51,93 +51,136 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Generic";
 
 	/** @hidden */
 	public static final String memo1PropertyName = "memo1";
+
 	/** @hidden */
 	public static final String memo2PropertyName = "memo2";
+
 	/** @hidden */
 	public static final String memo3PropertyName = "memo3";
+
 	/** @hidden */
 	public static final String memo4PropertyName = "memo4";
+
 	/** @hidden */
 	public static final String memo5PropertyName = "memo5";
+
 	/** @hidden */
 	public static final String memo6PropertyName = "memo6";
+
 	/** @hidden */
 	public static final String boolean1PropertyName = "boolean1";
+
 	/** @hidden */
 	public static final String boolean2PropertyName = "boolean2";
+
 	/** @hidden */
 	public static final String boolean3PropertyName = "boolean3";
+
 	/** @hidden */
 	public static final String date1PropertyName = "date1";
+
 	/** @hidden */
 	public static final String date2PropertyName = "date2";
+
 	/** @hidden */
 	public static final String date3PropertyName = "date3";
+
 	/** @hidden */
 	public static final String dateTime1PropertyName = "dateTime1";
+
 	/** @hidden */
 	public static final String dateTime2PropertyName = "dateTime2";
+
 	/** @hidden */
 	public static final String dateTime3PropertyName = "dateTime3";
+
 	/** @hidden */
 	public static final String time1PropertyName = "time1";
+
 	/** @hidden */
 	public static final String time2PropertyName = "time2";
+
 	/** @hidden */
 	public static final String time3PropertyName = "time3";
+
 	/** @hidden */
 	public static final String timestamp1PropertyName = "timestamp1";
+
 	/** @hidden */
 	public static final String timestamp2PropertyName = "timestamp2";
+
 	/** @hidden */
 	public static final String timestamp3PropertyName = "timestamp3";
+
 	/** @hidden */
 	public static final String decimal21PropertyName = "decimal21";
+
 	/** @hidden */
 	public static final String decimal22PropertyName = "decimal22";
+
 	/** @hidden */
 	public static final String decimal23PropertyName = "decimal23";
+
 	/** @hidden */
 	public static final String decimal51PropertyName = "decimal51";
+
 	/** @hidden */
 	public static final String decimal52PropertyName = "decimal52";
+
 	/** @hidden */
 	public static final String decimal53PropertyName = "decimal53";
+
 	/** @hidden */
 	public static final String decimal101PropertyName = "decimal101";
+
 	/** @hidden */
 	public static final String decimal102PropertyName = "decimal102";
+
 	/** @hidden */
 	public static final String decimal103PropertyName = "decimal103";
+
 	/** @hidden */
 	public static final String integer1PropertyName = "integer1";
+
 	/** @hidden */
 	public static final String integer2PropertyName = "integer2";
+
 	/** @hidden */
 	public static final String integer3PropertyName = "integer3";
+
 	/** @hidden */
 	public static final String longInteger1PropertyName = "longInteger1";
+
 	/** @hidden */
 	public static final String longInteger2PropertyName = "longInteger2";
+
 	/** @hidden */
 	public static final String longInteger3PropertyName = "longInteger3";
+
 	/** @hidden */
 	public static final String geometry1PropertyName = "geometry1";
+
 	/** @hidden */
 	public static final String geometry2PropertyName = "geometry2";
+
 	/** @hidden */
 	public static final String geometry3PropertyName = "geometry3";
+
 	/** @hidden */
 	public static final String markup1PropertyName = "markup1";
+
 	/** @hidden */
 	public static final String text5001PropertyName = "text5001";
+
 	/** @hidden */
 	public static final String text5002PropertyName = "text5002";
+
 	/** @hidden */
 	public static final String text5003PropertyName = "text5003";
 
@@ -145,176 +188,218 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * memo1
 	 **/
 	private String memo1;
+
 	/**
 	 * memo2
 	 **/
 	private String memo2;
+
 	/**
 	 * memo3
 	 **/
 	private String memo3;
+
 	/**
 	 * memo4
 	 **/
 	private String memo4;
+
 	/**
 	 * memo5
 	 **/
 	private String memo5;
+
 	/**
 	 * memo6
 	 **/
 	private String memo6;
+
 	/**
 	 * boolean1
 	 **/
 	private Boolean boolean1;
+
 	/**
 	 * boolean2
 	 **/
 	private Boolean boolean2;
+
 	/**
 	 * boolean3
 	 **/
 	private Boolean boolean3;
+
 	/**
 	 * date1
 	 **/
 	private DateOnly date1;
+
 	/**
 	 * date2
 	 **/
 	private DateOnly date2;
+
 	/**
 	 * date3
 	 **/
 	private DateOnly date3;
+
 	/**
 	 * dateTime1
 	 **/
 	private DateTime dateTime1;
+
 	/**
 	 * dateTime2
 	 **/
 	private DateTime dateTime2;
+
 	/**
 	 * dateTime3
 	 **/
 	private DateTime dateTime3;
+
 	/**
 	 * time1
 	 **/
 	private TimeOnly time1;
+
 	/**
 	 * time2
 	 **/
 	private TimeOnly time2;
+
 	/**
 	 * time3
 	 **/
 	private TimeOnly time3;
+
 	/**
 	 * timestamp1
 	 **/
 	private Timestamp timestamp1;
+
 	/**
 	 * timestamp2
 	 **/
 	private Timestamp timestamp2;
+
 	/**
 	 * timestamp3
 	 **/
 	private Timestamp timestamp3;
+
 	/**
 	 * decimal21
 	 **/
 	private Decimal2 decimal21;
+
 	/**
 	 * decimal22
 	 **/
 	private Decimal2 decimal22;
+
 	/**
 	 * decimal23
 	 **/
 	private Decimal2 decimal23;
+
 	/**
 	 * decimal51
 	 **/
 	private Decimal5 decimal51;
+
 	/**
 	 * decimal52
 	 **/
 	private Decimal5 decimal52;
+
 	/**
 	 * decimal53
 	 **/
 	private Decimal5 decimal53;
+
 	/**
 	 * decimal101
 	 **/
 	private Decimal10 decimal101;
+
 	/**
 	 * decimal102
 	 **/
 	private Decimal10 decimal102;
+
 	/**
 	 * decimal103
 	 **/
 	private Decimal10 decimal103;
+
 	/**
 	 * integer1
 	 **/
 	private Integer integer1;
+
 	/**
 	 * integer2
 	 **/
 	private Integer integer2;
+
 	/**
 	 * integer3
 	 **/
 	private Integer integer3;
+
 	/**
 	 * longInteger1
 	 **/
 	private Long longInteger1;
+
 	/**
 	 * longInteger2
 	 **/
 	private Long longInteger2;
+
 	/**
 	 * longInteger3
 	 **/
 	private Long longInteger3;
+
 	/**
 	 * geometry1
 	 **/
 	private Geometry geometry1;
+
 	/**
 	 * geometry2
 	 **/
 	private Geometry geometry2;
+
 	/**
 	 * geometry3
 	 **/
 	private Geometry geometry3;
+
 	/**
 	 * markup1
 	 **/
 	private String markup1;
+
 	/**
 	 * text 500 1
 	 **/
 	private String text5001;
+
 	/**
 	 * text 500 2
 	 **/
 	private String text5002;
+
 	/**
 	 * text 500 3
 	 **/
 	private String text5003;
-	private String bizParentId;
 
+	private String bizParentId;
 
 	@Override
 	@XmlTransient
@@ -527,9 +612,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #date1} mutator.
 	 * @param date1	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDate1(DateOnly date1) {
 		preset(date1PropertyName, date1);
 		this.date1 = date1;
@@ -547,9 +632,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #date2} mutator.
 	 * @param date2	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDate2(DateOnly date2) {
 		preset(date2PropertyName, date2);
 		this.date2 = date2;
@@ -567,9 +652,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #date3} mutator.
 	 * @param date3	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDate3(DateOnly date3) {
 		preset(date3PropertyName, date3);
 		this.date3 = date3;
@@ -587,9 +672,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #dateTime1} mutator.
 	 * @param dateTime1	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setDateTime1(DateTime dateTime1) {
 		preset(dateTime1PropertyName, dateTime1);
 		this.dateTime1 = dateTime1;
@@ -607,9 +692,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #dateTime2} mutator.
 	 * @param dateTime2	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setDateTime2(DateTime dateTime2) {
 		preset(dateTime2PropertyName, dateTime2);
 		this.dateTime2 = dateTime2;
@@ -627,9 +712,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #dateTime3} mutator.
 	 * @param dateTime3	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setDateTime3(DateTime dateTime3) {
 		preset(dateTime3PropertyName, dateTime3);
 		this.dateTime3 = dateTime3;
@@ -647,9 +732,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #time1} mutator.
 	 * @param time1	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
-	@XmlElement
 	public void setTime1(TimeOnly time1) {
 		preset(time1PropertyName, time1);
 		this.time1 = time1;
@@ -667,9 +752,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #time2} mutator.
 	 * @param time2	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
-	@XmlElement
 	public void setTime2(TimeOnly time2) {
 		preset(time2PropertyName, time2);
 		this.time2 = time2;
@@ -687,9 +772,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #time3} mutator.
 	 * @param time3	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
-	@XmlElement
 	public void setTime3(TimeOnly time3) {
 		preset(time3PropertyName, time3);
 		this.time3 = time3;
@@ -707,9 +792,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #timestamp1} mutator.
 	 * @param timestamp1	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setTimestamp1(Timestamp timestamp1) {
 		preset(timestamp1PropertyName, timestamp1);
 		this.timestamp1 = timestamp1;
@@ -727,9 +812,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #timestamp2} mutator.
 	 * @param timestamp2	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setTimestamp2(Timestamp timestamp2) {
 		preset(timestamp2PropertyName, timestamp2);
 		this.timestamp2 = timestamp2;
@@ -747,9 +832,9 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #timestamp3} mutator.
 	 * @param timestamp3	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setTimestamp3(Timestamp timestamp3) {
 		preset(timestamp3PropertyName, timestamp3);
 		this.timestamp3 = timestamp3;
@@ -767,8 +852,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal21} mutator.
 	 * @param decimal21	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	public void setDecimal21(Decimal2 decimal21) {
 		preset(decimal21PropertyName, decimal21);
 		this.decimal21 = decimal21;
@@ -786,8 +871,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal22} mutator.
 	 * @param decimal22	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	public void setDecimal22(Decimal2 decimal22) {
 		preset(decimal22PropertyName, decimal22);
 		this.decimal22 = decimal22;
@@ -805,8 +890,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal23} mutator.
 	 * @param decimal23	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	public void setDecimal23(Decimal2 decimal23) {
 		preset(decimal23PropertyName, decimal23);
 		this.decimal23 = decimal23;
@@ -824,8 +909,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal51} mutator.
 	 * @param decimal51	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	public void setDecimal51(Decimal5 decimal51) {
 		preset(decimal51PropertyName, decimal51);
 		this.decimal51 = decimal51;
@@ -843,8 +928,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal52} mutator.
 	 * @param decimal52	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	public void setDecimal52(Decimal5 decimal52) {
 		preset(decimal52PropertyName, decimal52);
 		this.decimal52 = decimal52;
@@ -862,8 +947,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal53} mutator.
 	 * @param decimal53	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	public void setDecimal53(Decimal5 decimal53) {
 		preset(decimal53PropertyName, decimal53);
 		this.decimal53 = decimal53;
@@ -881,8 +966,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal101} mutator.
 	 * @param decimal101	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	public void setDecimal101(Decimal10 decimal101) {
 		preset(decimal101PropertyName, decimal101);
 		this.decimal101 = decimal101;
@@ -900,8 +985,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal102} mutator.
 	 * @param decimal102	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	public void setDecimal102(Decimal10 decimal102) {
 		preset(decimal102PropertyName, decimal102);
 		this.decimal102 = decimal102;
@@ -919,8 +1004,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #decimal103} mutator.
 	 * @param decimal103	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	public void setDecimal103(Decimal10 decimal103) {
 		preset(decimal103PropertyName, decimal103);
 		this.decimal103 = decimal103;
@@ -1046,8 +1131,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #geometry1} mutator.
 	 * @param geometry1	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setGeometry1(Geometry geometry1) {
 		preset(geometry1PropertyName, geometry1);
 		this.geometry1 = geometry1;
@@ -1065,8 +1150,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #geometry2} mutator.
 	 * @param geometry2	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setGeometry2(Geometry geometry2) {
 		preset(geometry2PropertyName, geometry2);
 		this.geometry2 = geometry2;
@@ -1084,8 +1169,8 @@ public class Generic extends AbstractTransientBean implements HierarchicalBean<G
 	 * {@link #geometry3} mutator.
 	 * @param geometry3	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setGeometry3(Geometry geometry3) {
 		preset(geometry3PropertyName, geometry3);
 		this.geometry3 = geometry3;
