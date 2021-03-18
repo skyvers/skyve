@@ -69,5 +69,26 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5
 
     }
 
+    @Test
+    void createAdminUserFromContactWithGroupShouldFailIfNoValidGroupName()
+    {
+        //given
+        Contact contact = Contact.newInstance();
+        GroupExtension group = GroupExtension.newInstance();
+        group.setName("Admin");
+
+        //when
+        Executable executable = () -> ModulesUtil.createAdminUserFromContactWithGroup(contact, "Admin", "homeModuleName",false );
+
+        //then
+        assertThrows(ValidationException.class, executable);
+
+    }
+
+
+
+
+
+
 
 }
