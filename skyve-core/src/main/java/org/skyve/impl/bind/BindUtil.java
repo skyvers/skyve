@@ -623,19 +623,27 @@ public final class BindUtil {
 						// Get the real deal if this is a MapBean from a query
 						Bean realBean = bean;
 						if (bean instanceof MapBean) {
-							realBean = (Bean) ((MapBean) bean).get(DocumentQuery.THIS_ALIAS);
-						}
-						
-						int lastDotIndex = binding.lastIndexOf('.');
-						if (lastDotIndex >= 0) {
-							Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
-							if ((owningBean != null) && (target != null)) {
-								internalDocument = (DocumentImpl) target.getDocument();
-								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
+							MapBean mapBean = (MapBean) bean;
+							if (mapBean.isProperty(DocumentQuery.THIS_ALIAS)) {
+								realBean = (Bean) mapBean.get(DocumentQuery.THIS_ALIAS);
+							}
+							else { // no THIS_ALIAS in this mapBean (maybe its a app coder's list model)
+								realBean = null;
 							}
 						}
-						else {
-							domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
+						
+						if (realBean != null) {
+							int lastDotIndex = binding.lastIndexOf('.');
+							if (lastDotIndex >= 0) {
+								Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
+								if ((owningBean != null) && (target != null)) {
+									internalDocument = (DocumentImpl) target.getDocument();
+									domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
+								}
+							}
+							else {
+								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
+							}
 						}
 					}
 					else {
