@@ -37,47 +37,67 @@ public abstract class Startup extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Startup";
 
 	/** @hidden */
 	public static final String dontShowAgainPropertyName = "dontShowAgain";
+
 	/** @hidden */
 	public static final String environmentIdentifierPropertyName = "environmentIdentifier";
+
 	/** @hidden */
 	public static final String environmentSupportEmailPropertyName = "environmentSupportEmail";
+
 	/** @hidden */
 	public static final String mapTypePropertyName = "mapType";
+
 	/** @hidden */
 	public static final String mapZoomPropertyName = "mapZoom";
+
 	/** @hidden */
 	public static final String mapLayerPropertyName = "mapLayer";
+
 	/** @hidden */
 	public static final String mapCentrePropertyName = "mapCentre";
+
 	/** @hidden */
 	public static final String mailServerUrlPropertyName = "mailServerUrl";
+
 	/** @hidden */
 	public static final String mailPortPropertyName = "mailPort";
+
 	/** @hidden */
 	public static final String mailUsernamePropertyName = "mailUsername";
+
 	/** @hidden */
 	public static final String mailPasswordPropertyName = "mailPassword";
+
 	/** @hidden */
 	public static final String mailSenderPropertyName = "mailSender";
+
 	/** @hidden */
 	public static final String mailBogusSendPropertyName = "mailBogusSend";
+
 	/** @hidden */
 	public static final String mailTestRecipientPropertyName = "mailTestRecipient";
+
 	/** @hidden */
 	public static final String apiGoogleMapsKeyPropertyName = "apiGoogleMapsKey";
+
 	/** @hidden */
 	public static final String apiGoogleRecaptchaKeyPropertyName = "apiGoogleRecaptchaKey";
+
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
+
 	/** @hidden */
 	public static final String apiTwilioSIDPropertyName = "apiTwilioSID";
+
 	/** @hidden */
 	public static final String apiTwilioAuthTokenPropertyName = "apiTwilioAuthToken";
+
 	/** @hidden */
 	public static final String apiTwilioDefaultSendNumberPropertyName = "apiTwilioDefaultSendNumber";
 
@@ -165,91 +185,106 @@ public abstract class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * Allow the user to bypass the setup screen and set the showSetup value to false.
 	 **/
-	private Boolean dontShowAgain = new Boolean(false);
+	private Boolean dontShowAgain = Boolean.valueOf(false);
+
 	/**
 	 * Identifier
 	 * <br/>
 	 * The description of this environment, e.g. Test, UAT. Leave this blank for production.
 	 **/
 	private String environmentIdentifier;
+
 	/**
 	 * Support Email Address
 	 * <br/>
 	 * Email address for system support
 	 **/
 	private String environmentSupportEmail;
+
 	/**
 	 * Type
 	 * <br/>
 	 * Which map technology would you like to use for this Skyve application? Note: Google Maps requires an API key.
 	 **/
 	private MapType mapType = MapType.leaflet;
+
 	/**
 	 * Zoom
 	 * <br/>
 	 * What should the default zoom level be when opening a new map (value between 1-19)?
 	 **/
-	private Integer mapZoom = new Integer(1);
+	private Integer mapZoom = Integer.valueOf(1);
+
 	/**
 	 * Layers
 	 * <br/>
 	 * Google Map or Leaflet layer to show the map backdrop
 	 **/
 	private String mapLayer;
+
 	/**
 	 * Centre
 	 * <br/>
 	 * Where to centre a new map when it opens
 	 **/
 	private Geometry mapCentre;
+
 	/**
 	 * Server URL
 	 * <br/>
 	 * URL or IP address of the SMTP server to use
 	 **/
 	private String mailServerUrl;
+
 	/**
 	 * Server Port
 	 * <br/>
 	 * Which port should be used to access the mail server? This is usually 25, 465 or 587 depending if it is secure or insecure.
 	 **/
-	private Integer mailPort = new Integer(25);
+	private Integer mailPort = Integer.valueOf(25);
+
 	/**
 	 * Username
 	 * <br/>
 	 * Mail server username
 	 **/
 	private String mailUsername;
+
 	/**
 	 * Password
 	 * <br/>
 	 * Mail server password
 	 **/
 	private String mailPassword;
+
 	/**
 	 * Default Sender
 	 * <br/>
 	 * Default send from email address
 	 **/
 	private String mailSender;
+
 	/**
 	 * Test Mode
 	 * <br/>
 	 * If true, email is disabled and just logged, it will never be sent
 	 **/
-	private Boolean mailBogusSend = new Boolean(false);
+	private Boolean mailBogusSend = Boolean.valueOf(false);
+
 	/**
 	 * Test Mail Recipient
 	 * <br/>
 	 * All emails will only be sent to this email address if specified
 	 **/
 	private String mailTestRecipient;
+
 	/**
 	 * Google Maps Key
 	 * <br/>
 	 * If using Google Maps for your map type, specify your map key here
 	 **/
 	private String apiGoogleMapsKey;
+
 	/**
 	 * Google Recaptcha Site Key
 	 * <br/>
@@ -257,20 +292,24 @@ public abstract class Startup extends AbstractTransientBean {
 					for Google Recaptcha and the site key must be specified here.
 	 **/
 	private String apiGoogleRecaptchaKey;
+
 	/**
-	 * admin.startup.accountAllowUserSelfRegistration.displayName
+	 * Allow User Self Registration
 	 * <br/>
-	 * admin.startup.accountAllowUserSelfRegistration.description
+	 * Allows new users to register for an account when enabled, requires email.
 	 **/
-	private Boolean accountAllowUserSelfRegistration = new Boolean(false);
+	private Boolean accountAllowUserSelfRegistration = Boolean.valueOf(false);
+
 	/**
 	 * Account SID
 	 **/
 	private String apiTwilioSID;
+
 	/**
 	 * Account Auth Token
 	 **/
 	private String apiTwilioAuthToken;
+
 	/**
 	 * Default Send Number
 	 **/
@@ -433,8 +472,8 @@ public abstract class Startup extends AbstractTransientBean {
 	 * {@link #mapCentre} mutator.
 	 * @param mapCentre	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setMapCentre(Geometry mapCentre) {
 		preset(mapCentrePropertyName, mapCentre);
 		this.mapCentre = mapCentre;

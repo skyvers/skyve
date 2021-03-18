@@ -54,6 +54,7 @@
 	String q = request.getParameter("q"); // query
 	String i = request.getParameter("i"); // id
 	String c = request.getParameter("c"); // customer
+	String b = request.getParameter("b"); // binding
 
 	// Set the user agent type
 	UserAgentType userAgentType = UserAgent.getType(request);
@@ -72,9 +73,17 @@
 	// If we make it here without a principal, then we should either continue to a public unsecured page or login.
 	String userName = null;
 	Principal userPrincipal = request.getUserPrincipal();
+	boolean canonicalised = false;
 	if (userPrincipal == null) {
 		customerName = (UtilImpl.CUSTOMER == null) ? c : UtilImpl.CUSTOMER;
 		criteria.setCustomerName(customerName);
+		try {
+			criteria.canonicalise(b);
+			canonicalised = true;
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
+		}
 		if (router.isUnsecured(criteria)) {
 			if (customerName == null) {
 				throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
@@ -85,7 +94,7 @@
 					repository.getCustomer(customerName);
 				}
 				catch (Exception e) {
-					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer");
+					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer", e);
 				}
 			}
 			userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
@@ -140,6 +149,15 @@
 		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 		request.setAttribute(AbstractWebContext.UXUI, uxui);
 
+		if (! canonicalised) {
+			try {
+				criteria.canonicalise(b);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
+			}
+		}
+		
 		// Determine the route
 		criteria.setCustomerName(user.getCustomerName());
 		criteria.setDataGroupId(user.getDataGroupId());

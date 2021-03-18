@@ -30,32 +30,39 @@ public abstract class Group extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Group";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
+
 	/** @hidden */
 	public static final String candidateRolesPropertyName = "candidateRoles";
 
 	/**
-	 * admin.group.name.displayName
+	 * Group Name
 	 **/
 	private String name;
+
 	/**
-	 * admin.group.description.displayName
+	 * Description
 	 **/
 	private String description;
+
 	/**
-	 * admin.group.collection.roles.displayName
+	 * Roles
 	 **/
 	private List<GroupRole> roles = new ChangeTrackingArrayList<>("roles", this);
+
 	/**
-	 * admin.group.candidateRoles.displayName
+	 * Candidate Roles
 	 * <br/>
 	 * Holds the possible roles that can be assigned to this group.
 	 **/

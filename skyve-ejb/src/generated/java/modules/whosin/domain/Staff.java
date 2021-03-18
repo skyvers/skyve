@@ -54,27 +54,37 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 
 	/** @hidden */
 	public static final String MODULE_NAME = "whosin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Staff";
 
 	/** @hidden */
 	public static final String contactPropertyName = "contact";
+
 	/** @hidden */
 	public static final String staffCodePropertyName = "staffCode";
+
 	/** @hidden */
 	public static final String dateOfBirthPropertyName = "dateOfBirth";
+
 	/** @hidden */
 	public static final String roleTitlePropertyName = "roleTitle";
+
 	/** @hidden */
 	public static final String baseOfficePropertyName = "baseOffice";
+
 	/** @hidden */
 	public static final String locationPropertyName = "location";
+
 	/** @hidden */
 	public static final String statusPropertyName = "status";
+
 	/** @hidden */
 	public static final String dueBackPropertyName = "dueBack";
+
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
+
 	/** @hidden */
 	public static final String reportsToPropertyName = "reportsTo";
 
@@ -161,52 +171,61 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * Contact
 	 **/
 	private Contact contact = null;
+
 	/**
 	 * Code
 	 **/
 	private String staffCode;
+
 	/**
 	 * Date of Birth
 	 **/
 	private DateOnly dateOfBirth;
+
 	/**
 	 * Role Title
 	 * <br/>
 	 * The person's organisational title or role.
 	 **/
 	private String roleTitle;
+
 	/**
 	 * Base Office
 	 * <br/>
 	 * The office this person usually operates from.
 	 **/
 	private Office baseOffice = null;
+
 	/**
 	 * Location
 	 **/
 	private Geometry location;
+
 	/**
 	 * Status
 	 **/
 	private Status status;
+
 	/**
 	 * Due Back
 	 * <br/>
 	 * If not in the office, when the staff member is due back.
 	 **/
 	private DateTime dueBack;
+
 	/**
 	 * Demonstration Data
 	 * <br/>
 	 * If this is set, the data was created by the demo data job and can safely be deleted.
 	 **/
 	private Boolean demoData;
+
 	/**
 	 * Reports To
 	 **/
 	private Staff reportsTo = null;
-	private String bizParentId;
 
+	private String bizParentId;
 
 	@Override
 	@XmlTransient
@@ -299,9 +318,9 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * {@link #dateOfBirth} mutator.
 	 * @param dateOfBirth	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDateOfBirth(DateOnly dateOfBirth) {
 		preset(dateOfBirthPropertyName, dateOfBirth);
 		this.dateOfBirth = dateOfBirth;
@@ -357,8 +376,8 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * {@link #location} mutator.
 	 * @param location	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setLocation(Geometry location) {
 		preset(locationPropertyName, location);
 		this.location = location;
@@ -394,9 +413,9 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * {@link #dueBack} mutator.
 	 * @param dueBack	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setDueBack(DateTime dueBack) {
 		preset(dueBackPropertyName, dueBack);
 		this.dueBack = dueBack;

@@ -32,13 +32,16 @@ public class UniqueConstraintNonNullable extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UniqueConstraintNonNullable";
 
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
+
 	/** @hidden */
 	public static final String enum3PropertyName = "enum3";
+
 	/** @hidden */
 	public static final String textPropertyName = "text";
 
@@ -124,10 +127,12 @@ public class UniqueConstraintNonNullable extends AbstractPersistentBean {
 	 * Boolean Flag
 	 **/
 	private Boolean booleanFlag;
+
 	/**
 	 * Enum 3
 	 **/
 	private Enum3 enum3;
+
 	/**
 	 * Text
 	 **/

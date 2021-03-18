@@ -26,8 +26,11 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 	private static final long serialVersionUID = 1L;
 
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String DOCUMENT_NAME = "MappedSubclassedSingleStrategy";
 
 	/** @hidden */

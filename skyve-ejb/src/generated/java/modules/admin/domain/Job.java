@@ -28,25 +28,34 @@ public class Job extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Job";
 
 	/** @hidden */
 	public static final String startTimePropertyName = "startTime";
+
 	/** @hidden */
 	public static final String endTimePropertyName = "endTime";
+
 	/** @hidden */
 	public static final String displayNamePropertyName = "displayName";
+
 	/** @hidden */
 	public static final String percentCompletePropertyName = "percentComplete";
+
 	/** @hidden */
 	public static final String statusPropertyName = "status";
+
 	/** @hidden */
 	public static final String logPropertyName = "log";
+
 	/** @hidden */
 	public static final String beanBizIdPropertyName = "beanBizId";
+
 	/** @hidden */
 	public static final String beanModuleNamePropertyName = "beanModuleName";
+
 	/** @hidden */
 	public static final String beanDocumentNamePropertyName = "beanDocumentName";
 
@@ -54,36 +63,44 @@ public class Job extends AbstractPersistentBean {
 	 * Start Time
 	 **/
 	private Timestamp startTime;
+
 	/**
 	 * End Time
 	 **/
 	private Timestamp endTime;
+
 	/**
 	 * Name
 	 **/
 	private String displayName;
+
 	/**
 	 * Percent Complete
 	 **/
 	private Integer percentComplete;
+
 	/**
 	 * Status
 	 **/
 	private String status;
+
 	/**
 	 * Log
 	 **/
 	private String log;
+
 	/**
 	 * Bean Biz Id
 	 **/
 	private String beanBizId;
+
 	/**
 	 * Bean Module Name
 	 * <br/>
 	 * The name of the module for the bean.
 	 **/
 	private String beanModuleName;
+
 	/**
 	 * Bean Document Name
 	 * <br/>
@@ -144,9 +161,9 @@ public class Job extends AbstractPersistentBean {
 	 * {@link #startTime} mutator.
 	 * @param startTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setStartTime(Timestamp startTime) {
 		preset(startTimePropertyName, startTime);
 		this.startTime = startTime;
@@ -164,9 +181,9 @@ public class Job extends AbstractPersistentBean {
 	 * {@link #endTime} mutator.
 	 * @param endTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setEndTime(Timestamp endTime) {
 		preset(endTimePropertyName, endTime);
 		this.endTime = endTime;

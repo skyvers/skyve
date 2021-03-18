@@ -37,66 +37,93 @@ public class Tag extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Tag";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String visiblePropertyName = "visible";
+
 	/** @hidden */
 	public static final String combinationsOperatorPropertyName = "combinationsOperator";
+
 	/** @hidden */
 	public static final String combinationExplanationPropertyName = "combinationExplanation";
+
 	/** @hidden */
 	public static final String totalTaggedPropertyName = "totalTagged";
+
 	/** @hidden */
 	public static final String copyToUserPropertyName = "copyToUser";
+
 	/** @hidden */
 	public static final String copyToUserTagNamePropertyName = "copyToUserTagName";
+
 	/** @hidden */
 	public static final String uploadModuleNamePropertyName = "uploadModuleName";
+
 	/** @hidden */
 	public static final String uploadDocumentNamePropertyName = "uploadDocumentName";
+
 	/** @hidden */
 	public static final String attributeNamePropertyName = "attributeName";
+
 	/** @hidden */
 	public static final String fileHasHeadersPropertyName = "fileHasHeaders";
+
 	/** @hidden */
 	public static final String uploadedPropertyName = "uploaded";
+
 	/** @hidden */
 	public static final String uploadMatchedPropertyName = "uploadMatched";
+
 	/** @hidden */
 	public static final String uploadTaggedPropertyName = "uploadTagged";
+
 	/** @hidden */
 	public static final String filterOperatorPropertyName = "filterOperator";
+
 	/** @hidden */
 	public static final String filterActionPropertyName = "filterAction";
+
 	/** @hidden */
 	public static final String actionModuleNamePropertyName = "actionModuleName";
+
 	/** @hidden */
 	public static final String actionDocumentNamePropertyName = "actionDocumentName";
+
 	/** @hidden */
 	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
+
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
+
 	/** @hidden */
 	public static final String filterColumnPropertyName = "filterColumn";
+
 	/** @hidden */
 	public static final String operandTagPropertyName = "operandTag";
+
 	/** @hidden */
 	public static final String operandTagCountPropertyName = "operandTagCount";
+
 	/** @hidden */
 	public static final String documentConditionPropertyName = "documentCondition";
+
 	/** @hidden */
 	public static final String documentActionPropertyName = "documentAction";
+
 	/** @hidden */
 	public static final String documentActionResultsPropertyName = "documentActionResults";
+
 	/** @hidden */
 	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
-	 * admin.tag.combinationsOperator.displayName
+	 * Operator
 	 **/
 	@XmlEnum
 	public static enum CombinationsOperator implements Enumeration {
@@ -174,7 +201,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.tag.filterOperator.displayName
+	 * Filter Operator
 	 **/
 	@XmlEnum
 	public static enum FilterOperator implements Enumeration {
@@ -252,7 +279,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.tag.filterAction.displayName
+	 * Filter Action
 	 **/
 	@XmlEnum
 	public static enum FilterAction implements Enumeration {
@@ -329,129 +356,156 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.tag.name.displayName
+	 * Name
 	 **/
 	private String name;
+
 	/**
-	 * admin.tag.visible.displayName
+	 * Visible
 	 **/
 	private Boolean visible;
+
 	/**
-	 * admin.tag.combinationsOperator.displayName
+	 * Operator
 	 **/
 	private CombinationsOperator combinationsOperator;
+
 	/**
-	 * admin.tag.combinationExplanation.displayName
+	 * Explanation
 	 **/
 	private String combinationExplanation;
+
 	/**
-	 * admin.tag.totalTagged.displayName
+	 * Total Tagged
 	 **/
 	private Long totalTagged;
+
 	/**
-	 * admin.tag.association.copyToUser.displayName
+	 * Copy to user
 	 **/
 	private UserProxyExtension copyToUser = null;
+
 	/**
-	 * admin.tag.copyToUserTagName.displayName
+	 * Tag Name
 	 **/
 	private String copyToUserTagName;
+
 	/**
-	 * admin.tag.uploadModuleName.displayName
+	 * Module
 	 * <br/>
-	 * admin.tag.uploadModuleName.description
+	 * The module to tag.
 	 **/
 	private String uploadModuleName;
+
 	/**
-	 * admin.tag.uploadDocumentName.displayName
+	 * Document
 	 * <br/>
-	 * admin.tag.uploadDocumentName.displayName
+	 * Document
 	 **/
 	private String uploadDocumentName;
+
 	/**
-	 * admin.tag.attributeName.displayName
+	 * Attribute
 	 * <br/>
-	 * admin.tag.attributeName.description
+	 * The name of the attribute to tag.
 	 **/
 	private String attributeName;
+
 	/**
-	 * admin.tag.fileHasHeaders.displayName
+	 * Upload File has Column Headers
 	 **/
 	private Boolean fileHasHeaders;
+
 	/**
-	 * admin.tag.uploaded.displayName
+	 * Uploaded
 	 **/
 	private Long uploaded;
+
 	/**
-	 * admin.tag.uploadMatched.displayName
+	 * Match
 	 **/
 	private Long uploadMatched;
+
 	/**
-	 * admin.tag.uploadTagged.displayName
+	 * Tagged
 	 **/
 	private Long uploadTagged;
+
 	/**
-	 * admin.tag.filterOperator.displayName
+	 * Filter Operator
 	 **/
 	private FilterOperator filterOperator;
+
 	/**
-	 * admin.tag.filterAction.displayName
+	 * Filter Action
 	 **/
 	private FilterAction filterAction;
+
 	/**
-	 * admin.tag.actionModuleName.displayName
+	 * Module
 	 * <br/>
-	 * admin.tag.actionModuleName.description
+	 * The module for the tag Action.
 	 **/
 	private String actionModuleName;
+
 	/**
-	 * admin.tag.actionDocumentName.displayName
+	 * Document
 	 * <br/>
-	 * admin.tag.actionDocumentName.description
+	 * The document for the tag Action.
 	 **/
 	private String actionDocumentName;
+
 	/**
-	 * admin.tag.unTagSuccessful.displayName
+	 * Untag successful documents
 	 **/
 	private Boolean unTagSuccessful;
+
 	/**
-	 * admin.tag.notification.displayName
+	 * Notify when job is complete
 	 **/
 	private Boolean notification;
+
 	/**
-	 * admin.tag.filterColumn.displayName
+	 * Column (first column is 1)
 	 **/
 	private Integer filterColumn;
+
 	/**
-	 * admin.tag.association.operandTag.displayName
+	 * Other Tag
 	 * <br/>
-	 * admin.tag.association.operandTag.description
+	 * The other tag to use for the combination.
 	 **/
 	private Tag operandTag = null;
+
 	/**
-	 * admin.tag.operandTagCount.displayName
+	 * Tagged
 	 **/
 	private Long operandTagCount;
+
 	/**
-	 * admin.tag.documentCondition.displayName
+	 * Condition
 	 * <br/>
-	 * admin.tag.documentCondition.description
+	 * The condition which must be satisfied for the tagged document, for the action to be executed.
 	 **/
 	private String documentCondition;
+
 	/**
-	 * admin.tag.documentAction.displayName
+	 * Action
 	 * <br/>
-	 * admin.tag.documentAction.description
+	 * The action to be executed on the tagged document (provided the specified condition is satisfied for that document).
 	 **/
 	private String documentAction;
+
 	/**
-	 * admin.tag.documentActionResults.displayName
+	 * Request
 	 **/
 	private String documentActionResults;
+
 	/**
-	 * admin.tag.evictOption.displayName
+	 * Cache Evict
 	 * <br/>
-	 * admin.tag.evictOption.description
+	 * <p>Whether to evict each bean after processing.</p>
+<p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
 

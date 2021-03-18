@@ -32,40 +32,47 @@ public abstract class UserProxy extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserProxy";
 
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String createdDateTimePropertyName = "createdDateTime";
+
 	/** @hidden */
 	public static final String contactPropertyName = "contact";
+
 	/** @hidden */
 	public static final String inactivePropertyName = "inactive";
 
 	/**
-	 * admin.userProxy.userName.displayName
+	 * User Name
 	 * <br/>
 	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
+
 	/**
-	 * admin.userProxy.createdDateTime.displayName
+	 * Created
 	 * <br/>
-	 * admin.userProxy.createdDateTime.description
+	 * The time and date when this user account was created.
 	 **/
 	private DateTime createdDateTime;
+
 	/**
-	 * admin.userProxy.association.contact.displayName
+	 * Contact
 	 * <br/>
-	 * admin.userProxy.association.contact.description
+	 * The contact details for the user.
 	 **/
 	private Contact contact = null;
+
 	/**
-	 * admin.userProxy.inactive.displayName
+	 * Inactive
 	 * <br/>
-	 * admin.userProxy.inactive.description
+	 * Flag to indicate that this account has been marked as inactive and no longer in use.
 	 **/
 	private Boolean inactive;
 
@@ -140,9 +147,9 @@ public abstract class UserProxy extends AbstractPersistentBean {
 	 * {@link #createdDateTime} mutator.
 	 * @param createdDateTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setCreatedDateTime(DateTime createdDateTime) {
 		preset(createdDateTimePropertyName, createdDateTime);
 		this.createdDateTime = createdDateTime;

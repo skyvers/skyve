@@ -24,11 +24,13 @@ public class DataGroup extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "DataGroup";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
 
@@ -36,6 +38,7 @@ public class DataGroup extends AbstractPersistentBean {
 	 * Name
 	 **/
 	private String name;
+
 	/**
 	 * Description
 	 **/

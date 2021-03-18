@@ -47,71 +47,103 @@ public abstract class User extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "User";
 
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String passwordPropertyName = "password";
+
 	/** @hidden */
 	public static final String generatedPasswordPropertyName = "generatedPassword";
+
 	/** @hidden */
 	public static final String createdDateTimePropertyName = "createdDateTime";
+
 	/** @hidden */
 	public static final String homeModulePropertyName = "homeModule";
+
 	/** @hidden */
 	public static final String newPasswordPropertyName = "newPassword";
+
 	/** @hidden */
 	public static final String confirmPasswordPropertyName = "confirmPassword";
+
 	/** @hidden */
 	public static final String legacyIdPropertyName = "legacyId";
+
 	/** @hidden */
 	public static final String passwordExpiredPropertyName = "passwordExpired";
+
 	/** @hidden */
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
+
 	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
+
 	/** @hidden */
 	public static final String passwordHistoryPropertyName = "passwordHistory";
+
 	/** @hidden */
 	public static final String authenticationFailuresPropertyName = "authenticationFailures";
+
 	/** @hidden */
 	public static final String lastAuthenticationFailurePropertyName = "lastAuthenticationFailure";
+
 	/** @hidden */
 	public static final String contactPropertyName = "contact";
+
 	/** @hidden */
 	public static final String dataGroupPropertyName = "dataGroup";
+
 	/** @hidden */
 	public static final String groupsPropertyName = "groups";
+
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
+
 	/** @hidden */
 	public static final String wizardStatePropertyName = "wizardState";
+
 	/** @hidden */
 	public static final String searchContactNamePropertyName = "searchContactName";
+
 	/** @hidden */
 	public static final String searchEmailPropertyName = "searchEmail";
+
 	/** @hidden */
 	public static final String candidateContactsPropertyName = "candidateContacts";
+
 	/** @hidden */
 	public static final String contactSelectedPropertyName = "contactSelected";
+
 	/** @hidden */
 	public static final String inactivePropertyName = "inactive";
+
 	/** @hidden */
 	public static final String groupSelectionPropertyName = "groupSelection";
+
 	/** @hidden */
 	public static final String groupsExistPropertyName = "groupsExist";
+
 	/** @hidden */
 	public static final String newGroupPropertyName = "newGroup";
+
 	/** @hidden */
 	public static final String assignedRolesPropertyName = "assignedRoles";
+
 	/** @hidden */
 	public static final String activatedPropertyName = "activated";
+
 	/** @hidden */
 	public static final String activationCodePropertyName = "activationCode";
+
 	/** @hidden */
 	public static final String activationCodeCreationDateTimePropertyName = "activationCodeCreationDateTime";
+
 	/** @hidden */
 	public static final String activateUrlPropertyName = "activateUrl";
 
@@ -202,7 +234,7 @@ public abstract class User extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.user.groupSelection.displayName
+	 * Groups
 	 **/
 	@XmlEnum
 	public static enum GroupSelection implements Enumeration {
@@ -279,117 +311,138 @@ public abstract class User extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.user.userName.displayName
+	 * User Name
 	 * <br/>
 	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
+
 	/**
-	 * admin.user.password.displayName
+	 * Password
 	 * <br/>
-	 * admin.user.password.description
+	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String password;
+
 	/**
-	 * admin.user.generatedPassword.displayName
+	 * Generated Password
 	 * <br/>
-	 * admin.user.generatedPassword.description
+	 * Used to temporarily hold generated passwords for further processing.
 	 **/
 	private String generatedPassword;
+
 	/**
-	 * admin.user.createdDateTime.displayName
+	 * Created
 	 * <br/>
-	 * admin.user.createdDateTime.description
+	 * The time and date when this user account was created.
 	 **/
 	private DateTime createdDateTime;
+
 	/**
-	 * admin.user.homeModule.displayName
+	 * Home Module
 	 * <br/>
-	 * admin.user.homeModule.description
+	 * The module displayed when the user first logs in.
 	 **/
 	private String homeModule;
+
 	/**
-	 * admin.user.newPassword.displayName
+	 * New Password
 	 * <br/>
-	 * admin.user.newPassword.description
+	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String newPassword;
+
 	/**
-	 * admin.user.confirmPassword.displayName
+	 * Confirm Password
 	 * <br/>
-	 * admin.user.confirmPassword.description
+	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String confirmPassword;
+
 	/**
-	 * admin.user.legacyId.displayName
+	 * Legacy Id
 	 * <br/>
-	 * admin.user.legacyId.description
+	 * Legacy ID value when imported from legacy System using the conversion tool.
 	 **/
 	private String legacyId;
+
 	/**
-	 * admin.user.passwordExpired.displayName
+	 * Must change password
 	 * <br/>
-	 * admin.user.passwordExpired.description
+	 * Whether the password must be changed
 	 **/
 	private Boolean passwordExpired;
+
 	/**
-	 * admin.user.passwordLastChanged.displayName
+	 * Last changed
 	 * <br/>
-	 * admin.user.passwordLastChanged.description
+	 * Date and Time the users password was last changed
 	 **/
 	private DateTime passwordLastChanged;
+
 	/**
-	 * admin.user.passwordResetToken.displayName
+	 * Password Reset Token
 	 * <br/>
-	 * admin.user.passwordResetToken.description
+	 * The password reset token emailed to the user on pass reset request.
 	 * <br/>
 	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
 	 **/
 	private String passwordResetToken;
+
 	/**
-	 * admin.user.passwordHistory.displayName
+	 * Password History
 	 * <br/>
 	 * A tab separated list of previous password hashes used
 	 **/
 	private String passwordHistory;
+
 	/**
-	 * admin.user.authenticationFailures.displayName
+	 * Authentication Failures
 	 * <br/>
-	 * admin.user.authenticationFailures.description
+	 * The number of authentication failures since the last successful authentication
 	 * <br/>
 	 * This value is zeroed on successful authentication.
 	 **/
 	private Integer authenticationFailures;
+
 	/**
-	 * admin.user.lastAuthenticationFailure.displayName
+	 * Last Authentication Failure
 	 * <br/>
-	 * admin.user.lastAuthenticationFailure.description
+	 * Time that last authentication failure occurred
 	 **/
 	private Timestamp lastAuthenticationFailure;
+
 	/**
-	 * admin.user.association.contact.displayName
+	 * Contact
 	 * <br/>
-	 * admin.user.association.contact.description
+	 * The contact details for the user.
 	 **/
 	private Contact contact = null;
+
 	/**
-	 * admin.user.association.dataGroup.displayName
+	 * Data Group
 	 * <br/>
-	 * admin.user.association.dataGroup.description
+	 * The group that constrains what information this user can see.
 	 **/
 	private DataGroup dataGroup = null;
+
 	/**
-	 * admin.user.collection.groups.displayName
+	 * Security Groups
 	 * <br/>
-	 * admin.user.collection.groups.description
+	 * The collection of security groups that this user belongs to.
 	 **/
 	private List<GroupExtension> groups = new ChangeTrackingArrayList<>("groups", this);
+
 	/**
-	 * admin.user.collection.roles.displayName
+	 * Roles
 	 * <br/>
-	 * admin.user.collection.roles.description
+	 * Typically users are assigned membership of groups, which define sets of roles, corresponding to business roles within an organisation. 
+
+However user may also have specific roles assigned in addition to the roles
+which are implied from the groups to which they belong.
 	 **/
 	private List<UserRole> roles = new ChangeTrackingArrayList<>("roles", this);
+
 	/**
 	 * Wizard State
 	 * <br/>
@@ -401,75 +454,88 @@ public abstract class User extends AbstractPersistentBean {
 			to confirm the new user name and password and membership of groups.
 	 **/
 	private WizardState wizardState;
+
 	/**
-	 * admin.user.searchContactName.displayName
+	 * Full name
 	 * <br/>
-	 * admin.user.searchContactName.description
+	 * This is used to determine if you are on the system already
 	 **/
 	private String searchContactName;
+
 	/**
-	 * admin.user.searchEmail.displayName
+	 * Email
 	 * <br/>
-	 * admin.user.searchEmail.description
+	 * The email address to use to search existing contacts.
 	 **/
 	private String searchEmail;
+
 	/**
-	 * admin.user.collection.candidateContacts.displayName
+	 * Candidate Contacts
 	 * <br/>
-	 * admin.user.collection.candidateContacts.description
+	 * The contacts who possibly match the search criteria.
 	 **/
 	private List<UserCandidateContact> candidateContacts = new ChangeTrackingArrayList<>("candidateContacts", this);
+
 	/**
-	 * admin.user.contactSelected.displayName
+	 * The contact selected for this user.
 	 **/
-	private Boolean contactSelected = new Boolean(false);
+	private Boolean contactSelected = Boolean.valueOf(false);
+
 	/**
-	 * admin.user.inactive.displayName
+	 * Inactive
 	 * <br/>
-	 * admin.user.inactive.description
+	 * Indicates that this account has been marked as inactive and no longer in use.
 	 **/
 	private Boolean inactive;
+
 	/**
-	 * admin.user.groupSelection.displayName
+	 * Groups
 	 **/
 	private GroupSelection groupSelection;
+
 	/**
-	 * admin.user.groupsExist.displayName
+	 * Groups Exist
 	 **/
 	private Boolean groupsExist;
+
 	/**
-	 * admin.user.association.newGroup.displayName
+	 * New Group
 	 **/
 	private GroupExtension newGroup = null;
+
 	/**
-	 * admin.user.collection.assignedRoles.displayName
+	 * Roles
 	 * <br/>
-	 * admin.user.collection.assignedRoles.description
+	 * The assigned roles through the groups, customer roles and module roles assigned.
 	 **/
 	private List<UserRole> assignedRoles = new ArrayList<>();
+
 	/**
-	 * admin.user.activated.displayName
+	 * Account Activated
 	 * <br/>
-	 * admin.user.activated.description
+	 * Whether this account has been activated or not. An account not activated means the user has not finished the activation process by clicking the link from their registration email.
 	 * <br/>
 	 * By default the account will be activated.
 			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
 	 **/
-	private Boolean activated = new Boolean(true);
+	private Boolean activated = Boolean.valueOf(true);
+
 	/**
-	 * admin.user.activationCode.displayName
+	 * Activation Code
 	 * <br/>
-	 * admin.user.activationCode.description
+	 * The activation code for this user account.
 	 * <br/>
 	 * This contains a code which when submitted by the user will activate their account.
 	 **/
 	private String activationCode;
+
 	/**
-	 * admin.user.activationCodeCreationDateTime.displayName
+	 * The date and time the activation code was created
 	 * <br/>
-	 * admin.user.activationCodeCreationDateTime.description
+	 * This setting is used to control expiry of activation codes.
 	 **/
 	private DateTime activationCodeCreationDateTime;
+
 	/**
 	 * Activation Url
 	 **/
@@ -576,9 +642,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #createdDateTime} mutator.
 	 * @param createdDateTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setCreatedDateTime(DateTime createdDateTime) {
 		preset(createdDateTimePropertyName, createdDateTime);
 		this.createdDateTime = createdDateTime;
@@ -686,9 +752,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #passwordLastChanged} mutator.
 	 * @param passwordLastChanged	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setPasswordLastChanged(DateTime passwordLastChanged) {
 		preset(passwordLastChangedPropertyName, passwordLastChanged);
 		this.passwordLastChanged = passwordLastChanged;
@@ -759,9 +825,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #lastAuthenticationFailure} mutator.
 	 * @param lastAuthenticationFailure	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setLastAuthenticationFailure(Timestamp lastAuthenticationFailure) {
 		preset(lastAuthenticationFailurePropertyName, lastAuthenticationFailure);
 		this.lastAuthenticationFailure = lastAuthenticationFailure;
@@ -1252,9 +1318,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * {@link #activationCodeCreationDateTime} mutator.
 	 * @param activationCodeCreationDateTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setActivationCodeCreationDateTime(DateTime activationCodeCreationDateTime) {
 		preset(activationCodeCreationDateTimePropertyName, activationCodeCreationDateTime);
 		this.activationCodeCreationDateTime = activationCodeCreationDateTime;

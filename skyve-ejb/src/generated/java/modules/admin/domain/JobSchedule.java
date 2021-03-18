@@ -30,896 +30,1187 @@ public class JobSchedule extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "JobSchedule";
 
 	/** @hidden */
 	public static final String jobNamePropertyName = "jobName";
+
 	/** @hidden */
 	public static final String cronExpressionPropertyName = "cronExpression";
+
 	/** @hidden */
 	public static final String allMinutesPropertyName = "allMinutes";
+
 	/** @hidden */
 	public static final String minute0PropertyName = "minute0";
+
 	/** @hidden */
 	public static final String minute1PropertyName = "minute1";
+
 	/** @hidden */
 	public static final String minute2PropertyName = "minute2";
+
 	/** @hidden */
 	public static final String minute3PropertyName = "minute3";
+
 	/** @hidden */
 	public static final String minute4PropertyName = "minute4";
+
 	/** @hidden */
 	public static final String minute5PropertyName = "minute5";
+
 	/** @hidden */
 	public static final String minute6PropertyName = "minute6";
+
 	/** @hidden */
 	public static final String minute7PropertyName = "minute7";
+
 	/** @hidden */
 	public static final String minute8PropertyName = "minute8";
+
 	/** @hidden */
 	public static final String minute9PropertyName = "minute9";
+
 	/** @hidden */
 	public static final String minute10PropertyName = "minute10";
+
 	/** @hidden */
 	public static final String minute11PropertyName = "minute11";
+
 	/** @hidden */
 	public static final String minute12PropertyName = "minute12";
+
 	/** @hidden */
 	public static final String minute13PropertyName = "minute13";
+
 	/** @hidden */
 	public static final String minute14PropertyName = "minute14";
+
 	/** @hidden */
 	public static final String minute15PropertyName = "minute15";
+
 	/** @hidden */
 	public static final String minute16PropertyName = "minute16";
+
 	/** @hidden */
 	public static final String minute17PropertyName = "minute17";
+
 	/** @hidden */
 	public static final String minute18PropertyName = "minute18";
+
 	/** @hidden */
 	public static final String minute19PropertyName = "minute19";
+
 	/** @hidden */
 	public static final String minute20PropertyName = "minute20";
+
 	/** @hidden */
 	public static final String minute21PropertyName = "minute21";
+
 	/** @hidden */
 	public static final String minute22PropertyName = "minute22";
+
 	/** @hidden */
 	public static final String minute23PropertyName = "minute23";
+
 	/** @hidden */
 	public static final String minute24PropertyName = "minute24";
+
 	/** @hidden */
 	public static final String minute25PropertyName = "minute25";
+
 	/** @hidden */
 	public static final String minute26PropertyName = "minute26";
+
 	/** @hidden */
 	public static final String minute27PropertyName = "minute27";
+
 	/** @hidden */
 	public static final String minute28PropertyName = "minute28";
+
 	/** @hidden */
 	public static final String minute29PropertyName = "minute29";
+
 	/** @hidden */
 	public static final String minute30PropertyName = "minute30";
+
 	/** @hidden */
 	public static final String minute31PropertyName = "minute31";
+
 	/** @hidden */
 	public static final String minute32PropertyName = "minute32";
+
 	/** @hidden */
 	public static final String minute33PropertyName = "minute33";
+
 	/** @hidden */
 	public static final String minute34PropertyName = "minute34";
+
 	/** @hidden */
 	public static final String minute35PropertyName = "minute35";
+
 	/** @hidden */
 	public static final String minute36PropertyName = "minute36";
+
 	/** @hidden */
 	public static final String minute37PropertyName = "minute37";
+
 	/** @hidden */
 	public static final String minute38PropertyName = "minute38";
+
 	/** @hidden */
 	public static final String minute39PropertyName = "minute39";
+
 	/** @hidden */
 	public static final String minute40PropertyName = "minute40";
+
 	/** @hidden */
 	public static final String minute41PropertyName = "minute41";
+
 	/** @hidden */
 	public static final String minute42PropertyName = "minute42";
+
 	/** @hidden */
 	public static final String minute43PropertyName = "minute43";
+
 	/** @hidden */
 	public static final String minute44PropertyName = "minute44";
+
 	/** @hidden */
 	public static final String minute45PropertyName = "minute45";
+
 	/** @hidden */
 	public static final String minute46PropertyName = "minute46";
+
 	/** @hidden */
 	public static final String minute47PropertyName = "minute47";
+
 	/** @hidden */
 	public static final String minute48PropertyName = "minute48";
+
 	/** @hidden */
 	public static final String minute49PropertyName = "minute49";
+
 	/** @hidden */
 	public static final String minute50PropertyName = "minute50";
+
 	/** @hidden */
 	public static final String minute51PropertyName = "minute51";
+
 	/** @hidden */
 	public static final String minute52PropertyName = "minute52";
+
 	/** @hidden */
 	public static final String minute53PropertyName = "minute53";
+
 	/** @hidden */
 	public static final String minute54PropertyName = "minute54";
+
 	/** @hidden */
 	public static final String minute55PropertyName = "minute55";
+
 	/** @hidden */
 	public static final String minute56PropertyName = "minute56";
+
 	/** @hidden */
 	public static final String minute57PropertyName = "minute57";
+
 	/** @hidden */
 	public static final String minute58PropertyName = "minute58";
+
 	/** @hidden */
 	public static final String minute59PropertyName = "minute59";
+
 	/** @hidden */
 	public static final String allHoursPropertyName = "allHours";
+
 	/** @hidden */
 	public static final String hour0PropertyName = "hour0";
+
 	/** @hidden */
 	public static final String hour1PropertyName = "hour1";
+
 	/** @hidden */
 	public static final String hour2PropertyName = "hour2";
+
 	/** @hidden */
 	public static final String hour3PropertyName = "hour3";
+
 	/** @hidden */
 	public static final String hour4PropertyName = "hour4";
+
 	/** @hidden */
 	public static final String hour5PropertyName = "hour5";
+
 	/** @hidden */
 	public static final String hour6PropertyName = "hour6";
+
 	/** @hidden */
 	public static final String hour7PropertyName = "hour7";
+
 	/** @hidden */
 	public static final String hour8PropertyName = "hour8";
+
 	/** @hidden */
 	public static final String hour9PropertyName = "hour9";
+
 	/** @hidden */
 	public static final String hour10PropertyName = "hour10";
+
 	/** @hidden */
 	public static final String hour11PropertyName = "hour11";
+
 	/** @hidden */
 	public static final String hour12PropertyName = "hour12";
+
 	/** @hidden */
 	public static final String hour13PropertyName = "hour13";
+
 	/** @hidden */
 	public static final String hour14PropertyName = "hour14";
+
 	/** @hidden */
 	public static final String hour15PropertyName = "hour15";
+
 	/** @hidden */
 	public static final String hour16PropertyName = "hour16";
+
 	/** @hidden */
 	public static final String hour17PropertyName = "hour17";
+
 	/** @hidden */
 	public static final String hour18PropertyName = "hour18";
+
 	/** @hidden */
 	public static final String hour19PropertyName = "hour19";
+
 	/** @hidden */
 	public static final String hour20PropertyName = "hour20";
+
 	/** @hidden */
 	public static final String hour21PropertyName = "hour21";
+
 	/** @hidden */
 	public static final String hour22PropertyName = "hour22";
+
 	/** @hidden */
 	public static final String hour23PropertyName = "hour23";
+
 	/** @hidden */
 	public static final String allDaysPropertyName = "allDays";
+
 	/** @hidden */
 	public static final String day1PropertyName = "day1";
+
 	/** @hidden */
 	public static final String day2PropertyName = "day2";
+
 	/** @hidden */
 	public static final String day3PropertyName = "day3";
+
 	/** @hidden */
 	public static final String day4PropertyName = "day4";
+
 	/** @hidden */
 	public static final String day5PropertyName = "day5";
+
 	/** @hidden */
 	public static final String day6PropertyName = "day6";
+
 	/** @hidden */
 	public static final String day7PropertyName = "day7";
+
 	/** @hidden */
 	public static final String day8PropertyName = "day8";
+
 	/** @hidden */
 	public static final String day9PropertyName = "day9";
+
 	/** @hidden */
 	public static final String day10PropertyName = "day10";
+
 	/** @hidden */
 	public static final String day11PropertyName = "day11";
+
 	/** @hidden */
 	public static final String day12PropertyName = "day12";
+
 	/** @hidden */
 	public static final String day13PropertyName = "day13";
+
 	/** @hidden */
 	public static final String day14PropertyName = "day14";
+
 	/** @hidden */
 	public static final String day15PropertyName = "day15";
+
 	/** @hidden */
 	public static final String day16PropertyName = "day16";
+
 	/** @hidden */
 	public static final String day17PropertyName = "day17";
+
 	/** @hidden */
 	public static final String day18PropertyName = "day18";
+
 	/** @hidden */
 	public static final String day19PropertyName = "day19";
+
 	/** @hidden */
 	public static final String day20PropertyName = "day20";
+
 	/** @hidden */
 	public static final String day21PropertyName = "day21";
+
 	/** @hidden */
 	public static final String day22PropertyName = "day22";
+
 	/** @hidden */
 	public static final String day23PropertyName = "day23";
+
 	/** @hidden */
 	public static final String day24PropertyName = "day24";
+
 	/** @hidden */
 	public static final String day25PropertyName = "day25";
+
 	/** @hidden */
 	public static final String day26PropertyName = "day26";
+
 	/** @hidden */
 	public static final String day27PropertyName = "day27";
+
 	/** @hidden */
 	public static final String day28PropertyName = "day28";
+
 	/** @hidden */
 	public static final String day29PropertyName = "day29";
+
 	/** @hidden */
 	public static final String day30PropertyName = "day30";
+
 	/** @hidden */
 	public static final String day31PropertyName = "day31";
+
 	/** @hidden */
 	public static final String allMonthsPropertyName = "allMonths";
+
 	/** @hidden */
 	public static final String month1PropertyName = "month1";
+
 	/** @hidden */
 	public static final String month2PropertyName = "month2";
+
 	/** @hidden */
 	public static final String month3PropertyName = "month3";
+
 	/** @hidden */
 	public static final String month4PropertyName = "month4";
+
 	/** @hidden */
 	public static final String month5PropertyName = "month5";
+
 	/** @hidden */
 	public static final String month6PropertyName = "month6";
+
 	/** @hidden */
 	public static final String month7PropertyName = "month7";
+
 	/** @hidden */
 	public static final String month8PropertyName = "month8";
+
 	/** @hidden */
 	public static final String month9PropertyName = "month9";
+
 	/** @hidden */
 	public static final String month10PropertyName = "month10";
+
 	/** @hidden */
 	public static final String month11PropertyName = "month11";
+
 	/** @hidden */
 	public static final String month12PropertyName = "month12";
+
 	/** @hidden */
 	public static final String allWeekdaysPropertyName = "allWeekdays";
+
 	/** @hidden */
 	public static final String weekday1PropertyName = "weekday1";
+
 	/** @hidden */
 	public static final String weekday2PropertyName = "weekday2";
+
 	/** @hidden */
 	public static final String weekday3PropertyName = "weekday3";
+
 	/** @hidden */
 	public static final String weekday4PropertyName = "weekday4";
+
 	/** @hidden */
 	public static final String weekday5PropertyName = "weekday5";
+
 	/** @hidden */
 	public static final String weekday6PropertyName = "weekday6";
+
 	/** @hidden */
 	public static final String weekday7PropertyName = "weekday7";
+
 	/** @hidden */
 	public static final String startTimePropertyName = "startTime";
+
 	/** @hidden */
 	public static final String endTimePropertyName = "endTime";
+
 	/** @hidden */
 	public static final String runAsPropertyName = "runAs";
+
 	/** @hidden */
 	public static final String jobScheduledImmediatelyPropertyName = "jobScheduledImmediately";
+
 	/** @hidden */
 	public static final String disabledPropertyName = "disabled";
 
 	/**
-	 * admin.jobSchedule.jobName.displayName
+	 * Job To Run
 	 **/
 	private String jobName;
+
 	/**
 	 * admin.jobSchedule.cronExppression.displayName
 	 **/
 	private String cronExpression;
+
 	/**
-	 * admin.jobSchedule.allMinutes.displayName
+	 * All Minutes
 	 **/
 	private String allMinutes;
+
 	/**
-	 * admin.jobSchedule.minute0.displayName
+	 * 00
 	 **/
 	private Boolean minute0;
+
 	/**
-	 * admin.jobSchedule.minute1.displayName
+	 * 01
 	 **/
 	private Boolean minute1;
+
 	/**
-	 * admin.jobSchedule.minute2.displayName
+	 * 02
 	 **/
 	private Boolean minute2;
+
 	/**
-	 * admin.jobSchedule.minute3.displayName
+	 * 03
 	 **/
 	private Boolean minute3;
+
 	/**
-	 * admin.jobSchedule.minute4.displayName
+	 * 04
 	 **/
 	private Boolean minute4;
+
 	/**
-	 * admin.jobSchedule.minute5.displayName
+	 * 05
 	 **/
 	private Boolean minute5;
+
 	/**
-	 * admin.jobSchedule.minute6.displayName
+	 * 06
 	 **/
 	private Boolean minute6;
+
 	/**
-	 * admin.jobSchedule.minute7.displayName
+	 * 07
 	 **/
 	private Boolean minute7;
+
 	/**
-	 * admin.jobSchedule.minute8.displayName
+	 * 08
 	 **/
 	private Boolean minute8;
+
 	/**
-	 * admin.jobSchedule.minute9.displayName
+	 * 09
 	 **/
 	private Boolean minute9;
+
 	/**
-	 * admin.jobSchedule.minute10.displayName
+	 * 10
 	 **/
 	private Boolean minute10;
+
 	/**
-	 * admin.jobSchedule.minute11.displayName
+	 * 11
 	 **/
 	private Boolean minute11;
+
 	/**
-	 * admin.jobSchedule.minute12.displayName
+	 * 12
 	 **/
 	private Boolean minute12;
+
 	/**
-	 * admin.jobSchedule.minute13.displayName
+	 * 13
 	 **/
 	private Boolean minute13;
+
 	/**
-	 * admin.jobSchedule.minute14.displayName
+	 * 14
 	 **/
 	private Boolean minute14;
+
 	/**
-	 * admin.jobSchedule.minute15.displayName
+	 * 15
 	 **/
 	private Boolean minute15;
+
 	/**
-	 * admin.jobSchedule.minute16.displayName
+	 * 16
 	 **/
 	private Boolean minute16;
+
 	/**
-	 * admin.jobSchedule.minute17.displayName
+	 * 17
 	 **/
 	private Boolean minute17;
+
 	/**
-	 * admin.jobSchedule.minute18.displayName
+	 * 18
 	 **/
 	private Boolean minute18;
+
 	/**
-	 * admin.jobSchedule.minute19.displayName
+	 * 19
 	 **/
 	private Boolean minute19;
+
 	/**
-	 * admin.jobSchedule.minute20.displayName
+	 * 20
 	 **/
 	private Boolean minute20;
+
 	/**
-	 * admin.jobSchedule.minute21.displayName
+	 * 21
 	 **/
 	private Boolean minute21;
+
 	/**
-	 * admin.jobSchedule.minute22.displayName
+	 * 22
 	 **/
 	private Boolean minute22;
+
 	/**
-	 * admin.jobSchedule.minute23.displayName
+	 * 23
 	 **/
 	private Boolean minute23;
+
 	/**
-	 * admin.jobSchedule.minute24.displayName
+	 * 24
 	 **/
 	private Boolean minute24;
+
 	/**
-	 * admin.jobSchedule.minute25.displayName
+	 * 25
 	 **/
 	private Boolean minute25;
+
 	/**
-	 * admin.jobSchedule.minute26.displayName
+	 * 26
 	 **/
 	private Boolean minute26;
+
 	/**
-	 * admin.jobSchedule.minute27.displayName
+	 * 27
 	 **/
 	private Boolean minute27;
+
 	/**
-	 * admin.jobSchedule.minute28.displayName
+	 * 28
 	 **/
 	private Boolean minute28;
+
 	/**
-	 * admin.jobSchedule.minute29.displayName
+	 * 29
 	 **/
 	private Boolean minute29;
+
 	/**
-	 * admin.jobSchedule.minute30.displayName
+	 * 30
 	 **/
 	private Boolean minute30;
+
 	/**
-	 * admin.jobSchedule.minute31.displayName
+	 * 31
 	 **/
 	private Boolean minute31;
+
 	/**
-	 * admin.jobSchedule.minute32.displayName
+	 * 32
 	 **/
 	private Boolean minute32;
+
 	/**
-	 * admin.jobSchedule.minute33.displayName
+	 * 33
 	 **/
 	private Boolean minute33;
+
 	/**
-	 * admin.jobSchedule.minute34.displayName
+	 * 34
 	 **/
 	private Boolean minute34;
+
 	/**
-	 * admin.jobSchedule.minute35.displayName
+	 * 35
 	 **/
 	private Boolean minute35;
+
 	/**
-	 * admin.jobSchedule.minute36.displayName
+	 * 36
 	 **/
 	private Boolean minute36;
+
 	/**
-	 * admin.jobSchedule.minute37.displayName
+	 * 37
 	 **/
 	private Boolean minute37;
+
 	/**
-	 * admin.jobSchedule.minute38.displayName
+	 * 38
 	 **/
 	private Boolean minute38;
+
 	/**
-	 * admin.jobSchedule.minute39.displayName
+	 * 39
 	 **/
 	private Boolean minute39;
+
 	/**
-	 * admin.jobSchedule.minute40.displayName
+	 * 40
 	 **/
 	private Boolean minute40;
+
 	/**
-	 * admin.jobSchedule.minute41.displayName
+	 * 41
 	 **/
 	private Boolean minute41;
+
 	/**
-	 * admin.jobSchedule.minute42.displayName
+	 * 42
 	 **/
 	private Boolean minute42;
+
 	/**
-	 * admin.jobSchedule.minute43.displayName
+	 * 43
 	 **/
 	private Boolean minute43;
+
 	/**
-	 * admin.jobSchedule.minute44.displayName
+	 * 44
 	 **/
 	private Boolean minute44;
+
 	/**
-	 * admin.jobSchedule.minute45.displayName
+	 * 45
 	 **/
 	private Boolean minute45;
+
 	/**
-	 * admin.jobSchedule.minute46.displayName
+	 * 46
 	 **/
 	private Boolean minute46;
+
 	/**
-	 * admin.jobSchedule.minute47.displayName
+	 * 47
 	 **/
 	private Boolean minute47;
+
 	/**
-	 * admin.jobSchedule.minute48.displayName
+	 * 48
 	 **/
 	private Boolean minute48;
+
 	/**
-	 * admin.jobSchedule.minute49.displayName
+	 * 49
 	 **/
 	private Boolean minute49;
+
 	/**
-	 * admin.jobSchedule.minute50.displayName
+	 * 50
 	 **/
 	private Boolean minute50;
+
 	/**
-	 * admin.jobSchedule.minute51.displayName
+	 * 51
 	 **/
 	private Boolean minute51;
+
 	/**
-	 * admin.jobSchedule.minute52.displayName
+	 * 52
 	 **/
 	private Boolean minute52;
+
 	/**
-	 * admin.jobSchedule.minute53.displayName
+	 * 53
 	 **/
 	private Boolean minute53;
+
 	/**
-	 * admin.jobSchedule.minute54.displayName
+	 * 54
 	 **/
 	private Boolean minute54;
+
 	/**
-	 * admin.jobSchedule.minute55.displayName
+	 * 55
 	 **/
 	private Boolean minute55;
+
 	/**
-	 * admin.jobSchedule.minute56.displayName
+	 * 56
 	 **/
 	private Boolean minute56;
+
 	/**
-	 * admin.jobSchedule.minute57.displayName
+	 * 57
 	 **/
 	private Boolean minute57;
+
 	/**
-	 * admin.jobSchedule.minute58.displayName
+	 * 58
 	 **/
 	private Boolean minute58;
+
 	/**
-	 * admin.jobSchedule.minute59.displayName
+	 * 59
 	 **/
 	private Boolean minute59;
+
 	/**
-	 * admin.jobSchedule.allHours.displayName
+	 * All Hours
 	 **/
 	private String allHours;
+
 	/**
-	 * admin.jobSchedule.hour0.displayName
+	 * 00
 	 **/
 	private Boolean hour0;
+
 	/**
-	 * admin.jobSchedule.hour1.displayName
+	 * 01
 	 **/
 	private Boolean hour1;
+
 	/**
-	 * admin.jobSchedule.hour2.displayName
+	 * 02
 	 **/
 	private Boolean hour2;
+
 	/**
-	 * admin.jobSchedule.hour3.displayName
+	 * 03
 	 **/
 	private Boolean hour3;
+
 	/**
-	 * admin.jobSchedule.hour4.displayName
+	 * 04
 	 **/
 	private Boolean hour4;
+
 	/**
-	 * admin.jobSchedule.hour5.displayName
+	 * 05
 	 **/
 	private Boolean hour5;
+
 	/**
-	 * admin.jobSchedule.hour6.displayName
+	 * 06
 	 **/
 	private Boolean hour6;
+
 	/**
-	 * admin.jobSchedule.hour7.displayName
+	 * 07
 	 **/
 	private Boolean hour7;
+
 	/**
-	 * admin.jobSchedule.hour8.displayName
+	 * 08
 	 **/
 	private Boolean hour8;
+
 	/**
-	 * admin.jobSchedule.hour9.displayName
+	 * 09
 	 **/
 	private Boolean hour9;
+
 	/**
-	 * admin.jobSchedule.hour10.displayName
+	 * 10
 	 **/
 	private Boolean hour10;
+
 	/**
-	 * admin.jobSchedule.hour11.displayName
+	 * 11
 	 **/
 	private Boolean hour11;
+
 	/**
-	 * admin.jobSchedule.hour12.displayName
+	 * 12
 	 **/
 	private Boolean hour12;
+
 	/**
-	 * admin.jobSchedule.hour13.displayName
+	 * 13
 	 **/
 	private Boolean hour13;
+
 	/**
-	 * admin.jobSchedule.hour14.displayName
+	 * 14
 	 **/
 	private Boolean hour14;
+
 	/**
-	 * admin.jobSchedule.hour15.displayName
+	 * 15
 	 **/
 	private Boolean hour15;
+
 	/**
-	 * admin.jobSchedule.hour16.displayName
+	 * 16
 	 **/
 	private Boolean hour16;
+
 	/**
-	 * admin.jobSchedule.hour17.displayName
+	 * 17
 	 **/
 	private Boolean hour17;
+
 	/**
-	 * admin.jobSchedule.hour18.displayName
+	 * 18
 	 **/
 	private Boolean hour18;
+
 	/**
-	 * admin.jobSchedule.hour19.displayName
+	 * 19
 	 **/
 	private Boolean hour19;
+
 	/**
-	 * admin.jobSchedule.hour20.displayName
+	 * 20
 	 **/
 	private Boolean hour20;
+
 	/**
-	 * admin.jobSchedule.hour21.displayName
+	 * 21
 	 **/
 	private Boolean hour21;
+
 	/**
-	 * admin.jobSchedule.hour22.displayName
+	 * 22
 	 **/
 	private Boolean hour22;
+
 	/**
-	 * admin.jobSchedule.hour23.displayName
+	 * 23
 	 **/
 	private Boolean hour23;
+
 	/**
-	 * admin.jobSchedule.allDays.displayName
+	 * All Days
 	 **/
 	private String allDays;
+
 	/**
-	 * admin.jobSchedule.day1.displayName
+	 * 01
 	 **/
 	private Boolean day1;
+
 	/**
-	 * admin.jobSchedule.day2.displayName
+	 * 02
 	 **/
 	private Boolean day2;
+
 	/**
-	 * admin.jobSchedule.day3.displayName
+	 * 03
 	 **/
 	private Boolean day3;
+
 	/**
-	 * admin.jobSchedule.day4.displayName
+	 * 04
 	 **/
 	private Boolean day4;
+
 	/**
-	 * admin.jobSchedule.day5.displayName
+	 * 05
 	 **/
 	private Boolean day5;
+
 	/**
-	 * admin.jobSchedule.day6.displayName
+	 * 06
 	 **/
 	private Boolean day6;
+
 	/**
-	 * admin.jobSchedule.day7.displayName
+	 * 07
 	 **/
 	private Boolean day7;
+
 	/**
-	 * admin.jobSchedule.day8.displayName
+	 * 08
 	 **/
 	private Boolean day8;
+
 	/**
-	 * admin.jobSchedule.day9.displayName
+	 * 09
 	 **/
 	private Boolean day9;
+
 	/**
-	 * admin.jobSchedule.day10.displayName
+	 * 10
 	 **/
 	private Boolean day10;
+
 	/**
-	 * admin.jobSchedule.day11.displayName
+	 * 11
 	 **/
 	private Boolean day11;
+
 	/**
-	 * admin.jobSchedule.day12.displayName
+	 * 12
 	 **/
 	private Boolean day12;
+
 	/**
-	 * admin.jobSchedule.day13.displayName
+	 * 13
 	 **/
 	private Boolean day13;
+
 	/**
-	 * admin.jobSchedule.day14.displayName
+	 * 14
 	 **/
 	private Boolean day14;
+
 	/**
-	 * admin.jobSchedule.day15.displayName
+	 * 15
 	 **/
 	private Boolean day15;
+
 	/**
-	 * admin.jobSchedule.day16.displayName
+	 * 16
 	 **/
 	private Boolean day16;
+
 	/**
-	 * admin.jobSchedule.day17.displayName
+	 * 17
 	 **/
 	private Boolean day17;
+
 	/**
-	 * admin.jobSchedule.day18.displayName
+	 * 18
 	 **/
 	private Boolean day18;
+
 	/**
-	 * admin.jobSchedule.day19.displayName
+	 * 19
 	 **/
 	private Boolean day19;
+
 	/**
-	 * admin.jobSchedule.day20.displayName
+	 * 20
 	 **/
 	private Boolean day20;
+
 	/**
-	 * admin.jobSchedule.day21.displayName
+	 * 21
 	 **/
 	private Boolean day21;
+
 	/**
-	 * admin.jobSchedule.day22.displayName
+	 * 22
 	 **/
 	private Boolean day22;
+
 	/**
-	 * admin.jobSchedule.day23.displayName
+	 * 23
 	 **/
 	private Boolean day23;
+
 	/**
-	 * admin.jobSchedule.day24.displayName
+	 * 24
 	 **/
 	private Boolean day24;
+
 	/**
-	 * admin.jobSchedule.day25.displayName
+	 * 25
 	 **/
 	private Boolean day25;
+
 	/**
-	 * admin.jobSchedule.day26.displayName
+	 * 26
 	 **/
 	private Boolean day26;
+
 	/**
-	 * admin.jobSchedule.day27.displayName
+	 * 27
 	 **/
 	private Boolean day27;
+
 	/**
-	 * admin.jobSchedule.day28.displayName
+	 * 28
 	 **/
 	private Boolean day28;
+
 	/**
-	 * admin.jobSchedule.day29.displayName
+	 * 29
 	 **/
 	private Boolean day29;
+
 	/**
-	 * admin.jobSchedule.day30.displayName
+	 * 30
 	 **/
 	private Boolean day30;
+
 	/**
-	 * admin.jobSchedule.day31.displayName
+	 * 31
 	 **/
 	private Boolean day31;
+
 	/**
-	 * admin.jobSchedule.allMonths.displayName
+	 * All Months
 	 **/
 	private String allMonths;
+
 	/**
-	 * admin.jobSchedule.month1.displayName
+	 * Jan
 	 **/
 	private Boolean month1;
+
 	/**
-	 * admin.jobSchedule.month2.displayName
+	 * Feb
 	 **/
 	private Boolean month2;
+
 	/**
-	 * admin.jobSchedule.month3.displayName
+	 * Mar
 	 **/
 	private Boolean month3;
+
 	/**
-	 * admin.jobSchedule.month4.displayName
+	 * Apr
 	 **/
 	private Boolean month4;
+
 	/**
-	 * admin.jobSchedule.month5.displayName
+	 * May
 	 **/
 	private Boolean month5;
+
 	/**
-	 * admin.jobSchedule.month6.displayName
+	 * Jun
 	 **/
 	private Boolean month6;
+
 	/**
-	 * admin.jobSchedule.month7.displayName
+	 * Jul
 	 **/
 	private Boolean month7;
+
 	/**
-	 * admin.jobSchedule.month8.displayName
+	 * Aug
 	 **/
 	private Boolean month8;
+
 	/**
-	 * admin.jobSchedule.month9.displayName
+	 * Sep
 	 **/
 	private Boolean month9;
+
 	/**
-	 * admin.jobSchedule.month10.displayName
+	 * Oct
 	 **/
 	private Boolean month10;
+
 	/**
-	 * admin.jobSchedule.month11.displayName
+	 * Nov
 	 **/
 	private Boolean month11;
+
 	/**
-	 * admin.jobSchedule.month12.displayName
+	 * Dec
 	 **/
 	private Boolean month12;
+
 	/**
-	 * admin.jobSchedule.allWeekdays.displayName
+	 * All Weekdays
 	 **/
 	private String allWeekdays;
+
 	/**
-	 * admin.jobSchedule.weekday1.displayName
+	 * Sun
 	 **/
 	private Boolean weekday1;
+
 	/**
-	 * admin.jobSchedule.weekday2.displayName
+	 * Mon
 	 **/
 	private Boolean weekday2;
+
 	/**
-	 * admin.jobSchedule.weekday3.displayName
+	 * Tue
 	 **/
 	private Boolean weekday3;
+
 	/**
-	 * admin.jobSchedule.weekday4.displayName
+	 * Wed
 	 **/
 	private Boolean weekday4;
+
 	/**
-	 * admin.jobSchedule.weekday5.displayName
+	 * Thu
 	 **/
 	private Boolean weekday5;
+
 	/**
-	 * admin.jobSchedule.weekday6.displayName
+	 * Fri
 	 **/
 	private Boolean weekday6;
+
 	/**
-	 * admin.jobSchedule.weekday7.displayName
+	 * Sat
 	 **/
 	private Boolean weekday7;
+
 	/**
-	 * admin.jobSchedule.startTime.displayName
+	 * Start Time
 	 * <br/>
-	 * admin.jobSchedule.startTime.description
+	 * When to start triggering the job.  May be left blank
 	 **/
 	private DateTime startTime;
+
 	/**
-	 * admin.jobSchedule.endTime.displayName
+	 * End Time
 	 * <br/>
-	 * admin.jobSchedule.endTime.description
+	 * When to finish triggering the job.  May be left blank
 	 **/
 	private DateTime endTime;
+
 	/**
-	 * admin.jobSchedule.association.runAs.displayName
+	 * Run As
 	 * <br/>
-	 * admin.jobSchedule.association.runAs.description
+	 * The user to run the job
 	 **/
 	private UserProxyExtension runAs = null;
+
 	/**
-	 * admin.jobSchedule.jobScheduledImmediately.displayName
+	 * Job Scheduled Immediately
 	 * <br/>
-	 * admin.jobSchedule.jobScheduledImmediately.description
+	 * Whether or not the job was scheduled immediately
 	 **/
-	private Boolean jobScheduledImmediately = new Boolean(false);
+	private Boolean jobScheduledImmediately = Boolean.valueOf(false);
+
 	/**
-	 * admin.jobSchedule.disabled.displayName
+	 * Disabled
 	 * <br/>
 	 * Whether or not this schedule is disabled.
 	 **/
-	private Boolean disabled = new Boolean(false);
+	private Boolean disabled = Boolean.valueOf(false);
 
 	@Override
 	@XmlTransient
@@ -3507,9 +3798,9 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * {@link #startTime} mutator.
 	 * @param startTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setStartTime(DateTime startTime) {
 		preset(startTimePropertyName, startTime);
 		this.startTime = startTime;
@@ -3527,9 +3818,9 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 * {@link #endTime} mutator.
 	 * @param endTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setEndTime(DateTime endTime) {
 		preset(endTimePropertyName, endTime);
 		this.endTime = endTime;

@@ -38,83 +38,121 @@ public abstract class Communication extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Communication";
 
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String tagPropertyName = "tag";
+
 	/** @hidden */
 	public static final String toBindingPropertyName = "toBinding";
+
 	/** @hidden */
 	public static final String sendToPropertyName = "sendTo";
+
 	/** @hidden */
 	public static final String ccToPropertyName = "ccTo";
+
 	/** @hidden */
 	public static final String sendToOverridePropertyName = "sendToOverride";
+
 	/** @hidden */
 	public static final String ccToOverridePropertyName = "ccToOverride";
+
 	/** @hidden */
 	public static final String sendFromPropertyName = "sendFrom";
+
 	/** @hidden */
 	public static final String monitorBccPropertyName = "monitorBcc";
+
 	/** @hidden */
 	public static final String subjectPropertyName = "subject";
+
 	/** @hidden */
 	public static final String bodyPropertyName = "body";
+
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
+
 	/** @hidden */
 	public static final String attachment1PropertyName = "attachment1";
+
 	/** @hidden */
 	public static final String attachmentFileName1PropertyName = "attachmentFileName1";
+
 	/** @hidden */
 	public static final String attachment2PropertyName = "attachment2";
+
 	/** @hidden */
 	public static final String attachmentFileName2PropertyName = "attachmentFileName2";
+
 	/** @hidden */
 	public static final String attachment3PropertyName = "attachment3";
+
 	/** @hidden */
 	public static final String attachmentFileName3PropertyName = "attachmentFileName3";
+
 	/** @hidden */
 	public static final String actionTypePropertyName = "actionType";
+
 	/** @hidden */
 	public static final String formatTypePropertyName = "formatType";
+
 	/** @hidden */
 	public static final String selectedBatchTimestampFolderNamePropertyName = "selectedBatchTimestampFolderName";
+
 	/** @hidden */
 	public static final String refreshBatchesPropertyName = "refreshBatches";
+
 	/** @hidden */
 	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
+
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
+
 	/** @hidden */
 	public static final String systemUsePropertyName = "systemUse";
+
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
+
 	/** @hidden */
 	public static final String includeCalendarPropertyName = "includeCalendar";
+
 	/** @hidden */
 	public static final String calendarTitleExpressionPropertyName = "calendarTitleExpression";
+
 	/** @hidden */
 	public static final String calendarStartTimePropertyName = "calendarStartTime";
+
 	/** @hidden */
 	public static final String calendarEndTimePropertyName = "calendarEndTime";
+
 	/** @hidden */
 	public static final String calendarDescriptionExpressionPropertyName = "calendarDescriptionExpression";
+
 	/** @hidden */
 	public static final String mailImagePropertyName = "mailImage";
+
 	/** @hidden */
 	public static final String templatePropertyName = "template";
+
 	/** @hidden */
 	public static final String basePathPropertyName = "basePath";
+
 	/** @hidden */
 	public static final String batchPropertyName = "batch";
+
 	/** @hidden */
 	public static final String subscriptionsPropertyName = "subscriptions";
 
@@ -197,7 +235,7 @@ public abstract class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.communication.formatType.displayName
+	 * Format
 	 **/
 	@XmlEnum
 	public static enum FormatType implements Enumeration {
@@ -273,23 +311,26 @@ public abstract class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.communication.description.displayName
+	 * Description
 	 **/
 	private String description;
+
 	/**
-	 * admin.communication.moduleName.displayName
+	 * Module
 	 * <br/>
-	 * admin.communication.moduleName.description
+	 * Bindings used in the communication address, subject and body will be based on the selected module document.
 	 **/
 	private String moduleName;
+
 	/**
-	 * admin.communication.moduleName.displayName
+	 * Document
 	 * <br/>
-	 * admin.communication.moduleName.description
+	 * Bindings used in the communication address, subject and body will be based on the selected module document.
 	 **/
 	private String documentName;
+
 	/**
-	 * admin.communication.tag.displayName
+	 * Tag
 	 * <br/>
 	 * <p>Tag is transient:
 			<ul><li>as good practice so that the user is forced to reconsider which
@@ -299,176 +340,226 @@ public abstract class Communication extends AbstractPersistentBean {
 			</p>
 	 **/
 	private Tag tag = null;
+
 	/**
-	 * admin.communication.toBinding.displayName
+	 * Send to
 	 * <br/>
-	 * admin.communication.toBinding.description
+	 * Provide a binding which contains the email address to send to
 	 **/
 	private String toBinding;
+
 	/**
-	 * admin.communication.sendTo.displayName
+	 * To
 	 * <br/>
-	 * admin.communication.sendTo.description
+	 * The address to send to.
 	 **/
 	private String sendTo;
+
 	/**
-	 * admin.communication.ccTo.displayName
+	 * CC To
 	 * <br/>
-	 * admin.communication.ccTo.description
+	 * The address to send to.
 	 **/
 	private String ccTo;
+
 	/**
-	 * admin.communication.sendToOverride.displayName
+	 * To (expression)
 	 * <br/>
-	 * admin.communication.sendToOverride.description
+	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendToOverride;
+
 	/**
-	 * admin.communication.ccToOverride.displayName
+	 * CC To (expression)
 	 * <br/>
-	 * admin.communication.ccToOverride.description
+	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String ccToOverride;
+
 	/**
-	 * admin.communication.sendFrom.displayName
+	 * From (expression)
 	 * <br/>
-	 * admin.communication.sendFrom.description
+	 * The address to send from. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendFrom;
+
 	/**
-	 * admin.communication.monitorBcc.displayName
+	 * BCC Me
 	 * <br/>
-	 * admin.communication.monitorBcc.description
+	 * Monitor outgoing emails by including yourself in the Bcc
 	 **/
 	private Boolean monitorBcc;
+
 	/**
-	 * admin.communication.subject.displayName
+	 * Subject (expression)
 	 * <br/>
-	 * admin.communication.subject.description
+	 * The subject of the communication. Bindings are allowed relative to the above module document.
 	 **/
 	private String subject;
+
 	/**
-	 * admin.communication.body.displayName
+	 * Body (expression)
 	 * <br/>
-	 * admin.communication.body.description
+	 * 
+		The body of the communication.  
+		<p/>
+		Bindings are allowed relative to the above module document.
+		<p/>
+		To include images in the HTML, switch to the Source view, and embed the 64bit encoding from a site like 
+		http://www.freeformatter.com/base64-encoder.html
 	 **/
 	private String body;
+
 	/**
-	 * admin.communication.results.displayName
+	 * Results
 	 **/
 	private String results;
+
 	/**
-	 * admin.communication.attachment1.displayName
+	 * Attachment 1
 	 **/
 	private String attachment1;
+
 	/**
-	 * admin.communication.attachmentFileName1.displayName
+	 * Attachment File Name
 	 * <br/>
-	 * admin.communication.attachmentFileName1.description
+	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName1;
+
 	/**
-	 * admin.communication.attachment2.displayName
+	 * Attachment 2
 	 **/
 	private String attachment2;
+
 	/**
-	 * admin.communication.attachmentFileName2.displayName
+	 * Attachment File Name
 	 * <br/>
-	 * admin.communication.attachmentFileName2.description
+	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName2;
+
 	/**
-	 * admin.communication.attachment3.displayName
+	 * Attachment 3
 	 **/
 	private String attachment3;
+
 	/**
-	 * admin.communication.attachmentFileName3.displayName
+	 * Attachment File Name
 	 * <br/>
-	 * admin.communication.attachmentFileName3.description
+	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName3;
+
 	/**
 	 * admin.communicaiton.actionType.displayName
 	 **/
 	private ActionType actionType;
+
 	/**
-	 * admin.communication.formatType.displayName
+	 * Format
 	 **/
 	private FormatType formatType;
+
 	/**
-	 * admin.communication.selectedBatchTimestampFolderName.displayName
+	 * Selected Batch Timestamp Folder Name
 	 **/
 	private String selectedBatchTimestampFolderName;
+
 	/**
-	 * admin.communication.refreshBatches.displayName
+	 * Refresh Batches
 	 **/
-	private Boolean refreshBatches = new Boolean(true);
+	private Boolean refreshBatches = Boolean.valueOf(true);
+
 	/**
-	 * admin.communication.unTagSuccessful.displayName
+	 * Untag successful documents
 	 **/
 	private Boolean unTagSuccessful;
+
 	/**
-	 * admin.communication.notification.displayName
+	 * Notify when job is complete
 	 **/
 	private Boolean notification;
+
 	/**
-	 * admin.communication.systemUse.displayName
+	 * Used for System communications
 	 * <br/>
-	 * admin.communication.systemUse.description
+	 * System communications can not be deleted unless the system flag is cleared first.
 	 **/
 	private Boolean systemUse;
+
 	/**
 	 * admin.commmunication.unsubscribe.displayName
 	 **/
 	private String unsubscribeUrl;
+
 	/**
-	 * admin.communication.includeCalendar.displayName
+	 * Include Calendar Item
 	 * <br/>
-	 * admin.communication.includeCalendar.description
+	 * 
+	<b>Include Calendar Item</b>:
+	<br/>
+	Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+	<br/>
+	Check Options page for more.
+
 	 **/
 	private Boolean includeCalendar;
+
 	/**
-	 * admin.communication.calendarTitleExpression.displayName
+	 * Title (expression)
 	 * <br/>
-	 * admin.communication.calendarTitleExpression.description
+	 * Specify the title for the calendar item as a binding expression relative to the module document.
 	 **/
 	private String calendarTitleExpression;
+
 	/**
-	 * admin.communication.calendarStartTime.displayName
+	 * Start Time
 	 **/
 	private DateTime calendarStartTime;
+
 	/**
-	 * admin.communication.calendarEndTime.displayName
+	 * End Time
 	 **/
 	private DateTime calendarEndTime;
+
 	/**
-	 * admin.communication.calendarDescriptionExpression.displayName
+	 * Description (expression)
 	 * <br/>
-	 * admin.communication.calendarDescriptionExpression.description
+	 * 	<b>Description (expression)</b>
+	<br/>
+	Specify a description for the calendar item as a binding expression relative to the module document.
+	<br/>
+	NOTE: Google and Yahoo calendar links do not support multi-line 	descriptions.
 	 **/
 	private String calendarDescriptionExpression;
+
 	/**
-	 * admin.communication.mailImage.displayName
+	 * Image
 	 **/
 	private String mailImage;
+
 	/**
-	 * admin.communication.template.displayName
+	 * Communication Template
 	 * <br/>
-	 * admin.communication.template.description
+	 * <em>Optional</em> Select a communication template to use for this communication.
 	 **/
 	private CommunicationTemplate template = null;
+
 	/**
-	 * admin.communication.basePath.displayName
+	 * File Path to batches for this communication
 	 **/
 	private String basePath;
+
 	/**
-	 * admin.communication.batch.displayName
+	 * Batch
 	 * <br/>
-	 * admin.communication.batch.description
+	 * The batch identifier for a current bulk creation for this communication (in the format yyyyMMddHHmmss)
 	 **/
 	private String batch;
+
 	/**
-	 * admin.communication.subscriptions.displayName
+	 * Subscriptions
 	 **/
 	private List<Subscription> subscriptions = new ArrayList<>();
 
@@ -1058,9 +1149,9 @@ public abstract class Communication extends AbstractPersistentBean {
 	 * {@link #calendarStartTime} mutator.
 	 * @param calendarStartTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setCalendarStartTime(DateTime calendarStartTime) {
 		preset(calendarStartTimePropertyName, calendarStartTime);
 		this.calendarStartTime = calendarStartTime;
@@ -1078,9 +1169,9 @@ public abstract class Communication extends AbstractPersistentBean {
 	 * {@link #calendarEndTime} mutator.
 	 * @param calendarEndTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setCalendarEndTime(DateTime calendarEndTime) {
 		preset(calendarEndTimePropertyName, calendarEndTime);
 		this.calendarEndTime = calendarEndTime;

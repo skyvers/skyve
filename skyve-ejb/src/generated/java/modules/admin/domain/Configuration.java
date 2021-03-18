@@ -38,57 +38,81 @@ public abstract class Configuration extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Configuration";
 
 	/** @hidden */
 	public static final String passwordMinLengthPropertyName = "passwordMinLength";
+
 	/** @hidden */
 	public static final String passwordRequireLowercasePropertyName = "passwordRequireLowercase";
+
 	/** @hidden */
 	public static final String passwordRequireUppercasePropertyName = "passwordRequireUppercase";
+
 	/** @hidden */
 	public static final String passwordRequireNumericPropertyName = "passwordRequireNumeric";
+
 	/** @hidden */
 	public static final String passwordRequireSpecialPropertyName = "passwordRequireSpecial";
+
 	/** @hidden */
 	public static final String passwordRuleDescriptionPropertyName = "passwordRuleDescription";
+
 	/** @hidden */
 	public static final String fromEmailPropertyName = "fromEmail";
+
 	/** @hidden */
 	public static final String passwordResetEmailSubjectPropertyName = "passwordResetEmailSubject";
+
 	/** @hidden */
 	public static final String passwordResetEmailBodyPropertyName = "passwordResetEmailBody";
+
 	/** @hidden */
 	public static final String userSelfRegistrationGroupPropertyName = "userSelfRegistrationGroup";
+
 	/** @hidden */
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
+
 	/** @hidden */
 	@Deprecated
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
+
 	/** @hidden */
 	@Deprecated
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
+
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
+
 	/** @hidden */
 	public static final String emailFromPropertyName = "emailFrom";
+
 	/** @hidden */
 	public static final String emailToPropertyName = "emailTo";
+
 	/** @hidden */
 	public static final String emailSubjectPropertyName = "emailSubject";
+
 	/** @hidden */
 	public static final String emailContentPropertyName = "emailContent";
+
 	/** @hidden */
 	public static final String passwordExpiryDaysPropertyName = "passwordExpiryDays";
+
 	/** @hidden */
 	public static final String passwordHistoryRetentionPropertyName = "passwordHistoryRetention";
+
 	/** @hidden */
 	public static final String passwordAccountLockoutThresholdPropertyName = "passwordAccountLockoutThreshold";
+
 	/** @hidden */
 	public static final String passwordAccountLockoutDurationPropertyName = "passwordAccountLockoutDuration";
+
 	/** @hidden */
 	public static final String emailToContactPropertyName = "emailToContact";
+
 	/** @hidden */
 	public static final String startupPropertyName = "startup";
 
@@ -177,72 +201,83 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.configuration.passwordMinLength.displayName
+	 * Minumum Password Length
 	 * <br/>
-	 * admin.configuration.passwordMinLength.description
+	 * The minimum number of characters for new passwords
 	 **/
-	private Integer passwordMinLength = new Integer(10);
+	private Integer passwordMinLength = Integer.valueOf(10);
+
 	/**
-	 * admin.configuration.passwordRequireLowercase.displayName
+	 * Requires Lowercase
 	 * <br/>
-	 * admin.configuration.passwordRequireLowercase.description
+	 * If new passwords should require at least one lowercase character
 	 **/
 	private Boolean passwordRequireLowercase;
+
 	/**
-	 * admin.configuration.passwordRequireUppercase.displayName
+	 * Requires Uppercase
 	 * <br/>
-	 * admin.configuration.passwordRequireUppercase.description
+	 * If new passwords should require at least one uppercase character
 	 **/
 	private Boolean passwordRequireUppercase;
+
 	/**
-	 * admin.configuration.passwordRequireNumeric.displayName
+	 * Requires Numeric Characters
 	 * <br/>
-	 * admin.configuration.passwordRequireNumeric.description
+	 * If new passwords should require at least one numeric character
 	 **/
 	private Boolean passwordRequireNumeric;
+
 	/**
-	 * admin.configuration.passwordRequireSpecial.displayName
+	 * Requires Special Characters
 	 * <br/>
-	 * admin.configuration.passwordRequireSpecial.description
+	 * If new passwords should require at least one special character
 	 **/
 	private Boolean passwordRequireSpecial;
+
 	/**
-	 * admin.configuration.passwordRuleDescription
+	 * Password Rule Description
 	 * <br/>
 	 * A text description which can be shown to the user if their password does not comply
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
 	 **/
 	private String passwordRuleDescription;
+
 	/**
-	 * admin.configuration.fromEmail.displayName
+	 * Sender/From Email Address
 	 * <br/>
-	 * admin.configuration.fromEmail.description
+	 * Email Address that all email's that the system sends will be sent from.
 	 **/
 	private String fromEmail;
+
 	/**
-	 * admin.configuration.passwordResetEmailSubject.displayName
+	 * Password Reset Email Subject
 	 * <br/>
-	 * admin.configuration.passwordResetEmailSubject.description
+	 * The subject of the password reset email to be sent to clients. Bindings are allowed relative to the User.
 	 **/
 	private String passwordResetEmailSubject;
+
 	/**
-	 * admin.configuration.passwordResetEmailBody.displayName
+	 * Password Reset Email Body
 	 * <br/>
-	 * admin.configuration.passwordResetEmailBody.description
+	 * The body of the password reset email to be sent to clients. Bindings are allowed relative to the User.
 	 **/
 	private String passwordResetEmailBody;
+
 	/**
-	 * admin.configuration.association.userSelfRegistrationGroup.displayName
+	 * User Self Registration Group
 	 * <br/>
-	 * admin.configuration.association.userSelfRegistrationGroup.description
+	 * Which group self-registering users will be assigned upon registration, which specifies the roles they will have access to. 
 	 **/
 	private GroupExtension userSelfRegistrationGroup = null;
+
 	/**
-	 * admin.configuration.selfRegistrationActivationExpiryHours.displayName
+	 * Number of hours to keep self-registration activation codes enabled
 	 * <br/>
-	 * admin.configuration.selfRegistrationActivationExpiryHours.description
+	 * Clear this setting to have codes that never expire.
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+
 	/**
 	 * This option is now a startup property found in the project JSON file.
 	 * <br/>
@@ -250,6 +285,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@Deprecated
 	private Boolean allowUserSelfRegistration;
+
 	/**
 	 * Password Complexity
 	 * <br/>
@@ -260,66 +296,77 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@Deprecated
 	private PasswordComplexityModel passwordComplexityModel;
+
 	/**
-	 * admin.configuration.association.publicUser.displayName
+	 * Anonymous Public User
 	 * <br/>
-	 * admin.configuration.association.publicUser.description
+	 * The anonymous public user asserted on all public pages.
 	 **/
 	private UserProxyExtension publicUser = null;
+
 	/**
-	 * admin.configuration.emailFrom.displayName
+	 * Email From
 	 **/
 	private String emailFrom;
+
 	/**
-	 * admin.configuration.emailTo.displayName
+	 * Email To
 	 **/
 	private String emailTo;
+
 	/**
-	 * admin.configuration.emailSubject.displayName
+	 * Email Subject
 	 **/
 	private String emailSubject;
+
 	/**
-	 * admin.configuration.emailContent.displayName
+	 * Email
 	 **/
 	private String emailContent;
+
 	/**
-	 * admin.configuration.passwordExpiryDays.displayName
+	 * Password Expiry in Days
 	 * <br/>
-	 * admin.configuration.passwordExpiryDays.description
+	 * Number of days until a password change is required. Blank indicates no password aging.
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordExpiryDays;
+
 	/**
-	 * admin.configuration.passwordHistoryRetention.displayName
+	 * Password History Retention
 	 * <br/>
-	 * admin.configuration.passwordHistoryRetention.description
+	 * Number of previous passwords to check for duplicates. Blank indicates no password history.
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordHistoryRetention;
+
 	/**
-	 * admin.configuration.passwordAccountLockoutThreshold.displayName
+	 * Account Lockout Threshold
 	 * <br/>
-	 * admin.configuration.passwordAccountLockoutThreshold.description
+	 * Number of sign in attempts until the user account is locked. Blank indicates no account lockout.
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutThreshold;
+
 	/**
-	 * admin.configuration.passwordAccountLockoutDuration.displayName
+	 * Account Lockout Duration
 	 * <br/>
 	 * admin.configuration.passwordAccoutnLockoutDuration.description
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
 	private String passwordAccountLockoutDuration;
+
 	/**
-	 * admin.configuration.association.emailToContact.displayName
+	 * Email To Contact
 	 **/
 	private Contact emailToContact = null;
+
 	/**
-	 * admin.configuration.association.startup.displayName
+	 * Startup
 	 **/
 	private StartupExtension startup = null;
 

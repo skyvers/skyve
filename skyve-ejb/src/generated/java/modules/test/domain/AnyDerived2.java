@@ -4,7 +4,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.test.domain.AnyBase;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 
@@ -25,8 +24,11 @@ public class AnyDerived2 extends AnyBase {
 	private static final long serialVersionUID = 1L;
 
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String DOCUMENT_NAME = "AnyDerived2";
 
 	/** @hidden */

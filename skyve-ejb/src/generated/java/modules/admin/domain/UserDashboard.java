@@ -30,18 +30,21 @@ public abstract class UserDashboard extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserDashboard";
 
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
+
 	/** @hidden */
 	public static final String favouritesPropertyName = "favourites";
 
 	/**
-	 * admin.userDashboard.association.user.displayName
+	 * Current User
 	 **/
 	private UserExtension currentUser = null;
+
 	/**
 	 * Favourites
 	 **/

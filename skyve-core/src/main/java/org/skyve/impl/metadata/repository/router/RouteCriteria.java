@@ -3,10 +3,18 @@ package org.skyve.impl.metadata.repository.router;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
@@ -86,6 +94,30 @@ public class RouteCriteria implements MetaData {
 		this.userId = UtilImpl.processStringValue(userId);
 	}
 
+	public void canonicalise(String binding) {
+		String b = UtilImpl.processStringValue(binding);
+		if (b != null) {
+			if (moduleName == null) {
+				throw new IllegalStateException("RouteCriteria - Set moduleName before calling canonicalise()");
+			}
+			if (documentName == null) {
+				throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
+			}
+			AbstractRepository r = AbstractRepository.get();
+			Customer c = (customerName != null) ? r.getCustomer(customerName) : null;
+			Module m = r.getModule(c, moduleName);
+			Document d = r.getDocument(c, m, documentName);
+			TargetMetaData t = BindUtil.getMetaDataForBinding(c, m, d, binding);
+			d = t.getDocument();
+			moduleName = d.getOwningModuleName();
+			documentName = d.getName();
+			Attribute a = t.getAttribute();
+			if (a instanceof Relation) {
+				documentName = ((Relation) a).getDocumentName();
+			}
+		}
+	}
+	
 	public boolean matches(RouteCriteria criteria) {
 		if ((customerName != null) && (! customerName.equals(criteria.customerName))) {
 			return false;

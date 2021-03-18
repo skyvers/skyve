@@ -29,26 +29,31 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserLoginRecord";
 
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String loginDateTimePropertyName = "loginDateTime";
+
 	/** @hidden */
 	public static final String failedPropertyName = "failed";
 
 	/**
-	 * admin.userLoginRecord.userName.displayName
+	 * User Name
 	 **/
 	private String userName;
+
 	/**
-	 * admin.userLoginRecord.loginDateTime.displayName
+	 * Login Date/Time
 	 **/
 	private DateTime loginDateTime;
+
 	/**
-	 * admin.userLoginRecord.failed.displayName
+	 * Failed
 	 **/
 	private Boolean failed;
 
@@ -123,9 +128,9 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	 * {@link #loginDateTime} mutator.
 	 * @param loginDateTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setLoginDateTime(DateTime loginDateTime) {
 		preset(loginDateTimePropertyName, loginDateTime);
 		this.loginDateTime = loginDateTime;

@@ -37,11 +37,13 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserCandidateContact";
 
 	/** @hidden */
 	public static final String contactPropertyName = "contact";
+
 	/** @hidden */
 	public static final String matchScorePropertyName = "matchScore";
 
@@ -49,14 +51,15 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	 * admin.userCandidateContact.assocation.contact.displayName
 	 **/
 	private Contact contact = null;
+
 	/**
-	 * admin.userCandidateContact.matchScore.displayName
+	 * Score
 	 **/
 	private Integer matchScore;
+
 	private UserExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient

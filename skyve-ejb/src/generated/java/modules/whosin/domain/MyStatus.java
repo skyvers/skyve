@@ -25,6 +25,7 @@ public class MyStatus extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "whosin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "MyStatus";
 

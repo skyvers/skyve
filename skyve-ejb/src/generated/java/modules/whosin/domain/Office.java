@@ -29,25 +29,34 @@ public class Office extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "whosin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Office";
 
 	/** @hidden */
 	public static final String levelUnitPropertyName = "levelUnit";
+
 	/** @hidden */
 	public static final String buildingNamePropertyName = "buildingName";
+
 	/** @hidden */
 	public static final String streetAddressPropertyName = "streetAddress";
+
 	/** @hidden */
 	public static final String suburbPropertyName = "suburb";
+
 	/** @hidden */
 	public static final String postCodePropertyName = "postCode";
+
 	/** @hidden */
 	public static final String phonePropertyName = "phone";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String boundaryPropertyName = "boundary";
+
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
 
@@ -55,36 +64,44 @@ public class Office extends AbstractPersistentBean {
 	 * Level/Unit
 	 **/
 	private String levelUnit;
+
 	/**
 	 * Building Name
 	 **/
 	private String buildingName;
+
 	/**
 	 * Street Address
 	 **/
 	private String streetAddress;
+
 	/**
 	 * Suburb
 	 **/
 	private String suburb;
+
 	/**
 	 * Post Code
 	 **/
 	private String postCode;
+
 	/**
 	 * Phone
 	 **/
 	private String phone;
+
 	/**
 	 * Description
 	 **/
 	private String description;
+
 	/**
 	 * Boundary
 	 * <br/>
 	 * The boundary around the office.
 	 **/
 	private Geometry boundary;
+
 	/**
 	 * Demonstration Data
 	 * <br/>
@@ -271,8 +288,8 @@ public class Office extends AbstractPersistentBean {
 	 * {@link #boundary} mutator.
 	 * @param boundary	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setBoundary(Geometry boundary) {
 		preset(boundaryPropertyName, boundary);
 		this.boundary = boundary;

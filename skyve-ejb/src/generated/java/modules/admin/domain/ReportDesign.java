@@ -39,126 +39,183 @@ public class ReportDesign extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ReportDesign";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String modePropertyName = "mode";
+
 	/** @hidden */
 	public static final String definitionSourcePropertyName = "definitionSource";
+
 	/** @hidden */
 	public static final String reportTypePropertyName = "reportType";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String queryNamePropertyName = "queryName";
+
 	/** @hidden */
 	public static final String menuItemPropertyName = "menuItem";
+
 	/** @hidden */
 	public static final String repositoryPathPropertyName = "repositoryPath";
+
 	/** @hidden */
 	public static final String saveToDocumentPackagePropertyName = "saveToDocumentPackage";
+
 	/** @hidden */
 	public static final String orientationPropertyName = "orientation";
+
 	/** @hidden */
 	public static final String widthPropertyName = "width";
+
 	/** @hidden */
 	public static final String heightPropertyName = "height";
+
 	/** @hidden */
 	public static final String leftMarginPropertyName = "leftMargin";
+
 	/** @hidden */
 	public static final String rightMarginPropertyName = "rightMargin";
+
 	/** @hidden */
 	public static final String topMarginPropertyName = "topMargin";
+
 	/** @hidden */
 	public static final String bottomMarginPropertyName = "bottomMargin";
+
 	/** @hidden */
 	public static final String columnWidthPropertyName = "columnWidth";
+
 	/** @hidden */
 	public static final String defaultFontNamePropertyName = "defaultFontName";
+
 	/** @hidden */
 	public static final String titleFontSizePropertyName = "titleFontSize";
+
 	/** @hidden */
 	public static final String defaultFontSizePropertyName = "defaultFontSize";
+
 	/** @hidden */
 	public static final String defaultLineColourPropertyName = "defaultLineColour";
+
 	/** @hidden */
 	public static final String defaultLineWidthPropertyName = "defaultLineWidth";
+
 	/** @hidden */
 	public static final String renderLabelAsTextFieldsPropertyName = "renderLabelAsTextFields";
+
 	/** @hidden */
 	public static final String defaultBorderPropertyName = "defaultBorder";
+
 	/** @hidden */
 	public static final String defaultBorderTopPropertyName = "defaultBorderTop";
+
 	/** @hidden */
 	public static final String defaultBorderLeftPropertyName = "defaultBorderLeft";
+
 	/** @hidden */
 	public static final String defaultBorderBottomPropertyName = "defaultBorderBottom";
+
 	/** @hidden */
 	public static final String defaultBorderRightPropertyName = "defaultBorderRight";
+
 	/** @hidden */
 	public static final String defaultElementHeightPropertyName = "defaultElementHeight";
+
 	/** @hidden */
 	public static final String includePageNumbersPropertyName = "includePageNumbers";
+
 	/** @hidden */
 	public static final String defaultCellTopPaddingPropertyName = "defaultCellTopPadding";
+
 	/** @hidden */
 	public static final String defaultCellLeftPaddingPropertyName = "defaultCellLeftPadding";
+
 	/** @hidden */
 	public static final String defaultCellBottomPaddingPropertyName = "defaultCellBottomPadding";
+
 	/** @hidden */
 	public static final String defaultCellRightPaddingPropertyName = "defaultCellRightPadding";
+
 	/** @hidden */
 	public static final String dynamicFlowPropertyName = "dynamicFlow";
+
 	/** @hidden */
 	public static final String bandSplitTypePropertyName = "bandSplitType";
+
 	/** @hidden */
 	public static final String boldLabelsPropertyName = "boldLabels";
+
 	/** @hidden */
 	public static final String checkBoxFontNamePropertyName = "checkBoxFontName";
+
 	/** @hidden */
 	public static final String checkBoxDisplayExpressionPropertyName = "checkBoxDisplayExpression";
+
 	/** @hidden */
 	public static final String pixelToTwipPropertyName = "pixelToTwip";
+
 	/** @hidden */
 	public static final String sectionBorderTopPropertyName = "sectionBorderTop";
+
 	/** @hidden */
 	public static final String sectionBorderLeftPropertyName = "sectionBorderLeft";
+
 	/** @hidden */
 	public static final String sectionBorderRightPropertyName = "sectionBorderRight";
+
 	/** @hidden */
 	public static final String sectionBorderBottomPropertyName = "sectionBorderBottom";
+
 	/** @hidden */
 	public static final String sectionTitleBorderTopPropertyName = "sectionTitleBorderTop";
+
 	/** @hidden */
 	public static final String sectionTitleBorderLeftPropertyName = "sectionTitleBorderLeft";
+
 	/** @hidden */
 	public static final String sectionTitleBorderRightPropertyName = "sectionTitleBorderRight";
+
 	/** @hidden */
 	public static final String sectionTitleBorderBottomPropertyName = "sectionTitleBorderBottom";
+
 	/** @hidden */
 	public static final String sectionTitleForegroundPropertyName = "sectionTitleForeground";
+
 	/** @hidden */
 	public static final String sectionTitleBackgroundPropertyName = "sectionTitleBackground";
+
 	/** @hidden */
 	public static final String jrxmlPropertyName = "jrxml";
+
 	/** @hidden */
 	public static final String fieldPropertyName = "field";
+
 	/** @hidden */
 	public static final String collectionTypePropertyName = "collectionType";
+
 	/** @hidden */
 	public static final String parentReportPersistentNamePropertyName = "parentReportPersistentName";
+
 	/** @hidden */
 	public static final String verticalisePropertyName = "verticalise";
+
 	/** @hidden */
 	public static final String labelAlignmentOverridePropertyName = "labelAlignmentOverride";
 
 	/**
-	 * admin.reportDesign.mode.displayName
+	 * Mode
 	 **/
 	@XmlEnum
 	public static enum Mode implements Enumeration {
@@ -235,7 +292,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.reportDesign.definitionSource.displayName
+	 * Definition Source
 	 **/
 	@XmlEnum
 	public static enum DefinitionSource implements Enumeration {
@@ -314,7 +371,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.reportDesign.reportType.displayName
+	 * Type
 	 **/
 	@XmlEnum
 	public static enum ReportType implements Enumeration {
@@ -391,7 +448,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.reportDesign.orientation.displayName
+	 * Orientation
 	 **/
 	@XmlEnum
 	public static enum Orientation implements Enumeration {
@@ -468,7 +525,7 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.reportDesign.collectionType.displayName
+	 * Collection Type
 	 **/
 	@XmlEnum
 	public static enum CollectionType implements Enumeration {
@@ -546,259 +603,318 @@ public class ReportDesign extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.reportDesign.name.displayName
+	 * Report Name
 	 **/
 	private String name;
+
 	/**
-	 * admin.reportDesign.mode.displayName
+	 * Mode
 	 **/
 	private Mode mode;
+
 	/**
-	 * admin.reportDesign.definitionSource.displayName
+	 * Definition Source
 	 **/
 	private DefinitionSource definitionSource;
+
 	/**
-	 * admin.reportDesign.reportType.displayName
+	 * Type
 	 **/
 	private ReportType reportType;
+
 	/**
-	 * admin.reportDesign.moduleName.displayName
+	 * Module
 	 * <br/>
-	 * admin.reportDesign.moduleName.description
+	 * Report Bean Module.
 	 **/
 	private String moduleName;
+
 	/**
-	 * admin.reportDesign.documentName.displayName
+	 * Document
 	 * <br/>
-	 * admin.reportDesign.documentName.description
+	 * Report Bean Document.
 	 **/
 	private String documentName;
+
 	/**
-	 * admin.reportDesign.queryName.displayName
+	 * Query
 	 * <br/>
-	 * admin.reportDesign.queryName.description
+	 * Report Query.
 	 **/
 	private String queryName;
+
 	/**
-	 * admin.reportDesign.menuItem.displayName
+	 * Menu Item
 	 * <br/>
-	 * admin.reportDesign.menuItem.displayName
+	 * Menu Item
 	 **/
 	private String menuItem;
+
 	/**
-	 * admin.reportDesign.repositoryPath.displayName
+	 * Output Path
 	 * <br/>
-	 * admin.reportDesign.repositoryPath.description
+	 * <p>The path to the place where you want jrxml files created.</p>
+<p>Normally this will be the path to the folder where you modules are defined - e.g. C:\workspace\projectName\src\skyve\</p>
 	 **/
 	private String repositoryPath;
+
 	/**
-	 * admin.reportDesign.saveToDocumentPackage.displayName
+	 * Save to Document Package
 	 * <br/>
-	 * admin.reportDesign.saveToDocumentPackage.description
+	 * <p>Use this if you want report files to be created in a directory structure matching the metadata repository structure.</p>
+<p>This is useful if you want to put the reports into place ready to run.</p>
 	 **/
 	private Boolean saveToDocumentPackage;
+
 	/**
-	 * admin.reportDesign.orientation.displayName
+	 * Orientation
 	 **/
 	private Orientation orientation;
+
 	/**
-	 * admin.reportDesign.width.displayName
+	 * Width
 	 **/
 	private Integer width;
+
 	/**
-	 * admin.reportDesign.height.displayName
+	 * Height
 	 **/
 	private Integer height;
+
 	/**
-	 * admin.reportDesign.leftMargin.displayName
+	 * Left Margin
 	 **/
 	private Integer leftMargin;
+
 	/**
-	 * admin.reportDesign.rightMargin.displayName
+	 * Right Margin
 	 **/
 	private Integer rightMargin;
+
 	/**
-	 * admin.reportDesign.topMargin.displayName
+	 * Top Margin
 	 **/
 	private Integer topMargin;
+
 	/**
-	 * admin.reportDesign.bottomMargin.displayName
+	 * Bottom Margin
 	 **/
 	private Integer bottomMargin;
+
 	/**
-	 * admin.reportDesign.columnWidth.displayName
+	 * Column Width
 	 **/
 	private Integer columnWidth;
+
 	/**
-	 * admin.reportDesign.defaultFontName.displayName
+	 * Font Name
 	 * <br/>
-	 * admin.reportDesign.defaultFontName.description
+	 * Font not working? Check that you've included a font extension jar for your font in the classpath
 	 **/
 	private String defaultFontName;
+
 	/**
-	 * admin.reportDesign.titleFontSize.displayName
+	 * Font Size (Title)
 	 **/
 	private Integer titleFontSize;
+
 	/**
-	 * admin.reportDesign.defaultFontSize.displayName
+	 * Font Size (Detail)
 	 **/
 	private Integer defaultFontSize;
+
 	/**
-	 * admin.reportDesign.defaultLineColour.displayName
+	 * Default Line Colour
 	 **/
 	private String defaultLineColour;
+
 	/**
-	 * admin.reportDesign.defaultLineWidth.displayName
+	 * Default Line Pen Stroke Thickness
 	 **/
 	private Decimal2 defaultLineWidth;
+
 	/**
-	 * admin.reportDesign.renderLabelAsTextFields.displayName
+	 * Render Labels as TextFields
 	 * <br/>
-	 * admin.reportDesign.renderLabelAsTextFields.description
+	 * This option will allow labels to flow and stretch like text fields
 	 **/
 	private Boolean renderLabelAsTextFields;
+
 	/**
-	 * admin.reportDesign.defaultBorder.displayName
+	 * Default Border
 	 **/
 	private Boolean defaultBorder;
+
 	/**
-	 * admin.reportDesign.defaultBorderTop.displayName
+	 * Default Border Top
 	 **/
 	private Boolean defaultBorderTop;
+
 	/**
-	 * admin.reportDesign.defaultBorderLeft.displayName
+	 * Default Border Left
 	 **/
 	private Boolean defaultBorderLeft;
+
 	/**
-	 * admin.reportDesign.defaultBorderBottom.displayName
+	 * Default Border Bottom
 	 **/
 	private Boolean defaultBorderBottom;
+
 	/**
-	 * admin.reportDesign.defaultBorderRight.displayName
+	 * Default Border Right
 	 **/
 	private Boolean defaultBorderRight;
+
 	/**
-	 * admin.reportDesign.defaultElementHeight.displayName
+	 * Default Element Height
 	 **/
 	private Integer defaultElementHeight;
+
 	/**
-	 * admin.reportDesign.includePageNumbers.displayName
+	 * Include Page Numbers
 	 **/
 	private Boolean includePageNumbers;
+
 	/**
-	 * admin.reportDesign.defaultCellTopPadding.displayName
+	 * Cell Top Padding
 	 **/
 	private Integer defaultCellTopPadding;
+
 	/**
-	 * admin.reportDesign.defaultCellLeftPadding.displayName
+	 * Cell Left Padding
 	 **/
 	private Integer defaultCellLeftPadding;
+
 	/**
-	 * admin.reportDesign.defaultCellBottomPadding.displayName
+	 * Cell Bottom Padding
 	 **/
 	private Integer defaultCellBottomPadding;
+
 	/**
-	 * admin.reportDesign.defaultCellRightPadding.displayName
+	 * Cell Right Padding
 	 **/
 	private Integer defaultCellRightPadding;
+
 	/**
-	 * admin.reportDesign.dynamicFlow.displayName
+	 * Dynamic Flow
 	 * <br/>
-	 * admin.reportDesign.dynamicFlow.description
+	 * <p><b>Dynamic Flow</b></p>
+<p>Allow (as far as possible) page sections, bands and fields to flow as much as required to show all data.</p>
 	 **/
 	private Boolean dynamicFlow;
+
 	/**
-	 * admin.reportDesign.bandSplitType.displayName
+	 * Split Type
 	 **/
 	private String bandSplitType;
+
 	/**
-	 * admin.reportDesign.boldLabels.displayName
+	 * Bold Labels
 	 * <br/>
-	 * admin.reportDesign.boldLabels.description
+	 * Bold not working? Check that you've included a font extension jar for your font in the classpath
 	 **/
 	private Boolean boldLabels;
+
 	/**
-	 * admin.reportDesign.checkBoxFontName.displayName
+	 * Checkbox Font Name
 	 * <br/>
-	 * admin.reportDesign.checkBoxFontName.description
+	 * This is the font for checkboxes - ensure the font will be on your classpath
 	 **/
 	private String checkBoxFontName;
+
 	/**
-	 * admin.reportDesign.checkBoxDisplayExpression.displayName
+	 * Checkbox Display Expression
 	 * <br/>
-	 * admin.reportDesign.checkBoxDisplayExpression.description
+	 * This is the expression to use to represent checkboxes
 	 **/
 	private String checkBoxDisplayExpression;
+
 	/**
-	 * admin.reportDesign.pixelToTwip.displayName
+	 * Pixel to TWIP
 	 * <br/>
-	 * admin.reportDesign.pixelToTwip.description
+	 * TWIP conversion ratio for pixel-specified item sizing in views.
 	 **/
 	private Decimal5 pixelToTwip;
+
 	/**
-	 * admin.reportDesign.sectionBorderTop.displayName
+	 * Border Top
 	 **/
 	private Boolean sectionBorderTop;
+
 	/**
-	 * admin.reportDesign.sectionBorderLeft.displayName
+	 * Border Left
 	 **/
 	private Boolean sectionBorderLeft;
+
 	/**
-	 * admin.reportDesign.sectionBorderRight.displayName
+	 * Border Right
 	 **/
 	private Boolean sectionBorderRight;
+
 	/**
-	 * admin.reportDesign.sectionBorderBottom.displayName
+	 * Border Bottom
 	 **/
 	private Boolean sectionBorderBottom;
+
 	/**
-	 * admin.reportDesign.sectionTitleBorderTop.displayName
+	 * Title Border Top
 	 **/
 	private Boolean sectionTitleBorderTop;
+
 	/**
-	 * admin.reportDesign.sectionTitleBorderLeft.displayName
+	 * Title Border Left
 	 **/
 	private Boolean sectionTitleBorderLeft;
+
 	/**
-	 * admin.reportDesign.sectionTitleBorderRight.displayName
+	 * Title Border Right
 	 **/
 	private Boolean sectionTitleBorderRight;
+
 	/**
-	 * admin.reportDesign.sectionTitleBorderBottom.displayName
+	 * Title Border Bottom
 	 **/
 	private Boolean sectionTitleBorderBottom;
+
 	/**
-	 * admin.reportDesign.sectionTitleForeground.displayName
+	 * Title Foreground
 	 **/
 	private String sectionTitleForeground;
+
 	/**
-	 * admin.reportDesign.sectionTitleBackground.displayName
+	 * Title Background
 	 **/
 	private String sectionTitleBackground;
+
 	/**
-	 * admin.reportDesign.jrxml.displayName
+	 * Jrxml File Destination
 	 **/
 	private String jrxml;
+
 	/**
-	 * admin.reportDesign.field.displayName
+	 * Field
 	 * <br/>
-	 * admin.reportDesign.field.description
+	 * The field on which this subreport is based (if this is a subreport).
 	 **/
 	private String field;
+
 	/**
-	 * admin.reportDesign.collectionType.displayName
+	 * Collection Type
 	 **/
 	private CollectionType collectionType;
+
 	/**
 	 * Parent Report Persistent Name
 	 **/
 	private String parentReportPersistentName;
+
 	/**
-	 * admin.reportDesign.verticalise.displayName
+	 * Transform horizontal containers to vertical
 	 **/
 	private Boolean verticalise;
+
 	/**
-	 * admin.reportDesign.labelAlignmentOverride.displayName
+	 * Label Alignment
 	 **/
 	private String labelAlignmentOverride;
 
@@ -1251,8 +1367,8 @@ public class ReportDesign extends AbstractTransientBean {
 	 * {@link #defaultLineWidth} mutator.
 	 * @param defaultLineWidth	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	public void setDefaultLineWidth(Decimal2 defaultLineWidth) {
 		preset(defaultLineWidthPropertyName, defaultLineWidth);
 		this.defaultLineWidth = defaultLineWidth;
@@ -1576,8 +1692,8 @@ public class ReportDesign extends AbstractTransientBean {
 	 * {@link #pixelToTwip} mutator.
 	 * @param pixelToTwip	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	public void setPixelToTwip(Decimal5 pixelToTwip) {
 		preset(pixelToTwipPropertyName, pixelToTwip);
 		this.pixelToTwip = pixelToTwip;

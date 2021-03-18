@@ -31,6 +31,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Hierarchical";
 
@@ -41,8 +42,8 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 	 * Text
 	 **/
 	private String text;
-	private String bizParentId;
 
+	private String bizParentId;
 
 	@Override
 	@XmlTransient

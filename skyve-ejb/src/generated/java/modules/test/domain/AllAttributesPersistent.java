@@ -55,51 +55,73 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "AllAttributesPersistent";
 
 	/** @hidden */
 	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
+
 	/** @hidden */
 	public static final String composedAssociationPropertyName = "composedAssociation";
+
 	/** @hidden */
 	public static final String embeddedAssociationPropertyName = "embeddedAssociation";
+
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
+
 	/** @hidden */
 	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+
 	/** @hidden */
 	public static final String colourPropertyName = "colour";
+
 	/** @hidden */
 	public static final String datePropertyName = "date";
+
 	/** @hidden */
 	public static final String dateTimePropertyName = "dateTime";
+
 	/** @hidden */
 	public static final String decimal10PropertyName = "decimal10";
+
 	/** @hidden */
 	public static final String decimal2PropertyName = "decimal2";
+
 	/** @hidden */
 	public static final String decimal5PropertyName = "decimal5";
+
 	/** @hidden */
 	public static final String enum3PropertyName = "enum3";
+
 	/** @hidden */
 	public static final String geometryPropertyName = "geometry";
+
 	/** @hidden */
 	public static final String idPropertyName = "id";
+
 	/** @hidden */
 	public static final String normalIntegerPropertyName = "normalInteger";
+
 	/** @hidden */
 	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
+
 	/** @hidden */
 	public static final String longIntegerPropertyName = "longInteger";
+
 	/** @hidden */
 	public static final String markupPropertyName = "markup";
+
 	/** @hidden */
 	public static final String memoPropertyName = "memo";
+
 	/** @hidden */
 	public static final String textPropertyName = "text";
+
 	/** @hidden */
 	public static final String timePropertyName = "time";
+
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
 
@@ -185,86 +207,107 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Aggregated Association
 	 **/
 	private AllAttributesPersistent aggregatedAssociation = null;
+
 	/**
 	 * Composed Association
 	 **/
 	private AllAttributesPersistent composedAssociation = null;
+
 	/**
 	 * Embedded Association
 	 **/
 	private AllAttributesEmbedded embeddedAssociation = null;
+
 	/**
 	 * Boolean Flag
 	 **/
 	private Boolean booleanFlag;
+
 	/**
 	 * Aggregated Collection
 	 **/
 	private List<AllAttributesPersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
+
 	/**
 	 * Colour
 	 **/
 	private String colour;
+
 	/**
 	 * Date
 	 **/
 	private DateOnly date;
+
 	/**
 	 * Date Time
 	 **/
 	private DateTime dateTime;
+
 	/**
 	 * Decimal 10
 	 **/
 	private Decimal10 decimal10;
+
 	/**
 	 * Decimal 2
 	 **/
 	private Decimal2 decimal2;
+
 	/**
 	 * Decimal 5
 	 **/
 	private Decimal5 decimal5;
+
 	/**
 	 * Enum 3
 	 **/
 	private Enum3 enum3;
+
 	/**
 	 * Geometry
 	 **/
 	private Geometry geometry;
+
 	/**
 	 * Id
 	 **/
 	private String id;
+
 	/**
 	 * Integer
 	 **/
 	private Integer normalInteger;
+
 	/**
 	 * Inverse
 	 **/
 	private List<AllAttributesPersistent> inverseAggregatedAssociation = new ArrayList<>();
+
 	/**
 	 * Long Integer
 	 **/
 	private Long longInteger;
+
 	/**
 	 * Markup
 	 **/
 	private String markup;
+
 	/**
 	 * Memo
 	 **/
 	private String memo;
+
 	/**
 	 * Text
 	 **/
 	private String text;
+
 	/**
 	 * Time
 	 **/
 	private TimeOnly time;
+
 	/**
 	 * Timestamp
 	 **/
@@ -382,6 +425,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 			if (embeddedAssociation != null) {
 				embeddedAssociation.setParent(this);
 			}
+
 		}
 	}
 
@@ -493,9 +537,9 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #date} mutator.
 	 * @param date	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDate(DateOnly date) {
 		preset(datePropertyName, date);
 		this.date = date;
@@ -513,9 +557,9 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #dateTime} mutator.
 	 * @param dateTime	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
 	public void setDateTime(DateTime dateTime) {
 		preset(dateTimePropertyName, dateTime);
 		this.dateTime = dateTime;
@@ -533,8 +577,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #decimal10} mutator.
 	 * @param decimal10	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	public void setDecimal10(Decimal10 decimal10) {
 		preset(decimal10PropertyName, decimal10);
 		this.decimal10 = decimal10;
@@ -552,8 +596,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #decimal2} mutator.
 	 * @param decimal2	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	public void setDecimal2(Decimal2 decimal2) {
 		preset(decimal2PropertyName, decimal2);
 		this.decimal2 = decimal2;
@@ -571,8 +615,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #decimal5} mutator.
 	 * @param decimal5	The new value.
 	 **/
-	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	public void setDecimal5(Decimal5 decimal5) {
 		preset(decimal5PropertyName, decimal5);
 		this.decimal5 = decimal5;
@@ -608,8 +652,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #geometry} mutator.
 	 * @param geometry	The new value.
 	 **/
-	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
 	public void setGeometry(Geometry geometry) {
 		preset(geometryPropertyName, geometry);
 		this.geometry = geometry;
@@ -807,9 +851,9 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #time} mutator.
 	 * @param time	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
-	@XmlElement
 	public void setTime(TimeOnly time) {
 		preset(timePropertyName, time);
 		this.time = time;
@@ -827,9 +871,9 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * {@link #timestamp} mutator.
 	 * @param timestamp	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
