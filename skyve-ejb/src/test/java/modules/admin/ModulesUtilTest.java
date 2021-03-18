@@ -69,5 +69,5 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5
 
     }
 
-    
+
 }
