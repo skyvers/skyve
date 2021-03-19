@@ -127,22 +127,23 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 
 		final ClassName extensionClassName = ClassName.get("modules." + moduleName + "." + documentName, getExtensionName());
 		final MethodSpec crudInstance = MethodSpec.methodBuilder("crudInstance")
-													.addModifiers(Modifier.PUBLIC)
-													.returns(extensionClassName)
-													.addAnnotation(AnnotationSpec.builder(ClassName.get(SkyveFixture.class))
-																					.addMember("types", "$T.$L", FixtureType.class, FixtureType.crud)
-																					.build())
-													.addStatement("return new $T().fixture($L).factoryBuild($T.MODULE_NAME, $T.DOCUMENT_NAME)",
-																	DataBuilder.class,
-																	FixtureType.crud,
-																	extensionClassName, extensionClassName)
-													.build();
+				.addModifiers(Modifier.PUBLIC)
+				.returns(extensionClassName)
+				.addAnnotation(AnnotationSpec.builder(ClassName.get(SkyveFixture.class))
+						.addMember("types", "$T.$L", FixtureType.class, FixtureType.crud)
+						.build())
+				.addStatement("return new $T().fixture($T.$L).factoryBuild($T.MODULE_NAME, $T.DOCUMENT_NAME)",
+						DataBuilder.class,
+						FixtureType.class,
+						FixtureType.crud,
+						extensionClassName, extensionClassName)
+				.build();
 
 		final TypeSpec documentFactory = TypeSpec.classBuilder(factoryName)
-													.addModifiers(Modifier.PUBLIC)
-													.addAnnotation(AnnotationSpec.builder(ClassName.get(SkyveFactory.class)).build())
-													.addMethod(crudInstance)
-													.build();
+				.addModifiers(Modifier.PUBLIC)
+				.addAnnotation(AnnotationSpec.builder(ClassName.get(SkyveFactory.class)).build())
+				.addMethod(crudInstance)
+				.build();
 
 		final JavaFile javaFile = JavaFile.builder("modules." + moduleName + "." + documentName, documentFactory).indent("\t").build();
 
