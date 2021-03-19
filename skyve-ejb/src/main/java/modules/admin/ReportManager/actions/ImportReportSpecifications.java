@@ -23,6 +23,7 @@ import org.skyve.util.JSON;
 import org.skyve.web.WebContext;
 
 import modules.admin.ReportManager.ReportManagerExtension;
+import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportManager.ImportActionType;
 import modules.admin.domain.ReportTemplate;
 
@@ -50,6 +51,11 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			try {
 				PersistentBean pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
 				validateReport(pb, true, null);
+
+				if (bean.getImportActionType() == ImportActionType.validateOnlyReportConfigurationsAndTemplates) {
+					webContext.growl(MessageSeverity.info, "Report validated ok - select import option to import this report");
+					return bean;
+				}
 
 				// now load
 				pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
@@ -172,7 +178,11 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	 */
 	private void loadReport(ReportManagerExtension bean, PersistentBean pb) {
 		if (pb instanceof ReportTemplate) {
-			ReportTemplate newTemplate = (ReportTemplate) pb;
+			ReportTemplateExtension newTemplate = (ReportTemplateExtension) pb;
+
+			// clear the schedule component before saving
+			newTemplate.clearSchedules();
+
 			try {
 				newTemplate = CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {

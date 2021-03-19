@@ -30,6 +30,18 @@ public class ReportTemplateExtension extends ReportTemplate {
 	private static final String DEFAULT_TEMPLATE_HEADER_NAME = "headerPortrait.ftlh";
 
 	/**
+	 * Removes any assigned schedules from this report template.
+	 */
+	public void clearSchedules() {
+		setScheduled(Boolean.FALSE);
+		setCronExpression(null);
+		setStartTime(null);
+		setEndTime(null);
+		setRunAs(null);
+		getUsersToEmail().clear();
+	}
+
+	/**
 	 * Returns a text description of the cron schedule for this report.
 	 */
 	@Override

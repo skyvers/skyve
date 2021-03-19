@@ -112,24 +112,36 @@
 			<minCardinality>0</minCardinality>
 		</collection>
 		
-		<!-- Scheduling attributes. -->
+		<!-- Scheduling attributes -->
+		<boolean name="scheduled" required="true">
+			<documentation>Whether or not this report is scheduled.</documentation>
+			<displayName>Scheduled</displayName>
+			<description>Whether scheduling is enabled for this report or not.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
 		<text name="cronExpression">
 			<displayName>CRON Expression</displayName>
 			<length>128</length>
 		</text>
+		<dateTime name="startTime">
+			<displayName>Start Time</displayName>
+			<description>When to start triggering the report.  May be left blank</description>
+		</dateTime>
+		<dateTime name="endTime">
+			<displayName>End Time</displayName>
+			<description>When to finish triggering the report.  May be left blank</description>
+		</dateTime>
+		<association name="runAs" type="aggregation">
+			<displayName>Run As</displayName>
+			<description>The user to run the report</description>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
+		</association>
 		<collection name="usersToEmail" type="aggregation">
 			<displayName>Users to Email</displayName>
 			<documentName>UserProxy</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<association name="newUserToEmail" type="aggregation" persistent="false" trackChanges="false" audited="false">
-			<displayName>New Email</displayName>
-			<documentName>UserProxy</documentName>
-		</association>
-		<text name="scheduleDescription" persistent="false" trackChanges="false" audited="false">
-			<displayName>Schedule</displayName>
-			<length>255</length>
-		</text>
 		
 		<!-- non-persistent report template attributes -->
 		<memo name="results" audited="false" persistent="false" trackChanges="false" usage="domain">
@@ -176,6 +188,10 @@
 		</text>
 			
 		<!-- non-persistent scheduling attributes -->
+		<text name="scheduleDescription" persistent="false" trackChanges="false" audited="false">
+			<displayName>Schedule</displayName>
+			<length>255</length>
+		</text>
 		<text name="allHours" persistent="false">
 			<displayName>All Hours</displayName>
 			<domain>constant</domain>
@@ -418,27 +434,10 @@
 		<boolean name="weekday7" persistent="false">
 			<displayName>Sat</displayName>
 		</boolean>
-		<dateTime name="startTime">
-			<displayName>Start Time</displayName>
-			<description>When to start triggering the report.  May be left blank</description>
-		</dateTime>
-		<dateTime name="endTime">
-			<displayName>End Time</displayName>
-			<description>When to finish triggering the report.  May be left blank</description>
-		</dateTime>
-		<association name="runAs" type="aggregation">
-			<displayName>Run As</displayName>
-			<description>The user to run the report</description>
+		<association name="newUserToEmail" type="aggregation" persistent="false" trackChanges="false" audited="false">
+			<displayName>New Recipient</displayName>
 			<documentName>UserProxy</documentName>
-			<queryName>qActiveUserProxies</queryName>
 		</association>
-
-		<boolean name="scheduled" required="true">
-			<documentation>Whether or not this report is scheduled.</documentation>
-			<displayName>Scheduled</displayName>
-			<description>Whether scheduling is enabled for this report or not.</description>
-			<defaultValue>false</defaultValue>
-		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="created" usage="view">

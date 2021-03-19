@@ -318,7 +318,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 						"Please provide at least one user to email the report to"));
 			}
 
-			if ((!ALL_CODE.equals(bean.getAllDays())) && (!ALL_CODE.equals(bean.getAllWeekdays()))) {
+			if ((bean.getAllDays() != null && !bean.getAllDays().equals(ALL_CODE))
+					&& (bean.getAllWeekdays() != null && !bean.getAllWeekdays().equals(ALL_CODE))) {
 				e.getMessages().add(new Message(
 						new String[] { ReportTemplate.allDaysPropertyName, ReportTemplate.allWeekdaysPropertyName },
 						"Choose week days or days of the month, but not both"));
