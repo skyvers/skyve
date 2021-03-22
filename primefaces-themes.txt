@@ -13,5 +13,5 @@ To install the ultima theme (>= 2.0.0) on skyve.
 2) Drop ecuador-layout/ folder into WEB-INF/resources/
 3) Drop primefaces-ecuador-*/ folder into WEB-INF/resources/
 4) Drop primefaces-ecuador.taglib.xml into WEB-INF/
-5) Change router.DefaultUxUiSelector to use "ecuador" for the template name, "ecuador" for the theme name
+5) Change router.UxUis to use "ecuador" for the template name, "ecuador" for the theme name
 	and a theme colour matching the theme colour if there is one eg "indigo"
