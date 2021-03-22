@@ -124,7 +124,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 					(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
 				http.oauth2Login().loginPage(Util.getLoginUrl());
 			}
-//			http.saml2Login();
+			
+//			http.saml2Login()
+//					.loginPage(Util.getLoginUrl())
+//					.defaultSuccessUrl(Util.getHomeUrl());
 	}
 
 	@Override
@@ -135,8 +138,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
 		RelyingPartyRegistration relyingPartyRegistration = RelyingPartyRegistrations
-				.fromMetadataLocation("https://simplesaml-for-spring-saml.cfapps.io/saml2/idp/metadata.php")
-				.registrationId("one")
+				.fromMetadataLocation("https://login.microsoftonline.com/blah-blah-blah")
+				.registrationId("<app-name-registered-with-AD>")
+				.entityId("https://{baseHost}/saml2/service-provider-metadata/{registrationId}")
+				.assertionConsumerServiceLocation("https://{baseHost}/login/saml2/sso/{registrationId}")
 				.build();
 		return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
 	}
