@@ -4,23 +4,6 @@
 	<tabPane selectedTabIndexBinding="tabIndex">
 		<tab title="admin.controlPanel.edit.design.tabTitle">
 			<component name="_generateTestData" />
-			<form border="true" borderTitle="admin.controlPanel.edit.design.generate.borderTitle">
-				<column pixelWidth="175" />
-				<column />
-				<column pixelWidth="140" />
-				<column pixelWidth="140" />
-				<row>
-					<item>
-						<combo binding="designModuleDocumentName" />
-					</item>
-					<item align="centre">
-						<button action="GenerateEditView" pixelWidth="130" />
-					</item>
-					<item align="centre">
-						<button action="GenerateQuery" pixelWidth="130" />
-					</item>
-				</row>
-			</form>
 			<form border="true" borderTitle="admin.controlPanel.edit.design.swapCustomer.borderTitle">
 				<column pixelWidth="175" />
 				<column />
@@ -380,8 +363,6 @@
 		<action className="StopOrStartSelectedCache" displayName="admin.controlPanel.actions.stopOrStartSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
 		<action className="EvictFromCache" displayName="admin.controlPanel.actions.evictFromCache.actionName" />
 		<action className="SwapCustomer" displayName="admin.controlPanel.actions.swapCustomer.actionName" inActionPanel="false" />
-		<action className="GenerateEditView" displayName="admin.controlPanel.actions.generateEditView.actionName" inActionPanel="false" />
-		<action className="GenerateQuery" displayName="admin.controlPanel.actions.generateQuery.actionName" inActionPanel="false" />
 		<action className="ExecuteQuery" displayName="admin.controlPanel.actions.executeQuery.actionName" inActionPanel="false" />
 		<action className="GenerateMenuSAIL" displayName="admin.controlPanel.actions.generateMenuSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateMenuSail.toolTip" />
 		<action className="GenerateModuleSAIL" displayName="admin.controlPanel.actions.generateModuleSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateModuleSail.toolTip" />
@@ -390,7 +371,7 @@
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
 		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
 			iconStyleClass="fa fa-exclamation" />
-		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey" 
+		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey"
 			iconStyleClass="fa fa-plus"/>
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />

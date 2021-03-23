@@ -16,6 +16,11 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
+/*
+@Deprecated
+This class is no longer needed as the functionality has been moved to a Maven goal
+It is likely to be removed in a later version.
+ */
 
 public class GenerateEditView implements ServerSideAction<ControlPanelExtension> {
 	private static final long serialVersionUID = 5990074876826469688L;
@@ -36,11 +41,11 @@ public class GenerateEditView implements ServerSideAction<ControlPanelExtension>
 			Persistence persistence = CORE.getPersistence();
 			User user = persistence.getUser();
 			Customer customer = user.getCustomer();
-			
+
 			String[] modoc = moduleDocumentName.split("\\.");
 			Module module = customer.getModule(modoc[0]);
 			Document document = module.getDocument(customer, modoc[1]);
-			
+
 			bean.setResults(new ViewGenerator(AbstractRepository.get()).generateEditViewXML(customer, document, false, false));
 		}
 		catch (Exception e) {
