@@ -217,7 +217,7 @@
 					<item>
 						<checkBox binding="httpTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -226,7 +226,7 @@
 					<item>
 						<checkBox binding="commandTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -235,7 +235,7 @@
 					<item>
 						<checkBox binding="facesTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -251,7 +251,7 @@
 					<item>
 						<checkBox binding="queryTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -278,7 +278,7 @@
 					<item>
 						<checkBox binding="contentTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -292,7 +292,7 @@
 					<item>
 						<checkBox binding="xmlTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -301,7 +301,7 @@
 					<item>
 						<checkBox binding="securityTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -310,7 +310,7 @@
 					<item>
 						<checkBox binding="bizletTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -319,7 +319,7 @@
 					<item>
 						<checkBox binding="dirtyTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -390,7 +390,7 @@
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
 		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
 			iconStyleClass="fa fa-exclamation" />
-		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey" 
+		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey"
 			iconStyleClass="fa fa-plus"/>
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
