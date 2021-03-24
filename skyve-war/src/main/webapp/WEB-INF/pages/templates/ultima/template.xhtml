@@ -8,6 +8,7 @@
 		xmlns:pu="http://primefaces.org/ultima"
 		xmlns:o="http://omnifaces.org/ui"
 		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -67,6 +68,7 @@
 					<pu:menu />
 				</c:if>
 
+				<s:resetMenuState rendered="#{resetMenu}" />
 				<h:form id="menuform" prependId="false" rendered="#{showMenu}">
 					<div class="layout-menu layout-menu-dark">
 						<div class="nano">

@@ -48,23 +48,7 @@
 	</head>
 	<body>
 		<%
-			request.logout();
-
-			// NB invalidate the session after logging out otherwise WebLogic 12c NPEs
-			HttpSession s = request.getSession(false);
-			if (s != null) {
-				s.invalidate();
-			}
-
-			// remove all cookies too
-			Cookie[] cookies = request.getCookies();
-			if (cookies != null && cookies.length > 0) {
-				for (Cookie cookie : cookies) {
-					cookie.setValue("-");
-					cookie.setMaxAge(0);
-					response.addCookie(cookie);
-				}
-			}
+			WebUtil.logout(request, response);
 		%>
 		
 		<div class="ui middle aligned center aligned grid">

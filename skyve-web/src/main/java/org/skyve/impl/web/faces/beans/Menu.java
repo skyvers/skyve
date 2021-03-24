@@ -1,9 +1,6 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -36,6 +33,13 @@ import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
+/**
+ * The menu is session scoped.
+ * The expanded state is set based on the "m" parameter of first URL hit.
+ * The menu is reset by home.xhtml <s:resetMenuState /> tag so that the / URL sets up the menu based on the defaults.
+ * The menus respond to the cookies in the browser before adhering to the server side state in this menu model.
+ * This means the menu model expanded state is really on used once WebUtil.clearMenuCookies() has been called.
+ */
 @ManagedBean
 @SessionScoped
 public class Menu extends Harness {
@@ -43,26 +47,28 @@ public class Menu extends Harness {
 
 	// The modules menu on the LHS
 	private MenuModel menu;
-	// The map of module name to sub menu nodes in the model
-	private Map<String, DefaultSubMenu> moduleSubMenus = new TreeMap<>();
 	
 	public MenuModel getMenu() {
 		if (menu == null) {
-			preRender();
+			setState();
 		}
-		setExpandedModule();
 		return menu;
 	}
+	
+	public void resetState() {
+		menu = null;
+	}
 
-	public void preRender() {
+	private void setState() {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
-					initialise();
-					
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
+					setBizModuleParameter(request.getParameter("m"));
+					initialise(); // check m parameter and set to default if DNE
+					
 					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
@@ -73,18 +79,6 @@ public class Menu extends Harness {
 				return null;
 			}
 		}.execute();
-	}
-	
-	private void setExpandedModule() {
-		if (menu != null) {
-			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-			String moduleName = params.get("m");
-			if (moduleName != null) {
-				for (Entry<String, DefaultSubMenu> e : moduleSubMenus.entrySet()) {
-					e.getValue().setExpanded(moduleName.equals(e.getKey()));
-				}
-			}
-		}
 	}
 	
 	private MenuModel createMenuModel(String bizModule, String uxui) {
@@ -99,7 +93,6 @@ public class Menu extends Harness {
 											Module menuModule,
 											boolean open) {
 				DefaultSubMenu moduleSub = new DefaultSubMenu(menuModule.getLocalisedTitle());
-				moduleSubMenus.put(menuModule.getName(), moduleSub);
 				result.addElement(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);

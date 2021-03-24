@@ -7,6 +7,7 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -82,6 +83,7 @@
 						</c:if>
 					</tr>
 					<tr>
+						<s:resetMenuState rendered="#{resetMenu}" />
 						<c:if test="#{showMenu}">
 							<td style="height:100%;vertical-align:top">
 								<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>

@@ -19,9 +19,12 @@
 
 	HttpSession session = request.getSession(false);
 	if (session != null) {
+		// NB do not invalidate the session here because the post login success redirect page is stored in the session.
 		session.removeAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		session.invalidate();
 	}
+	
+	// NB Remove the menu cookies here so that the post login redirect URL can establish the menu expanded state
+	WebUtil.deleteMenuCookies(request, response);
 	
 	// Determine the locale
 	Locale locale = request.getLocale();

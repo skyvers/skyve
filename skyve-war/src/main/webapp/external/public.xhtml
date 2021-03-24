@@ -20,6 +20,7 @@
 		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyvePublic.templateName).concat('/view.xhtml')}">
 			<ui:param name="bean" value="#{skyvePublic}" />
 			<ui:param name="showMenu" value="false" />
+			<ui:param name="resetMenu" value="false" />
 			<ui:param name="showSwitchMode" value="false" />
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="body">

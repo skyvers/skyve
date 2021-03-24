@@ -8,6 +8,7 @@
 		xmlns:pt="http://primefaces.org/ecuador"
 		xmlns:o="http://omnifaces.org/ui"
 		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -65,6 +66,7 @@
 					<pt:menu />
 				</c:if>
 				
+				<s:resetMenuState rendered="#{resetMenu}" />
 				<h:panelGroup layout="block" styleClass="layout-sidebar" rendered="#{showMenu}">
 					<div class="nano">
 						<div class="nano-content menu-scroll-content">

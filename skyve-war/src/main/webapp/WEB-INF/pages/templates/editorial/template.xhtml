@@ -7,6 +7,7 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view encoding="UTF-8">
 		<h:head>
@@ -137,6 +138,7 @@
 					</div>
 				</div>
 				<!-- Sidebar -->
+				<s:resetMenuState rendered="#{resetMenu}" />
 				<c:if test="#{showMenu}">
 					<div id="sidebar">
 						<div class="inner">
@@ -150,7 +152,7 @@
 									</tr>
 								</table>
 								<h:form id="menuform" prependId="false"> 
-									<p:panelMenu model="#{menu.menu}" />
+									<p:panelMenu id="leftMenu" model="#{menu.menu}" />
 								</h:form>
 							</nav>
 						</div>
