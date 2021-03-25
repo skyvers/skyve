@@ -147,7 +147,13 @@ public class WebUtil {
 		if (cookies != null && cookies.length > 0) {
 			for (Cookie cookie : cookies) {
 				String name = cookie.getName();
-				boolean delete = (names.length == 0) && (! AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(name));
+				boolean delete = (names.length == 0) && 
+									(! AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(name)) &&
+									// Don't include "ecuador_expandeditems", "ultima_expandeditems" as the menus don't respond well.
+									// Ecuador Menu - accordions do not open at all when expanded on server menu model and no cookie set
+									// Ultima Menu - Selecting a different menu item within the same module makes the module accordion collapse
+									(! name.startsWith("ecuador_")) &&
+									(! name.startsWith("ultima_"));
 				if (! delete) {
 					for (String n : names) {
 						if (n.equals(name)) {
@@ -172,7 +178,10 @@ public class WebUtil {
 	 * Delete the menu state cookies for all PF themes.
 	 */
 	public static void deleteMenuCookies(HttpServletRequest request, HttpServletResponse response) {
-		deleteCookies(request, response, "ecuador_expandeditems", "ultima_expandeditems", "panelMenu-leftMenu");
+		// Don't include "ecuador_expandeditems", "ultima_expandeditems" as the menus don't respond well.
+		// Ecuador Menu - accordions do not open at all when expanded on server menu model and no cookie set
+		// Ultima Menu - Selecting a different menu item within the same module makes the module accordion collapse
+		deleteCookies(request, response, "panelMenu-leftMenu");
 	}
 	
 	/**
