@@ -21,7 +21,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
-import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
@@ -124,18 +123,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-		if (ControlPanel.designModuleDocumentNamePropertyName.equals(attributeName)) {
-			Customer c = CORE.getUser().getCustomer();
-			List<DomainValue> result = new ArrayList<>();
-			for (Module m : c.getModules()) {
-				for (String d : m.getDocumentRefs().keySet()) {
-					result.add(new DomainValue(m.getName() + '.' + d));
-				}
-			}
-			Collections.sort(result, new DomainValueSortByCode());
-			return result;
-		}
-		else if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
+		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
 			AbstractRepository rep = AbstractRepository.get();
 			for (String cus : rep.getAllCustomerNames()) {

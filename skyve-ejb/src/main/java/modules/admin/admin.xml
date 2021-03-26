@@ -204,8 +204,6 @@
 					<action name="EvictSelectedCache" />
 					<action name="StopOrStartSelectedCache" />
 					<action name="ExecuteQuery" />
-					<action name="GenerateEditView" />
-					<action name="GenerateQuery" />
 					<action name="SwapCustomer" />
 					<action name="GenerateMenuSAIL" />
 					<action name="GenerateModuleSAIL" />

@@ -78,7 +78,7 @@ public class Audit extends AbstractPersistentBean {
 	public static final String mePropertyName = "me";
 
 	/**
-	 * admin.audit.operator.displayName
+	 * Operation
 	 **/
 	@XmlEnum
 	public static enum Operation implements Enumeration {
@@ -161,7 +161,7 @@ public class Audit extends AbstractPersistentBean {
 	private String auditModuleName;
 
 	/**
-	 * Module
+	 * Document
 	 **/
 	private String auditDocumentName;
 
@@ -176,7 +176,7 @@ public class Audit extends AbstractPersistentBean {
 	private String auditBizKey;
 
 	/**
-	 * admin.audit.operator.displayName
+	 * Operation
 	 **/
 	private Operation operation;
 
@@ -206,7 +206,7 @@ public class Audit extends AbstractPersistentBean {
 	private Audit sourceVersion = null;
 
 	/**
-	 * admin.audit.assocation.comparisonVersion.displayName
+	 * Other Version To Compare
 	 **/
 	private Audit comparisonVersion = null;
 
