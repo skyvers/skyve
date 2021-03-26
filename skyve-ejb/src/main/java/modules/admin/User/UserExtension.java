@@ -45,7 +45,7 @@ public class UserExtension extends User {
 			activateUrlPropertyName,
 			Util.getSupportEmailAddress());
 
-	
+
 	@Override
 	public List<UserRole> getAssignedRoles() {
 		List<UserRole> assignedRoles = super.getAssignedRoles();
@@ -55,7 +55,7 @@ public class UserExtension extends User {
 			if (isPersisted()) {
 				try {
 					org.skyve.metadata.user.User metaDataUser = toMetaDataUser();
-	
+
 					// Add the assigned roles
 					Customer c = metaDataUser.getCustomer();
 					for (Module m : c.getModules()) {
@@ -76,21 +76,21 @@ public class UserExtension extends User {
 				}
 			}
 		}
-		
+
 		return assignedRoles;
 	}
-		
+
 	void clearAssignedRoles() {
 		determinedRoles = false;
 	}
-	 
+
 	/**
 	 * Return the metadata user that is this user
-	 * 
+	 *
 	 * @return the metadata user that is this user
 	 */
 	public org.skyve.metadata.user.User toMetaDataUser() {
-		
+
 		UserImpl metaDataUser  = null;
 		if(isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
@@ -98,43 +98,44 @@ public class UserExtension extends User {
 			metaDataUser.clearAllPermissionsAndMenus();
 			SQLMetaDataUtil.populateUser(metaDataUser, ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection());
 		}
-		
+
 		return metaDataUser;
 	}
-	
+
 	/**
 	 * Generates the activation code and link for this new user and upserts them
 	 * into the datastore.
 	 */
 	public void generateActivationDetailsAndSave(final Persistence persistence) {
-		// Set activation details
+		// Set activation details and generate link used for activation
 		this.setActivated(Boolean.FALSE);
 		this.setActivationCode(UUID.randomUUID().toString());
 		this.setActivationCodeCreationDateTime(new DateTime());
 
 		this.setBizUserId(getBizId());
-		
+
 		// Save and set the user
 		this.upsertUser(persistence, this);
-		
-		// Generate link used for activation
-		generateActivationLink();
 	}
-	
+
 	/**
 	 * Generates the activation link for the email to send to the new user with the activation code.
 	 */
-	public void generateActivationLink() {
+	@Override
+	public String getActivateUrl() {
+		if (this.getActivationCode() == null) {
+			return null;
+		}
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(Util.getDocumentUrl(SelfRegistrationActivation.MODULE_NAME, SelfRegistrationActivation.DOCUMENT_NAME))
 				.append("&code=")
 				.append(this.getActivationCode());
-		this.setActivateUrl(urlBuilder.toString());
+		return urlBuilder.toString();
 	}
-	
+
 	/**
 	 * Sends the activation email to the user who registered.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void sendUserRegistrationEmail() throws Exception {
@@ -156,7 +157,7 @@ public class UserExtension extends User {
 	 * calling save will automatically set the bizUserId to be the current logged in user.
 	 * <br />
 	 * When registering, we want the User we are just about to create to own the documents.
-	 * 
+	 *
 	 * @param persistence skyve persistence to save the bean
 	 * @param bean the user bean to register
 	 * @return the saved user bean
@@ -179,7 +180,7 @@ public class UserExtension extends User {
 		persistence.commit(false);
 		return bean;
 	}
-	
+
 	/**
 	 * Visitor to update all beans related to a document to have a given owning bizUserId
 	 */
@@ -198,5 +199,5 @@ public class UserExtension extends User {
 			return true;
 		}
 	}
-	
+
 }
