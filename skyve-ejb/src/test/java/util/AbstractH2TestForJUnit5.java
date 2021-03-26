@@ -1,8 +1,5 @@
 package util;
 
-import modules.WeldMarker;
-import modules.admin.User.UserExtension;
-import modules.admin.domain.User;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.junit.jupiter.api.AfterAll;
@@ -24,6 +21,10 @@ import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
+
+import modules.WeldMarker;
+import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 
 
 public class AbstractH2TestForJUnit5
@@ -52,8 +53,7 @@ public class AbstractH2TestForJUnit5
 
 
     @BeforeAll
-    public static void setUp()
-    {
+	public static void setUp() {
         // init the cache once
         UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
         if (CacheUtil.isUnInitialised()) {
@@ -68,18 +68,14 @@ public class AbstractH2TestForJUnit5
         weld.initialize();
     }
 
-    @AfterAll
-    public static void tearDown()
-    {
-        if (weld != null) {
-            weld.shutdown();
-        }
-    }
-
-
+	@AfterAll
+	public static void tearDown() {
+		if (weld != null) {
+			weld.shutdown();
+		}
+	}
 
     @BeforeEach
-    @SuppressWarnings("static-method")
     public void beforeBase() throws Exception {
         AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
         AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
@@ -106,7 +102,6 @@ public class AbstractH2TestForJUnit5
     }
 
     @AfterEach
-    @SuppressWarnings("static-method")
     public void afterBase() {
         final AbstractPersistence persistence = AbstractPersistence.get();
         persistence.rollback();

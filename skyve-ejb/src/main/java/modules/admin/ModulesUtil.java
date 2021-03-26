@@ -1,11 +1,15 @@
 package modules.admin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.UUID;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Group.GroupExtension;
-import modules.admin.UserList.UserListUtil;
-import modules.admin.domain.Group;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.bizport.BizPortWorkbook;
@@ -38,10 +42,14 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
 
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.UserList.UserListUtil;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
+import modules.admin.domain.Group;
 import modules.admin.domain.UserProxy;
 
 /**
@@ -574,24 +582,22 @@ public class ModulesUtil {
 	 * - sets a password reset token that can be provided to the user to reset their password
 	 * - optionally sends an invitation email
 	 *
-	 * @param contact
-	 * @param groupName
+	 * @param contact the Contact to create the new User from
+	 * @param groupName The name of the group
 	 * @param homeModuleName
 	 * @param sendInvitation
 	 * @return
 	 */
-	public static UserExtension createAdminUserFromContactWithGroup(Contact contact, String groupName, String homeModuleName, boolean sendInvitation) {
+	public static UserExtension createAdminUserFromContactWithGroup(Contact contact, final String groupName,
+			final String homeModuleName, final boolean sendInvitation) {
 
 		var resourceBundle = ResourceBundle.getBundle("resources.i18n", Locale.getDefault());
 
-		if(contact == null)
-		{
+		if (contact == null) {
 			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact")));
 		}
 
-
-		if(groupName == null)
-		{
+		if (groupName == null) {
 			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName")));
 		}
 
@@ -604,6 +610,20 @@ public class ModulesUtil {
 		if (found != null) {
 			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser")));
 		}
+
+		// check the group exists
+		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
+		qGroup.setMaxResults(1);
+		GroupExtension group = qGroup.beanResult();
+
+		if (group == null) {
+			throw new ValidationException(new Message(
+					resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
+		}
+
+		// check the home module name exists (Skyve will throw if it doesn't)
+		CORE.getCustomer().getModule(homeModuleName);
 
 		// save the contact to validate the contact and so that it can be referenced by the user
 		contact = CORE.getPersistence().save(contact);
@@ -619,17 +639,7 @@ public class ModulesUtil {
 		newUser.setContact(contact);
 
 		// assign group
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
-		qGroup.setMaxResults(1);
-		List<GroupExtension> groupList = qGroup.beanResults();
-
-		if(groupList.isEmpty())
-		{
-			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
-		}
-
-		newUser.getGroups().add(groupList.get(0));
+		newUser.getGroups().add(group);
 
 		newUser = CORE.getPersistence().save(newUser);
 
