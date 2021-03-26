@@ -9,10 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.skyve.CORE;
-import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.DataBuilder;
+import org.skyve.util.Util;
 import org.skyve.util.test.SkyveFixture;
 
 import modules.admin.Group.GroupExtension;
@@ -46,20 +47,23 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 				false);
 
 		// then
-		assertThrows(ValidationException.class, executable);
-
+		DomainException e = assertThrows(DomainException.class, executable);
+		assertThat(e.getMessage(),
+				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact")));
 	}
 
 	@Test
 	void createAdminUserFromContactWithGroupShouldFailIfNoGroupName() {
 		// given
-		Contact contact = Contact.newInstance();
+		contact = Contact.newInstance();
 
 		// when
 		Executable executable = () -> ModulesUtil.createAdminUserFromContactWithGroup(contact, null, "homeModuleName", false);
 
 		// then
-		assertThrows(ValidationException.class, executable);
+		DomainException e = assertThrows(DomainException.class, executable);
+		assertThat(e.getMessage(),
+				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName")));
 	}
 
 	@Test
@@ -73,7 +77,9 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 		Executable executable = () -> ModulesUtil.createAdminUserFromContactWithGroup(contact, "Admin", "homeModuleName", false);
 
 		// then
-		assertThrows(ValidationException.class, executable);
+		DomainException e = assertThrows(DomainException.class, executable);
+		assertThat(e.getMessage(),
+				is(Util.i18n("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
 	}
 
 	@Test
@@ -81,15 +87,18 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 		// given
 		Contact contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 
+		String homeModuleName = "homeModuleName";
+
 		GroupExtension group = db.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 		group.setName("Admin");
 		CORE.getPersistence().save(group);
 
 		// when
-		Executable executable = () -> ModulesUtil.createAdminUserFromContactWithGroup(contact, "Admin", "homeModuleName", false);
+		Executable executable = () -> ModulesUtil.createAdminUserFromContactWithGroup(contact, "Admin", homeModuleName, false);
 
 		// then
-		assertThrows(MetaDataException.class, executable);
+		MetaDataException e = assertThrows(MetaDataException.class, executable);
+		assertThat(e.getMessage(), containsString("Module " + homeModuleName + " does not exist"));
 	}
 
 	@Test

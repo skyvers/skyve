@@ -591,12 +591,11 @@ public class ModulesUtil {
 
 
 		if (contact == null) {
-			throw new ValidationException(new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact"));
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact");
 		}
 
 		if (groupName == null) {
-			throw new ValidationException(
-					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName"));
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName");
 		}
 
 		// check if user already exists
@@ -606,8 +605,7 @@ public class ModulesUtil {
 
 		User found = q.beanResult();
 		if (found != null) {
-			throw new ValidationException(
-					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser"));
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser");
 		}
 
 		// check the group exists
@@ -617,8 +615,7 @@ public class ModulesUtil {
 		GroupExtension group = qGroup.beanResult();
 
 		if (group == null) {
-			throw new ValidationException(
-					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup"));
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup");
 		}
 
 		// check the home module name exists (Skyve will throw if it doesn't)
@@ -651,8 +648,7 @@ public class ModulesUtil {
 																  CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 			} catch (Exception e) {
-				throw new ValidationException(
-						new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation"));
+				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation");
 			}
 		}
 		return newUser;
