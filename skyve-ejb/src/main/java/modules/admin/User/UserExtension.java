@@ -107,7 +107,7 @@ public class UserExtension extends User {
 	 * into the datastore.
 	 */
 	public void generateActivationDetailsAndSave(final Persistence persistence) {
-		// Set activation details
+		// Set activation details and generate link used for activation
 		this.setActivated(Boolean.FALSE);
 		this.setActivationCode(UUID.randomUUID().toString());
 		this.setActivationCodeCreationDateTime(new DateTime());
@@ -116,19 +116,14 @@ public class UserExtension extends User {
 
 		// Save and set the user
 		this.upsertUser(persistence, this);
-
-		// Generate link used for activation
-		this.setActivateUrl(getActivateUrl());
 	}
-
 
 	/**
 	 * Generates the activation link for the email to send to the new user with the activation code.
-	 * CUSTOMISED - should be rolled back to Skyve
 	 */
 	@Override
 	public String getActivateUrl() {
-		if(this.getActivationCode()==null) {
+		if (this.getActivationCode() == null) {
 			return null;
 		}
 		StringBuilder urlBuilder = new StringBuilder();
@@ -137,7 +132,6 @@ public class UserExtension extends User {
 				.append(this.getActivationCode());
 		return urlBuilder.toString();
 	}
-
 
 	/**
 	 * Sends the activation email to the user who registered.
