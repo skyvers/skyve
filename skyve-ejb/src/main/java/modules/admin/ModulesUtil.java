@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.UUID;
 
 import org.skyve.CORE;
@@ -591,14 +589,14 @@ public class ModulesUtil {
 	public static UserExtension createAdminUserFromContactWithGroup(Contact contact, final String groupName,
 			final String homeModuleName, final boolean sendInvitation) {
 
-		var resourceBundle = ResourceBundle.getBundle("resources.i18n", Locale.getDefault());
 
 		if (contact == null) {
-			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact")));
+			throw new ValidationException(new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact"));
 		}
 
 		if (groupName == null) {
-			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName")));
+			throw new ValidationException(
+					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName"));
 		}
 
 		// check if user already exists
@@ -608,7 +606,8 @@ public class ModulesUtil {
 
 		User found = q.beanResult();
 		if (found != null) {
-			throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser")));
+			throw new ValidationException(
+					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser"));
 		}
 
 		// check the group exists
@@ -618,8 +617,8 @@ public class ModulesUtil {
 		GroupExtension group = qGroup.beanResult();
 
 		if (group == null) {
-			throw new ValidationException(new Message(
-					resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup")));
+			throw new ValidationException(
+					new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup"));
 		}
 
 		// check the home module name exists (Skyve will throw if it doesn't)
@@ -652,7 +651,8 @@ public class ModulesUtil {
 																  CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 			} catch (Exception e) {
-				throw new ValidationException(new Message(resourceBundle.getString("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation")));
+				throw new ValidationException(
+						new Message("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation"));
 			}
 		}
 		return newUser;
