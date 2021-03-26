@@ -72,9 +72,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public static final String dirtyTracePropertyName = "dirtyTrace";
 
 	/** @hidden */
-	public static final String designModuleDocumentNamePropertyName = "designModuleDocumentName";
-
-	/** @hidden */
 	public static final String queryPropertyName = "query";
 
 	/** @hidden */
@@ -455,11 +452,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	private Boolean dirtyTrace;
 
 	/**
-	 * Module.Document Name
-	 **/
-	private String designModuleDocumentName;
-
-	/**
 	 * BizQL
 	 **/
 	private String query;
@@ -808,24 +800,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public void setDirtyTrace(Boolean dirtyTrace) {
 		preset(dirtyTracePropertyName, dirtyTrace);
 		this.dirtyTrace = dirtyTrace;
-	}
-
-	/**
-	 * {@link #designModuleDocumentName} accessor.
-	 * @return	The value.
-	 **/
-	public String getDesignModuleDocumentName() {
-		return designModuleDocumentName;
-	}
-
-	/**
-	 * {@link #designModuleDocumentName} mutator.
-	 * @param designModuleDocumentName	The new value.
-	 **/
-	@XmlElement
-	public void setDesignModuleDocumentName(String designModuleDocumentName) {
-		preset(designModuleDocumentNamePropertyName, designModuleDocumentName);
-		this.designModuleDocumentName = designModuleDocumentName;
 	}
 
 	/**
