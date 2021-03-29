@@ -12,7 +12,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
-import org.skyve.impl.metadata.view.InjectBinding;
 
 /**
  * Inserts a bit of script at the location of the tag.

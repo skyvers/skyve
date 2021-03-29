@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.locationtech.jts.geom.Geometry;
@@ -72,6 +73,10 @@ public final class BindUtil {
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
 	public static String formatMessage(String message, Bean... beans) {
+		return formatMessage(message, null, beans);
+	}
+	
+	public static String formatMessage(String message, Function<String, String> postEvaluateDisplayValue, Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
@@ -94,6 +99,10 @@ public final class BindUtil {
 							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
 							// property, it could be a condition or an implicit property.
 							String displayValue = ExpressionEvaluator.format(expression, bean);
+							// if there is a postEvaluateDisplayValue function, apply it
+							if (postEvaluateDisplayValue != null) {
+								displayValue = postEvaluateDisplayValue.apply(displayValue);
+							}
 							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
 							// move the openCurlyBraceIndex along by the display value length so that
 							// any '{' occurrences replaced in as literals above are skipped.
@@ -1103,26 +1112,31 @@ public final class BindUtil {
 				valueToSet = null;
 			}
 	
-			if (valueToSet != null) {
-				Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
-	
-				// if we are setting a String value to a non-string property then
-				// use an appropriate constructor or static valueOf()
-				if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
-					try {
-						valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
-					}
-					catch (@SuppressWarnings("unused") NoSuchMethodException e) {
-						valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
-					}
-				}
-	
-				// Convert the value to String if required
-				if (String.class.equals(propertyType)) {
-					valueToSet = valueToSet.toString();
-				} // if (we have a String property)
+			if (bean instanceof MapBean) {
+				((MapBean) bean).set(fullyQualifiedPropertyName, valueToSet);
 			}
-			PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+			else {
+				if (valueToSet != null) {
+					Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
+		
+					// if we are setting a String value to a non-string property then
+					// use an appropriate constructor or static valueOf()
+					if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
+						try {
+							valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
+						}
+						catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+							valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+						}
+					}
+		
+					// Convert the value to String if required
+					if (String.class.equals(propertyType)) {
+						valueToSet = valueToSet.toString();
+					} // if (we have a String property)
+				}
+				PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+			}
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {

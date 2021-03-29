@@ -6,13 +6,16 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.model.document.Document;
 
 public class ViewBindings {
+	private static final ViewBinding MUTABLE_UNESCAPED_TEXT = new ViewBinding(true, false, Sanitisation.text);
+	
 	private String bindingPrefix;
 
-	// binding to mutable indicator
-	private Map<String, Boolean> bindings = new TreeMap<>();
+	// binding to mutable/escape/sanitise indicators
+	private Map<String, ViewBinding> bindings = new TreeMap<>();
 	
 	// binding to child bindings
 	private Map<String, ViewBindings> children = new TreeMap<>();
@@ -20,9 +23,9 @@ public class ViewBindings {
 	private ViewBindings parent;
 	
 	public ViewBindings(Document document) {
-        bindings.put(Bean.DOCUMENT_ID, Boolean.TRUE);
+        bindings.put(Bean.DOCUMENT_ID, MUTABLE_UNESCAPED_TEXT);
         if (document.getPersistent() != null) {
-			bindings.put(PersistentBean.LOCK_NAME, Boolean.TRUE);
+			bindings.put(PersistentBean.LOCK_NAME, MUTABLE_UNESCAPED_TEXT);
         }
     }
 	
@@ -43,13 +46,13 @@ public class ViewBindings {
 		return getBindingPrefix();
 	}
 	
-	public void putBinding(String binding, boolean mutable) {
-	    Boolean currentlyMutable = bindings.get(binding);
-	    if (currentlyMutable == null) {
-	        bindings.put(binding, Boolean.valueOf(mutable));
+	public void putBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
+	    ViewBinding current = bindings.get(binding);
+	    if (current == null) {
+	        bindings.put(binding, new ViewBinding(mutable, escape, sanitise));
 	    }
-	    else if (mutable && (! currentlyMutable.booleanValue())) {
-	        bindings.put(binding,  Boolean.TRUE);
+	    else {
+	    	current.merge(mutable, escape, sanitise);
 	    }
 	}
 	
@@ -57,8 +60,8 @@ public class ViewBindings {
 		return bindings.keySet();
 	}
 
-	public boolean isMutable(String binding) {
-	    return Boolean.TRUE.equals(bindings.get(binding));
+	public ViewBinding getBinding(String binding) {
+		return bindings.get(binding);
 	}
 	
 	public ViewBindings getParent() {

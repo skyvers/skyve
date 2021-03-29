@@ -187,13 +187,11 @@ public class ViewImpl extends Container implements View {
 			// Overrides visitComponent standard behaviour to load the component
 			// Note that the component children are not traversed here.
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
 				component.setContained(uxui, customer, module, document, name);
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				ChartBuilderMetaData model = chart.getModel();
 				if (model != null) {

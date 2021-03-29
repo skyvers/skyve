@@ -452,6 +452,8 @@
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
+        <xs:attribute name="escape" type="xs:boolean"/>
+        <xs:attribute name="sanitise" type="tns:sanitisation"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -593,6 +595,8 @@
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="minPixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="maxPixelHeight" type="xs:int" use="required"/>
+        <xs:attribute name="escape" type="xs:boolean"/>
+        <xs:attribute name="sanitise" type="tns:sanitisation"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1210,6 +1214,8 @@
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="formatted" type="xs:boolean"/>
+        <xs:attribute name="escape" type="xs:boolean"/>
+        <xs:attribute name="sanitise" type="tns:sanitisation"/>
         <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
       </xs:extension>
     </xs:complexContent>
@@ -1223,6 +1229,8 @@
         <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="escape" type="xs:boolean"/>
+        <xs:attribute name="sanitise" type="tns:sanitisation"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -1751,6 +1759,8 @@
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="alignment" type="tns:horizontalAlignment"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="escape" type="xs:boolean"/>
+    <xs:attribute name="sanitise" type="tns:sanitisation"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridContainerColumn">
@@ -1947,6 +1957,16 @@
       <xs:enumeration value="left"/>
       <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sanitisation">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="simple"/>
+      <xs:enumeration value="basic"/>
+      <xs:enumeration value="relaxed"/>
+      <xs:enumeration value="text"/>
     </xs:restriction>
   </xs:simpleType>
 

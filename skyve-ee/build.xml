@@ -6,11 +6,9 @@
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
 		</fileset>
-		<fileset dir="javaee/skyve.ear/lib">
+		<fileset dir="../skyve-war/deployments/skyve.war/WEB-INF/lib/">
 			<include name="**/*.jar"/>
-		</fileset>
-		<fileset dir="javaee/skyve.ear/skyve.war/WEB-INF/lib">
-			<include name="**/*.jar"/>
+			<exclude name="**/skyve-ejb*.jar"/>
 		</fileset>
 
 		<!-- for generating xsds -->
@@ -18,7 +16,7 @@
 		<pathelement path="../skyve-tools/src" />
 		
 		<!-- for generating domain - don't use a file element here - doesn't work in old ant -->
-		<pathelement path="javaee/skyve.ear/apps.jar/" />
+		<pathelement path="../skyve-war/deployments/skyve.war/WEB-INF/classes/" />
 	</path>
 
 	<target name="build" description="Create jars for the skyve framework and associated tools">
@@ -162,7 +160,7 @@
 		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
 			<classpath refid="classpath" />
 		</java>
-		<copy todir="src/skyve/schemas" failonerror="true">
+		<copy todir="../skyve-ejb/src/main/java/schemas" failonerror="true">
 			<fileset dir="." includes="*.xsd" />
 		</copy>
 		<move todir="../skyve-core/src/test/resources/schemas" failonerror="true">

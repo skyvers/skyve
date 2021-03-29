@@ -20,7 +20,6 @@ import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.container.Box;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "HBox")
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "hbox")

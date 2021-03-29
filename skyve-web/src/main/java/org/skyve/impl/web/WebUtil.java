@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -13,6 +15,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
+import org.primefaces.shaded.owasp.encoder.Encode;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -24,6 +30,7 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -46,6 +53,68 @@ public class WebUtil {
 		// Disallow instantiation.
 	}
 	
+    private static final PolicyFactory TEXT_SANITIZER = new HtmlPolicyBuilder().toFactory();
+    private static final PolicyFactory BASIC_SANITIZER = Sanitizers.FORMATTING;
+    private static final PolicyFactory SIMPLE_SANITIZER = BASIC_SANITIZER.and(Sanitizers.BLOCKS);  
+    private static final PolicyFactory RELAXED_SANITIZER = SIMPLE_SANITIZER.and(Sanitizers.TABLES).and(Sanitizers.IMAGES).and(Sanitizers.LINKS).and(Sanitizers.STYLES);
+
+	// from https://github.com/OWASP/java-html-sanitizer/blob/main/src/main/java/org/owasp/html/Encoding.java
+	private static final Map<String, String> REPLACEMENTS = new TreeMap<>();
+	static {
+		REPLACEMENTS.put("&#" + ((int) '\"') + ";", "\"");
+		REPLACEMENTS.put("&amp;", "&");
+		REPLACEMENTS.put("&#" + ((int) '\'') + ";", "'");
+		REPLACEMENTS.put("&#" + ((int) '+') + ";", "+");
+		REPLACEMENTS.put("&lt;", "<");
+		REPLACEMENTS.put("&#" + ((int) '=') + ";", "=");
+		REPLACEMENTS.put("&gt;", ">");
+		REPLACEMENTS.put("&#" + ((int) '@') + ";", "@");
+		REPLACEMENTS.put("&#" + ((int) '`') + ";", "`");
+	}
+
+    // NB When we start using PF 8 we can use the HtmlSanitizer class
+	public static String sanitise(Sanitisation sanitise, String html, boolean forJson) {
+    	String result = html;
+    	
+    	if (sanitise != null) {
+	    	switch (sanitise) {
+		    	case text:
+		    		result = TEXT_SANITIZER.sanitize(html);
+		    		break;
+		    	case basic:
+		    		result = BASIC_SANITIZER.sanitize(html);
+		    		break;
+		    	case simple:
+		    		result = SIMPLE_SANITIZER.sanitize(html);
+		    		break;
+		    	case relaxed:
+		    		result = RELAXED_SANITIZER.sanitize(html);
+		    		break;
+				default:
+	    	}
+	    	
+	    	if (forJson) {
+	    		for (String entity : REPLACEMENTS.keySet()) {
+	    			result = result.replace(entity, REPLACEMENTS.get(entity));
+	    		}
+	    	}
+//System.out.println("SECURITY Sanitise " + html + " to " + result);
+    	}
+    	
+		return result;
+	}
+
+	public static String escapeHtml(String html) {
+		String result = Encode.forHtml(html);
+//System.out.println("SECURITY Encode " + html + " to " + result);
+		return result;
+    }
+
+	public static String sanitiseAndEscapeHtml(Sanitisation sanitise, String html, boolean forJson) {
+		String result = sanitise(sanitise, html, forJson);
+		return escapeHtml(result);
+    }
+
 	public static User processUserPrincipalForRequest(HttpServletRequest request,
 														String userPrincipal,
 														boolean useSession)

@@ -1,6 +1,7 @@
 package org.skyve.metadata.module.query;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SortDirection;
@@ -53,4 +54,8 @@ public interface MetaDataQueryColumn extends NamedMetaData {
 	public Integer getPixelWidth();
 	
 	public HorizontalAlignment getAlignment();
+	
+	public boolean isEscape();
+
+	public Sanitisation getSanitise();
 }

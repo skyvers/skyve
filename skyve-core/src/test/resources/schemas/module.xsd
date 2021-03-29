@@ -338,6 +338,8 @@
     <xs:attribute name="hidden" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="alignment" type="ns1:horizontalAlignment"/>
+    <xs:attribute name="escape" type="xs:boolean"/>
+    <xs:attribute name="sanitise" type="ns1:sanitisation"/>
   </xs:complexType>
 
   <xs:complexType name="metaDataQueryContentColumnMetaData">
