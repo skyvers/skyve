@@ -35,7 +35,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -63,6 +62,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 /**
@@ -380,30 +380,7 @@ public class SmartClientListServlet extends HttpServlet {
 		List<Bean> beans = page.getRows();
 		
 		// Escape and Sanitise rows
-		List<MetaDataQueryColumn> columns = model.getColumns();
-		for (Bean bean : beans) {
-			for (MetaDataQueryColumn column : columns) {
-				String key = column.getBinding();
-				if (key == null) {
-					key = column.getName();
-				}
-
-				// escape and sanitise string values if needed
-				boolean escape = column.isEscape();
-				Sanitisation sanitise = column.getSanitise();
-				if (escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) {
-					Object value = BindUtil.get(bean, key);
-					if (value instanceof String) {
-						String string = (String) value;
-						string = WebUtil.sanitise(sanitise, string, true);
-						if (escape) {
-							string = WebUtil.escapeHtml(string);
-						}
-						BindUtil.set(bean, key, string);
-					}
-				}
-			}
-		}
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
 		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {

@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                        
+                            
+    
     
     
     
     
     <wb-module deploy-name="skyve-war">
-                                                
+                                                        
+        
         
         
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-                                                
+                                                        
+        
         
         
         
         
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
-                                                
+                                                        
+        
         
         
         
@@ -35,31 +39,36 @@
         <dependent-module archiveName="skyve-core-7.0.4-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                
+                                                        
+        
         
         
         
         
         <property name="context-root" value="skyve-war"/>
-                                                
+                                                        
+        
         
         
         
         
         <property name="java-output-path" value="/skyve-war/target/classes"/>
-                                                
+                                                        
+        
         
         
         
         
         <property name="component.exclusion.patterns" value="WEB-INF/classes/customers/**,WEB-INF/classes/modules/**,WEB-INF/classes/resources/**,WEB-INF/classes/router/**,WEB-INF/classes/schemas/**"/>
-                                            
+                                                    
+    
     
     
     
     
     </wb-module>
-                    
+                        
+
 
 
 

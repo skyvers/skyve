@@ -145,13 +145,14 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
-import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
@@ -205,7 +206,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String id = result.getId();
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
-			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class));
+			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class, false, Sanitisation.none));
 			result.setOnTabChange("SKYVE.PF.tabChange()");
 		}
 		else {
@@ -395,7 +396,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							blurb.getTextAlignment(),
 							blurb.getPixelWidth(),
 							blurb.getPixelHeight(),
-							blurb.getInvisibleConditionName());
+							blurb.getInvisibleConditionName(),
+							! Boolean.FALSE.equals(blurb.getEscape()),
+							blurb.getSanitise());
 	}
 
 	@Override
@@ -414,7 +417,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							label.getTextAlignment(),
 							label.getPixelWidth(),
 							label.getPixelHeight(),
-							label.getInvisibleConditionName());
+							label.getInvisibleConditionName(),
+							! Boolean.FALSE.equals(label.getEscape()),
+							label.getSanitise());
 	}
 
 	private HtmlOutputText outputText(String dataWidgetVar,
@@ -423,7 +428,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										HorizontalAlignment textAlignment,
 										Integer pixelWidth,
 										Integer pixelHeight,
-										String invisibleConditionName) {
+										String invisibleConditionName,
+										boolean escape,
+										Sanitisation sanitise) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(result, null);
 		if (value != null) {
@@ -433,10 +440,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// escape bindings with ' as \' as the binding could be for blurb expressions
 			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
 			if (dataWidgetVar != null) {
-				result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, Object.class, escape, sanitise));
 			}
 			else {
-				result.setValueExpression("value", createValueExpressionFromFragment(sanitisedBinding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromFragment(sanitisedBinding, true, null, Object.class, escape, sanitise));
 			}
 		}
 		result.setEscape(false);
@@ -557,7 +564,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
-	        result.getChildren().add(outputText(dataWidgetVar, gridColumnExpression.toString()));
+	        result.getChildren().add(outputText(dataWidgetVar,
+	        										gridColumnExpression.toString(),
+	        										! Boolean.FALSE.equals(column.getEscape()),
+	        										column.getSanitise()));
 		}
 
 		return result;
@@ -1409,6 +1419,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String name = queryColumn.getName();
 			String binding = queryColumn.getBinding();
+			boolean escape = queryColumn.isEscape();
 
 			// Sort out a display name and filter facet
 			String displayName = queryColumn.getLocalisedDisplayName();
@@ -1466,7 +1477,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			else {
 				column.setValueExpression("sortBy",
-											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
+											// NB no need to sanitise and escape here as the SkyveLazyDataModel does this to the underlying data
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class, false, Sanitisation.none));
 			}
 
 			// Unbound columns, content columns or unfilterable columns should be set unfilterable
@@ -1475,7 +1487,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					(projectedQueryColumn != null) &&
 					projectedQueryColumn.isFilterable()) {
 				column.setValueExpression("filterBy",
-											createValueExpressionFromFragment("row", true, binding, true, null, Object.class));
+											// NB no need to sanitise and escape here as the SkyveLazyDataModel does this to the underlying data
+											createValueExpressionFromFragment("row", true, binding, true, null, Object.class, false, Sanitisation.none));
 				if (specialFilterComponent != null) {
 					column.getFacets().put("filter", specialFilterComponent);
 				}
@@ -1496,6 +1509,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			}
 			else { // content column
+				escape = false; // can't be escaped as it is html markup
 				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) queryColumn;
 				DisplayType display = contentColumn.getDisplay();
 				String emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
@@ -1561,8 +1575,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				column.setStyle(style.toString());
 			}
 
-			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			HtmlOutputText outputText = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
+			outputText.setEscape(escape);
 			column.getChildren().add(outputText);
 			componentChildrenToAddTo.add(column);
 		}
@@ -2964,7 +2979,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																				expression.toString(),
 																				false,
 																				null,
-																				Boolean.class));
+																				Boolean.class,
+																				false,
+																				Sanitisation.none));
 			}
 			else {
 				setInvisible(result, invisible, expression.toString());
@@ -2982,7 +2999,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																					expression.toString(),
 																					false,
 																					null,
-																					Boolean.class));
+																					Boolean.class,
+																					false,
+																					Sanitisation.none));
 				}
 				else {
 					setInvisible(result, invisible, expression.toString());
@@ -3313,10 +3332,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIOutput outputText(String dataWidgetVar, String binding) {
+	private UIOutput outputText(String dataWidgetVar, String binding, boolean escape, Sanitisation sanitise) {
 		// escape bindings with ' as \' as the binding could be for blurb expressions
 		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
-		ValueExpression ve = createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, String.class);
+		ValueExpression ve = createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, String.class, escape, sanitise);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
 		setId(result, null);
@@ -3553,9 +3572,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class));
+									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.relaxed));
 		result.setValueExpression("itemValue",
-									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class));
+									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class, false, Sanitisation.none));
 		result.setConverter(new AssociationAutoCompleteConverter());
 		result.setScrollHeight(200);
 
@@ -3655,6 +3674,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							boolean required,
 							String disabled,
 							String formDisabled) {
+		// NB there is no escape option and sanitise input is only enabled in PF 8.
 		return (Editor) input(Editor.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 	}
 
@@ -3674,7 +3694,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		addGridHeader(title, result);
 
 		result.setVar(dataWidgetVar);
-		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
+		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
 
 		if (selectedIdBinding != null) {
 			addDataTableSelection(result, selectedIdBinding, selectedActions, binding);
@@ -3689,7 +3709,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																			Bean.DOCUMENT_ID,
 																			true,
 																			null,
-																			String.class));
+																			String.class,
+																			false,
+																			Sanitisation.text));
 
 			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 			StringBuilder expression = new StringBuilder(64);
@@ -3735,7 +3757,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		addGridHeader(title, result);
 
 		result.setVar(dataWidgetVar);
-		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
+		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
 
 		return result;
 	}
@@ -3769,7 +3791,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setHeaderText(title);
 		if (sortBinding != null) {
 			result.setValueExpression("sortBy",
-										createValueExpressionFromFragment(dataWidgetVar, true, sortBinding, true, null, Object.class));
+										// NB no need to sanitise and escape here as the SkyveLazyDataModel does this to the underlying data
+										createValueExpressionFromFragment(dataWidgetVar, true, sortBinding, true, null, Object.class, false, Sanitisation.none));
 		}
 
 		StringBuilder style = new StringBuilder(64);
@@ -3804,15 +3827,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										documentName,
 										binding,
 										String.valueOf(includeEmptyItems));
-			valueExpression = createValueExpressionFromFragment(managedBeanName, false, expression, false, null, List.class);
+			valueExpression = createValueExpressionFromFragment(managedBeanName, false, expression, false, null, List.class, false, Sanitisation.none);
 		}
 		else { // use the FacesView.currentBean.getSelectItems()
 			expression = String.format("getSelectItems('%s',%s)", binding, String.valueOf(includeEmptyItems));
 			if (dataWidgetVar != null) {
-				valueExpression = createValueExpressionFromFragment(dataWidgetVar, true, expression, false, null, List.class);
+				valueExpression = createValueExpressionFromFragment(dataWidgetVar, true, expression, false, null, List.class, false, Sanitisation.none);
 			}
 			else {
-				valueExpression = createValueExpressionFromFragment(expression, false, null, List.class);
+				valueExpression = createValueExpressionFromFragment(expression, false, null, List.class, false, Sanitisation.none);
 			}
 		}
 		result.setValueExpression("value", valueExpression);
@@ -3832,10 +3855,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (binding != null) { // data table filter components don't set a binding
 			if (dataWidgetVar != null) {
 				result.setValueExpression("value",
-											createValueExpressionFromFragment(dataWidgetVar, true, binding, true, null, Object.class));
+											createValueExpressionFromFragment(dataWidgetVar, true, binding, true, null, Object.class, false, Sanitisation.none));
 			}
 			else {
-				result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class, false, Sanitisation.none));
 			}
 		}
 		if (title != null) {
@@ -3872,7 +3895,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected void setValueOrValueExpression(String value, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
 		if (value != null && value.indexOf('{') > -1) {
 			final String sanitisedBinding = ((value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value);
-			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding, true, null, String.class);
+			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding, true, null, String.class, false, Sanitisation.text);
 			component.setValueExpression(valueExpressionName, ve);
 		} else if (value != null) {
 			valueSetter.accept(value);

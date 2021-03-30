@@ -41,6 +41,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 import org.skyve.web.SortParameter;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
@@ -155,6 +156,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));

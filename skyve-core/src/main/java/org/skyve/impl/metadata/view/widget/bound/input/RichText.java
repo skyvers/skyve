@@ -13,8 +13,8 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.FormItemWidget;
-import org.skyve.impl.metadata.view.TextOutput;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.TextOutput;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,

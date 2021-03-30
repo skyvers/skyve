@@ -15,10 +15,10 @@ import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.TextOutput;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.metadata.view.TextOutput;
 import org.skyve.util.Util;
 
 /**

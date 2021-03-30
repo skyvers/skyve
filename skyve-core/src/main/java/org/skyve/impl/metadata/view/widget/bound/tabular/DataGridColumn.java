@@ -10,10 +10,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.TextOutput;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.view.TextOutput;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth", "escape", "sanitise", "properties"})
 public abstract class DataGridColumn implements TabularColumn, DecoratedMetaData, TextOutput {

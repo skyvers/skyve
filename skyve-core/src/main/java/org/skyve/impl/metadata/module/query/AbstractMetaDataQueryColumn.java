@@ -1,10 +1,10 @@
 package org.skyve.impl.metadata.module.query;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn {
 	private static final long serialVersionUID = 5165779649604451833L;

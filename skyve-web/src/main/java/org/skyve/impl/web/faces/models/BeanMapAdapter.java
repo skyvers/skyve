@@ -12,10 +12,13 @@ import javax.faces.model.SelectItem;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.web.WebContext;
 
 public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>, Serializable {
@@ -68,6 +71,10 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 	 */
 	@Override
 	public Object get(final Object key) {
+		return get(key, false, Sanitisation.none);
+	}
+	
+	public Object get(final Object key, final boolean escape, final Sanitisation sanitise) {
 		return new FacesAction<>() {
 			@Override
 			public Object callback() throws Exception {
@@ -85,18 +92,58 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 						int lastCharIndex = binding.length() - 1;
 						// no more occurrences of '{' after the '{' at char 0, and ends with '}'
 						if ((curlyBraceIndex == -1) && (binding.charAt(lastCharIndex) == '}')) {
-							result = Binder.getDisplay(CORE.getUser().getCustomer(), bean, binding.substring(1, lastCharIndex));
+							String string = Binder.getDisplay(CORE.getUser().getCustomer(), bean, binding.substring(1, lastCharIndex));
+							if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
+								string = OWASP.sanitise(sanitise, string);
+							}
+							if (escape) {
+								string = OWASP.escapeHtml(string);
+							}
+							result = string;
 						}
 						else {
-							result = Binder.formatMessage(binding, bean);
+							if (escape) {
+								result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitise, displayValue), bean);
+							}
+							else {
+								result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitise(sanitise, displayValue), bean);
+							}
 						}
 					}
 					else {
-						result = Binder.formatMessage(binding, bean);
+						if (escape) {
+							result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitise, displayValue), bean);
+						}
+						else {
+							result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitise(sanitise, displayValue), bean);
+						}
 					}
 				}
 				else {
-					result = get(binding);
+					result = Binder.get(bean, binding);
+					
+					if (result instanceof String) {
+						String string = (String) result;
+						if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
+							string = OWASP.sanitise(sanitise, string);
+						}
+						if (escape) {
+							string = OWASP.escapeHtml(string);
+						}
+						result = string;
+					}
+					else if (result instanceof Bean) {
+						result = new BeanMapAdapter<>((Bean) result, webContext);
+					}
+					else if (result instanceof List<?>) {
+						@SuppressWarnings("unchecked")
+						List<Bean> childBeans = (List<Bean>) result;
+						List<BeanMapAdapter<Bean>> adaptedChildBeans = new ArrayList<>();
+						for (Bean childBean : childBeans) {
+							adaptedChildBeans.add(new BeanMapAdapter<>(childBean, webContext));
+						}
+						result = adaptedChildBeans;
+					}
 				}
 				delegate.put(binding, result);
 
@@ -149,25 +196,6 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 		final String key = String.format("%s.%s.%s", bizModule, bizDocument, binding);
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
 		return new GetSelectItemsAction(bean, webContext, binding, includeEmptyItem).execute();
-	}
-	
-	private Object get(final String binding) throws Exception {
-		Object result = Binder.get(bean, binding);
-		
-		if (result instanceof Bean) {
-			result = new BeanMapAdapter<>((Bean) result, webContext);
-		}
-		else if (result instanceof List<?>) {
-			@SuppressWarnings("unchecked")
-			List<Bean> childBeans = (List<Bean>) result;
-			List<BeanMapAdapter<Bean>> adaptedChildBeans = new ArrayList<>();
-			for (Bean childBean : childBeans) {
-				adaptedChildBeans.add(new BeanMapAdapter<>(childBean, webContext));
-			}
-			result = adaptedChildBeans;
-		}
-		
-		return result;
 	}
 	
 	private void set(final String binding, final Object value) {

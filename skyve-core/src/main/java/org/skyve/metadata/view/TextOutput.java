@@ -1,4 +1,4 @@
-package org.skyve.impl.metadata.view;
+package org.skyve.metadata.view;
 
 import javax.xml.bind.annotation.XmlType;
 

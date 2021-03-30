@@ -17,11 +17,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
@@ -407,7 +409,7 @@ public class UserDashboardExtension extends UserDashboard {
 		StringBuilder tileText = new StringBuilder();
 		tileText.append(action).append(" ").append(singularAlias);
 		if (bean != null && bean.getBizKey() != null) {
-			tileText.append(" - ").append(bean.getBizKey());
+			tileText.append(" - ").append(OWASP.sanitise(Sanitisation.relaxed, bean.getBizKey()));
 		}
 
 		Tile tile = new Tile.Builder().action(action)

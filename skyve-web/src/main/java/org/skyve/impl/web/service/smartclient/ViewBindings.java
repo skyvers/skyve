@@ -6,8 +6,8 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class ViewBindings {
 	private static final ViewBinding MUTABLE_UNESCAPED_TEXT = new ViewBinding(true, false, Sanitisation.text);

@@ -1,6 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 class ViewBinding {
 	private boolean mutable = false;

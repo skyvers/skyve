@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.TextOutput;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.view.TextOutput;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"binding", 

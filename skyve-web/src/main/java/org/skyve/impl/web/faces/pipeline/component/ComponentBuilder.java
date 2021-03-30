@@ -58,6 +58,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -376,10 +377,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										ReferenceTarget target) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (dataWidgetVar != null) {
-			result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, href, true, null, String.class));
+			result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, href, true, null, String.class, false, Sanitisation.relaxed));
 		}
 		else {
-			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class));
+			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class, false, Sanitisation.relaxed));
 		}
 		if (value != null) {
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);

@@ -51,6 +51,7 @@
 		<jts.version>1.16.1</jts.version>
 		<lucene.version>8.7.0</lucene.version>
 		<omnifaces.version>2.7.1</omnifaces.version>
+		<owasp.encoder.version>1.2.3</owasp.encoder.version>
 		<owasp.html.sanitizer.version>20200713.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pdfbox.version>1.8.4</pdfbox.version>

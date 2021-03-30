@@ -2,6 +2,7 @@ package org.skyve.util;
 
 import java.util.List;
 import java.util.SortedMap;
+import java.util.function.Function;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
@@ -34,6 +35,10 @@ public class Binder {
 	 */
 	public static String formatMessage(String message, Bean... beans) {
 		return BindUtil.formatMessage(message, beans);
+	}
+
+	public static String formatMessage(String message, Function<String, String> postEvaluateDisplayValue, Bean... beans) {
+		return BindUtil.formatMessage(message, postEvaluateDisplayValue, beans);
 	}
 
 	public static String negateCondition(String condition) {

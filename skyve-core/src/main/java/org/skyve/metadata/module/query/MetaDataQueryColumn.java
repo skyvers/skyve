@@ -1,10 +1,10 @@
 package org.skyve.metadata.module.query;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Util;
 
 /**

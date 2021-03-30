@@ -19,7 +19,6 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.InjectBinding;
-import org.skyve.impl.metadata.view.TextOutput.Sanitisation;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.WidgetReference;
@@ -120,6 +119,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
@@ -129,6 +129,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -387,9 +388,9 @@ class ViewJSONManipulator extends ViewVisitor {
 			// escape and sanitise string values if needed
 			if ((escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) && (value instanceof String)) {
 				String string = (String) value;
-				string = WebUtil.sanitise(sanitise, string, true);
+				string = OWASP.sanitise(sanitise, string);
 				if (escape) {
-					string = WebUtil.escapeHtml(string);
+					string = OWASP.escapeHtml(string);
 				}
 				value = string;
 			}
@@ -430,10 +431,10 @@ class ViewJSONManipulator extends ViewVisitor {
 				// now format the message
 				Sanitisation sanitisation = viewFormat.getSanitise();
 				if (viewFormat.isEscape()) {
-					format = BindUtil.formatMessage(format, displayValue -> WebUtil.sanitiseAndEscapeHtml(sanitisation, displayValue, true), aBean);
+					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue), aBean);
 				}
 				else {
-					format = BindUtil.formatMessage(format, displayValue -> WebUtil.sanitise(sanitisation, displayValue, true), aBean);
+					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitise(sanitisation, displayValue), aBean);
 				}
 				// remove the display style if its true
 				format = format.replace("display:true;", "");
