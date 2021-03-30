@@ -191,7 +191,7 @@ public abstract class AbstractBean implements Bean {
 		return result;
 	}
 
-	public boolean isUserInModuleRole(String roleName) {
+	public boolean isUserInOwningModuleRole(String roleName) {
 		return isUserInRole(getBizModule(), roleName);
 	}
 
