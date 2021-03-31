@@ -128,7 +128,7 @@
 				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
 				<p:fileUpload id="upload"
-								fileUploadListener="#{_skyveContent.handleFileUpload}" 
+								listener="#{_skyveContent.handleFileUpload}" 
 								accept="image/*"
 								update="messages"
 								multiple="false"
