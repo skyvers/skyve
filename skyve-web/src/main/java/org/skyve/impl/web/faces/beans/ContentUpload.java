@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.content.AttachmentContent;
@@ -100,7 +100,7 @@ public class ContentUpload extends Localisable {
 	public void handleFileUpload(FileUploadEvent event)
 	throws Exception {
 		UploadedFile file = event.getFile();
-		upload(file.getFileName(), file.getContents());
+		upload(file.getFileName(), file.getContent());
 	}
 	
 	/**

@@ -2,7 +2,7 @@ package org.skyve.impl.web.faces.beans;
 
 import org.apache.commons.io.FilenameUtils;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -32,7 +32,7 @@ public class FacesContentUtil {
 														String binding)
 	throws Exception {
 		UploadedFile file = event.getFile();
-		return handleFileUpload(file.getFileName(), file.getContents(), bean, binding);
+		return handleFileUpload(file.getFileName(), file.getContent(), bean, binding);
 	}
 	
 	/**

@@ -11,6 +11,7 @@ import org.owasp.html.Sanitizers;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 /**
@@ -81,6 +82,11 @@ public class OWASP {
 	public static void sanitiseAndEscapeListModelRows(List<Bean> rows, List<MetaDataQueryColumn> columns) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : columns) {
+				// Don't sanitise columns that are not projected
+				if ((column instanceof MetaDataQueryProjectedColumn) && (! ((MetaDataQueryProjectedColumn) column).isProjected()))  {
+					continue;
+				}
+				
 				String key = column.getBinding();
 				if (key == null) {
 					key = column.getName();
@@ -89,7 +95,7 @@ public class OWASP {
 				// escape and sanitise string values if needed
 				boolean escape = column.isEscape();
 				Sanitisation sanitise = column.getSanitise();
-				if (escape || ((sanitise != null) && (!Sanitisation.none.equals(sanitise)))) {
+				if (escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) {
 					Object value = BindUtil.get(row, key);
 					if (value instanceof String) {
 						String string = (String) value;

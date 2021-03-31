@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.cache.ConversationUtil;
 import org.skyve.domain.Bean;
@@ -150,7 +150,7 @@ public class BizportImport extends Localisable {
 
 			UploadException exception = new UploadException();
 			try {
-				try (InputStream fis = file.getInputstream()) {
+				try (InputStream fis = file.getInputStream()) {
 					try (Workbook wb = WorkbookFactory.create(fis)) {
 						POIWorkbook workbook = new POIWorkbook(customer, wb, exception);
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
