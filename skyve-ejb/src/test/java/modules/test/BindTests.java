@@ -10,8 +10,10 @@ import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
@@ -336,4 +338,16 @@ public class BindTests extends AbstractSkyveTest {
 								"dynamicDomainValue",
 								BindUtil.getDisplay(c, bean, Snapshot.queryNamePropertyName));
 	}
+	
+	
+	@Test
+	public void testSanitiseAsFunction() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		aap.setText("Test<script>alert(1)</script>Me");
+
+		Assert.assertEquals("Format Message with sanitise function should remove script tag", 
+								"<h1>TestMe</h1>",
+								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
+	}
+
 }

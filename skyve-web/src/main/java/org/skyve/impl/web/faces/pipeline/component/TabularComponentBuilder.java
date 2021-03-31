@@ -1419,7 +1419,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String name = queryColumn.getName();
 			String binding = queryColumn.getBinding();
-			boolean escape = queryColumn.isEscape();
 
 			// Sort out a display name and filter facet
 			String displayName = queryColumn.getLocalisedDisplayName();
@@ -1509,7 +1508,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			}
 			else { // content column
-				escape = false; // can't be escaped as it is html markup
 				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) queryColumn;
 				DisplayType display = contentColumn.getDisplay();
 				String emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
@@ -1577,7 +1575,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			HtmlOutputText outputText = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
-			outputText.setEscape(escape);
+			outputText.setEscape(false);
 			column.getChildren().add(outputText);
 			componentChildrenToAddTo.add(column);
 		}

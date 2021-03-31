@@ -74,7 +74,15 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 		return get(key, false, Sanitisation.none);
 	}
 	
-	public Object get(final Object key, final boolean escape, final Sanitisation sanitise) {
+	/**
+	 * For calling from EL
+	 */
+	public Object get(final Object key, final boolean escape, final String sanitisationType) {
+		final Sanitisation sanitise = (sanitisationType == null) ? null : Sanitisation.valueOf(sanitisationType);
+		return get(key, escape, sanitise);
+	}
+	
+	private Object get(final Object key, final boolean escape, final Sanitisation sanitise) {
 		return new FacesAction<>() {
 			@Override
 			public Object callback() throws Exception {
