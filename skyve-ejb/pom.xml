@@ -17,7 +17,6 @@
 		<build.number>${project.version}</build.number>
 		<forkCount>2</forkCount>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<junit-jupiter.version>5.7.1</junit-jupiter.version>
 	</properties>
 
 	<build>
@@ -213,14 +212,13 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit-jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!--JUnit Jupiter Engine to depend on the JUnit4 engine and JUnit 4 API  -->
 		<dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
-			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
