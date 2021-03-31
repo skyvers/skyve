@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                    
+                                        
     
     
     
@@ -7,8 +7,10 @@
     
     
     
-    <wb-module deploy-name="skyve-ear-7.0.4-SNAPSHOT">
-                                                                        
+    
+    <wb-module deploy-name="skyve-ear-7.1.0-SNAPSHOT">
+                                                                                
+        
         
         
         
@@ -17,7 +19,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                        
+                                                                                
+        
         
         
         
@@ -32,10 +35,10 @@
         <dependent-module archiveName="skyve.war" deploy-path="/" handle="module:/resource/skyve-war/skyve-war">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-7.0.4-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-7.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-7.0.4-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-7.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="commons-beanutils-1.9.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar">
@@ -392,7 +395,8 @@
         <dependent-module archiveName="junit-platform-commons-1.7.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                    
+                                                                            
+    
     
     
     
@@ -401,7 +405,8 @@
     
     
     </wb-module>
-                                
+                                    
+
 
 
 
