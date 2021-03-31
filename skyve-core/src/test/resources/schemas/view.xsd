@@ -452,7 +452,6 @@
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
-        <xs:attribute name="escape" type="xs:boolean"/>
         <xs:attribute name="sanitise" type="tns:sanitisation"/>
       </xs:extension>
     </xs:complexContent>
@@ -595,7 +594,6 @@
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="minPixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="maxPixelHeight" type="xs:int" use="required"/>
-        <xs:attribute name="escape" type="xs:boolean"/>
         <xs:attribute name="sanitise" type="tns:sanitisation"/>
       </xs:extension>
     </xs:complexContent>

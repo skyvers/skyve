@@ -13,17 +13,16 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.view.TextOutput;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "escape", "sanitise", "properties"})
-public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget, TextOutput {
+			propOrder = {"pixelWidth", "pixelHeight", "sanitise", "properties"})
+public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	private static final long serialVersionUID = -2155059200252882977L;
 
 	private Integer pixelWidth;
 	private Integer pixelHeight;
-	private Boolean escape;
 	private Sanitisation sanitise;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -57,17 +56,6 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget, T
 		this.pixelHeight = pixelHeight;
 	}
 
-	@Override
-	public Boolean getEscape() {
-		return escape;
-	}
-
-	@XmlAttribute
-	public void setEscape(Boolean escape) {
-		this.escape = escape;
-	}
-
-	@Override
 	public Sanitisation getSanitise() {
 		return sanitise;
 	}

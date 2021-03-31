@@ -1729,7 +1729,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(text))) {
-				addBinding(text.getBinding(), true, ! Boolean.FALSE.equals(text.getEscape()), text.getSanitise());
+				addBinding(text.getBinding(), true, false, text.getSanitise());
 			}
 		}
 		addCondition(text.getDisabledConditionName());
@@ -1753,7 +1753,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(html)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(html))) {
-				addBinding(html.getBinding(), true, ! Boolean.FALSE.equals(html.getEscape()), html.getSanitise());
+				addBinding(html.getBinding(), true, false, html.getSanitise());
 			}
 		}
 		addCondition(html.getDisabledConditionName());
