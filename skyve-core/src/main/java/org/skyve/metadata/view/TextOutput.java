@@ -13,7 +13,7 @@ public interface TextOutput {
 		
 		// No sanitisation applied
 		none,
-		// CSS too
+		// Formatting tags, structural tags, links and images and CSS too
 		relaxed,
 		// Formatting tags, structural tags, links and images
 		basic,
