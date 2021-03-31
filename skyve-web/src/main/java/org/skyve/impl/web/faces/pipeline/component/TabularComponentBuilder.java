@@ -39,7 +39,6 @@ import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
-import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
@@ -62,6 +61,7 @@ import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.model.DualListModel;
@@ -2127,7 +2127,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						title,
 						required,
 						html.getDisabledConditionName(),
-						formDisabledConditionName);
+						formDisabledConditionName,
+						html.getSanitise());
 	}
 
 	@Override
@@ -2217,12 +2218,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		Editor result = editor(dataWidgetVar,
-								text.getBinding(),
-								title,
-								required,
-								text.getDisabledConditionName(),
-								formDisabledConditionName);
+		TextEditor result = editor(dataWidgetVar,
+									text.getBinding(),
+									title,
+									required,
+									text.getDisabledConditionName(),
+									formDisabledConditionName,
+									text.getSanitise());
 		return new EventSourceComponent(result, result);
 	}
 
@@ -3147,7 +3149,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String disabled,
 										String formDisabled,
 										String invisible) {
-		// A span as the top item so it can floiw correctly in the action panel
+		// A span as the top item so it can flow correctly in the action panel
 		HtmlPanelGroup result = panelGroup(false, false, false, invisible, null);
 		List<UIComponent> children = result.getChildren();
 
@@ -3668,14 +3670,39 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	// this has a customisable toolbar for rich and html skyve editors.
-	private Editor editor(String dataWidgetVar,
+	private TextEditor editor(String dataWidgetVar,
 							String binding,
 							String title,
 							boolean required,
 							String disabled,
-							String formDisabled) {
-		// NB there is no escape option and sanitise input is only enabled in PF 8.
-		return (Editor) input(Editor.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
+							String formDisabled,
+							Sanitisation sanitise) {
+		TextEditor result = (TextEditor) input(TextEditor.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
+		if (sanitise == Sanitisation.none) {
+			result.setSecure(false);
+		}
+		else {
+			result.setSecure(true);
+			if (sanitise == Sanitisation.text) {
+				result.setAllowFormatting(false);
+				result.setAllowBlocks(false);
+				result.setAllowImages(false);
+				result.setAllowLinks(false);
+				result.setAllowStyles(false);
+			}
+			else {
+				result.setAllowFormatting(true);
+				if (sanitise != Sanitisation.simple) {
+					result.setAllowBlocks(true);
+					result.setAllowImages(true);
+					result.setAllowLinks(true);
+					if (sanitise != Sanitisation.basic) {
+						result.setAllowStyles(true);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private DataTable dataTable(String binding,
