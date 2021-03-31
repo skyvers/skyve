@@ -689,13 +689,14 @@
 			</columns>
 		</query>
 		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
-			<description>Communications</description>
+			<description>Communication Templates</description>
 			<columns>
 				<column binding="name" sortOrder="ascending"/>
 				<column binding="description" />
 				<column binding="template"/>
 			</columns>
-		</query>		<query name="qSubscriptions" documentName="Subscription">
+		</query>		
+		<query name="qSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />
