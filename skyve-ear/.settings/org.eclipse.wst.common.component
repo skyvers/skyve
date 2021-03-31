@@ -380,21 +380,6 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="junit-vintage-engine-5.7.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/junit/vintage/junit-vintage-engine/5.7.1/junit-vintage-engine-5.7.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="apiguardian-api-1.1.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="junit-platform-engine-1.7.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/junit/platform/junit-platform-engine/1.7.1/junit-platform-engine-1.7.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="opentest4j-1.2.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="junit-platform-commons-1.7.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
                                                                             
     
     

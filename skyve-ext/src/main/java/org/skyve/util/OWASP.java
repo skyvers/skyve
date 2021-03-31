@@ -1,6 +1,8 @@
 package org.skyve.util;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.owasp.encoder.Encode;
 import org.owasp.html.HtmlPolicyBuilder;
@@ -21,6 +23,20 @@ public class OWASP {
 	private static final PolicyFactory BASIC_SANITIZER = Sanitizers.FORMATTING;
 	private static final PolicyFactory SIMPLE_SANITIZER = BASIC_SANITIZER.and(Sanitizers.BLOCKS);
 	private static final PolicyFactory RELAXED_SANITIZER = SIMPLE_SANITIZER.and(Sanitizers.TABLES).and(Sanitizers.IMAGES).and(Sanitizers.LINKS).and(Sanitizers.STYLES);
+
+	// from https://github.com/OWASP/java-html-sanitizer/blob/main/src/main/java/org/owasp/html/Encoding.java
+	private static final Map<String, String> REPLACEMENTS = new TreeMap<>();
+	static {
+		REPLACEMENTS.put("&#" + ((int) '\"') + ";", "\"");
+		REPLACEMENTS.put("&amp;", "&");
+		REPLACEMENTS.put("&#" + ((int) '\'') + ";", "'");
+		REPLACEMENTS.put("&#" + ((int) '+') + ";", "+");
+		REPLACEMENTS.put("&lt;", "<");
+		REPLACEMENTS.put("&#" + ((int) '=') + ";", "=");
+		REPLACEMENTS.put("&gt;", ">");
+		REPLACEMENTS.put("&#" + ((int) '@') + ";", "@");
+		REPLACEMENTS.put("&#" + ((int) '`') + ";", "`");
+	}
 
 	private OWASP() {
 		// nothing to see here
@@ -51,7 +67,11 @@ public class OWASP {
 	}
 
 	public static String escapeHtml(String html) {
-		return Encode.forHtml(html);
+		String unescaped = html;
+		for (String entity : REPLACEMENTS.keySet()) {
+			unescaped = unescaped.replace(entity, REPLACEMENTS.get(entity));
+		}
+		return Encode.forHtml(unescaped);
 	}
 
 	public static String sanitiseAndEscapeHtml(Sanitisation sanitise, String html) {
