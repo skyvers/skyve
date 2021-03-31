@@ -980,7 +980,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
-		overlay.setModal(true);
+		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
 		overlay.setStyle("width:50%;height:300px");
 
 		MapDisplay display = new MapDisplay();
@@ -2071,7 +2071,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setHideEffect("fade");
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
-			overlay.setModal(true);
+			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
 			overlay.setStyle("width:50%;height:300px");
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -2089,7 +2089,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:100%%;border:none\"></iframe>", id));
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
@@ -3183,7 +3183,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
-		overlay.setModal(true);
+		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
 		overlay.setStyle("width:50%;height:300px");
 		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
 		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
@@ -3199,7 +3199,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s01_iframe" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:280px;border:none\"></iframe>", overlayId));
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
 		setId(iframe, null);
 		overlay.getChildren().add(iframe);
 
