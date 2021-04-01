@@ -185,7 +185,7 @@
    			<defaultValue>1</defaultValue>
    			<validator min="1" max="10000"/>
    		</integer>
-   		<text name="testModuleName" required="true">
+   		<text name="testModuleName" required="false">
    			<displayName>admin.controlPanel.testModuleName.displayName</displayName>
    			<description>admin.controlPanel.testModuleName.description</description>
    			<domain>constant</domain>

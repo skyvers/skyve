@@ -200,7 +200,7 @@
 					<item>
 						<checkBox binding="httpTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -209,7 +209,7 @@
 					<item>
 						<checkBox binding="commandTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -218,7 +218,7 @@
 					<item>
 						<checkBox binding="facesTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -234,7 +234,7 @@
 					<item>
 						<checkBox binding="queryTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -261,7 +261,7 @@
 					<item>
 						<checkBox binding="contentTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -275,7 +275,7 @@
 					<item>
 						<checkBox binding="xmlTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -284,7 +284,7 @@
 					<item>
 						<checkBox binding="securityTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -293,7 +293,7 @@
 					<item>
 						<checkBox binding="bizletTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
@@ -302,7 +302,7 @@
 					<item>
 						<checkBox binding="dirtyTrace" triState="false">
 							<onChangedHandlers>
-								<rerender />
+								<rerender clientValidation="false"/>
 							</onChangedHandlers>
 						</checkBox>
 					</item>
