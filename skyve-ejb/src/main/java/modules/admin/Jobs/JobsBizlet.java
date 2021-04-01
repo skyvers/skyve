@@ -40,7 +40,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 				Job job = Job.newInstance();
 				job.setStartTime(jd.getStartTime());
 				job.setDisplayName(jd.getName());
-				job.setPercentComplete(new Integer(jd.getPercentComplete()));
+				job.setPercentComplete(Integer.valueOf(jd.getPercentComplete()));
 				job.setLog(jd.getLogging());
 				runningJobs.add(job);
 			}
