@@ -693,7 +693,7 @@
 			<columns>
 				<column binding="name" sortOrder="ascending"/>
 				<column binding="description" />
-				<column binding="template"/>
+				<column binding="template" sanitise="relaxed" escape="false"/>
 			</columns>
 		</query>		
 		<query name="qSubscriptions" documentName="Subscription">
