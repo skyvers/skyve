@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="admin.communicationTemplate.edit.title" iconStyleClass="fa fa-envelope-o" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
-    <form responsiveWidth="12" percentageWidth="60" border="true">
-        <column percentageWidth="30" responsiveWidth="4"/>
+    <form responsiveWidth="12" border="true" borderTitle="Template Details">
+        <column responsiveWidth="3"/>
         <column/>
+        <column responsiveWidth="1"/>
         <row>
             <item>
                 <default binding="name"/>
@@ -15,19 +16,16 @@
         </row>
         <row>
             <item showLabel="true">
-				<textArea binding="template" />
+				<html binding="template" pixelHeight="300" pixelWidth="800" />
 			</item>
 		</row>
 	</form>
-	<vbox border="true"
-		borderTitle="Communications using this template">
+	<vbox border="true" borderTitle="Communications using this template">
 		<listGrid query="qCommunications" continueConversation="true">
-			<filterParameter operator="equal"
-				filterBinding="template" valueBinding="bizId" />
+			<filterParameter operator="equal" filterBinding="template" valueBinding="bizId" />
 		</listGrid>
 	</vbox>
 	<actions>
 		<defaults />
 	</actions>
-	<newParameters />
 </view>
