@@ -124,6 +124,16 @@
 		<url-pattern>*.jsp</url-pattern>
     </filter-mapping>
 
+	<!-- Replace faces servlet Cache-control: no-cache with Cache-Control: no-cache,no-store,must-revalidate -->
+	<filter>
+		<filter-name>FacesNoCacheFilter</filter-name>
+		<filter-class>org.omnifaces.filter.CacheControlFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>FacesNoCacheFilter</filter-name>
+		<servlet-name>FacesServlet</servlet-name>
+	</filter-mapping>
+
 	<filter>
 		<filter-name>SkyveFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.SkyveFilter</filter-class>
