@@ -1,4 +1,4 @@
-<%@ page session="false" language="java"%>
+<%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.security.Principal"%>
 <%@ page import="javax.servlet.http.Cookie"%>
 <%@ page import="org.skyve.CORE"%>
