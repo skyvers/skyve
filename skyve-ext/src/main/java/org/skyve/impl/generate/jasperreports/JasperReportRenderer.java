@@ -1109,8 +1109,8 @@ public class JasperReportRenderer {
                 textElement.setFontSize(12f);
             }
         }
-        textElement.setBold(Optional.ofNullable(reportElement.getElementBold()).orElse(false));
-        textElement.setItalic(Optional.ofNullable(reportElement.getElementItalic()).orElse(false));
+		textElement.setBold(Optional.ofNullable(reportElement.getElementBold()).orElse(Boolean.FALSE));
+		textElement.setItalic(Optional.ofNullable(reportElement.getElementItalic()).orElse(Boolean.FALSE));
         textElement.setUnderline(false);
         textElement.setStrikeThrough(false);
     }

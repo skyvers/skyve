@@ -86,7 +86,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	public Double getNumericFieldValue(int index, boolean emptyAsZero) throws Exception {
 		String value = getStringFieldValue(index, true);
 		if (null == value)
-			return new Double(0);
+			return Double.valueOf(0);
 
 		return Double.valueOf(value);
 	}

@@ -1,10 +1,10 @@
 package org.skyve.impl.backup;
 
-import org.skyve.impl.util.UtilImpl;
-
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * An interface that defines common backup functionality and can be used to implement a variety of backup strategies
@@ -51,9 +51,9 @@ public interface ExternalBackup {
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				throw new IllegalStateException("Failed to instantiate external backup class.", e);
 			}
-		} else {
-			throw new IllegalStateException("Unable to instantiate ExternalBackup instance as the externalBackupClass property has not been configured in the JSON configuration.");
 		}
+		throw new IllegalStateException(
+				"Unable to instantiate ExternalBackup instance as the externalBackupClass property has not been configured in the JSON configuration.");
 	}
 
 	/**
