@@ -102,6 +102,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
+				.useSecureCookie(Util.isSecureUrl())
 				.and()
 			.formLogin()
 				.defaultSuccessUrl(Util.getHomeUrl())

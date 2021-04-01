@@ -92,15 +92,15 @@ public class Menu extends Harness {
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
 											Module menuModule,
 											boolean open) {
-				DefaultSubMenu moduleSub = new DefaultSubMenu(menuModule.getLocalisedTitle());
-				result.addElement(moduleSub);
+				DefaultSubMenu moduleSub = DefaultSubMenu.builder().label(menuModule.getLocalisedTitle()).build();
+				result.getElements().add(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
 			}
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				DefaultSubMenu sub = new DefaultSubMenu(group.getLocalisedName());
+				DefaultSubMenu sub = DefaultSubMenu.builder().label(group.getLocalisedName()).build();
 				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
@@ -188,7 +188,7 @@ public class Menu extends Harness {
 																		Module itemModule,
 																		String itemQueryName,
 																		String itemAbsoluteHref) {
-		DefaultMenuItem result = new DefaultMenuItem(item.getLocalisedName(), iconStyleClass);
+		DefaultMenuItem result = DefaultMenuItem.builder().value(item.getLocalisedName()).icon(iconStyleClass).build();
 		result.setAjax(false);
 		result.setHref("#");
 		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));

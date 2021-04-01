@@ -45,7 +45,7 @@ public class OWASP {
 	public static String sanitise(Sanitisation sanitise, String html) {
 		String result = html;
 
-		if (sanitise != null) {
+		if ((html != null) && (sanitise != null)) {
 			switch (sanitise) {
 			case text:
 				result = TEXT_SANITIZER.sanitize(html);
@@ -67,13 +67,16 @@ public class OWASP {
 	}
 
 	public static String escapeHtml(String html) {
-		String unescaped = html;
-		for (String entity : REPLACEMENTS.keySet()) {
-			unescaped = unescaped.replace(entity, REPLACEMENTS.get(entity));
+		String result = html;
+		if (html != null) {
+			for (String entity : REPLACEMENTS.keySet()) {
+				result = result.replace(entity, REPLACEMENTS.get(entity));
+			}
+			result = Encode.forHtml(result);
 		}
-		return Encode.forHtml(unescaped);
+		return result;
 	}
-
+	
 	public static String sanitiseAndEscapeHtml(Sanitisation sanitise, String html) {
 		String result = sanitise(sanitise, html);
 		return escapeHtml(result);

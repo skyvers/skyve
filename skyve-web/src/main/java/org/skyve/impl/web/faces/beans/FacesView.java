@@ -56,8 +56,10 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
@@ -111,7 +113,7 @@ public class FacesView<T extends Bean> extends Harness {
 		return bindingParameter;
 	}
 	public void setBindingParameter(String bindingParameter) {
-		this.bindingParameter = bindingParameter;
+		this.bindingParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bindingParameter));
 	}
 	
 	@PostConstruct
@@ -270,7 +272,7 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	// for navigate-on-select in data grids
-	public void navigate(SelectEvent evt) {
+	public void navigate(SelectEvent<?> evt) {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
@@ -323,7 +325,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 * else if actionName is "false" - rerender with no validation.
 	 * else run the action.
 	 */
-	public void selectGridRow(SelectEvent evt) {
+	public void selectGridRow(SelectEvent<?> evt) {
 		UIComponent component = evt.getComponent();
 		Map<String, Object> attributes = component.getAttributes();
 		String selectedIdBinding = (String) attributes.get("selectedIdBinding");

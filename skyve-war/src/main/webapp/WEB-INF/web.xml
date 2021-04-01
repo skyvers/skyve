@@ -626,5 +626,10 @@
 
 	<session-config>
 		<session-timeout>30</session-timeout>
+		<cookie-config>
+			<http-only>true</http-only>
+			<!-- This will be set to true in the cookie if Util.isSecureUrl() is true -->
+			<secure>false</secure>
+		</cookie-config>
 	</session-config>
 </web-app>
