@@ -37,6 +37,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 			for (Module module : customer.getModules()) {
 				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		}
 
@@ -57,6 +58,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 				}
 			}
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		}
 
