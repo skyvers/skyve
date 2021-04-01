@@ -54,23 +54,23 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 
 			if (maxUName != null) {
 				// go backwards and find trailing numeric
-				Integer numericPart = new Integer(0);
+				Integer numericPart = Integer.valueOf(0);
 				for (int i = maxUName.length() - 1; i > 0; i--) {
 					try {
 						// see if last chars are numeric
-						numericPart = new Integer(Integer.parseInt(maxUName.substring(i, maxUName.length())));
+						numericPart = Integer.valueOf(Integer.parseInt(maxUName.substring(i, maxUName.length())));
 					} catch (Exception e) {
 						// break out when non-numeric found
 						break;
 					}
 				}
 
-				if (numericPart.equals(new Integer(0))) {
+				if (numericPart.equals(Integer.valueOf(0))) {
 					// no previous matches - just append a numeric
 					newUName = maxUName + "1";
 				} else {
 					// previous matches found - increment the numeric
-					newUName = maxUName.replace(numericPart.toString(), (new Integer(numericPart.intValue() + 1)).toString());
+					newUName = maxUName.replace(numericPart.toString(), (Integer.valueOf(numericPart.intValue() + 1)).toString());
 				}
 
 			}
