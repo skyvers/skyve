@@ -654,10 +654,9 @@
 
 	<session-config>
 		<session-timeout>30</session-timeout>
-		<cookie-config>
-			<http-only>true</http-only>
-			<!-- This will be set to true in the cookie if Util.isSecureUrl() is true -->
-			<secure>false</secure>
-		</cookie-config>
+		<!-- 
+			<cookie-config/> is set in SkyveContextListener based on Util.isSecureUrl().
+			The SameSite attribute is set within undertow-handlers.conf as it was impossible through spring security or Filters.
+		-->
 	</session-config>
 </web-app>

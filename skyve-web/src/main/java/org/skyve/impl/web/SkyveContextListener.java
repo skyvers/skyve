@@ -13,6 +13,7 @@ import javax.faces.FacesException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.SessionCookieConfig;
 import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpointConfig;
 
@@ -39,11 +40,13 @@ import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
+import org.skyve.util.Util;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
+
 		populateUtilImpl(ctx);
 
 		CacheUtil.init();
@@ -81,6 +84,11 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			JobScheduler.init();
 			
+			// Set up the session cookie
+			SessionCookieConfig scc = ctx.getSessionCookieConfig();
+			scc.setHttpOnly(true);
+			scc.setSecure(Util.isSecureUrl());
+						
 			// Start a websocket end point
 			// NB From org.omnifaces.cdi.push.Socket.registerEndpointIfNecessary() called by org.omnifaces.ApplicationListener
 			try {
