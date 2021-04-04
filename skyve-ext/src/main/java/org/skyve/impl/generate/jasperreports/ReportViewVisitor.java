@@ -171,9 +171,9 @@ public class ReportViewVisitor extends ViewVisitor {
 		Integer resultSizeInTwips = null; // auto set
 		if (pixels != null) {
 			if (design.getPixelToTwip() != null) {
-				resultSizeInTwips = new Double(pixels.doubleValue() * design.getPixelToTwip().doubleValue()).intValue();
+				resultSizeInTwips = Double.valueOf(pixels.doubleValue() * design.getPixelToTwip().doubleValue()).intValue();
 			} else {
-				resultSizeInTwips = new Double(pixels.doubleValue() * PIXEL_TO_TWIP).intValue();
+				resultSizeInTwips = Double.valueOf(pixels.doubleValue() * PIXEL_TO_TWIP).intValue();
 			}
 		} else if (percentage != null) {
 			resultSizeInTwips = (containerSizeInTwips * percentage) / 100;
@@ -337,7 +337,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		}
 		int remainingWidth = container.getWidth();
 
-		container.setHeight(new Integer(0));
+		container.setHeight(Integer.valueOf(0));
 		container.setVerticalPosition(container.getTop());
 
 		// BORDER TITLE
@@ -530,7 +530,7 @@ public class ReportViewVisitor extends ViewVisitor {
 						verticalPosition = verticalPosition + container.getContainers().get(index - 1).getVerticalPosition();
 					}
 				}
-				c.setLeft(new Integer(horizontalPosition));
+				c.setLeft(Integer.valueOf(horizontalPosition));
 				c.setTop(verticalPosition);
 
 				// recurse
@@ -547,7 +547,7 @@ public class ReportViewVisitor extends ViewVisitor {
 					// size vertical
 					// Todo cleanup
 					if (c.getHeight() == null) {
-						c.setHeight(new Integer(0));
+						c.setHeight(Integer.valueOf(0));
 					}
 					container.addHeight(c.getHeight());
 					container.setVerticalPosition(container.getHeight());
@@ -621,7 +621,7 @@ public class ReportViewVisitor extends ViewVisitor {
 
 			if(container.getHeight()!=null && container.getHeight().intValue()>0){
 				// TODO implement borders as lines
-				band = Renderer.addElement(band, ReportElement.ElementType.border, null, null, null, null, new Integer(0), container.getLeft(), container.getWidth(),
+				band = Renderer.addElement(band, ReportElement.ElementType.border, null, null, null, null, Integer.valueOf(0), container.getLeft(), container.getWidth(),
 					container.getHeight(), null, null, null, null, null, null, null);
 			}
 		}
@@ -935,10 +935,10 @@ public class ReportViewVisitor extends ViewVisitor {
 
 		sub.setWidth(design.getColumnWidth());
 		sub.setColumnWidth(design.getColumnWidth());
-		sub.setLeftMargin(new Integer(0)); // subreports normally don't have a margin as they sit inside another report
-		sub.setRightMargin(new Integer(0)); // padding around subreports can be handled within the containing report
-		sub.setTopMargin(new Integer(0));
-		sub.setBottomMargin(new Integer(0));
+		sub.setLeftMargin(Integer.valueOf(0)); // subreports normally don't have a margin as they sit inside another report
+		sub.setRightMargin(Integer.valueOf(0)); // padding around subreports can be handled within the containing report
+		sub.setTopMargin(Integer.valueOf(0));
+		sub.setBottomMargin(Integer.valueOf(0));
 
 		sub.setMode(design.getMode()); // default to same mode as containing report
 		sub.setField(fld);

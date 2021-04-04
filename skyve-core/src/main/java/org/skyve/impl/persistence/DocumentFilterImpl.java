@@ -455,7 +455,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeEquals(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size = ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size = ", Integer.valueOf(operand), false, false, null, null);
 	}
 
 	@Override
@@ -465,7 +465,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeNotEquals(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size != ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size != ", Integer.valueOf(operand), false, false, null, null);
 	}
 
 	@Override
@@ -475,7 +475,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeGreaterThan(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size > ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size > ", Integer.valueOf(operand), false, false, null, null);
 	}
 
 	@Override
@@ -485,7 +485,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 
 	@Override
 	public DocumentFilter addAliasedCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size >= ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size >= ", Integer.valueOf(operand), false, false, null, null);
 	}
 
 	@Override
@@ -495,7 +495,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeLessThan(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size < ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size < ", Integer.valueOf(operand), false, false, null, null);
 	}
 
 	@Override
@@ -505,7 +505,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand) {
-		return appendRestriction(entityAlias, binding, ".size <= ", new Integer(operand), false, false, null, null);
+		return appendRestriction(entityAlias, binding, ".size <= ", Integer.valueOf(operand), false, false, null, null);
 	}
 	
 	private DocumentFilter appendRestriction(String entityAlias,

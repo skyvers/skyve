@@ -92,7 +92,7 @@ public class DataFileField {
 	}
 
 	public void setIndex(int index) {
-		this.index = new Integer(index);
+		this.index = Integer.valueOf(index);
 	}
 
 	public void setRequired(boolean required) {
@@ -110,21 +110,21 @@ public class DataFileField {
 		this.binding = binding;
 		this.loadAction = LoadAction.SET_VALUE;
 		this.required=  false;
-		this.index = new Integer(index);
+		this.index = Integer.valueOf(index);
 	}
 	
 	public DataFileField(String binding, LoadAction loadAction, boolean required, int index) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;
-		this.index = new Integer(index);
+		this.index = Integer.valueOf(index);
 	}
 
 	public DataFileField(String binding, LoadAction loadAction, boolean required, int index, Converter<?> converter) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;
-		this.index = new Integer(index);
+		this.index = Integer.valueOf(index);
 		this.converter = converter;
 	}
 

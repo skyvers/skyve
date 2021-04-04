@@ -74,8 +74,8 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 				EXT.untag(tag.getBizId(), bean);
 			}
 		}
-		tag.setUploaded(new Long(loader.getDataIndex()));
-		tag.setUploadMatched(new Long(beansToTag.size()));
+		tag.setUploaded(Long.valueOf(loader.getDataIndex()));
+		tag.setUploadMatched(Long.valueOf(beansToTag.size()));
 
 		// reset counts
 		tag.setTotalTagged(TagBizlet.getCount(tag));

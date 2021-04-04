@@ -53,7 +53,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                     if (Boolean.TRUE.equals(a.getIncludeTotal())) {
                         alignment = ReportElement.ElementAlignment.right;
                     }
-                    columnHeader = Renderer.addElement(columnHeader, type, a.getName(), valueExpression, null, null, new Integer(0), null, null, null, null, alignment,
+                    columnHeader = Renderer.addElement(columnHeader, type, a.getName(), valueExpression, null, null, Integer.valueOf(0), null, null, null, null, alignment,
                             design.getBoldLabels(), null, null, null, null);
                 }
             }
@@ -75,8 +75,8 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                         ReportElement.ElementAlignment alignment = ReportElement.ElementAlignment.left;
                         String valueExpression = "$F{" + srf.getName() + "}";
 
-                        subReportDetail = Renderer.addElement(subReportDetail, ReportElement.ElementType.textField, srf.getName(), valueExpression, null, null, new Integer(0),
-                                new Integer(0), design.getColumnWidth(), null, null, alignment, null, null, null, null, null);
+                        subReportDetail = Renderer.addElement(subReportDetail, ReportElement.ElementType.textField, srf.getName(), valueExpression, null, null, Integer.valueOf(0),
+                                Integer.valueOf(0), design.getColumnWidth(), null, null, alignment, null, null, null, null, null);
                     }
                 }
                 subReportDetail.spreadElements();
@@ -96,9 +96,9 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                         ReportElement.ElementType type = ReportElement.ElementType.staticText;
                         String valueExpression = a.getDisplayName();
                         ReportElement.ElementAlignment alignment = ReportElement.ElementAlignment.left;
-                        Integer labelWidth = new Integer(design.getDefaultElementHeight().intValue() * 5);
-                        Integer top = new Integer(0);
-                        Integer labelLeft = new Integer(0);
+                        Integer labelWidth = Integer.valueOf(design.getDefaultElementHeight().intValue() * 5);
+                        Integer top = Integer.valueOf(0);
+                        Integer labelLeft = Integer.valueOf(0);
 
                         // add label
                         if (Boolean.TRUE.equals(design.getRenderLabelAsTextFields()) || Boolean.TRUE.equals(design.getDynamicFlow())) {

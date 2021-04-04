@@ -169,7 +169,7 @@ public abstract class ReportDesignGenerator {
                 // page X of Y
                 Integer width = Integer.valueOf(design.getColumnWidth().intValue() - design.getDefaultElementHeight().intValue());
                 Integer left = Integer.valueOf(0);
-                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageX", "\"Page \" + $V{PAGE_NUMBER} + \" of \"", null, null, new Integer(0),
+                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageX", "\"Page \" + $V{PAGE_NUMBER} + \" of \"", null, null, Integer.valueOf(0),
                         left,
                         width, null, null, ReportElement.ElementAlignment.right, null, null, null, null, null);
 

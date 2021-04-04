@@ -59,8 +59,8 @@ public class WebStatsUtil {
 			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();
-			Integer month = new Integer(CORE.getDateFormat(MONTH_FORMAT).format(now));
-			Integer year = new Integer(CORE.getDateFormat(YEAR_FORMAT).format(now));
+			Integer month = Integer.valueOf(CORE.getDateFormat(MONTH_FORMAT).format(now));
+			Integer year = Integer.valueOf(CORE.getDateFormat(YEAR_FORMAT).format(now));
 			
 			String truncatedUserAgentHeader = userAgentHeader;
 			if ((truncatedUserAgentHeader != null) && (truncatedUserAgentHeader.length() > 400)) {

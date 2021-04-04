@@ -61,7 +61,7 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	public int hashCode(Object o) 
 	throws HibernateException {
 		java.util.Date ts = (Date) o;
-		return new Long(ts.getTime() / 1000).hashCode();
+		return Long.valueOf(ts.getTime() / 1000).hashCode();
 	}
 
 	@Override
