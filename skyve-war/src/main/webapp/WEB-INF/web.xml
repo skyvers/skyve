@@ -276,7 +276,7 @@
 
 	<!-- CSRF Header to stop click jacking or frame busting -->
 	<filter>
-		<filter-name>CSRFHeadersFilter</filter-name>
+		<filter-name>SecurityHeadersFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
@@ -290,26 +290,14 @@
 			<param-name>Referrer-Policy</param-name>
 			<param-value>same-origin</param-value>
 		</init-param>
+		<init-param>
+			<param-name>X-Content-Type-Options</param-name>
+			<param-value>nosniff</param-value>
+		</init-param>
 	</filter>
 	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
+		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.jsp</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.xhtml</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.html</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
