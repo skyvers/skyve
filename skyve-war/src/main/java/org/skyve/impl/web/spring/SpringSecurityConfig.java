@@ -111,7 +111,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureUrl(Util.getLoginUrl() + "?error")
 				.and()
 			.logout()
-				.logoutSuccessUrl(Util.getSkyveContextUrl() + "/loggedOut")
+				.logoutSuccessUrl(Util.getLoggedOutUrl())
 				.deleteCookies("JSESSIONID")
 				.and()
 			.csrf().disable()

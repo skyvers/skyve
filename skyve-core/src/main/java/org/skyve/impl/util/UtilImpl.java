@@ -232,7 +232,9 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
 	// The Login URI to forward to
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
-	
+	// The Logged Out URI to forward to
+	public static String AUTHENTICATION_LOGGED_OUT_URI = "/loggedOut";
+
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	

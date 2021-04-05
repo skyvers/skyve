@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.beans;
 
+import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
+import javax.faces.FacesException;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -22,8 +25,8 @@ import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.util.UtilImpl;
@@ -34,6 +37,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.ChartAction;
+import org.skyve.impl.web.faces.actions.CompleteAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
@@ -42,7 +46,6 @@ import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
-import org.skyve.impl.web.faces.actions.CompleteAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -114,6 +117,49 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setBindingParameter(String bindingParameter) {
 		this.bindingParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bindingParameter));
+	}
+	
+	/**
+	 * Used to track requests being executed out of order possibly from a Cross Site Request Forgery
+	 */
+	private String csrfToken;
+	
+	/**
+	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
+	 * @return	Seure Random integer
+	 */
+	public String getCsrfToken() {
+		if (csrfToken == null) {
+			csrfToken = String.valueOf(new SecureRandom().nextInt());
+		}
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);
+		return csrfToken;
+	}
+
+	/**
+	 * Compares the token set with the existing value to detect CSRF attacks.
+	 * If there is a token set and it matches, this method clears the existing csrfToken value ready for a getter call.
+	 * If the tokens do not match, then the current user is logged out.
+	 * @param csrfToken	The value from the web request.
+	 */
+	public void setCsrfToken(String csrfToken) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("setCsrfToken() = " + csrfToken);
+		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
+		if (this.csrfToken != null) { // there needs to be a token to check first
+			if (! this.csrfToken.equals(currentCsrfToken)) {
+				Util.LOGGER.severe("CSRF attack detected");
+				
+				FacesContext context = FacesContext.getCurrentInstance();
+				try {
+					context.getExternalContext().redirect(Util.getLoggedOutUrl());
+				}
+				catch (IOException e) {
+					throw new FacesException("Could not redirect home after CSRF attack", e);
+				}
+				context.responseComplete();
+			}
+			this.csrfToken = null;
+		}
 	}
 	
 	@PostConstruct

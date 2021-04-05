@@ -29,6 +29,9 @@
 					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyvePublic.i18n['page.public.noPublicUser']}" /></h1>
 				</h:panelGroup>
 				<h:form prependId="false" rendered="#{not empty skyvePublic.user}">
+					<h:inputHidden id="csrfToken" value="#{skyvePublic.csrfToken}">
+						<p:autoUpdate />
+					</h:inputHidden>
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyvePublic}" />
 					</ui:include>
