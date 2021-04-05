@@ -57,10 +57,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 import org.skyve.web.UserAgentType;
 import org.skyve.util.Util;
 
@@ -89,7 +91,7 @@ public class SmartClientEditServlet extends HttpServlet {
         response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 		try (PrintWriter pw = response.getWriter()) {
-	    	String operationType = request.getParameter("_operationType");
+	    	String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
 	        if (operationType == null) {
 	        	pw.append("{}");
 	        	return;
@@ -101,7 +103,7 @@ public class SmartClientEditServlet extends HttpServlet {
 				try {
 					// Start or continue a smartclient conversation
 					AbstractWebContext webContext = null;
-			        String key = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+			        String key = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (key != null) {
 			        	webContext = ConversationUtil.getCachedConversation(key, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
@@ -117,7 +119,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			            persistence.evictAllCached();
 			            webContext.setConversation(persistence);
 			    	}
-			        webContext.setAction(request.getParameter(AbstractWebContext.ACTION_NAME));
+			        webContext.setAction(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ACTION_NAME))));
 			
 					UserAgentType userAgentType = UserAgent.getType(request);
 			        Router router = CORE.getRepository().getRouter();
@@ -134,17 +136,17 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 			    	Customer customer = user.getCustomer();
 			    	
-			    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
+			    	String formBinding = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.BINDING_NAME)));
 			    	if (formBinding != null) {
 			    		formBinding = BindUtil.unsanitiseBinding(formBinding);
 			    	}
-			    	String gridBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
+			    	String gridBinding = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.GRID_BINDING_NAME)));
 			    	if (gridBinding != null) {
 			    		gridBinding = BindUtil.unsanitiseBinding(gridBinding);
 			    	}
-			    	String source = request.getParameter(AbstractWebContext.SOURCE_NAME);
-			    	String editIdCounter = request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER);
-			    	String createIdCounter = request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER);
+			    	String source = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.SOURCE_NAME)));
+			    	String editIdCounter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER)));
+			    	String createIdCounter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER)));
 	
 			    	SortedMap<String, Object> parameters = collectRequestParameters(request);
 					
@@ -179,8 +181,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			    		}
 			    	}
 	
-			    	Module processModule = customer.getModule(request.getParameter(AbstractWebContext.MODULE_NAME));
-			    	Document processDocument = processModule.getDocument(customer, request.getParameter(AbstractWebContext.DOCUMENT_NAME));
+			    	Module processModule = customer.getModule(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME))));
+			    	Document processDocument = processModule.getDocument(customer, OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME))));
 	
 			    	Module formModule = processModule;
 			    	Document formDocument = processDocument;
@@ -252,7 +254,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									processDocument,
 									formBinding,
 									source,
-									(String) parameters.get(Bean.DOCUMENT_ID),
+									bizId,
 									Integer.parseInt(editIdCounter),
 									Integer.parseInt(createIdCounter),
 									action,

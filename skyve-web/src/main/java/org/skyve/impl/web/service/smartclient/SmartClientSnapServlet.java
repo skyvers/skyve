@@ -23,9 +23,12 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.OWASP;
+import org.skyve.util.Util;
 
 public class SmartClientSnapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -68,12 +71,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 						throw new SessionEndedException(request.getLocale());
 					}
 	
-					String menuButtonId = request.getParameter("ID");
-					String action = request.getParameter("a");
-					String snapId = request.getParameter("i");
-					String snapName = request.getParameter("n");
-					String snapshot = request.getParameter("s");
-					String dataSource = request.getParameter("d");
+					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
+					String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
+					String snapId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("i")));
+					String snapName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
+					String snapshot = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("s")));
+					String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 
 					String moduleName = null;
 					String queryName = null;
