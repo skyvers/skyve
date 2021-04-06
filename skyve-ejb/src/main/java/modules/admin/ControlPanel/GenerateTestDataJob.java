@@ -28,6 +28,8 @@ public class GenerateTestDataJob extends CancellableJob {
 	
 	@Override
 	public void execute() throws Exception {
+		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
+				"Generate Test Data Job has been started"));
 		List<String> log = getLog();
 		Customer customer = CORE.getCustomer();
 		Persistence pers = CORE.getPersistence();
