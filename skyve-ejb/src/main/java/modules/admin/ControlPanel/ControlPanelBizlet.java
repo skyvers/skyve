@@ -165,8 +165,10 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	
 	@Override
 	public void preRerender(String source, ControlPanelExtension bean, WebContext webContext) throws Exception {
-		// clear list of selected documents
-		bean.getTestDocumentNames().clear();
+		if ("push".equals(source)) {
+			// clear list of selected documents
+			bean.getTestDocumentNames().clear();
+		}
 		super.preRerender(source, bean, webContext);
 	}
 }
