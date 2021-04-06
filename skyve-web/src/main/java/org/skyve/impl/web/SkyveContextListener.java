@@ -22,6 +22,7 @@ import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.addin.DefaultAddInManager;
+import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.CacheUtil;
 import org.skyve.cache.ConversationCacheConfig;
@@ -226,13 +227,19 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_CONTEXT = getString("url", "context", url, true);
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
-		Map<String, Object> conversations = getObject(null, "conversations", properties, true);
-		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("conversations", "heapSizeEntries", conversations),
-																	getInt("conversations", "offHeapSizeMB", conversations),
-																	getInt("conversations", "diskSizeGB", conversations) * 1024,
-																	getInt("conversations", "expiryTimeMinutes", conversations));
-		UtilImpl.CONVERSATION_EVICT_CRON = getString("conversations", "evictCron", conversations, false);
-	
+		Map<String, Object> state = getObject(null, "state", properties, true);
+		Map<String, Object> conversations = getObject("state", "conversations", state, true);
+		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
+																	getInt("state.conversations", "offHeapSizeMB", conversations),
+																	getInt("state.conversations", "diskSizeGB", conversations) * 1024,
+																	getInt("state.conversations", "expiryTimeMinutes", conversations));
+		Map<String, Object> tokens = getObject("state", "csrfTokens", state, true);
+		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(getInt("state.csrfTokens", "heapSizeEntries", tokens),
+																	getInt("state.csrfTokens", "offHeapSizeMB", tokens),
+																	getInt("state.csrfTokens", "diskSizeGB", tokens) * 1024,
+																	getInt("state.csrfTokens", "expiryTimeMinutes", tokens));
+		UtilImpl.STATE_EVICT_CRON = getString("state", "evictCron", state, false);
+
 		Map<String, Object> caches = getObject(null, "caches", properties, false);
 		if (caches != null) {
 			// for each cache defined

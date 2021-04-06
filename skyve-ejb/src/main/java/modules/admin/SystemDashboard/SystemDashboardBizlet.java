@@ -1,6 +1,6 @@
 package modules.admin.SystemDashboard;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.util.Util;
@@ -27,7 +27,7 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		// session count
 		Generic sessionCount = Generic.newInstance();
 		sessionCount.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.sessionCount")));
-		sessionCount.setText5001(formatStringValueHTML(Integer.toString(ConversationUtil.getSessionCount()), ""));
+		sessionCount.setText5001(formatStringValueHTML(Integer.toString(StateUtil.getSessionCount()), ""));
 		bean.getStatus().add(sessionCount);
 
 		// email configuration

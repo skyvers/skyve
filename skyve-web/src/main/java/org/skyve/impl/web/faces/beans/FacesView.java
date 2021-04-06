@@ -123,6 +123,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 * Used to track requests being executed out of order possibly from a Cross Site Request Forgery
 	 */
 	private String csrfToken;
+	private boolean csrfTokenChecked = true;
 	
 	/**
 	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
@@ -131,6 +132,7 @@ public class FacesView<T extends Bean> extends Harness {
 	public String getCsrfToken() {
 		if (csrfToken == null) {
 			csrfToken = String.valueOf(new SecureRandom().nextInt());
+			csrfTokenChecked = false;
 		}
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);
 		return csrfToken;
@@ -145,18 +147,16 @@ public class FacesView<T extends Bean> extends Harness {
 	public void setCsrfToken(String csrfToken) {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("setCsrfToken() = " + csrfToken);
 		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
+		csrfTokenChecked = true; // indicate we have checked the token
 		if (this.csrfToken != null) { // there needs to be a token to check first
 			if (! this.csrfToken.equals(currentCsrfToken)) {
 				Util.LOGGER.severe("CSRF attack detected");
-				
-				FacesContext context = FacesContext.getCurrentInstance();
 				try {
-					context.getExternalContext().redirect(Util.getLoggedOutUrl());
+					FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getLoggedOutUrl());
 				}
 				catch (IOException e) {
 					throw new FacesException("Could not redirect home after CSRF attack", e);
 				}
-				context.responseComplete();
 			}
 			this.csrfToken = null;
 		}
@@ -170,15 +170,32 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
-		if (! fc.isPostback()) {
-			new PreRenderAction<>(this).execute();
+		if (fc.isPostback()) {
+			if (UtilImpl.FACES_TRACE) {
+				UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
+										" : m=" + getBizModuleParameter() + 
+										" : d=" + getBizDocumentParameter() + 
+										" : q=" + getQueryNameParameter() + 
+										" : i=" + getBizIdParameter());
+			}
+			if (! csrfTokenChecked) {
+				String csrfTokenParameterValue = fc.getExternalContext().getRequestParameterMap().get("csrfToken");
+				if (csrfTokenParameterValue != null) {
+					setCsrfToken(csrfTokenParameterValue);
+				}
+				else {
+					try {
+						Util.LOGGER.severe("No CSRF token detected");
+						fc.getExternalContext().redirect(Util.getLoggedOutUrl());
+					}
+					catch (IOException e) {
+						throw new FacesException("Could not redirect home after CSRF attack", e);
+					}
+				}
+			}
 		}
-		else if (UtilImpl.FACES_TRACE) {
-			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
-									" : m=" + getBizModuleParameter() + 
-									" : d=" + getBizDocumentParameter() + 
-									" : q=" + getQueryNameParameter() + 
-									" : i=" + getBizIdParameter());
+		else {
+			new PreRenderAction<>(this).execute();
 		}
 	}
 

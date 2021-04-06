@@ -19,7 +19,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
@@ -115,7 +115,7 @@ public class BizportImport extends Localisable {
 
 		UploadedFile file = event.getFile();
 		
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -177,7 +177,7 @@ public class BizportImport extends Localisable {
 			}
 
 			// only put conversation in cache if we have been successful in executing
-			ConversationUtil.cacheConversation(webContext);
+			StateUtil.cacheConversation(webContext);
 
 			
 			if (exception.hasProblems()) {

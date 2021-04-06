@@ -14,7 +14,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -129,7 +129,7 @@ public class ContentUpload extends Localisable {
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -151,7 +151,7 @@ public class ContentUpload extends Localisable {
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
-			ConversationUtil.cacheConversation(webContext);
+			StateUtil.cacheConversation(webContext);
 			
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);

@@ -4,7 +4,7 @@ import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -37,7 +37,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	 */
 	@Override
 	public final void cacheConversation() throws Exception {
-		ConversationUtil.cacheConversation(webContext);
+		StateUtil.cacheConversation(webContext);
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			JobDataMap map = context.getMergedJobDataMap();
 			String webId = map.getString(AbstractWebContext.CONTEXT_NAME);
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
-        	webContext = ConversationUtil.getCachedConversation(webId, null, null);
+        	webContext = StateUtil.getCachedConversation(webId, null, null);
 			@SuppressWarnings("unchecked")
 			T t = (T) webContext.getCurrentBean();
 			bean = t;

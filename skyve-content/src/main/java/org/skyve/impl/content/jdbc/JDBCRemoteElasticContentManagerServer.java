@@ -5,12 +5,12 @@ import java.sql.Connection;
 
 import org.h2.tools.Server;
 import org.skyve.EXT;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.elastic.ElasticContentManager;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.StateUtil;
 import org.skyve.util.Util;
 
 /**

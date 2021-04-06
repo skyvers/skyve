@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -49,7 +49,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		
 		bean.loadStartupConfiguration();
 		
-		bean.setSessionCount(Integer.valueOf(ConversationUtil.getSessionCount()));
+		bean.setSessionCount(Integer.valueOf(StateUtil.getSessionCount()));
 		
 		return bean;
 	}

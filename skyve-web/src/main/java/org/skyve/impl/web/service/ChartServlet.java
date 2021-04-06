@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -140,7 +140,7 @@ public class ChartServlet extends HttpServlet {
 	throws Exception {
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
