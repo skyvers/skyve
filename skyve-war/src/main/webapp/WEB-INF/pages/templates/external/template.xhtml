@@ -64,9 +64,14 @@
 						</td>
 						<c:if test="#{showSwitchMode}">
 							<td width="40px">
-								<a href="javascript:setUxUi()" title="Switch Mode">
-									<i style="color:whitesmoke" class="fa fa-share-square-o fa-2x" />
-								</a>
+								<h:form id="uxuiform" prependId="false"> 
+									<h:inputHidden value="#{bean.csrfToken}">
+										<p:autoUpdate />
+									</h:inputHidden>
+				            		<p:commandLink class="icon fa fa-share-square-o fa-2x" style="color:whitesmoke" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
+										<span class="label">Switch Mode</span>
+									</p:commandLink>
+								</h:form>
 							</td>
 						</c:if>
 						<c:if test="#{showLogout}">
@@ -91,9 +96,6 @@
 <!--
 								<ui:insert name="breadcrumbs" />
 -->
-							<h:form id="uxuiform" prependId="false"> 
-								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
-							</h:form>
 							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:messages>

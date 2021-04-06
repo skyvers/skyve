@@ -40,10 +40,15 @@
 						<ul class="ultima-menu fadeInDown animated topbar-menu">
 							<c:if test="#{showSwitchMode}">
 								<li role="menuitem">
-									<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@this" update="@none" ignoreAutoUpdate="true">
-										<i class="fa fa-share-square-o"></i>
-										<span>Switch Mode</span>
-									</p:commandLink>
+									<h:form id="uxuiform" prependId="false"> 
+										<h:inputHidden value="#{bean.csrfToken}">
+											<p:autoUpdate />
+										</h:inputHidden>
+										<p:commandLink action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
+											<i class="fa fa-share-square-o"></i>
+											<span>Switch Mode</span>
+										</p:commandLink>
+									</h:form>
 								</li>
 							</c:if>
 							<c:if test="#{showLogout}">
