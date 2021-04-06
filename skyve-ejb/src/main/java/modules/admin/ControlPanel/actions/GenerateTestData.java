@@ -3,7 +3,6 @@ package modules.admin.ControlPanel.actions;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -11,6 +10,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -32,7 +32,7 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		JobMetaData job = m.getJob("jGenerateTestData");
 
 		EXT.runOneShotJob(job, bean, CORE.getUser());
-		webContext.growl(MessageSeverity.info, "Generate Test Data Job has been started");
+		EXT.push(new PushMessage().user(CORE.getUser()).rerender());
 
 		return new ServerSideActionResult<>(bean);
 	}

@@ -19,6 +19,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
 import modules.admin.UserProxy.UserProxyExtension;
@@ -162,5 +163,10 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return super.complete(attributeName, value, bean);
 	}
 	
-	
+	@Override
+	public void preRerender(String source, ControlPanelExtension bean, WebContext webContext) throws Exception {
+		// clear list of selected documents
+		bean.getTestDocumentNames().clear();
+		super.preRerender(source, bean, webContext);
+	}
 }
