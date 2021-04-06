@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -85,7 +85,7 @@ public class DynamicImageServlet extends HttpServlet {
 				}
 		        
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());
 	        	}

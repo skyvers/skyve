@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -84,7 +84,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					else if ("T".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
@@ -99,7 +99,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					else if ("U".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 

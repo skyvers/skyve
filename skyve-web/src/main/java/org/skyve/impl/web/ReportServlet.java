@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -134,7 +134,7 @@ public class ReportServlet extends HttpServlet {
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -358,7 +358,7 @@ public class ReportServlet extends HttpServlet {
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+		        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();

@@ -18,6 +18,7 @@ import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
+import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -86,9 +87,9 @@ public class UtilImpl {
 	// Defaults to run at 7 past the hour every hour.
 	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
 
-	// The cron expression to use to fire off the evict expired conversations job
+	// The cron expression to use to fire off the evict expired state job
 	// Defaults to run at 37 past midnight every day.
-	public static String CONVERSATION_EVICT_CRON = "0 37 0 1/1 * ? *";
+	public static String STATE_EVICT_CRON = "0 37 0 1/1 * ? *";
 
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
@@ -156,6 +157,7 @@ public class UtilImpl {
 
 	// For caches
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
+	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
 	public static boolean HIBERNATE_FAIL_ON_MISSING_CACHE = false;
 	public static List<CacheConfig<? extends Serializable, ? extends Serializable>> APP_CACHES = new ArrayList<>();

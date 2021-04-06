@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -116,7 +116,7 @@ public class SmartClientListServlet extends HttpServlet {
 				try {
 					// use the view's conversation if it was sent down from the client
 					String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-					AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
@@ -325,7 +325,7 @@ public class SmartClientListServlet extends HttpServlet {
 					
 					// serialize and cache conversation, if applicable
 			    	if (webContext != null) {
-			    		ConversationUtil.cacheConversation(webContext);
+			    		StateUtil.cacheConversation(webContext);
 			    	}
 				}
 				catch (InvocationTargetException e) {

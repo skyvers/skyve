@@ -1,6 +1,6 @@
 package org.skyve.impl.web;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.job.JobScheduler;
 import org.skyve.web.BackgroundTask;
@@ -18,7 +18,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 
 	@Override
 	public void cacheConversation() throws Exception {
-		ConversationUtil.cacheConversation(this);
+		StateUtil.cacheConversation(this);
 	}
 	
 	@Override

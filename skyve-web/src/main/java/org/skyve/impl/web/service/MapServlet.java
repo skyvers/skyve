@@ -17,7 +17,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -146,7 +146,7 @@ public class MapServlet extends HttpServlet {
 	throws Exception {
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-    	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+    	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
@@ -161,7 +161,7 @@ public class MapServlet extends HttpServlet {
 	throws Exception {
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());

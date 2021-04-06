@@ -25,6 +25,9 @@
 			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<h:form prependId="false">
+					<h:inputHidden id="csrfToken" value="#{skyve.csrfToken}">
+						<p:autoUpdate />
+					</h:inputHidden>
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>

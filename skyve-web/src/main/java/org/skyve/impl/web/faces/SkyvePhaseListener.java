@@ -15,7 +15,7 @@ import javax.faces.event.PhaseListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -104,7 +104,7 @@ public class SkyvePhaseListener implements PhaseListener {
 	private static void restore(FacesView<?> view, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(view.getDehydratedWebId(),
+		AbstractWebContext webContext = StateUtil.getCachedConversation(view.getDehydratedWebId(),
 																				(HttpServletRequest) ec.getRequest(),
 																				(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
@@ -119,7 +119,7 @@ public class SkyvePhaseListener implements PhaseListener {
 	private static void restore(String webId, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId,
+		AbstractWebContext webContext = StateUtil.getCachedConversation(webId,
 																				(HttpServletRequest) ec.getRequest(),
 																				(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
@@ -154,7 +154,7 @@ public class SkyvePhaseListener implements PhaseListener {
 					Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
 					if ((maximumSeverity == null) || 
 							(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
-						ConversationUtil.cacheConversation(webContext);
+						StateUtil.cacheConversation(webContext);
 					}
 					view.dehydrate();
 				}
@@ -168,7 +168,7 @@ public class SkyvePhaseListener implements PhaseListener {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) ConversationUtil.logSessionAndConversationsStats();
+			if (UtilImpl.FACES_TRACE) StateUtil.logSessionAndConversationsStats();
 		}
 	}
 }
