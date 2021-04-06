@@ -78,7 +78,7 @@
 		customerName = (UtilImpl.CUSTOMER == null) ? c : UtilImpl.CUSTOMER;
 		criteria.setCustomerName(customerName);
 		try {
-			criteria.canonicalise(b);
+			criteria.canonicalise(null, b);
 			canonicalised = true;
 		}
 		catch (Exception e) {
@@ -149,9 +149,16 @@
 		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 		request.setAttribute(AbstractWebContext.UXUI, uxui);
 
+		// Set the extra criterium if  user is defined
+		if (user != null) {
+			criteria.setCustomerName(user.getCustomerName());
+			criteria.setDataGroupId(user.getDataGroupId());
+			criteria.setUserId(user.getId());
+		}
+
 		if (! canonicalised) {
 			try {
-				criteria.canonicalise(b);
+				criteria.canonicalise((user == null) ? null : user.getCustomer(), b);
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
@@ -159,10 +166,6 @@
 		}
 		
 		// Determine the route
-		criteria.setCustomerName(user.getCustomerName());
-		criteria.setDataGroupId(user.getDataGroupId());
-		criteria.setUserId(user.getId());
-
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (UtilImpl.COMMAND_TRACE) {
 			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",

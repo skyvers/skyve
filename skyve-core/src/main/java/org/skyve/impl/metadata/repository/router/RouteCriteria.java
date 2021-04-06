@@ -94,7 +94,7 @@ public class RouteCriteria implements MetaData {
 		this.userId = UtilImpl.processStringValue(userId);
 	}
 
-	public void canonicalise(String binding) {
+	public void canonicalise(Customer customer, String binding) {
 		String b = UtilImpl.processStringValue(binding);
 		if (b != null) {
 			if (moduleName == null) {
@@ -104,10 +104,10 @@ public class RouteCriteria implements MetaData {
 				throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
 			}
 			AbstractRepository r = AbstractRepository.get();
-			Customer c = (customerName != null) ? r.getCustomer(customerName) : null;
+			Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
 			Module m = r.getModule(c, moduleName);
 			Document d = r.getDocument(c, m, documentName);
-			TargetMetaData t = BindUtil.getMetaDataForBinding(c, m, d, binding);
+			TargetMetaData t = BindUtil.getMetaDataForBinding(c, m, d, b);
 			d = t.getDocument();
 			moduleName = d.getOwningModuleName();
 			documentName = d.getName();
