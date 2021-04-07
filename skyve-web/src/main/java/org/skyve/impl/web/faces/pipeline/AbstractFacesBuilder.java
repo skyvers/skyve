@@ -46,7 +46,7 @@ public abstract class AbstractFacesBuilder {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
 		}
-		// Do nothing is this is being executed through SAIL
+		// Do nothing if this is being executed through SAIL
 		if (FacesContext.getCurrentInstance() != null) {
 			managedBean = FacesUtil.getManagedBean(managedBeanName);
 		}

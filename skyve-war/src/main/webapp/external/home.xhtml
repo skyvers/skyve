@@ -25,10 +25,7 @@
 			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
-				<h:form prependId="false">
-					<h:inputHidden id="csrfToken" value="#{skyve.csrfToken}">
-						<p:autoUpdate />
-					</h:inputHidden>
+				<s:csrfForm managedBean="skyve">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
@@ -42,7 +39,7 @@
 									managedBean="skyve"
 									update="@form"
 									rendered="#{'l' eq skyve.webActionParameter}" />
-				</h:form>
+				</s:csrfForm>
 			</ui:define>
 		</ui:composition>
 	</f:view>
