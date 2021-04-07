@@ -47,14 +47,6 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	@Override
-	protected void doPost(HttpServletRequest request,
-							HttpServletResponse response)
-	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClient Generate - post....");
-		processRequest(request, response);
-	}
-
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
 	private static void processRequest(HttpServletRequest request,
 										HttpServletResponse response)
