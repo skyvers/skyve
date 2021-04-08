@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
@@ -58,7 +59,7 @@ public class StateUtil {
 			String currentBeanId = webId.substring(36);
 			byte[] value = getConversations().get(conversationKey);
 			if (value == null) {
-				throw new ConversationEndedException(request.getLocale());
+				throw new ConversationEndedException((request == null) ? Locale.ENGLISH : request.getLocale());
 			}
 
 			result = (AbstractWebContext) SerializationHelper.deserialize(value);
@@ -93,8 +94,16 @@ public class StateUtil {
 		return CacheUtil.getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
+	@SuppressWarnings("rawtypes")
+	public static boolean checkToken(HttpSession session, String token) {
+		Cache<String, TreeSet> tokens = getTokens();
+		String sessionId = session.getId();
+		TreeSet values = tokens.get(sessionId);
+		return (values != null) && values.contains(token);
+	}
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static void addToken(HttpSession session, String token)
+	public static void replaceToken(HttpSession session, String oldToken, String newToken)
 	throws Exception {
 		Cache<String, TreeSet> tokens = getTokens();
 		String sessionId = session.getId();
@@ -102,26 +111,17 @@ public class StateUtil {
 		if (values == null) {
 			values = new TreeSet();
 		}
-		values.add(token);
+		else {
+			if (oldToken != null) {
+				values.remove(oldToken);
+			}
+		}
+		values.add(newToken);
 
 		// Note that EHCache puts are thread-safe
 		tokens.put(sessionId, values);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public static boolean checkToken(HttpSession session, String token) {
-		Cache<String, TreeSet> tokens = getTokens();
-		String sessionId = session.getId();
-		TreeSet values = tokens.get(sessionId);
-		boolean result = ((values != null) && values.remove(token));
-		if (result) {
-			// Note that EHCache puts are thread-safe
-			tokens.put(sessionId, values);
-		}
-		
-		return result;
-	}
-
 	public static void logSessionAndConversationsStats() {
 		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(UtilImpl.CONVERSATION_CACHE.getName());
 		if (statistics != null) {
