@@ -62,12 +62,6 @@ public class ReportServlet extends HttpServlet {
 	public static final String EXPORT_PATH = "/export";
 
 	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-	throws ServletException, IOException {
-		doGet(request, response);
-	}
-
-	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		AbstractPersistence persistence = AbstractPersistence.get();
