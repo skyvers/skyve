@@ -511,7 +511,7 @@ public class SmartClientListServlet extends HttpServlet {
      * @param module
      * @param document
      * @param customer
-     * @param query	Add the filter critiera to this query.
+     * @param query	Add the filter criteria to this query.
      * @param filterOperator	The default operator to use for all filter critiera.
      * @param criteria	A Map of name value pairs
      * @throws Exception

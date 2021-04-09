@@ -14,6 +14,14 @@ isc.RPCManager.handleError = function (response, request) {
 
 	return this.Super("handleError", arguments);
 };
+// Remove popup login so CSRF Tokens are purged by a full page refresh
+isc.RPCManager.addClassMethods({
+	// callback from smart client login system
+	loginRequired: function(transactionNum, rpcRequest, rpcResponse) {
+		window.location.assign(SKYVE.Util.CONTEXT_URL);
+	}
+});
+
 Date.setShortDisplayFormat("toEuropeanShortDate");
 Date.setNormalDisplayFormat("toEuropeanShortDate");
 Date.setInputFormat("DMY");
