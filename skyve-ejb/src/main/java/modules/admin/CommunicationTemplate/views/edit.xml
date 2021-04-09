@@ -16,7 +16,8 @@
         </row>
         <row>
             <item showLabel="true">
-				<html binding="template" pixelHeight="300" pixelWidth="800" />
+            	<!-- using a textarea in responsive because the quill editor does not allow html source to be edited -->
+				<textArea binding="template" pixelHeight="300" pixelWidth="800" />
 			</item>
 		</row>
 	</form>

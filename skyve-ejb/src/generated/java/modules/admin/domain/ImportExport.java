@@ -246,7 +246,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 <i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
 <p><b>Create everything even if there might be duplicates</b>
 <br/>
-<i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+<i>With this option, new records will always be created</i></p>
 	 **/
 	@XmlEnum
 	public static enum LoadType implements Enumeration {
@@ -400,7 +400,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 <i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
 <p><b>Create everything even if there might be duplicates</b>
 <br/>
-<i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+<i>With this option, new records will always be created</i></p>
 	 **/
 	private LoadType loadType = LoadType.createFind;
 
