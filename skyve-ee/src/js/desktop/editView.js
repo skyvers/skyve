@@ -234,6 +234,9 @@ isc.EditView.addMethods({
 			var me = this;
 
 			var params = {_mod: this._mod, _doc: this._doc, _ecnt: this._ecnt, _ccnt: this._ccnt};
+			if (this._csrf) {
+				params._csrf = this._csrf;
+			}
 			if (formBinding) {
 				params._b = formBinding;
 			}
@@ -254,6 +257,9 @@ isc.EditView.addMethods({
 							dsRequest) { // the request that was sent
 					var values = {};
 					if (dsResponse.status >= 0) { // success test
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
 						// ensure that save operation is set to add (it would be edit)
 						me._vm.setSaveOperationType("add");
 
@@ -306,6 +312,9 @@ isc.EditView.addMethods({
 			this._b = formBinding;
 
 			var params = {bizId: bizId, _mod: this._mod, _doc: this._doc, _ecnt: this._ecnt, _ccnt: this._ccnt};
+			if (this._csrf) {
+				params._csrf = this._csrf;
+			}
 			if (action) {
 				params._a = action;
 			}
@@ -328,6 +337,9 @@ isc.EditView.addMethods({
 							dsRequest) { // the request that was sent
 					var values = {}
 					if (dsResponse.status >= 0) { // success test
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
 						// scatter the first (and only) row returned from the server
 						// data parameter is an array on fetch
 						values = data[0];
@@ -432,6 +444,9 @@ isc.EditView.addMethods({
 							bean: instance,
 							bizId: instance.bizId,
 							_c: context};
+			if (this._csrf) {
+				params._csrf = this._csrf;
+			}
 			if (action) {
 				params._a = action;
 				if (action == '_PUSH') {
@@ -455,6 +470,9 @@ isc.EditView.addMethods({
 							data, // the returned data
 							dsRequest) { // the request that was sent
 					if (dsResponse.status >= 0) { // redundant success test
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
 						// if we came from a lookupDescription, this will be not null
 						var lookupDescription = null;
 						var opener = isc.WindowStack.getOpener();
@@ -593,12 +611,21 @@ isc.EditView.addMethods({
 			var context = instance._c;
 			delete instance._c;
 
+			var params = {_mod: this._mod, _doc: this._doc, _c: context};
+			if (this._csrf) {
+				params._csrf = this._csrf;
+			}
+
+			var me = this;
 			isc.EditView._DATA_SOURCE.removeData(
 				instance,
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
 					if (dsResponse.status >= 0) { // redundant success test
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
 						isc.WindowStack.popoff(true); // rerender the opener view
 
 						if (successCallback) {
@@ -609,7 +636,7 @@ isc.EditView.addMethods({
 						isc.warn(data, null, {title: 'Problems'});
 					}
 				},
-				{params:{_mod: this._mod, _doc: this._doc, _c: context}, willHandleError: true}
+				{params: params, willHandleError: true}
 			);
 		}
 	},
@@ -638,6 +665,9 @@ isc.EditView.addMethods({
 							bean: instance,
 							bizId: (gridRowBizId ? gridRowBizId : instance.bizId),
 							_c: context};
+			if (this._csrf) {
+				params._csrf = this._csrf;
+			}
 			if (action) {
 				params._a = action;
 			}
@@ -657,6 +687,9 @@ isc.EditView.addMethods({
 							data, // the returned data
 							dsRequest) { // the request that was sent
 					if (dsResponse.status >= 0) { // redundant success test
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
 						// scatter the first (and only) row returned from the server
 						// data parameter is an object on save
 						me._saved = true;

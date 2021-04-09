@@ -91,7 +91,7 @@ public class SkyveFilter implements Filter {
 				UtilImpl.LOGGER.info(headerName + "=" + httpRequest.getHeader(headerName));
 			}
 			UtilImpl.LOGGER.info("******************** SESSION/CONVERSATION ********************");
-			StateUtil.logSessionAndConversationsStats();
+			StateUtil.logStateStats();
 		}
 
 		HttpSession session = httpRequest.getSession(false);

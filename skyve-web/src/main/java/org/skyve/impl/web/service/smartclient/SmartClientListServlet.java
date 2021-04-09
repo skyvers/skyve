@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
@@ -96,15 +98,29 @@ public class SmartClientListServlet extends HttpServlet {
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
     private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
-
         response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 
+    	// Send CSRF Token as a response header (must be done before getting the writer)
+		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
+		Integer newCsrfToken = currentCsrfToken;
+		String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
+		// If this is a mutating request, we'll definitely need a new CSRF Token
+		if (Operation.fetch.toString().equals(operationType)) {
+			if (newCsrfToken == null) {
+				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			}
+		}
+		else {
+			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+		}
+    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
+
 		try (PrintWriter pw = response.getWriter()) {
 			String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_dataSource")));
-			String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
 	        if (operationType == null) {
 	        	pw.append("{}");
 	        	return;
@@ -226,6 +242,8 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 					}
 
+					HttpSession session = request.getSession();
+
 					switch (operation) {
 					case fetch:
 						if (! user.canReadDocument(drivingDocument)) {
@@ -283,11 +301,15 @@ public class SmartClientListServlet extends HttpServlet {
 								model);
 						break;
 					case add:
+						checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						if (! user.canCreateDocument(drivingDocument)) {
 							throw new SecurityException("create this data", user.getName());
 						}
 						break;
 					case update:
+						checkCsrfToken(session, request, response, currentCsrfToken);
+
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 						if ("TAG".equals(bizTagged)) {
 							tag(customer, module, model, tagId, parameters, pw);
@@ -314,6 +336,8 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						break;
 					case remove:
+						checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						if (! user.canDeleteDocument(drivingDocument)) {
 							throw new SecurityException("delete this data", user.getName());
 						}
@@ -322,6 +346,9 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					default:
 					}
+					
+					// Replace CSRF token
+					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 					
 					// serialize and cache conversation, if applicable
 			    	if (webContext != null) {
@@ -467,7 +494,18 @@ public class SmartClientListServlet extends HttpServlet {
 										model);
     }
 
-    /**
+	static void checkCsrfToken(HttpSession session,
+								HttpServletRequest request,
+								HttpServletResponse response,
+								Integer currentCsrfToken)
+	throws ServletException {
+		if (! StateUtil.checkToken(session, currentCsrfToken)) {
+			WebUtil.logout(request, response);
+			throw new java.lang.SecurityException("CSRF attack detected");
+		}
+	}
+	
+	/**
      * Add simple criteria to the query.
      * 
      * @param module

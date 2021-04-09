@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
 import org.skyve.cache.StateUtil;
@@ -20,6 +22,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TagUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
@@ -57,6 +60,22 @@ public class SmartClientTagServlet extends HttpServlet {
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
+    	// Send CSRF Token as a response header (must be done before getting the writer)
+		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
+		Integer newCsrfToken = currentCsrfToken;
+		String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
+		// If this is a mutating request, we'll definitely need a new CSRF Token
+		if ("L".equals(action)) {
+			if (newCsrfToken == null) {
+				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			}
+		}
+		else {
+			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+		}
+    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
+
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
@@ -72,16 +91,20 @@ public class SmartClientTagServlet extends HttpServlet {
 					Customer customer = user.getCustomer();
 	
 					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
-					String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
 					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("t")));
 					String tagName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
-					String criteria = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("c")));
+					// Dont sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
+					String criteria = Util.processStringValue(request.getParameter("c"));
 					String dataSourceName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 		
+					HttpSession session = request.getSession();
+
 					if ("L".equals(action)) {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
@@ -97,6 +120,8 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("U".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
@@ -112,20 +137,29 @@ public class SmartClientTagServlet extends HttpServlet {
 						}
 					}
 					else if ("C".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						TagUtil.clear(tagId);
 					}
 					else if ("N".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						tagId = TagUtil.create(tagName, true);
 						sb.append("{bizId:'");
 						sb.append(tagId);
 						sb.append("'}");
 					}
 					else if ("D".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						TagUtil.delete(tagId);
 					}
 
 					pw.append(sb);
 					pw.flush();
+					
+					// Replace CSRF token
+					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();

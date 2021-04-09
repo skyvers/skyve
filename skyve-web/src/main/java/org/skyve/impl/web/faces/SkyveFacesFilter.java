@@ -132,7 +132,7 @@ public class SkyveFacesFilter implements Filter {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesFilter - DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) StateUtil.logSessionAndConversationsStats();
+			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
     }
 }
