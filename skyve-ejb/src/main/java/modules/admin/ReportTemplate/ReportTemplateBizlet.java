@@ -30,7 +30,7 @@ import modules.admin.domain.ReportDataset.DatasetType;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.ReportType;
 
-public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
+public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 
 	private static final long serialVersionUID = 5608017044113249859L;
 
@@ -38,12 +38,12 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 
 	// scheduling constants
 	private static final String ALL_CODE = "*";
-	private static final Integer ALL_CODE_SPEC = new Integer(99);
+	private static final Integer ALL_CODE_SPEC = Integer.valueOf(99);
 	private static final String SELECTED_CODE = "X";
 	private static final String LAST_DAY_CODE = "L";
 	private static final String LAST_WEEK_DAY_CODE = "LW";
 	private static final String ANY_CODE = "?";
-	private static final Integer ANY_CODE_SPEC = new Integer(98);
+	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
 
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
@@ -76,7 +76,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, ReportTemplate bean) throws Exception {
+	public List<DomainValue> getDynamicDomainValues(String attributeName, ReportTemplateExtension bean) throws Exception {
 		// list documents within modules
 		if (ReportTemplate.documentNamePropertyName.equals(attributeName)) {
 			if (bean.getModuleName() != null) {
@@ -94,8 +94,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public ReportTemplate newInstance(ReportTemplate bean) throws Exception {
-		ReportTemplate template = super.newInstance(bean);
+	public ReportTemplateExtension newInstance(ReportTemplateExtension bean) throws Exception {
+		ReportTemplateExtension template = super.newInstance(bean);
 		template.setAllHours(ALL_CODE);
 		template.setAllDays(ALL_CODE);
 		template.setAllMonths(ALL_CODE);
@@ -105,8 +105,8 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public ReportTemplate preExecute(ImplicitActionName actionName, ReportTemplate bean, Bean parentBean, WebContext webContext)
-			throws Exception {
+	public ReportTemplateExtension preExecute(ImplicitActionName actionName, ReportTemplateExtension bean,
+			Bean parentBean, WebContext webContext) throws Exception {
 
 		if (ImplicitActionName.Edit.equals(actionName)) {
 			if (bean.getAllHours() == null) {
@@ -128,7 +128,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public void preRerender(String source, ReportTemplate bean, WebContext webContext) throws Exception {
+	public void preRerender(String source, ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		if (ReportTemplate.reportTypePropertyName.equals(source)) {
 			// clear generate/existing when the report type changes
 			bean.setGenerateExisting(null);
@@ -140,7 +140,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public void postLoad(ReportTemplate bean) throws Exception {
+	public void postLoad(ReportTemplateExtension bean) throws Exception {
 		super.postLoad(bean);
 
 		if (StringUtils.isNotBlank(bean.getCronExpression())) {
@@ -196,7 +196,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public void preDelete(ReportTemplate bean) throws Exception {
+	public void preDelete(ReportTemplateExtension bean) throws Exception {
 		super.preDelete(bean);
 		if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.getScheduled())) {
 			JobScheduler.unscheduleReport(bean, CORE.getUser().getCustomer());
@@ -204,7 +204,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public void preSave(ReportTemplate bean) throws Exception {
+	public void preSave(ReportTemplateExtension bean) throws Exception {
 		// update the templateName if not set or needs to be changed
 		if (bean.getTemplateName() == null || bean.originalValues().containsKey(ReportTemplate.namePropertyName)) {
 			bean.setTemplateName(String.format("%s.%s", bean.getName(), FREEMARKER_HTML_TEMPLATE_EXTENSION));
@@ -309,10 +309,15 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	}
 
 	@Override
-	public void validate(ReportTemplate bean, ValidationException e) throws Exception {
+	public void validate(ReportTemplateExtension bean, ValidationException e) throws Exception {
 		super.validate(bean, e);
 
 		if (Boolean.TRUE.equals(bean.getScheduled())) {
+			// check if there are any required parameters
+			if (bean.hasRequiredParameters()) {
+				e.getMessages().add(new Message("This report has required parameters and cannot be scheduled"));
+			}
+
 			if (bean.getUsersToEmail().isEmpty()) {
 				e.getMessages().add(new Message(ReportTemplate.usersToEmailPropertyName,
 						"Please provide at least one user to email the report to"));
@@ -402,7 +407,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 	 * @param bean The ReportTemplate to validate
 	 * @param e The ValidationException any errors will be added to
 	 */
-	private void validateReportParameters(ReportTemplate bean, ValidationException e) {
+	private void validateReportParameters(ReportTemplateExtension bean, ValidationException e) {
 		// skip validation for jasper reports
 		if (bean.getReportType() == ReportType.jasper) {
 			return;
@@ -440,5 +445,4 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplate> {
 			}
 		}
 	}
-
 }

@@ -16,6 +16,7 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 
 import modules.admin.ReportDataset.ReportDatasetExtension;
+import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportDataset.DatasetType;
 import modules.admin.domain.ReportTemplate;
@@ -146,5 +147,23 @@ public class ReportTemplateExtension extends ReportTemplate {
 
 	private String generateTableHeaderRow(String displayName) {
 		return String.format("\t\t\t\t\t<th>%s</th>\n", displayName);
+	}
+
+	/**
+	 * Does this report template contain any required paramters? This is used to determine
+	 * if the report can be scheduled or not.
+	 * 
+	 * @return True if this report template has required parameters
+	 */
+	public boolean hasRequiredParameters() {
+		if (getParameters().size() > 0) {
+			for (ReportParameterExtension param : getParameters()) {
+				if (Boolean.TRUE.equals(param.getRequired())) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }
