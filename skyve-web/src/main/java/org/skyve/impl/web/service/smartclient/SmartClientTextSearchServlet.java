@@ -93,7 +93,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 					            iconMarkup.append("&_n=").append(icon16).append("\"/>");
 				            }
 				            row.put("icon", iconMarkup.toString());
-				            row.put("doc", document.getSingularAlias());
+				            row.put("doc", document.getLocalisedSingularAlias());
 				            row.put(Bean.BIZ_KEY, (bean != null) ? bean.getBizKey() : null);
 				            row.put("excerpt", result.getExcerpt());
 				            row.put("score", Integer.valueOf(result.getScore()));

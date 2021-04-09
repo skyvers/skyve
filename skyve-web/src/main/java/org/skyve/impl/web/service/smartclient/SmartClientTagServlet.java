@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -28,10 +28,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
+import org.skyve.util.Util;
 
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -68,20 +71,20 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					Customer customer = user.getCustomer();
 	
-					String menuButtonId = request.getParameter("ID");
-					String action = request.getParameter("a");
-					String tagId = request.getParameter("t");
-					String tagName = request.getParameter("n");
-					String criteria = request.getParameter("c");
-					String dataSourceName = request.getParameter("d");
+					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
+					String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
+					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("t")));
+					String tagName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
+					String criteria = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("c")));
+					String dataSourceName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 		
 					if ("L".equals(action)) {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
-						String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
+			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
@@ -95,8 +98,8 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("U".equals(action)) {
 						// Note - if there is no form in the view then there is no web context
-						String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
+			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 

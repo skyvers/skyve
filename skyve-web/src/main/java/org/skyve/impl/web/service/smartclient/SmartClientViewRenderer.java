@@ -111,7 +111,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
 
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
@@ -370,7 +369,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.TRUE.equals(border)) {
 			borderBox = new VBox();
 			borderBox.setBorder(Boolean.TRUE);
-			borderBox.setBorderTitle(form.getBorderTitle());
+			borderBox.setBorderTitle(form.getLocalisedBorderTitle());
 			borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
 			borderBox.setPixelWidth(form.getPixelWidth());
 			borderBox.setResponsiveWidth(form.getResponsiveWidth());
@@ -848,7 +847,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Set endRow false as well to stop formatting gayness
 		// Since this is not an input widget, we can't use preProcessFormItem()
 		// Take care of the title, as we're not calling preProcessFormItem
-		String title = currentFormItem.getLabel();
+		String title = currentFormItem.getLocalisedLabel();
 		if (title == null) {
 			title = value;
 		}
@@ -861,7 +860,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 
-		// does the value have binding expressions in them? - (?s) means mutliline match
+		// does the value have binding expressions in them? - (?s) means multiline match
 		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
 		if (dynamic) {
 			binding = "_" + formatCounter++; // _1, _2 and so on
@@ -1049,10 +1048,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("ID:").append(IDExpression()).append(',');
 		code.append("dataSource:'").append(dataSourceId).append("',");
 		code.append("name:'").append(listWidgetVariable).append("',");
-		String title = widget.getTitle();
+		String title = widget.getLocalisedTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
+			code.append(SmartClientGenerateUtils.processString(title)).append("',");
 		}
 		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
@@ -1194,10 +1193,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(",canCreate:").append(user.canCreateDocument(dataWidgetDocument));
 		code.append(",canUpdate:").append(user.canUpdateDocument(dataWidgetDocument));
 		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
-		String title = widget.getTitle();
+		String title = widget.getLocalisedTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
+			code.append(SmartClientGenerateUtils.processString(title)).append("',");
 		}
 		if ((relation instanceof Collection) && 
 				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
@@ -1596,6 +1595,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormPassword(Password password) {
 		preProcessFormItem(password, "password");
 		size(password, null, code);
+		// Security settings
+		code.append("autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
 		disabled(password.getDisabledConditionName(), code);
 		invisible(password.getInvisibleConditionName(), code);
 	}

@@ -40,35 +40,43 @@ public class Subscription extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Subscription";
 
 	/** @hidden */
 	public static final String communicationPropertyName = "communication";
+
 	/** @hidden */
 	public static final String receiverIdentifierPropertyName = "receiverIdentifier";
+
 	/** @hidden */
 	public static final String declinedPropertyName = "declined";
+
 	/** @hidden */
 	@Deprecated
 	public static final String formatTypePropertyName = "formatType";
+
 	/** @hidden */
 	public static final String preferredReceiverIdentifierPropertyName = "preferredReceiverIdentifier";
 
 	/**
-	 * admin.subscription.association.communication.displayName
+	 * Communication
 	 **/
 	private CommunicationExtension communication = null;
+
 	/**
-	 * admin.subscription.receiverIdentifier.displayName
+	 * Receiver
 	 * <br/>
-	 * admin.subscription.receiverIdentifier.description
+	 * This could be an email or sms number, or any other identifier for a delivery method
 	 **/
 	private String receiverIdentifier;
+
 	/**
-	 * admin.subscription.declined.displayName
+	 * Declined
 	 **/
 	private Boolean declined;
+
 	/**
 	 * Format
 	 * <br/>
@@ -76,10 +84,11 @@ public class Subscription extends AbstractPersistentBean {
 	 **/
 	@Deprecated
 	private FormatType formatType;
+
 	/**
-	 * admin.subscription.preferredReceiverIdentifier.displayName
+	 * Redirect to
 	 * <br/>
-	 * admin.subscription.preferredReceiverIdentifier.description
+	 * This could be an email or sms number, or any other identifier for a delivery method
 	 **/
 	private String preferredReceiverIdentifier;
 

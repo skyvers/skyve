@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -37,7 +37,7 @@ public class DownloadServlet extends HttpServlet {
 		try (OutputStream out = response.getOutputStream()) {
 			try {
 				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-	        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());
 	        	}
@@ -119,7 +119,7 @@ public class DownloadServlet extends HttpServlet {
 			            
 						// lastly put the conversation in the cache, after the response is sent
 						// and all lazy loading of domain objects has been realised
-						ConversationUtil.cacheConversation(webContext);
+						StateUtil.cacheConversation(webContext);
 					}
 					catch (InvocationTargetException e) {
 						throw e.getTargetException();

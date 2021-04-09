@@ -33,6 +33,24 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
+	<!-- Force UTF-8 encoding on everything -->
+	<filter>
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<!-- FACES PARAMS -->
 	<context-param>
         <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
@@ -123,6 +141,16 @@
         <filter-name>SkyveFacesFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
     </filter-mapping>
+
+	<!-- Replace faces servlet Cache-control: no-cache with Cache-Control: no-cache,no-store,must-revalidate -->
+	<filter>
+		<filter-name>FacesNoCacheFilter</filter-name>
+		<filter-class>org.omnifaces.filter.CacheControlFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>FacesNoCacheFilter</filter-name>
+		<servlet-name>FacesServlet</servlet-name>
+	</filter-mapping>
 
 	<filter>
 		<filter-name>SkyveFilter</filter-name>
@@ -248,7 +276,7 @@
 
 	<!-- CSRF Header to stop click jacking or frame busting -->
 	<filter>
-		<filter-name>CSRFHeadersFilter</filter-name>
+		<filter-name>SecurityHeadersFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
@@ -262,26 +290,18 @@
 			<param-name>Referrer-Policy</param-name>
 			<param-value>same-origin</param-value>
 		</init-param>
+		<init-param>
+			<param-name>X-Content-Type-Options</param-name>
+			<param-value>nosniff</param-value>
+		</init-param>
+		<init-param>
+			<param-name>X-XSS-Protection</param-name>
+			<param-value>1; mode=block</param-value>
+		</init-param>
 	</filter>
 	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
+		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.jsp</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.xhtml</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>*.html</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
@@ -626,5 +646,9 @@
 
 	<session-config>
 		<session-timeout>30</session-timeout>
+		<!-- 
+			<cookie-config/> is set in SkyveContextListener based on Util.isSecureUrl().
+			The SameSite attribute is set within undertow-handlers.conf as it was impossible through spring security or Filters.
+		-->
 	</session-config>
 </web-app>

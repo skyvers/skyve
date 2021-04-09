@@ -12,14 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -46,9 +45,7 @@ public class ContentUpload extends Localisable {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				Persistence p = CORE.getPersistence();
-				UserImpl internalUser = (UserImpl) p.getUser();
-				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				initialise();
 				
 				return null;
 			}
@@ -103,7 +100,7 @@ public class ContentUpload extends Localisable {
 	public void handleFileUpload(FileUploadEvent event)
 	throws Exception {
 		UploadedFile file = event.getFile();
-		upload(file.getFileName(), file.getContents());
+		upload(file.getFileName(), file.getContent());
 	}
 	
 	/**
@@ -132,7 +129,7 @@ public class ContentUpload extends Localisable {
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -154,7 +151,7 @@ public class ContentUpload extends Localisable {
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
-			ConversationUtil.cacheConversation(webContext);
+			StateUtil.cacheConversation(webContext);
 			
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);

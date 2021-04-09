@@ -27,6 +27,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserRole";
 
@@ -34,13 +35,13 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<UserEx
 	public static final String roleNamePropertyName = "roleName";
 
 	/**
-	 * admin.userRole.roleName.displayName
+	 * Role Name
 	 **/
 	private String roleName;
+
 	private UserExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient

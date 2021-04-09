@@ -379,7 +379,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent tab(UIComponent component, String title, Tab tab) {
 		if (component != null) {
 			// TODO this needs to take into account that it could be nested in other tabs and have a name clash
-			context.put(tab.getTitle() + " Tab", component, tab);
+			context.put(tab.getLocalisedTitle() + " Tab", component, tab);
 		}
 		return component;
 	}

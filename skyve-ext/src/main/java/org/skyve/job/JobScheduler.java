@@ -29,7 +29,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.job.ContentGarbageCollectionJob;
 import org.skyve.impl.job.ContentInitJob;
-import org.skyve.impl.job.EvictConversationsJob;
+import org.skyve.impl.job.EvictStateJob;
 import org.skyve.impl.job.SkyveTriggerListener;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -139,28 +139,28 @@ public class JobScheduler {
 			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
 		}
 
-		// Do expired conversation cache eviction as schedule in the CRON expression in the application properties file
-		if (UtilImpl.CONVERSATION_EVICT_CRON != null) {
-			detail = JobBuilder.newJob(EvictConversationsJob.class)
-								.withIdentity("Evict Expired Conversations", Scheduler.DEFAULT_GROUP)
+		// Do expired state eviction as schedule in the CRON expression in the application properties file
+		if (UtilImpl.STATE_EVICT_CRON != null) {
+			detail = JobBuilder.newJob(EvictStateJob.class)
+								.withIdentity("Evict Expired State", Scheduler.DEFAULT_GROUP)
 								.storeDurably()
 								.build();
 			trigger = TriggerBuilder.newTrigger()
 										.forJob(detail)
-										.withIdentity("Evict Expired Conversations Trigger", Scheduler.DEFAULT_GROUP)
+										.withIdentity("Evict Expired State Trigger", Scheduler.DEFAULT_GROUP)
 										.startAt(in5Minutes) // start in 5 minutes once everything has settled down
-										.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.CONVERSATION_EVICT_CRON))
+										.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.STATE_EVICT_CRON))
 										.build();
 			try {
 				JOB_SCHEDULER.scheduleJob(detail, trigger);
-				Util.LOGGER.info("Evict Expired Conversations Job scheduled for " + trigger.getNextFireTime());
+				Util.LOGGER.info("Evict Expired State Job scheduled for " + trigger.getNextFireTime());
 			}
 			catch (SchedulerException e) {
-				Util.LOGGER.severe("Evict Expired Conversations Job was not scheduled because - " + e.getLocalizedMessage());
+				Util.LOGGER.severe("Evict Expired State Job was not scheduled because - " + e.getLocalizedMessage());
 			}
 		}
 		else {
-			Util.LOGGER.info("Evict Expired Conversations Job was not scheduled because there was no conversations.evictCron in the json.");
+			Util.LOGGER.info("Evict Expired State Job was not scheduled because there was no conversations.evictCron in the json.");
 		}
 	}
 
@@ -299,7 +299,7 @@ public class JobScheduler {
 		
 		// Add the job data
 		JobDataMap map = mutableTrigger.getJobDataMap();
-		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getDisplayName());
+		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, job.getLocalisedDisplayName());
 		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
 		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
 		if (sleepAtEndInSeconds != null) {
@@ -331,14 +331,14 @@ public class JobScheduler {
 				JOB_SCHEDULER.scheduleJob(mutableTrigger);
 			}
 			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
-				throw new ValidationException(new Message("You are already running job " + job.getDisplayName() +
+				throw new ValidationException(new Message("You are already running job " + job.getLocalisedDisplayName() +
 															".  Look in the jobs list for more information."));
 			}
 		}
 		
 		JobKey jobKey = mutableTrigger.getJobKey();
 		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
-		trace.append(": ").append(job.getDisplayName()).append(" with trigger ");
+		trace.append(": ").append(job.getLocalisedDisplayName()).append(" with trigger ");
 		TriggerKey key = mutableTrigger.getKey();
 		trace.append(key.getGroup() + '/' + key.getName());
 		if (firstFireTime != null) {

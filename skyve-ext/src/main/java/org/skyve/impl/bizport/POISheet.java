@@ -15,7 +15,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
-import org.skyve.CORE;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
@@ -613,7 +612,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "String"));
+											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "String"));
 				}
 				break;
 			case BOOLEAN:
@@ -623,7 +622,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Boolean"));
+											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Boolean"));
 				}
 				break;
 			case NUMERIC:
@@ -645,7 +644,7 @@ public final class POISheet implements BizPortSheet {
 						else {
 							addErrorAtCurrentRow(problems,
 													column,
-													Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Date"));
+													Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Date"));
 						}
 					}
 				}
@@ -677,7 +676,7 @@ public final class POISheet implements BizPortSheet {
 					else {
 						addErrorAtCurrentRow(problems,
 												column,
-												Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, CORE.getUser().getLocale(), (attributeType == null) ? "unkown" : attributeType.toString(), "Numeric"));
+												Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Numeric"));
 					}
 				}
 				break;

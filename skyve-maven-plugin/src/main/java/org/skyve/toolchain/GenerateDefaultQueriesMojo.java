@@ -1,7 +1,11 @@
 package org.skyve.toolchain;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.skyve.impl.generate.QueryGenerator;
 import org.skyve.toolchain.config.GenerateDefaultQueriesConfig;
 import org.slf4j.Logger;
@@ -13,30 +17,32 @@ import org.slf4j.LoggerFactory;
 @Mojo(name = "generateDefaultQueries", requiresDependencyResolution = ResolutionScope.TEST)
 @Execute(phase = LifecyclePhase.PROCESS_RESOURCES)
 public class GenerateDefaultQueriesMojo extends AbstractSkyveMojo {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenerateDefaultQueriesMojo.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GenerateDefaultQueriesMojo.class);
 
-    @Parameter()
-    private GenerateDefaultQueriesConfig generateDefaultQueriesConfig;
+	@Parameter
+	private GenerateDefaultQueriesConfig generateDefaultQueriesConfig;
 
-    public void execute() throws MojoExecutionException {
-        try {
-            final String configCustomerName = generateDefaultQueriesConfig != null ? generateDefaultQueriesConfig.getCustomer() : null;
-            final String customerName = getDefaultOrPromptCustomer(configCustomerName);
+	@Override
+	public void execute() throws MojoExecutionException {
+		try {
+			final String configCustomerName = (generateDefaultQueriesConfig != null) ? 
+													generateDefaultQueriesConfig.getCustomer() :
+													null;
+			final String customerName = getDefaultOrPromptCustomer(configCustomerName);
+			final String configModuleName = (generateDefaultQueriesConfig != null) ?
+												generateDefaultQueriesConfig.getModule() :
+												null;
+			final String moduleName = getDefaultOrPrompt(configModuleName, "Please enter a module name");
+			final boolean includeAssociationBizKeys = (generateDefaultQueriesConfig != null) ?
+														generateDefaultQueriesConfig.isIncludeAssociationBizKeys() :
+														false;
 
-            final String configModuleName = generateDefaultQueriesConfig != null ? generateDefaultQueriesConfig.getModule() : null;
-            final String moduleName = getDefaultOrPrompt(configModuleName, "Please enter a module name");
-
-            final Boolean includeAssociationBizKeys = generateDefaultQueriesConfig != null ? generateDefaultQueriesConfig.getIncludeAssociationBizKeys() : false;
-
-            configureClasspath();
-            QueryGenerator.main(new String[] {
-                    customerName,
-                    moduleName,
-                    String.valueOf(Boolean.TRUE.equals(includeAssociationBizKeys))
-            });
-        } catch (Exception e) {
-            LOGGER.error("Failed to generated default queries.", e);
-            throw new MojoExecutionException("Failed to generate default queries.", e);
-        }
-    }
+			configureClasspath();
+			QueryGenerator.main(new String[] {customerName, moduleName, String.valueOf(includeAssociationBizKeys)});
+		}
+		catch (Exception e) {
+			LOGGER.error("Failed to generated default queries.", e);
+			throw new MojoExecutionException("Failed to generate default queries.", e);
+		}
+	}
 }

@@ -3,7 +3,7 @@ package org.skyve.impl.job;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.util.Util;
 
 /**
@@ -11,18 +11,21 @@ import org.skyve.util.Util;
  * 
  * @author sandsm01
  */
-public class EvictConversationsJob implements Job {
+public class EvictStateJob implements Job {
 	
 	@Override
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
 		try {
 			Util.LOGGER.info("Evict expired conversations");
-			ConversationUtil.evictExpiredConversations();
+			StateUtil.evictExpiredConversations();
 			Util.LOGGER.info("Successfully evicted expired conversations");
+			Util.LOGGER.info("Evict expired session CSRF tokens");
+			StateUtil.evictExpiredSessionTokens();
+			Util.LOGGER.info("Successfully evicted expired session CSRF tokens");
 		}
 		catch (Exception e) {
-			throw new JobExecutionException("Error encountered whilst evicting expired conversations", e);
+			throw new JobExecutionException("Error encountered whilst evicting expired web state", e);
 		}
 	}
 }

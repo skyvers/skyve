@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.util.Util;
 
 /**

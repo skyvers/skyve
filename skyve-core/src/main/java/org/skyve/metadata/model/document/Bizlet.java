@@ -7,6 +7,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 /**
@@ -61,7 +62,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 		 */
 		public DomainValue(String code, String description) {
 			this.code = code;
-			this.description = description;
+			this.description = Util.i18n(description);
 		}
 		
 		/**

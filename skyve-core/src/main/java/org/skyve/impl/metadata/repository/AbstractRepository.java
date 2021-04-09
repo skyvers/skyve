@@ -206,7 +206,7 @@ public abstract class AbstractRepository implements Repository {
 		}
 		else {
 			try {
-				result = (T) type.newInstance();
+				result = (T) type.getConstructor().newInstance();
 				if (runtime) {
 					BeanProvider.injectFields(result);
 				}

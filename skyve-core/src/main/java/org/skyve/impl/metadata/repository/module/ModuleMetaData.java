@@ -40,6 +40,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
@@ -371,6 +372,15 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 							column.setPixelWidth(repositoryColumn.getPixelWidth());
 							column.setAlignment(repositoryColumn.getAlignment());
 
+							Boolean escape = repositoryColumn.getEscape();
+							if (escape != null) {
+								column.setEscape(escape.booleanValue());
+							}
+							Sanitisation sanitise = repositoryColumn.getSanitise();
+							if (sanitise != null) {
+								column.setSanitise(sanitise);
+							}
+							
 							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
 								Boolean projected = projectedRepositoryColumn.getProjected();
 								if (projected != null) {

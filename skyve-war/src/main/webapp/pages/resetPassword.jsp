@@ -3,11 +3,12 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 
-<%@ page import="org.primefaces.shaded.owasp.encoder.Encode"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.metadata.user.User"%>
+<%@ page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
+<%@ page import="org.skyve.util.OWASP"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
 <%
@@ -21,7 +22,7 @@
 	String passwordChangeErrorMessage = null;
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
-	String passwordResetToken = request.getParameter("t");
+	String passwordResetToken = OWASP.sanitise(Sanitisation.text, request.getParameter("t"));
 
 	if (passwordResetToken == null) {
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
@@ -122,7 +123,7 @@
 		    	<%@include file="fragments/noscript.html" %>
 		    	
 		    	<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
-					<input type="hidden" name="t" value="<%=Encode.forHtmlAttribute(passwordResetToken)%>" />
+					<input type="hidden" name="t" value="<%=passwordResetToken%>" />
 		    	
 		    		<div class="ui segment">
 			    		<div class="ui header">

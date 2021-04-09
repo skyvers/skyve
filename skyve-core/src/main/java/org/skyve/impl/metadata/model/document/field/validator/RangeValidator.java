@@ -1,7 +1,5 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import java.util.Locale;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -56,34 +54,32 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	}
 
 	@Override
-	public String constructMessage(User user, String displayName, Converter<T> converter) {
-		Locale locale = user.getLocale();
-		String result = Util.i18n(getValidationMessage(), locale);
+	public String constructMessage(User user, String localisedDisplayName, Converter<T> converter) {
+		String result = getLocalisedValidationMessage();
 		if (result == null) {
-			String localisedDisplayName = Util.i18n(displayName, locale);
 			try {
 				if (min != null) {
 					String minDisplay = (converter == null) ? min.toString() : converter.toDisplayValue(min);
 					if (max == null) {
 						if (min instanceof Number) {
-							result = Util.i18n(BeanValidator.VALIDATION_RANGE_LESS_KEY, locale, localisedDisplayName, minDisplay);
+							result = Util.i18n(BeanValidator.VALIDATION_RANGE_LESS_KEY, localisedDisplayName, minDisplay);
 						}
 						else {
-							result = Util.i18n(BeanValidator.VALIDATION_RANGE_BEFORE_KEY, locale, localisedDisplayName, minDisplay);
+							result = Util.i18n(BeanValidator.VALIDATION_RANGE_BEFORE_KEY, localisedDisplayName, minDisplay);
 						}
 					}
 					else {
 						String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY, locale, localisedDisplayName, minDisplay, maxDisplay);
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_BETWEEN_KEY, localisedDisplayName, minDisplay, maxDisplay);
 					}
 				}
 				else if (max != null) {
 					String maxDisplay = (converter == null) ? max.toString() : converter.toDisplayValue(max);
 					if (max instanceof Number) {
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_GREATER_KEY, locale, localisedDisplayName, maxDisplay);
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_GREATER_KEY, localisedDisplayName, maxDisplay);
 					}
 					else {
-						result = Util.i18n(BeanValidator.VALIDATION_RANGE_AFTER_KEY, locale, localisedDisplayName, maxDisplay);
+						result = Util.i18n(BeanValidator.VALIDATION_RANGE_AFTER_KEY, localisedDisplayName, maxDisplay);
 					}
 				}
 			}

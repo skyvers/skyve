@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.util.Util;
 
 /**
  * This class is used for collection unique constraints and for document unique constraints.
@@ -68,6 +69,10 @@ public interface UniqueConstraint extends NamedMetaData {
 	 * @return
 	 */
 	public String getDescription();
+	
+	public default String getLocalisedDescription() {
+		return Util.i18n(getDescription());
+	}
 	
 	/**
 	 * 

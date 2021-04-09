@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.UUID;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -15,6 +16,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
@@ -31,25 +33,30 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
 
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
+import modules.admin.UserList.UserListUtil;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
+import modules.admin.domain.Group;
 import modules.admin.domain.UserProxy;
 
 /**
  * Utility methods applicable across application modules.
  * <p>
  * This class is provided as part of Skyve
- * 
+ *
  * @author robert.brown
- * 
+ *
  */
 public class ModulesUtil {
 
@@ -121,7 +128,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns a calendar day of the week
-	 * 
+	 *
 	 * @param weekDay
 	 *        - the day of the week (DayOfWeek)
 	 * @return - the day of the week as a Calendar.day (int)
@@ -156,7 +163,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns a day of the week from a Calendar day
-	 * 
+	 *
 	 * @param calendarDay
 	 *        - the number of the day (int)
 	 * @return - the DayOfWeek (DayOfWeek)
@@ -209,7 +216,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the number of periods of specified frequency which occur in the
 	 * calendar year.
-	 * 
+	 *
 	 * @param frequency
 	 *        - the specified frequency (OccurrenceFrequency)
 	 * @return - the number of times the specified frequency occurs in a
@@ -239,7 +246,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the number of periods which occur in a calendar year.
-	 * 
+	 *
 	 * @param period
 	 *        - the time period (OccurrencePeriod)
 	 * @return - the number of times the period occurs within a calendar year
@@ -264,7 +271,7 @@ public class ModulesUtil {
 
 	/**
 	 * Adds a time frequency to a given date.
-	 * 
+	 *
 	 * @param frequency
 	 *        - the frequency to add
 	 * @param date
@@ -315,7 +322,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the last day of the month in which the specified date occurs.
-	 * 
+	 *
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the last day of the month in which the specified
@@ -348,7 +355,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the last day of the year in which the specified date occurs.
-	 * 
+	 *
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the last day of the year in which the specified
@@ -383,7 +390,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date of the first day of the month in which the specified
 	 * date occurs.
-	 * 
+	 *
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the first day of that month
@@ -410,7 +417,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date of the first day of the year in which the specified date
 	 * occurs.
-	 * 
+	 *
 	 * @param date
 	 *        - the specified date
 	 * @return - the date of the first day of that year
@@ -436,7 +443,7 @@ public class ModulesUtil {
 	/**
 	 * Returns the date which occurs after the specified date, given the number
 	 * of days to add.
-	 * 
+	 *
 	 * @param date
 	 *        - the specified date
 	 * @param daysToAdd
@@ -546,7 +553,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns the current session/conversation user as an Admin module User
-	 * 
+	 *
 	 * @return The current {@link modules.admin.User.UserExtension}
 	 */
 	public static UserExtension currentAdminUser() {
@@ -565,8 +572,91 @@ public class ModulesUtil {
 	}
 
 	/**
+	 * Creates a new admin User for a given contact
+	 * - sets the new user name to be the contact email address
+	 * - adds the specified group privileges to the user
+	 * - sets their home Module (if provided)
+	 * - sets an expired password (to force them to reset their password)
+	 * - sets a password reset token that can be provided to the user to reset their password
+	 * - optionally sends an invitation email
+	 *
+	 * @param contact the Contact to create the new User from
+	 * @param groupName The name of the group
+	 * @param homeModuleName
+	 * @param sendInvitation
+	 * @return
+	 */
+	public static UserExtension createAdminUserFromContactWithGroup(Contact contact, final String groupName,
+			final String homeModuleName, final boolean sendInvitation) {
+
+
+		if (contact == null) {
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.contact");
+		}
+
+		if (groupName == null) {
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.groupName");
+		}
+
+		// check if user already exists
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		q.getFilter().addEquals(modules.admin.domain.User.userNamePropertyName, contact.getEmail1());
+		q.setMaxResults(1);
+
+		User found = q.beanResult();
+		if (found != null) {
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser");
+		}
+
+		// check the group exists
+		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		qGroup.getFilter().addEquals(Group.namePropertyName, groupName);
+		qGroup.setMaxResults(1);
+		GroupExtension group = qGroup.beanResult();
+
+		if (group == null) {
+			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invalidGroup");
+		}
+
+		// check the home module name exists (Skyve will throw if it doesn't)
+		CORE.getCustomer().getModule(homeModuleName);
+
+		// save the contact to validate the contact and so that it can be referenced by the user
+		contact = CORE.getPersistence().save(contact);
+
+		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
+		// create a user - not with a generated password
+		UserExtension newUser = modules.admin.domain.User.newInstance();
+		newUser.setUserName(contact.getEmail1());
+		newUser.setPassword(EXT.hashPassword(token));
+		newUser.setPasswordExpired(Boolean.TRUE);
+		newUser.setPasswordResetToken(token);
+		newUser.setHomeModule(homeModuleName);
+		newUser.setContact(contact);
+
+		// assign group
+		newUser.getGroups().add(group);
+
+		newUser = CORE.getPersistence().save(newUser);
+
+		if (sendInvitation) {
+			try {
+				// send invitation email
+				CommunicationUtil.sendFailSafeSystemCommunication(UserListUtil.SYSTEM_USER_INVITATION,
+																  UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_SUBJECT,
+																  UserListUtil.SYSTEM_USER_INVITATION_DEFAULT_BODY,
+																  CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
+
+			} catch (Exception e) {
+				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation");
+			}
+		}
+		return newUser;
+	}
+
+	/**
 	 * Returns the current session/conversation user as an Admin module UserProxy
-	 * 
+	 *
 	 * @return The current {@link modules.admin.domain.UserProxy}
 	 */
 	public static UserProxyExtension currentAdminUserProxy() {
@@ -608,7 +698,7 @@ public class ModulesUtil {
 	 * attempts to find the Maximum existing value currently extant in the field
 	 * and increments that. Otherwise, the value returned is incremented and
 	 * updated DocumentNumber value for the specified combination.
-	 * 
+	 *
 	 * @param prefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
@@ -707,7 +797,7 @@ public class ModulesUtil {
 	 */
 	public static Integer getNextDocumentNumber(String moduleName, String documentName, String fieldName) {
 
-		return new Integer(Integer.parseInt(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
+		return Integer.valueOf(Integer.parseInt(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
@@ -716,12 +806,12 @@ public class ModulesUtil {
      */
     public static Long getNextLongDocumentNumber(String moduleName, String documentName, String fieldName) {
 
-        return new Long(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
+		return Long.valueOf(Long.parseLong(getNextDocumentNumber(null, moduleName, documentName, fieldName, 0)));
     }
 
 	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
-	 * 
+	 *
 	 * @param suppliedPrefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
@@ -729,14 +819,14 @@ public class ModulesUtil {
 	 *        - the number to increment
 	 * @param numberLength
 	 *        - the minimum length of the number when specified as a string
-	 *        
+	 *
 	 * @return - the next number
 	 */
 	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {
 
 		String newNumber = "";
 		String nonNumeric = lastNumber;
-		Integer value = new Integer(1);
+		Integer value = Integer.valueOf(1);
 		String prefix;
 		if (suppliedPrefix != null) {
 			prefix = suppliedPrefix;
@@ -752,18 +842,18 @@ public class ModulesUtil {
 				String numberPart = lastNumber.substring(parts[0].length(), lastNumber.length());
 				nonNumeric = lastNumber.substring(0, parts[0].length());
 
-				value = new Integer(Integer.parseInt(numberPart) + 1);
+				value = Integer.valueOf(Integer.parseInt(numberPart) + 1);
 
 				// cater for purely numeric prefix
 			} else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$") && !"0".equals(lastNumber)) {
 				int len = prefix.length();
-				value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
+				value = Integer.valueOf(Integer.parseInt(lastNumber.substring(len)) + 1);
 				nonNumeric = prefix;
 
 				// cater for numeric only
 			} else if (lastNumber.matches("^\\d+$")) {
 				nonNumeric = prefix;
-				value = new Integer(Integer.parseInt(lastNumber) + 1);
+				value = Integer.valueOf(Integer.parseInt(lastNumber) + 1);
 			}
 		} else {
 			nonNumeric = prefix;
@@ -846,18 +936,18 @@ public class ModulesUtil {
 	public static Decimal5 coalesce(Decimal5 val, Decimal5 ifNullValue) {
 		return (val == null ? ifNullValue : val);
 	}
-	
+
 	/** returns null if zero - for reports or data import/export */
 	public static Decimal10 coalesce(Decimal10 val, Decimal10 ifNullValue) {
 		return (val == null ? ifNullValue : val);
-	}	
+	}
 
 	/**
 	 * Replaces the value found in the bean for the binding string provided,
 	 * e.g. if the bean has a binding of contact.name, for which the
 	 * displayNames of those bindings are Contact.FullName , then get the value
 	 * of that binding from the bean provided.
-	 * 
+	 *
 	 * @param bean
 	 *        - the bean relevant for the binding
 	 * @param replacementString
@@ -905,7 +995,7 @@ public class ModulesUtil {
 					Document document = module.getDocument(customer, b.getBizDocument());
 
 					for (Attribute attribute : document.getAllAttributes()) {
-						if (attribute.getDisplayName().equals(a)) {
+						if (attribute.getLocalisedDisplayName().equals(a)) {
 							found = true;
 							if (binding.toString().length() > 0) {
 								binding.append('.').append(attribute.getName());
@@ -991,7 +1081,7 @@ public class ModulesUtil {
 
 	/**
 	 * Returns whether the user has access to the specified module
-	 * 
+	 *
 	 * @param moduleName
 	 * @return
 	 */
@@ -1010,7 +1100,7 @@ public class ModulesUtil {
 
 	/**
 	 * Generic bizport export method.
-	 * 
+	 *
 	 * @param moduleName
 	 *        - the module to be exported
 	 * @param documentName
@@ -1048,7 +1138,15 @@ public class ModulesUtil {
 			// filter for this project if provided
 			query.getFilter().addEquals(Bean.DOCUMENT_ID, b.getBizId());
 		}
-		bgBean.generateData(result, query.beanIterable());
+		try (AutoClosingIterable<Bean> i = query.beanIterable()) {
+			bgBean.generateData(result, i);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 
 		return result;
 	}
@@ -1117,10 +1215,10 @@ public class ModulesUtil {
 		Persistent p = document.getPersistent();
 		return p.getPersistentIdentifier();
 	}
-	
+
 	/**
 	 * Convenience method for returning autocomplete suggestions for a String attribute based on previous values
-	 * 
+	 *
 	 * @param moduleName
 	 * @param documentName
 	 * @param attributeName

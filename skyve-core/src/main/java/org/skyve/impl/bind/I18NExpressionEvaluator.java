@@ -1,6 +1,5 @@
 package org.skyve.impl.bind;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -17,7 +16,7 @@ class I18NExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	public String formatWithoutPrefix(String expression, Bean bean) {
-		return Util.i18n(expression, CORE.getUser().getLocale());
+		return Util.i18n(expression);
 	}
 	
 	@Override

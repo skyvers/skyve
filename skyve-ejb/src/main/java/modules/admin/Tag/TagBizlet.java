@@ -48,7 +48,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			Module module = customer.getModule(bean.getActionModuleName());
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
-				result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
 		}
 
@@ -57,7 +57,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
-				result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
 		}
 
@@ -66,7 +66,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			Document document = module.getDocument(customer, bean.getUploadDocumentName());
 			for (Attribute attribute : document.getAllAttributes()) {
-				result.add(new DomainValue(attribute.getName(), attribute.getDisplayName()));
+				result.add(new DomainValue(attribute.getName(), attribute.getLocalisedDisplayName()));
 			}
 		}
 
@@ -131,7 +131,7 @@ public class TagBizlet extends Bizlet<Tag> {
 				bean.setFilterAction(FilterAction.tagRecordsThatMatch);
 			}
 			if (bean.getFilterColumn() == null) {
-				bean.setFilterColumn(new Integer(1));
+				bean.setFilterColumn(Integer.valueOf(1));
 			}
 			bean.setCopyToUserTagName(bean.getName());
 			
@@ -158,7 +158,7 @@ public class TagBizlet extends Bizlet<Tag> {
 		Customer customer = CORE.getUser().getCustomer();
 		if (Tag.uploadModuleNamePropertyName.equals(attributeName) || Tag.actionModuleNamePropertyName.equals(attributeName)) {
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 		}
 
@@ -288,7 +288,7 @@ public class TagBizlet extends Bizlet<Tag> {
 
 		//if refactoring this method for a TagExtension, ensure you re-test basic tagging functions in lists
 		
-		Long result = new Long(0);
+		Long result = Long.valueOf(0);
 
 		try {
 			DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
@@ -303,7 +303,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfTagged");
 
 			result = Long.valueOf(q.retrieveScalar(Number.class).longValue());
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			result = null;
 		}
 		return result;

@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.view.widget.bound.input.FocusableInputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions"})

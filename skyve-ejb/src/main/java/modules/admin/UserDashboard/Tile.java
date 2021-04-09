@@ -34,7 +34,7 @@ public class Tile implements Serializable {
 	 * 5 - title
 	 * 6 - description
 	 */
-	private String template = "<div class=\"tile %1$s\" onclick=\"location.href='%2$s';\">"
+	private String template = "<div class=\"tile %1$s\" %2$s>"
 			+ "  <div>"
 			+ "    %3$s"
 			+ "    <div class=\"title\"><i class=\"fa %4$s\"></i>%5$s</i></a></div>"
@@ -59,43 +59,38 @@ public class Tile implements Serializable {
 		public Builder() {
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder action(final String action) {
 			this.action = action;
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder actionClass(final String actionClass) {
 			this.actionClass = actionClass;
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder icon(final String icon) {
 			this.icon = icon;
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder link(final String link) {
-			this.link = link;
+			if (link != null && link.length() > 0) {
+				this.link = String.format("onclick=\"location.href='%s';\"", link);
+			}
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder operation(final Operation operation) {
 			this.operation = operation.toString();
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder reason(final String reason) {
 			this.reason = reason;
 			return this;
 		}
 
-		@SuppressWarnings("hiding")
 		public Builder title(final String title) {
 			this.title = title;
 			return this;

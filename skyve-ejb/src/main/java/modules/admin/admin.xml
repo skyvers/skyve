@@ -46,7 +46,7 @@
 		<document ref="ReportParameter" />
 		<document ref="ReportManager" />
 		<document ref="ReportTemplate" defaultQueryName="qReportTemplates" />
-		<document ref="SelfRegistration" />		
+		<document ref="SelfRegistration" />
 		<document ref="SelfRegistrationActivation" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Startup"/>
@@ -66,7 +66,7 @@
 	</documents>
 	<roles>
 		<role name="Anonymous">
-			<description>Access anonymous (not logged in) public features</description>
+			<description>admin.adminRoles.anonymous.description</description>
 			<privileges>
 				<document name="Communication" permission="_R__G"/>
 				<document name="CommunicationTemplate" permission="_R__G"/>
@@ -88,7 +88,7 @@
 				
 				App Users can create their own contacts, and change their own passwords.			
 			</documentation>
-			<description>Manage own contact details and password</description>
+			<description>admin.adminRoles.appUser.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -97,11 +97,14 @@
 				<document name="Generic" permission="CRUDG" />
 				<document name="ReportTemplate" permission="_R__C" />
 				<document name="User" permission="_RU_U" />
+				<document name="UserDashboard" permission="CR__U">
+					<action name="UpdateMyDetails" />
+				</document>
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 		</role>
 		<role name="AuditManager">
-			<description>Manage the activity audit log</description>
+			<description>admin.adminRoles.auditManager.description</description>
 			<privileges>
 				<document name="Audit" permission="_R_DC"/>
 				<document name="DataMaintenance" permission="CRUDC">
@@ -119,7 +122,7 @@
 				For example, shared contact management, common document number serials 
 				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.			
 			</documentation>
-			<description>General access to the administration module</description>
+			<description>admin.adminRoles.basicUser.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -163,7 +166,7 @@
 			<documentation>
 				Allows atomic control over management of, and interaction with, contacts.
 			</documentation>
-			<description>Manage contact details and interactions</description>
+			<description>admin.adminRoles.contactManager.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -189,7 +192,7 @@
 			<documentation>
 				Allows atomic control over visibility of contacts.
 			</documentation>
-			<description>View-only access to contact details</description>
+			<description>admin.adminRoles.contactViewer.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -199,7 +202,7 @@
 			</privileges>
 		</role>
 		<role name="DevOps">
-			<description>Generate Skyve designs and metadata and administer technical aspects of the Skyve runtime</description>
+			<description>admin.adminRoles.devOps.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -210,8 +213,6 @@
 					<action name="EvictSelectedCache" />
 					<action name="StopOrStartSelectedCache" />
 					<action name="ExecuteQuery" />
-					<action name="GenerateEditView" />
-					<action name="GenerateQuery" />
 					<action name="SwapCustomer" />
 					<action name="GenerateMenuSAIL" />
 					<action name="GenerateModuleSAIL" />
@@ -294,7 +295,7 @@
 			<documentation>
 				Allows atomic control over the ability to schedule jobs and review job progress.
 			</documentation>
-			<description>Maintain Jobs</description>
+			<description>admin.adminRoles.jobMaintainer.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -314,7 +315,7 @@
 			<documentation>
 				Administration of users and permissions.
 			</documentation>
-			<description>Allows administration of Users and Groups</description>
+			<description>admin.adminRoles.securityAdministrator.description</description>
 			<privileges>
 				<document name="Audit" permission="_R__C">
 					<action name="SourceVersionChanged" />
@@ -384,7 +385,7 @@
 			<documentation>
 			The view user is intended as a read-only office user, with visibility as per Basic User role.
 			</documentation>
-			<description>View-only access to the administration module</description>
+			<description>admin.adminRoles.viewUser.description</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -411,66 +412,63 @@
 		</role>
 	</roles>
 	<menu>
-		<edit document="ChangePassword" name="Password">
+		<edit document="ChangePassword" name="admin.adminMenu.changePassword.document.displayName">
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 			<role name="AppUser" />
 		</edit>
-		<edit document="UserDashboard" name="User Dashboard">
+		<edit document="UserDashboard" name="admin.adminMenu.userDashboard.document.displayName">
+			<role name="AppUser" />
 			<role name="BasicUser" />
 		</edit>
-		<list document="Contact" name="Contacts">
+		<list document="Contact" name="admin.adminMenu.contact.list.displayName">
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
-		<group name="Communication">
-			<list document="Communication" name="Communications">
+		<group name="admin.adminMenu.communication.group.displayName">
+			<list document="Communication" name="admin.adminMenu.communication.list.displayName">
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
 			</list>
-			<list document="CommunicationTemplate" name="Communication Templates">
+			<list document="CommunicationTemplate" name="admin.adminMenu.communicationTemplate.list.displayName">
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
-		<group name="Security Admin">
-			<list document="Group" name="Groups">
+		<group name="admin.adminMenu.securityAdmin.group.displayName">
+			<list document="Group" name="admin.adminMenu.groups.list.displayName">
 				<role name="SecurityAdministrator" />
 			</list>
-			<edit document="UserList" name="Users">
+			<edit document="UserList" name="admin.adminMenu.userList.document.displayName">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list document="DataGroup" name="Data Groups">
+			<list document="DataGroup" name="admin.adminMenu.dataGroup.list.displayName">
 				<uxui name="desktop" />
 				<uxui name="external" />
 				<uxui name="tablet" />
 				<role name="SecurityAdministrator" />
 			</list>
-			<edit document="Configuration" name="Configuration">
+			<edit document="Configuration" name="admin.adminMenu.configuration.document.displayName">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list query="qLoginHistory" name="Login History">
+			<list query="qLoginHistory" name="admin.adminMenu.qLoginHistory.list.displayName">
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
-		<group name="DevOps">
-			<edit document="ControlPanel" name="Control Panel">
+		<group name="admin.adminMenu.devOps.group.displayName">
+			<edit document="ControlPanel" name="admin.adminMenu.controlPanel.document.displayName">
 				<role name="DevOps" />
 			</edit>
-			<edit document="DataMaintenance" name="Data Maintenance">
+			<edit document="DataMaintenance" name="admin.adminMenu.dataMaintenance.document.displayName">
 				<role name="DevOps" />
 			</edit>
-			<edit name="Document Creator" document="DocumentCreator">
+			<edit document="DocumentCreator" name="admin.adminMenu.documentCreator.document.displayName">
 				<uxui name="desktop" />
 				<uxui name="external" />
 				<uxui name="tablet" />
 				<role name="DevOps" />
 			</edit>
-			<!-- <edit document="ReportDesign" name="Report Design">
-				<uxui name="desktop" />
-				<role name="DevOps" />
-			</edit> -->
 			<list document="UserMonthlyHits" name="User Hits" autoPopulate="false">
 				<uxui name="desktop" />
 				<role name="DevOps" />
@@ -491,35 +489,35 @@
 				<role name="SecurityAdministrator"/>
 			</list>
 		</group>
-		<list name="Snapshots" document="Snapshot">
+		<list document="Snapshot" name="admin.adminMenu.snapshots.list.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
-		<list name="Tags" document="Tag">
+		<list document="Tag" name="admin.adminMenu.tags.list.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
-		<list name="Audits" document="Audit">
+		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="SecurityAdministrator" />
 			<role name="AuditManager" />
 		</list>
-		<edit document="SystemDashboard" name="System Dashboard">
+		<edit document="SystemDashboard" name="admin.adminMenu.systemDashboard.document.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
 			<role name="SecurityAdministrator" />
 		</edit>
-		<list name="Document Numbers" document="DocumentNumber">
+		<list document="DocumentNumber" name="admin.adminMenu.documentNumber.list.displayName">
 			<role name="SecurityAdministrator" />
 		</list>
-		<edit document="Jobs" name="Jobs">
+		<edit document="Jobs" name="admin.adminMenu.jobs.document.displayName">
 			<role name="JobMaintainer" />
 		</edit>
 	</menu>
@@ -732,17 +730,18 @@
 				<column binding="description" sortOrder="ascending" />
 				<column binding="documentName" />
 				<column binding="subject" />
-				<column binding="template"/>
+				<column binding="template.bizKey"/>
 			</columns>
 		</query>
 		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
-			<description>Communications</description>
+			<description>Communication Templates</description>
 			<columns>
 				<column binding="name" sortOrder="ascending"/>
 				<column binding="description" />
-				<column binding="template"/>
+				<column binding="template" sanitise="relaxed" escape="false"/>
 			</columns>
-		</query>		<query name="qSubscriptions" documentName="Subscription">
+		</query>
+		<query name="qSubscriptions" documentName="Subscription">
 			<description>Subscriptions</description>
 			<columns>
 				<column binding="receiverIdentifier" sortOrder="ascending" />

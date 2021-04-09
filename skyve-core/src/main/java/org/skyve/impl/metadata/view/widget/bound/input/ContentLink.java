@@ -21,7 +21,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
+import org.skyve.util.Util;
 
 /**
  * value is optional - defaults to "Content" or "Empty".
@@ -48,6 +48,10 @@ public class ContentLink extends InputWidget implements Editable, Parameterizabl
 	
 	public String getValue() {
 		return value;
+	}
+	
+	public String getLocalisedValue() {
+		return Util.i18n(value);
 	}
 
 	@XmlAttribute(required = false)

@@ -27,11 +27,13 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "InverseOneToOnePersistent";
 
 	/** @hidden */
 	public static final String aggAssociationPropertyName = "aggAssociation";
+
 	/** @hidden */
 	public static final String invAggAssociationPropertyName = "invAggAssociation";
 
@@ -39,6 +41,7 @@ public class InverseOneToOnePersistent extends AbstractPersistentBean {
 	 * Aggregated Association
 	 **/
 	private InverseOneToOnePersistent aggAssociation = null;
+
 	/**
 	 * Inverse
 	 **/

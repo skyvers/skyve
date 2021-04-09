@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -131,6 +134,70 @@ public class WebUtil {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Delete all cookies (except the customer cookie which could be useful next time) or selected cookies by name.
+	 * If names varargs isn't used all cookies bar the customer cookie are deleted.
+	 * If names varargs is used, only those cookies are deleted.
+	 */
+	public static void deleteCookies(HttpServletRequest request, HttpServletResponse response, String... names) {
+		// remove all cookies too
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null && cookies.length > 0) {
+			for (Cookie cookie : cookies) {
+				String name = cookie.getName();
+				boolean delete = (names.length == 0) && 
+									(! AbstractWebContext.CUSTOMER_COOKIE_NAME.equals(name)) &&
+									// Don't include "ecuador_expandeditems", "ultima_expandeditems" as the menus don't respond well.
+									// Ecuador Menu - accordions do not open at all when expanded on server menu model and no cookie set
+									// Ultima Menu - Selecting a different menu item within the same module makes the module accordion collapse
+									(! name.startsWith("ecuador_")) &&
+									(! name.startsWith("ultima_"));
+				if (! delete) {
+					for (String n : names) {
+						if (n.equals(name)) {
+							delete = true;
+							break;
+						}
+					}
+				}
+				if (delete) {
+					cookie.setValue("-");
+					cookie.setMaxAge(0);
+					cookie.setPath("/");
+					cookie.setHttpOnly(true);
+					cookie.setSecure(Util.isSecureUrl());
+					response.addCookie(cookie);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Delete the menu state cookies for all PF themes.
+	 */
+	public static void deleteMenuCookies(HttpServletRequest request, HttpServletResponse response) {
+		// Don't include "ecuador_expandeditems", "ultima_expandeditems" as the menus don't respond well.
+		// Ecuador Menu - accordions do not open at all when expanded on server menu model and no cookie set
+		// Ultima Menu - Selecting a different menu item within the same module makes the module accordion collapse
+		deleteCookies(request, response, "panelMenu-leftMenu");
+	}
+	
+	/**
+	 * Really logout of the app - logout, invalidate session and remove all cookies.
+	 */
+	public static void logout(HttpServletRequest request, HttpServletResponse response) 
+	throws ServletException {
+		request.logout();
+
+		// NB invalidate the session after logging out otherwise WebLogic 12c NPEs
+		HttpSession s = request.getSession(false);
+		if (s != null) {
+			s.invalidate();
+		}
+		
+		deleteCookies(request, response);
 	}
 	
 	/**
@@ -339,7 +406,7 @@ public class WebUtil {
 														bizId),
 										e);
 				throw new MetaDataException(String.format("Failed to resolve this %s.", 
-															referenceDocument.getSingularAlias()),
+															referenceDocument.getLocalisedSingularAlias()),
 												e);
 				
 			}
@@ -349,7 +416,7 @@ public class WebUtil {
 		}
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
-																		referenceDocument.getSingularAlias())));
+																		referenceDocument.getLocalisedSingularAlias())));
 		}
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 

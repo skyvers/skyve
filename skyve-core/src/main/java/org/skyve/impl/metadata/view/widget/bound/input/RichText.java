@@ -14,11 +14,11 @@ import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "properties"})
+			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "sanitise", "properties"})
 public class RichText extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -4873861225052464043L;
 
@@ -26,6 +26,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+	private Sanitisation sanitise;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -78,6 +79,15 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	@XmlAttribute(required = true)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	public Sanitisation getSanitise() {
+		return sanitise;
+	}
+
+	@XmlAttribute
+	public void setSanitise(Sanitisation sanitise) {
+		this.sanitise = sanitise;
 	}
 
 	@Override

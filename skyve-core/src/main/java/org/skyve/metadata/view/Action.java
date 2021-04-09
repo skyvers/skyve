@@ -9,6 +9,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -49,7 +50,11 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @return
 	 */
 	public String getDisplayName();
-	
+
+	public default String getLocalisedDisplayName() {
+		return Util.i18n(getDisplayName());
+	}
+
 	/**
 	 * 
 	 * @return
@@ -68,11 +73,19 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 */
 	public String getConfirmationText();
 	
+	public default String getLocalisedConfirmationText() {
+		return Util.i18n(getConfirmationText());
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
 	public String getToolTip();
+	
+	public default String getLocalisedToolTip() {
+		return Util.i18n(getToolTip());
+	}
 	
 	/**
 	 * 

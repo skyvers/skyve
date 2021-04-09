@@ -27,6 +27,7 @@ public abstract class InjectedDocument extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "InjectedDocument";
 

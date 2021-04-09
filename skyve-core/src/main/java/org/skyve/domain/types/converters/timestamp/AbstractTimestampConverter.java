@@ -1,17 +1,34 @@
-package org.skyve.domain.types.converters.datetime;
+package org.skyve.domain.types.converters.timestamp;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.Validator;
+import org.skyve.metadata.model.Attribute.AttributeType;
 
 public abstract class AbstractTimestampConverter implements Converter<Timestamp> {
+	@Override
+	public final AttributeType getAttributeType() {
+		return AttributeType.timestamp;
+	}
+
+	@Override
+	public Format<Timestamp> getFormat() {
+		return null;
+	}
+
+	@Override
+	public Validator<Timestamp> getValidator() {
+		return null;
+	}
 
 	/**
 	 * The pattern for this Timestamp converter
 	 * 
 	 * @return Timestamp format String pattern
 	 */
-	public abstract String getPattern();
+	protected abstract String getPattern();
 
 	@Override
 	public Timestamp fromDisplayValue(String displayValue) throws Exception {

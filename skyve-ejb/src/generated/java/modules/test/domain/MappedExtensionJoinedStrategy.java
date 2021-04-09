@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
-import modules.test.domain.MappedBase;
 import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -34,18 +33,25 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	private static final long serialVersionUID = 1L;
 
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
+	@SuppressWarnings("hiding")
 	public static final String DOCUMENT_NAME = "MappedExtensionJoinedStrategy";
 
 	/** @hidden */
 	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
+
 	/** @hidden */
 	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+
 	/** @hidden */
 	public static final String composedCollectionPropertyName = "composedCollection";
+
 	/** @hidden */
 	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
+
 	/** @hidden */
 	public static final String derivedIntegerPropertyName = "derivedInteger";
 
@@ -53,18 +59,22 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	 * Aggregated Association
 	 **/
 	private MappedExtensionJoinedStrategyExtension aggregatedAssociation = null;
+
 	/**
 	 * Aggregated Collection
 	 **/
 	private List<MappedExtensionJoinedStrategyExtension> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
+
 	/**
 	 * Composed Collection
 	 **/
 	private List<MappedExtensionJoinedStrategyExtension> composedCollection = new ChangeTrackingArrayList<>("composedCollection", this);
+
 	/**
 	 * Inverse
 	 **/
 	private List<MappedExtensionJoinedStrategyExtension> inverseAggregatedAssociation = new ArrayList<>();
+
 	/**
 	 * Derived Integer
 	 **/

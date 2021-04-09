@@ -18,7 +18,8 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
+import org.skyve.metadata.view.TextOutput;
+import org.skyve.util.Util;
 
 /**
  * If a label width/height is not specified, it sizes to fit its contents.
@@ -34,8 +35,10 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 						"invisibleConditionName", 
 						"visibleConditionName",
 						"formatted",
+						"escape",
+						"sanitise",
 						"properties"})
-public class Label extends AbstractBound implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
+public class Label extends AbstractBound implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget, TextOutput {
 	private static final long serialVersionUID = -1713640318580531970L;
 
 	/**
@@ -64,6 +67,9 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 */
 	private HorizontalAlignment textAlignment = null;
 	
+	private Boolean escape;
+	private Sanitisation sanitise;
+
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
@@ -75,6 +81,10 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	
 	public String getValue() {
 		return value;
+	}
+	
+	public String getLocalisedValue() {
+		return Util.i18n(value);
 	}
 
 	@XmlAttribute(required = false)
@@ -152,6 +162,26 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	@XmlAttribute(name = "textAlignment", required = false)
 	public void setTextAlignment(HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
+	}
+
+	@Override
+	public Boolean getEscape() {
+		return escape;
+	}
+
+	@XmlAttribute
+	public void setEscape(Boolean escape) {
+		this.escape = escape;
+	}
+
+	@Override
+	public Sanitisation getSanitise() {
+		return sanitise;
+	}
+
+	@XmlAttribute
+	public void setSanitise(Sanitisation sanitise) {
+		this.sanitise = sanitise;
 	}
 
 	@Override

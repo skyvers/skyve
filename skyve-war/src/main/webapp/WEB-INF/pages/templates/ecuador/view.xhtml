@@ -8,7 +8,7 @@
 		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:o="http://omnifaces.org/ui"
 		dir="#{bean.dir}">
-	<f:view encoding="UTF-8">
+	<f:view contentType="text/html" encoding="UTF-8">
 		<ui:composition template="./template.xhtml">
 			<ui:param name="showMenu" value="#{showMenu}" />
 			<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
@@ -17,6 +17,8 @@
 			<ui:define name="head">
 				<h:outputScript library="primefaces" name="moment/moment.js" />
 				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
+				<h:outputStylesheet library="primefaces" name="texteditor/texteditor.css" />
+				<h:outputScript library="primefaces" name="texteditor/texteditor.js" />
 				<ui:insert name="head" />
 			</ui:define>
 			<ui:define name="body">

@@ -84,7 +84,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 				}
 			}
 		}
@@ -101,7 +101,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		Customer customer = pers.getUser().getCustomer();
 		if (Communication.moduleNamePropertyName.equals(attributeName)) {
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 		}
 
@@ -137,10 +137,10 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
 
 			StringBuilder sb = new StringBuilder(64);
-			sb.append(document.getAttribute(Communication.systemUsePropertyName).getDisplayName());
-			sb.append(' ').append(document.getPluralAlias());
+			sb.append(document.getAttribute(Communication.systemUsePropertyName).getLocalisedDisplayName());
+			sb.append(' ').append(document.getLocalisedPluralAlias());
 			sb.append(" may not be deleted unless ");
-			sb.append(document.getAttribute(Communication.systemUsePropertyName).getDisplayName());
+			sb.append(document.getAttribute(Communication.systemUsePropertyName).getLocalisedDisplayName());
 			sb.append(" is set to FALSE.");
 
 			throw new ValidationException(new Message(sb.toString()));
@@ -183,7 +183,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		try {
 			BigInteger exists = sqlSub.scalarResult(BigInteger.class);
 			result = exists.compareTo(new BigInteger("0")) > 0;
-		} catch (DomainException d) {
+		} catch (@SuppressWarnings("unused") DomainException d) {
 			// do nothing, return false
 		}
 		return result;

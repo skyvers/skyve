@@ -1,4 +1,4 @@
-<%@ page session="false" language="java"%>
+<%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="org.skyve.util.Util"%>
 
 <%

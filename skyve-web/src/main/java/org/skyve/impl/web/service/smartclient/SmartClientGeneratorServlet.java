@@ -27,7 +27,9 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
@@ -45,20 +47,12 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	@Override
-	protected void doPost(HttpServletRequest request,
-							HttpServletResponse response)
-	throws ServletException, IOException {
-		UtilImpl.LOGGER.info("SmartClient Generate - post....");
-		processRequest(request, response);
-	}
-
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
 	private static void processRequest(HttpServletRequest request,
 										HttpServletResponse response)
 	throws IOException {
-		String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
-		String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+		String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
+		String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 
 		response.setContentType(MimeType.javascript.toString());
 		response.setCharacterEncoding(Util.UTF8);
@@ -188,7 +182,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					}
 				}
 				
-				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(Util.i18n(document.getSingularAlias(), user.getLocale())));
+				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getLocalisedSingularAlias()));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 

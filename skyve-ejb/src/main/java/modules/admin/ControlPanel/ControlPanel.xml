@@ -50,18 +50,14 @@
 			<displayName>admin.controlPanel.dirtyTrace.displayName</displayName>
 			<description>admin.controlPanel.dirtyTrace.description</description>
 		</boolean>
-<!-- Cant influence this setting as it is set in the hibernate session factory
+		<!-- Can't influence this setting as it is set in the hibernate session factory
 		<boolean name="prettySqlOutput">
 			<displayName>Pretty SQL</displayName>
 			<description>Output any SQL logged in a more readable multiline format.</description>
 		</boolean>
--->
+		-->
+		
 		<!-- Design attributes -->
-		<text name="designModuleDocumentName">
-			<displayName>admin.controlPanel.designModuleDocumentName.displayName</displayName>
-			<domain>variant</domain>
-			<length>50</length>
-		</text>
 		<text name="query">
 			<displayName>admin.controlPanel.query.displayName</displayName>
 			<length>2048</length>
@@ -189,7 +185,7 @@
    			<defaultValue>1</defaultValue>
    			<validator min="1" max="10000"/>
    		</integer>
-   		<text name="testModuleName" required="true">
+   		<text name="testModuleName" required="false">
    			<displayName>admin.controlPanel.testModuleName.displayName</displayName>
    			<description>admin.controlPanel.testModuleName.description</description>
    			<domain>constant</domain>

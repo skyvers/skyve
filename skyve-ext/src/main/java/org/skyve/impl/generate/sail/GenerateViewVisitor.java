@@ -76,7 +76,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		TabSelect select = new TabSelect();
-		select.setTabPath(tab.getTitle());
+		select.setTabPath(tab.getLocalisedTitle());
 		populateSteps.add(select);
 		actionSteps.add(select);
 	}

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.locationtech.jts.geom.Geometry;
+import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
@@ -41,6 +42,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 import org.skyve.web.SortParameter;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
@@ -73,8 +75,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	@Override
 	public List<BeanMapAdapter<Bean>> load(int first,
 											int pageSize,
-											List<SortMeta> multiSortMeta,
-											Map<String, Object> filters) {
+											Map<String, SortMeta> multiSortMeta,
+											Map<String, FilterMeta> filters) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
@@ -155,6 +157,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));
@@ -167,10 +170,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 											int pageSize,
 											String sortField,
 											SortOrder sortOrder,
-											Map<String, Object> filters) {
-		List<SortMeta> sorts = null;
+											Map<String, FilterMeta> filters) {
+		Map<String, SortMeta> sorts = null;
 		if (sortField != null) {
-			sorts = Collections.singletonList(new SortMeta(null, sortField, sortOrder, null));
+			sorts = Collections.singletonMap(sortField, new SortMeta(null, sortField, sortOrder, null));
 		}
 		return load(first, pageSize, sorts, filters);
 	}
@@ -194,28 +197,29 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
 	}
 	
-	private static void sort(List<SortMeta> multiSortMeta, ListModel<Bean> model) {
+	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {
 		int l = multiSortMeta.size();
 		SortParameter[] sortParameters = new SortParameter[l];
-		for (int i = 0; i < l; i++) {
-			SortMeta sm = multiSortMeta.get(i);
+		int i = 0;
+		for (SortMeta sm : multiSortMeta.values()) {
 			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getSortField(), sm.getSortOrder()));
 			SortParameter sp = new SortParameterImpl();
 			sp.setBy(sm.getSortField());
 			sp.setDirection((SortOrder.DESCENDING.equals(sm.getSortOrder())) ? SortDirection.descending : null);
-			sortParameters[i] = sp;
+			sortParameters[i++] = sp;
 		}
 
 		model.setSortParameters(sortParameters);
 	}
 	
-	private static void filter(Map<String, Object> filters, ListModel<Bean> model, Customer customer)
+	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		Filter modelFilter = model.getFilter();
 		for (String key : filters.keySet()) {
-			Object value = filters.get(key);
+			FilterMeta fm = filters.get(key);
+			Object value = fm.getFilterValue();
 			if ((value == null) || "".equals(value)) {
 				continue;
 			}

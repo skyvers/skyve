@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
-import java.util.Locale;
 
 import javax.faces.component.UIComponent;
 
@@ -108,16 +107,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setUserAgentType(userAgentType);
-		}
-	}
-	
-	@Override
-	public void setLocale(Locale locale) {
-		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
-		super.setLocale(locale);
-		// Now set the state on all builders in the chain
-		for (ComponentBuilder builder : builders) {
-			builder.setLocale(locale);
 		}
 	}
 	

@@ -118,7 +118,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 						indexList = new ArrayList<>();
 						tempMap.put(name, indexList);
 					}
-					indexList.add(new Integer(index));
+					indexList.add(Integer.valueOf(index));
 
 					index++;
 				}

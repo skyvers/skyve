@@ -27,6 +27,7 @@ public class SystemDashboard extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "SystemDashboard";
 

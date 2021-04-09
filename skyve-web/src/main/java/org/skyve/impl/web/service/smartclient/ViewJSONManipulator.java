@@ -119,6 +119,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
@@ -128,7 +129,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
+import org.skyve.util.OWASP;
 import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -137,7 +138,6 @@ class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processActionReference(ActionReference reference) {
 			htmlGuts.append("javascript:").append(generateWidgetId());
 			htmlGuts.append("._view.doAction('").append(reference.getActionName()).append("',false,'");
@@ -146,7 +146,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processContentReference(ContentReference reference) {
 			String binding = reference.getBinding();
 			
@@ -160,7 +159,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processEditViewReference(EditViewReference reference) {
 			String binding = reference.getBinding();
 			htmlGuts.append(org.skyve.util.Util.getDocumentUrl(reference.getModuleName(),
@@ -171,13 +169,11 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processExternalReference(ExternalReference reference) {
 			htmlGuts.append(reference.getHref());
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processImplicitActionReference(ImplicitActionReference reference) {
 			ImplicitActionName implicitAction = reference.getImplicitActionName();
 
@@ -194,7 +190,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processReportReference(ReportReference reference) {
 			htmlGuts.append("report.rpt?_format=").append(reference.getFormat()).append("&_id={bizId}");
 			htmlGuts.append("&_n=").append(reference.getReportName());
@@ -215,7 +210,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void processResourceReference(ResourceReference reference) {
 			htmlGuts.append("resources?").append(AbstractWebContext.DOCUMENT_NAME).append("={bizModule}.{bizDocument}&");
 			htmlGuts.append(AbstractWebContext.REPORT_NAME).append('=').append(reference.getRelativeFile());
@@ -261,8 +255,8 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 	// These are format strings keyed by the binding prefix
 	// binding prefix ("" if no prefix - see bindings above), and then a map of 
-	// form/grid column item names -> format expressions 
-	private Map<String, Map<String, String>> formats = new TreeMap<>();
+	// form/grid column item names -> format expression objects
+	private Map<String, Map<String, ViewFormat>> formats = new TreeMap<>();
 
 	// There is no binding prefixes for comparisons - too hard
 	// The map is for comparison bindings -> comparison JSON tree required to populate the widget
@@ -278,7 +272,6 @@ class ViewJSONManipulator extends ViewVisitor {
 	private int createIdCounter = 0;
 
 	// HrefProcessor - takes a Reference and appends a suitable href in htmlGuts
-	@SuppressWarnings("synthetic-access")
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
@@ -316,8 +309,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		String title = Util.i18n(view.getTitle(), user.getLocale());
-		result.put("_title", BindUtil.formatMessage(title, bean));
+		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
 
 		// put the view changed/dirty flag in
 		result.put("_changed", Boolean.valueOf(webContextToReference.getCurrentBean().hasChanged()));
@@ -389,8 +381,20 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws Exception {
 		// Add bindings
 		for (String binding : bindings.getBindings()) {
+			ViewBinding viewBinding = bindings.getBinding(binding);
 			Object value = BindUtil.get(aBean, binding);
-			if (value instanceof Bean) {
+			boolean escape = viewBinding.isEscape();
+			Sanitisation sanitise = viewBinding.getSanitise();
+			// escape and sanitise string values if needed
+			if ((escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) && (value instanceof String)) {
+				String string = (String) value;
+				string = OWASP.sanitise(sanitise, string);
+				if (escape) {
+					string = OWASP.escapeHtml(string);
+				}
+				value = string;
+			}
+			else if (value instanceof Bean) {
 				value = ((Bean) value).getBizId();
 			}
 			// Coerce boolean and numbers into strings if they have a domain defined
@@ -417,14 +421,21 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (bindingKey == null) {
 			bindingKey = "";
 		}
-		Map<String, String> formatMap = formats.get(bindingKey);
+		Map<String, ViewFormat> formatMap = formats.get(bindingKey);
 		if (formatMap != null) {
 			for (String name : formatMap.keySet()) {
-				String format = formatMap.get(name);
+				ViewFormat viewFormat = formatMap.get(name);
+				String format = viewFormat.getFormat();
 				// replace the "{CONTEXT}" placeholder with the current webId
 				format = format.replace("{CONTEXT}", webId);
 				// now format the message
-				format = BindUtil.formatMessage(format, aBean);
+				Sanitisation sanitisation = viewFormat.getSanitise();
+				if (viewFormat.isEscape()) {
+					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitisation, displayValue), aBean);
+				}
+				else {
+					format = BindUtil.formatMessage(format, displayValue -> OWASP.sanitise(sanitisation, displayValue), aBean);
+				}
 				// remove the display style if its true
 				format = format.replace("display:true;", "");
 				// change to display none if display style is false
@@ -624,7 +635,8 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
 //UtilImpl.LOGGER.info(currentBindings.getFullyQualifiedBindingPrefix() + " : " + binding);
-			if (bindings.isMutable(binding)) {
+			ViewBinding vb = bindings.getBinding(binding);
+			if ((vb != null) && vb.isMutable()) {
 				applyJSONProperty(documentToApply, binding, valuesToApply, beanToApplyTo, persistence, webContext);
 			}
 		}
@@ -696,34 +708,38 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addBinding(String binding, boolean mutable) {
-		addBinding(binding, mutable, false);
+	private void addBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
+		addBinding(binding, mutable, escape, sanitise, false);
 	}
 
-	private void addBinding(String binding, boolean mutable, boolean noPrefix) {
+	private void addBinding(String binding,
+								boolean mutable,
+								boolean escape,
+								Sanitisation sanitise,
+								boolean noPrefix) {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
-			bindings.putBinding(binding, mutable);
+			bindings.putBinding(binding, mutable, escape, (sanitise == null) ? Sanitisation.relaxed : sanitise);
 		}
 	}
 
-	private void addFormat(String valueTemplate) {
+	private void addFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
 		if (valueTemplate != null) {
 			String currentBindingPrefix = currentBindings.getBindingPrefix();
 			String formatKey = (currentBindingPrefix == null) ? "" : currentBindingPrefix;
-			Map<String, String> formatMap = formats.get(formatKey);
+			Map<String, ViewFormat> formatMap = formats.get(formatKey);
 			if (formatMap == null) {
 				formatMap = new TreeMap<>();
 				formats.put(formatKey, formatMap);
 			}
 			String name = "_" + formatCounter++;
-			formatMap.put(name, valueTemplate);
+			formatMap.put(name, new ViewFormat(valueTemplate, escape, sanitise));
 		}
 	}
 
 	private void addCondition(String condition) {
 		if ((condition != null) && (! condition.equals("true")) && (! condition.equals("false"))) {
-			addBinding(condition, false, true);
+			addBinding(condition, false, false, Sanitisation.none, true);
 		}
 	}
 	
@@ -833,7 +849,7 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(tabPane.getInvisibleConditionName());
 		addCondition(tabPane.getDisabledConditionName());
-		addBinding(tabPane.getSelectedTabIndexBinding(), false);
+		addBinding(tabPane.getSelectedTabIndexBinding(), false, false, Sanitisation.text);
 	}
 
 	@Override
@@ -946,7 +962,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(geometry)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(geometry.getBinding(), true);
+				addBinding(geometry.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(geometry.getInvisibleConditionName());
@@ -967,7 +983,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(geometry)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(geometry.getBinding(), true);
+				addBinding(geometry.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(geometry.getInvisibleConditionName());
@@ -1086,15 +1102,15 @@ class ViewJSONManipulator extends ViewVisitor {
 			if (parentVisible && visible(image)) {
 				if ((! forApply) || 
 						(forApply && parentEnabled && (! Boolean.FALSE.equals(image.getEditable())))) {
-					addBinding(image.getBinding(), true);
+					addBinding(image.getBinding(), true, false, Sanitisation.text);
 				}
 			}
 			addCondition(image.getInvisibleConditionName());
 			addCondition(image.getDisabledConditionName());
-			addBinding(Bean.MODULE_KEY, false);
-			addBinding(Bean.DOCUMENT_KEY, false);
-			addBinding(Bean.DATA_GROUP_ID, false);
-			addBinding(Bean.USER_ID, false);
+			addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
+			addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
+			addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
+			addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 		}
 	}
 
@@ -1111,15 +1127,15 @@ class ViewJSONManipulator extends ViewVisitor {
 									blurb.getPixelHeight(),
 									blurb.getTextAlignment(),
 									blurb.getInvisibleConditionName());
-			htmlGuts.append('>').append(blurb.getMarkup()).append("</div>");
+			htmlGuts.append('>').append(blurb.getLocalisedMarkup()).append("</div>");
 		}
 		else {
-			String markup = blurb.getMarkup();
+			String markup = blurb.getLocalisedMarkup();
 			if (BindUtil.messageIsBound(markup)) { // has a binding expression
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addFormat(markup);
+						addFormat(markup, ! Boolean.FALSE.equals(blurb.getEscape()), blurb.getSanitise());
 					}
 					else {
 						// ensure the format counter is incremented to stay in sync with the generated edit view
@@ -1154,7 +1170,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				htmlGuts.append('{').append(binding).append('}');
 			}
 			else {
-				String value = label.getValue();
+				String value = label.getLocalisedValue();
 				if (value != null) {
 					htmlGuts.append(value);
 				}
@@ -1165,13 +1181,13 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append("</span>");
 		}
 		else {
-			String value = label.getValue();
+			String value = label.getLocalisedValue();
 			boolean boundValue = (value != null) && BindUtil.messageIsBound(value);
 			if (boundValue) { // has a binding expression
 				if (parentVisible && visible(label)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addFormat(value);
+						addFormat(value, ! Boolean.FALSE.equals(label.getEscape()), label.getSanitise());
 					}
 					else {
 						// ensure the format counter is incremented to stay in sync with the generated edit view
@@ -1187,7 +1203,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				if (parentVisible && visible(label)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addBinding(label.getBinding(), false);
+						addBinding(label.getBinding(), false, ! Boolean.FALSE.equals(label.getEscape()), label.getSanitise());
 					}
 				}
 			}
@@ -1223,7 +1239,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			}
 		}
 			
-		String value = link.getValue();
+		String value = link.getLocalisedValue();
 		if (value != null) {
 			htmlGuts.append(">").append(value).append("</a>");
 		}
@@ -1232,7 +1248,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 		
 		if (! visitingDataWidget) {
-			addFormat(htmlGuts.toString());
+			addFormat(htmlGuts.toString(), false, Sanitisation.none);
 			htmlGuts.setLength(0);
 			
 			addCondition(link.getInvisibleConditionName());
@@ -1278,15 +1294,15 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(link)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && (! Boolean.FALSE.equals(link.getEditable())))) {
-				addBinding(link.getBinding(), true);
+				addBinding(link.getBinding(), true, false, Sanitisation.text);
 			}
 		}
 		addCondition(link.getInvisibleConditionName());
 		addCondition(link.getDisabledConditionName());
-		addBinding(Bean.MODULE_KEY, false);
-		addBinding(Bean.DOCUMENT_KEY, false);
-		addBinding(Bean.DATA_GROUP_ID, false);
-		addBinding(Bean.USER_ID, false);
+		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
+		addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 	}
 
 	@Override
@@ -1296,7 +1312,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(parameter.getValueBinding(), false);
+				addBinding(parameter.getValueBinding(), false, true, Sanitisation.none);
 			}
 		}
 	}
@@ -1308,7 +1324,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(parameter.getValueBinding(), false);
+				addBinding(parameter.getValueBinding(), false, true, Sanitisation.none);
 			}
 		}
 	}
@@ -1320,7 +1336,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(progressBar)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(progressBar.getBinding(), false);
+				addBinding(progressBar.getBinding(), false, false, Sanitisation.none);
 			}
 		}
 		addCondition(progressBar.getInvisibleConditionName());
@@ -1340,7 +1356,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				addCondition(grid.getDisableZoomConditionName());
 				addCondition(grid.getDisableRemoveConditionName());
 				addCondition(grid.getPostRefreshConditionName());
-				addBinding(grid.getSelectedIdBinding(), true);
+				addBinding(grid.getSelectedIdBinding(), true, false, Sanitisation.text);
 			}
 		}
 	}
@@ -1372,8 +1388,8 @@ class ViewJSONManipulator extends ViewVisitor {
 				addCondition(grid.getDisableZoomConditionName());
 				addCondition(grid.getDisableRemoveConditionName());
 				addCondition(grid.getPostRefreshConditionName());
-				addBinding(grid.getSelectedIdBinding(), true);
-				addBinding(grid.getRootIdBinding(), false);
+				addBinding(grid.getSelectedIdBinding(), true, false, Sanitisation.text);
+				addBinding(grid.getRootIdBinding(), false, false, Sanitisation.text);
 			}
 		}
 	}
@@ -1440,7 +1456,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				addCondition(disableZoomConditionName);
 				addCondition(disableEditConditionName);
 				addCondition(disableRemoveConditionName);
-				addBinding(selectedIdBinding, true, true);
+				addBinding(selectedIdBinding, true, false, Sanitisation.text, true);
 				
 				String gridBinding = widget.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
@@ -1449,14 +1465,14 @@ class ViewJSONManipulator extends ViewVisitor {
 		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
 		        
 		        // Add these for polymorphic zooming on data grids
-		        addBinding(Bean.MODULE_KEY, false);
-		        addBinding(Bean.DOCUMENT_KEY, false);
+		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
+		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		        
 		        if (targetRelation instanceof Collection) {
 			        Collection collection = (Collection) targetRelation;
 			        // Only child collections have the bizOrdinal property exposed
 			        if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
-						addBinding(Bean.ORDINAL_NAME, true);
+						addBinding(Bean.ORDINAL_NAME, true, false, Sanitisation.text);
 					}
 		        }
 		        
@@ -1467,13 +1483,13 @@ class ViewJSONManipulator extends ViewVisitor {
 					if (gridColumn instanceof DataGridBoundColumn) {
 						DataGridBoundColumn boundGridColumn = (DataGridBoundColumn) gridColumn;
 						if (boundGridColumn.getBinding() == null) {
-							addBinding(Bean.DOCUMENT_ID, true);
+							addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
 							WidgetReference ref = boundGridColumn.getInputWidget();
 							if (ref != null) {
 								InputWidget inputWidget = ref.getWidget();
 								if (inputWidget instanceof LookupDescription) {
 									LookupDescription lookup = (LookupDescription) inputWidget;
-									addBinding(lookup.getDescriptionBinding(), false);
+									addBinding(lookup.getDescriptionBinding(), false, false, Sanitisation.relaxed);
 								}
 							}
 						}
@@ -1556,7 +1572,7 @@ class ViewJSONManipulator extends ViewVisitor {
 						parentEnabled && 
 						visitedDataWidgetHasEditableColumns && 
 						(! Boolean.FALSE.equals(column.getEditable())))) {
-				addBinding(column.getBinding(), true);
+				addBinding(column.getBinding(), true, ! Boolean.FALSE.equals(column.getEscape()), column.getSanitise());
 			}
 		}
 	}
@@ -1579,7 +1595,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
-		addFormat(UtilImpl.processStringValue(htmlGuts.toString()));
+		addFormat(UtilImpl.processStringValue(htmlGuts.toString()), false, Sanitisation.none);
 	}
 
 	@Override
@@ -1593,7 +1609,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(checkBox)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(checkBox))) {
-				addBinding(checkBox.getBinding(), true);
+				addBinding(checkBox.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(checkBox.getDisabledConditionName());
@@ -1624,8 +1640,8 @@ class ViewJSONManipulator extends ViewVisitor {
 				    currentBindings = currentBindings.putOrGetChild(binding, referenceDocument);
 				}
 	
-				addBinding(Bean.DOCUMENT_ID, true);
-				addBinding(Bean.BIZ_KEY, false);
+				addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
+				addBinding(Bean.BIZ_KEY, false, false, Sanitisation.relaxed);
 
 				if (binding != null) {
 					currentBindings = currentBindings.getParent();
@@ -1652,7 +1668,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(colour)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(colour))) {
-				addBinding(colour.getBinding(), true);
+				addBinding(colour.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(colour.getDisabledConditionName());
@@ -1686,7 +1702,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(combo))) {
 				String binding = combo.getBinding();
-				addBinding(binding, true);
+				addBinding(binding, true, false, Sanitisation.relaxed);
 				
 				putVariantAndDynamicDomainValuesInValueMaps(binding);
 			}
@@ -1713,7 +1729,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(text))) {
-				addBinding(text.getBinding(), true);
+				addBinding(text.getBinding(), true, false, text.getSanitise());
 			}
 		}
 		addCondition(text.getDisabledConditionName());
@@ -1737,7 +1753,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(html)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(html))) {
-				addBinding(html.getBinding(), true);
+				addBinding(html.getBinding(), true, false, html.getSanitise());
 			}
 		}
 		addCondition(html.getDisabledConditionName());
@@ -1761,8 +1777,8 @@ class ViewJSONManipulator extends ViewVisitor {
 				    currentBindings = currentBindings.putOrGetChild(binding, referenceDocument);
 				}
 	
-				addBinding(Bean.DOCUMENT_ID, true);
-				addBinding(Bean.BIZ_KEY, false);
+				addBinding(Bean.DOCUMENT_ID, true, false, Sanitisation.text);
+				addBinding(Bean.BIZ_KEY, false, false, Sanitisation.relaxed);
 
 				putVariantAndDynamicDomainValuesInValueMaps(binding);
 				
@@ -1828,7 +1844,7 @@ class ViewJSONManipulator extends ViewVisitor {
         }
 
         for (ComparisonProperty property : node.getProperties()) {
-            currentBindings.putBinding(property.getName(), true);
+            currentBindings.putBinding(property.getName(), true, true, Sanitisation.none);
         }
         
         for (ComparisonComposite child : node.getChildren()) {
@@ -1853,7 +1869,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			if ((! forApply) && (lookupBinding != null)) {
 				StringBuilder bindingBuilder = new StringBuilder(64);
 				bindingBuilder.append(lookupBinding).append('.').append(lookup.getDescriptionBinding());
-				addBinding(bindingBuilder.toString(), true);
+				addBinding(bindingBuilder.toString(), true, false, Sanitisation.relaxed);
 			}
 			return;
 		}
@@ -1868,16 +1884,16 @@ class ViewJSONManipulator extends ViewVisitor {
 				// data grid and the lookup selects the entire row
 				String binding = lookup.getBinding();
 				if (binding == null) { 
-					addBinding(lookup.getDescriptionBinding(), false);
+					addBinding(lookup.getDescriptionBinding(), false, false, Sanitisation.relaxed);
 				}
 				else { // not in a data grid
-					addBinding(binding, true);
+					addBinding(binding, true, false, Sanitisation.relaxed);
 					
 					// only include the description binding if we are fetching
 					if (! forApply) {
 						StringBuilder bindingBuilder = new StringBuilder(64);
 						bindingBuilder.append(binding).append('.').append(lookup.getDescriptionBinding());
-						addBinding(bindingBuilder.toString(), false);
+						addBinding(bindingBuilder.toString(), false, false, Sanitisation.relaxed);
 					}
 				}
 			}
@@ -1909,7 +1925,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(lookup)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(lookup))) {
-				addBinding(new StringBuilder(32).append(lookup.getBinding()).append('.').append(Bean.DOCUMENT_ID).toString(), true);
+				addBinding(new StringBuilder(32).append(lookup.getBinding()).append('.').append(Bean.DOCUMENT_ID).toString(), true, false, Sanitisation.text);
 			}
 		}
 		addCondition(lookup.getDisabledConditionName());
@@ -1938,7 +1954,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible & visible(password)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(password))) {
-				addBinding(password.getBinding(), true);
+				addBinding(password.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(password.getDisabledConditionName());
@@ -1962,7 +1978,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(radio)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(radio))) {
-				addBinding(radio.getBinding(), true);
+				addBinding(radio.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(radio.getDisabledConditionName());
@@ -1987,7 +2003,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(slider)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(slider))) {
-				addBinding(slider.getBinding(), true);
+				addBinding(slider.getBinding(), true, false, Sanitisation.text);
 			}
 		}
 		addCondition(slider.getDisabledConditionName());
@@ -2012,7 +2028,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(spinner)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(spinner))) {
-				addBinding(spinner.getBinding(), true);
+				addBinding(spinner.getBinding(), true, false, Sanitisation.text);
 			}
 		}
 		addCondition(spinner.getDisabledConditionName());
@@ -2037,7 +2053,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
-				addBinding(text.getBinding(), true);
+				addBinding(text.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(text.getDisabledConditionName());
@@ -2062,7 +2078,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
-				addBinding(text.getBinding(), true);
+				addBinding(text.getBinding(), true, false, Sanitisation.none);
 			}
 		}
 		addCondition(text.getDisabledConditionName());
@@ -2082,7 +2098,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
 				for (InjectBinding binding : inject.getBindings()) {
-					addBinding(binding.getBinding(), Boolean.FALSE.equals(binding.getReadOnly()));
+					addBinding(binding.getBinding(), Boolean.FALSE.equals(binding.getReadOnly()), false, Sanitisation.none);
 				}
 			}
 		}
@@ -2344,7 +2360,8 @@ class ViewJSONManipulator extends ViewVisitor {
 												boolean parentEnabled) {
 		addCondition(setDisabled.getDisabledConditionName());
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
-		addBinding(setDisabled.getBinding(), true);
+		// NB escape and sanitisation already set from visiting the widget
+		addBinding(setDisabled.getBinding(), true, false, Sanitisation.none);
 	}
 
 	@Override
@@ -2352,7 +2369,8 @@ class ViewJSONManipulator extends ViewVisitor {
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
-		addBinding(toggleDisabled.getBinding(), true);
+		// NB escape and sanitisation already set from visiting the widget
+		addBinding(toggleDisabled.getBinding(), true, false, Sanitisation.none);
 	}
 
 	@Override
@@ -2360,7 +2378,8 @@ class ViewJSONManipulator extends ViewVisitor {
 													boolean parentVisible,
 													boolean parentEnabled) {
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
-		addBinding(toggleVisibility.getBinding(), true);
+		// NB escape and sanitisation already set from visiting the widget
+		addBinding(toggleVisibility.getBinding(), true, false, Sanitisation.none);
 	}
 
 
@@ -2370,6 +2389,7 @@ class ViewJSONManipulator extends ViewVisitor {
 												boolean parentEnabled) {
 		addCondition(setInvisible.getInvisibleConditionName());
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
-		addBinding(setInvisible.getBinding(), true);
+		// NB escape and sanitisation already set from visiting the widget
+		addBinding(setInvisible.getBinding(), true, false, Sanitisation.none);
 	}
 }

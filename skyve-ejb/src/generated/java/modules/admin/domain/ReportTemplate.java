@@ -52,219 +52,324 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ReportTemplate";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String templateNamePropertyName = "templateName";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String enabledPropertyName = "enabled";
+
 	/** @hidden */
 	public static final String includeFragmentPropertyName = "includeFragment";
+
 	/** @hidden */
 	public static final String reportTypePropertyName = "reportType";
+
 	/** @hidden */
 	public static final String outputFormatPropertyName = "outputFormat";
+
 	/** @hidden */
 	public static final String templatePropertyName = "template";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String reportNamePropertyName = "reportName";
+
 	/** @hidden */
 	public static final String modePropertyName = "mode";
+
 	/** @hidden */
 	public static final String datasetsPropertyName = "datasets";
+
 	/** @hidden */
 	public static final String parametersPropertyName = "parameters";
-	/** @hidden */
-	public static final String cronExpressionPropertyName = "cronExpression";
-	/** @hidden */
-	public static final String usersToEmailPropertyName = "usersToEmail";
-	/** @hidden */
-	public static final String newUserToEmailPropertyName = "newUserToEmail";
-	/** @hidden */
-	public static final String scheduleDescriptionPropertyName = "scheduleDescription";
-	/** @hidden */
-	public static final String resultsPropertyName = "results";
-	/** @hidden */
-	public static final String wizardStatePropertyName = "wizardState";
-	/** @hidden */
-	public static final String generateExistingPropertyName = "generateExisting";
-	/** @hidden */
-	public static final String generateModuleNamePropertyName = "generateModuleName";
-	/** @hidden */
-	public static final String generateDocumentNamePropertyName = "generateDocumentName";
-	/** @hidden */
-	public static final String allHoursPropertyName = "allHours";
-	/** @hidden */
-	public static final String hour0PropertyName = "hour0";
-	/** @hidden */
-	public static final String hour1PropertyName = "hour1";
-	/** @hidden */
-	public static final String hour2PropertyName = "hour2";
-	/** @hidden */
-	public static final String hour3PropertyName = "hour3";
-	/** @hidden */
-	public static final String hour4PropertyName = "hour4";
-	/** @hidden */
-	public static final String hour5PropertyName = "hour5";
-	/** @hidden */
-	public static final String hour6PropertyName = "hour6";
-	/** @hidden */
-	public static final String hour7PropertyName = "hour7";
-	/** @hidden */
-	public static final String hour8PropertyName = "hour8";
-	/** @hidden */
-	public static final String hour9PropertyName = "hour9";
-	/** @hidden */
-	public static final String hour10PropertyName = "hour10";
-	/** @hidden */
-	public static final String hour11PropertyName = "hour11";
-	/** @hidden */
-	public static final String hour12PropertyName = "hour12";
-	/** @hidden */
-	public static final String hour13PropertyName = "hour13";
-	/** @hidden */
-	public static final String hour14PropertyName = "hour14";
-	/** @hidden */
-	public static final String hour15PropertyName = "hour15";
-	/** @hidden */
-	public static final String hour16PropertyName = "hour16";
-	/** @hidden */
-	public static final String hour17PropertyName = "hour17";
-	/** @hidden */
-	public static final String hour18PropertyName = "hour18";
-	/** @hidden */
-	public static final String hour19PropertyName = "hour19";
-	/** @hidden */
-	public static final String hour20PropertyName = "hour20";
-	/** @hidden */
-	public static final String hour21PropertyName = "hour21";
-	/** @hidden */
-	public static final String hour22PropertyName = "hour22";
-	/** @hidden */
-	public static final String hour23PropertyName = "hour23";
-	/** @hidden */
-	public static final String allDaysPropertyName = "allDays";
-	/** @hidden */
-	public static final String day1PropertyName = "day1";
-	/** @hidden */
-	public static final String day2PropertyName = "day2";
-	/** @hidden */
-	public static final String day3PropertyName = "day3";
-	/** @hidden */
-	public static final String day4PropertyName = "day4";
-	/** @hidden */
-	public static final String day5PropertyName = "day5";
-	/** @hidden */
-	public static final String day6PropertyName = "day6";
-	/** @hidden */
-	public static final String day7PropertyName = "day7";
-	/** @hidden */
-	public static final String day8PropertyName = "day8";
-	/** @hidden */
-	public static final String day9PropertyName = "day9";
-	/** @hidden */
-	public static final String day10PropertyName = "day10";
-	/** @hidden */
-	public static final String day11PropertyName = "day11";
-	/** @hidden */
-	public static final String day12PropertyName = "day12";
-	/** @hidden */
-	public static final String day13PropertyName = "day13";
-	/** @hidden */
-	public static final String day14PropertyName = "day14";
-	/** @hidden */
-	public static final String day15PropertyName = "day15";
-	/** @hidden */
-	public static final String day16PropertyName = "day16";
-	/** @hidden */
-	public static final String day17PropertyName = "day17";
-	/** @hidden */
-	public static final String day18PropertyName = "day18";
-	/** @hidden */
-	public static final String day19PropertyName = "day19";
-	/** @hidden */
-	public static final String day20PropertyName = "day20";
-	/** @hidden */
-	public static final String day21PropertyName = "day21";
-	/** @hidden */
-	public static final String day22PropertyName = "day22";
-	/** @hidden */
-	public static final String day23PropertyName = "day23";
-	/** @hidden */
-	public static final String day24PropertyName = "day24";
-	/** @hidden */
-	public static final String day25PropertyName = "day25";
-	/** @hidden */
-	public static final String day26PropertyName = "day26";
-	/** @hidden */
-	public static final String day27PropertyName = "day27";
-	/** @hidden */
-	public static final String day28PropertyName = "day28";
-	/** @hidden */
-	public static final String day29PropertyName = "day29";
-	/** @hidden */
-	public static final String day30PropertyName = "day30";
-	/** @hidden */
-	public static final String day31PropertyName = "day31";
-	/** @hidden */
-	public static final String allMonthsPropertyName = "allMonths";
-	/** @hidden */
-	public static final String month1PropertyName = "month1";
-	/** @hidden */
-	public static final String month2PropertyName = "month2";
-	/** @hidden */
-	public static final String month3PropertyName = "month3";
-	/** @hidden */
-	public static final String month4PropertyName = "month4";
-	/** @hidden */
-	public static final String month5PropertyName = "month5";
-	/** @hidden */
-	public static final String month6PropertyName = "month6";
-	/** @hidden */
-	public static final String month7PropertyName = "month7";
-	/** @hidden */
-	public static final String month8PropertyName = "month8";
-	/** @hidden */
-	public static final String month9PropertyName = "month9";
-	/** @hidden */
-	public static final String month10PropertyName = "month10";
-	/** @hidden */
-	public static final String month11PropertyName = "month11";
-	/** @hidden */
-	public static final String month12PropertyName = "month12";
-	/** @hidden */
-	public static final String allWeekdaysPropertyName = "allWeekdays";
-	/** @hidden */
-	public static final String weekday1PropertyName = "weekday1";
-	/** @hidden */
-	public static final String weekday2PropertyName = "weekday2";
-	/** @hidden */
-	public static final String weekday3PropertyName = "weekday3";
-	/** @hidden */
-	public static final String weekday4PropertyName = "weekday4";
-	/** @hidden */
-	public static final String weekday5PropertyName = "weekday5";
-	/** @hidden */
-	public static final String weekday6PropertyName = "weekday6";
-	/** @hidden */
-	public static final String weekday7PropertyName = "weekday7";
-	/** @hidden */
-	public static final String startTimePropertyName = "startTime";
-	/** @hidden */
-	public static final String endTimePropertyName = "endTime";
-	/** @hidden */
-	public static final String runAsPropertyName = "runAs";
+
 	/** @hidden */
 	public static final String scheduledPropertyName = "scheduled";
+
+	/** @hidden */
+	public static final String cronExpressionPropertyName = "cronExpression";
+
+	/** @hidden */
+	public static final String startTimePropertyName = "startTime";
+
+	/** @hidden */
+	public static final String endTimePropertyName = "endTime";
+
+	/** @hidden */
+	public static final String runAsPropertyName = "runAs";
+
+	/** @hidden */
+	public static final String usersToEmailPropertyName = "usersToEmail";
+
+	/** @hidden */
+	public static final String resultsPropertyName = "results";
+
+	/** @hidden */
+	public static final String wizardStatePropertyName = "wizardState";
+
+	/** @hidden */
+	public static final String generateExistingPropertyName = "generateExisting";
+
+	/** @hidden */
+	public static final String generateModuleNamePropertyName = "generateModuleName";
+
+	/** @hidden */
+	public static final String generateDocumentNamePropertyName = "generateDocumentName";
+
+	/** @hidden */
+	public static final String scheduleDescriptionPropertyName = "scheduleDescription";
+
+	/** @hidden */
+	public static final String allHoursPropertyName = "allHours";
+
+	/** @hidden */
+	public static final String hour0PropertyName = "hour0";
+
+	/** @hidden */
+	public static final String hour1PropertyName = "hour1";
+
+	/** @hidden */
+	public static final String hour2PropertyName = "hour2";
+
+	/** @hidden */
+	public static final String hour3PropertyName = "hour3";
+
+	/** @hidden */
+	public static final String hour4PropertyName = "hour4";
+
+	/** @hidden */
+	public static final String hour5PropertyName = "hour5";
+
+	/** @hidden */
+	public static final String hour6PropertyName = "hour6";
+
+	/** @hidden */
+	public static final String hour7PropertyName = "hour7";
+
+	/** @hidden */
+	public static final String hour8PropertyName = "hour8";
+
+	/** @hidden */
+	public static final String hour9PropertyName = "hour9";
+
+	/** @hidden */
+	public static final String hour10PropertyName = "hour10";
+
+	/** @hidden */
+	public static final String hour11PropertyName = "hour11";
+
+	/** @hidden */
+	public static final String hour12PropertyName = "hour12";
+
+	/** @hidden */
+	public static final String hour13PropertyName = "hour13";
+
+	/** @hidden */
+	public static final String hour14PropertyName = "hour14";
+
+	/** @hidden */
+	public static final String hour15PropertyName = "hour15";
+
+	/** @hidden */
+	public static final String hour16PropertyName = "hour16";
+
+	/** @hidden */
+	public static final String hour17PropertyName = "hour17";
+
+	/** @hidden */
+	public static final String hour18PropertyName = "hour18";
+
+	/** @hidden */
+	public static final String hour19PropertyName = "hour19";
+
+	/** @hidden */
+	public static final String hour20PropertyName = "hour20";
+
+	/** @hidden */
+	public static final String hour21PropertyName = "hour21";
+
+	/** @hidden */
+	public static final String hour22PropertyName = "hour22";
+
+	/** @hidden */
+	public static final String hour23PropertyName = "hour23";
+
+	/** @hidden */
+	public static final String allDaysPropertyName = "allDays";
+
+	/** @hidden */
+	public static final String day1PropertyName = "day1";
+
+	/** @hidden */
+	public static final String day2PropertyName = "day2";
+
+	/** @hidden */
+	public static final String day3PropertyName = "day3";
+
+	/** @hidden */
+	public static final String day4PropertyName = "day4";
+
+	/** @hidden */
+	public static final String day5PropertyName = "day5";
+
+	/** @hidden */
+	public static final String day6PropertyName = "day6";
+
+	/** @hidden */
+	public static final String day7PropertyName = "day7";
+
+	/** @hidden */
+	public static final String day8PropertyName = "day8";
+
+	/** @hidden */
+	public static final String day9PropertyName = "day9";
+
+	/** @hidden */
+	public static final String day10PropertyName = "day10";
+
+	/** @hidden */
+	public static final String day11PropertyName = "day11";
+
+	/** @hidden */
+	public static final String day12PropertyName = "day12";
+
+	/** @hidden */
+	public static final String day13PropertyName = "day13";
+
+	/** @hidden */
+	public static final String day14PropertyName = "day14";
+
+	/** @hidden */
+	public static final String day15PropertyName = "day15";
+
+	/** @hidden */
+	public static final String day16PropertyName = "day16";
+
+	/** @hidden */
+	public static final String day17PropertyName = "day17";
+
+	/** @hidden */
+	public static final String day18PropertyName = "day18";
+
+	/** @hidden */
+	public static final String day19PropertyName = "day19";
+
+	/** @hidden */
+	public static final String day20PropertyName = "day20";
+
+	/** @hidden */
+	public static final String day21PropertyName = "day21";
+
+	/** @hidden */
+	public static final String day22PropertyName = "day22";
+
+	/** @hidden */
+	public static final String day23PropertyName = "day23";
+
+	/** @hidden */
+	public static final String day24PropertyName = "day24";
+
+	/** @hidden */
+	public static final String day25PropertyName = "day25";
+
+	/** @hidden */
+	public static final String day26PropertyName = "day26";
+
+	/** @hidden */
+	public static final String day27PropertyName = "day27";
+
+	/** @hidden */
+	public static final String day28PropertyName = "day28";
+
+	/** @hidden */
+	public static final String day29PropertyName = "day29";
+
+	/** @hidden */
+	public static final String day30PropertyName = "day30";
+
+	/** @hidden */
+	public static final String day31PropertyName = "day31";
+
+	/** @hidden */
+	public static final String allMonthsPropertyName = "allMonths";
+
+	/** @hidden */
+	public static final String month1PropertyName = "month1";
+
+	/** @hidden */
+	public static final String month2PropertyName = "month2";
+
+	/** @hidden */
+	public static final String month3PropertyName = "month3";
+
+	/** @hidden */
+	public static final String month4PropertyName = "month4";
+
+	/** @hidden */
+	public static final String month5PropertyName = "month5";
+
+	/** @hidden */
+	public static final String month6PropertyName = "month6";
+
+	/** @hidden */
+	public static final String month7PropertyName = "month7";
+
+	/** @hidden */
+	public static final String month8PropertyName = "month8";
+
+	/** @hidden */
+	public static final String month9PropertyName = "month9";
+
+	/** @hidden */
+	public static final String month10PropertyName = "month10";
+
+	/** @hidden */
+	public static final String month11PropertyName = "month11";
+
+	/** @hidden */
+	public static final String month12PropertyName = "month12";
+
+	/** @hidden */
+	public static final String allWeekdaysPropertyName = "allWeekdays";
+
+	/** @hidden */
+	public static final String weekday1PropertyName = "weekday1";
+
+	/** @hidden */
+	public static final String weekday2PropertyName = "weekday2";
+
+	/** @hidden */
+	public static final String weekday3PropertyName = "weekday3";
+
+	/** @hidden */
+	public static final String weekday4PropertyName = "weekday4";
+
+	/** @hidden */
+	public static final String weekday5PropertyName = "weekday5";
+
+	/** @hidden */
+	public static final String weekday6PropertyName = "weekday6";
+
+	/** @hidden */
+	public static final String weekday7PropertyName = "weekday7";
+
+	/** @hidden */
+	public static final String newUserToEmailPropertyName = "newUserToEmail";
 
 	/**
 	 * Report Type
@@ -672,6 +777,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 	 * The name of this report
 	 **/
 	private String name;
+
 	/**
 	 * Template Name
 	 * <br/>
@@ -679,36 +785,42 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 				extension suffix so freemarker knows the encoding (should always be HTML).
 	 **/
 	private String templateName;
+
 	/**
 	 * Description
 	 * <br/>
 	 * Description of this report. Shown to users to help select which report to run.
 	 **/
 	private String description;
+
 	/**
 	 * Enabled
 	 * <br/>
 	 * Whether this report is enabled and able to be run as a report by users.
 	 **/
-	private Boolean enabled = new Boolean(true);
+	private Boolean enabled = Boolean.valueOf(true);
+
 	/**
 	 * Include Only/Subreport
 	 * <br/>
 	 * Whether this template is only intended to be included in other templates and is not a standalone report.
 	 **/
-	private Boolean includeFragment = new Boolean(false);
+	private Boolean includeFragment = Boolean.valueOf(false);
+
 	/**
 	 * Report Type
 	 * <br/>
 	 * Which template engine is being used to create this report?
 	 **/
 	private ReportType reportType = ReportType.freemarker;
+
 	/**
 	 * Output Format
 	 * <br/>
 	 * What is the output format for this report?
 	 **/
 	private OutputFormat outputFormat = OutputFormat.PDF;
+
 	/**
 	 * Template
 	 * <br/>
@@ -717,60 +829,92 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 	 * Not audited since template definition contains handlebars which inteferes with auditing.
 	 **/
 	private String template;
+
 	/**
 	 * Module Name
 	 * <br/>
 	 * The module where the report is located
 	 **/
 	private String moduleName;
+
 	/**
 	 * Document Name
 	 * <br/>
 	 * The document where the report is located
 	 **/
 	private String documentName;
+
 	/**
 	 * Report Name
 	 * <br/>
 	 * The name of the Jasper report
 	 **/
 	private String reportName;
+
 	/**
 	 * Mode
 	 * <br/>
 	 * The query mode of the Jasper report
 	 **/
 	private Mode mode;
+
 	/**
 	 * Datasets
 	 **/
 	private List<ReportDatasetExtension> datasets = new ChangeTrackingArrayList<>("datasets", this);
+
 	/**
 	 * Parameters
 	 **/
 	private List<ReportParameterExtension> parameters = new ChangeTrackingArrayList<>("parameters", this);
+
+	/**
+	 * Scheduled
+	 * <br/>
+	 * Whether scheduling is enabled for this report or not.
+	 * <br/>
+	 * Whether or not this report is scheduled.
+	 **/
+	private Boolean scheduled = Boolean.valueOf(false);
+
 	/**
 	 * CRON Expression
 	 **/
 	private String cronExpression;
+
+	/**
+	 * Start Time
+	 * <br/>
+	 * When to start triggering the report.  May be left blank
+	 **/
+	private DateTime startTime;
+
+	/**
+	 * End Time
+	 * <br/>
+	 * When to finish triggering the report.  May be left blank
+	 **/
+	private DateTime endTime;
+
+	/**
+	 * Run As
+	 * <br/>
+	 * The user to run the report
+	 **/
+	private UserProxyExtension runAs = null;
+
 	/**
 	 * Users to Email
 	 **/
 	private List<UserProxyExtension> usersToEmail = new ChangeTrackingArrayList<>("usersToEmail", this);
-	/**
-	 * New Email
-	 **/
-	private UserProxyExtension newUserToEmail = null;
-	/**
-	 * Schedule
-	 **/
-	private String scheduleDescription;
+
 	/**
 	 * Results
 	 * <br/>
 	 * Used as temporary storage for the preparation of report downloads.
 	 **/
 	private String results;
+
 	/**
 	 * Wizard State
 	 * <br/>
@@ -781,6 +925,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 					</ul>
 	 **/
 	private WizardState wizardState = WizardState.enterDetails;
+
 	/**
 	 * Generate/Existing
 	 * <br/>
@@ -788,356 +933,420 @@ public abstract class ReportTemplate extends AbstractPersistentBean {
 				markup to enter directly?
 	 **/
 	private GenerateExisting generateExisting;
+
 	/**
 	 * Module
 	 * <br/>
 	 * Module which contains the document to generate the report for
 	 **/
 	private String generateModuleName;
+
 	/**
 	 * Document
 	 * <br/>
 	 * Document to generate the report for
 	 **/
 	private String generateDocumentName;
+
+	/**
+	 * Schedule
+	 **/
+	private String scheduleDescription;
+
 	/**
 	 * All Hours
 	 **/
 	private String allHours;
+
 	/**
 	 * 00
 	 **/
 	private Boolean hour0;
+
 	/**
 	 * 01
 	 **/
 	private Boolean hour1;
+
 	/**
 	 * 02
 	 **/
 	private Boolean hour2;
+
 	/**
 	 * 03
 	 **/
 	private Boolean hour3;
+
 	/**
 	 * 04
 	 **/
 	private Boolean hour4;
+
 	/**
 	 * 05
 	 **/
 	private Boolean hour5;
+
 	/**
 	 * 06
 	 **/
 	private Boolean hour6;
+
 	/**
 	 * 07
 	 **/
 	private Boolean hour7;
+
 	/**
 	 * 08
 	 **/
 	private Boolean hour8;
+
 	/**
 	 * 09
 	 **/
 	private Boolean hour9;
+
 	/**
 	 * 10
 	 **/
 	private Boolean hour10;
+
 	/**
 	 * 11
 	 **/
 	private Boolean hour11;
+
 	/**
 	 * 12
 	 **/
 	private Boolean hour12;
+
 	/**
 	 * 13
 	 **/
 	private Boolean hour13;
+
 	/**
 	 * 14
 	 **/
 	private Boolean hour14;
+
 	/**
 	 * 15
 	 **/
 	private Boolean hour15;
+
 	/**
 	 * 16
 	 **/
 	private Boolean hour16;
+
 	/**
 	 * 17
 	 **/
 	private Boolean hour17;
+
 	/**
 	 * 18
 	 **/
 	private Boolean hour18;
+
 	/**
 	 * 19
 	 **/
 	private Boolean hour19;
+
 	/**
 	 * 20
 	 **/
 	private Boolean hour20;
+
 	/**
 	 * 21
 	 **/
 	private Boolean hour21;
+
 	/**
 	 * 22
 	 **/
 	private Boolean hour22;
+
 	/**
 	 * 23
 	 **/
 	private Boolean hour23;
+
 	/**
 	 * All Days
 	 **/
 	private String allDays;
+
 	/**
 	 * 01
 	 **/
 	private Boolean day1;
+
 	/**
 	 * 02
 	 **/
 	private Boolean day2;
+
 	/**
 	 * 03
 	 **/
 	private Boolean day3;
+
 	/**
 	 * 04
 	 **/
 	private Boolean day4;
+
 	/**
 	 * 05
 	 **/
 	private Boolean day5;
+
 	/**
 	 * 06
 	 **/
 	private Boolean day6;
+
 	/**
 	 * 07
 	 **/
 	private Boolean day7;
+
 	/**
 	 * 08
 	 **/
 	private Boolean day8;
+
 	/**
 	 * 09
 	 **/
 	private Boolean day9;
+
 	/**
 	 * 10
 	 **/
 	private Boolean day10;
+
 	/**
 	 * 11
 	 **/
 	private Boolean day11;
+
 	/**
 	 * 12
 	 **/
 	private Boolean day12;
+
 	/**
 	 * 13
 	 **/
 	private Boolean day13;
+
 	/**
 	 * 14
 	 **/
 	private Boolean day14;
+
 	/**
 	 * 15
 	 **/
 	private Boolean day15;
+
 	/**
 	 * 16
 	 **/
 	private Boolean day16;
+
 	/**
 	 * 17
 	 **/
 	private Boolean day17;
+
 	/**
 	 * 18
 	 **/
 	private Boolean day18;
+
 	/**
 	 * 19
 	 **/
 	private Boolean day19;
+
 	/**
 	 * 20
 	 **/
 	private Boolean day20;
+
 	/**
 	 * 21
 	 **/
 	private Boolean day21;
+
 	/**
 	 * 22
 	 **/
 	private Boolean day22;
+
 	/**
 	 * 23
 	 **/
 	private Boolean day23;
+
 	/**
 	 * 24
 	 **/
 	private Boolean day24;
+
 	/**
 	 * 25
 	 **/
 	private Boolean day25;
+
 	/**
 	 * 26
 	 **/
 	private Boolean day26;
+
 	/**
 	 * 27
 	 **/
 	private Boolean day27;
+
 	/**
 	 * 28
 	 **/
 	private Boolean day28;
+
 	/**
 	 * 29
 	 **/
 	private Boolean day29;
+
 	/**
 	 * 30
 	 **/
 	private Boolean day30;
+
 	/**
 	 * 31
 	 **/
 	private Boolean day31;
+
 	/**
 	 * All Months
 	 **/
 	private String allMonths;
+
 	/**
 	 * Jan
 	 **/
 	private Boolean month1;
+
 	/**
 	 * Feb
 	 **/
 	private Boolean month2;
+
 	/**
 	 * Mar
 	 **/
 	private Boolean month3;
+
 	/**
 	 * Apr
 	 **/
 	private Boolean month4;
+
 	/**
 	 * May
 	 **/
 	private Boolean month5;
+
 	/**
 	 * Jun
 	 **/
 	private Boolean month6;
+
 	/**
 	 * Jul
 	 **/
 	private Boolean month7;
+
 	/**
 	 * Aug
 	 **/
 	private Boolean month8;
+
 	/**
 	 * Sep
 	 **/
 	private Boolean month9;
+
 	/**
 	 * Oct
 	 **/
 	private Boolean month10;
+
 	/**
 	 * Nov
 	 **/
 	private Boolean month11;
+
 	/**
 	 * Dec
 	 **/
 	private Boolean month12;
+
 	/**
 	 * All Months
 	 **/
 	private String allWeekdays;
+
 	/**
 	 * Sun
 	 **/
 	private Boolean weekday1;
+
 	/**
 	 * Mon
 	 **/
 	private Boolean weekday2;
+
 	/**
 	 * Tue
 	 **/
 	private Boolean weekday3;
+
 	/**
 	 * Wed
 	 **/
 	private Boolean weekday4;
+
 	/**
 	 * Thu
 	 **/
 	private Boolean weekday5;
+
 	/**
 	 * Fri
 	 **/
 	private Boolean weekday6;
+
 	/**
 	 * Sat
 	 **/
 	private Boolean weekday7;
+
 	/**
-	 * Start Time
-	 * <br/>
-	 * When to start triggering the report.  May be left blank
+	 * New Recipient
 	 **/
-	private DateTime startTime;
-	/**
-	 * End Time
-	 * <br/>
-	 * When to finish triggering the report.  May be left blank
-	 **/
-	private DateTime endTime;
-	/**
-	 * Run As
-	 * <br/>
-	 * The user to run the report
-	 **/
-	private UserProxyExtension runAs = null;
-	/**
-	 * Scheduled
-	 * <br/>
-	 * Whether scheduling is enabled for this report or not.
-	 * <br/>
-	 * Whether or not this report is scheduled.
-	 **/
-	private Boolean scheduled = new Boolean(false);
+	private UserProxyExtension newUserToEmail = null;
 
 	@Override
 	@XmlTransient
@@ -1526,6 +1735,24 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	}
 
 	/**
+	 * {@link #scheduled} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getScheduled() {
+		return scheduled;
+	}
+
+	/**
+	 * {@link #scheduled} mutator.
+	 * @param scheduled	The new value.
+	 **/
+	@XmlElement
+	public void setScheduled(Boolean scheduled) {
+		preset(scheduledPropertyName, scheduled);
+		this.scheduled = scheduled;
+	}
+
+	/**
 	 * {@link #cronExpression} accessor.
 	 * @return	The value.
 	 **/
@@ -1541,6 +1768,66 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	public void setCronExpression(String cronExpression) {
 		preset(cronExpressionPropertyName, cronExpression);
 		this.cronExpression = cronExpression;
+	}
+
+	/**
+	 * {@link #startTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getStartTime() {
+		return startTime;
+	}
+
+	/**
+	 * {@link #startTime} mutator.
+	 * @param startTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setStartTime(DateTime startTime) {
+		preset(startTimePropertyName, startTime);
+		this.startTime = startTime;
+	}
+
+	/**
+	 * {@link #endTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getEndTime() {
+		return endTime;
+	}
+
+	/**
+	 * {@link #endTime} mutator.
+	 * @param endTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setEndTime(DateTime endTime) {
+		preset(endTimePropertyName, endTime);
+		this.endTime = endTime;
+	}
+
+	/**
+	 * {@link #runAs} accessor.
+	 * @return	The value.
+	 **/
+	public UserProxyExtension getRunAs() {
+		return runAs;
+	}
+
+	/**
+	 * {@link #runAs} mutator.
+	 * @param runAs	The new value.
+	 **/
+	@XmlElement
+	public void setRunAs(UserProxyExtension runAs) {
+		if (this.runAs != runAs) {
+			preset(runAsPropertyName, runAs);
+			this.runAs = runAs;
+		}
 	}
 
 	/**
@@ -1601,42 +1888,6 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	 **/
 	public UserProxyExtension removeUsersToEmailElement(int index) {
 		return usersToEmail.remove(index);
-	}
-
-	/**
-	 * {@link #newUserToEmail} accessor.
-	 * @return	The value.
-	 **/
-	public UserProxyExtension getNewUserToEmail() {
-		return newUserToEmail;
-	}
-
-	/**
-	 * {@link #newUserToEmail} mutator.
-	 * @param newUserToEmail	The new value.
-	 **/
-	@XmlElement
-	public void setNewUserToEmail(UserProxyExtension newUserToEmail) {
-		if (this.newUserToEmail != newUserToEmail) {
-			this.newUserToEmail = newUserToEmail;
-		}
-	}
-
-	/**
-	 * {@link #scheduleDescription} accessor.
-	 * @return	The value.
-	 **/
-	public String getScheduleDescription() {
-		return scheduleDescription;
-	}
-
-	/**
-	 * {@link #scheduleDescription} mutator.
-	 * @param scheduleDescription	The new value.
-	 **/
-	@XmlElement
-	public void setScheduleDescription(String scheduleDescription) {
-		this.scheduleDescription = scheduleDescription;
 	}
 
 	/**
@@ -1722,6 +1973,23 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	@XmlElement
 	public void setGenerateDocumentName(String generateDocumentName) {
 		this.generateDocumentName = generateDocumentName;
+	}
+
+	/**
+	 * {@link #scheduleDescription} accessor.
+	 * @return	The value.
+	 **/
+	public String getScheduleDescription() {
+		return scheduleDescription;
+	}
+
+	/**
+	 * {@link #scheduleDescription} mutator.
+	 * @param scheduleDescription	The new value.
+	 **/
+	@XmlElement
+	public void setScheduleDescription(String scheduleDescription) {
+		this.scheduleDescription = scheduleDescription;
 	}
 
 	/**
@@ -3129,81 +3397,22 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	}
 
 	/**
-	 * {@link #startTime} accessor.
+	 * {@link #newUserToEmail} accessor.
 	 * @return	The value.
 	 **/
-	public DateTime getStartTime() {
-		return startTime;
+	public UserProxyExtension getNewUserToEmail() {
+		return newUserToEmail;
 	}
 
 	/**
-	 * {@link #startTime} mutator.
-	 * @param startTime	The new value.
-	 **/
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
-	public void setStartTime(DateTime startTime) {
-		preset(startTimePropertyName, startTime);
-		this.startTime = startTime;
-	}
-
-	/**
-	 * {@link #endTime} accessor.
-	 * @return	The value.
-	 **/
-	public DateTime getEndTime() {
-		return endTime;
-	}
-
-	/**
-	 * {@link #endTime} mutator.
-	 * @param endTime	The new value.
-	 **/
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	@XmlElement
-	public void setEndTime(DateTime endTime) {
-		preset(endTimePropertyName, endTime);
-		this.endTime = endTime;
-	}
-
-	/**
-	 * {@link #runAs} accessor.
-	 * @return	The value.
-	 **/
-	public UserProxyExtension getRunAs() {
-		return runAs;
-	}
-
-	/**
-	 * {@link #runAs} mutator.
-	 * @param runAs	The new value.
+	 * {@link #newUserToEmail} mutator.
+	 * @param newUserToEmail	The new value.
 	 **/
 	@XmlElement
-	public void setRunAs(UserProxyExtension runAs) {
-		if (this.runAs != runAs) {
-			preset(runAsPropertyName, runAs);
-			this.runAs = runAs;
+	public void setNewUserToEmail(UserProxyExtension newUserToEmail) {
+		if (this.newUserToEmail != newUserToEmail) {
+			this.newUserToEmail = newUserToEmail;
 		}
-	}
-
-	/**
-	 * {@link #scheduled} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getScheduled() {
-		return scheduled;
-	}
-
-	/**
-	 * {@link #scheduled} mutator.
-	 * @param scheduled	The new value.
-	 **/
-	@XmlElement
-	public void setScheduled(Boolean scheduled) {
-		preset(scheduledPropertyName, scheduled);
-		this.scheduled = scheduled;
 	}
 
 	/**

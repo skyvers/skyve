@@ -18,4 +18,14 @@
 			<minCardinality>0</minCardinality>
 		</collection>
 	</attributes>
+	<conditions>
+		<condition name="canReadJobs" usage="view">
+			<description>True if the logged in user has permission to read jobs</description>
+			<expression>
+				<![CDATA[
+					((UserDashboardExtension)this).canReadJobs()
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

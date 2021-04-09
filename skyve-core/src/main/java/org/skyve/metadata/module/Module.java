@@ -14,6 +14,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -106,6 +107,10 @@ public interface Module extends NamedMetaData {
 	 * @return
 	 */
 	public String getTitle();
+	
+	public default String getLocalisedTitle() {
+		return Util.i18n(getTitle());
+	}
 	
 	/**
 	 * 

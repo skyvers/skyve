@@ -157,7 +157,7 @@ System.out.println(visitModules(args[0]));
 		String moduleName = m.getName();
 		for (MenuItem item : items) {
 			if (item.isApplicable(uxui)) {
-				String description = item.getName();
+				String description = item.getLocalisedName();
 				if (descriptionPrefix != null) {
 					description = String.format("%s::%s", descriptionPrefix, description);
 				}

@@ -295,8 +295,8 @@ public final class ReportUtil {
 		switch (format) {
 			case txt:
 				exporter = new JRTextExporter();
-				exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, new Integer(80));
-				exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, new Integer(24));
+				exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, Integer.valueOf(80));
+				exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, Integer.valueOf(24));
 				break;
 			case csv:
 				exporter = new JRCsvExporter();

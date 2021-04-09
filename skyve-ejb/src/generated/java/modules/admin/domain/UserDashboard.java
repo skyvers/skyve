@@ -30,18 +30,21 @@ public abstract class UserDashboard extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserDashboard";
 
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
+
 	/** @hidden */
 	public static final String favouritesPropertyName = "favourites";
 
 	/**
-	 * admin.userDashboard.association.user.displayName
+	 * Current User
 	 **/
 	private UserExtension currentUser = null;
+
 	/**
 	 * Favourites
 	 **/
@@ -166,5 +169,24 @@ public abstract class UserDashboard extends AbstractTransientBean {
 	 **/
 	public Generic removeFavouritesElement(int index) {
 		return favourites.remove(index);
+	}
+
+	/**
+	 * True if the logged in user has permission to read jobs
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanReadJobs() {
+		return (((UserDashboardExtension)this).canReadJobs());
+	}
+
+	/**
+	 * {@link #isCanReadJobs} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanReadJobs() {
+		return (! isCanReadJobs());
 	}
 }

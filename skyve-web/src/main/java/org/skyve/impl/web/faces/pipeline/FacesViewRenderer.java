@@ -936,37 +936,31 @@ public class FacesViewRenderer extends ViewRenderer {
 		final AtomicReference<UIComponent> c = new AtomicReference<>();
 		new ReferenceProcessor() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processResourceReference(ResourceReference reference) {
 				c.set(cb.label(null, "resource link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processReportReference(ReportReference reference) {
 				c.set(cb.label(null, "report link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processQueryListViewReference(QueryListViewReference reference) {
 				c.set(cb.label(null, "list view link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processImplicitActionReference(ImplicitActionReference reference) {
 				c.set(cb.label(null, "implicit action link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processExternalReference(ExternalReference reference) {
 				c.set(cb.label(null, "external link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processEditViewReference(EditViewReference reference) {
 				StringBuilder href = new StringBuilder(128);
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
@@ -976,13 +970,11 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processDefaultListViewReference(DefaultListViewReference reference) {
 				c.set(cb.label(null, "default list view link")); // TODO link
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void processContentReference(ContentReference reference) {
 				c.set(cb.label(null, "content link")); // TODO link
 			}
@@ -1061,7 +1053,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderLabel(String value, Label label) {
-		String ultimateValue = label.getValue();
+		String ultimateValue = label.getLocalisedValue();
 		String binding = label.getBinding();
 		if ((ultimateValue == null) && (binding == null)) { // using the Label.for attribute
 			ultimateValue = "Label";
@@ -1298,7 +1290,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
-				alias = module.getDocument(customer, targetRelation.getDocumentName()).getSingularAlias();
+				alias = module.getDocument(customer, targetRelation.getDocumentName()).getLocalisedSingularAlias();
 			}
 		}
 
@@ -2511,9 +2503,9 @@ public class FacesViewRenderer extends ViewRenderer {
 						toolbarLayout.getChildren().add(cb.upload(null, action));
 					}
 					else {
-						String displayName = action.getDisplayName();
+						String displayName = action.getLocalisedDisplayName();
 						if (displayName == null) {
-							displayName = name.getDisplayName();
+							displayName = name.getLocalisedDisplayName();
 						}
 						toolbarLayout.getChildren().add(cb.action(null,
 																	dataWidgetBinding,

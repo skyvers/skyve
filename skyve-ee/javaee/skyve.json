@@ -65,19 +65,33 @@
 		// home path
 		home: "/"
 	},
-	// Conversation cache settings
-	conversations: {
-		// Max conversations allowed in heap memory before being moved off-heap or to disk
-		heapSizeEntries: 1000,
-		// Max off-heap memory size - 0 indicates no usage
-		offHeapSizeMB: 128,
-		// Max disk size - 0 indicates no usage
-		diskSizeGB: 10,
-		// Number of seconds to wait until expiring a conversation from the cache
-		expiryTimeMinutes: 60,
-		// CRON Expression for Evicting Expired Conversations job - run at 12:37 - null indictes no eviction
+	// State settings
+	state: {
+		// Conversation cache settings
+		conversations: {
+			// Max conversations allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 64,
+			// Max disk size - 0 indicates no usage
+			diskSizeGB: 10,
+			// Number of seconds to wait until expiring a conversation from the cache
+			expiryTimeMinutes: 60
+		},
+		// CSRF Token cache settings
+		csrfTokens: {
+			// Max session tokens allowed in heap memory before being moved off-heap or to disk
+			heapSizeEntries: 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			offHeapSizeMB: 64,
+			// Max disk size - 0 indicates no usage
+			diskSizeGB: 10,
+			// Number of seconds to wait until expiring session tokens from the cache
+			expiryTimeMinutes: 60
+		},
+		// CRON Expression for Evicting Expired State job - run at 12:37 - null indictes no eviction
 		evictCron: "0 37 0 1/1 * ? *"
-	},
+	},	
 	// app cache definitions
 /*
 	caches: {

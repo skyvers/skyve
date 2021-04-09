@@ -81,9 +81,9 @@ public class InitialiseServlet extends HttpServlet {
 										final StringBuilder json) {
 		json.append("[");
 		
-		new MenuRenderer(uxui, user.getLocale(), chosenModuleName) {
+		new MenuRenderer(uxui, chosenModuleName) {
 			private void appendItem(MenuItem item, String iconStyleClass, Module itemModule, String function, String ref) {
-				json.append("{\"label\":\"").append(item.getName());
+				json.append("{\"label\":\"").append(item.getLocalisedName());
 				if (iconStyleClass != null) {
 					json.append("\",\"icon\":\"").append(iconStyleClass);
 				}
@@ -93,12 +93,12 @@ public class InitialiseServlet extends HttpServlet {
 			
 			@Override
 			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
-				json.append("{\"label\":\"").append(menuModule.getTitle()).append("\",\"items\":[");
+				json.append("{\"label\":\"").append(menuModule.getLocalisedTitle()).append("\",\"items\":[");
 			}
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				json.append("{\"label\":\"").append(group.getName()).append("\",\"items\":[");
+				json.append("{\"label\":\"").append(group.getLocalisedName()).append("\",\"items\":[");
 			}
 			
 			@Override
@@ -125,7 +125,7 @@ public class InitialiseServlet extends HttpServlet {
 
 			@Override
 			public void renderLinkItem(LinkItem item, Module menuModule, boolean relative, String absoluteHref) {
-				json.append("{\"label\":\"").append(item.getName());
+				json.append("{\"label\":\"").append(item.getLocalisedName());
 				json.append("\",\"command\":()=>{window.location='").append(absoluteHref).append("'}},");
 			}
 			

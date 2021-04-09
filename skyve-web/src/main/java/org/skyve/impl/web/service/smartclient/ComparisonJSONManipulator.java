@@ -185,7 +185,7 @@ public final class ComparisonJSONManipulator {
 						item.put(LENGTH_KEY, length);
 		            }
 		            if ((attribute != null) && DomainType.constant.equals(attribute.getDomainType())) {
-			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(user, nodeDocument, attribute, true);
+			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(customer, nodeDocument, attribute, true);
 			            if (valueMap != null) {
 							item.put(VALUE_MAP_KEY, valueMap);
 			            }

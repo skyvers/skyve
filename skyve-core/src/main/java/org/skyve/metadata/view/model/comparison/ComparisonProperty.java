@@ -33,7 +33,7 @@ public final class ComparisonProperty {
 								Bean newBean)
 	throws Exception {
 		name = attribute.getName();
-		title = attribute.getDisplayName();
+		title = attribute.getLocalisedDisplayName();
 		widget = attribute.getDefaultInputWidget();
 		if (oldBean != null) {
 			oldValue = BindUtil.get(oldBean, name);

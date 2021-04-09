@@ -397,7 +397,6 @@ public class TestUtil {
 	 * @param currentValue The current int value of the enum so that it is not chosen again
 	 * @return A random enum constant
 	 */
-	@SuppressWarnings("boxing")
 	public static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
 		int x;
 		if (currentValue != null) {
@@ -502,7 +501,7 @@ public class TestUtil {
 			}
 		}
 
-		return new Integer(RANDOM.nextInt((max - min) + 1) + min);
+		return Integer.valueOf(RANDOM.nextInt((max - min) + 1) + min);
 	}
 
 	/**

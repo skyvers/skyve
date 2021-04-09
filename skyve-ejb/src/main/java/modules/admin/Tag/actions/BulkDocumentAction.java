@@ -49,8 +49,8 @@ public class BulkDocumentAction implements ServerSideAction<Tag> {
 		
 		Module docMod = customer.getModule(tag.getActionModuleName());
 		Document document = docMod.getDocument(customer, tag.getActionDocumentName());		
-		sb.append("\nFor all tagged instances of: ").append(docMod.getTitle());
-		sb.append(" ").append(document.getPluralAlias());
+		sb.append("\nFor all tagged instances of: ").append(docMod.getLocalisedTitle());
+		sb.append(" ").append(document.getLocalisedPluralAlias());
 		
 		if(tag.getDocumentCondition()!=null){
 			sb.append("\nMeeting condition: ").append(tag.getDocumentCondition());

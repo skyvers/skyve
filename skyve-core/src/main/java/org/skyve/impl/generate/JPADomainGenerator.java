@@ -85,6 +85,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 	 * @param packagePath
 	 * @param className
 	 */
+	@SuppressWarnings("resource")
 	public void generateJavaFile(Customer customer,
 									Module module,
 									Document document,

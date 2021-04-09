@@ -5,7 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		dir="#{_skyveContent.dir}">
-    <f:view encoding="#{_skyveContent.encoding}">
+    <f:view contentType="text/html" encoding="#{_skyveContent.encoding}">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
 		</f:metadata>
@@ -128,7 +128,7 @@
 				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
 				<p:fileUpload id="upload"
-								fileUploadListener="#{_skyveContent.handleFileUpload}" 
+								listener="#{_skyveContent.handleFileUpload}" 
 								accept="image/*"
 								update="messages"
 								multiple="false"

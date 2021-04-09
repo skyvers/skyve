@@ -496,15 +496,15 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="adminReportParameter" />
 		</bag>
+		<property name="scheduled" />
 		<property name="cronExpression" length="128" />
+		<property name="startTime" type="DateTime" />
+		<property name="endTime" type="DateTime" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_ReportTemplate_runAs"/>
 		<bag name="usersToEmail" table="ADM_ReportTemplate_usersToEmail" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" foreign-key="FK_ADM_ReportTemplate_usersToEmail_owner_id" />
 			<many-to-many entity-name="adminUserProxy" foreign-key="FK_ADM_ReportTemplate_usersToEmail_element_id" column="element_id" />
 		</bag>
-		<property name="startTime" type="DateTime" />
-		<property name="endTime" type="DateTime" />
-		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_ReportTemplate_runAs"/>
-		<property name="scheduled" />
 		<filter name="adminReportTemplateNoneFilter" condition="1=0"/>
 		<filter name="adminReportTemplateCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminReportTemplateDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

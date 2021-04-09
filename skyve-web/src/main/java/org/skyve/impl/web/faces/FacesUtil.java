@@ -69,13 +69,6 @@ public class FacesUtil {
 		}
 	}
 	
-	public static String xmlPartialRedirect(String url) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<?xml version='1.0' encoding='UTF-8'?>");
-		sb.append("<partial-response><redirect url=\"").append(url.replace("&", "&amp;")).append("\"/></partial-response>");
-		return sb.toString();
-	}
-
     public static boolean isAjax(HttpServletRequest request) {
         return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }

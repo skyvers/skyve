@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 import javax.faces.application.ViewExpiredException;
+import javax.faces.context.FacesContext;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -104,13 +104,7 @@ public class SkyveFacesFilter implements Filter {
                 // String redirect = WebUtil.getRefererHeader(request);
                 String redirect = Util.getSkyveContextUrl() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
-                if (FacesUtil.isAjax(request)) {
-                	response.getWriter().print(FacesUtil.xmlPartialRedirect(redirect));
-                    response.flushBuffer();
-                }
-                else {
-                	response.sendRedirect(redirect);
-                }
+                FacesContext.getCurrentInstance().getExternalContext().redirect(redirect);
             }
             else {
         		chain.doFilter(req, resp);
@@ -124,8 +118,6 @@ public class SkyveFacesFilter implements Filter {
         	e.printStackTrace();
         	
         	// redirect to appropriate page
-            HttpServletResponse response = (HttpServletResponse) resp;
-
             String uri = errorURI;
             if ((e instanceof ViewExpiredException) || 
             		(c instanceof ViewExpiredException) ||
@@ -134,20 +126,13 @@ public class SkyveFacesFilter implements Filter {
             	uri = expiredURI;
             }
             
-            if (FacesUtil.isAjax(request)) {
-                response.getWriter().print(FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl() + uri));
-                response.flushBuffer();
-            }
-            else {
-				RequestDispatcher rd = request.getRequestDispatcher(uri);
-				rd.forward(request, response);
-            }
+            FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getSkyveContextUrl() + uri);
         }
 		finally {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesFilter - DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) ConversationUtil.logSessionAndConversationsStats();
+			if (UtilImpl.FACES_TRACE) StateUtil.logSessionAndConversationsStats();
 		}
     }
 }

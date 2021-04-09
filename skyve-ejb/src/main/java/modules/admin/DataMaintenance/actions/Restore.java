@@ -31,7 +31,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 			
 			StringBuilder sb = new StringBuilder(64);
 			sb.append("You must select a ");
-			sb.append(d.getAttribute(DataMaintenance.restorePreProcessPropertyName).getDisplayName());
+			sb.append(d.getAttribute(DataMaintenance.restorePreProcessPropertyName).getLocalisedDisplayName());
 			sb.append(" before you can perform this action.");
 			
 			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, sb.toString()));

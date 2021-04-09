@@ -736,26 +736,26 @@ public class DesignSpecification {
 		
 		setReportType(ReportType.report);
 		
-		setDefaultElementHeight(new Integer(20));
+		setDefaultElementHeight(Integer.valueOf(20));
 		setOrientation(Orientation.portrait);
 
-		setLeftMargin(new Integer(30));
-		setRightMargin(new Integer(30));
-		setTopMargin(new Integer(42));
-		setBottomMargin(new Integer(30));
+		setLeftMargin(Integer.valueOf(30));
+		setRightMargin(Integer.valueOf(30));
+		setTopMargin(Integer.valueOf(42));
+		setBottomMargin(Integer.valueOf(30));
 		setMode(Mode.bean);
 		setDefaultFontName("SansSerif");
-		setDefaultFontSize(new Integer(12));
-		setTitleFontSize(new Integer(16));
+		setDefaultFontSize(Integer.valueOf(12));
+		setTitleFontSize(Integer.valueOf(16));
 		setDefinitionSource(DefinitionSource.view);
 		setDynamicFlow(Boolean.TRUE);
 		setRenderLabelAsTextFields(Boolean.TRUE);
 		setBandSplitType(ReportBand.SplitType.prevent);
 		
-		setDefaultCellTopPadding(new Integer(2));
-		setDefaultCellLeftPadding(new Integer(2));
-		setDefaultCellBottomPadding(new Integer(2));
-		setDefaultCellRightPadding(new Integer(2));
+		setDefaultCellTopPadding(Integer.valueOf(2));
+		setDefaultCellLeftPadding(Integer.valueOf(2));
+		setDefaultCellBottomPadding(Integer.valueOf(2));
+		setDefaultCellRightPadding(Integer.valueOf(2));
 		
 		setDefaultBorder(Boolean.FALSE);
 		setDefaultLineWidth(new Decimal2(1.0));

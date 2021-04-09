@@ -10,12 +10,15 @@ import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Contact;
+import modules.admin.domain.Snapshot;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import modules.test.domain.AllAttributesPersistent;
@@ -322,4 +325,29 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{text}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "\\{{text}"));
 	}
+	
+	/**
+	 * Test that a MapBean with a display binding with a dynamic domain defined by no THIS_ALIAS returns code.
+	 */
+	@Test
+	public void testMapBeanWithNoThisReturnsDynamicDomainCode() {
+		Map<String, Object> properties = new TreeMap<>();
+		properties.put(Snapshot.queryNamePropertyName, "dynamicDomainValue");
+		MapBean bean = new MapBean(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME, properties);
+		Assert.assertEquals("Dynamic domain code value with no THIS_ALIAS should return the code value for a MapBean",
+								"dynamicDomainValue",
+								BindUtil.getDisplay(c, bean, Snapshot.queryNamePropertyName));
+	}
+	
+	
+	@Test
+	public void testSanitiseAsFunction() throws Exception {
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+		aap.setText("Test<script>alert(1)</script>Me");
+
+		Assert.assertEquals("Format Message with sanitise function should remove script tag", 
+								"<h1>TestMe</h1>",
+								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
+	}
+
 }

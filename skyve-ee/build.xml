@@ -6,11 +6,9 @@
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
 		</fileset>
-		<fileset dir="javaee/skyve.ear/lib">
+		<fileset dir="../skyve-war/deployments/skyve.war/WEB-INF/lib/">
 			<include name="**/*.jar"/>
-		</fileset>
-		<fileset dir="javaee/skyve.ear/skyve.war/WEB-INF/lib">
-			<include name="**/*.jar"/>
+			<exclude name="**/skyve-ejb*.jar"/>
 		</fileset>
 
 		<!-- for generating xsds -->
@@ -18,7 +16,7 @@
 		<pathelement path="../skyve-tools/src" />
 		
 		<!-- for generating domain - don't use a file element here - doesn't work in old ant -->
-		<pathelement path="javaee/skyve.ear/apps.jar/" />
+		<pathelement path="../skyve-war/deployments/skyve.war/WEB-INF/classes/" />
 	</path>
 
 	<target name="build" description="Create jars for the skyve framework and associated tools">
@@ -78,17 +76,17 @@
 		</concat>
 	</target>
 	<target name="copyJavascript" depends="concatSkyveJavascript">
-		<copy tofile="javaee/skyve.ear/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
 		<delete file="src/js/desktop/skyve.js" />
-		<copy tofile="javaee/skyve.ear/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
 		<delete file="src/js/prime/skyve.js" />
 
-		<copy tofile="javaee/skyve.ear/skyve.war/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
@@ -162,7 +160,7 @@
 		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
 			<classpath refid="classpath" />
 		</java>
-		<copy todir="src/skyve/schemas" failonerror="true">
+		<copy todir="../skyve-ejb/src/main/java/schemas" failonerror="true">
 			<fileset dir="." includes="*.xsd" />
 		</copy>
 		<move todir="../skyve-core/src/test/resources/schemas" failonerror="true">

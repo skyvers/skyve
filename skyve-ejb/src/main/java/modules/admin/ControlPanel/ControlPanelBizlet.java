@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -19,9 +19,9 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
-import modules.admin.ModulesUtil.DomainValueSortByCode;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
@@ -49,7 +49,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		
 		bean.loadStartupConfiguration();
 		
-		bean.setSessionCount(Integer.valueOf(ConversationUtil.getSessionCount()));
+		bean.setSessionCount(Integer.valueOf(StateUtil.getSessionCount()));
 		
 		return bean;
 	}
@@ -77,7 +77,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
 			return result;
 		}
@@ -109,7 +109,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 						
 						if(!alreadySelected) {
 							// only add persistent documents
-							results.add(new DomainValue(document.getName(), document.getSingularAlias()));
+							results.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 						}
 					}
 				}
@@ -124,18 +124,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-		if (ControlPanel.designModuleDocumentNamePropertyName.equals(attributeName)) {
-			Customer c = CORE.getUser().getCustomer();
-			List<DomainValue> result = new ArrayList<>();
-			for (Module m : c.getModules()) {
-				for (String d : m.getDocumentRefs().keySet()) {
-					result.add(new DomainValue(m.getName() + '.' + d));
-				}
-			}
-			Collections.sort(result, new DomainValueSortByCode());
-			return result;
-		}
-		else if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
+		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
 			AbstractRepository rep = AbstractRepository.get();
 			for (String cus : rep.getAllCustomerNames()) {
@@ -174,5 +163,12 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		return super.complete(attributeName, value, bean);
 	}
 	
-	
+	@Override
+	public void preRerender(String source, ControlPanelExtension bean, WebContext webContext) throws Exception {
+		if ("push".equals(source)) {
+			// clear list of selected documents
+			bean.getTestDocumentNames().clear();
+		}
+		super.preRerender(source, bean, webContext);
+	}
 }

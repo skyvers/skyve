@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -101,7 +101,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 			        try {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
-			        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId, request, response);
+			        	AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			        	bean = webContext.getCurrentBean();
 

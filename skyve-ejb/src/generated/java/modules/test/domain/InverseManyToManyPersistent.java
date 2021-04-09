@@ -30,11 +30,13 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "InverseManyToManyPersistent";
 
 	/** @hidden */
 	public static final String aggCollectionPropertyName = "aggCollection";
+
 	/** @hidden */
 	public static final String invAggCollectionPropertyName = "invAggCollection";
 
@@ -42,6 +44,7 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 * Aggregated Collection
 	 **/
 	private List<InverseManyToManyPersistent> aggCollection = new ChangeTrackingArrayList<>("aggCollection", this);
+
 	/**
 	 * Inverse
 	 **/

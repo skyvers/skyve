@@ -10,8 +10,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
-import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
-import org.skyve.impl.metadata.view.widget.bound.input.MembershipWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)

@@ -15,8 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -57,9 +56,6 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public static final String REPORT_PATH = "/report";
@@ -138,7 +134,7 @@ public class ReportServlet extends HttpServlet {
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -362,7 +358,7 @@ public class ReportServlet extends HttpServlet {
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		        	AbstractWebContext webContext = ConversationUtil.getCachedConversation(contextKey, request, response);
+		        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();
@@ -465,7 +461,7 @@ public class ReportServlet extends HttpServlet {
 					sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
 					sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
 					params.put("RESOURCE_DIR", sb.toString());
-					params.put("TITLE", model.getDescription());
+					params.put("TITLE", model.getLocalisedDescription());
 
 					jasperPrint = JasperFillManager.fillReport(jasperReport,
 																params,

@@ -1,21 +1,25 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.util.Locale;
 import java.util.Set;
 
+import javax.faces.FacesException;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
+import org.skyve.CORE;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.web.WebContext;
@@ -38,7 +42,7 @@ public abstract class Harness extends Localisable {
 		return bizModuleParameter;
 	}
 	public void setBizModuleParameter(String bizModuleParameter) {
-		this.bizModuleParameter = bizModuleParameter;
+		this.bizModuleParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizModuleParameter));
 	}
 
 	private String bizDocumentParameter;
@@ -46,7 +50,7 @@ public abstract class Harness extends Localisable {
 		return bizDocumentParameter;
 	}
 	public void setBizDocumentParameter(String bizDocumentParameter) {
-		this.bizDocumentParameter = bizDocumentParameter;
+		this.bizDocumentParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizDocumentParameter));
 	}
 	
 	private String queryNameParameter;
@@ -54,7 +58,7 @@ public abstract class Harness extends Localisable {
 		return queryNameParameter;
 	}
 	public void setQueryNameParameter(String queryNameParameter) {
-		this.queryNameParameter = queryNameParameter;
+		this.queryNameParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(queryNameParameter));
 	}
 
 	private String bizIdParameter;
@@ -62,7 +66,7 @@ public abstract class Harness extends Localisable {
 		return bizIdParameter;
 	}
 	public void setBizIdParameter(String bizIdParameter) {
-		this.bizIdParameter = bizIdParameter;
+		this.bizIdParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizIdParameter));
 	}
 
 	private WebAction webActionParameter;
@@ -105,8 +109,16 @@ public abstract class Harness extends Localisable {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
-	public final void initialise(Customer customer, UserImpl user, Locale requestLocale) {
-		super.initialise(user, requestLocale);
+	@Override
+	public final void initialise() {
+		super.initialise();
+
+		User user = CORE.getUser();
+		if (user == null) {
+			return;
+		}
+		
+		Customer customer = user.getCustomer();
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");
@@ -155,6 +167,36 @@ public abstract class Harness extends Localisable {
 			if (webActionParameter == null) {
 				webActionParameter = (queryNameParameter != null) ? WebAction.l : WebAction.e;
 			}
+		}
+
+		// Protected bizModule, bizDocument, query from URL tampering
+		try {
+			if (bizModuleParameter != null) {
+				Module m = customer.getModule(bizModuleParameter);
+				Document d = null;
+				if (bizDocumentParameter != null) {
+					d = m.getDocument(customer, bizDocumentParameter);
+				}
+				if (queryNameParameter != null) {
+					if (! queryNameParameter.equals(bizDocumentParameter)) {
+						if (m.getMetaDataQuery(queryNameParameter) == null) {
+							if (d == null) {
+								if (m.getDocument(customer, queryNameParameter) == null) {
+									throw new MetaDataException("Query name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
+								}
+							}
+							else {
+								if (CORE.getRepository().getListModel(customer, d, queryNameParameter, false) == null) {
+									throw new MetaDataException("Model name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new FacesException("Malformed URL", e);
 		}
 		
 		String cssRelativeFileName = customer.getHtmlResources().getCssRelativeFileName();

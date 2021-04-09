@@ -1,8 +1,6 @@
 package org.skyve.impl.generate;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
 
 import org.skyve.CORE;
@@ -70,9 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -91,8 +87,6 @@ import org.skyve.util.Util;
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
-	// The locale to render for
-	protected Locale locale;
 
 	// Stack of containers sent in to render methods
 	private Stack<Container> currentContainers = new Stack<>();
@@ -106,7 +100,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	protected ViewRenderer(User user, Module module, Document document, View view) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view);
 		this.user = user;
-		locale = user.getLocale();
 	}
 
 	private String viewIcon16x16Url;
@@ -156,7 +149,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
-		String title = Util.i18n(tab.getTitle(), locale);
+		String title = tab.getLocalisedTitle();
 		String icon16x16Url = iconToUrl(tab.getIcon16x16RelativeFileName());
 		renderAttributes.push(icon16x16Url);
 		renderAttributes.push(title);
@@ -176,7 +169,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
-		String borderTitle = Util.i18n(vbox.getBorderTitle(), locale);
+		String borderTitle = vbox.getLocalisedBorderTitle();
 		renderAttributes.push(borderTitle);
 		renderVBox(borderTitle, vbox);
 		currentContainers.push(vbox);
@@ -194,7 +187,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
-		String borderTitle = Util.i18n(hbox.getBorderTitle(), locale);
+		String borderTitle = hbox.getLocalisedBorderTitle();
 		renderAttributes.push(borderTitle);
 		renderHBox(borderTitle, hbox);
 		currentContainers.push(hbox);
@@ -219,7 +212,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		currentForm = form;
-		currentFormBorderTitle = Util.i18n(form.getBorderTitle(), locale);
+		currentFormBorderTitle = form.getLocalisedBorderTitle();
 		currentFormColumnIndex = 0;
 		renderForm(currentFormBorderTitle, form);
 	}
@@ -332,27 +325,27 @@ public abstract class ViewRenderer extends ViewVisitor {
 			Attribute targetAttribute = currentTarget.getAttribute();
 			if (ultimateBinding.endsWith(Bean.BIZ_KEY)) {
 				if (targetDocument != null) {
-					currentWidgetLabel = targetDocument.getSingularAlias();
-					currentWidgetHelp = targetDocument.getDescription();
+					currentWidgetLabel = targetDocument.getLocalisedSingularAlias();
+					currentWidgetHelp = targetDocument.getLocalisedDescription();
 				}
 				else {
 					Text bizKeyAttribute = DocumentImpl.getBizKeyAttribute();
-					currentWidgetLabel = bizKeyAttribute.getDisplayName();
+					currentWidgetLabel = bizKeyAttribute.getLocalisedDisplayName();
 					currentWidgetRequired = bizKeyAttribute.getRequiredBool();
-					currentWidgetHelp = bizKeyAttribute.getDescription();
+					currentWidgetHelp = bizKeyAttribute.getLocalisedDescription();
 				}
 			}
 			else if (ultimateBinding.endsWith(Bean.ORDINAL_NAME)) {
 				org.skyve.impl.metadata.model.document.field.Integer bizOrdinalAttribute = DocumentImpl.getBizOrdinalAttribute();
-				currentWidgetLabel = bizOrdinalAttribute.getDisplayName();
+				currentWidgetLabel = bizOrdinalAttribute.getLocalisedDisplayName();
 				currentWidgetRequired = bizOrdinalAttribute.getRequiredBool();
-				currentWidgetHelp = bizOrdinalAttribute.getDescription();
+				currentWidgetHelp = bizOrdinalAttribute.getLocalisedDescription();
 			}
 			
 			if ((targetDocument != null) && (targetAttribute != null)) {
-				currentWidgetLabel = targetAttribute.getDisplayName();
+				currentWidgetLabel = targetAttribute.getLocalisedDisplayName();
 				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
-				currentWidgetHelp = targetAttribute.getDescription();
+				currentWidgetHelp = targetAttribute.getLocalisedDescription();
 			}
 			preProcessWidget(false, showsLabelByDefault);
 		}
@@ -365,11 +358,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentWidgetRequired = null;
 		}
 		if (currentFormItem != null) {
-			String label = currentFormItem.getLabel();
+			String label = currentFormItem.getLocalisedLabel();
 			if (label != null) {
 				currentWidgetLabel = label;
 			}
-			String help = currentFormItem.getHelp();
+			String help = currentFormItem.getLocalisedHelp();
 			if (help != null) {
 				currentWidgetHelp = help;
 			}
@@ -378,8 +371,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetRequired = required;
 			}
 		}
-		currentWidgetLabel = Util.i18n(currentWidgetLabel, locale);
-		currentWidgetHelp = Util.i18n(currentWidgetHelp, locale);
 		if (currentFormItem != null) {
 			Boolean showLabel = currentFormItem.getShowLabel();
 			currentWidgetShowLabel = (showLabel == null) ? showsLabelByDefault : showLabel.booleanValue();
@@ -433,14 +424,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 */
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action) {
 		String resourceName = action.getResourceName();
-		String displayName = action.getDisplayName();
+		String displayName = action.getLocalisedDisplayName();
 		// Note that the " " result is for SC
 		actionLabel = (displayName == null) ? 
-						((implicitName == null) ? " " : Util.i18n(implicitName.getDisplayName(), locale)) :
-							Util.i18n(displayName, locale);
+						((implicitName == null) ? " " : implicitName.getLocalisedDisplayName()) :
+							displayName;
 		String relativeIconFileName = action.getRelativeIconFileName();
 		actionIconStyleClass = action.getIconStyleClass();
-		actionConfirmationText = action.getConfirmationText();
+		actionConfirmationText = action.getConfirmationText(); // NB localised later with the param
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
@@ -532,7 +523,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					if (actionConfirmationText == null) {
 						actionConfirmationText = "ui.delete.confirmation";
-						actionConfirmationParam = document.getSingularAlias();
+						actionConfirmationParam = document.getLocalisedSingularAlias();
 					}
 					actionType = 'D';
 					break;
@@ -634,12 +625,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 
 		actionIconUrl = iconToUrl(relativeIconFileName);
-		actionToolTip = Util.i18n(action.getToolTip(), locale);
+		actionToolTip = action.getLocalisedToolTip();
 		if (actionConfirmationParam != null) {
-			actionConfirmationText = Util.i18n(actionConfirmationText, locale, actionConfirmationParam);
+			actionConfirmationText = Util.i18n(actionConfirmationText, actionConfirmationParam);
 		}
 		else {
-			actionConfirmationText = Util.i18n(actionConfirmationText, locale);
+			actionConfirmationText = Util.i18n(actionConfirmationText);
 		}
 		
 		return true;
@@ -751,7 +742,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
-		String label = Util.i18n(button.getDisplayName(), locale);
+		String label = button.getLocalisedDisplayName();
 		if (currentFormItem != null) {
 			renderFormDialogButton(label, button);
 		}
@@ -812,7 +803,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, link.showsLabelByDefault());
-		String value = Util.i18n(link.getValue(), locale);
+		String value = link.getLocalisedValue();
 		if (currentFormItem != null) {
 			renderFormLink(value, link);
 		}
@@ -831,7 +822,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, blurb.showsLabelByDefault());
-		String markup = Util.i18n(blurb.getMarkup(), locale);
+		String markup = blurb.getLocalisedMarkup();
 		if (currentFormItem != null) {
 			renderFormBlurb(markup, blurb);
 		}
@@ -849,7 +840,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitLabel(Label label, boolean parentVisible, boolean parentEnabled) {
-		String value = label.getValue();
+		String value = null;
 		String binding = label.getBinding();
 		String faw = label.getFor();
 		if (faw != null) {
@@ -858,11 +849,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 		else if (binding != null) {
 			preProcessWidget(binding, label.showsLabelByDefault());
-			value = null;
 		}
 		else {
 			preProcessWidget(true, label.showsLabelByDefault());
-			value = Util.i18n(value, locale);
+			value = label.getLocalisedValue();
 			currentTarget = null;
 		}
 		if (currentFormItem != null) {
@@ -909,7 +899,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	private boolean currentListWidgetAggregateQuery;
 	
 	private void preProcessListWidget(AbstractListWidget widget) {
-		currentTabularTitle = Util.i18n(widget.getTitle(), locale);
+		currentTabularTitle = widget.getLocalisedTitle();
 
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
@@ -1037,7 +1027,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(grid.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
-		currentTabularTitle = Util.i18n(grid.getTitle(), locale);
+		currentTabularTitle = grid.getLocalisedTitle();
 		currentDataWidget = grid;
 		renderDataGrid(currentTabularTitle, grid);
 	}
@@ -1059,7 +1049,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(repeater.getBinding(), false);
 		currentDataWidgetTarget = currentTarget;
-		currentTabularTitle = Util.i18n(repeater.getTitle(), locale);
+		currentTabularTitle = repeater.getLocalisedTitle();
 		currentDataWidget = repeater;
 		renderDataRepeater(currentTabularTitle, repeater);
 	}
@@ -1088,12 +1078,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
-		currentColumnTitle = column.getTitle();
+		currentColumnTitle = column.getLocalisedTitle();
 		preProcessWidget(column.getBinding(), false);
 		if (currentColumnTitle == null) {
 			currentColumnTitle = currentWidgetLabel;
 		}
-		currentColumnTitle = Util.i18n(currentColumnTitle, locale);
 		currentBoundColumn = column;
 		if (currentDataWidget instanceof DataGrid) {
 			renderDataGridBoundColumn(currentColumnTitle, column);
@@ -1128,7 +1117,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
-		currentColumnTitle = Util.i18n(column.getTitle(), locale);
+		currentColumnTitle = column.getLocalisedTitle();
 		currentContainerColumn = column;
 		if (currentDataWidget instanceof DataGrid) {
 			renderDataGridContainerColumn(currentColumnTitle, column);
@@ -1273,7 +1262,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(link.getBinding(), link.showsLabelByDefault());
-		String value = Util.i18n(link.getValue(), locale);
+		String value = link.getLocalisedValue();
 		if (currentBoundColumn != null) {
 			renderBoundColumnContentLink(value, link);
 		}
@@ -1305,8 +1294,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(membership.getBinding(), false);
-		listMembershipCandidatesHeading = Util.i18n(membership.getCandidatesHeading(), locale);
-		listMembershipMembersHeading = Util.i18n(membership.getMembersHeading(), locale);
+		listMembershipCandidatesHeading = membership.getLocalisedCandidatesHeading();
+		listMembershipMembersHeading = membership.getLocalisedMembersHeading();
 		renderListMembership(listMembershipCandidatesHeading,
 								listMembershipMembersHeading,
 								membership);
@@ -2034,20 +2023,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	
 	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
-
-	protected LinkedHashMap<String, String> getLocalisedConstantDomainValueMap(Attribute attribute) {
-		List<DomainValue> values = document.getDomainValues(customer, 
-																DomainType.constant, 
-																attribute, 
-																null,
-																true);
-		LinkedHashMap<String, String> result = new LinkedHashMap<>(values.size());
-		for (DomainValue value : values) {
-			result.put(value.getCode(), Util.i18n(value.getDescription(), locale));
-		}
-		
-		return result;
-	}
 
 	public static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 

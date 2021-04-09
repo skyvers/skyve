@@ -23,6 +23,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
@@ -279,6 +280,10 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	}
 	
 	public abstract String getDescription();
+	
+	public String getLocalisedDescription() {
+		return Util.i18n(getDescription());
+	}
 	
 	public abstract Document getDrivingDocument();
 	

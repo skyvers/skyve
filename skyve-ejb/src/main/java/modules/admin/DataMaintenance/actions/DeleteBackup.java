@@ -21,34 +21,34 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 		String customerName = CORE.getUser().getCustomerName();
 		
 		// delete external backup if enabled
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					String backupName = bean.getSelectedBackupName();
-					if (ExternalBackup.getInstance().exists(backupName)) {
-						Util.LOGGER.info("Deleting backup " + backupName);
-						ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
-						Util.LOGGER.info("Deleted backup " + backupName);
-					} else {
-						Util.LOGGER.info("Backup " + backupName + " no longer exists");
-					}
-				} else {
-					// delete from local content
-					File backup = new File(String.format("%sbackup_%s%s%s",
-							Util.getContentDirectory(),
-							customerName,
-							File.separator,
-							bean.getSelectedBackupName()));
-					if (backup.exists()) {
-						Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
-						FileUtil.delete(backup);
-						Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
-					} else {
-						Util.LOGGER.info("Backup " + backup.getAbsolutePath() + " no longer exists");
-					}
-				}
+		if (ExternalBackup.areExternalBackupsEnabled()) {
+			String backupName = bean.getSelectedBackupName();
+			if (ExternalBackup.getInstance().exists(backupName)) {
+				Util.LOGGER.info("Deleting backup " + backupName);
+				ExternalBackup.getInstance().deleteBackup(bean.getSelectedBackupName());
+				Util.LOGGER.info("Deleted backup " + backupName);
+			} else {
+				Util.LOGGER.info("Backup " + backupName + " no longer exists");
+			}
+		} else {
+			// delete from local content
+			File backup = new File(String.format("%sbackup_%s%s%s",
+					Util.getContentDirectory(),
+					customerName,
+					File.separator,
+					bean.getSelectedBackupName()));
+			if (backup.exists()) {
+				Util.LOGGER.info("Deleting backup " + backup.getAbsolutePath());
+				FileUtil.delete(backup);
+				Util.LOGGER.info("Deleted backup " + backup.getAbsolutePath());
+			} else {
+				Util.LOGGER.info("Backup " + backup.getAbsolutePath() + " no longer exists");
+			}
+		}
 
-				// deselect the deleted backup
-				bean.setSelectedBackupName(null);
-				bean.setRefreshBackups(Boolean.TRUE);
+		// deselect the deleted backup
+		bean.setSelectedBackupName(null);
+		bean.setRefreshBackups(Boolean.TRUE);
 
 		return new ServerSideActionResult<>(bean);
 	}

@@ -27,6 +27,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "GroupRole";
 
@@ -34,13 +35,13 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	public static final String roleNamePropertyName = "roleName";
 
 	/**
-	 * admin.groupRole.roleName.displayName
+	 * Role Name
 	 **/
 	private String roleName;
+
 	private GroupExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient

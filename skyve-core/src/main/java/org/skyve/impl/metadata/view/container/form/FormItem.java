@@ -43,6 +43,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "item")
@@ -145,6 +146,10 @@ public class FormItem implements DecoratedMetaData {
 		return label;
 	}
 
+	public String getLocalisedLabel() {
+		return Util.i18n(label);
+	}
+	
 	@XmlAttribute(required = false)
 	public void setLabel(String label) {
 		this.label = label;
@@ -172,6 +177,10 @@ public class FormItem implements DecoratedMetaData {
 		return help;
 	}
 
+	public String getLocalisedHelp() {
+		return Util.i18n(help);
+	}
+	
 	@XmlAttribute(required = false)
 	public void setHelp(String help) {
 		this.help = help;

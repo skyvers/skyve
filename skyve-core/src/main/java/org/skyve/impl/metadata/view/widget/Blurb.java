@@ -18,6 +18,8 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.metadata.view.TextOutput;
+import org.skyve.util.Util;
 
 /**
  * If a label width/height is not specified, it sizes to fit its contents.
@@ -31,10 +33,12 @@ import org.skyve.metadata.view.Invisible;
 							"pixelHeight", 
 							"textAlignment",
 							"invisibleConditionName",
-							"visibleConditionName"})
+							"visibleConditionName",
+							"escape", 
+							"sanitise"})
 							//"properties"})
 // Blurb markup value cant be an XML value and have properties.
-public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
+public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget, TextOutput {
 	private static final long serialVersionUID = -1234525506006033853L;
 
 	/**
@@ -52,6 +56,9 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	private HorizontalAlignment textAlignment = null;
 	
+	private Boolean escape;
+	private Sanitisation sanitise;
+
 //	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 //	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
@@ -65,6 +72,10 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 		return markup;
 	}
 
+	public String getLocalisedMarkup() {
+		return Util.i18n(markup);
+	}
+	
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setMarkup(String markup) {
@@ -123,6 +134,26 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	@XmlAttribute(name = "textAlignment", required = false)
 	public void setTextAlignment(HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
+	}
+
+	@Override
+	public Boolean getEscape() {
+		return escape;
+	}
+
+	@XmlAttribute
+	public void setEscape(Boolean escape) {
+		this.escape = escape;
+	}
+
+	@Override
+	public Sanitisation getSanitise() {
+		return sanitise;
+	}
+
+	@XmlAttribute
+	public void setSanitise(Sanitisation sanitise) {
+		this.sanitise = sanitise;
 	}
 	
 	@Override

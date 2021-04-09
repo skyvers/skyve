@@ -132,7 +132,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 		imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return result;
 	}
 
@@ -141,7 +141,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 		imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return result;
 	}
 
@@ -154,7 +154,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 		imports.put("{Button}", "primereact/button");
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getDisplayName()).append("\" />");
+		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
 		return result;
 	}
 
@@ -537,7 +537,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
 		if (ImplicitActionName.Cancel.equals(name)) {
-			output.append("<Button label=\"Cancel\" onClick={(e) => this.props.history.goBack()} />");
+			output.append("<Button label=\"").append(title).append("\" onClick={(e) => this.props.history.goBack()} />");
 		}
 		else {
 			output.append("action " + name);

@@ -28,15 +28,19 @@ public class UserToken extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserToken";
 
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String seriesPropertyName = "series";
+
 	/** @hidden */
 	public static final String tokenPropertyName = "token";
+
 	/** @hidden */
 	public static final String lastUsedPropertyName = "lastUsed";
 
@@ -46,14 +50,17 @@ public class UserToken extends AbstractPersistentBean {
 	 * Length is derived User.userName length + bizCustomer length + 1
 	 **/
 	private String userName;
+
 	/**
 	 * Series
 	 **/
 	private String series;
+
 	/**
 	 * Token
 	 **/
 	private String token;
+
 	/**
 	 * Last Used
 	 **/
@@ -166,9 +173,9 @@ public class UserToken extends AbstractPersistentBean {
 	 * {@link #lastUsed} mutator.
 	 * @param lastUsed	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	@XmlElement
 	public void setLastUsed(Timestamp lastUsed) {
 		preset(lastUsedPropertyName, lastUsed);
 		this.lastUsed = lastUsed;

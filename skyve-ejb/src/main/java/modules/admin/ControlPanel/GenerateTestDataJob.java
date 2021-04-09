@@ -28,6 +28,8 @@ public class GenerateTestDataJob extends CancellableJob {
 	
 	@Override
 	public void execute() throws Exception {
+		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
+				"Generate Test Data Job has been started"));
 		List<String> log = getLog();
 		Customer customer = CORE.getCustomer();
 		Persistence pers = CORE.getPersistence();
@@ -77,7 +79,7 @@ public class GenerateTestDataJob extends CancellableJob {
 		log.add("Finished Generate Test Data job at " + new Date());
 		log.add(successful + " Documents successfully created, " + failed + " failed.");
 		EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.info,
-				String.format("%d Documents successfully created", new Integer(successful))));
+				String.format("%d Documents successfully created", Integer.valueOf(successful))));
 	}
 
 	private static Tag createOrRetrieveTag(Persistence pers, ControlPanelExtension bean) {

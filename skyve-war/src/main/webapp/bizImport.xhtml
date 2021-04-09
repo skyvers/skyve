@@ -5,7 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		dir="#{_skyveBizImport.dir}">
-    <f:view encoding="#{_skyveBizImport.encoding}">
+    <f:view contentType="text/html" encoding="#{_skyveBizImport.encoding}">
 		<f:metadata>
 			<f:event type="preRenderView" listener="#{_skyveBizImport.preRender}" />
 		</f:metadata>
@@ -36,7 +36,7 @@
 				<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
 				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
 				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
-				<p:fileUpload fileUploadListener="#{_skyveBizImport.handleFileUpload}" 
+				<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}" 
 								allowTypes="/(\.|\/)(XLS|XLSX)$/i"
 								update="messages problems" 
 								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />

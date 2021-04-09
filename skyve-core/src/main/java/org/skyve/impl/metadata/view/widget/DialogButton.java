@@ -22,6 +22,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -43,8 +44,8 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	private String displayName;
 	private String dialogName;
 	private String command;
-	private Integer dialogWidth = new Integer(800);
-	private Integer dialogHeight = new Integer(630);
+	private Integer dialogWidth = Integer.valueOf(800);
+	private Integer dialogHeight = Integer.valueOf(630);
 	private Boolean modalDialog = Boolean.FALSE;
 	private String invisibleConditionName;
 	private String disabledConditionName;
@@ -73,6 +74,10 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 		return displayName;
 	}
 
+	public String getLocalisedDisplayName() {
+		return Util.i18n(dialogName);
+	}
+	
 	@XmlAttribute(required = true)
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
@@ -81,7 +86,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	public String getDialogName() {
 		return dialogName;
 	}
-
+	
 	@XmlAttribute(required = false)
 	public void setDialogName(String dialogName) {
 		this.dialogName = UtilImpl.processStringValue(dialogName);

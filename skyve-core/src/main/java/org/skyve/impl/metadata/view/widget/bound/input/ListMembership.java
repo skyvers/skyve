@@ -26,8 +26,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
-import org.skyve.impl.metadata.view.widget.bound.input.MembershipWidget;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -88,6 +87,10 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 		return candidatesHeading;
 	}
 
+	public String getLocalisedCandidatesHeading() {
+		return Util.i18n(candidatesHeading);
+	}
+	
 	@XmlAttribute(required = false)
 	public void setCandidatesHeading(String candidatesHeading) {
 		this.candidatesHeading = UtilImpl.processStringValue(candidatesHeading);
@@ -97,6 +100,10 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 		return membersHeading;
 	}
 
+	public String getLocalisedMembersHeading() {
+		return Util.i18n(membersHeading);
+	}
+	
 	@XmlAttribute(required = false)
 	public void setMembersHeading(String membersHeading) {
 		this.membersHeading = UtilImpl.processStringValue(membersHeading);

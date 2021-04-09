@@ -18,8 +18,8 @@
 			<length>500</length>
 		</text>
 		<text name="documentName">
-			<displayName>admin.communication.moduleName.displayName</displayName>
-			<description>admin.communication.moduleName.description</description>
+			<displayName>admin.communication.documentName.displayName</displayName>
+			<description>admin.communication.documentName.description</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>

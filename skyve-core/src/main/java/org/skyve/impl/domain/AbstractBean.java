@@ -191,6 +191,10 @@ public abstract class AbstractBean implements Bean {
 		return result;
 	}
 
+	public boolean isUserInOwningModuleRole(String roleName) {
+		return isUserInRole(getBizModule(), roleName);
+	}
+
 	@SuppressWarnings("static-method") // not static because it is used in the generated beans generating warnings
 	public boolean isUserInRole(String moduleName, String roleName) {
 		return AbstractPersistence.get().getUser().isInRole(moduleName, roleName);

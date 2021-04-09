@@ -17,11 +17,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import modules.admin.ModulesUtil;
@@ -29,6 +31,7 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.Generic;
+import modules.admin.domain.Job;
 import modules.admin.domain.UserDashboard;
 
 public class UserDashboardExtension extends UserDashboard {
@@ -40,7 +43,19 @@ public class UserDashboardExtension extends UserDashboard {
 	private final Set<Tile> tiles = new HashSet<>();
 	
 	// used for 14 day dashboard calculations
-	public static final Long TWO_WEEKS_AGO = new Long(System.currentTimeMillis() - 1209600000L);
+	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
+
+	/**
+	 * Returns true if the current logged in user has access to the Jobs document.
+	 * 
+	 * @return true if the jobs list should be visible in the User Dashboard
+	 */
+	public boolean canReadJobs() {
+		Module module = CORE.getCustomer().getModule(Job.MODULE_NAME);
+		Document document = module.getDocument(CORE.getCustomer(), Job.DOCUMENT_NAME);
+
+		return CORE.getUser().canReadDocument(document);
+	}
   
 	@Inject
 	private transient Persistence persistence;
@@ -289,6 +304,12 @@ public class UserDashboardExtension extends UserDashboard {
 			return null;
 		}
 
+		if (bean != null
+				&& !CORE.getUser().canReadBean(bean.getBizId(), bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(),
+						bean.getBizDataGroupId(), bean.getBizUserId())) {
+			return null;
+		}
+
 		StringBuilder link = new StringBuilder();
 		link.append(Util.getHomeUrl());
 		link.append("?a=e&m=").append(moduleName).append("&d=").append(documentName);
@@ -304,7 +325,7 @@ public class UserDashboardExtension extends UserDashboard {
 		String action;
 		String actionClass = null;
 		String iconClass = (document.getIconStyleClass() == null ? DEFAULT_ICON_CLASS : document.getIconStyleClass());
-		String singularAlias = document.getSingularAlias();
+		String singularAlias = document.getLocalisedSingularAlias();
 
 
 		Tile.Operation tileOperation = Tile.Operation.view;
@@ -314,26 +335,51 @@ public class UserDashboardExtension extends UserDashboard {
 				action = "Delete ";
 				actionClass = "fa-times";
 				tileOperation = Tile.Operation.delete;
+
+				// clear the link if the user does not have delete permission
+				if (!CORE.getUser().canDeleteDocument(document)) {
+					link.setLength(0);
+				}
 				break;
 			case insert:
 				action = "Create a new ";
 				actionClass = "fa-plus";
 				tileOperation = Tile.Operation.insert;
+
+				// clear the link if the user does not have create permission
+				if (!CORE.getUser().canCreateDocument(document)) {
+					link.setLength(0);
+				}
 				break;
 			case update:
 				// check if the document is persistent for "view" or "edit"
 				if (document.getPersistent() == null) {
 					action = "View ";
 					actionClass = "fa-chevron-right";
+
+					// clear the link if the user does not have read permission
+					if (!CORE.getUser().canReadDocument(document)) {
+						link.setLength(0);
+					}
 				} else {
 					action = operation.toDescription();
 					actionClass = "fa-angle-up";
 					tileOperation = Tile.Operation.update;
+
+					// clear the link if the user does not have update permission
+					if (!CORE.getUser().canUpdateDocument(document)) {
+						link.setLength(0);
+					}
 				}
 				break;
 			default:
 				action = operation.toDescription();
 				actionClass = "fa-chevron-right";
+
+				// clear the link if the user does not have read permission
+				if (!CORE.getUser().canReadDocument(document)) {
+					link.setLength(0);
+				}
 		}
 
 		// set the document icon
@@ -363,7 +409,7 @@ public class UserDashboardExtension extends UserDashboard {
 		StringBuilder tileText = new StringBuilder();
 		tileText.append(action).append(" ").append(singularAlias);
 		if (bean != null && bean.getBizKey() != null) {
-			tileText.append(" - ").append(bean.getBizKey());
+			tileText.append(" - ").append(OWASP.sanitise(Sanitisation.relaxed, bean.getBizKey()));
 		}
 
 		Tile tile = new Tile.Builder().action(action)
@@ -409,10 +455,10 @@ public class UserDashboardExtension extends UserDashboard {
 	}
 
 	/**
-	 * Queries the 10 most recently updated audit records, filtered by the specified user if provided.
+	 * Queries the 20 most recently updated audit records, filtered by the specified user if provided.
 	 * 
 	 * @param The user to filter the audits by
-	 * @return The last 10 audits in the system
+	 * @return The last 20 audits in the system
 	 */
 	private List<Bean> recentUpdates(UserExtension filterUser) {
 
@@ -428,7 +474,7 @@ public class UserDashboardExtension extends UserDashboard {
 		q.addBoundProjection(Audit.auditBizIdPropertyName);
 		q.addBoundOrdering(Audit.timestampPropertyName, SortDirection.descending);
 		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
-		q.setMaxResults(10);
+		q.setMaxResults(20);
 
 		return q.projectedResults();
 	}

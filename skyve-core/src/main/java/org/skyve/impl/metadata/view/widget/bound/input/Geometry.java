@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 /**
  * Popup Map Editor for a geometry field

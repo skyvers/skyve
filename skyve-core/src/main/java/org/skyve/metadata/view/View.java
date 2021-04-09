@@ -12,6 +12,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.util.Util;
 
 /**
  * 
@@ -96,6 +97,10 @@ public interface View extends NamedMetaData, DecoratedMetaData {
 	 */
 	public String getTitle();
 
+	public default String getLocalisedTitle() {
+		return Util.i18n(getTitle());
+	}
+	
 	/**
 	 * 
 	 * @return

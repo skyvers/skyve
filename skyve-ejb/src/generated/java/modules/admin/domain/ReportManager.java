@@ -36,13 +36,16 @@ public abstract class ReportManager extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ReportManager";
 
 	/** @hidden */
 	public static final String pathToZipPropertyName = "pathToZip";
+
 	/** @hidden */
 	public static final String importActionTypePropertyName = "importActionType";
+
 	/** @hidden */
 	public static final String currentReportsPropertyName = "currentReports";
 
@@ -129,10 +132,12 @@ public abstract class ReportManager extends AbstractTransientBean {
 	 * The path of the zip of report configurations for download
 	 **/
 	private String pathToZip;
+
 	/**
 	 * Import action
 	 **/
 	private ImportActionType importActionType = ImportActionType.validateOnlyReportConfigurationsAndTemplates;
+
 	/**
 	 * Current Reports
 	 **/

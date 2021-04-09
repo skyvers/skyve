@@ -40,86 +40,120 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ControlPanel";
 
 	/** @hidden */
 	public static final String xmlTracePropertyName = "xmlTrace";
+
 	/** @hidden */
 	public static final String httpTracePropertyName = "httpTrace";
+
 	/** @hidden */
 	public static final String queryTracePropertyName = "queryTrace";
+
 	/** @hidden */
 	public static final String commandTracePropertyName = "commandTrace";
+
 	/** @hidden */
 	public static final String facesTracePropertyName = "facesTrace";
+
 	/** @hidden */
 	public static final String contentTracePropertyName = "contentTrace";
+
 	/** @hidden */
 	public static final String securityTracePropertyName = "securityTrace";
+
 	/** @hidden */
 	public static final String bizletTracePropertyName = "bizletTrace";
+
 	/** @hidden */
 	public static final String dirtyTracePropertyName = "dirtyTrace";
-	/** @hidden */
-	public static final String designModuleDocumentNamePropertyName = "designModuleDocumentName";
+
 	/** @hidden */
 	public static final String queryPropertyName = "query";
+
 	/** @hidden */
 	public static final String customerNameToSwapToPropertyName = "customerNameToSwapTo";
+
 	/** @hidden */
 	public static final String sailUserPropertyName = "sailUser";
+
 	/** @hidden */
 	public static final String sailModuleNamePropertyName = "sailModuleName";
+
 	/** @hidden */
 	public static final String sailUxUiPropertyName = "sailUxUi";
+
 	/** @hidden */
 	public static final String sailUserAgentTypePropertyName = "sailUserAgentType";
+
 	/** @hidden */
 	public static final String sailTestStrategyPropertyName = "sailTestStrategy";
+
 	/** @hidden */
 	public static final String sailExecutorPropertyName = "sailExecutor";
+
 	/** @hidden */
 	public static final String sailComponentBuilderPropertyName = "sailComponentBuilder";
+
 	/** @hidden */
 	public static final String sailLayoutBuilderPropertyName = "sailLayoutBuilder";
+
 	/** @hidden */
 	public static final String sailPropertyName = "sail";
+
 	/** @hidden */
 	public static final String sailLoginCustomerPropertyName = "sailLoginCustomer";
+
 	/** @hidden */
 	public static final String sailLoginPasswordPropertyName = "sailLoginPassword";
+
 	/** @hidden */
 	public static final String sailBaseUrlPropertyName = "sailBaseUrl";
+
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
+
 	/** @hidden */
 	public static final String tabIndexPropertyName = "tabIndex";
+
 	/** @hidden */
 	public static final String startupPropertiesPropertyName = "startupProperties";
+
 	/** @hidden */
 	public static final String originalStartupPropertiesPropertyName = "originalStartupProperties";
+
 	/** @hidden */
 	public static final String newPropertyPropertyName = "newProperty";
+
 	/** @hidden */
 	public static final String addKeyNotSupportedPropertyName = "addKeyNotSupported";
+
 	/** @hidden */
 	public static final String selectedCachePropertyName = "selectedCache";
+
 	/** @hidden */
 	public static final String sessionCountPropertyName = "sessionCount";
+
 	/** @hidden */
 	public static final String testNumberToGeneratePropertyName = "testNumberToGenerate";
+
 	/** @hidden */
 	public static final String testModuleNamePropertyName = "testModuleName";
+
 	/** @hidden */
 	public static final String testTagNamePropertyName = "testTagName";
+
 	/** @hidden */
 	public static final String testTagGeneratedDataPropertyName = "testTagGeneratedData";
+
 	/** @hidden */
 	public static final String testDocumentNamesPropertyName = "testDocumentNames";
 
 	/**
-	 * admin.controlPanel.sailUserAgentType.displayName
+	 * User Agent Type
 	 **/
 	@XmlEnum
 	public static enum SailUserAgentType implements Enumeration {
@@ -198,9 +232,9 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.controlPanel.sailTestStrategy.displayName
+	 * Test Strategy
 	 * <br/>
-	 * admin.controlPanel.sailTestStrategy.description
+	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
 	 **/
 	@XmlEnum
 	public static enum SailTestStrategy implements Enumeration {
@@ -278,7 +312,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.controlPanel.sailExecutor.displayName
+	 * Executor
 	 **/
 	@XmlEnum
 	public static enum SailExecutor implements Enumeration {
@@ -355,186 +389,217 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * admin.controlPanel.xmlTrace.displayName
+	 * XML
 	 * <br/>
-	 * admin.controlPanel.xmlTrace.description
+	 * Log XML metadata parse operations
 	 **/
 	private Boolean xmlTrace;
+
 	/**
-	 * admin.controlPanel.httpTrace.displayName
+	 * HTTP
 	 * <br/>
-	 * admin.controlPanel.httpTrace.description
+	 * Log request information including headers, parameters, cache state and timings.
 	 **/
 	private Boolean httpTrace;
+
 	/**
-	 * admin.controlPanel.queryTrace.displayName
+	 * Query
 	 * <br/>
-	 * admin.controlPanel.queryTrace.description
+	 * Log BizQL, Document Queries, Metadata Queries generated and executed during processing.
 	 **/
 	private Boolean queryTrace;
+
 	/**
-	 * admin.controlPanel.commandTrace.displayName
+	 * Command
 	 * <br/>
-	 * admin.controlPanel.commandTrace.description
+	 * Log command information such as filter criteria and paging row counts.
 	 **/
 	private Boolean commandTrace;
+
 	/**
-	 * admin.controlPanel.facesTrace.displayName
+	 * Faces
 	 * <br/>
-	 * admin.controlPanel.facesTrace.description
+	 * Log the faces phases and the xhtml generated.
 	 **/
 	private Boolean facesTrace;
+
 	/**
-	 * admin.controlPanel.contentTrace.displayName
+	 * Content
 	 * <br/>
-	 * admin.controlPanel.contentTrace.description
+	 * Log information on content fetched and stored.
 	 **/
 	private Boolean contentTrace;
+
 	/**
-	 * admin.controlPanel.securityTrace.displayName
+	 * Security
 	 * <br/>
-	 * admin.controlPanel.securityTrace.description
+	 * Log information on security denials.
 	 **/
 	private Boolean securityTrace;
+
 	/**
-	 * admin.controlPanel.bizletTrace.displayName
+	 * Bizlet
 	 * <br/>
-	 * admin.controlPanel.bizletTrace.description
+	 * Log every bizlet callback made (verbose).
 	 **/
 	private Boolean bizletTrace;
+
 	/**
-	 * admin.controlPanel.dirtyTrace.displayName
+	 * Dirty
 	 * <br/>
-	 * admin.controlPanel.dirtyTrace.description
+	 * Log the dirty state of domain objects (verbose).
 	 **/
 	private Boolean dirtyTrace;
+
 	/**
-	 * admin.controlPanel.designModuleDocumentName.displayName
-	 **/
-	private String designModuleDocumentName;
-	/**
-	 * admin.controlPanel.query.displayName
+	 * BizQL
 	 **/
 	private String query;
+
 	/**
-	 * admin.controlPanel.customerNameToSwapTo.displayName
+	 * Customer Name To Swap To
 	 **/
 	private String customerNameToSwapTo;
+
 	/**
-	 * admin.controlPanel.association.sailUser.displayName
+	 * User
 	 **/
 	private UserProxyExtension sailUser = null;
+
 	/**
-	 * admin.controlPanel.sailModuleName.displayName
+	 * Module Name
 	 **/
 	private String sailModuleName;
+
 	/**
-	 * admin.controlPanel.sailUxUi.displayName
+	 * UX/UI
 	 **/
 	private String sailUxUi;
+
 	/**
-	 * admin.controlPanel.sailUserAgentType.displayName
+	 * User Agent Type
 	 **/
 	private SailUserAgentType sailUserAgentType;
+
 	/**
-	 * admin.controlPanel.sailTestStrategy.displayName
+	 * Test Strategy
 	 * <br/>
-	 * admin.controlPanel.sailTestStrategy.description
+	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
 	 **/
 	private SailTestStrategy sailTestStrategy = SailTestStrategy.Assert;
+
 	/**
-	 * admin.controlPanel.sailExecutor.displayName
+	 * Executor
 	 **/
 	private SailExecutor sailExecutor;
+
 	/**
-	 * admin.controlPanel.sailComponentBuilder.displayName
+	 * Component Builder
 	 **/
 	private String sailComponentBuilder = "org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain";
+
 	/**
-	 * admin.controlPanel.sailLayoutBuilder.displayName
+	 * Layout Builder
 	 **/
 	private String sailLayoutBuilder = "org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder";
+
 	/**
-	 * admin.controlPanel.sail.displayName
+	 * SAIL
 	 **/
 	private String sail;
+
 	/**
-	 * admin.controlPanel.sailLoginCustomer.displayName
+	 * Login Customer
 	 **/
 	private String sailLoginCustomer;
+
 	/**
-	 * admin.controlPanel.sailLoginPassword.displayName
+	 * Login Password
 	 **/
 	private String sailLoginPassword;
+
 	/**
-	 * admin.controlPanel.sailBaseUrl.displayName
+	 * Base URL
 	 **/
 	private String sailBaseUrl;
+
 	/**
-	 * admin.controlPanel.results.displayName
+	 * Results
 	 **/
 	private String results;
+
 	/**
-	 * admin.controlPanel.tabIndex.displayName
+	 * TabIndex
 	 * <br/>
 	 * The index of the tab in the edit view.
 			 	This is set to the results tab when there is results to display.
 	 **/
 	private Integer tabIndex;
+
 	/**
-	 * admin.controlPanel.collection.startupProperties.displayName
+	 * Startup
 	 * <br/>
-	 * admin.controlPanel.collection.startupProperties.description
+	 * Startup Configuration
 	 **/
 	private List<Generic> startupProperties = new ChangeTrackingArrayList<>("startupProperties", this);
+
 	/**
-	 * admin.controlPanel.collection.originalStartupProperties.displayName
+	 * Original Startup values
 	 * <br/>
-	 * admin.controlPanel.collection.originalStartupProperties.description
+	 * Startup Configuration
 	 **/
 	private List<Generic> originalStartupProperties = new ChangeTrackingArrayList<>("originalStartupProperties", this);
+
 	/**
-	 * admin.controlPanel.association.newProperty.displayName
+	 * New Property
 	 **/
 	private Generic newProperty = null;
+
 	/**
-	 * admin.controlPanel.addKeyNotSupported.displayName
+	 * Add Key Not Supported
 	 * <br/>
 	 * admin.controlPanel.addkeyNotSupported.description
 	 **/
 	private Boolean addKeyNotSupported;
+
 	/**
-	 * admin.controlPanel.selectedCache.displayName
+	 * Cache
 	 **/
 	private String selectedCache;
+
 	/**
-	 * admin.controlPanel.sessionCount.displayName
+	 * Session Count
 	 **/
 	private Integer sessionCount;
+
 	/**
-	 * admin.controlPanel.testNumberToGenerate.displayName
+	 * Number To Generate
 	 * <br/>
 	 * admin.controlPanel.testnumberToGenerate.description
 	 **/
-	private Integer testNumberToGenerate = new Integer(1);
+	private Integer testNumberToGenerate = Integer.valueOf(1);
+
 	/**
-	 * admin.controlPanel.testModuleName.displayName
+	 * Module Name
 	 * <br/>
-	 * admin.controlPanel.testModuleName.description
+	 * The target module
 	 **/
 	private String testModuleName;
+
 	/**
-	 * admin.controlPanel.testTagName.displayName
+	 * Tag Name
 	 * <br/>
-	 * admin.controlPanel.testTagName.description
+	 * The name of the tag to be used
 	 **/
 	private String testTagName;
+
 	/**
-	 * admin.controlPanel.testTagGeneratedData.displayName
+	 * Tag Generated Data?
 	 **/
-	private Boolean testTagGeneratedData = new Boolean(false);
+	private Boolean testTagGeneratedData = Boolean.valueOf(false);
+
 	/**
-	 * admin.controlPanel.testDocumentNames.displayName
+	 * Document Names
 	 **/
 	private List<ModuleDocument> testDocumentNames = new ChangeTrackingArrayList<>("testDocumentNames", this);
 
@@ -735,24 +800,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	public void setDirtyTrace(Boolean dirtyTrace) {
 		preset(dirtyTracePropertyName, dirtyTrace);
 		this.dirtyTrace = dirtyTrace;
-	}
-
-	/**
-	 * {@link #designModuleDocumentName} accessor.
-	 * @return	The value.
-	 **/
-	public String getDesignModuleDocumentName() {
-		return designModuleDocumentName;
-	}
-
-	/**
-	 * {@link #designModuleDocumentName} mutator.
-	 * @param designModuleDocumentName	The new value.
-	 **/
-	@XmlElement
-	public void setDesignModuleDocumentName(String designModuleDocumentName) {
-		preset(designModuleDocumentNamePropertyName, designModuleDocumentName);
-		this.designModuleDocumentName = designModuleDocumentName;
 	}
 
 	/**

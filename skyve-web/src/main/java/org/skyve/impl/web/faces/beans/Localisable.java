@@ -6,9 +6,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.skyve.impl.metadata.user.UserImpl;
+import javax.faces.context.FacesContext;
+
+import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
 public abstract class Localisable implements Serializable {
@@ -47,9 +50,8 @@ public abstract class Localisable implements Serializable {
 		public String get(final Object key) {
 			return new FacesAction<String>() {
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public String callback() throws Exception {
-					String result = Util.i18n((String) key, (locale == null) ? Locale.ENGLISH : locale);
+					String result = Util.i18n((String) key, locale);
 					if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("I18nMapAdapter.get " + key + " = " + result);
 					return result;
 				}
@@ -102,11 +104,6 @@ public abstract class Localisable implements Serializable {
 		return dir;
 	}
 
-	private Locale locale;
-	public Locale getLocale() {
-		return locale;
-	}
-
 	/**
 	 * Used in the faces view tag
 	 * @return UTF-8
@@ -121,8 +118,9 @@ public abstract class Localisable implements Serializable {
 		return i18n;
 	}
 	
-	protected final void initialise(UserImpl user, Locale requestLocale) {
-		locale = requestLocale;
+	protected void initialise() {
+		Locale locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+		User user = CORE.getUser();
 		if (user != null) {
 			Locale userLocale = user.getLocale();
 			if (userLocale != null) {

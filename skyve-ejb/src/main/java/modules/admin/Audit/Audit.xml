@@ -15,7 +15,7 @@
 			<length>128</length>
 		</text>
 		<text name="auditDocumentName" required="true">
-			<displayName>admin.audit.auditModuleName.displayName</displayName>
+			<displayName>admin.audit.auditDocumentName.displayName</displayName>
 			<length>128</length>
 		</text>
 		<id name="auditBizId" required="true">
@@ -27,7 +27,7 @@
 			<length>1024</length>
 		</text>
 		<enum name="operation" required="true">
-			<displayName>admin.audit.operator.displayName</displayName>
+			<displayName>admin.audit.operation.displayName</displayName>
 			<values>
 				<value code="I" description="Insert" />
 				<value code="U" description="Update" />
@@ -56,7 +56,7 @@
 			<documentName>Audit</documentName>
 		</association>
 		<association name="comparisonVersion" type="aggregation" persistent="false">
-			<displayName>admin.audit.assocation.comparisonVersion.displayName</displayName>
+			<displayName>admin.audit.association.comparisonVersion.displayName</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>

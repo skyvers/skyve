@@ -58,10 +58,10 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 		if (!Boolean.TRUE.equals(bean.getDeclined())) {
 			if (bean.getFormatType() == null) {
 				StringBuilder msg = new StringBuilder(128);
-				msg.append("A ").append(document.getSingularAlias());
-				msg.append(" requires a ").append(document.getAttribute(Subscription.formatTypePropertyName).getDisplayName());
-				msg.append(" unless the ").append(document.getSingularAlias());
-				msg.append(" has ").append(document.getAttribute(Subscription.declinedPropertyName).getDisplayName()).append(" set.");
+				msg.append("A ").append(document.getLocalisedSingularAlias());
+				msg.append(" requires a ").append(document.getAttribute(Subscription.formatTypePropertyName).getLocalisedDisplayName());
+				msg.append(" unless the ").append(document.getLocalisedSingularAlias());
+				msg.append(" has ").append(document.getAttribute(Subscription.declinedPropertyName).getLocalisedDisplayName()).append(" set.");
 				e.getMessages().add(new Message(Subscription.formatTypePropertyName, msg.toString()));
 			}
 		}
@@ -95,7 +95,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 			SQL sqlInsert = persistence.newSQL(sqlInsertString.toString());
 
 			String bizId = UUID.randomUUID().toString();
-			Integer bizVersion = new Integer("0");
+			Integer bizVersion = Integer.valueOf(0);
 			OptimisticLock lock = new OptimisticLock(SUBSCRIPTION_PUBLIC_USERNAME, new Date());
 			String bizLock = lock.toString();
 			String bizKey = "Subscription for " + receiverIdentifier;
@@ -159,7 +159,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 				SQL sqlInsContact = persistence.newSQL(sqlInsContactString.toString());
 
 				String bizId = SUBSCRIPTION_PUBLIC_USER_ID;
-				Integer bizVersion = new Integer("0");
+				Integer bizVersion = Integer.valueOf(0);
 				OptimisticLock lock = new OptimisticLock(SUBSCRIPTION_PUBLIC_USERNAME, new Date());
 				String bizLock = lock.toString();
 				String bizKey = SUBSCRIPTION_PUBLIC_USERNAME;
@@ -186,7 +186,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 				SQL sqlInsUser = persistence.newSQL(sqlInsUserString.toString());
 
 				bizId = SUBSCRIPTION_PUBLIC_USER_ID;
-				bizVersion = new Integer("0");
+				bizVersion = Integer.valueOf(0);
 				lock = new OptimisticLock(SUBSCRIPTION_PUBLIC_USERNAME, new Date());
 				bizLock = lock.toString();
 				bizKey = SUBSCRIPTION_PUBLIC_USERNAME;
@@ -207,7 +207,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 			} else {
 				result = true;
 			}
-		} catch (DomainException d) {
+		} catch (@SuppressWarnings("unused") DomainException d) {
 			// do nothing, return null
 			// public user cannot be found or created
 		}
@@ -243,7 +243,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 		try {
 			BigInteger exists = sqlSub.scalarResult(BigInteger.class);
 			result = exists.compareTo(new BigInteger("0"))>0;
-		} catch (DomainException d) {
+		} catch (@SuppressWarnings("unused") DomainException d) {
 			// do nothing, return false
 		}
 		return result;

@@ -8,7 +8,7 @@ import javax.faces.context.FacesContext;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -82,7 +82,7 @@ public class ActionUtil {
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
-		ConversationUtil.cacheConversation(webContext);
+		StateUtil.cacheConversation(webContext);
 
 		// Get the view's bean
 		Bean contextBean = facesView.getBean();

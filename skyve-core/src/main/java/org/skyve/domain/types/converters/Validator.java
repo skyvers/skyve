@@ -10,7 +10,7 @@ public abstract class Validator<T extends Object> {
 	public abstract void validate(User user,
 									T value,
 									String binding,
-									String displayName,
+									String localisedDisplayName,
 									Converter<T> converter,
 									ValidationException e);
 }

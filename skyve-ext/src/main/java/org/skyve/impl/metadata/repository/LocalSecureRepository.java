@@ -1,6 +1,5 @@
 package org.skyve.impl.metadata.repository;
 
-import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.metadata.user.User;

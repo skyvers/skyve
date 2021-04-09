@@ -13,9 +13,6 @@ import org.skyve.metadata.view.Invisible;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"invisibleConditionName", "visibleConditionName", "disabledConditionName", "enabledConditionName"})
 public abstract class InputWidget extends AbstractBound implements Disableable, Invisible {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5332816537102477174L;
 
 	private String disabledConditionName;

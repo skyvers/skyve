@@ -203,7 +203,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										String widgetInvisible,
 										String widgetHelpText) {
 		// The label
-		String label = currentFormItem.getLabel();
+		String label = currentFormItem.getLocalisedLabel();
 		if (label == null) {
 			label = widgetLabel;
 		}

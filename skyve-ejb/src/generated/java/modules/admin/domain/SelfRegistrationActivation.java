@@ -33,13 +33,16 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "SelfRegistrationActivation";
 
 	/** @hidden */
 	public static final String resultPropertyName = "result";
+
 	/** @hidden */
 	public static final String userPropertyName = "user";
+
 	/** @hidden */
 	public static final String loginUrlPropertyName = "loginUrl";
 
@@ -126,12 +129,14 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	 * Activation Result
 	 **/
 	private Result result;
+
 	/**
 	 * User
 	 * <br/>
 	 * The activated user.
 	 **/
 	private UserExtension user = null;
+
 	/**
 	 * Login Url
 	 **/

@@ -3,7 +3,6 @@ package org.skyve.metadata.module.menu;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -23,12 +22,10 @@ import org.skyve.util.Util;
 
 public class MenuRenderer {
 	protected String uxui;
-	protected Locale locale;
 	protected String selectedModuleName;
 	
-	protected MenuRenderer(String uxui, Locale locale, String selectedModuleName) {
+	protected MenuRenderer(String uxui, String selectedModuleName) {
 		this.uxui = uxui;
-		this.locale = locale;
 		this.selectedModuleName = selectedModuleName;
 	}
 	

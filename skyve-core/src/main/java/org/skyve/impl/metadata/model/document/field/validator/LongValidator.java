@@ -18,7 +18,7 @@ public class LongValidator extends RangeValidator<Long> {
 	public void validate(User user,
 							Long value,
 							String binding,
-							String displayName,
+							String localisedDisplayName,
 							Converter<Long> converter,
 							ValidationException e) {
 		if (value != null) {
@@ -26,7 +26,7 @@ public class LongValidator extends RangeValidator<Long> {
 			Long max = getMax();
 			if (((min != null) && (value.compareTo(min) < 0)) ||
 					((max != null) && (value.compareTo(max) > 0))) {
-				e.getMessages().add(new Message(binding, constructMessage(user, displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(user, localisedDisplayName, converter)));
 			}
 		}
 	}

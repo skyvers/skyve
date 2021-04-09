@@ -129,7 +129,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		}
 		else if (ChartType.line.equals(type) || ChartType.lineArea.equals(type)) {
 			LineChartDataSet set = new LineChartDataSet();
-			set.setData(data.getValues());
+			@SuppressWarnings("unchecked")
+			List<Object> objects = (List<Object>) (List<?>) data.getValues();
+			set.setData(objects);
 			set.setLabel(data.getLabel());
 			set.setBackgroundColor(web(data.getBackground()));
 			set.setBorderColor(web(data.getBorder()));
@@ -270,7 +272,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		if (postProcessor != null) {
 			try {
 				@SuppressWarnings("unchecked")
-				PrimeFacesChartPostProcessor<ChartModel> instance = (PrimeFacesChartPostProcessor<ChartModel>) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).newInstance();
+				PrimeFacesChartPostProcessor<ChartModel> instance = (PrimeFacesChartPostProcessor<ChartModel>) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).getConstructor().newInstance();
 				instance.process(model);
 			}
 			catch (Exception e) {

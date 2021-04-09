@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -54,6 +54,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -62,6 +63,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 /**
@@ -101,8 +103,8 @@ public class SmartClientListServlet extends HttpServlet {
 		response.addDateHeader("Expires", 0); // never
 
 		try (PrintWriter pw = response.getWriter()) {
-			String dataSource = request.getParameter("_dataSource");
-			String operationType = request.getParameter("_operationType");
+			String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_dataSource")));
+			String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
 	        if (operationType == null) {
 	        	pw.append("{}");
 	        	return;
@@ -113,8 +115,8 @@ public class SmartClientListServlet extends HttpServlet {
 	        try {
 				try {
 					// use the view's conversation if it was sent down from the client
-					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-					AbstractWebContext webContext = ConversationUtil.getCachedConversation(webId, request, response);
+					String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
+					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
@@ -216,7 +218,7 @@ public class SmartClientListServlet extends HttpServlet {
 						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
 					}
 
-					String tagId = request.getParameter("_tagId");
+					String tagId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_tagId")));
 					// "null" can be sent by Smart Client
 					if (tagId != null) {
 						if ((tagId.length() == 0) || "null".equals(tagId)) {
@@ -229,11 +231,11 @@ public class SmartClientListServlet extends HttpServlet {
 						if (! user.canReadDocument(drivingDocument)) {
 							throw new SecurityException("read this data", user.getName());
 						}
-						String _startRow = request.getParameter("_startRow");
+						String _startRow = Util.processStringValue(request.getParameter("_startRow"));
 						int startRow = (_startRow == null) ? 0 : Integer.parseInt(_startRow);
-						String _endRow = request.getParameter("_endRow");
+						String _endRow = Util.processStringValue(request.getParameter("_endRow"));
 						int endRow = (_endRow == null) ? Integer.MAX_VALUE : Integer.parseInt(_endRow);
-						String textMatchStyle = request.getParameter("_textMatchStyle");
+						String textMatchStyle = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_textMatchStyle")));
 						SmartClientFilterOperator operator = null;
 						if (textMatchStyle != null) {
 							operator = SmartClientFilterOperator.valueOf(textMatchStyle);
@@ -244,7 +246,7 @@ public class SmartClientListServlet extends HttpServlet {
 						if (sortBys != null) {
 							sortParameters = new SortParameter[sortBys.length];
 							for (int i = 0; i < sortBys.length; i++) {
-								String sortBy = sortBys[i];
+								String sortBy = OWASP.sanitise(Sanitisation.text, Util.processStringValue(sortBys[i]));
 								
 								SortParameter sortParameter = new SortParameterImpl();
 								if (sortBy.startsWith("-")) {
@@ -260,7 +262,7 @@ public class SmartClientListServlet extends HttpServlet {
 							}
 						}
 	
-						String summary = request.getParameter("_summary");
+						String summary = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_summary")));
 						if ("".equals(summary)) {
 							summary = null;
 						}
@@ -323,7 +325,7 @@ public class SmartClientListServlet extends HttpServlet {
 					
 					// serialize and cache conversation, if applicable
 			    	if (webContext != null) {
-			    		ConversationUtil.cacheConversation(webContext);
+			    		StateUtil.cacheConversation(webContext);
 			    	}
 				}
 				catch (InvocationTargetException e) {
@@ -377,6 +379,10 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+		
+		// Escape and Sanitise rows
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
+		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
 			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);

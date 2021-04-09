@@ -35,42 +35,56 @@ public abstract class ImportExport extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ImportExport";
 
 	/** @hidden */
 	public static final String modePropertyName = "mode";
+
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
+
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
+
 	/** @hidden */
 	public static final String importFileAbsolutePathPropertyName = "importFileAbsolutePath";
+
 	/** @hidden */
 	public static final String importFileNamePropertyName = "importFileName";
+
 	/** @hidden */
 	public static final String exportFileAbsolutePathPropertyName = "exportFileAbsolutePath";
+
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
+
 	/** @hidden */
 	@Deprecated
 	public static final String advancedModePropertyName = "advancedMode";
+
 	/** @hidden */
 	@Deprecated
 	public static final String columnTitlesOnlyPropertyName = "columnTitlesOnly";
+
 	/** @hidden */
 	public static final String fileContainsHeadersPropertyName = "fileContainsHeaders";
+
 	/** @hidden */
 	public static final String detailedLoggingPropertyName = "detailedLogging";
+
 	/** @hidden */
 	public static final String importExportColumnsPropertyName = "importExportColumns";
+
 	/** @hidden */
 	public static final String rollbackErrorsPropertyName = "rollbackErrors";
+
 	/** @hidden */
 	public static final String loadTypePropertyName = "loadType";
 
 	/**
-	 * admin.importExport.mode.displayName
+	 * Mode
 	 **/
 	@XmlEnum
 	public static enum Mode implements Enumeration {
@@ -147,7 +161,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.importExport.rollbackErrors.displayName
+	 * Error handling
 	 **/
 	@XmlEnum
 	public static enum RollbackErrors implements Enumeration {
@@ -224,9 +238,15 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.importExport.loadType.displayName
+	 * Loading strategy
 	 * <br/>
-	 * admin.importExport.loadType.description
+	 * <p><b>Loading strategy</b></p>
+<p><b>Create related records if they don't exist (recommended)</b>
+<br/>
+<i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+<p><b>Create everything even if there might be duplicates</b>
+<br/>
+<i>With this option, new records will always be created</i></p>
 	 **/
 	@XmlEnum
 	public static enum LoadType implements Enumeration {
@@ -303,65 +323,84 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	}
 
 	/**
-	 * admin.importExport.mode.displayName
+	 * Mode
 	 **/
 	private Mode mode = Mode.importData;
+
 	/**
-	 * admin.importExport.moduleName.displayName
+	 * Module Name
 	 **/
 	private String moduleName;
+
 	/**
-	 * admin.importExport.documentName.displayName
+	 * Document
 	 **/
 	private String documentName;
+
 	/**
-	 * admin.importExport.importFileAbsolutePath.displayName
+	 * File Absolute Path
 	 **/
 	private String importFileAbsolutePath;
+
 	/**
-	 * admin.importExport.importFileName.displayName
+	 * Imported File
 	 **/
 	private String importFileName;
+
 	/**
-	 * admin.importExport.exportFileAbsolutePath.displayName
+	 * File Absolute Path
 	 **/
 	private String exportFileAbsolutePath;
+
 	/**
-	 * admin.importExport.results.displayName
+	 * Results
 	 **/
 	private String results;
+
 	/**
-	 * admin.importExport.advancedMode.displayName
+	 * Advanced Mode
 	 **/
 	@Deprecated
 	private Boolean advancedMode;
+
 	/**
-	 * admin.importExport.columnTitlesOnly.displayName
+	 * Include Titles only
 	 **/
 	@Deprecated
 	private Boolean columnTitlesOnly;
+
 	/**
-	 * admin.importExport.fileContainsHeaders.displayName
+	 * Column Headers
 	 **/
-	private Boolean fileContainsHeaders = new Boolean(true);
+	private Boolean fileContainsHeaders = Boolean.valueOf(true);
+
 	/**
-	 * admin.importExport.detailedLogging.displayName
+	 * Detailed logging
 	 * <br/>
-	 * admin.importExport.detailedLogging.description
+	 * Include all import details row by row to server log
 	 **/
-	private Boolean detailedLogging = new Boolean(true);
+	private Boolean detailedLogging = Boolean.valueOf(true);
+
 	/**
-	 * admin.importExport.collection.importExportColumns.displayName
+	 * Columns
 	 **/
 	private List<ImportExportColumn> importExportColumns = new ChangeTrackingArrayList<>("importExportColumns", this);
+
 	/**
-	 * admin.importExport.rollbackErrors.displayName
+	 * Error handling
 	 **/
 	private RollbackErrors rollbackErrors = RollbackErrors.rollbackErrors;
+
 	/**
-	 * admin.importExport.loadType.displayName
+	 * Loading strategy
 	 * <br/>
-	 * admin.importExport.loadType.description
+	 * <p><b>Loading strategy</b></p>
+<p><b>Create related records if they don't exist (recommended)</b>
+<br/>
+<i>With this option, uploaded records will be created but where these reference other records, they will only be created if a match can't be found</i></p>
+<p><b>Create everything even if there might be duplicates</b>
+<br/>
+<i>With this option, new records will always be created</i></p>
 	 **/
 	private LoadType loadType = LoadType.createFind;
 

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.locationtech.jts.geom.Geometry;
@@ -43,6 +44,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.NullTolerantBeanComparator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
@@ -72,6 +74,10 @@ public final class BindUtil {
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
 	public static String formatMessage(String message, Bean... beans) {
+		return formatMessage(message, null, beans);
+	}
+	
+	public static String formatMessage(String message, Function<String, String> postEvaluateDisplayValue, Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
@@ -94,6 +100,10 @@ public final class BindUtil {
 							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
 							// property, it could be a condition or an implicit property.
 							String displayValue = ExpressionEvaluator.format(expression, bean);
+							// if there is a postEvaluateDisplayValue function, apply it
+							if (postEvaluateDisplayValue != null) {
+								displayValue = postEvaluateDisplayValue.apply(displayValue);
+							}
 							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
 							// move the openCurlyBraceIndex along by the display value length so that
 							// any '{' occurrences replaced in as literals above are skipped.
@@ -623,19 +633,27 @@ public final class BindUtil {
 						// Get the real deal if this is a MapBean from a query
 						Bean realBean = bean;
 						if (bean instanceof MapBean) {
-							realBean = (Bean) ((MapBean) bean).get(DocumentQuery.THIS_ALIAS);
-						}
-						
-						int lastDotIndex = binding.lastIndexOf('.');
-						if (lastDotIndex >= 0) {
-							Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
-							if ((owningBean != null) && (target != null)) {
-								internalDocument = (DocumentImpl) target.getDocument();
-								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
+							MapBean mapBean = (MapBean) bean;
+							if (mapBean.isProperty(DocumentQuery.THIS_ALIAS)) {
+								realBean = (Bean) mapBean.get(DocumentQuery.THIS_ALIAS);
+							}
+							else { // no THIS_ALIAS in this mapBean (maybe its a app coder's list model)
+								realBean = null;
 							}
 						}
-						else {
-							domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
+						
+						if (realBean != null) {
+							int lastDotIndex = binding.lastIndexOf('.');
+							if (lastDotIndex >= 0) {
+								Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
+								if ((owningBean != null) && (target != null)) {
+									internalDocument = (DocumentImpl) target.getDocument();
+									domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
+								}
+							}
+							else {
+								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean, true);							
+							}
 						}
 					}
 					else {
@@ -1095,26 +1113,31 @@ public final class BindUtil {
 				valueToSet = null;
 			}
 	
-			if (valueToSet != null) {
-				Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
-	
-				// if we are setting a String value to a non-string property then
-				// use an appropriate constructor or static valueOf()
-				if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
-					try {
-						valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
-					}
-					catch (@SuppressWarnings("unused") NoSuchMethodException e) {
-						valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
-					}
-				}
-	
-				// Convert the value to String if required
-				if (String.class.equals(propertyType)) {
-					valueToSet = valueToSet.toString();
-				} // if (we have a String property)
+			if (bean instanceof MapBean) {
+				((MapBean) bean).set(fullyQualifiedPropertyName, valueToSet);
 			}
-			PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+			else {
+				if (valueToSet != null) {
+					Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
+		
+					// if we are setting a String value to a non-string property then
+					// use an appropriate constructor or static valueOf()
+					if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
+						try {
+							valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
+						}
+						catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+							valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+						}
+					}
+		
+					// Convert the value to String if required
+					if (String.class.equals(propertyType)) {
+						valueToSet = valueToSet.toString();
+					} // if (we have a String property)
+				}
+				PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+			}
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -1525,7 +1548,9 @@ public final class BindUtil {
 													tokenizer.nextToken() +
 													"] doesn't check out)");
 				}
-				navigatingModule = customer.getModule(navigatingDocument.getOwningModuleName());
+				navigatingModule = (customer == null) ?
+										AbstractRepository.get().getModule(null, navigatingDocument.getOwningModuleName()) :
+										customer.getModule(navigatingDocument.getOwningModuleName());
 			}
 			else {
 				// ignore validating implicit attributes

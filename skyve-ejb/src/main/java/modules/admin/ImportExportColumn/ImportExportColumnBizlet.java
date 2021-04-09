@@ -59,10 +59,10 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 						// also exclude non persistent fields
 						if (a.isPersistent()) {
 							if(AttributeType.association.equals(a.getAttributeType())) {
-//								bindings.add(new DomainValue(a.getName()+ Bean.BIZ_KEY, a.getDisplayName()));
-								bindings.add(new DomainValue(a.getName(), a.getDisplayName()));
+//								bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
+								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
 							} else {
-								bindings.add(new DomainValue(a.getName(), a.getDisplayName()));
+								bindings.add(new DomainValue(a.getName(), a.getLocalisedDisplayName()));
 							}
 						}
 					}

@@ -30,19 +30,25 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "UserMonthlyHits";
 
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
+
 	/** @hidden */
 	public static final String yearPropertyName = "year";
+
 	/** @hidden */
 	public static final String monthPropertyName = "month";
+
 	/** @hidden */
 	public static final String userAgentHeaderPropertyName = "userAgentHeader";
+
 	/** @hidden */
 	public static final String devicePropertyName = "device";
+
 	/** @hidden */
 	public static final String numberOfHitsPropertyName = "numberOfHits";
 
@@ -129,22 +135,27 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	 * User Name
 	 **/
 	private String userName;
+
 	/**
 	 * Year
 	 **/
 	private Integer year;
+
 	/**
 	 * Month
 	 **/
 	private Integer month;
+
 	/**
 	 * User-Agent Header
 	 **/
 	private String userAgentHeader;
+
 	/**
 	 * Device
 	 **/
 	private Device device;
+
 	/**
 	 * Number Of Hits
 	 **/

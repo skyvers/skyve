@@ -255,7 +255,7 @@ public class ComponentRenderer {
 			putValue(attributes, "update", fu.getUpdate());
 			putValue(attributes, "fileLimit", Integer.valueOf(fu.getFileLimit()));
 			putValue(attributes, "fileLimitMessage", fu.getFileLimitMessage());
-			putMethodExpression(attributes, "fileUploadListener", fu.getFileUploadListener());
+			putMethodExpression(attributes, "fileUploadListener", fu.getListener());
 		}
 		else if (component instanceof GraphicImage) {
 			tagName = "p:graphicImage";

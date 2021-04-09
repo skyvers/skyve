@@ -1,7 +1,6 @@
 package modules.admin.Communication;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.skyve.CORE;
@@ -11,10 +10,6 @@ import org.skyve.util.Util;
 import modules.admin.domain.Communication;
 
 public class CommunicationExtension extends Communication {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4916984359227145959L;
 
 	private static final String BATCH_FOLDER_PREFIX = "batch_";
@@ -40,14 +35,11 @@ public class CommunicationExtension extends Communication {
 
 	@Override
 	public String getBatch() {
-
 		// cache the datetime that this batch was started so that all emails end up in the same folder
 		if (batchDateTime == null) {
 			batchDateTime = new Date();
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat(BATCH_FORMAT);
-
-		return sdf.format(batchDateTime);
+		return CORE.getDateFormat(BATCH_FORMAT).format(batchDateTime);
 	}
 
 }

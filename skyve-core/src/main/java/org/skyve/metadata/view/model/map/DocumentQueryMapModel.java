@@ -7,6 +7,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
 public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
@@ -27,8 +28,10 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 		
 		List<MapItem> items = new ArrayList<>(256);
 		Envelope mapEnvelope = mapBounds.getEnvelopeInternal();
-		for (Bean bean : documentQuery.projectedIterable()) {
-			addItem(bean, items, mapEnvelope);
+		try (AutoClosingIterable<Bean> i = documentQuery.projectedIterable()) {
+			for (Bean bean : i) {
+				addItem(bean, items, mapEnvelope);
+			}
 		}
 		
 		return new MapResult(items, null);

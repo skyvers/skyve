@@ -25,15 +25,19 @@ public class Tagged extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "Tagged";
 
 	/** @hidden */
 	public static final String taggedModulePropertyName = "taggedModule";
+
 	/** @hidden */
 	public static final String taggedDocumentPropertyName = "taggedDocument";
+
 	/** @hidden */
 	public static final String taggedBizIdPropertyName = "taggedBizId";
+
 	/** @hidden */
 	public static final String tagPropertyName = "tag";
 
@@ -41,14 +45,17 @@ public class Tagged extends AbstractPersistentBean {
 	 * Tagged Module
 	 **/
 	private String taggedModule;
+
 	/**
 	 * Tagged Document
 	 **/
 	private String taggedDocument;
+
 	/**
 	 * Tagged BizId
 	 **/
 	private String taggedBizId;
+
 	/**
 	 * Tag
 	 * <br/>

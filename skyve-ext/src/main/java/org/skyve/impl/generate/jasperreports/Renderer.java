@@ -20,6 +20,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -618,23 +619,29 @@ public class Renderer {
 			if (Mode.bean.equals(design.getMode())) {
 				if (ReportType.report.equals(design.getReportType())) {
 					sb.append(design.getModuleName()).append('.').append(design.getDocumentName());
-				} else {
+				}
+				else {
 					// nothing
 				}
-			} else {
+			}
+			else {
 				String sqlName = null;
-				if (document.getExtends() != null) {
+				Extends e = document.getExtends();
+				if (e != null) {
+					String extDocumentName = e.getDocumentName();
 					Document extDocument = null;
-					if (document.getExtends().getDocumentName() != null && ExtensionStrategy.joined.equals(document.getPersistent().getStrategy())) {
-						extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
+					if ((extDocumentName != null) && ExtensionStrategy.joined.equals(document.getPersistent().getStrategy())) {
+						extDocument = module.getDocument(customer, extDocumentName);
 						design.setAlias(design.getAlias() + 1);
 					}
-					sqlName = extDocument.getName();
+					if (extDocument != null) {
+						sqlName = extDocument.getName();
+					}
 				}
 
 				StringBuilder sql = new StringBuilder();
 				for (ReportField f : design.getFields()) {
-					if (!Boolean.TRUE.equals(f.getCollection())) {
+					if (! Boolean.TRUE.equals(f.getCollection())) {
 						if (sql.length() > 0) {
 							sql.append("\n ,");
 						}
@@ -644,7 +651,8 @@ public class Renderer {
 
 				if (ReportType.report.equals(design.getReportType())) {
 					// not implemented
-				} else {
+				}
+				else {
 					// nothing
 				}
 
@@ -851,67 +859,63 @@ public class Renderer {
 
 			ReportElement tE = new ReportElement(type, name, valueExpression, fontName, fontSize, top, left, width, height, border, alignment, bold, italic, printWhenExpression);
 
-			if (tE != null) {
-				tE.setParent(band);
+			tE.setParent(band);
 
-				// inherit from band
-				if (tE.getElementFontName() == null) {
-					tE.setElementFontName(band.getParent().getDefaultFontName());
-				}
-
-				// font size
-				if (tE.getElementFontSize() == null) {
-					tE.setElementFontSize(band.getParent().getDefaultFontSize());
-				}
-
-				// height
-				if (tE.getElementHeight() == null) {
-					tE.setElementHeight(band.getParent().getDefaultElementHeight());
-				}
-
-				// dynamic flow
-				if (tE.getDynamicFlow() == null) {
-					tE.setDynamicFlow(band.getParent().getDynamicFlow());
-				}
-
-				// border
-				if (tE.getElementBorder() == null) {
-					tE.setElementBorder(band.getParent().getDefaultBorder());
-				}
-				tE.setBorderLineWidth(band.getParent().getDefaultLineWidth());
-				tE.setBorderColour(band.getParent().getDefaultLineColour());
-
-				// colour
-				if (foreColour != null) {
-					tE.setElementForeColour(foreColour);
-				}
-				if (backColour != null) {
-					tE.setElementBackColour(backColour);
-				}
-
-				tE.setBorderTop(band.getParent().getDefaultBorderTop());
-				tE.setBorderLeft(band.getParent().getDefaultBorderLeft());
-				tE.setBorderBottom(band.getParent().getDefaultBorderBottom());
-				tE.setBorderRight(band.getParent().getDefaultBorderRight());
-
-				// padding
-				tE.setTopPadding(band.getParent().getDefaultCellTopPadding());
-				tE.setLeftPadding(band.getParent().getDefaultCellLeftPadding());
-				tE.setBottomPadding(band.getParent().getDefaultCellBottomPadding());
-				tE.setRightPadding(band.getParent().getDefaultCellRightPadding());
-
-				// if element is a border, move to the first position in the collection
-				// it will have been created last, so that it could know the height of all previous items
-				// but it needs to be rendered first so that it is "behind" other items
-				if (ElementType.border.equals(type)) {
-					band.getElements().add(0, tE);
-				} else {
-					band.getElements().add(tE);
-				}
-
+			// inherit from band
+			if (tE.getElementFontName() == null) {
+				tE.setElementFontName(band.getParent().getDefaultFontName());
 			}
 
-		} catch (Exception e) {
+			// font size
+			if (tE.getElementFontSize() == null) {
+				tE.setElementFontSize(band.getParent().getDefaultFontSize());
+			}
+
+			// height
+			if (tE.getElementHeight() == null) {
+				tE.setElementHeight(band.getParent().getDefaultElementHeight());
+			}
+
+			// dynamic flow
+			if (tE.getDynamicFlow() == null) {
+				tE.setDynamicFlow(band.getParent().getDynamicFlow());
+			}
+
+			// border
+			if (tE.getElementBorder() == null) {
+				tE.setElementBorder(band.getParent().getDefaultBorder());
+			}
+			tE.setBorderLineWidth(band.getParent().getDefaultLineWidth());
+			tE.setBorderColour(band.getParent().getDefaultLineColour());
+
+			// colour
+			if (foreColour != null) {
+				tE.setElementForeColour(foreColour);
+			}
+			if (backColour != null) {
+				tE.setElementBackColour(backColour);
+			}
+
+			tE.setBorderTop(band.getParent().getDefaultBorderTop());
+			tE.setBorderLeft(band.getParent().getDefaultBorderLeft());
+			tE.setBorderBottom(band.getParent().getDefaultBorderBottom());
+			tE.setBorderRight(band.getParent().getDefaultBorderRight());
+
+			// padding
+			tE.setTopPadding(band.getParent().getDefaultCellTopPadding());
+			tE.setLeftPadding(band.getParent().getDefaultCellLeftPadding());
+			tE.setBottomPadding(band.getParent().getDefaultCellBottomPadding());
+			tE.setRightPadding(band.getParent().getDefaultCellRightPadding());
+
+			// if element is a border, move to the first position in the collection
+			// it will have been created last, so that it could know the height of all previous items
+			// but it needs to be rendered first so that it is "behind" other items
+			if (ElementType.border.equals(type)) {
+				band.getElements().add(0, tE);
+			} else {
+				band.getElements().add(tE);
+			}
+		} catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.warning("UNABLE TO CREATE REPORT ELEMENT IN BAND FOR " + name);
 		}
 
@@ -1053,7 +1057,7 @@ public class Renderer {
 					final JasperReportRenderer reportRenderer = new JasperReportRenderer(design);
 					out.println(reportRenderer.getJrxml());
 					out.flush();
-				} catch (NullPointerException npe) {
+				} catch (@SuppressWarnings("unused") NullPointerException npe) {
 					Util.LOGGER.warning(String.format("NullPointerException while writing report to %s", reportPath.toString()));
 				}
 			}

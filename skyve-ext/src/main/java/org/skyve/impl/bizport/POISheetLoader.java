@@ -123,7 +123,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		boolean foundNonEmpty = false;
 		for (DataFileField field : fields) {
 			if(field.getIndex()==null){
-				field.setIndex(new Integer(0));
+				field.setIndex(Integer.valueOf(0));
 			}
 			String val = getStringFieldValue(field.getIndex().intValue(), true);
 			if (val != null && val.trim().length() > 0) {

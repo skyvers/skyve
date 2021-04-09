@@ -1573,7 +1573,7 @@ t.printStackTrace();
 	
 				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
-						throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
+						throw new ReferentialConstraintViolationException(document.getLocalisedSingularAlias(), bean.getBizKey(), ref.getLocalisedDocumentAlias());
 					}
 				}
 			}
@@ -1650,7 +1650,7 @@ t.printStackTrace();
 	
 			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 				if (results.next()) {
-					throw new ReferentialConstraintViolationException(document.getSingularAlias(), bean.getBizKey(), ref.getDocumentAlias());
+					throw new ReferentialConstraintViolationException(document.getLocalisedSingularAlias(), bean.getBizKey(), ref.getLocalisedDocumentAlias());
 				}
 			}
 		}

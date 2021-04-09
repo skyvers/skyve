@@ -18,6 +18,7 @@ import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
+import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -58,8 +59,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "36";
-	public static final String SKYVE_VERSION = "7.0.3-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "37";
+	public static final String SKYVE_VERSION = "7.1.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -86,9 +87,9 @@ public class UtilImpl {
 	// Defaults to run at 7 past the hour every hour.
 	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
 
-	// The cron expression to use to fire off the evict expired conversations job
+	// The cron expression to use to fire off the evict expired state job
 	// Defaults to run at 37 past midnight every day.
-	public static String CONVERSATION_EVICT_CRON = "0 37 0 1/1 * ? *";
+	public static String STATE_EVICT_CRON = "0 37 0 1/1 * ? *";
 
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
@@ -156,6 +157,7 @@ public class UtilImpl {
 
 	// For caches
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
+	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
 	public static boolean HIBERNATE_FAIL_ON_MISSING_CACHE = false;
 	public static List<CacheConfig<? extends Serializable, ? extends Serializable>> APP_CACHES = new ArrayList<>();
@@ -232,7 +234,9 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
 	// The Login URI to forward to
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
-	
+	// The Logged Out URI to forward to
+	public static String AUTHENTICATION_LOGGED_OUT_URI = "/loggedOut";
+
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	

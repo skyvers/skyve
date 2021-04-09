@@ -2,13 +2,13 @@ package modules.admin.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
+import modules.admin.ReportDataset.ReportDatasetExtension;
+import modules.admin.ReportTemplate.ReportTemplateExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -16,9 +16,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-
-import modules.admin.ReportDataset.ReportDatasetExtension;
-import modules.admin.ReportTemplate.ReportTemplateExtension;
 
 /**
  * Report Dataset
@@ -40,15 +37,19 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ReportDataset";
 
 	/** @hidden */
 	public static final String datasetNamePropertyName = "datasetName";
+
 	/** @hidden */
 	public static final String datasetTypePropertyName = "datasetType";
+
 	/** @hidden */
 	public static final String queryPropertyName = "query";
+
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
 
@@ -139,28 +140,31 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 	 * The name this dataset will be made available to within the report definition.
 	 **/
 	private String datasetName;
+
 	/**
 	 * Dataset Type
 	 * <br/>
 	 * The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.
 	 **/
 	private DatasetType datasetType = DatasetType.bizQL;
+
 	/**
 	 * Query
 	 * <br/>
 	 * The query to retrieve this dataset for the report.
 	 **/
 	private String query;
+
 	/**
 	 * Query Results
 	 * <br/>
 	 * Results of testing the query.
 	 **/
 	private String results;
+
 	private ReportTemplateExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient
@@ -190,8 +194,7 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("Query - {parent.name} {datasetType}",
-														this);
+			return org.skyve.util.Binder.formatMessage("Query - {parent.name} {datasetType}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";

@@ -64,10 +64,10 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewGenerator {
-	private static final Integer THIRTY = new Integer(30);
-	private static final Integer SIXTY = new Integer(60);
-	private static final Integer FOUR = new Integer(4);
-	private static final Integer TWELVE = new Integer(12);
+	private static final Integer THIRTY = Integer.valueOf(30);
+	private static final Integer SIXTY = Integer.valueOf(60);
+	private static final Integer FOUR = Integer.valueOf(4);
+	private static final Integer TWELVE = Integer.valueOf(12);
 	
 	private AbstractRepository repository;
 	
@@ -101,10 +101,10 @@ public class ViewGenerator {
 		StringBuilder title = new StringBuilder(64);
 		String finalDescription = description;
 		if (finalDescription == null) {
-			finalDescription = document.getDescription();
+			finalDescription = document.getLocalisedDescription();
 		}
 		if (finalDescription == null) {
-			finalDescription = document.getPluralAlias();
+			finalDescription = document.getLocalisedPluralAlias();
 		}
 		if (finalDescription != null) {
 			title.append(finalDescription);
@@ -127,7 +127,7 @@ public class ViewGenerator {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
 
-		result.setTitle(document.getSingularAlias());
+		result.setTitle(document.getLocalisedSingularAlias());
 
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
@@ -288,9 +288,8 @@ public class ViewGenerator {
 					populatePropertyNames(customer, module, detailDocument, propertyNames);
 					
 					if (collection.getDomainType() == null) {
-						@SuppressWarnings("synthetic-access")
 						Detail detail = new Detail();
-						detail.title = attribute.getDisplayName();
+						detail.title = attribute.getLocalisedDisplayName();
 						detail.widget = generateDataGrid(collection.getType(), 
 															customer,
 															module,
@@ -300,9 +299,8 @@ public class ViewGenerator {
 						details.add(detail);
 					}
 					else {
-						@SuppressWarnings("synthetic-access")
 						Detail detail = new Detail();
-						detail.title = attribute.getDisplayName();
+						detail.title = attribute.getLocalisedDisplayName();
 						ListMembership membership = new ListMembership();
 						membership.setBinding(binding);
 						membership.setCandidatesHeading("Candidates");
@@ -319,9 +317,8 @@ public class ViewGenerator {
 					List<String> propertyNames = new ArrayList<>();
 					populatePropertyNames(customer, module, detailDocument, propertyNames);
 					
-					@SuppressWarnings("synthetic-access")
 					Detail detail = new Detail();
-					detail.title = attribute.getDisplayName();
+					detail.title = attribute.getLocalisedDisplayName();
 					detail.widget = generateDataGrid(CollectionType.composition,
 														customer,
 														module,
@@ -417,7 +414,7 @@ public class ViewGenerator {
 		DataGrid result = new DataGrid();
 		if (dataGridBinding != null) {
 			result.setBinding(dataGridBinding);
-			result.setTitle(document.getPluralAlias());
+			result.setTitle(document.getLocalisedPluralAlias());
 		}
 
 		if (CollectionType.aggregation.equals(collectionType)) {

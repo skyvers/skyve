@@ -7,17 +7,13 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:o="http://omnifaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
-	<f:view encoding="UTF-8">
+	<f:view contentType="text/html" encoding="UTF-8">
 		<h:head>
 	        <f:facet name="first">
 	            <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 	        </f:facet>
-			<meta http-equiv="pragma" content="no-cache" />
-			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
-			<meta http-equiv="expires" content="0" />
-			<meta http-equiv="Content-Type" content="text/html" />
-		
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 		
@@ -68,9 +64,14 @@
 						</td>
 						<c:if test="#{showSwitchMode}">
 							<td width="40px">
-								<a href="javascript:setUxUi()" title="Switch Mode">
-									<i style="color:whitesmoke" class="fa fa-share-square-o fa-2x" />
-								</a>
+								<h:form id="uxuiform" prependId="false"> 
+									<h:inputHidden value="#{bean.csrfToken}">
+										<p:autoUpdate />
+									</h:inputHidden>
+				            		<p:commandLink class="icon fa fa-share-square-o fa-2x" style="color:whitesmoke" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
+										<span class="label">Switch Mode</span>
+									</p:commandLink>
+								</h:form>
 							</td>
 						</c:if>
 						<c:if test="#{showLogout}">
@@ -82,6 +83,7 @@
 						</c:if>
 					</tr>
 					<tr>
+						<s:resetMenuState rendered="#{resetMenu}" />
 						<c:if test="#{showMenu}">
 							<td style="height:100%;vertical-align:top">
 								<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
@@ -94,9 +96,6 @@
 <!--
 								<ui:insert name="breadcrumbs" />
 -->
-							<h:form id="uxuiform" prependId="false"> 
-								<p:remoteCommand name="setUxUi" actionListener="#{bean.setUxUi('desktop')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
-							</h:form>
 							<p:messages id="messages" widgetVar="messages" globalOnly="true" escape="false">
 								<p:autoUpdate />
 							</p:messages>

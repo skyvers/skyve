@@ -1,7 +1,5 @@
 package org.skyve.impl.web.faces.pipeline;
 
-import java.util.Locale;
-
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
@@ -18,6 +16,7 @@ import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.web.UserAgentType;
 
 public abstract class AbstractFacesBuilder {
@@ -42,13 +41,12 @@ public abstract class AbstractFacesBuilder {
 	protected String process = "@form";
 	protected String update = "@(form)";
 	protected UserAgentType userAgentType;
-	protected Locale locale;
 	
 	public void setManagedBeanName(String managedBeanName) {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
 		}
-		// Do nothing is this is being executed through SAIL
+		// Do nothing if this is being executed through SAIL
 		if (FacesContext.getCurrentInstance() != null) {
 			managedBean = FacesUtil.getManagedBean(managedBeanName);
 		}
@@ -71,10 +69,7 @@ public abstract class AbstractFacesBuilder {
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
-	
+
 	protected void setId(UIComponent component, String widgetId) {
 		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
@@ -103,8 +98,14 @@ public abstract class AbstractFacesBuilder {
 	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleConditionName, String extraELToAnd) {
 		if (invisibleConditionName != null) {
 			final String visible = BindUtil.negateCondition(invisibleConditionName);
-			component.setValueExpression("rendered",  createValueExpressionFromFragment(dataWidgetVar, true,
-					visible, false, extraELToAnd, Boolean.class));
+			component.setValueExpression("rendered",  createValueExpressionFromFragment(dataWidgetVar,
+																							true,
+																							visible,
+																							false,
+																							extraELToAnd,
+																							Boolean.class,
+																							false,
+																							Sanitisation.none));
 		}
 	}
 
@@ -172,13 +173,17 @@ public abstract class AbstractFacesBuilder {
 	protected ValueExpression createValueExpressionFromFragment(String fragment, 
 																	boolean map,
 																	String extraELConditionToAnd, 
-																	Class<?> typeReturned) {
+																	Class<?> typeReturned,
+																	boolean escape,
+																	Sanitisation sanitise) {
 		return createValueExpressionFromFragment(managedBeanName + ".currentBean",
 													false,
 													fragment, 
 													map, 
 													extraELConditionToAnd,
-													typeReturned);
+													typeReturned,
+													escape,
+													sanitise);
 	}
 
 	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
@@ -186,16 +191,26 @@ public abstract class AbstractFacesBuilder {
 																	String fragment, 
 																	boolean map,
 																	String extraELConditionToAnd, 
-																	Class<?> typeReturned) {
+																	Class<?> typeReturned,
+																	boolean escape,
+																	Sanitisation sanitise) {
+		// default sanitisation is relaxed, for widgets that have no sanitisation set
+		Sanitisation finalSanitise = (sanitise == null) ? Sanitisation.relaxed : sanitise;
+		boolean escapeOrSanitise = escape || (! Sanitisation.none.equals(finalSanitise));
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
 		if (expressionPrefix != null) {
 			sb.append(dataWidgetVar ? BindUtil.sanitiseBinding(expressionPrefix) : expressionPrefix);
-			sb.append(map ? "['" : ".");
+			sb.append(escapeOrSanitise ? ".get('" : (map ? "['" : "."));
 		}
 		sb.append(fragment);
-		if (map && (expressionPrefix != null)) {
-			sb.append("']");
+		if (expressionPrefix != null) {
+			if (escapeOrSanitise) {
+				sb.append("',").append(escape).append(",'").append(finalSanitise).append("')");
+			}
+			else if (map) {
+				sb.append("']");
+			}
 		}
 		if (extraELConditionToAnd != null) {
 			sb.append(" and ").append(extraELConditionToAnd);
@@ -214,10 +229,10 @@ public abstract class AbstractFacesBuilder {
 				return ef.createValueExpression(condition, Boolean.class);
 			}
 
-			return createValueExpressionFromFragment(null, false, extraELConditionToAnd, false, null, Boolean.class);
+			return createValueExpressionFromFragment(null, false, extraELConditionToAnd, false, null, Boolean.class, false, Sanitisation.none);
 		}
 
-		return createValueExpressionFromFragment(condition, true, extraELConditionToAnd, Boolean.class);
+		return createValueExpressionFromFragment(condition, true, extraELConditionToAnd, Boolean.class, false, Sanitisation.none);
 	}
 	
 	protected String createOredValueExpressionFragmentFromConditions(String[] conditions) {
@@ -252,7 +267,9 @@ public abstract class AbstractFacesBuilder {
 														createOredValueExpressionFragmentFromConditions(conditions), 
 														false, 
 														null, 
-														Boolean.class);
+														Boolean.class,
+														false,
+														Sanitisation.none);
 		}
 		return null;
 	}

@@ -80,7 +80,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNull(final String binding) {
-		predicates.add(new MyPredicate<Object>(binding, "is null", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "is null", null, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Object value, Object start, Object end) throws Exception {
@@ -91,7 +91,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotNull(String binding) {
-		predicates.add(new MyPredicate<Object>(binding, "is not null", null, null, null) {
+		predicates.add(new MyPredicate<>(binding, "is not null", null, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Object value, Object start, Object end) throws Exception {
@@ -102,7 +102,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, final String value) {
-		predicates.add(new MyPredicate<String>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -113,7 +113,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -124,7 +124,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -135,7 +135,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -146,7 +146,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -157,7 +157,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Boolean value) {
-		predicates.add(new MyPredicate<Boolean>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Boolean value, Boolean start, Boolean end) throws Exception {
@@ -179,7 +179,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEquals(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -190,7 +190,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -201,7 +201,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -212,7 +212,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -223,7 +223,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -234,7 +234,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -245,7 +245,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Boolean value) {
-		predicates.add(new MyPredicate<Boolean>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Boolean value, Boolean start, Boolean end) throws Exception {
@@ -267,7 +267,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEquals(String binding, Geometry value) {
-		predicates.add(new MyPredicate<Geometry>(binding, "!=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
@@ -278,7 +278,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEqualsIgnoreCase(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "equalsIgnoreCase", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "equalsIgnoreCase", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -289,7 +289,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEqualsIgnoreCase(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "! equalsIgnoreCase", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "! equalsIgnoreCase", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -300,7 +300,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addContains(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "contains", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -312,7 +312,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotContains(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "! contains", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "! contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -324,7 +324,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addStartsWith(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "startsWith", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "startsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -336,7 +336,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotStartsWith(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "! startsWith", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "! startsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -348,7 +348,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addEndsWith(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "endsWith", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "endsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -360,7 +360,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addNotEndsWith(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "! endsWith", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "! endsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -372,7 +372,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThan(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, ">", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -384,7 +384,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThan(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, ">", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -396,7 +396,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThan(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding,  ">", value, null, null) {
+		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -408,7 +408,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThan(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding,  ">", value, null, null) {
+		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -420,7 +420,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThan(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding,  ">", value, null, null) {
+		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -432,7 +432,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding,  ">=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding,  ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -444,7 +444,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, ">=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -456,7 +456,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding, ">=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -468,7 +468,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding, ">=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -480,7 +480,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding, ">=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -492,7 +492,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThan(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "<", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -504,7 +504,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThan(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, "<", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -516,7 +516,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThan(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding, "<", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -528,7 +528,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThan(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding, "<", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -540,7 +540,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThan(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding, "<", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -552,7 +552,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, String value) {
-		predicates.add(new MyPredicate<String>(binding, "<=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -564,7 +564,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, Date value) {
-		predicates.add(new MyPredicate<Date>(binding, "<=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -576,7 +576,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, Integer value) {
-		predicates.add(new MyPredicate<Integer>(binding, "<=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -588,7 +588,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, Long value) {
-		predicates.add(new MyPredicate<Long>(binding, "<=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -600,7 +600,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, Decimal value) {
-		predicates.add(new MyPredicate<Decimal>(binding, "<=", value, null, null) {
+		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
@@ -612,7 +612,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, String start, String end) {
-		predicates.add(new MyPredicate<String>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
@@ -625,7 +625,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Date start, Date end) {
-		predicates.add(new MyPredicate<Date>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
@@ -637,7 +637,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Integer start, Integer end) {
-		predicates.add(new MyPredicate<Integer>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
@@ -649,7 +649,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Long start, Long end) {
-		predicates.add(new MyPredicate<Long>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
@@ -661,7 +661,7 @@ public class InMemoryFilter implements Filter {
 
 	@Override
 	public void addBetween(String binding, Decimal start, Decimal end) {
-		predicates.add(new MyPredicate<Decimal>(binding, "between", null, start, end) {
+		predicates.add(new MyPredicate<>(binding, "between", null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {

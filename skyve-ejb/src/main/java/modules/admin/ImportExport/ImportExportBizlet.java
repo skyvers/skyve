@@ -1,6 +1,7 @@
 package modules.admin.ImportExport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
@@ -14,6 +15,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.ImportExport.actions.UploadSimpleImportDataFile;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
@@ -35,8 +37,9 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 			Customer customer = CORE.getUser().getCustomer();
 			List<DomainValue> result = new ArrayList<>();
 			for (Module module : customer.getModules()) {
-				result.add(new DomainValue(module.getName(), module.getTitle()));
+				result.add(new DomainValue(module.getName(), module.getLocalisedTitle()));
 			}
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		}
 
@@ -54,9 +57,10 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getSingularAlias()));
+					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 				}
 			}
+			Collections.sort(result, new DomainValueSortByDescription());
 			return result;
 		}
 
@@ -125,7 +129,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				default:
 					ImportExportColumn col = ImportExportColumn.newInstance();
 					col.setBindingName(a.getName());
-					col.setColumnName(a.getDisplayName());
+					col.setColumnName(a.getLocalisedDisplayName());
 					columns.add(col);
 					break;
 				}

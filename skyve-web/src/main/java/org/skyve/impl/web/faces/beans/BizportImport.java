@@ -14,11 +14,12 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
@@ -28,7 +29,6 @@ import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -57,9 +57,7 @@ public class BizportImport extends Localisable {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				Persistence p = CORE.getPersistence();
-				UserImpl internalUser = (UserImpl) p.getUser();
-				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				initialise();
 				
 				return null;
 			}
@@ -117,7 +115,7 @@ public class BizportImport extends Localisable {
 
 		UploadedFile file = event.getFile();
 		
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -152,20 +150,20 @@ public class BizportImport extends Localisable {
 
 			UploadException exception = new UploadException();
 			try {
-				try (InputStream fis = file.getInputstream()) {
-					POIWorkbook workbook = new POIWorkbook(customer,
-															WorkbookFactory.create(fis), 
-															exception);
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
-					boolean vetoed = internalCustomer.interceptBeforeBizImportAction(document, action, workbook, exception);
-					if (! vetoed) {
-						bizPortAction.bizImport(workbook, exception);
-						internalCustomer.interceptAfterBizImportAction(document, action, workbook, exception);
-					}
-		
-					// throw if we have errors found, to ensure rollback
-					if (exception.hasErrors()) {
-						throw exception;
+				try (InputStream fis = file.getInputStream()) {
+					try (Workbook wb = WorkbookFactory.create(fis)) {
+						POIWorkbook workbook = new POIWorkbook(customer, wb, exception);
+						CustomerImpl internalCustomer = (CustomerImpl) customer;
+						boolean vetoed = internalCustomer.interceptBeforeBizImportAction(document, action, workbook, exception);
+						if (! vetoed) {
+							bizPortAction.bizImport(workbook, exception);
+							internalCustomer.interceptAfterBizImportAction(document, action, workbook, exception);
+						}
+			
+						// throw if we have errors found, to ensure rollback
+						if (exception.hasErrors()) {
+							throw exception;
+						}
 					}
 				}
 			}
@@ -179,7 +177,7 @@ public class BizportImport extends Localisable {
 			}
 
 			// only put conversation in cache if we have been successful in executing
-			ConversationUtil.cacheConversation(webContext);
+			StateUtil.cacheConversation(webContext);
 
 			
 			if (exception.hasProblems()) {

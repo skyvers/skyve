@@ -1,9 +1,6 @@
 package org.skyve.impl.web.faces.beans;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -23,11 +20,8 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -39,6 +33,13 @@ import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
+/**
+ * The menu is session scoped.
+ * The expanded state is set based on the "m" parameter of first URL hit.
+ * The menu is reset by home.xhtml <s:resetMenuState /> tag so that the / URL sets up the menu based on the defaults.
+ * The menus respond to the cookies in the browser before adhering to the server side state in this menu model.
+ * This means the menu model expanded state is really on used once WebUtil.clearMenuCookies() has been called.
+ */
 @ManagedBean
 @SessionScoped
 public class Menu extends Harness {
@@ -46,31 +47,28 @@ public class Menu extends Harness {
 
 	// The modules menu on the LHS
 	private MenuModel menu;
-	// The map of module name to sub menu nodes in the model
-	private Map<String, DefaultSubMenu> moduleSubMenus = new TreeMap<>();
 	
 	public MenuModel getMenu() {
 		if (menu == null) {
-			preRender();
+			setState();
 		}
-		setExpandedModule();
 		return menu;
 	}
+	
+	public void resetState() {
+		menu = null;
+	}
 
-	public void preRender() {
+	private void setState() {
 		new FacesAction<Void>() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
-					AbstractPersistence persistence = AbstractPersistence.get();
-					UserImpl internalUser = (UserImpl) persistence.getUser();
-					Customer customer = internalUser.getCustomer();
-
-					initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
-					
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
+					setBizModuleParameter(request.getParameter("m"));
+					initialise(); // check m parameter and set to default if DNE
+					
 					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
@@ -83,47 +81,32 @@ public class Menu extends Harness {
 		}.execute();
 	}
 	
-	private void setExpandedModule() {
-		if (menu != null) {
-			Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-			String moduleName = params.get("m");
-			if (moduleName != null) {
-				for (Entry<String, DefaultSubMenu> e : moduleSubMenus.entrySet()) {
-					e.getValue().setExpanded(moduleName.equals(e.getKey()));
-				}
-			}
-		}
-	}
-	
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
 		// render each module menu
-		new MenuRenderer(uxui, getLocale(), bizModule) {
+		new MenuRenderer(uxui, bizModule) {
 			private Stack<Submenu> subs = new Stack<>();
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
 											Module menuModule,
 											boolean open) {
-				DefaultSubMenu moduleSub = new DefaultSubMenu(menuModule.getTitle());
-				moduleSubMenus.put(menuModule.getName(), moduleSub);
-				result.addElement(moduleSub);
+				DefaultSubMenu moduleSub = DefaultSubMenu.builder().label(menuModule.getLocalisedTitle()).build();
+				result.getElements().add(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
 			}
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				DefaultSubMenu sub = new DefaultSubMenu(group.getName());
+				DefaultSubMenu sub = DefaultSubMenu.builder().label(group.getLocalisedName()).build();
 				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderCalendarItem(CalendarItem item,
 											Module menuModule,
 											Module itemModule,
@@ -135,7 +118,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderEditItem(EditItem item,
 										Module menuModule,
 										Module itemModule,
@@ -146,7 +128,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderLinkItem(LinkItem item,
 										Module menuModule,
 										boolean relative,
@@ -155,7 +136,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderListItem(ListItem item,
 										Module menuModule,
 										Module itemModule,
@@ -167,7 +147,6 @@ public class Menu extends Harness {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderMapItem(MapItem item,
 										Module menuModule,
 										Module itemModule,
@@ -179,7 +158,6 @@ public class Menu extends Harness {
 			}
 			
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderTreeItem(TreeItem item,
 										Module menuModule,
 										Module itemModule,
@@ -210,7 +188,7 @@ public class Menu extends Harness {
 																		Module itemModule,
 																		String itemQueryName,
 																		String itemAbsoluteHref) {
-		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass);
+		DefaultMenuItem result = DefaultMenuItem.builder().value(item.getLocalisedName()).icon(iconStyleClass).build();
 		result.setAjax(false);
 		result.setHref("#");
 		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));

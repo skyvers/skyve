@@ -31,7 +31,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 			Module module = customer.getModule(jobName.substring(0, dotIndex));
 			JobMetaData job = module.getJob(jobName.substring(dotIndex + 1));
 	
-			return module.getName() + " - " + job.getDisplayName();
+			return module.getName() + " - " + job.getLocalisedDisplayName();
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "";
@@ -49,7 +49,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		private Object get(String name) {
 			try {
 				Field f = expression.getClass().getDeclaredField(name);
-				if (! f.isAccessible()) {
+				if (! f.canAccess(expression)) {
 					f.setAccessible(true);
 				}
 				return f.get(expression);
@@ -97,12 +97,12 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	}
 
 	private static final String ALL_CODE = "*";
-	private static final Integer ALL_CODE_SPEC = new Integer(99);
+	private static final Integer ALL_CODE_SPEC = Integer.valueOf(99);
 	private static final String SELECTED_CODE = "X";
 	private static final String LAST_DAY_CODE = "L";
 	private static final String LAST_WEEK_DAY_CODE = "LW";
 	private static final String ANY_CODE = "?";
-	private static final Integer ANY_CODE_SPEC = new Integer(98);
+	private static final Integer ANY_CODE_SPEC = Integer.valueOf(98);
 	
 	@Override
 	public JobSchedule newInstance(JobSchedule bean) throws Exception {
@@ -152,7 +152,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 					StringBuilder sb = new StringBuilder(128);
 					StringBuilder sbDisplay = new StringBuilder(128);
 					sb.append(module.getName()).append('.').append(job.getName());
-					sbDisplay.append(module.getName()).append(" - ").append(job.getDisplayName());
+					sbDisplay.append(module.getName()).append(" - ").append(job.getLocalisedDisplayName());
 					result.add(new DomainValue(sb.toString(), sbDisplay.toString()));
 				}
 			}
@@ -177,7 +177,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		else {
 			bean.setAllMinutes(SELECTED_CODE);
 			for (int i = 0, l = 60; i < l; i++) {
-				Binder.set(bean, "minute" + i, minutes.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+				Binder.set(bean, "minute" + i, minutes.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}
 
@@ -187,7 +187,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		else {
 			bean.setAllHours(SELECTED_CODE);
 			for (int i = 0, l = 24; i < l; i++) {
-				Binder.set(bean, "hour" + i, hours.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+				Binder.set(bean, "hour" + i, hours.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}
 		
@@ -205,7 +205,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		else {
 			bean.setAllDays(SELECTED_CODE);
 			for (int i = 1, l = 32; i < l; i++) {
-				Binder.set(bean, "day" + i, days.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+				Binder.set(bean, "day" + i, days.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}
 		
@@ -215,7 +215,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		else {
 			bean.setAllMonths(SELECTED_CODE);
 			for (int i = 1, l = 13; i < l; i++) {
-				Binder.set(bean, "month" + i, months.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+				Binder.set(bean, "month" + i, months.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}
 		
@@ -225,7 +225,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		else {
 			bean.setAllWeekdays(SELECTED_CODE);
 			for (int i = 1, l = 8; i < l; i++) {
-				Binder.set(bean, "weekday" + i, weekdays.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+				Binder.set(bean, "weekday" + i, weekdays.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}
 	}

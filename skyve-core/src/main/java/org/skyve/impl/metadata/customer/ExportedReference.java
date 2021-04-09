@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
+import org.skyve.util.Util;
 
 public class ExportedReference implements Serializable {
 	private static final long serialVersionUID = 3672667027101941186L;
@@ -19,6 +20,10 @@ public class ExportedReference implements Serializable {
 	
 	public String getDocumentAlias() {
 		return documentAlias;
+	}
+	
+	public String getLocalisedDocumentAlias() {
+		return Util.i18n(documentAlias);
 	}
 
 	public void setDocumentAlias(String documentAlias) {

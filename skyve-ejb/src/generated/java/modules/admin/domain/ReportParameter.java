@@ -2,7 +2,6 @@ package modules.admin.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,7 +9,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
+import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.ReportTemplate.ReportTemplateExtension;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -20,9 +20,6 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-
-import modules.admin.ReportParameter.ReportParameterExtension;
-import modules.admin.ReportTemplate.ReportTemplateExtension;
 
 /**
  * Report Parameter
@@ -47,35 +44,49 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
+
 	/** @hidden */
 	public static final String DOCUMENT_NAME = "ReportParameter";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
+
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
+
 	/** @hidden */
 	public static final String typePropertyName = "type";
+
 	/** @hidden */
 	public static final String requiredPropertyName = "required";
+
 	/** @hidden */
 	public static final String dateDefaultValuePropertyName = "dateDefaultValue";
+
 	/** @hidden */
 	public static final String numericalDefaultValuePropertyName = "numericalDefaultValue";
+
 	/** @hidden */
 	public static final String textDefaultValuePropertyName = "textDefaultValue";
+
 	/** @hidden */
 	public static final String dateTestValuePropertyName = "dateTestValue";
+
 	/** @hidden */
 	public static final String numericalTestValuePropertyName = "numericalTestValue";
+
 	/** @hidden */
 	public static final String textTestValuePropertyName = "textTestValue";
+
 	/** @hidden */
 	public static final String defaultValueStringPropertyName = "defaultValueString";
+
 	/** @hidden */
 	public static final String testValueStringPropertyName = "testValueString";
+
 	/** @hidden */
 	public static final String reportInputValuePropertyName = "reportInputValue";
+
 	/** @hidden */
 	public static final String formattedInputValuePropertyName = "formattedInputValue";
 
@@ -166,6 +177,7 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 	 * The name of this parameter.
 	 **/
 	private String name;
+
 	/**
 	 * Description
 	 * <br/>
@@ -173,66 +185,77 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 				they run the report to assist them in providing a value.
 	 **/
 	private String description;
+
 	/**
 	 * Parameter Type
 	 * <br/>
 	 * The data type of this parameter
 	 **/
 	private Type type;
+
 	/**
 	 * Required
 	 * <br/>
 	 * Is this parameter required to run the report?
 	 **/
-	private Boolean required = new Boolean(false);
+	private Boolean required = Boolean.valueOf(false);
+
 	/**
 	 * Default Value
 	 * <br/>
 	 * The default value which will be used if one is not provided
 	 **/
 	private DateOnly dateDefaultValue;
+
 	/**
 	 * Default Value
 	 * <br/>
 	 * The default value which will be used if one is not provided
 	 **/
 	private Long numericalDefaultValue;
+
 	/**
 	 * Default Value
 	 * <br/>
 	 * The default value which will be used if one is not provided
 	 **/
 	private String textDefaultValue;
+
 	/**
 	 * Test Value
 	 * <br/>
 	 * The value to use when testing this report
 	 **/
 	private DateOnly dateTestValue;
+
 	/**
 	 * Test Value
 	 * <br/>
 	 * The value to use when testing this report
 	 **/
 	private Long numericalTestValue;
+
 	/**
 	 * Test Value
 	 * <br/>
 	 * The value to use when testing this report
 	 **/
 	private String textTestValue;
+
 	/**
 	 * Default Value
 	 * <br/>
 	 * Calculated field to show the default value as a String in the ReportTemplate view
 	 **/
 	private String defaultValueString;
+
 	/**
 	 * Test Value
 	 * <br/>
 	 * Calculated field to show the test value as a String in the ReportTemplate view
 	 **/
 	private String testValueString;
+
 	/**
 	 * Value
 	 * <br/>
@@ -241,6 +264,7 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 	 * This is the input parameter value passed into the report when it being run from the user interface.
 	 **/
 	private String reportInputValue;
+
 	/**
 	 * Formatted Value
 	 * <br/>
@@ -248,10 +272,10 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 				which was supplied, or the default value used if one exists and it was used.
 	 **/
 	private String formattedInputValue;
+
 	private ReportTemplateExtension parent;
 
 	private Integer bizOrdinal;
-
 
 	@Override
 	@XmlTransient
@@ -281,8 +305,7 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("Parameter - {name}",
-														this);
+			return org.skyve.util.Binder.formatMessage("Parameter - {name}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
@@ -379,9 +402,9 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 	 * {@link #dateDefaultValue} mutator.
 	 * @param dateDefaultValue	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDateDefaultValue(DateOnly dateDefaultValue) {
 		preset(dateDefaultValuePropertyName, dateDefaultValue);
 		this.dateDefaultValue = dateDefaultValue;
@@ -435,9 +458,9 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 	 * {@link #dateTestValue} mutator.
 	 * @param dateTestValue	The new value.
 	 **/
+	@XmlElement
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	@XmlElement
 	public void setDateTestValue(DateOnly dateTestValue) {
 		preset(dateTestValuePropertyName, dateTestValue);
 		this.dateTestValue = dateTestValue;

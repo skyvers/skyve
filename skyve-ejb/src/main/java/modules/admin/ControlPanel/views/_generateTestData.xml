@@ -37,15 +37,7 @@
 				</row>
 				<row>
 					<item>
-						<checkBox binding="testTagGeneratedData" triState="false">
-							<onChangedHandlers>
-								<rerender clientValidation="false">
-									<properties>
-										<c:property key="update">generationParameters</c:property>
-									</properties>
-								</rerender>
-							</onChangedHandlers>
-						</checkBox>
+						<checkBox binding="testTagGeneratedData" triState="false"/>
 					</item>
 					<item>
 						<textField binding="testTagName" complete="suggest"/>

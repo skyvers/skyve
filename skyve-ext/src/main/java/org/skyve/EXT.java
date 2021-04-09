@@ -587,12 +587,11 @@ public class EXT {
 	// Not a CDI provider as it is auto-closeable 
 	@SuppressWarnings("resource")
 	public static ContentManager newContentManager() {
-		ContentManager result = DefaultAddInManager.get().getExtension(ContentManager.class);
+		final ContentManager result = (AbstractContentManager.IMPLEMENTATION_CLASS == null) ?
+										DefaultAddInManager.get().getExtension(ContentManager.class) :
+										AbstractContentManager.get();
 		if (result == null) {
-			if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
-				throw new DomainException("No content manager addin detected and \"factories.contentManagerClass\" is not defined in the Skyve configuration");
-			}
-			result = AbstractContentManager.get();
+			throw new DomainException("No content manager addin detected and \"factories.contentManagerClass\" is not defined in the Skyve configuration");
 		}
 		return result;
 	}

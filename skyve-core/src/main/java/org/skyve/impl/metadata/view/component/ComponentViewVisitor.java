@@ -298,13 +298,13 @@ public class ComponentViewVisitor extends ViewVisitor {
 	@Override
 	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		invisible(link);
-		link.setValue(prefixExpression(link.getValue()));
+		link.setValue(prefixExpression(link.getLocalisedValue()));
 	}
 
 	@Override
 	public void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
 		invisible(blurb);
-		blurb.setMarkup(prefixExpression(blurb.getMarkup()));
+		blurb.setMarkup(prefixExpression(blurb.getLocalisedMarkup()));
 	}
 
 	@Override
@@ -312,7 +312,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 		bound(label);
 		invisible(label);
 		label.setFor(prefixBinding(label.getFor()));
-		label.setValue(prefixExpression(label.getValue()));
+		label.setValue(prefixExpression(label.getLocalisedValue()));
 	}
 
 	@Override
@@ -478,7 +478,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 		bound(link);
 		disable(link);
 		invisible(link);
-		link.setValue(prefixExpression(link.getValue()));
+		link.setValue(prefixExpression(link.getLocalisedValue()));
 	}
 
 	@Override

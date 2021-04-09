@@ -3,7 +3,7 @@ package org.skyve.impl.web;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 
 /**
  * Used to count the active sessions on a server.
@@ -15,11 +15,11 @@ import org.skyve.cache.ConversationUtil;
 public class SkyveSessionListener implements HttpSessionListener {
 	@Override
 	public void sessionCreated(HttpSessionEvent se) {
-		ConversationUtil.incrementSessionCount();
+		StateUtil.incrementSessionCount();
 	}
 
 	@Override
 	public void sessionDestroyed(HttpSessionEvent se) {
-		ConversationUtil.decrementSessionCount();
+		StateUtil.decrementSessionCount();
 	}
 }

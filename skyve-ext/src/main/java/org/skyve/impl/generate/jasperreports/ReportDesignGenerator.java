@@ -23,7 +23,7 @@ public abstract class ReportDesignGenerator {
 
         design.setJoins(new HashMap<>());
         design.setJoinAlias(new HashMap<>());
-        design.setAlias((int) ('a'));
+        design.setAlias('a');
 
         clearDesign(design);
 
@@ -167,15 +167,15 @@ public abstract class ReportDesignGenerator {
             if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
 
                 // page X of Y
-                Integer width = new Integer(design.getColumnWidth().intValue() - design.getDefaultElementHeight().intValue());
-                Integer left = new Integer(0);
-                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageX", "\"Page \" + $V{PAGE_NUMBER} + \" of \"", null, null, new Integer(0),
+                Integer width = Integer.valueOf(design.getColumnWidth().intValue() - design.getDefaultElementHeight().intValue());
+                Integer left = Integer.valueOf(0);
+                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageX", "\"Page \" + $V{PAGE_NUMBER} + \" of \"", null, null, Integer.valueOf(0),
                         left,
                         width, null, null, ReportElement.ElementAlignment.right, null, null, null, null, null);
 
                 width = design.getDefaultElementHeight();
-                left = new Integer(design.getColumnWidth().intValue() - design.getDefaultElementHeight().intValue());
-                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageOfY", "$V{PAGE_NUMBER}", null, null, new Integer(0), left, width, null, null,
+                left = Integer.valueOf(design.getColumnWidth().intValue() - design.getDefaultElementHeight().intValue());
+                pageFooter = Renderer.addElement(pageFooter, ReportElement.ElementType.textField, "pageOfY", "$V{PAGE_NUMBER}", null, null, Integer.valueOf(0), left, width, null, null,
                         null, null, null, null, null, null);
                 pageFooter.getElements().get(1).setEvaluationTime(ReportElement.EvaluationTime.report);
             }
@@ -198,9 +198,9 @@ public abstract class ReportDesignGenerator {
         noData.setBandType(ReportBand.BandType.noData);
         noData.setParent(design);
 
-        noData = Renderer.addElement(noData, ReportElement.ElementType.staticText, "no_data_title", "No data matched your selection.", null, null, new Integer(0), new Integer(0),
+        noData = Renderer.addElement(noData, ReportElement.ElementType.staticText, "no_data_title", "No data matched your selection.", null, null, Integer.valueOf(0), Integer.valueOf(0),
                 design.getColumnWidth(),
-                design.getDefaultElementHeight() * 2, null, null, Boolean.TRUE, null, null, null, null);
+                Integer.valueOf(design.getDefaultElementHeight().intValue() * 2), null, null, Boolean.TRUE, null, null, null, null);
 
         if (Boolean.TRUE.equals(design.getSectionBorderTop())
                 || Boolean.TRUE.equals(design.getSectionBorderLeft())
@@ -208,8 +208,8 @@ public abstract class ReportDesignGenerator {
                 || Boolean.TRUE.equals(design.getSectionBorderRight())) {
 
             // TODO implement borders as lines
-            noData = Renderer.addElement(noData, ReportElement.ElementType.border, null, null, null, null, new Integer(0), new Integer(0), design.getColumnWidth(),
-                    design.getDefaultElementHeight() * 2, null, null, null, null, null, null, null);
+            noData = Renderer.addElement(noData, ReportElement.ElementType.border, null, null, null, null, Integer.valueOf(0), Integer.valueOf(0), design.getColumnWidth(),
+            		Integer.valueOf(design.getDefaultElementHeight().intValue() * 2), null, null, null, null, null, null, null);
         }
 
         design.getBands().add(noData);
@@ -279,7 +279,7 @@ public abstract class ReportDesignGenerator {
                 break;
         }
         f.setSkyveType(a.getAttributeType().name());
-        f.setDisplayName(a.getDisplayName());
+        f.setDisplayName(a.getLocalisedDisplayName());
 
         return f;
     }

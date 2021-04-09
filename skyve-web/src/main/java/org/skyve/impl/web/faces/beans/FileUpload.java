@@ -16,9 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FilenameUtils;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.cache.ConversationUtil;
+import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
@@ -28,7 +28,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -60,9 +59,7 @@ public class FileUpload extends Localisable {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				Persistence p = CORE.getPersistence();
-				UserImpl internalUser = (UserImpl) p.getUser();
-				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				initialise();
 				
 				return null;
 			}
@@ -117,7 +114,7 @@ public class FileUpload extends Localisable {
 
 		UploadedFile file = event.getFile();
 
-		AbstractWebContext webContext = ConversationUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -158,9 +155,10 @@ public class FileUpload extends Localisable {
 				// do nothing
 			}
 			try{
+				@SuppressWarnings("resource")
 				UploadAction.UploadedFile bizFile = 
 						new UploadAction.UploadedFile(FilenameUtils.getName(file.getFileName()),
-														file.getInputstream(),
+														file.getInputStream(),
 														mimeType);
 				boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
 				if (! vetoed) {
@@ -190,7 +188,7 @@ public class FileUpload extends Localisable {
 			}
 			
 			// only put conversation in cache if we have been successful in executing
-			ConversationUtil.cacheConversation(webContext);
+			StateUtil.cacheConversation(webContext);
 			
 			if (exception.hasProblems()) {
 				for (Problem error : exception.getErrors()) {

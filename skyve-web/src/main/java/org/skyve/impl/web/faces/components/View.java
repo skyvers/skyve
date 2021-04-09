@@ -3,7 +3,6 @@ package org.skyve.impl.web.faces.components;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.faces.component.FacesComponent;
@@ -146,17 +145,14 @@ public class View extends HtmlPanelGroup {
         Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
         Repository repository = CORE.getRepository();
 
-        Locale locale = user.getLocale();
         componentBuilder.setManagedBeanName(managedBeanName);
     	componentBuilder.setProcess(process);
     	componentBuilder.setUpdate(update);
     	componentBuilder.setUserAgentType(userAgentType);
-    	componentBuilder.setLocale(locale);
     	layoutBuilder.setManagedBeanName(managedBeanName);
     	layoutBuilder.setProcess(process);
     	layoutBuilder.setUpdate(update);
     	layoutBuilder.setUserAgentType(userAgentType);
-    	layoutBuilder.setLocale(locale);
 
     	FacesViewRenderer fvr = null;
         org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit.toString());

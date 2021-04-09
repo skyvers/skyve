@@ -14,9 +14,6 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -256924803932268240L;
 
 	private Customer customer;
@@ -42,7 +39,6 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		// Visit the new bean and add in the model structure
 		new BeanVisitor(false, false, false) {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
@@ -64,7 +60,6 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		// Visit oldBean and add/modify the resulting model.
 		new BeanVisitor(false, false, false) {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
@@ -122,15 +117,15 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean) ? 
 											((PersistentBean) bean).getBizKey() : 
-											currentDocument.getSingularAlias());
+											currentDocument.getLocalisedSingularAlias());
 		result.setDocument(currentDocument);
 		if (owningRelation == null) {
 			result.setReferenceName(null);
-			result.setRelationshipDescription(currentDocument.getSingularAlias());
+			result.setRelationshipDescription(currentDocument.getLocalisedSingularAlias());
 		}
 		else {
 			result.setReferenceName(owningRelation.getName());
-			result.setRelationshipDescription(owningRelation.getDisplayName());
+			result.setRelationshipDescription(owningRelation.getLocalisedDisplayName());
 		}
 		result.setMutation(newNode ? Mutation.added : Mutation.deleted);
 		addProperties(result, currentDocument, bean, newNode, binding);
@@ -175,7 +170,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 				ComparisonProperty property = new ComparisonProperty();
 				String name = attribute.getName();
 				property.setName(name);
-				property.setTitle(attribute.getDisplayName());
+				property.setTitle(attribute.getLocalisedDisplayName());
 				property.setWidget(attribute.getDefaultInputWidget());
 
 				Object value = Binder.get(bean, name);

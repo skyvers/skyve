@@ -45,15 +45,12 @@ FORM styles
 /*
     Used for the BizHub logo image on the top left.
 */
-td > img[name$="main"] {
+div.logo > table {
+    vertical-align: top;
+}
+div.logo img {
 	max-width: 280px; 
 	height: auto;
-}
-
-table.logo {
-    cellpadding: 0;
-    cellspacing: 0;
-    vertical-align: top;
 }
 
 body {

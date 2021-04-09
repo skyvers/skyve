@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.beans;
 
+import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
+import javax.faces.FacesException;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -22,8 +25,8 @@ import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.util.UtilImpl;
@@ -34,6 +37,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.ChartAction;
+import org.skyve.impl.web.faces.actions.CompleteAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.ExecuteDownloadAction;
@@ -42,7 +46,6 @@ import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
-import org.skyve.impl.web.faces.actions.CompleteAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -56,8 +59,10 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
@@ -111,7 +116,50 @@ public class FacesView<T extends Bean> extends Harness {
 		return bindingParameter;
 	}
 	public void setBindingParameter(String bindingParameter) {
-		this.bindingParameter = bindingParameter;
+		this.bindingParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bindingParameter));
+	}
+	
+	/**
+	 * Used to track requests being executed out of order possibly from a Cross Site Request Forgery
+	 */
+	private String csrfToken;
+	private boolean csrfTokenChecked = true;
+	
+	/**
+	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
+	 * @return	Seure Random integer
+	 */
+	public String getCsrfToken() {
+		if (csrfToken == null) {
+			csrfToken = String.valueOf(new SecureRandom().nextInt());
+			csrfTokenChecked = false;
+		}
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);
+		return csrfToken;
+	}
+
+	/**
+	 * Compares the token set with the existing value to detect CSRF attacks.
+	 * If there is a token set and it matches, this method clears the existing csrfToken value ready for a getter call.
+	 * If the tokens do not match, then the current user is logged out.
+	 * @param csrfToken	The value from the web request.
+	 */
+	public void setCsrfToken(String csrfToken) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("setCsrfToken() = " + csrfToken);
+		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
+		csrfTokenChecked = true; // indicate we have checked the token
+		if (this.csrfToken != null) { // there needs to be a token to check first
+			if (! this.csrfToken.equals(currentCsrfToken)) {
+				Util.LOGGER.severe("CSRF attack detected");
+				try {
+					FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getLoggedOutUrl());
+				}
+				catch (IOException e) {
+					throw new FacesException("Could not redirect home after CSRF attack", e);
+				}
+			}
+			this.csrfToken = null;
+		}
 	}
 	
 	@PostConstruct
@@ -122,15 +170,32 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
-		if (! fc.isPostback()) {
-			new PreRenderAction<>(this).execute();
+		if (fc.isPostback()) {
+			if (UtilImpl.FACES_TRACE) {
+				UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
+										" : m=" + getBizModuleParameter() + 
+										" : d=" + getBizDocumentParameter() + 
+										" : q=" + getQueryNameParameter() + 
+										" : i=" + getBizIdParameter());
+			}
+			if (! csrfTokenChecked) {
+				String csrfTokenParameterValue = fc.getExternalContext().getRequestParameterMap().get("csrfToken");
+				if (csrfTokenParameterValue != null) {
+					setCsrfToken(csrfTokenParameterValue);
+				}
+				else {
+					try {
+						Util.LOGGER.severe("No CSRF token detected");
+						fc.getExternalContext().redirect(Util.getLoggedOutUrl());
+					}
+					catch (IOException e) {
+						throw new FacesException("Could not redirect home after CSRF attack", e);
+					}
+				}
+			}
 		}
-		else if (UtilImpl.FACES_TRACE) {
-			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
-									" : m=" + getBizModuleParameter() + 
-									" : d=" + getBizDocumentParameter() + 
-									" : q=" + getQueryNameParameter() + 
-									" : i=" + getBizIdParameter());
+		else {
+			new PreRenderAction<>(this).execute();
 		}
 	}
 
@@ -270,7 +335,7 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	// for navigate-on-select in data grids
-	public void navigate(SelectEvent evt) {
+	public void navigate(SelectEvent<?> evt) {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
@@ -323,7 +388,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 * else if actionName is "false" - rerender with no validation.
 	 * else run the action.
 	 */
-	public void selectGridRow(SelectEvent evt) {
+	public void selectGridRow(SelectEvent<?> evt) {
 		UIComponent component = evt.getComponent();
 		Map<String, Object> attributes = component.getAttributes();
 		String selectedIdBinding = (String) attributes.get("selectedIdBinding");

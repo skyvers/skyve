@@ -102,9 +102,8 @@ public class ReactNativeRouter {
 
 	private void menuImportsAndRoutes() {
 		Customer c = CORE.getCustomer();
-		new MenuRenderer(generator.uxui, null, null) {
+		new MenuRenderer(generator.uxui, null) {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderCalendarItem(CalendarItem item,
 											Module menuModule,
 											Module itemModule,
@@ -119,7 +118,6 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderEditItem(EditItem item,
 										Module menuModule,
 										Module itemModule,
@@ -135,7 +133,6 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderListItem(ListItem item,
 										Module menuModule,
 										Module itemModule,
@@ -167,7 +164,6 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderMapItem(MapItem item,
 										Module menuModule,
 										Module itemModule,
@@ -182,7 +178,6 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void renderTreeItem(TreeItem item,
 										Module menuModule,
 										Module itemModule,
