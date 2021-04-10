@@ -499,10 +499,12 @@ public class SmartClientListServlet extends HttpServlet {
 								HttpServletResponse response,
 								Integer currentCsrfToken)
 	throws ServletException {
+/* TODO Commented out until I can work out the async problems in SC
 		if (! StateUtil.checkToken(session, currentCsrfToken)) {
 			WebUtil.logout(request, response);
 			throw new java.lang.SecurityException("CSRF attack detected");
 		}
+*/
 	}
 	
 	/**

@@ -249,6 +249,7 @@ isc.EditView.addMethods({
 					params[binding] = value;
 				}
 			}
+//console.log('bnewInstance csrf=' + this._csrf);
 
 			this._vm.fetchData(
 				null, // no criteria required
@@ -259,6 +260,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+//console.log('anewInstance csrf=' + me._csrf);
 
 						// ensure that save operation is set to add (it would be edit)
 						me._vm.setSaveOperationType("add");
@@ -328,6 +330,7 @@ isc.EditView.addMethods({
 				params._s = this._source;
 				this._source = null;
 			}
+//console.log('beditInstance csrf=' + this._csrf);
 			
 			var me = this;
 			this._vm.fetchData(
@@ -339,6 +342,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+//console.log('aeditInstance csrf=' + me._csrf);
 
 						// scatter the first (and only) row returned from the server
 						// data parameter is an array on fetch
@@ -460,6 +464,7 @@ isc.EditView.addMethods({
 				params._s = this._source;
 				this._source = null;
 			}
+//console.log('bsaveInstance csrf=' + this._csrf);
 			
 			var me = this;
 			// temporarily disable values manager validation as saveData() calls validate
@@ -472,6 +477,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // redundant success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+//console.log('asaveInstance csrf=' + me._csrf);
 
 						// if we came from a lookupDescription, this will be not null
 						var lookupDescription = null;
@@ -625,6 +631,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // redundant success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+//console.log('dleeteInstance csrf=' + me._csrf);
 
 						isc.WindowStack.popoff(true); // rerender the opener view
 
@@ -677,6 +684,7 @@ isc.EditView.addMethods({
 			if (gridBinding) {
 				params._g = gridBinding;
 			}
+//console.log('bdoAction ' + action + ' csrf=' + this._csrf);
 
 			var me = this;
 			// temporarily disable values manager validation as saveData() calls validate
@@ -689,6 +697,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // redundant success test
 						// Assign the CSRF Token from the response header
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+//console.log('adoAction ' + action + ' csrf=' + me._csrf);
 
 						// scatter the first (and only) row returned from the server
 						// data parameter is an object on save
