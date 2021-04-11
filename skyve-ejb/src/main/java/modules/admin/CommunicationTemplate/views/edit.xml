@@ -21,7 +21,7 @@
 		</row>
 	</form>
 	<vbox border="true" borderTitle="Communications using this template">
-		<listGrid query="qCommunications" continueConversation="true">
+		<listGrid query="qCommunicationsForTemplate" continueConversation="true">
 			<filterParameter operator="equal" filterBinding="template" valueBinding="bizId" />
 		</listGrid>
 	</vbox>

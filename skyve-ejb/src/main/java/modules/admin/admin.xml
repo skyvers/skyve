@@ -683,11 +683,19 @@
 			<description>Communications</description>
 			<columns>
 				<column binding="description" sortOrder="ascending" />
-				<column binding="documentName" />
 				<column binding="subject" />
+				<column binding="systemUse"/>
 				<column binding="template.bizKey"/>
 			</columns>
 		</query>
+		<query name="qCommunicationsForTemplate" documentName="Communication">
+			<description>Communication Templates</description>
+			<columns>
+				<column binding="description" sortOrder="ascending" />
+				<column binding="subject" />
+				<column binding="systemUse"/>
+			</columns>
+		</query>		
 		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
 			<description>Communication Templates</description>
 			<columns>
