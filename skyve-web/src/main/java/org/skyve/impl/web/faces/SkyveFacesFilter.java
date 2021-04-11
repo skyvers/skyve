@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 
 import javax.faces.application.ViewExpiredException;
@@ -104,8 +105,18 @@ public class SkyveFacesFilter implements Filter {
                 // String redirect = WebUtil.getRefererHeader(request);
                 String redirect = Util.getSkyveContextUrl() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
-                FacesContext.getCurrentInstance().getExternalContext().redirect(redirect);
-            }
+
+                // Can't use FacesContext.getCurrentInstance().getExternalContext().redirect() here coz the faces ontext is gone
+				if (FacesUtil.isAjax(request)) {
+					try (PrintWriter pw = response.getWriter()) {
+						pw.print(FacesUtil.xmlPartialRedirect(redirect));
+					}
+					response.flushBuffer();
+				}
+				else {
+					response.sendRedirect(redirect);
+				}
+	        }
             else {
         		chain.doFilter(req, resp);
             }
