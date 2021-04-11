@@ -55,7 +55,7 @@
     			<column />
     			<row>
     				<item>
-    					<blurb>{markdownPreview}</blurb>
+    					<blurb escape="false" sanitise="none">{markdownPreview}</blurb>
     				</item>
     			</row>
     		</form>
