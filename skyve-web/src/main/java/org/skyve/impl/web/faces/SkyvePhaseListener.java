@@ -168,7 +168,7 @@ public class SkyvePhaseListener implements PhaseListener {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) StateUtil.logSessionAndConversationsStats();
+			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
 	}
 }

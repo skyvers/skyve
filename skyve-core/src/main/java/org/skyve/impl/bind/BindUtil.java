@@ -44,6 +44,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.NullTolerantBeanComparator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
@@ -1547,7 +1548,9 @@ public final class BindUtil {
 													tokenizer.nextToken() +
 													"] doesn't check out)");
 				}
-				navigatingModule = customer.getModule(navigatingDocument.getOwningModuleName());
+				navigatingModule = (customer == null) ?
+										AbstractRepository.get().getModule(null, navigatingDocument.getOwningModuleName()) :
+										customer.getModule(navigatingDocument.getOwningModuleName());
 			}
 			else {
 				// ignore validating implicit attributes

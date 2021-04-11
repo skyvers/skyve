@@ -20,9 +20,6 @@ import org.skyve.metadata.MetaData;
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "containerColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"widgets"})
 public class DataGridContainerColumn extends DataGridColumn {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -26924109323814766L;
 
 	private List<MetaData> widgets = new ArrayList<>();

@@ -5,6 +5,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class RouterMerger {
+	/**
+	 * Merges subsequent routers into the first router.
+	 * If the route exists already then the route criteria are added.
+	 * If the route does not exist already, it is inserted in the order defined at the top of the list.
+	 * Thus the broadest routes should go in the global router and the module router should be mainly for public pages. 
+	 * @param routersToMerge	List of routers to merge into router at element 0.
+	 * @return	Element 0 from the routersToMerge list.
+	 */
 	@SuppressWarnings("static-method")
 	public Router mergeRouters(List<Router> routersToMerge) {
 		final Router mergedRouter = routersToMerge.get(0);

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
@@ -58,7 +59,7 @@ public class StateUtil {
 			String currentBeanId = webId.substring(36);
 			byte[] value = getConversations().get(conversationKey);
 			if (value == null) {
-				throw new ConversationEndedException(request.getLocale());
+				throw new ConversationEndedException((request == null) ? Locale.ENGLISH : request.getLocale());
 			}
 
 			result = (AbstractWebContext) SerializationHelper.deserialize(value);
@@ -93,55 +94,93 @@ public class StateUtil {
 		return CacheUtil.getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static void addToken(HttpSession session, String token)
-	throws Exception {
+	public static void clearTokens(HttpSession session) {
+		clearTokens(session.getId());
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static void clearTokens(String sessionId) {
 		Cache<String, TreeSet> tokens = getTokens();
-		String sessionId = session.getId();
+		TreeSet values = tokens.get(sessionId);
+		if (values != null) {
+			values.clear();
+			// Note that EHCache puts are thread-safe
+			tokens.put(sessionId, values);
+		}
+	}
+	
+	public static boolean checkToken(HttpSession session, Integer token) {
+		return checkToken(session.getId(), token);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static boolean checkToken(String sessionId, Integer token) {
+		if (token == null) {
+			return false;
+		}
+		Cache<String, TreeSet> tokens = getTokens();
+		TreeSet values = tokens.get(sessionId);
+		return (values != null) && values.contains(token);
+	}
+
+	public static void replaceToken(HttpSession session, Integer oldToken, Integer newToken) {
+		replaceToken(session.getId(), oldToken, newToken);
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static void replaceToken(String sessionId, Integer oldToken, Integer newToken) {
+//System.out.println("replace token o=" + oldToken + ":n=" + newToken);
+		if (newToken.equals(oldToken)) {
+			return;
+		}
+		
+		Cache<String, TreeSet> tokens = getTokens();
 		TreeSet values = tokens.get(sessionId);
 		if (values == null) {
 			values = new TreeSet();
 		}
-		values.add(token);
-
+		else {
+			if (oldToken != null) {
+				values.remove(oldToken);
+			}
+		}
+		values.add(newToken);
+//System.out.println("tokens size =" + values.size());
 		// Note that EHCache puts are thread-safe
 		tokens.put(sessionId, values);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public static boolean checkToken(HttpSession session, String token) {
-		Cache<String, TreeSet> tokens = getTokens();
-		String sessionId = session.getId();
-		TreeSet values = tokens.get(sessionId);
-		boolean result = ((values != null) && values.remove(token));
-		if (result) {
-			// Note that EHCache puts are thread-safe
-			tokens.put(sessionId, values);
-		}
-		
-		return result;
+	public static void logStateStats() {
+		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
+		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Session");
+		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
+		UtilImpl.LOGGER.info("**************************************************************");
 	}
-
-	public static void logSessionAndConversationsStats() {
-		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(UtilImpl.CONVERSATION_CACHE.getName());
+	
+	private static void logCacheStats(String cacheName, String cacheDescription) {
+		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(cacheName);
 		if (statistics != null) {
+			StringBuilder log = new StringBuilder(64);
 			TierStatistics tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Conversation count in heap memory = " + tier.getMappings());
+				log.append(cacheDescription).append(" Count in heap memory = ").append(tier.getMappings());
+				UtilImpl.LOGGER.info(log.toString());
+				log.setLength(0);
 			}
 			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Conversation count in off-heap memory = " + tier.getMappings());
-				UtilImpl.LOGGER.info("Conversation MB in off-heap memory = " + ((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0));
+				log.append(cacheDescription).append(" Count/MB in off-heap memory = ").append(tier.getMappings());
+				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
+				UtilImpl.LOGGER.info(log.toString());
+				log.setLength(0);
 			}
 			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk);
 			if (tier != null) {
-				UtilImpl.LOGGER.info("Conversation count on disk = " + tier.getMappings());
-				UtilImpl.LOGGER.info("Conversation MB on disk = " + ((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0));
+				log.append(cacheDescription).append(" Count/MB on disk = ").append(tier.getMappings());
+				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
+				UtilImpl.LOGGER.info(log.toString());
 			}
 		}
-		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
-		UtilImpl.LOGGER.info("**************************************************************");
 	}
 	
 	public static void evictExpiredConversations() {

@@ -3571,8 +3571,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String var = BindUtil.sanitiseBinding(binding) + "Row";
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
+		// Sanitisation and escaping is done in the list model
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.relaxed));
+									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.none));
 		result.setValueExpression("itemValue",
 									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class, false, Sanitisation.none));
 		result.setConverter(new AssociationAutoCompleteConverter());
