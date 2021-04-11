@@ -267,7 +267,7 @@ public abstract class AbstractRepository implements Repository {
 				path.append(resourcePath);
 				file = new File(path.toString());
 				if (file.exists()) {
-					return file;
+					return protect(file);
 				}
 			}
 			
@@ -281,7 +281,7 @@ public abstract class AbstractRepository implements Repository {
 			path.append(resourcePath);
 			file = new File(path.toString());
 			if (file.exists()) {
-				return file;
+				return protect(file);
 			}
 		}
 
@@ -296,7 +296,7 @@ public abstract class AbstractRepository implements Repository {
 			path.append(resourcePath);
 			file = new File(path.toString());
 			if (file.exists()) {
-				return file;
+				return protect(file);
 			}
 		}
 		
@@ -304,9 +304,23 @@ public abstract class AbstractRepository implements Repository {
 		path.append(absolutePath);
 		path.append(RESOURCES_NAMESPACE);
 		path.append(resourcePath);
-		return new File(path.toString());
+		return protect(new File(path.toString()));
 	}
 
+	private File protect(File file) {
+		// resolve ../ with canonical path
+		try {
+			String pathToTest = file.getCanonicalPath().replace('\\', '/');
+			if (! pathToTest.startsWith(absolutePath)) {
+				throw new SecurityException("File path " + pathToTest + " is not within web root.");
+			}
+			return file;
+		}
+		catch (Exception e) {
+			throw new SecurityException("File path not within web root.", e);
+		}
+	}
+	
 	public String getEncapsulatingClassNameForEnumeration(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) {
 		StringBuilder result = new StringBuilder(64);
 		
