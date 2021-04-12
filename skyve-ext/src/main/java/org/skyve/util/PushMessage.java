@@ -62,7 +62,7 @@ public class PushMessage {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "g");
 		item.put(ITEM_SEVERITY, severity.toString());
-		item.put(ITEM_MESSAGE, message);
+		item.put(ITEM_MESSAGE, Util.i18n(message));
 		items.add(item);
 		return this;
 	}
@@ -74,7 +74,7 @@ public class PushMessage {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "m");
 		item.put(ITEM_SEVERITY, severity.toString());
-		item.put(ITEM_MESSAGE, message);
+		item.put(ITEM_MESSAGE, Util.i18n(message));
 		items.add(item);
 		return this;
 	}

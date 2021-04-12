@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
+import org.skyve.util.Util;
 
 public class FacesWebContext extends ViewWebContext {
 	private static final long serialVersionUID = -1539528185277420146L;
@@ -27,9 +28,8 @@ public class FacesWebContext extends ViewWebContext {
 
 	@Override
 	public void message(MessageSeverity severity, String message) {
-		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(determineFacesSeverity(severity),
-																				message,
-																				message));
+		String i18n = Util.i18n(message);
+		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(determineFacesSeverity(severity), i18n, i18n));
 	}
 	
 	private static Severity determineFacesSeverity(MessageSeverity severity) {
