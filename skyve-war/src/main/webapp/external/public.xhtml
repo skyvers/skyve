@@ -28,7 +28,7 @@
 				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyvePublic.user}">
 					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyvePublic.i18n['page.public.noPublicUser']}" /></h1>
 				</h:panelGroup>
-				<s:csrfForm managedBean="skyve" rendered="#{not empty skyvePublic.user}">
+				<s:csrfForm managedBean="skyvePublic" rendered="#{not empty skyvePublic.user}">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyvePublic}" />
 					</ui:include>
