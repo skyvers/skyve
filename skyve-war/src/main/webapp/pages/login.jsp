@@ -85,7 +85,6 @@
 		<script type="text/javascript" src="prime/skyve-min.js"></script>
 
 		<script type="text/javascript">
-			<!--
 			function testMandatoryFields(form) {
 				if($('.ui.form').form('is valid')) {
 					var hidden = document.createElement('input');
@@ -136,7 +135,6 @@
 			    });
 			    SKYVE.Util.setTouchCookie();
 			});
-			-->
 		</script>
 	</head>
 	<body onload="document.forms['loginForm'].elements['<%=(customer == null) ? customerFieldName : userFieldName%>'].focus()">

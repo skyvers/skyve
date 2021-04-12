@@ -56,7 +56,7 @@
 		    		<%@include file="fragments/logo.html" %>
 		    	</div>
 		    	
-		        <form class="ui large form">
+		        <div class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui red message">
 		            		<div class="ui header">
@@ -76,7 +76,7 @@
 							</a>
 					 	</div>
 		            </div>
-		        </form>
+		        </div>
 		    </div>
 		</div>
 	</body>

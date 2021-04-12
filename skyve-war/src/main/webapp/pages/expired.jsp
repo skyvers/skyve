@@ -63,7 +63,7 @@
 		    	</div>
 		    	<%@include file="fragments/noscript.html" %>
 		    	
-		        <form class="ui large form">
+		        <div class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
 		            		<%=Util.i18n("page.expired.banner", locale)%>
@@ -78,7 +78,7 @@
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						<% } %>
 		            </div>
-		        </form>
+		        </div>
 		    </div>
 		</div>
 	</body>
