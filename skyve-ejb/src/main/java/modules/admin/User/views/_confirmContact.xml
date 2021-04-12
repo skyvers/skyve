@@ -5,7 +5,7 @@
 		<column />
 		<row>
 			<item>
-				<blurb>
+				<blurb escape="false" sanitise="relaxed">
 					<![CDATA[
 						<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
 							<div style="margin-bottom: 0" class="ui-messages-info ui-corner-all">
@@ -35,7 +35,7 @@
 						<spacer />
 					</item>
 					<item colspan="2">
-						<blurb textAlignment="left">
+						<blurb textAlignment="left" escape="false" sanitise="relaxed">
 							<![CDATA[
 								{i18n:admin.user.confirmContact.existingContact.label}
 							]]>
@@ -91,10 +91,10 @@
 					<spacer />
 				</item>
 				<item colspan="2">
-					<blurb textAlignment="left">
-					<![CDATA[
-						{i18n:admin.user.confirmContact.newContact.label}
-					]]>
+					<blurb textAlignment="left" escape="false" sanitise="relaxed">
+						<![CDATA[
+							{i18n:admin.user.confirmContact.newContact.label}
+						]]>
 					</blurb>
 				</item>
 			</row>
