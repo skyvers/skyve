@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                
+                                    
+    
     
     
     
@@ -7,7 +8,8 @@
     
     
     <wb-module deploy-name="skyve-war">
-                                                                
+                                                                        
+        
         
         
         
@@ -15,7 +17,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -23,7 +26,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -31,19 +35,20 @@
         
         
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <dependent-module archiveName="skyve-ee-7.1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ee/skyve-ee">
+        <dependent-module archiveName="skyve-ee-7.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ee/skyve-ee">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-web-7.1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-web/skyve-web">
+        <dependent-module archiveName="skyve-web-7.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-web/skyve-web">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-7.1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-7.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-7.1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-7.1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                
+                                                                        
+        
         
         
         
@@ -51,7 +56,8 @@
         
         
         <property name="context-root" value="skyve-war"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -59,7 +65,8 @@
         
         
         <property name="java-output-path" value="/skyve-war/target/classes"/>
-                                                                
+                                                                        
+        
         
         
         
@@ -67,7 +74,8 @@
         
         
         <property name="component.exclusion.patterns" value="WEB-INF/classes/customers/**,WEB-INF/classes/modules/**,WEB-INF/classes/resources/**,WEB-INF/classes/router/**,WEB-INF/classes/schemas/**"/>
-                                                            
+                                                                    
+    
     
     
     
@@ -75,7 +83,8 @@
     
     
     </wb-module>
-                            
+                                
+
 
 
 
