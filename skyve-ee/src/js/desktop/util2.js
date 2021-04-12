@@ -251,7 +251,11 @@ isc.BizUtil.addClassMethods({
 				(type == 'datetime') || 
 				(type == 'bizDate') ||
 				(type == 'bizTime') ||
-				type.startsWith('DD_');
+				type.startsWith('DD_MM') ||
+				type.startsWith('MM_DD') ||
+				type.startsWith('MMM_DD') ||
+				type.startsWith('HH_MI') ||
+				type.startsWith('HH24_MI');
 	},
 	
 	// Change something like [{name: 'poo', operator: 'equals', value 'wee'}] filter params to 
