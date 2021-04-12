@@ -307,18 +307,27 @@ public abstract class AbstractRepository implements Repository {
 		return protect(new File(path.toString()));
 	}
 
+	private String canonicalBasePath;
+
+	// Ensure that the file path asks for doesn't break out of the project / web root directory
 	private File protect(File file) {
-		// resolve ../ with canonical path
+		// resolve ../ and symbolic links with canonical path
+		String pathToTest = null;
 		try {
-			String pathToTest = file.getCanonicalPath().replace('\\', '/');
-			if (! pathToTest.startsWith(absolutePath)) {
-				throw new SecurityException("File path " + pathToTest + " is not within web root.");
+			if (canonicalBasePath == null) {
+				canonicalBasePath = new File(absolutePath).getCanonicalPath();
 			}
-			return file;
+
+			pathToTest = file.getCanonicalPath();
 		}
 		catch (Exception e) {
 			throw new SecurityException("File path not within web root.", e);
 		}
+
+		if (! pathToTest.startsWith(canonicalBasePath)) {
+			throw new SecurityException("File path " + pathToTest + " is not within web root " + canonicalBasePath);
+		}
+		return file;
 	}
 	
 	public String getEncapsulatingClassNameForEnumeration(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) {
