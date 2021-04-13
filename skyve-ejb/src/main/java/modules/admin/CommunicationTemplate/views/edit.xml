@@ -17,7 +17,7 @@
         <row>
             <item showLabel="true">
             	<!-- using a textarea in responsive because the quill editor does not allow html source to be edited -->
-				<textArea binding="template" pixelHeight="300" pixelWidth="800" />
+				<textArea binding="template" />
 			</item>
 		</row>
 	</form>
