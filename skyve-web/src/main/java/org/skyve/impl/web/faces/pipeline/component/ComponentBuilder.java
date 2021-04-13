@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -306,6 +307,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String title, 
 												boolean required);
 	
+	public abstract UIComponent contentSignature(UIComponent component, 
+													ContentSignature signature, 
+													String formDisabledConditionName,
+													String title, 
+													boolean required);
+
 	public abstract UIComponent html(UIComponent component, 
 										String dataWidgetVar, 
 										HTML html, 

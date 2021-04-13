@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -204,7 +205,13 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 													ContentLink link, 
 													String title, 
 													boolean required);
-	
+
+	public abstract RenderedComponent contentSignature(RenderedComponent component, 
+														String dataWidgetVar, 
+														ContentSignature signature, 
+														String title, 
+														boolean required);
+
 	public abstract RenderedComponent html(RenderedComponent component, 
 											String dataWidgetVar, 
 											HTML html, 

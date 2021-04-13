@@ -73,6 +73,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -1112,6 +1113,26 @@ class ViewJSONManipulator extends ViewVisitor {
 			addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
 			addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 		}
+	}
+
+	@Override
+	public void visitContentSignature(ContentSignature signature,
+										boolean parentVisible, 
+										boolean parentEnabled) {
+/* TODO not implemented for SC yet
+		if (parentVisible && visible(signature)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled && (! Boolean.FALSE.equals(signature.getEditable())))) {
+				addBinding(signature.getBinding(), true, false, Sanitisation.text);
+			}
+		}
+		addCondition(signature.getInvisibleConditionName());
+		addCondition(signature.getDisabledConditionName());
+		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
+		addBinding(Bean.USER_ID, false, false, Sanitisation.text);
+*/
 	}
 
 	@Override

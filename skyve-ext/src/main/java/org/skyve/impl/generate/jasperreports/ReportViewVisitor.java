@@ -54,6 +54,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -894,6 +895,11 @@ public class ReportViewVisitor extends ViewVisitor {
 	public void visitContentLink(ContentLink arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
+	}
+
+	@Override
+	public void visitContentSignature(ContentSignature arg0, boolean arg1, boolean arg2) {
+		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), null, null, arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
 	}
 
 	@Override

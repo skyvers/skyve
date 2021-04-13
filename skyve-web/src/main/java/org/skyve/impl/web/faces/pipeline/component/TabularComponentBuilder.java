@@ -106,6 +106,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -2001,6 +2002,47 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								formDisabledConditionName,
 								false);
 		}
+
+		return result;
+	}
+
+	@Override
+	public UIComponent contentSignature(UIComponent component,
+											ContentSignature signature,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		if (component != null) {
+			return component;
+		}
+
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(5);
+		String id = result.getId();
+		List<UIComponent> toAddTo = result.getChildren();
+
+		String binding = signature.getBinding();
+		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
+		Integer pixelWidth = signature.getPixelWidth();
+		Integer pixelHeight = signature.getPixelHeight();
+		HtmlPanelGroup contentImage = contentGraphicImage((pixelWidth == null) ? ONE_HUNDRED : pixelWidth,
+															null,
+															null,
+															(pixelHeight == null) ? ONE_HUNDRED : pixelHeight,
+															null,
+															binding);
+		// Set the id of the inner image element
+		contentImage.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
+		toAddTo.add(contentImage);
+
+		editableContent(toAddTo,
+							id,
+							binding,
+							sanitisedBinding,
+							signature.getDisabledConditionName(),
+							formDisabledConditionName,
+							true);
 
 		return result;
 	}

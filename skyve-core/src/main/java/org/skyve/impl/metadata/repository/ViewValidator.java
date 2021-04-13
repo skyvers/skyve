@@ -68,6 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -676,6 +677,24 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
 		validateParameterBindings(link.getParameters(), linkIdentifier);
 		validateSize(link, linkIdentifier);
+	}
+
+	@Override
+	public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+		String binding = signature.getBinding();
+		String signatureIdentifier = "ContentSignature " + binding;
+		validateBinding(dataWidgetBinding, 
+							binding,
+							true,
+							false,
+							false,
+							true,
+							signatureIdentifier,
+							AttributeType.content,
+							AttributeType.image);
+		validateConditionName(signature.getDisabledConditionName(), signatureIdentifier);
+		validateConditionName(signature.getInvisibleConditionName(), signatureIdentifier);
+		validateSize(signature, signatureIdentifier);
 	}
 
 	@Override

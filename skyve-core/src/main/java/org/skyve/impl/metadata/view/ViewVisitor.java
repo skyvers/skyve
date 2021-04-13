@@ -49,6 +49,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -271,6 +272,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitContentLink(ContentLink link,
 											boolean parentVisible,
 											boolean parentEnabled);
+	public abstract void visitContentSignature(ContentSignature signature,
+												boolean parentVisible,
+												boolean parentEnabled);
 	public abstract void visitHTML(HTML html,
 									boolean parentVisible,
 									boolean parentEnabled);
@@ -638,6 +642,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 			ContentLink link = (ContentLink) widget;
 			visitContentLink(link, parentVisible, parentEnabled);
 			visitParameterizable(link, parentVisible, parentEnabled);
+		}
+		else if (widget instanceof ContentSignature) {
+			ContentSignature signature = (ContentSignature) widget;
+			visitContentSignature(signature, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof HTML) {
 			HTML html = (HTML) widget;

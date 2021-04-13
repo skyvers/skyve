@@ -45,6 +45,8 @@
 
   <xs:element name="contentReference" type="tns:contentReference"/>
 
+  <xs:element name="contentSignature" type="tns:contentSignature"/>
+
   <xs:element name="dataGrid" type="tns:dataGrid"/>
 
   <xs:element name="dataRepeater" type="tns:dataRepeater"/>
@@ -1080,6 +1082,7 @@
         <xs:element ref="tns:default"/>
         <xs:element ref="tns:contentImage"/>
         <xs:element ref="tns:contentLink"/>
+        <xs:element ref="tns:contentSignature"/>
         <xs:element ref="tns:button"/>
         <xs:element ref="tns:dialogButton"/>
         <xs:element ref="tns:geometry"/>
@@ -1123,6 +1126,18 @@
         <xs:sequence>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="contentSignature">
+    <xs:complexContent>
+      <xs:extension base="tns:inputWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -24,6 +24,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -387,6 +388,18 @@ System.out.println("action column " + current);
 		StringBuilder output = result.getOutput();
 		output.append("<span>ContentLink</span>");
 		return label(component, "contentLink");
+	}
+
+	@Override
+	public RenderedComponent contentSignature(RenderedComponent component,
+												String dataWidgetVar,
+												ContentSignature signature,
+												String title,
+												boolean required) {
+		RenderedComponent result = new RenderedComponent();
+		StringBuilder output = result.getOutput();
+		output.append("contentSignature");
+		return label(component, "contentSignature");
 	}
 
 	@Override

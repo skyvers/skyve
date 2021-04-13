@@ -43,6 +43,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -1273,6 +1274,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderBoundColumnContentLink(String value, ContentLink link);
 	public abstract void renderFormContentLink(String value, ContentLink link);
+
+	@Override
+	public final void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(signature.getBinding(), signature.showsLabelByDefault());
+		renderFormContentSignature(signature);
+	}
+
+	public abstract void renderFormContentSignature(ContentSignature signature);
 
 	@Override
 	public final void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {

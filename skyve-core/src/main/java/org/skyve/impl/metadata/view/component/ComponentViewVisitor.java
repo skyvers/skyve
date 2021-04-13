@@ -57,6 +57,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -479,6 +480,13 @@ public class ComponentViewVisitor extends ViewVisitor {
 		disable(link);
 		invisible(link);
 		link.setValue(prefixExpression(link.getLocalisedValue()));
+	}
+
+	@Override
+	public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+		bound(signature);
+		disable(signature);
+		invisible(signature);
 	}
 
 	@Override

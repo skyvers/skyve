@@ -67,6 +67,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -1444,6 +1445,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		editable(link.getEditable(), code);
 	}
 	
+	@Override
+	public void renderFormContentSignature(ContentSignature signature) {
+/* TODO not implemented for SC yet
+		preProcessFormItem(signature, "bizContentSignature");
+		size(signature, null, code);
+		disabled(signature.getDisabledConditionName(), code);
+		invisible(signature.getInvisibleConditionName(), code);
+		editable(signature.getEditable(), code);
+*/
+	}
+
 	@Override
 	public void renderBoundColumnHTML(HTML html) {
 		dataWidgetColumnInputWidget = html;
