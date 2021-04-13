@@ -175,11 +175,7 @@
         </repository>
         <repository>
             <id>Prime Faces</id>
-            <url>http://repository.primefaces.org/</url>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
+            <url>https://repository.primefaces.org</url>
         </repository>
         <repository>
             <id>boundlessgeo</id>
@@ -187,7 +183,7 @@
         </repository>
 		<repository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/skyve/</url>
+			<url>https://repo.skyve.org/repository/skyve/</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
