@@ -446,14 +446,10 @@
 		</group>
 		<list document="Snapshot" name="admin.adminMenu.snapshots.list.displayName">
 			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list document="Tag" name="admin.adminMenu.tags.list.displayName">
 			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
