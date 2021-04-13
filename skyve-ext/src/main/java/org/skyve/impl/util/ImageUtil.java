@@ -1,5 +1,10 @@
 package org.skyve.impl.util;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,7 +12,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -16,6 +25,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 
@@ -131,6 +141,43 @@ public class ImageUtil {
 				}
 				return baos.toByteArray();
 			}
+		}
+	}
+	
+	public static byte[] signature(String json, int width, int height) throws IOException {
+		List<List<Point>> lines = new ArrayList<>();
+		Matcher lineMatcher = Pattern.compile("(\\[(?:,?\\[-?[\\d\\.]+,-?[\\d\\.]+\\])+\\])").matcher(json);
+		while (lineMatcher.find()) {
+			Matcher pointMatcher = Pattern.compile("\\[(-?[\\d\\.]+),(-?[\\d\\.]+)\\]").matcher(lineMatcher.group(1));
+			List<Point> line = new ArrayList<>();
+			lines.add(line);
+			while (pointMatcher.find()) {
+				line.add(new Point(Math.round(Float.parseFloat(pointMatcher.group(1))),
+									Math.round(Float.parseFloat(pointMatcher.group(2)))));
+			}
+		}
+
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+		Graphics2D g = (Graphics2D) image.getGraphics();
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, width, height);
+		g.setColor(Color.BLACK);
+		g.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		Point lastPoint = null;
+		for (List<Point> line : lines) {
+			for (Point point : line) {
+				if (lastPoint != null) {
+					g.drawLine(lastPoint.x, lastPoint.y, point.x, point.y);
+				}
+				lastPoint = point;
+			}
+			lastPoint = null;
+		}
+		
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+			ImageIO.write(image, ImageFormat.png.toString(), output); 
+			return output.toByteArray();
 		}
 	}
 }

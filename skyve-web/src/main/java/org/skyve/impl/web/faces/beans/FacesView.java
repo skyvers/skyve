@@ -22,13 +22,19 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.charts.ChartModel;
+import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -746,6 +752,46 @@ public class FacesView<T extends Bean> extends Harness {
 		return new ChartAction<>(this, model, type).execute();
 	}
  	
+	/**
+	 * Capture a signature from its json payloads
+	 */
+	public void sign(String signatureId, String binding, int width, int height) {
+		new FacesAction<Void>() {
+			@Override
+			public Void callback() throws Exception {
+				String json = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureId + "_signature_value");
+				if (json == null) {
+					throw new ValidationException("Signature was not found");
+				}
+				Bean bean = getCurrentBean().getBean();
+				try (ContentManager cm = EXT.newContentManager()) {
+					byte[] signature = ImageUtil.signature(json, width, height);
+					final AttachmentContent ac = new AttachmentContent(bean.getBizCustomer(),
+																		bean.getBizModule(),
+																		bean.getBizDocument(),
+																		bean.getBizDataGroupId(),
+																		bean.getBizUserId(),
+																		bean.getBizId(),
+																		binding,
+																		MimeType.png,
+																		signature);
+		
+					cm.put(ac);
+					BindUtil.set(bean, binding, ac.getContentId());
+				}
+
+				return null;
+			}
+		}.execute();
+	}
+	
+	/**
+	 * Clear a signature content
+	 */
+	public void clear(String binding) {
+		BindUtil.set(getCurrentBean().getBean(), binding, null);
+	}
+	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
  	// NB This is only set when the bean is dehydrated
 	private String dehydratedWebId;

@@ -59,6 +59,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectmanycheckbox.SelectManyCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
+import org.primefaces.component.signature.Signature;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
@@ -437,6 +438,14 @@ public class ComponentRenderer {
 			SelectOneRadio radio = (SelectOneRadio) component;
 			putValue(attributes, "style", radio.getStyle());
 			putValue(attributes, "styleClass", radio.getStyleClass());
+		}
+		else if (component instanceof Signature) {
+			tagName = "p:signature";
+			
+			Signature signature = (Signature) component;
+			putValue(attributes, "style", signature.getStyle());
+			putValue(attributes, "styleClass", signature.getStyleClass());
+			putValue(attributes, "guideline", Boolean.valueOf(signature.isGuideline()));
 		}
 		else if (component instanceof Spacer) {
 			tagName = "p:spacer";

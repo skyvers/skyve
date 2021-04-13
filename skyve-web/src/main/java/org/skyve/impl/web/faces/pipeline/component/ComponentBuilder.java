@@ -497,6 +497,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										ImplicitActionName name, 
 										String title);
 	
+	static final Class<?>[] STRING = new Class<?>[] {String.class};
 	static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
 	static final Class<?>[] STRING_STRING_STRING = new Class<?>[] {String.class, String.class, String.class};
 	static final Class<?>[] STRING_STRING_LIST = new Class<?>[] {String.class, String.class, List.class};
