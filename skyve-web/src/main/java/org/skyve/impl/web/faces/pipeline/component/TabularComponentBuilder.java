@@ -2115,7 +2115,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
 		// onstart
 		sb.setLength(0);
-		sb.append("if(SKYVE.PF.getById('").append(id).append("_signature').signature('isEmpty')){alert('Create your signature first');return false}");
+		sb.append("if(SKYVE.PF.getById('").append(id).append("_signature').signature('isEmpty')){SKYVE.PF.onPushMessage([{type:'g',severity:'error',message:'Create your signature first'}]);return false}");
 		button.setOnstart(sb.toString());
 		
 		toAddTo.add(button);
