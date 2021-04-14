@@ -1,6 +1,7 @@
 package services.report;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,8 +21,11 @@ import javax.inject.Singleton;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
@@ -55,6 +59,7 @@ import freemarker.template.TemplateNotFoundException;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
+import modules.admin.domain.ReportTemplate.OutputFormat;
 import services.report.freemarker.ContentDirective;
 import services.report.freemarker.DescriptionDirective;
 import services.report.freemarker.DisplayNameDirective;
@@ -228,6 +233,39 @@ public class ReportService {
 
 		// create the report
 		return createReport(template, reportParameters, reportFilename);
+	}
+
+	/**
+	 * Executes a {@link ReportTemplate} which has been created and saved in the database using the
+	 * parameters and datasets defined in the template or supplied here, and prepares it ready to
+	 * serve in a {@link DownloadAction}.
+	 * 
+	 * @param reportName The template name of the report in the database, e.g. myReport.flth
+	 * @param reportParameters An optional map of parameters which will replace any existing parameters already
+	 *        defined in the report template
+	 * @param format The output format of the report, CSV or PDF
+	 * @param downloadFilename The filename of the report (without the file extension)
+	 * @return A download to be returned from a {@link DownloadAction}
+	 * @throws Exception
+	 */
+	public Download downloadReport(final String reportName, final Map<String, Object> reportParameters,
+			final ReportTemplate.OutputFormat format, final String downloadFilename) throws Exception {
+		final String reportOutput = runReport(reportName, reportParameters);
+
+		// convert merged report output from String to an InputStream
+		InputStream inputStream = new ByteArrayInputStream(reportOutput.getBytes(Charset.forName("UTF-8")));
+
+		// if CSV, return the stream
+		if (format == OutputFormat.CSV) {
+			return new Download(String.format("%s.csv", downloadFilename), inputStream, MimeType.csv);
+		}
+
+		// convert to PDF (writing to PDF requires an OutputStream)
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		generatePDFFromHTML(inputStream, baos);
+		InputStream pdfInputStream = new ByteArrayInputStream(baos.toByteArray());
+
+		return new Download(String.format("%s.pdf", downloadFilename), pdfInputStream, MimeType.pdf);
 	}
 
 	/**
