@@ -3,6 +3,7 @@ package modules.test;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,4 +65,22 @@ public class OWASPTest extends AbstractSkyveTest {
 								"<h1>TestMe</h1>",
 								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
 	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseBindings() throws Exception {
+		Assert.assertEquals("Sanitise should leave bindings alone",
+								"user.contacts(1234567890).poo[0]",
+								OWASP.sanitise(Sanitisation.text, "user.contacts(1234567890).poo[0]"));
+	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testSanitiseUUIDs() throws Exception {
+		String uuid = UUID.randomUUID().toString();
+		Assert.assertEquals("Sanitise should leave UUIDs alone",
+								uuid,
+								OWASP.sanitise(Sanitisation.text, uuid));
+	}
+
 }

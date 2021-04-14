@@ -35,7 +35,9 @@ import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.OWASP;
 
 @ManagedBean(name = "_skyveUpload")
 @RequestScoped
@@ -67,7 +69,7 @@ public class FileUpload extends Localisable {
 	}
 
 	public void setContext(String context) {
-		this.context = UtilImpl.processStringValue(context);
+		this.context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
 	}
 
 	public String getBinding() {
@@ -75,7 +77,7 @@ public class FileUpload extends Localisable {
 	}
 
 	public void setBinding(String binding) {
-		this.binding = UtilImpl.processStringValue(binding);
+		this.binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
 	}
 
 	public String getAction() {
@@ -83,7 +85,7 @@ public class FileUpload extends Localisable {
 	}
 
 	public void setAction(String action) {
-		this.action = UtilImpl.processStringValue(action);
+		this.action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(action));
 	}
 
 	private List<Problem> problems = new ArrayList<>();

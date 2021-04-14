@@ -22,7 +22,9 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.OWASP;
 
 @ManagedBean(name = "_skyveContent")
 @RequestScoped
@@ -57,7 +59,7 @@ public class ContentUpload extends Localisable {
 	}
 
 	public void setContext(String context) {
-		this.context = UtilImpl.processStringValue(context);
+		this.context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
 	}
 
 	public String getBinding() {
@@ -65,7 +67,7 @@ public class ContentUpload extends Localisable {
 	}
 
 	public void setBinding(String binding) {
-		this.binding = UtilImpl.processStringValue(binding);
+		this.binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
 	}
 
 	public String getContentBinding() {
@@ -73,7 +75,7 @@ public class ContentUpload extends Localisable {
 	}
 
 	public void setContentBinding(String contentBinding) {
-		this.contentBinding = UtilImpl.processStringValue(contentBinding);
+		this.contentBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBinding));
 	}
 
 	public String getCroppedDataUrl() {
