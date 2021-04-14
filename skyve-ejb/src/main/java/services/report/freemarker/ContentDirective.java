@@ -48,7 +48,7 @@ import freemarker.template.utility.DeepUnwrap;
  * Directive nested content: No
  * 
  * <p>
- * Usage: <code><@content content=bean module="admin" document="Contact" attribute="image" /></code>.
+ * Usage: <code><@content bean=content module="admin" document="Contact" attribute="image" /></code>.
  * </p>
  */
 public class ContentDirective implements TemplateDirectiveModel {
