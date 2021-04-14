@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.cache.StateUtil;
+import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -107,6 +108,8 @@ public class SkyveFacesFilter implements Filter {
 
                 // Can't use FacesContext.getCurrentInstance().getExternalContext().redirect() here coz the faces context could be gone
 				if (FacesUtil.isAjax(request)) {
+					response.setContentType(MimeType.xml.toString());
+			        response.setCharacterEncoding(Util.UTF8);
 					try (PrintWriter pw = response.getWriter()) {
 						pw.print(FacesUtil.xmlPartialRedirect(redirect));
 					}
@@ -138,6 +141,8 @@ public class SkyveFacesFilter implements Filter {
             
             // Can't use FacesContext.getCurrentInstance().getExternalContext().redirect() here coz the faces context could be gone
 			if (FacesUtil.isAjax(request)) {
+				response.setContentType(MimeType.xml.toString());
+		        response.setCharacterEncoding(Util.UTF8);
 				try (PrintWriter pw = response.getWriter()) {
 					pw.print(FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl() + uri));
 				}
