@@ -7,7 +7,10 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.date.DD_MM_YYYY;
+import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
+import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
@@ -98,7 +101,13 @@ public class ReportParameterExtension extends ReportParameter {
 			} catch (Exception ex) {
 				String expectedDateFormat = "dd-mmm-yyyy";
 				if (dateConverter instanceof DD_MM_YYYY) {
-					expectedDateFormat = "dd-mm-yyyy";
+					expectedDateFormat = DD_MM_YYYY.PATTERN;
+				} else if (dateConverter instanceof DD_MMM_YYYY) {
+					expectedDateFormat = DD_MMM_YYYY.PATTERN;
+				} else if (dateConverter instanceof MM_DD_YYYY) {
+					expectedDateFormat = MM_DD_YYYY.PATTERN;
+				} else if (dateConverter instanceof MMM_DD_YYYY) {
+					expectedDateFormat = MMM_DD_YYYY.PATTERN;
 				}
 
 				e.getMessages().add(new Message(

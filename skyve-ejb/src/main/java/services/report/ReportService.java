@@ -24,6 +24,8 @@ import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -58,6 +60,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNotFoundException;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.domain.ReportParameter;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.OutputFormat;
 import services.report.freemarker.ContentDirective;
@@ -399,7 +402,13 @@ public class ReportService {
 		if (reportParameters != null) {
 			for (ReportParameterExtension param : parameters) {
 				if (reportParameters.containsKey(param.getName())) {
-					param.setReportInputValue((String) reportParameters.get(param.getName()));
+					if (ReportParameter.Type.date == param.getType()) {
+						Converter<DateOnly> dateConverter = CORE.getCustomer().getDefaultDateConverter();
+						DateOnly date = (DateOnly) reportParameters.get(param.getName());
+						param.setReportInputValue(dateConverter.toDisplayValue(date));
+					} else {
+						param.setReportInputValue((String) reportParameters.get(param.getName()));
+					}
 				}
 			}
 		}

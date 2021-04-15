@@ -475,6 +475,10 @@
 			</list>
 		</group>
 		<group name="Reports">
+			<list name="Reports" query="qEnabledReports">
+				<role name="DevOps"/>
+				<role name="SecurityAdministrator"/>
+			</list>
 			<edit name="Report Manager" document="ReportManager">
 				<uxui name="desktop" />
 				<role name="DevOps"/>
@@ -788,6 +792,14 @@
                 <column binding="documentNumber" />
             </columns>
         </query>
+        <query documentName="ReportTemplate" name="qEnabledReports">
+			<description><![CDATA[All Reports]]></description>
+			<filter>bean.includeFragment = false and bean.enabled = true</filter>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="description" />
+			</columns>
+		</query>
         <query documentName="ReportTemplate" name="qReportSchedules">
 			<documentation>Shows the schedules for enabled reports.</documentation>
 			<description><![CDATA[All Report Schedules]]></description>
