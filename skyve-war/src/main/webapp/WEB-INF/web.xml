@@ -280,7 +280,7 @@
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
-			<param-value>default-src 'self'; frame-src 'self' *.google.com; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; form-action 'self'</param-value>
+			<param-value>default-src 'self'; frame-src 'self' *.google.com; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; form-action 'self'; connect-src 'self' ws: wss:</param-value>
 		</init-param>
 		<init-param>
 			<param-name>X-Frame-Options</param-name>
