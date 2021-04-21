@@ -54,7 +54,11 @@
 			<artifactId>generex</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>net.gcardone.junidecode</groupId>
+			<artifactId>junidecode</artifactId>
+ 			<scope>compile</scope>
+ 		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>

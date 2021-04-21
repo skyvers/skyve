@@ -39,6 +39,8 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 
+import net.gcardone.junidecode.Junidecode;
+
 public class UtilImpl {
 	/**
 	 * Disallow instantiation
@@ -523,6 +525,13 @@ public class UtilImpl {
 		return result;
 	}
 	
+	/**
+	 * Change unicode text to ascii.
+	 */
+	public static String unidecode(String value) {
+		return Junidecode.unidecode(value);
+	}
+
 	/**
 	 * Checks that the module directory:
 	 * <ul>
