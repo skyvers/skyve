@@ -151,10 +151,16 @@ public class FacesView<T extends Bean> extends Harness {
 	 * @param csrfToken	The value from the web request.
 	 */
 	public void setCsrfToken(String csrfToken) {
+		// We can't do CSRF processing as  
+		if (FacesUtil.isIgnoreAutoUpdate()) {
+			return;
+		}
+		
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("setCsrfToken() = " + csrfToken);
 		String currentCsrfToken = OWASP.sanitise(Sanitisation.text, Util.processStringValue(csrfToken));
 		csrfTokenChecked = true; // indicate we have checked the token
 		if (this.csrfToken != null) { // there needs to be a token to check first
+			
 			if (! this.csrfToken.equals(currentCsrfToken)) {
 				Util.LOGGER.severe("CSRF attack detected");
 				try {
@@ -185,17 +191,19 @@ public class FacesView<T extends Bean> extends Harness {
 										" : i=" + getBizIdParameter());
 			}
 			if (! csrfTokenChecked) {
-				String csrfTokenParameterValue = fc.getExternalContext().getRequestParameterMap().get("csrfToken");
-				if (csrfTokenParameterValue != null) {
-					setCsrfToken(csrfTokenParameterValue);
-				}
-				else {
-					try {
-						Util.LOGGER.severe("No CSRF token detected");
-						fc.getExternalContext().redirect(Util.getLoggedOutUrl());
+				if (! FacesUtil.isIgnoreAutoUpdate()) {
+					String csrfTokenParameterValue = fc.getExternalContext().getRequestParameterMap().get("csrfToken");
+					if (csrfTokenParameterValue != null) {
+						setCsrfToken(csrfTokenParameterValue);
 					}
-					catch (IOException e) {
-						throw new FacesException("Could not redirect home after CSRF attack", e);
+					else {
+						try {
+							Util.LOGGER.severe("No CSRF token detected");
+							fc.getExternalContext().redirect(Util.getLoggedOutUrl());
+						}
+						catch (IOException e) {
+							throw new FacesException("Could not redirect home after CSRF attack", e);
+						}
 					}
 				}
 			}

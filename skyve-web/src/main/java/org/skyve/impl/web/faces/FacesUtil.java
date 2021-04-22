@@ -82,6 +82,12 @@ public class FacesUtil {
         return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
     
+	private static final String PRIMEFACES_IGNORE_AUTO_UPDATE = "primefaces.ignoreautoupdate";
+	
+    public static boolean isIgnoreAutoUpdate() {
+    	return Boolean.TRUE.toString().equals(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(PRIMEFACES_IGNORE_AUTO_UPDATE));
+    }
+    
     public static void jsRedirect(String url) {
 		PrimeFaces.current().executeScript(String.format("window.location='%s'", url));
     }
