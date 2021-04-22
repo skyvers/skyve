@@ -610,14 +610,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent contentSignature(UIComponent component,
+	public UIComponent addContentSignature(UIComponent component,
+											UIComponent layout,
 											ContentSignature signature,
 											String formDisabledConditionName,
 											String title,
 											boolean required) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentSignature(result, signature, formDisabledConditionName, title, required);
+			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, required);
 		}
 		return result;
 	}

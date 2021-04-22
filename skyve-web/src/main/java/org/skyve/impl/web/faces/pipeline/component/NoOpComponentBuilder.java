@@ -337,11 +337,12 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent contentSignature(UIComponent component,
-											ContentSignature signature,
-											String formDisabledConditionName,
-											String title,
-											boolean required) {
+	public UIComponent addContentSignature(UIComponent component,
+												UIComponent layout,
+												ContentSignature signature,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
 		return component;
 	}
 

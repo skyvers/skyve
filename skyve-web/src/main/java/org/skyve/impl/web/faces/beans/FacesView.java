@@ -755,11 +755,11 @@ public class FacesView<T extends Bean> extends Harness {
 	/**
 	 * Capture a signature from its json payloads
 	 */
-	public void sign(String signatureId, String binding, int width, int height) {
+	public void sign(String signatureClientId, String binding, int width, int height) {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				String json = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureId + "_signature_value");
+				String json = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureClientId + "_signature_value");
 				if (json == null) {
 					throw new ValidationException("Signature was not found");
 				}

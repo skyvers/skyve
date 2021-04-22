@@ -2017,10 +2017,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 *						<p:commandButton id="one_server" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
 	 *					</h:panelGrid>
 	 *				</h:panelGrid>
-	 * 
+	 * See LayoutBuilder.contentSignatureLayout() for the outer panel grid.
 	 */
 	@Override
-	public UIComponent contentSignature(UIComponent component,
+	public UIComponent addContentSignature(UIComponent component,
+											UIComponent layout,
 											ContentSignature signature,
 											String formDisabledConditionName,
 											String title,
@@ -2039,13 +2040,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			pixelHeight = Integer.valueOf(200);
 		}
 
-		// Component Grid
-		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-		setId(result, null);
-		result.setColumns(2);
-		setInvisible(result, signature.getInvisibleConditionName(), null);
-		String id = result.getId();
-		List<UIComponent> toAddTo = result.getChildren();
+		String id = layout.getId();
+		String clientId = layout.getClientId();
+		List<UIComponent> toAddTo = layout.getChildren();
 
 		// Signature
 		Signature signatureComponent = (Signature) input(Signature.COMPONENT_TYPE, null, binding, title, required, null, null);
@@ -2106,7 +2103,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setUpdate(id);
 		// action
 		sb.setLength(0);
-		sb.append("#{").append(managedBeanName).append(".sign('").append(id).append("','").append(binding).append("',");
+		sb.append("#{").append(managedBeanName).append(".sign('").append(clientId).append("','").append(binding).append("',");
 		sb.append(pixelWidth).append(',').append(pixelHeight).append(")}");
 		button.setActionExpression(ef.createMethodExpression(elc, sb.toString(), null, STRING_STRING));
 		// rendered
@@ -2115,7 +2112,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
 		// onstart
 		sb.setLength(0);
-		sb.append("if(SKYVE.PF.getById('").append(id).append("_signature').signature('isEmpty')){SKYVE.PF.onPushMessage([{type:'g',severity:'error',message:'Create your signature first'}]);return false}");
+		sb.append("if(SKYVE.PF.getById('").append(clientId).append("_signature').signature('isEmpty')){SKYVE.PF.onPushMessage([{type:'g',severity:'error',message:'Create your signature first'}]);return false}");
 		button.setOnstart(sb.toString());
 		
 		toAddTo.add(button);
@@ -2130,7 +2127,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
 		// onclick
 		sb.setLength(0);
-		sb.append("SKYVE.PF.getById('").append(id).append("_signature').signature('clear')");
+		sb.append("SKYVE.PF.getById('").append(clientId).append("_signature').signature('clear')");
 		button.setOnclick(sb.toString());
 		// rendered
 		sb.setLength(0);
@@ -2159,7 +2156,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		toAddTo.add(button);
 		
-		return result;
+		// This is only returned to short circuit any component builder chains
+		return signatureComponent;
 	}
 
 	/**

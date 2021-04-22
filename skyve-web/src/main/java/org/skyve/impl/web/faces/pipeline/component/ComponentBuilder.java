@@ -307,11 +307,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String title, 
 												boolean required);
 	
-	public abstract UIComponent contentSignature(UIComponent component, 
-													ContentSignature signature, 
-													String formDisabledConditionName,
-													String title, 
-													boolean required);
+	public abstract UIComponent addContentSignature(UIComponent component,
+														UIComponent layout, 
+														ContentSignature signature, 
+														String formDisabledConditionName,
+														String title, 
+														boolean required);
 
 	public abstract UIComponent html(UIComponent component, 
 										String dataWidgetVar, 

@@ -1587,11 +1587,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
-		UIComponent c = cb.contentSignature(null,
-												signature,
-												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
-												title,
-												required);
+		UIComponent c = lb.contentSignatureLayout(null, signature);
         addComponent(title, 
         				false, 
         				signature.getInvisibleConditionName(), 
@@ -1604,6 +1600,12 @@ public class FacesViewRenderer extends ViewRenderer {
         				null,
         				null,
         				null);
+        cb.addContentSignature(null,
+        						c,
+								signature,
+								(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+								title,
+								required);
 	}
 
 	@Override

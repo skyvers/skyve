@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.web.UserAgentType;
 
@@ -253,6 +254,15 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		}
 	}
 
+	@Override
+	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+		UIComponent result = component;
+		for (LayoutBuilder builder : builders) {
+			result = builder.contentSignatureLayout(result, signature);
+		}
+		return result;
+	}
+	
 	@Override
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer,
