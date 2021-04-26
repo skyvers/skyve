@@ -30,7 +30,7 @@ Skyve also provides sophisticated validation and a high-level API so that you ca
 
 At any time, branch out into "traditional" development without restriction, but will all the benefits of the API and integrated platform.
 
-Skyve supports spatial concepts natively with MySQL, SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
+Skyve supports spatial concepts natively with MySQL (and MariaDB), SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
 
 For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
@@ -54,24 +54,44 @@ The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://g
 
 ## Creating a new Skyve project
 
-### Before you start
+We recommend starting your Skyve experience with Skyve Foundry - https://foundry.skyve.org/foundry.
 
-* Install a Java 8 JDK for your operating system.
-* Install Eclipse or an alternative Java based Integrated Development Environment.
-* Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 15).
+Skyve Foundry provides a point and click project creator: you can quickly declare the data model for your project, deploy and test your project using Skyve Foundry's Free Trial server.
 
-These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
+Once your foundry project is created, you can use the collaboration feature to connect Skyve Foundry to a secure git code repository, then continue making changes using both Skyve Foundry, or in your own preferred Integrated Development Environment (IDE) (Eclipse, IntelliJ etc) on your local development infrastructure.
+
+Using Skyve Foundry to create your project will not prevent you deploying the application you create to your own infrastructure if preferred, but it will enable you to quicky deploy and test your application. You can also export your project at any time.
 
 ### Overview
-(Note - these steps are demonstrated in detail in the video on the help-tab of the Skyve project creator or here - https://youtu.be/jcwk6pFnErg)
-1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email. 
+
+1. Create your project with Skyve Foundry, or by using the Skyve project creator.
+ a. for Skyve Foundry - create a new git repository project (via github or gitlab etc) and set the in repository URL on the collaboration tab in Skyve Foundry, then push your project to the repository (video steps are available at https://youtu.be/G3OQu5PeUn8)
+ b. for the project creator, create a new Skyve project download and receive the link to the file via email  (video steps are available at https://youtu.be/jcwk6pFnErg)
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application instance properties `.json` file and data source `-ds.xml` files and place them into the Wildfly deployment folder. In the `.json` settings file, you will need to (at a minimum) specify the location for Skyve to store 'content' and specify an environment identifier string to be able to get it with a bootstrap credential (also specified in the `.json` file)
 4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions
 
-#### Creating the Project
+### Before you start
+
+These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
+
+* Install a Java 11+ JDK for your operating system.
+* Install Eclipse or an alternative Java based Integrated Development Environment.
+* Install JBoss Wildfly - Our instructions are for Wildfly-22.1.0.Final. You may use other versions and other application servers if you're familiar with configuration.
+
+### Creating your project using Skyve Foundry
+* Go to https://foundry.skyve.org/foundry and register for an account
+* Sign in with your account
+* On the Describe tab, enter a name and description for your application
+* On the Design tab, create documents and attributes
+* On the Customise tab, upload your logo and icons and select from available themes
+* On the Deploy tab, enter a password for a setup user account, then deploy your application
+* On the Collaboration tab, enter the URL for your git code repository and push your project to the repository. You can then pull your project to your local development environment.
+Video instructions are available using the "How to get started" icon in the title bar of Skyve Foundry
+
+#### Creating your project using the Skyve project creatorr
 * Go to https://foundry.skyve.org/foundry/project.xhtml
 * Enter a valid email address
 * Enter project name
