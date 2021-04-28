@@ -66,7 +66,7 @@ Using Skyve Foundry to create your project will not prevent you deploying the ap
 
 1. Create your project with Skyve Foundry, or by using the Skyve project creator.
  a. for Skyve Foundry - create a new git repository project (via github or gitlab etc) and set the in repository URL on the collaboration tab in Skyve Foundry, then push your project to the repository (video steps are available at https://youtu.be/G3OQu5PeUn8)
- b. for the project creator, create a new Skyve project download and receive the link to the file via email  (video steps are available at https://youtu.be/jcwk6pFnErg)
+ b. for the project creator, create a new Skyve project download and receive the link to the file via email  (video steps are available at https://youtu.be/DkdJ7ROYoxc)
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application instance properties `.json` file and data source `-ds.xml` files and place them into the Wildfly deployment folder. In the `.json` settings file, you will need to (at a minimum) specify the location for Skyve to store 'content' and specify an environment identifier string to be able to get it with a bootstrap credential (also specified in the `.json` file)
 4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
