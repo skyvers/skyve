@@ -215,7 +215,12 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 					processedValue = ((BeanMapAdapter<?>) value).getBean();
 				}
 				else if (value instanceof String) {
-					processedValue = UtilImpl.processStringValue((String) value);
+					String processedStringValue = (String) value;
+					processedStringValue = UtilImpl.processStringValue(processedStringValue);
+					if (processedStringValue != null) {
+						processedStringValue = OWASP.unescapeHtmlChars(processedStringValue);
+					}
+					processedValue = processedStringValue;
 				}
 				Binder.populateProperty(CORE.getUser(), bean, binding, processedValue, false);
 				

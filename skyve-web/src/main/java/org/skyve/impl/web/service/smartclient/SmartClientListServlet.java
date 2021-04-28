@@ -227,7 +227,7 @@ public class SmartClientListServlet extends HttpServlet {
 									value = null;
 								}
 							}
-							parameters.put(name, value);
+							parameters.put(name, OWASP.unescapeHtmlChars(value));
 						}
 					}
 					for (String name : parameters.keySet()) {
@@ -407,8 +407,9 @@ public class SmartClientListServlet extends HttpServlet {
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
 		
-		// Escape and Sanitise rows
-		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
+		// Sanitise rows
+		// Note that HTML escaping is taken care by SC client-side for data grid columns
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), false);
 		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {

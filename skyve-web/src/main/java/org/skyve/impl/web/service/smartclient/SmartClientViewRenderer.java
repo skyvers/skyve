@@ -1265,6 +1265,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			
 			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
 			def.setPixelWidth(column.getPixelWidth());
+			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
 			code.append('{').append(def.toJavascript()).append("},");
 
 			SmartClientLookupDefinition lookup = def.getLookup();

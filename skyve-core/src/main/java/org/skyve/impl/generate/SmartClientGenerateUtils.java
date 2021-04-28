@@ -254,6 +254,7 @@ public class SmartClientGenerateUtils {
 		protected String valueMap;
 		protected boolean required = false;
 		protected boolean triStateCheckBox = false;
+        protected boolean escape = true;
 		protected TargetMetaData target;
 		
 		protected SmartClientAttributeDefinition(User user,
@@ -639,6 +640,14 @@ public class SmartClientGenerateUtils {
 			this.type = type;
 		}
 
+		public boolean isEscape() {
+			return escape;
+		}
+
+		public void setEscape(boolean escape) {
+			this.escape = escape;
+		}
+
 		public String getValueMap() {
 			return valueMap;
 		}
@@ -940,6 +949,9 @@ public class SmartClientGenerateUtils {
             if (pixelWidth != null) {
             	result.append(",width:").append(pixelWidth);
             }
+            if (escape) {
+            	result.append(",escapeHTML:true");
+            }
 // TODO fix this
 //result.append(",changed:'alert(item.grid.getSelectedRecord().bizId)'");
             
@@ -1101,6 +1113,7 @@ public class SmartClientGenerateUtils {
 			}
 			align = column.getAlignment();
 			pixelWidth = column.getPixelWidth();
+			escape = column.isEscape();
 
 			Attribute attribute = (target != null) ? target.getAttribute() : null;
 			if (attribute != null) {
@@ -1315,6 +1328,9 @@ public class SmartClientGenerateUtils {
             	else {
             		result.append(",width:72"); // 64 + 8
             	}
+            }
+            if (escape) {
+            	result.append(",escapeHTML:true");
             }
 			if (onlyEqualsFilterOperators) {
 				result.append(",validOperators:['equals','notEqual','isNull','notNull']");

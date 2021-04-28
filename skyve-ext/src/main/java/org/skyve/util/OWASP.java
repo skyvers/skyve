@@ -25,17 +25,17 @@ public class OWASP {
 	private static final PolicyFactory RELAXED_SANITIZER = SIMPLE_SANITIZER.and(Sanitizers.TABLES).and(Sanitizers.IMAGES).and(Sanitizers.LINKS).and(Sanitizers.STYLES);
 
 	// from https://github.com/OWASP/java-html-sanitizer/blob/main/src/main/java/org/owasp/html/Encoding.java
-	private static final Map<String, String> REPLACEMENTS = new TreeMap<>();
+	private static final Map<String, String> UNESCAPE_REPLACEMENTS = new TreeMap<>();
 	static {
-		REPLACEMENTS.put("&#" + ((int) '\"') + ";", "\"");
-		REPLACEMENTS.put("&amp;", "&");
-		REPLACEMENTS.put("&#" + ((int) '\'') + ";", "'");
-		REPLACEMENTS.put("&#" + ((int) '+') + ";", "+");
-		REPLACEMENTS.put("&lt;", "<");
-		REPLACEMENTS.put("&#" + ((int) '=') + ";", "=");
-		REPLACEMENTS.put("&gt;", ">");
-		REPLACEMENTS.put("&#" + ((int) '@') + ";", "@");
-		REPLACEMENTS.put("&#" + ((int) '`') + ";", "`");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '\"') + ";", "\"");
+		UNESCAPE_REPLACEMENTS.put("&amp;", "&");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '\'') + ";", "'");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '+') + ";", "+");
+		UNESCAPE_REPLACEMENTS.put("&lt;", "<");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '=') + ";", "=");
+		UNESCAPE_REPLACEMENTS.put("&gt;", ">");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '@') + ";", "@");
+		UNESCAPE_REPLACEMENTS.put("&#" + ((int) '`') + ";", "`");
 	}
 
 	private OWASP() {
@@ -48,16 +48,16 @@ public class OWASP {
 		if ((html != null) && (sanitise != null)) {
 			switch (sanitise) {
 			case text:
-				result = TEXT_SANITIZER.sanitize(html);
+				result = unescapeHtmlChars(TEXT_SANITIZER.sanitize(html));
 				break;
 			case basic:
-				result = BASIC_SANITIZER.sanitize(html);
+				result = unescapeHtmlChars(BASIC_SANITIZER.sanitize(html));
 				break;
 			case simple:
-				result = SIMPLE_SANITIZER.sanitize(html);
+				result = unescapeHtmlChars(SIMPLE_SANITIZER.sanitize(html));
 				break;
 			case relaxed:
-				result = RELAXED_SANITIZER.sanitize(html);
+				result = unescapeHtmlChars(RELAXED_SANITIZER.sanitize(html));
 				break;
 			default:
 			}
@@ -66,23 +66,39 @@ public class OWASP {
 		return result;
 	}
 
-	public static String escapeHtml(String html) {
+	public static String unescapeHtmlChars(String html) {
 		String result = html;
 		if (html != null) {
-			for (String entity : REPLACEMENTS.keySet()) {
-				result = result.replace(entity, REPLACEMENTS.get(entity));
+			for (String entity : UNESCAPE_REPLACEMENTS.keySet()) {
+				result = result.replace(entity, UNESCAPE_REPLACEMENTS.get(entity));
+			}
+		}
+		return result;
+	}
+	
+	public static String escapeHtml(String html) {
+		return escapeHtml(html, true);
+	}
+
+	private static String escapeHtml(String html, boolean unescapeFirst) {
+		String result = html;
+		if (html != null) {
+			if (unescapeFirst) {
+				result = unescapeHtmlChars(html);
 			}
 			result = Encode.forHtml(result);
 		}
 		return result;
 	}
-	
+
 	public static String sanitiseAndEscapeHtml(Sanitisation sanitise, String html) {
 		String result = sanitise(sanitise, html);
-		return escapeHtml(result);
+		return escapeHtml(result, false);
 	}
 
-	public static void sanitiseAndEscapeListModelRows(List<Bean> rows, List<MetaDataQueryColumn> columns) {
+	public static void sanitiseAndEscapeListModelRows(List<Bean> rows,
+														List<MetaDataQueryColumn> columns,
+														boolean escape) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : columns) {
 				// Don't sanitise columns that are not projected
@@ -96,14 +112,14 @@ public class OWASP {
 				}
 
 				// escape and sanitise string values if needed
-				boolean escape = column.isEscape();
-				Sanitisation sanitise = column.getSanitise();
-				if (escape || ((sanitise != null) && (! Sanitisation.none.equals(sanitise)))) {
+				boolean escapeColumn = escape && column.isEscape();
+				Sanitisation sanitiseColumn = column.getSanitise();
+				if (escapeColumn || ((sanitiseColumn != null) && (! Sanitisation.none.equals(sanitiseColumn)))) {
 					Object value = BindUtil.get(row, key);
 					if (value instanceof String) {
 						String string = (String) value;
-						string = OWASP.sanitise(sanitise, string);
-						if (escape) {
+						string = OWASP.sanitise(sanitiseColumn, string);
+						if (escapeColumn) {
 							string = OWASP.escapeHtml(string);
 						}
 						BindUtil.set(row, key, string);

@@ -26,7 +26,7 @@ public class OWASPTest extends AbstractSkyveTest {
 		escape.put("<h1>test</h1>", "&lt;h1&gt;test&lt;/h1&gt;");
 		escape.put("<h1>test<script>alert(1)</script></h1>", "&lt;h1&gt;test&lt;script&gt;alert(1)&lt;/script&gt;&lt;/h1&gt;");
 
-		sanitise.put("poo@wee.com", "poo&#64;wee.com");
+		sanitise.put("poo@wee.com", "poo@wee.com");
 		sanitise.put("<h1>test</h1>", "<h1>test</h1>");
 		sanitise.put("<h1>test<script>alert(1)</script></h1>", "<h1>test</h1>");
 

@@ -696,11 +696,11 @@ class ViewJSONManipulator extends ViewVisitor {
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
 //UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
-				BindUtil.populateProperty(user, 
-											targetBean, 
-											binding, 
-											values.get(valueKey), 
-											true);
+				Object value = values.get(valueKey);
+				if (value instanceof String) {
+					value = OWASP.unescapeHtmlChars((String) value);
+				}
+				BindUtil.populateProperty(user, targetBean, binding, value, true);
 			}
 		}
 		catch (MetaDataException e) {
@@ -1593,7 +1593,8 @@ class ViewJSONManipulator extends ViewVisitor {
 						parentEnabled && 
 						visitedDataWidgetHasEditableColumns && 
 						(! Boolean.FALSE.equals(column.getEditable())))) {
-				addBinding(column.getBinding(), true, ! Boolean.FALSE.equals(column.getEscape()), column.getSanitise());
+				// Note that HTML escaping is taken care by SC client-side for data grid columns
+				addBinding(column.getBinding(), true, false, column.getSanitise());
 			}
 		}
 	}

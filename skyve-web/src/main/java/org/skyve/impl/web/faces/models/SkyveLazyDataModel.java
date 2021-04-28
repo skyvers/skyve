@@ -157,7 +157,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
-		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns());
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), true);
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));
