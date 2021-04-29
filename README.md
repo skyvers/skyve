@@ -85,7 +85,7 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 
 * Install a Java 11+ JDK for your operating system.
 * Install Eclipse or an alternative Java based Integrated Development Environment.
-* Install JBoss Wildfly - Our instructions are for Wildfly-22.1.0.Final. You may use other versions and other application servers if you're familiar with configuration.
+* Install JBoss Wildfly - Our instructions are for Wildfly 20+ - you may be able to use older versions and other application servers if you're familiar with configuration.
 
 ### Creating your project using Skyve Foundry
 * Go to https://foundry.skyve.org/foundry and register for an account
