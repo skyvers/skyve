@@ -6,6 +6,8 @@ This repository is the Java implementation of the Skyve framework specification.
 
 * [What is Skyve](#what-is-skyve)
 * [Getting Started](#getting-started)
+  * [Skyve Tutorial](#skyve-tutorial)
+  * [User Guide](#user-guide)
   * [Development Guide](#development-guide)
   * [Skyve Cookbook](#skyve-cookbook) 
 * [Creating a new Skyve project](#creating-a-new-skyve-project)
@@ -39,6 +41,10 @@ Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer
 ## Getting Started
 
 In addition to the [Skyve platform website](https://skyve.org/) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
+
+### Skyve Tutorial
+
+This tutorial walks through building a sample application using Foundry and no-code, setting up your development environment and building upon it with low-code, and finally some more advanced logic with code.
 
 ### User Guide
 
@@ -112,13 +118,15 @@ Video instructions are available using the "How to get started" icon in the titl
 
 #### Configure the application server and database
 * To configure Wildfly to deploy your application:
-	* Copy the contents of the deployments folder to `wildfly/standalone/deployments/`
-		* The project root contains a data source file (projectName-ds.xml) and a json instance settings file (projectName.json).
+	* Copy the project configuration files to `wildfly/standalone/deployments/`
+		* The project root contains a data source file (`projectName-ds.xml`) and a json instance settings file (`projectName.json`).
 		* The datasource file declares the data source connection name to the nominated database engine. The JDBC connection string and associated credentials settings must be valid for the selected database engine. Skyve will create all required tables, so an empty database is required. For an H2 database, this will specify the path to the database file's location.
 		* The json settings file contains the settings specific to the application instance and includes credentials for a boostrap user to get your started.
-		* You will need to configure the `content: { directory:` path within your JSON to be a valid directory on your filesystem. This is where any uploaded files will be stored and indexed by Elastic Search.
-	* If you selected a database engine other than H2, you'll need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you'll need to modify the projectName-ds.xml file in the deployments folder accordingly.
-		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
+		* You will need to configure the `content: { directory:` path within your JSON to be a valid directory on your filesystem. This is where any uploaded files will be stored and indexed by Elastic Search. Create a new directory in your file system at this path, Skyve will not create this for you.
+    * You will need to create an `addins` directory either within your content directory (where Skyve will look by default), or configure `addins: { directory:` within your `projectName.json` to the location of the addins directory.
+    * Copy `skyve-content.zip` from your project target directory into your addins directory (if not present in target, this can be triggered by performing a maven compile or maven install)
+	* If you selected a database engine other than H2, you will need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you will need to modify the `projectName-ds.xml` file in the deployments folder accordingly.
+		- You may also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
 #### Sign in

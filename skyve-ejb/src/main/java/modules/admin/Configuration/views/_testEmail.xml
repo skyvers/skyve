@@ -12,13 +12,11 @@
 			<item>
 				<textField binding="emailTo" />
 			</item>
-			<!-- i18n name not resolving 
 			<item label="admin.configuration.testEmail.emailToContact.label">
 				<lookupDescription binding="emailToContact" descriptionBinding="email1">
 					<filterParameter filterBinding="email1" operator="notNull" />
 				</lookupDescription>
 			</item>
-			 -->
 		</row>
 		<row>
 			<item>
