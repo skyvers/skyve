@@ -64,7 +64,7 @@
 					border-top: 1px solid #c8c8c8 !important;
 				}
 			</style>
-			<ui:insert name="head" />
+			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body class="is-preload">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
@@ -129,7 +129,7 @@
 													style="float:right;"
 													icon="fa fa-check" />
 							</p:confirmDialog>
-							<ui:insert name="body" />
+							<ui:insert name="templateBody" />
 						</section>
 						<!-- Footer -->
 						<footer id="footer">

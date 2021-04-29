@@ -37,7 +37,7 @@
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
-			<ui:insert name="head" />
+			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body>
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
@@ -124,7 +124,7 @@
 													icon="fa fa-check" />
 							</p:confirmDialog>
 							
-							<ui:insert name="body" />
+							<ui:insert name="templateBody" />
 						</td>
 					</tr>
 				</tbody>
