@@ -2119,7 +2119,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			sb.append("null)}");
 		}
 		else {
-			sb.append('\'').append(rgbHexBackgroundColour).append("')}");
+			sb.append('\'').append(rgbHexForegroundColour).append("')}");
 		}
 		button.setActionExpression(ef.createMethodExpression(elc,
 																sb.toString(),
