@@ -2048,7 +2048,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Signature signatureComponent = (Signature) input(Signature.COMPONENT_TYPE, null, binding, title, required, null, null);
 		signatureComponent.setValueExpression("value", null);
 		setId(signatureComponent, id + "_signature");
-		signatureComponent.setGuideline(true);
+		signatureComponent.setGuideline(false);
+		String rgbHexBackgroundColour = signature.getRgbHexBackgroundColour();
+		signatureComponent.setBackgroundColor((rgbHexBackgroundColour == null) ? "#FFFFFF" : rgbHexBackgroundColour);
+		String rgbHexForegroundColour = signature.getRgbHexForegroundColour();
+		signatureComponent.setColor((rgbHexForegroundColour == null) ? "#000000" : rgbHexForegroundColour);
 		StringBuilder sb = new StringBuilder(32);
 		sb.append("width:").append(pixelWidth);
 		sb.append("px;height:").append(pixelHeight).append("px");
@@ -2104,8 +2108,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// action
 		sb.setLength(0);
 		sb.append("#{").append(managedBeanName).append(".sign('").append(clientId).append("','").append(binding).append("',");
-		sb.append(pixelWidth).append(',').append(pixelHeight).append(")}");
-		button.setActionExpression(ef.createMethodExpression(elc, sb.toString(), null, STRING_STRING));
+		sb.append(pixelWidth).append(',').append(pixelHeight);
+		if (rgbHexBackgroundColour == null) {
+			sb.append(",null,");
+		}
+		else {
+			sb.append(",'").append(rgbHexBackgroundColour).append("',");
+		}
+		if (rgbHexForegroundColour == null) {
+			sb.append("null)}");
+		}
+		else {
+			sb.append('\'').append(rgbHexBackgroundColour).append("')}");
+		}
+		button.setActionExpression(ef.createMethodExpression(elc,
+																sb.toString(),
+																null,
+																new Class[] {String.class, String.class, Integer.class, Integer.class, String.class, String.class}));
 		// rendered
 		sb.setLength(0);
 		sb.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");

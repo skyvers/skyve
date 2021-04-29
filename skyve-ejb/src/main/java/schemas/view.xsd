@@ -1138,6 +1138,8 @@
         </xs:sequence>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="rgbHexBackgroundColour" type="xs:string"/>
+        <xs:attribute name="rgbHexForegroundColour" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

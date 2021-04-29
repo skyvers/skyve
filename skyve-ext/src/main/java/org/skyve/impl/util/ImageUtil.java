@@ -39,6 +39,8 @@ import net.coobird.thumbnailator.util.exif.Orientation;
 public class ImageUtil {
 	private static final int FIRST_IMAGE_INDEX = 0;
 	
+	private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+	
 	/**
 	 * Just like javax.imageio.ImageIO.read() but will subs-sample pixels for large images
 	 * to constrain memory usage and apply EXIF rotation.
@@ -144,7 +146,12 @@ public class ImageUtil {
 		}
 	}
 	
-	public static byte[] signature(String json, int width, int height) throws IOException {
+	public static byte[] signature(String json,
+									int width,
+									int height,
+									String rgbHexBackgroundColour,
+									String rgbHexForegroundColour)
+	throws IOException {
 		List<List<Point>> lines = new ArrayList<>();
 		Matcher lineMatcher = Pattern.compile("(\\[(?:,?\\[-?[\\d\\.]+,-?[\\d\\.]+\\])+\\])").matcher(json);
 		while (lineMatcher.find()) {
@@ -157,11 +164,11 @@ public class ImageUtil {
 			}
 		}
 
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) image.getGraphics();
-		g.setColor(Color.WHITE);
+		g.setColor((rgbHexBackgroundColour == null) ? TRANSPARENT : Color.decode(rgbHexBackgroundColour));
 		g.fillRect(0, 0, width, height);
-		g.setColor(Color.BLACK);
+		g.setColor((rgbHexForegroundColour == null) ? Color.BLACK : Color.decode(rgbHexForegroundColour));
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		Point lastPoint = null;

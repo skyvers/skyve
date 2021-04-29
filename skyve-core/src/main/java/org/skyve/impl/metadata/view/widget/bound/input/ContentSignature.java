@@ -19,12 +19,18 @@ import org.skyve.impl.util.XMLMetaData;
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "properties"})
+			propOrder = {"pixelWidth",
+							"pixelHeight",
+							"rgbHexBackgroundColour",
+							"rgbHexForegroundColour",
+							"properties"})
 public class ContentSignature extends InputWidget implements AbsoluteSize, FormItemWidget {
 	private static final long serialVersionUID = 7902784327466913291L;
 	
 	private Integer pixelWidth;
 	private Integer pixelHeight;
+	private String rgbHexBackgroundColour;
+	private String rgbHexForegroundColour;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -61,4 +67,22 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	public Map<String, String> getProperties() {
 		return properties;
 	}
+	
+	public String getRgbHexBackgroundColour() {
+		return rgbHexBackgroundColour;
+	}
+
+	@XmlAttribute(required = false)
+	public void setRgbHexBackgroundColour(String rgbHexBackgroundColour) {
+		this.rgbHexBackgroundColour = rgbHexBackgroundColour;
+	}
+	
+	public String getRgbHexForegroundColour() {
+		return rgbHexForegroundColour;
+	}
+
+	@XmlAttribute(required = false)
+	public void setRgbHexForegroundColour(String rgbHexForegroundColour) {
+		this.rgbHexForegroundColour = rgbHexForegroundColour;
+	}	
 }

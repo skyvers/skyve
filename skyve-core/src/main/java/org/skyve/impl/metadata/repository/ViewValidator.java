@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -695,6 +696,25 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(signature.getDisabledConditionName(), signatureIdentifier);
 		validateConditionName(signature.getInvisibleConditionName(), signatureIdentifier);
 		validateSize(signature, signatureIdentifier);
+		
+		String colour = signature.getRgbHexBackgroundColour();
+		if (colour != null) {
+			try {
+				Color.decode(colour);
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				throw new MetaDataException(signatureIdentifier + " in " + viewIdentifier + " has an invalid value for rgbHexBackgroundColour of " + colour + " (Should be formatted as #RRGGBB)");
+			}
+		}
+		colour = signature.getRgbHexForegroundColour();
+		if (colour != null) {
+			try {
+				Color.decode(colour);
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				throw new MetaDataException(signatureIdentifier + " in " + viewIdentifier + " has an invalid value for rgbHexForegroundColour of " + colour + " (Should be formatted as #RRGGBB)");
+			}
+		}
 	}
 
 	@Override

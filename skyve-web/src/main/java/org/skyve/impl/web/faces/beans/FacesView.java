@@ -763,7 +763,12 @@ public class FacesView<T extends Bean> extends Harness {
 	/**
 	 * Capture a signature from its json payloads
 	 */
-	public void sign(String signatureClientId, String binding, int width, int height) {
+	public void sign(String signatureClientId,
+						String binding,
+						int width,
+						int height,
+						String rgbHexBackgroundColour,
+						String rgbHexForegroundColour) {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
@@ -773,7 +778,7 @@ public class FacesView<T extends Bean> extends Harness {
 				}
 				Bean bean = getCurrentBean().getBean();
 				try (ContentManager cm = EXT.newContentManager()) {
-					byte[] signature = ImageUtil.signature(json, width, height);
+					byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
 					final AttachmentContent ac = new AttachmentContent(bean.getBizCustomer(),
 																		bean.getBizModule(),
 																		bean.getBizDocument(),
