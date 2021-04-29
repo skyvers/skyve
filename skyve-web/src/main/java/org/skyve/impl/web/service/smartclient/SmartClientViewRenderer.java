@@ -1448,13 +1448,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
-/* TODO not implemented for SC yet
-		preProcessFormItem(signature, "bizContentSignature");
+		// TODO not implemented for SC yet - use a ContentImage for now
+		preProcessFormItem(signature, "bizContentImage");
 		size(signature, null, code);
 		disabled(signature.getDisabledConditionName(), code);
 		invisible(signature.getInvisibleConditionName(), code);
-		editable(signature.getEditable(), code);
-*/
+		editable(Boolean.TRUE, code);
 	}
 
 	@Override

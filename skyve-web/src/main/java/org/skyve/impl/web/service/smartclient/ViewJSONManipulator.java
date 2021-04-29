@@ -1119,10 +1119,9 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitContentSignature(ContentSignature signature,
 										boolean parentVisible, 
 										boolean parentEnabled) {
-/* TODO not implemented for SC yet
+		// TODO not implemented for SC yet - use ContentImage
 		if (parentVisible && visible(signature)) {
-			if ((! forApply) || 
-					(forApply && parentEnabled && (! Boolean.FALSE.equals(signature.getEditable())))) {
+			if ((! forApply) || (forApply && parentEnabled)) {
 				addBinding(signature.getBinding(), true, false, Sanitisation.text);
 			}
 		}
@@ -1132,7 +1131,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
 		addBinding(Bean.USER_ID, false, false, Sanitisation.text);
-*/
 	}
 
 	@Override
