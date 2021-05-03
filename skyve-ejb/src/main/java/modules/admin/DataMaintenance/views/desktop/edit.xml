@@ -214,7 +214,7 @@
 			</hbox>
 		</tab>
 		<tab title="admin.dataMaintenance.edit.manageAudits.tabTitle" visible="auditManager">
-			<form border="true" percentageWidth="60" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.filter.borderTitle">
+			<form border="true" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.filter.borderTitle">
 				<column percentageWidth="20" responsiveWidth="2" />
 				<column responsiveWidth="4" />
 				<column />
@@ -270,7 +270,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" percentageWidth="60" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.truncate.borderTitel">
+			<form border="true" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.truncate.borderTitle">
 				<column percentageWidth="20" responsiveWidth="2" />
 				<column />
 				<row>

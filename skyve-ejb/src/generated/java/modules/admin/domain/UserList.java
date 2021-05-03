@@ -91,8 +91,12 @@ Provide a list separated by either comma or semicolon.
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-		return toString();
-
+		try {
+			return org.skyve.util.Binder.formatMessage("User List", this);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

@@ -96,8 +96,12 @@ public class ChangePassword extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-		return toString();
-
+		try {
+			return org.skyve.util.Binder.formatMessage("Change Password", this);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

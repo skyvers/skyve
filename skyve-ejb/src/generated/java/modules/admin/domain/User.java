@@ -1561,7 +1561,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	@XmlTransient
 	public boolean isSelfRegistrationEnabledAndUserNotActivated() {
-		return ((org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (getActivated().equals(Boolean.FALSE))));
+		return (org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && Boolean.FALSE.equals(getActivated()));
 	}
 
 	/**
