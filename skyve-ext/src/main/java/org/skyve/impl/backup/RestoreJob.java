@@ -1,8 +1,14 @@
 package org.skyve.impl.backup;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -57,17 +63,16 @@ public class RestoreJob extends CancellableJob {
 		String trace;
 
 		String selectedBackupName = options.getSelectedBackupName();
-		File backup = new File(String.format("%sbackup_%s%s%s",
-												Util.getContentDirectory(),
-												customerName,
-												File.separator,
-												selectedBackupName));
+		Path backupDir = Paths.get(Util.getContentDirectory(), "backup_" + customerName);
+		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;
+
 		try {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				deleteLocalBackup = true;
-				backup.mkdirs();
+				backupDir.toFile().mkdirs();
 				try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {
+					Util.LOGGER.info("Downloading external backup " + backup.getName());
 					ExternalBackup.getInstance().downloadBackup(selectedBackupName, backupOutputStream);
 				}
 			}
