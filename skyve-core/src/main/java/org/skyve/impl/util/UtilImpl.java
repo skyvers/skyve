@@ -62,7 +62,7 @@ public class UtilImpl {
 
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "40";
-	public static final String SKYVE_VERSION = "7.1.3";
+	public static final String SKYVE_VERSION = "7.1.4-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
