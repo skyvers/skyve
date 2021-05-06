@@ -14,9 +14,9 @@ import org.skyve.persistence.Persistence;
 
 import modules.admin.UserDashboard.UserDashboardExtension;
 import modules.admin.domain.Audit;
-import modules.admin.domain.UserDashboard;
+import modules.admin.domain.SystemDashboard;
 
-public class ActivityContextModel extends ChartModel<UserDashboard> {
+public class ActivityContextModel extends ChartModel<SystemDashboard> {
 
 	/**
 	 * 
