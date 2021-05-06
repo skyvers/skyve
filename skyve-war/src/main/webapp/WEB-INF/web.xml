@@ -298,43 +298,19 @@
 			<param-name>X-XSS-Protection</param-name>
 			<param-value>1; mode=block</param-value>
 		</init-param>
+		<!-- HSTS Header for protection from man in the middle on user agent client networks -->
+		<!-- This is switched in foundry projects in nginx -->
+<!--
+		<init-param>
+			<param-name>Strict-Transport-Security</param-name>
+			<param-value>max-age=31536000; includeSubDomains</param-value>
+		</init-param>
+-->
 	</filter>
 	<filter-mapping>
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
-	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
-<!--
-	<filter>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
-		<init-param>
-			<param-name>Strict-Transport-Security</param-name>
-			<param-value>max-age=31536000; includeSubDomains</param-value>
-		</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>*.jsp</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>*.xhtml</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>*.html</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>/login</url-pattern>
-	</filter-mapping>
--->
     <filter>
         <display-name>RestFilter</display-name>
         <filter-name>RestFilter</filter-name>
