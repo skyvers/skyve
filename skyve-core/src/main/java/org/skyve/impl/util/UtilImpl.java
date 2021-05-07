@@ -99,6 +99,30 @@ public class UtilImpl {
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
 
+	// Allowed file upload file names - default is a blacklist of harmful "executable" files
+	public static String UPLOADS_FILE_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)).+$";
+	
+	// Max file upload size - default is 10MB the same as wildfly default
+	public static int UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;
+	
+	// Allowed content upload file names - default is a blacklist of harmful "executable" files
+	public static String UPLOADS_CONTENT_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
+	
+	// Max content upload size - default is 10MB the same as wildfly default
+	public static int UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+
+	// Allowed image upload file names - default is a blacklist of harmful "executable" files
+	public static String UPLOADS_IMAGE_WHITELIST_REGEX = UPLOADS_FILE_WHITELIST_REGEX;
+	
+	// Max image upload size - default is 10MB the same as wildfly default
+	public static int UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+
+	// Allowed bizport upload file names - default is a XLS and XLSX files
+	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(XLS|XLSX)$";
+	
+	// Max bizport upload size - default is 10MB the same as wildfly default
+	public static int UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
+
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 

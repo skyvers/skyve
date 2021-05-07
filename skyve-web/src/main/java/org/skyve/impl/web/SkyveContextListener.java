@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.faces.FacesException;
 import javax.servlet.ServletContext;
@@ -195,6 +197,86 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
+		// Uploads settings
+		Map<String, Object> uploads = getObject(null, "uploads", properties, false);
+		if (uploads != null) {
+			// File
+			Map<String, Object> values = getObject("uploads", "file", uploads, false);
+			if (values != null) {
+				String whitelistRegex = Util.processStringValue(getString("uploads.file", "whitelistRegex", values, false));
+				if (whitelistRegex != null) {
+					try {
+						Pattern.compile(whitelistRegex);
+					}
+					catch (PatternSyntaxException e) {
+						throw new IllegalStateException("uploads.file.whitelistRegex is not a valid regex pattern", e);
+					}
+					UtilImpl.UPLOADS_FILE_WHITELIST_REGEX = whitelistRegex;
+				}
+				Number maximumSizeMB = getNumber("uploads.file", "maximumSizeMB", values, false);
+				if (maximumSizeMB != null) {
+					UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
+				}
+			}
+
+			// Content
+			values = getObject("uploads", "content", uploads, false);
+			if (values != null) {
+				String whitelistRegex = Util.processStringValue(getString("uploads.content", "whitelistRegex", values, false));
+				if (whitelistRegex != null) {
+					try {
+						Pattern.compile(whitelistRegex);
+					}
+					catch (PatternSyntaxException e) {
+						throw new IllegalStateException("uploads.content.whitelistRegex is not a valid regex pattern", e);
+					}
+					UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX = whitelistRegex;
+				}
+				Number maximumSizeMB = getNumber("uploads.content", "maximumSizeMB", values, false);
+				if (maximumSizeMB != null) {
+					UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
+				}
+			}
+
+			// Image
+			values = getObject("uploads", "image", uploads, false);
+			if (values != null) {
+				String whitelistRegex = Util.processStringValue(getString("uploads.image", "whitelistRegex", values, false));
+				if (whitelistRegex != null) {
+					try {
+						Pattern.compile(whitelistRegex);
+					}
+					catch (PatternSyntaxException e) {
+						throw new IllegalStateException("uploads.image.whitelistRegex is not a valid regex pattern", e);
+					}
+					UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX = whitelistRegex;
+				}
+				Number maximumSizeMB = getNumber("uploads.image", "maximumSizeMB", values, false);
+				if (maximumSizeMB != null) {
+					UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
+				}
+			}
+
+			// BizPort
+			values = getObject("uploads", "bizport", uploads, false);
+			if (values != null) {
+				String whitelistRegex = Util.processStringValue(getString("uploads.bizport", "whitelistRegex", values, false));
+				if (whitelistRegex != null) {
+					try {
+						Pattern.compile(whitelistRegex);
+					}
+					catch (PatternSyntaxException e) {
+						throw new IllegalStateException("uploads.bizport.whitelistRegex is not a valid regex pattern", e);
+					}
+					UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX = whitelistRegex;
+				}
+				Number maximumSizeMB = getNumber("uploads.bizport", "maximumSizeMB", values, false);
+				if (maximumSizeMB != null) {
+					UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = maximumSizeMB.intValue();
+				}
+			}
+		}
+		
 		// Add-ins settings
 		Map<String, Object> addins = getObject(null, "addins", properties, false);
 		if (addins != null) {

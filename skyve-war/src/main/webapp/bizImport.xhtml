@@ -37,7 +37,10 @@
 				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
 				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
 				<p:fileUpload listener="#{_skyveBizImport.handleFileUpload}" 
-								allowTypes="/(\.|\/)(XLS|XLSX)$/i"
+								sizeLimit="#{_skyveBizImport.maximumSizeInBytes}"
+								invalidSizeMessage="#{_skyveBizImport.i18n['page.bizImport.sizeLimit']}"
+								allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
+								invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
 								update="messages problems" 
 								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />

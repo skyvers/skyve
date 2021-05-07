@@ -26,48 +26,34 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
-@ManagedBean(name = "_skyveContent")
 @RequestScoped
-public class ContentUpload extends Localisable {
+@ManagedBean(name = "_skyveContent")
+public class ContentUpload extends AbstractUpload {
 	private static final long serialVersionUID = -6769960348990922565L;
 
-	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
-    private String context;
-    
-    @ManagedProperty(value = "#{param." + AbstractWebContext.BINDING_NAME + "}")
-    private String binding;
+	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
+	private String contentBinding;
 
-    @ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
-    private String contentBinding;
+	private String croppedDataUrl;
+	private String croppedFileName;
 
-    private String croppedDataUrl;
-    private String croppedFileName;
-    
+	public ContentUpload() {
+		super(UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
+	}
+
+	protected ContentUpload(String whitelistRegex, int maximumSizeMB) {
+		super(whitelistRegex, maximumSizeMB);
+	}
+
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
 				initialise();
-				
+
 				return null;
 			}
 		}.execute();
-	}
-
-    public String getContext() {
-		return context;
-	}
-
-	public void setContext(String context) {
-		this.context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
-	}
-
-	public String getBinding() {
-		return binding;
-	}
-
-	public void setBinding(String binding) {
-		this.binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
 	}
 
 	public String getContentBinding() {
@@ -99,32 +85,33 @@ public class ContentUpload extends Localisable {
 	 * 
 	 * @param event
 	 */
-	public void handleFileUpload(FileUploadEvent event)
-	throws Exception {
+	public void handleFileUpload(FileUploadEvent event) throws Exception {
+		FacesContext fc = FacesContext.getCurrentInstance();
 		UploadedFile file = event.getFile();
-		upload(file.getFileName(), file.getContent());
+		if (! validFile(file, fc)) {
+			return;
+		}
+		upload(file.getFileName(), file.getContent(), fc);
 	}
-	
+
 	/**
 	 * Process the file upload from the croppie plugin.
 	 * For use as a remote command with a hidden populated with a data url
 	 */
-	public void uploadCropped()
-	throws Exception {
+	public void uploadCropped() throws Exception {
+		FacesContext fc = FacesContext.getCurrentInstance();
 		String base64 = croppedDataUrl.substring(croppedDataUrl.indexOf(','));
 		Base64 base64Codec = new Base64();
-		upload(croppedFileName, base64Codec.decode(base64));
+		upload(croppedFileName, base64Codec.decode(base64), fc);
 	}
 
-	private void upload(String fileName, byte[] fileContents)
-	throws Exception {
-		FacesContext fc = FacesContext.getCurrentInstance();
-
+	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
+		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context, binding, or contentBinding is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
-	        fc.addMessage(null, msg);
-	        return;
+			fc.addMessage(null, msg);
+			return;
 		}
 
 		ExternalContext ec = fc.getExternalContext();
@@ -135,8 +122,8 @@ public class ContentUpload extends Localisable {
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
-	        FacesContext.getCurrentInstance().addMessage(null, msg);
-	        return;
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
 		}
 
 		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
@@ -145,16 +132,17 @@ public class ContentUpload extends Localisable {
 			Bean currentBean = webContext.getCurrentBean();
 			Bean bean = currentBean;
 
+			String binding = getBinding();
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
-			
+
 			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
 			StateUtil.cacheConversation(webContext);
-			
+
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);
 			String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBinding);
@@ -173,8 +161,8 @@ public class ContentUpload extends Localisable {
 			persistence.rollback();
 			e.printStackTrace();
 			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
-	        fc.addMessage(null, msg);
+			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyvePhaseListener after the response is rendered.
-    }
+	}
 }

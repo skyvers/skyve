@@ -41,23 +41,17 @@ import org.skyve.util.OWASP;
 
 @ManagedBean(name = "_skyveUpload")
 @RequestScoped
-public class FileUpload extends Localisable {
+public class FileUpload extends AbstractUpload {
 	private static final long serialVersionUID = -8705052124876109265L;
-
-	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
-    private String context;
-    
-    @ManagedProperty(value = "#{param." + AbstractWebContext.BINDING_NAME + "}")
-    private String binding;
 
     @ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
     private String action;
 
-    public String getContext() {
-		return context;
-	}
-
-	public void preRender() {
+    public FileUpload() {
+    	super(UtilImpl.UPLOADS_FILE_WHITELIST_REGEX, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
+    }
+    
+    public void preRender() {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
@@ -66,18 +60,6 @@ public class FileUpload extends Localisable {
 				return null;
 			}
 		}.execute();
-	}
-
-	public void setContext(String context) {
-		this.context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
-	}
-
-	public String getBinding() {
-		return binding;
-	}
-
-	public void setBinding(String binding) {
-		this.binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
 	}
 
 	public String getAction() {
@@ -103,6 +85,12 @@ public class FileUpload extends Localisable {
 	throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();
 
+		UploadedFile file = event.getFile();
+		if (! validFile(file, fc)) {
+			return;
+		}
+
+		String context = getContext();
 		if ((context == null) || (action == null)) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context, binding, or action is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -113,8 +101,6 @@ public class FileUpload extends Localisable {
 		ExternalContext ec = fc.getExternalContext();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
-
-		UploadedFile file = event.getFile();
 
 		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
@@ -134,6 +120,7 @@ public class FileUpload extends Localisable {
 			Bean currentBean = webContext.getCurrentBean();
 
 			Bean bean = currentBean;
+			String binding = getBinding();
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
