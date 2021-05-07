@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="admin.tag.edit.details.tagTitle">
+		<tab title="admin.tag.edit.details.tabTitle">
 			<form border="true">
 				<column percentageWidth="20" />
 				<column />
