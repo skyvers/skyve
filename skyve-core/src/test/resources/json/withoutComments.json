@@ -1,9 +1,9 @@
 {
-	api: {
-		twilio: {
-			accountSid: "1234",
-			authToken: "1234",
-			defaultSendNumber: "+614555555"
+	"api": {
+		"twilio": {
+			"accountSid": "1234",
+			"authToken": "1234",
+			"defaultSendNumber": "+614555555"
 		}
 	}		
 }

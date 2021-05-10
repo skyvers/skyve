@@ -1,7 +1,7 @@
 {
 	// cache definitions
 	/*
-	caches: {
+	"caches": {
 		"exampleEHCache": {
 		}
 	}
