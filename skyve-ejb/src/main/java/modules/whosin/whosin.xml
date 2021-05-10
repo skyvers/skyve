@@ -64,7 +64,7 @@
 			<description>All Staff</description>
 			<columns>
 				<content display="thumbnail" binding="contact.image" displayName="Image"
-					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg" escape="false"/>
 				<column binding="contact.name" sortOrder="ascending"/>
 				<column binding="roleTitle" />
 				<column binding="status" />
@@ -78,7 +78,7 @@
 			<description>Staff based at this office</description>
 			<columns>
 				<content display="thumbnail" binding="contact.image" displayName="Image"
-					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg"/>
+					 emptyThumbnailRelativeFile="shared/images/UnknownContact.jpg" escape="false"/>
 				<column binding="contact.name" sortOrder="ascending"/>
 				<column binding="status" />
 			</columns>
