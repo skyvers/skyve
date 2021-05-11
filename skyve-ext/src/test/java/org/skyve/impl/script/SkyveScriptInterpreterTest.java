@@ -1,7 +1,7 @@
 package org.skyve.impl.script;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;

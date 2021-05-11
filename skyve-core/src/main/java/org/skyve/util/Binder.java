@@ -448,4 +448,14 @@ public class Binder {
 	public static String toJavaPropertyName(String methodName) {
 		return BindUtil.toJavaPropertyName(methodName);
 	}
+
+	/**
+	 * Fashion a title case identifier from the given string.
+	 * 
+	 * @param string The string to convert
+	 * @return A title case string. First letter of each word upper cased with spaces between words.
+	 */
+	public static String toTitleCase(String string) {
+		return BindUtil.toTitleCase(string);
+	}
 }
