@@ -1,10 +1,13 @@
-# Skyve
+[![Logo][skyve-logo]][skyve-url]
+
+Welcome to Skyve!
 
 This repository is the Java implementation of the Skyve framework specification.
 
 ### Contents
 
 * [What is Skyve](#what-is-skyve)
+* [Contributing](#contributing)
 * [Getting Started](#getting-started)
   * [Skyve Tutorial](#skyve-tutorial)
   * [User Guide](#user-guide)
@@ -38,13 +41,23 @@ For more details on the framework and its capabilities, please check out the pla
 
 Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer a range of support agreements if required. Or use it for free, no obligation.
 
+## Contributing
+
+We welcome new contributions to the project, however small. Please refer to our [contribution guidelines](https://github.com/skyvers/skyve/blob/master/CONTRIBUTING.md) for information about contributing to Skyve.
+
+## Questions
+
+If you've found a bug or want to request a new feature, please create a [GitHub Issue](https://github.com/skyvers/skyve/issues/new/choose).
+
+If you need help getting started with or extending Skyve, please reach out on [Slack](https://join.slack.com/t/skyveframework/shared_invite/enQtNDMwNTcyNzE0NzI2LTRkMWUxZDBlZmFlMmJkMjQzYWMzYWQxMmQzYWQ1ZTdlODNkNjRlYzVhYjFmMmQ4NTlhYWY4MjNhMGVkZGNlMjY). Someone from the community or a Skyve developer will be happy to assist. Or use the [skyve tag on StackOverflow](https://stackoverflow.com/tags/skyve) and ask for help there.
+
 ## Getting Started
 
-In addition to the [Skyve platform website](https://skyve.org/) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
+The [Skyve platform website](https://skyve.org/) which hosts training videos, links to a comprehensive development guide, Skyve tutorial as well as a cookbook.
 
 ### Skyve Tutorial
 
-This tutorial walks through building a sample application using Foundry and no-code, setting up your development environment and building upon it with low-code, and finally some more advanced logic with code.
+[This tutorial](https://skyvers.github.io/Aged-care/) walks through building a sample application using Foundry and no-code, setting up your development environment and building upon it with low-code, and finally some more advanced logic with code.
 
 ### User Guide
 
@@ -349,3 +362,6 @@ These instructions apply to projects created using the [Creating a new Skyve Pro
 - When successful, run your project's generated tests
 - Deploy your project locally and sanity check everything still works correctly
 - When satisified, commit the changes to your project
+
+[skyve-logo]: https://images.squarespace-cdn.com/content/5bac80be16b6407444b95a0c/1604036522472-OMV89LAE4GYP8JV9OC1C/skyve-logo-black.png?content-type=image%2Fpng
+[skyve-url]: https://www.skyve.org/
