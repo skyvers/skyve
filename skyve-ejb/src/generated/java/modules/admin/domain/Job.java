@@ -59,6 +59,9 @@ public class Job extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String beanDocumentNamePropertyName = "beanDocumentName";
 
+	/** @hidden */
+	public static final String instanceIdPropertyName = "instanceId";
+
 	/**
 	 * Start Time
 	 **/
@@ -107,6 +110,11 @@ public class Job extends AbstractPersistentBean {
 	 * The name of the document for the bean.
 	 **/
 	private String beanDocumentName;
+
+	/**
+	 * Instance ID
+	 **/
+	private String instanceId;
 
 	@Override
 	@XmlTransient
@@ -313,5 +321,42 @@ public class Job extends AbstractPersistentBean {
 	public void setBeanDocumentName(String beanDocumentName) {
 		preset(beanDocumentNamePropertyName, beanDocumentName);
 		this.beanDocumentName = beanDocumentName;
+	}
+
+	/**
+	 * {@link #instanceId} accessor.
+	 * @return	The value.
+	 **/
+	public String getInstanceId() {
+		return instanceId;
+	}
+
+	/**
+	 * {@link #instanceId} mutator.
+	 * @param instanceId	The new value.
+	 **/
+	@XmlElement
+	public void setInstanceId(String instanceId) {
+		preset(instanceIdPropertyName, instanceId);
+		this.instanceId = instanceId;
+	}
+
+	/**
+	 * cancellable
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCancellable() {
+		return (getStatus() == null);
+	}
+
+	/**
+	 * {@link #isCancellable} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCancellable() {
+		return (! isCancellable());
 	}
 }

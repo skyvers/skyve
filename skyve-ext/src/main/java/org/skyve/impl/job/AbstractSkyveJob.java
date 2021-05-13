@@ -118,6 +118,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		if (cantCancelReason != null) {
 			throw new UnableToInterruptJobException(cantCancelReason);
 		}
+		status = JobStatus.cancelled;
 	}
 
 	@Override
@@ -138,7 +139,9 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.begin();
 			BeanProvider.injectFields(this);
 			execute();
-			status = JobStatus.complete;
+			if (status == null) { // status could be cancelled here
+				status = JobStatus.complete;
+			}
 		}
 		catch (Throwable t) {
 			status = JobStatus.failed;

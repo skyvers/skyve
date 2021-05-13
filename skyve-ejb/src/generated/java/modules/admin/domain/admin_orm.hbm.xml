@@ -369,7 +369,7 @@
 		<property name="endTime" type="Timestamp" />
 		<property name="displayName" length="100" />
 		<property name="percentComplete" />
-		<property name="status" length="8" />
+		<property name="status" length="9" />
 		<property name="log" type="text" />
 		<property name="beanBizId" length="36" />
 		<property name="beanModuleName" length="500" />

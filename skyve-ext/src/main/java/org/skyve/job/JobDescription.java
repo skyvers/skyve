@@ -11,7 +11,7 @@ public class JobDescription {
 	private String logging;
 	private JobStatus status;
 	private User user;
-	private String triggerName;
+	private String instanceId;
 
 	public String getName() {
 		return name;
@@ -68,12 +68,12 @@ public class JobDescription {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
-	public void setTriggerName(String triggerName) {
-		this.triggerName = triggerName;
+
+	public String getInstanceId() {
+		return instanceId;
 	}
 
-	public String getTriggerName() {
-		return this.triggerName;
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
 	}
 }

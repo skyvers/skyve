@@ -26,7 +26,7 @@
 		</integer>
 		<text name="status" >
 			<displayName>Status</displayName>
-			<length>8</length>
+			<length>9</length>
 		</text>
 		<memo name="log">
 			<displayName>Log</displayName>
@@ -44,9 +44,9 @@
 			<description>The name of the document for the bean.</description>
 			<length>500</length>
 		</text>
-		<text name="triggerName" persistent="false">
-			<displayName>Trigger Name</displayName>
-			<length>100</length>
+		<text name="instanceId" persistent="false">
+			<displayName>Instance ID</displayName>
+			<length>1024</length>
 		</text>
 	</attributes>
 	<conditions>

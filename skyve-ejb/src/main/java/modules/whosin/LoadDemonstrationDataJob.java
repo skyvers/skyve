@@ -28,15 +28,15 @@ import modules.whosin.domain.Staff.Status;
  * @author rob
  */
 public class LoadDemonstrationDataJob extends Job {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 8903261480076338400L;
 
 	private static String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist" };
+
+	private volatile boolean cancelled = false;
 	
 	@Override
 	public String cancel() {
+		cancelled = true;
 		return null;
 	}
 	
@@ -61,12 +61,14 @@ public class LoadDemonstrationDataJob extends Job {
 		}
 	}
 
-	private static void generateRandomData() {
+	private void generateRandomData() throws InterruptedException {
 		
 		//generate a random number of staff
 		int staffCount = new Random().nextInt(1000) + 50;
 		for(int i=0;i<staffCount;i++) {
-			
+			if (cancelled) {
+				return;
+			}
 			Staff bean = new DataBuilder().fixture(FixtureType.seed).build(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 			bean = CORE.getPersistence().save(bean);
 			CORE.getPersistence().evictCached(bean);
@@ -234,7 +236,7 @@ public class LoadDemonstrationDataJob extends Job {
 
 	}
 
-	private static void clearPreviousData(Persistence persistence) throws Exception {
+	private void clearPreviousData(Persistence persistence) throws Exception {
 
 		// try to delete all staff (some may fail if users have been created)
 		DocumentQuery qStaff = persistence.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
@@ -242,6 +244,9 @@ public class LoadDemonstrationDataJob extends Job {
 
 		List<Staff> allStaff = qStaff.beanResults();
 		for (Staff s : allStaff) {
+			if (cancelled) {
+				return;
+			}
 			try {
 				Contact c = s.getContact();
 				persistence.delete(s);
@@ -264,6 +269,9 @@ public class LoadDemonstrationDataJob extends Job {
 
 		List<Office> allOffices = qOffice.beanResults();
 		for (Office o : allOffices) {
+			if (cancelled) {
+				return;
+			}
 			try {
 				persistence.delete(o);
 				persistence.commit(false);

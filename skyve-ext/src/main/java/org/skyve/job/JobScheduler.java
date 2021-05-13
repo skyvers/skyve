@@ -11,6 +11,7 @@ import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
@@ -20,7 +21,6 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -30,7 +30,6 @@ import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.job.ContentGarbageCollectionJob;
 import org.skyve.impl.job.ContentInitJob;
 import org.skyve.impl.job.EvictStateJob;
-import org.skyve.impl.job.SkyveTriggerListener;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
@@ -46,13 +45,11 @@ import org.skyve.web.BackgroundTask;
 
 public class JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
-	private static final SkyveTriggerListener SKYVE_TRIGGER_LISTENER = new SkyveTriggerListener();
 
 	public static void init() {
 		SchedulerFactory sf = new StdSchedulerFactory();
 		try {
 			JOB_SCHEDULER = sf.getScheduler();
-			JOB_SCHEDULER.getListenerManager().addTriggerListener(SKYVE_TRIGGER_LISTENER);
 			JOB_SCHEDULER.start();
 		}
 		catch (SchedulerException e) {
@@ -359,18 +356,18 @@ public class JobScheduler {
 
 		String customerName = user.getCustomer().getName();
 
-		for (TriggerKey triggerKey : JOB_SCHEDULER.getTriggerKeys(GroupMatcher.groupEquals(customerName))) {
-			Trigger trigger = JOB_SCHEDULER.getTrigger(triggerKey);
-			AbstractSkyveJob job = SKYVE_TRIGGER_LISTENER.getRunningJob(customerName, triggerKey.getName());
-			if (job != null) {
+		for (JobExecutionContext context : JOB_SCHEDULER.getCurrentlyExecutingJobs()) {
+			AbstractSkyveJob job = (AbstractSkyveJob) context.getJobInstance();
+			Trigger trigger = context.getTrigger();
+			if (customerName.equals(trigger.getKey().getGroup())) {
 				JobDescription jd = new JobDescription();
-				jd.setUser((User) trigger.getJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
+				jd.setUser((User) context.getMergedJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
 				jd.setStartTime(job.getStartTime());
 				jd.setName(job.getDisplayName());
 				jd.setPercentComplete(job.getPercentComplete());
 				jd.setLogging(job.createLogDescriptionString());
-				jd.setTriggerName(triggerName);
-
+				jd.setInstanceId(context.getFireInstanceId());
+	
 				result.add(jd);
 			}
 		}
@@ -378,15 +375,7 @@ public class JobScheduler {
 		return result;
 	}
 	
-	public static boolean cancelJob(String triggerName) throws SchedulerException {
-		String customerName = AbstractPersistence.get().getUser().getCustomer().getName();
-		Trigger trigger = JOB_SCHEDULER.getTrigger(triggerName, customerName);
-
-		if (trigger == null) {
-			return false;
-		}
-		else {
-			return JOB_SCHEDULER.interrupt(trigger.getJobName(), trigger.getJobGroup());
-		}
+	public static boolean cancelJob(String instanceId) throws SchedulerException {
+		return JOB_SCHEDULER.interrupt(instanceId);
 	}
 }
