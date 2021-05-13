@@ -369,11 +369,24 @@ public class JobScheduler {
 				jd.setName(job.getDisplayName());
 				jd.setPercentComplete(job.getPercentComplete());
 				jd.setLogging(job.createLogDescriptionString());
+				jd.setTriggerName(triggerName);
 
 				result.add(jd);
 			}
 		}
 
 		return result;
+	}
+	
+	public static boolean cancelJob(String triggerName) throws SchedulerException {
+		String customerName = AbstractPersistence.get().getUser().getCustomer().getName();
+		Trigger trigger = JOB_SCHEDULER.getTrigger(triggerName, customerName);
+
+		if (trigger == null) {
+			return false;
+		}
+		else {
+			return JOB_SCHEDULER.interrupt(trigger.getJobName(), trigger.getJobGroup());
+		}
 	}
 }

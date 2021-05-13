@@ -42,6 +42,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 				job.setDisplayName(jd.getName());
 				job.setPercentComplete(Integer.valueOf(jd.getPercentComplete()));
 				job.setLog(jd.getLogging());
+				job.setTriggerName(jd.getTriggerName());
 				runningJobs.add(job);
 			}
 		}

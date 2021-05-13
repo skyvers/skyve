@@ -272,7 +272,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Generic" permission="CRUDG"/>
-				<document name="Job" permission="CRUDC" />
+				<document name="Job" permission="CRUDC">
+					<action name="CancelJob" />
+				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
 					<action name="Refresh" />

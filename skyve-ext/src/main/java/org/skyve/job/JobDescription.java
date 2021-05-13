@@ -11,6 +11,7 @@ public class JobDescription {
 	private String logging;
 	private JobStatus status;
 	private User user;
+	private String triggerName;
 
 	public String getName() {
 		return name;
@@ -66,5 +67,13 @@ public class JobDescription {
 	
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public void setTriggerName(String triggerName) {
+		this.triggerName = triggerName;
+	}
+
+	public String getTriggerName() {
+		return this.triggerName;
 	}
 }

@@ -44,5 +44,14 @@
 			<description>The name of the document for the bean.</description>
 			<length>500</length>
 		</text>
+		<text name="triggerName" persistent="false">
+			<displayName>Trigger Name</displayName>
+			<length>100</length>
+		</text>
 	</attributes>
+	<conditions>
+		<condition name="cancellable">
+			<expression>getStatus() == null</expression>
+		</condition>
+	</conditions>
 </document>
