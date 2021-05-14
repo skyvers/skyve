@@ -34,7 +34,7 @@ SKYVE.PF = function() {
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
 			top.$('[id$="_' + binding + '"]').val(contentId);
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
-			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName);
+			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');
 			top.$('[id$="_' + binding + '_image"]').attr('src', url);
 			top.PF(binding + 'Overlay').hide();
 		},
@@ -46,7 +46,7 @@ SKYVE.PF = function() {
 		
 		clearContentLink: function(binding) {
 			$('[id$="_' + binding + '"]').val('');
-			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>');
+			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
 		},
 		
 		tabChange: function() {

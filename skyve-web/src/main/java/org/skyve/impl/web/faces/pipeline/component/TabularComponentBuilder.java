@@ -3626,6 +3626,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		outputText.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		result.getChildren().add(outputText);
 
+		expression = String.format("#{(empty %s.currentBean['%s']) ? 'return false' : null}", managedBeanName, binding);
+		result.setValueExpression("onclick", ef.createValueExpression(elc, expression, String.class));
+
 		result.setTarget("_blank");
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, null);
