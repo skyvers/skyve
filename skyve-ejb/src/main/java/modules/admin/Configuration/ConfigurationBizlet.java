@@ -59,7 +59,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			result.setStartup(startup);
 		}
 
-		return super.newInstance(result);
+		return result;
 	}
 
 	@Override
