@@ -116,6 +116,12 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String startupPropertyName = "startup";
 
+	/** @hidden */
+	public static final String availableDiskSpaceAlarmLevelPercentagePropertyName = "availableDiskSpaceAlarmLevelPercentage";
+
+	/** @hidden */
+	public static final String availableDiskSpaceAlarmLevelMBPropertyName = "availableDiskSpaceAlarmLevelMB";
+
 	/**
 	 * Password Complexity
 	 * <br/>
@@ -369,6 +375,20 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Startup
 	 **/
 	private StartupExtension startup = null;
+
+	/**
+	 * Available disk space alarm level as a percentage of total disk space
+	 * <br/>
+	 * When available disk space falls below either level, when the disk space check job is schedule, a notification will be sent to the support email address, (update the Disk Space Check Notification Communication to specify another receiver). If the job is configured without this value set, it will default to 10%.
+	 **/
+	private Integer availableDiskSpaceAlarmLevelPercentage;
+
+	/**
+	 * Available disk space alarm level in MB
+	 * <br/>
+	 * When available disk space falls below either level, when the disk space check job is schedule, a notification will be sent to the support email address, (update the Disk Space Check Notification Communication to specify another receiver). If the job is configured without this value set, it will default to 10%.
+	 **/
+	private Long availableDiskSpaceAlarmLevelMB;
 
 	@Override
 	@XmlTransient
@@ -848,6 +868,61 @@ public abstract class Configuration extends AbstractPersistentBean {
 			preset(startupPropertyName, startup);
 			this.startup = startup;
 		}
+	}
+
+	/**
+	 * {@link #availableDiskSpaceAlarmLevelPercentage} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getAvailableDiskSpaceAlarmLevelPercentage() {
+		return availableDiskSpaceAlarmLevelPercentage;
+	}
+
+	/**
+	 * {@link #availableDiskSpaceAlarmLevelPercentage} mutator.
+	 * @param availableDiskSpaceAlarmLevelPercentage	The new value.
+	 **/
+	@XmlElement
+	public void setAvailableDiskSpaceAlarmLevelPercentage(Integer availableDiskSpaceAlarmLevelPercentage) {
+		preset(availableDiskSpaceAlarmLevelPercentagePropertyName, availableDiskSpaceAlarmLevelPercentage);
+		this.availableDiskSpaceAlarmLevelPercentage = availableDiskSpaceAlarmLevelPercentage;
+	}
+
+	/**
+	 * {@link #availableDiskSpaceAlarmLevelMB} accessor.
+	 * @return	The value.
+	 **/
+	public Long getAvailableDiskSpaceAlarmLevelMB() {
+		return availableDiskSpaceAlarmLevelMB;
+	}
+
+	/**
+	 * {@link #availableDiskSpaceAlarmLevelMB} mutator.
+	 * @param availableDiskSpaceAlarmLevelMB	The new value.
+	 **/
+	@XmlElement
+	public void setAvailableDiskSpaceAlarmLevelMB(Long availableDiskSpaceAlarmLevelMB) {
+		preset(availableDiskSpaceAlarmLevelMBPropertyName, availableDiskSpaceAlarmLevelMB);
+		this.availableDiskSpaceAlarmLevelMB = availableDiskSpaceAlarmLevelMB;
+	}
+
+	/**
+	 * availableDiskSpaceAlarmConfigured
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isAvailableDiskSpaceAlarmConfigured() {
+		return (modules.admin.Configuration.ConfigurationExtension.validAvailableDiskSpaceAlarmSchedule());
+	}
+
+	/**
+	 * {@link #isAvailableDiskSpaceAlarmConfigured} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotAvailableDiskSpaceAlarmConfigured() {
+		return (! isAvailableDiskSpaceAlarmConfigured());
 	}
 
 	/**

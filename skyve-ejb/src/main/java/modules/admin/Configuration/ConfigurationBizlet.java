@@ -1,9 +1,11 @@
 package modules.admin.Configuration;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
@@ -20,7 +22,11 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
+		
+		// temporarily elevate access to find existing configuration for all users
+		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 		ConfigurationExtension result = super.newInstance(bean);
+		CORE.getPersistence().resetDocumentPermissionScopes();
 
 		// Set the user name and email to the logged in user (if logged in)
 		if (result.getStartup() == null) {

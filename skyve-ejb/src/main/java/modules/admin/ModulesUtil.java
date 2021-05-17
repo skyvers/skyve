@@ -60,6 +60,8 @@ import modules.admin.domain.UserProxy;
  */
 public class ModulesUtil {
 
+	public static final long MEGABYTE = 1024L * 1024L;
+
 	/** comparator to allow sorting of domain values by code */
 	public static class DomainValueSortByCode implements Comparator<DomainValue> {
 		@Override

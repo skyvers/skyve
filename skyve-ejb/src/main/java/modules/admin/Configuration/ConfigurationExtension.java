@@ -2,6 +2,12 @@ package modules.admin.Configuration;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import java.io.IOException;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,15 +15,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Util;
 
+import modules.admin.ModulesUtil;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.Generic;
 import modules.admin.domain.JobSchedule;
 
 public class ConfigurationExtension extends Configuration {
 
 	private static final long serialVersionUID = -5669557826609528645L;
 	private static final String BACKUP_JOB_NAME = ".jBackup";
+	private static final String AVAILABLE_DISK_SPACE_ALARM_JOB_NAME = ".jAvailableDiskSpaceAlarm";
 
 	/**
 	 * The minimum length for new usernames
@@ -155,6 +165,15 @@ public class ConfigurationExtension extends Configuration {
 		return  (q.beanResult() != null);
 	}
 
+	
+	public static boolean validAvailableDiskSpaceAlarmSchedule() {
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(JobSchedule.MODULE_NAME, JobSchedule.DOCUMENT_NAME);
+		q.getFilter().addNullOrEquals(JobSchedule.disabledPropertyName, Boolean.FALSE);
+		q.getFilter().addEquals(JobSchedule.jobNamePropertyName, JobSchedule.MODULE_NAME + AVAILABLE_DISK_SPACE_ALARM_JOB_NAME);
+		
+		return  (q.beanResult() != null);
+	}
+	
 	/**
 	 * Self registration is validly configured if:
 	 * - userSelfRegistrationGroup has been assigned, and
@@ -193,5 +212,56 @@ public class ConfigurationExtension extends Configuration {
 		}
 
 		return args.toArray();
+	}
+	
+	/**
+	 * Return a GENERIC with 
+	 *  - longInteger1 = available space in MB
+	 *  - longInteger2 = total space in MB
+	 *  - longInteger3 = available space as an integer percentage
+	 *  - markup1 = detailed summary
+	 * @param root
+	 * @return
+	 */
+	public Generic diskSpaceSummary() {
+
+		Generic diskSpaceSummary = Generic.newInstance();
+		
+		long totalSpace = 0;
+		long totalAvailable = 0;
+		long totalDiskUsageLevel = 0;
+		NumberFormat nf = NumberFormat.getNumberInstance();
+		StringBuilder summary = new StringBuilder();
+		for (Path root : FileSystems.getDefault().getRootDirectories()) {
+
+			summary.append("<p><strong>" + root + "</strong></p>");
+			try {
+				FileStore store = Files.getFileStore(root);
+				long usableSpace = store.getUsableSpace() / ModulesUtil.MEGABYTE;
+				long space = store.getTotalSpace() / ModulesUtil.MEGABYTE;
+
+				if (space != 0) {
+					long diskUsageLevel = (100 * usableSpace / space); // report in megabytes
+					summary.append("<p>Total=" + nf.format(space) + "MB, Available=" + nf.format(usableSpace) + "MB, Available Percentage=" + diskUsageLevel + "%</p>");
+					totalSpace += space;
+					totalAvailable += usableSpace;
+				}
+
+			} catch (IOException e) {
+				Util.LOGGER.severe("Error querying available disk space: " + e.toString());
+			}
+		}
+
+		// summary
+		summary.append("<p><strong>Summary</strong></p>");
+		totalDiskUsageLevel = (100 * totalAvailable / totalSpace);
+		summary.append("<p>Total=" + nf.format(totalSpace) + "MB, Available=" + nf.format(totalAvailable) + "MB, Available Percentage=" + totalDiskUsageLevel + "%</p>");
+		
+		diskSpaceSummary.setLongInteger1(totalAvailable);
+		diskSpaceSummary.setLongInteger2(totalSpace);
+		diskSpaceSummary.setLongInteger3(totalDiskUsageLevel);
+		diskSpaceSummary.setMarkup1(summary.toString());
+		
+		return diskSpaceSummary;
 	}
 }

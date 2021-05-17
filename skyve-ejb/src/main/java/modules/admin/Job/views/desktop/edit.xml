@@ -36,7 +36,7 @@
 		<row>
 			<item showLabel="false">
 				<!-- Log binding must NOT be indented as it is inside a pre tag -->
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						<pre>
 {log}

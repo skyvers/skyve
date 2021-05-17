@@ -5,6 +5,7 @@
 	
 	<component name="_emailNotConfiguredBanner" />
 	<component name="_backupsNotConfiguredBanner" />
+	<component name="_availableDiskSpaceAlarmNotConfiguredBanner" />
 	<component name="_selfRegistrationNotConfiguredBanner" />
 	
 	<form border="true" borderTitle="admin.configuration.edit.general.passwordComplexity.borderTitle">
@@ -111,4 +112,20 @@
 			</item>
 		</row>
 	</form>
+	
+	<form border="true" borderTitle="admin.configuration.edit.general.availableDiskSpaceAlarmLevel.borderTitle">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="3"/>
+		<column />
+		<row>
+			<item>
+				<default binding="availableDiskSpaceAlarmLevelPercentage" />
+			</item>
+			<item>
+				<default binding="availableDiskSpaceAlarmLevelMB" />
+			</item>
+		</row>
+	</form>
+	
 </view>
