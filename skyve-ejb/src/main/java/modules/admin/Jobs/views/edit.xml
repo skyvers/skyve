@@ -11,7 +11,6 @@
 				<boundColumn binding="startTime" title="admin.jobs.edit.dataGrid.runningJobs.startTime.title" />
 				<boundColumn binding="displayName" title="admin.jobs.edit.dataGrid.runningJobs.displayName.title" />
 				<boundColumn binding="percentComplete" title="admin.jobs.edit.dataGrid.runningJobs.percentComplete.title" />
-				<boundColumn binding="log" title="admin.jobs.edit.dataGrid.runningJobs.log.title" />
 			</dataGrid>
 			<listGrid query="qCompletedJobs" title="admin.jobs.edit.listGrid.qCompletedJobs.title" continueConversation="false" showAdd="false" />
 		</tab>
