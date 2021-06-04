@@ -50,6 +50,19 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 			throw new ValidationException(new Message(Util.i18n("admin.dataMaintenance.actions.restore.jobAlreadyRunningException")));
 		}
 		
+		if(bean.getContentRestoreOption()==null) {
+			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
+			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException"
+					, d.getAttribute(DataMaintenance.contentRestoreOptionPropertyName).getLocalisedDisplayName()); 
+			throw new ValidationException(DataMaintenance.contentRestoreOptionPropertyName, msg);
+		}
+		if(bean.getRestoreIndexingOption()==null) {
+			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
+			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException"
+					, d.getAttribute(DataMaintenance.restoreIndexingOptionPropertyName).getLocalisedDisplayName()); 
+			throw new ValidationException(DataMaintenance.restoreIndexingOptionPropertyName, msg);
+		}
+		
 		if (bean.getRestorePreProcess() == null) {
 			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
 			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectPreProcessException"
