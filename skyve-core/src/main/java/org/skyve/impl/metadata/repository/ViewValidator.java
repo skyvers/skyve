@@ -845,7 +845,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
-		validateBinding(null,
+		validateBinding(dataWidgetBinding,
 							geometry.getBinding(),
 							true,
 							false,
