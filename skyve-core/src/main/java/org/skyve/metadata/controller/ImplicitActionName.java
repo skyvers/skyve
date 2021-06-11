@@ -13,87 +13,87 @@ public enum ImplicitActionName {
 	/**
 	 * Produce default button for the view type
 	 */
-	DEFAULTS("Defaults"),
+	DEFAULTS("resources.implicitActionName.defaults"),
 	
 	/**
 	 * OK on edit view
 	 */
-	OK("OK"),
+	OK("resources.implicitActionName.ok"),
 	
 	/**
 	 * Save on edit view
 	 */
-	Save("Save"),
+	Save("resources.implicitActionName.save"),
 	
 	/**
 	 * Delete on edit view
 	 */
-	Delete("Delete"),
+	Delete("resources.implicitActionName.delete"),
 	
 	/**
 	 * Add on child edit view
 	 */
-	Add("Add"),
+	Add("resources.implicitActionName.add"),
 	
 	/**
 	 * Change on child edit view
 	 */
-	ZoomOut("Zoom Out"),
+	ZoomOut("resources.implicitActionName.zoomOut"),
 	
 	/**
 	 * Cancel on edit view and child edit view
 	 */
-	Cancel("Cancel"),
+	Cancel("resources.implicitActionName.cancel"),
 	
 	/**
 	 * Remove on child edit view
 	 */
-	Remove("Remove"),
+	Remove("resources.implicitActionName.remove"),
 	
 	/**
 	 * Add new item in list view
 	 */
-	New("New"),
+	New("resources.implicitActionName.new"),
 	
 	/**
 	 * Edit an item in list view
 	 */
-	Edit("Edit"),
+	Edit("resources.implicitActionName.edit"),
 	
 	/**
 	 * Fire up a report dialog from a button
 	 */
-	Report("Report"),
+	Report("resources.implicitActionName.report"),
 	
 	/**
 	 * Navigate to a binding within a conversation
 	 */
-	Navigate("Navigate"),
+	Navigate("resources.implicitActionName.navigate"),
 	
 	/**
 	 * Import data using the BizPort capability
 	 */
-	BizImport("Import"),
+	BizImport("resources.implicitActionName.import"),
 	
 	/**
 	 * Export data using the BizPort capability
 	 */
-	BizExport("Export"),
+	BizExport("resources.implicitActionName.export"),
 	
 	/**
 	 * Create and stream a file for Download
 	 */
-	Download("Download"),
+	Download("resources.implicitActionName.download"),
 
 	/**
 	 * Upload and process a file
 	 */
-	Upload("Upload"),
+	Upload("resources.implicitActionName.upload"),
 
 	/**
 	 * Prints the current view
 	 */
-	Print("Print");
+	Print("resources.implicitActionName.print");
 	
 	private String displayName;
 
