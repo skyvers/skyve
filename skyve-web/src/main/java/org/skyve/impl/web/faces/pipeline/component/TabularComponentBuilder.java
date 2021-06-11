@@ -2231,6 +2231,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
+			dialog.setHeader("Image Upload");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
 			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
 			panel = dialog;
@@ -2245,6 +2247,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
 			overlay.setStyle("width:50%;height:300px");
+			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
 			panel = overlay;
