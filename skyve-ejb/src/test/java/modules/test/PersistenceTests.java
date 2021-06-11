@@ -7,6 +7,9 @@ import java.util.List;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -15,6 +18,7 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 
@@ -935,5 +939,16 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		p.evictAllCached();
 		test = p.retrieve(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME, test.getBizId());
 		Assert.assertNull(test.getEmbeddedAssociation());
+	}
+	
+	@Test
+	public void testGeometry() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+
+		DocumentQuery q = p.newDocumentQuery(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		Polygon poly = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-180, -360), new Coordinate(-180, 360), new Coordinate(180, 360), new Coordinate(180, -360), new Coordinate(-180, -360)});
+		q.getFilter().addContains(AllAttributesPersistent.geometryPropertyName, poly);
+		q.beanResults();
 	}
 }
