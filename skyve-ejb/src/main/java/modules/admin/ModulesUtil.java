@@ -32,6 +32,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
@@ -733,7 +734,11 @@ public class ModulesUtil {
 			qN.getFilter().addEquals(DocumentNumber.documentNamePropertyName, documentName);
 			qN.getFilter().addEquals(DocumentNumber.sequenceNamePropertyName, fieldName);
 
+			//temporarily escalate access to the Document Number sequences
+			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 			List<DocumentNumber> num = qN.beanResults();
+			CORE.getPersistence().resetDocumentPermissionScopes();
+			
 			if (num.isEmpty()) {
 
 				// System.out.println("DOCUMENT NUMBER: No previous found - source from table");
