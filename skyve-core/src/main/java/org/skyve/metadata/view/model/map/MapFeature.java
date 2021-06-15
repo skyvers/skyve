@@ -8,7 +8,7 @@ public class MapFeature {
 	private boolean editable = false;
 	private String strokeColour;
 	private String fillColour;
-	private String fillOpacity;
+	private Float fillOpacity;
 	private String iconRelativeFilePath;
 	private Integer iconAnchorX;
 	private Integer iconAnchorY;
@@ -17,20 +17,20 @@ public class MapFeature {
 	}
 
 	public MapFeature(Geometry geometry,
-						boolean zoomable,
-						boolean editable,
-						String strokeColour,
-						String fillColour,
-						String fillOpacity,
-						String iconRelativeFilePath,
-						Integer iconAnchorX,
-						Integer iconAnchorY) {
+			boolean zoomable,
+			boolean editable,
+			String strokeColour,
+			String fillColour,
+			Float fillOpacity,
+			String iconRelativeFilePath,
+			Integer iconAnchorX,
+			Integer iconAnchorY) {
 		this.geometry = geometry;
 		this.zoomable = zoomable;
 		this.editable = editable;
 		this.strokeColour = strokeColour;
 		this.fillColour = fillColour;
-		this.fillOpacity = fillOpacity;
+		setFillOpacity(fillOpacity);
 		this.iconRelativeFilePath = iconRelativeFilePath;
 		this.iconAnchorX = iconAnchorX;
 		this.iconAnchorY = iconAnchorY;
@@ -76,12 +76,26 @@ public class MapFeature {
 		this.fillColour = fillColour;
 	}
 
-	public String getFillOpacity() {
+	public float getFillOpacity() {
 		return fillOpacity;
 	}
 
-	public void setFillOpacity(String fillOpacity) {
-		this.fillOpacity = fillOpacity;
+	/**
+	 * Set the fill opacity of this map feature. Expects a float between 0.0 (fully transparent) and 1.0 (fully opaque).
+	 * 
+	 * @param fillOpacity The fill opacity of the feature
+	 */
+	public void setFillOpacity(Float fillOpacity) {
+		if (fillOpacity != null) {
+			if (fillOpacity.floatValue() > 1.0) {
+				fillOpacity = 1.0f;
+			}
+			if (fillOpacity.floatValue() < 0.0) {
+				fillOpacity = 0.0f;
+			}
+
+			this.fillOpacity = fillOpacity;
+		}
 	}
 
 	public String getIconRelativeFilePath() {
