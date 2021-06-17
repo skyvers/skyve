@@ -199,7 +199,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 		if (header instanceof HtmlPanelGroup) { // flex grid inside column header
 			if (header.getChildCount() >= 2) { // add button is 2nd in the list if it exists
 				UIComponent addButton = header.getChildren().get(1);
-				if (addButton instanceof Button) { // there is an add button (might be no create privilege)
+				if ((addButton instanceof CommandButton) || (addButton instanceof Button)) { // there is an add button (might be no create privilege)
 					context.put(addedViewComponentIdentifier + ".new", addButton, addedViewComponent);
 				}
 			}
@@ -208,7 +208,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 			context.put(addedViewComponentIdentifier + ".new", header, addedViewComponent);
 		}
 		UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
-		if (zoomButton instanceof Button) {
+		if ((zoomButton instanceof CommandButton) || (zoomButton instanceof Button)) {
 			context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
 		}
 		context.put(addedViewComponentIdentifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
