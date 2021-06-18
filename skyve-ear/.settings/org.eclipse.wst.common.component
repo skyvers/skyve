@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                        
+                                            
+    
     
     
     
@@ -9,7 +10,8 @@
     
     
     <wb-module deploy-name="skyve-ear-7.1.0-SNAPSHOT">
-                                                                                
+                                                                                        
+        
         
         
         
@@ -19,7 +21,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                
+                                                                                        
+        
         
         
         
@@ -176,9 +179,6 @@
         <dependent-module archiveName="commons-logging-1.1.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="itext-2.1.7.js5.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/lowagie/itext/2.1.7.js5/itext-2.1.7.js5.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="jcommon-1.0.23.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jfree/jcommon/1.0.23/jcommon-1.0.23.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -302,7 +302,7 @@
         <dependent-module archiveName="animal-sniffer-annotations-1.17.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="json-sanitizer-1.2.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/mikesamuel/json-sanitizer/1.2.2/json-sanitizer-1.2.2.jar">
+        <dependent-module archiveName="json-sanitizer-1.2.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/mikesamuel/json-sanitizer/1.2.3/json-sanitizer-1.2.3.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="asm-5.0.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/ow2/asm/asm/5.0.4/asm-5.0.4.jar">
@@ -380,7 +380,38 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                            
+        <dependent-module archiveName="freemarker-2.3.29.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/freemarker/freemarker/2.3.29/freemarker-2.3.29.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="flying-saucer-core-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-core/9.1.18/flying-saucer-core-9.1.18.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="flying-saucer-pdf-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-pdf/9.1.18/flying-saucer-pdf-9.1.18.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="itext-2.1.7.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/lowagie/itext/2.1.7/itext-2.1.7.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="bcmail-jdk14-1.60.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bcmail-jdk14/1.60/bcmail-jdk14-1.60.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="bcpkix-jdk14-1.60.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bcpkix-jdk14/1.60/bcpkix-jdk14-1.60.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="bctsp-jdk14-1.46.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bctsp-jdk14/1.46/bctsp-jdk14-1.46.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="bcprov-jdk14-1.60.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bcprov-jdk14/1.60/bcprov-jdk14-1.60.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="flying-saucer-swt-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-swt/9.1.18/flying-saucer-swt-9.1.18.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="cron-utils-9.0.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/cronutils/cron-utils/9.0.1/cron-utils-9.0.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+                                                                                    
+    
     
     
     
@@ -390,7 +421,8 @@
     
     
     </wb-module>
-                                    
+                                        
+
 
 
 
