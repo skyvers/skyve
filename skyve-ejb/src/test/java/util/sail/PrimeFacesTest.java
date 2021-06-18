@@ -19,7 +19,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		driver.get(baseUrl + url);
 		waitForFullPageResponse(viewState);
 	}
-	
+
 	protected void tab(String id) {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
 		WebElement element = byXpath(xpath);
@@ -28,7 +28,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			waitForAjaxResponse();
 		}
 	}
-	
+
 	protected void step(String id) {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
 		WebElement element = byXpath(xpath);
@@ -37,30 +37,34 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			waitForAjaxResponse();
 		}
 	}
-	
-    protected void login(String customer, String username, String password) throws Exception {        
-        driver.get(baseUrl);
 
-        if (customer != null) {
-            driver.findElement(By.name("customer")).clear();
-            driver.findElement(By.name("customer")).sendKeys(customer);
-        }
-        
-        driver.findElement(By.name("user")).clear();
-        driver.findElement(By.name("user")).sendKeys(username);
+	protected void login(String customer, String username, String password) throws Exception {
+		driver.get(baseUrl);
 
-        driver.findElement(By.name("password")).clear();
-        driver.findElement(By.name("password")).sendKeys(password);
-     
-        driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();        
-    }
-    
-    protected void logout() {
-    	driver.get(baseUrl + "loggedOut");
+		WebElement element = null;
+		if (customer != null) {
+			element = driver.findElement(By.name("customer"));
+			element.clear();
+			element.sendKeys(customer);
+		}
+
+		element = driver.findElement(By.name("user"));
+		element.clear();
+		element.sendKeys(username);
+
+		element = driver.findElement(By.name("password"));
+		element.clear();
+		element.sendKeys(password);
+
+		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
+	}
+
+	protected void logout() {
+		driver.get(baseUrl + "loggedOut");
 		WebDriverWait wait = new WebDriverWait(driver, 10);
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
-    }
-    
+	}
+
 	protected void checkbox(String id, Boolean value) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -101,15 +105,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected void _input(String id, String value) {
 		text(String.format("%s_input", id), value);
 	}
-	
+
 	protected void text(String id, String value) {
 		boolean success = false;
 		while (! success) {
 			WebElement element = byId(id);
-			if ((element != null) &&
-					element.isDisplayed() &&
+			if ((element != null) && 
+					element.isDisplayed() && 
 					element.isEnabled() &&
-					(element.getAttribute("disabled") == null) &&
+					(element.getAttribute("disabled") == null) && 
 					(element.getAttribute("readonly") == null)) {
 				try {
 					element.clear();
@@ -137,13 +141,12 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				element = byXpath("//label[@for='" + id + ":" + index + "']");
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 					click(element);
-					
 					waitForAjaxResponse();
 				}
 			}
 		}
 	}
-	
+
 	protected void selectOne(String id, int index) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -156,7 +159,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					// Wait for pick list drop down
 					By panelXpath = By.id(String.format("%s_panel", id));
 					WebDriverWait wait = new WebDriverWait(driver, 1);
-					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath), 
+					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
 														ExpectedConditions.visibilityOfElementLocated(panelXpath),
 														ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
 
@@ -174,16 +177,16 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 
 						// Wait for pick list drop down to disappear (opacity is taken into account)
 						wait = new WebDriverWait(driver, 1);
-						wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath), 
+						wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
 															ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
-						
+
 						waitForAjaxResponse();
 					}
 				}
 			}
 		}
 	}
-	
+
 	protected void button(String id, boolean ajax, boolean confirm) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -209,7 +212,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
-	
+
 	protected void redirectButton(String id, boolean confirm) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -228,7 +231,8 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				}
 				try {
 					Thread.sleep(250);
-				} catch (@SuppressWarnings("unused") InterruptedException e) {
+				}
+				catch (@SuppressWarnings("unused") InterruptedException e) {
 					// nothing to do here
 				}
 				waitForFullPageResponse(viewState);
@@ -246,15 +250,16 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 //				Actions clicker = new Actions(driver);
 //				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
 				click(element);
-				
+
 				// Wait for pick list drop down - can be a span or div depending on theme
 				By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 				WebDriverWait wait = new WebDriverWait(driver, 30);
-				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
+				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
 													ExpectedConditions.visibilityOfElementLocated(xpath)));
-				
+
 				// Select the row
-				// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+				// NB could be <div><div><ul><li> or <span><ul><li>
+				// in the middle means find the <ul> anywhere below
 				element = byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row + 1)));
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 					// Scroll the drop down panel so the item is visible
@@ -265,7 +270,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
-	
+
 	protected void lookupDescription(String id, String search) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -274,11 +279,12 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			// Wait for pick list drop down - can be a span or div depending on theme
 			By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
 			WebDriverWait wait = new WebDriverWait(driver, 30);
-			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath), 
+			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
 												ExpectedConditions.visibilityOfElementLocated(xpath)));
 
 			// Select the first row
-			// NB could be <div><div><ul><li> or <span><ul><li>, the // in the middle means find the <ul> anywhere below
+			// NB could be <div><div><ul><li> or <span><ul><li>
+			// in the middle means find the <ul> anywhere below
 			element = byXpath(String.format("//*[@id='%s_panel']//ul/li", id));
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				click(element);
@@ -286,7 +292,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
-	
+
 	protected void dataGridButton(String dataGridId, String buttonId, boolean ajax) {
 		// check data grid is present
 		WebElement element = byId(dataGridId);
@@ -309,7 +315,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
-	
+
 	protected void dataGridSelect(String dataGridId, int row) {
 		// check list grid is present
 		WebElement element = byId(dataGridId);
@@ -343,7 +349,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
-	
+
 	protected void listGridSelect(String listGridId, int row) {
 		// check list grid is present
 		WebElement element = byId(listGridId);
@@ -354,7 +360,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			waitForAjaxResponse();
 		}
 	}
-	
+
 	protected boolean verifySuccess() {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
@@ -370,11 +376,11 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 
 		return true;
 	}
-	
+
 	protected void assertSuccess() {
 		Assert.assertTrue("Not successful", verifySuccess());
 	}
-	
+
 	protected boolean verifyFailure(String messageToCheck) {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
@@ -393,17 +399,17 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				System.err.println("**************");
 			}
 		}
-		
+
 		System.err.println("**************");
 		System.err.println("Not successful - no error or fatal messages.");
 		System.err.println("**************");
 		return false;
 	}
-	
+
 	protected boolean verifyFailure() {
 		return verifyFailure(null);
 	}
-	
+
 	protected void assertFailure(String messageToCheck) {
 		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
 	}
@@ -417,7 +423,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		By id = By.id("confirmOK");
 		WebDriverWait wait = new WebDriverWait(driver, 2);
 		try {
-			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(id), 
+			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(id),
 												ExpectedConditions.visibilityOfElementLocated(id)));
 		}
 		catch (RuntimeException e) {
@@ -426,7 +432,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 		click(byId("confirmOK"));
 	}
-	
+
 	protected void waitForAjaxResponse() {
 		// Wait until busy is invisible after AJAX
 		WebElement element = byId("busy");
@@ -435,12 +441,12 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			wait.until(ExpectedConditions.invisibilityOf(element));
 		}
 	}
-	
+
 	protected void waitForFullPageResponse(String oldViewState) {
 		WebDriverWait wait = new WebDriverWait(driver, 30);
 		try {
 			wait.ignoring(StaleElementReferenceException.class)
-				.until(d -> ((getViewState() == null) || getViewState().equals(oldViewState)) ? Boolean.FALSE : Boolean.TRUE);
+					.until(d -> ((getViewState() == null) || getViewState().equals(oldViewState)) ? Boolean.FALSE : Boolean.TRUE);
 		}
 		catch (RuntimeException e) {
 			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState);
@@ -449,29 +455,29 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		wait = new WebDriverWait(driver, 5);
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 	}
-	
+
 	@SuppressWarnings("static-method")
 	protected void trace(String comment) {
 		System.out.println(comment);
 	}
-	
+
 	protected String getViewState() {
 		String result = null;
-		
+
 		WebElement element = byName("javax.faces.ViewState");
 		if (element != null) {
 			result = element.getAttribute("value");
 		}
-		
+
 		return result;
 	}
-	
+
 	protected void click(WebElement element) {
 		try {
 			element.click();
 		}
 		// This could occur when the control is behind a floating element
-		// So scroll to the top of the page and see if the element can be made visible 
+		// So scroll to the top of the page and see if the element can be made visible
 		catch (@SuppressWarnings("unused") WebDriverException e) {
 			JavascriptExecutor js = (JavascriptExecutor) driver;
 			try {
@@ -487,6 +493,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			}
 		}
 	}
+
 	protected List<WebElement> byClass(String className) {
 		try {
 			return driver.findElements(By.className(className));
@@ -504,7 +511,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			return null;
 		}
 	}
-	
+
 	protected WebElement byId(String id) {
 		try {
 			WebElement result = driver.findElement(By.id(id));
@@ -525,7 +532,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			return byId(id);
 		}
 	}
-	
+
 	protected WebElement byXpath(String xpath) {
 		try {
 			WebElement result = driver.findElement(By.xpath(xpath));
@@ -546,7 +553,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			return byXpath(xpath);
 		}
 	}
-	
+
 	protected WebElement byName(String name) {
 		try {
 			WebElement result = driver.findElement(By.name(name));
@@ -568,9 +575,9 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 
-/*	
+	/*
 	By.linkText(linkText)
 	By.partialLinkText(linkText)
 	By.tagName(name)
-*/
+	 */
 }

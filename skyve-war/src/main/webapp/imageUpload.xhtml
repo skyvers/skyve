@@ -4,13 +4,13 @@
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
-		dir="#{_skyveContent.dir}">
-    <f:view contentType="text/html" encoding="#{_skyveContent.encoding}">
+		dir="#{_skyveImage.dir}">
+    <f:view contentType="text/html" encoding="#{_skyveImage.encoding}">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{_skyveContent.preRender}" />
+			<f:event type="preRenderView" listener="#{_skyveImage.preRender}" />
 		</f:metadata>
 		<h:head>
-			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<title>#{_skyveImage.i18n['page.contentUpload.title']}</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -123,17 +123,21 @@
 		</h:head>
 		<h:body style="height:2000px">
 			<h:form id="form" enctype="multipart/form-data" prependId="false">
-				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
-				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
-				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
+				<h:inputHidden id="_c" value="#{_skyveImage.context}" />
+				<h:inputHidden id="_b" value="#{_skyveImage.binding}" />
+				<h:inputHidden id="_n" value="#{_skyveImage.contentBinding}" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
 				<p:fileUpload id="upload"
-								listener="#{_skyveContent.handleFileUpload}" 
+								listener="#{_skyveImage.handleFileUpload}" 
 								accept="image/*"
 								update="messages"
 								multiple="false"
 								fileLimit="1"
-								fileLimitMessage="#{_skyveContent.i18n['page.contentUpload.error']}"
+								fileLimitMessage="#{_skyveImage.i18n['page.contentUpload.fileLimit']}"
+								sizeLimit="#{_skyveImage.maximumSizeInBytes}"
+								invalidSizeMessage="#{_skyveImage.i18n['page.contentUpload.sizeLimit']}"
+								allowTypes="#{'/'.concat(_skyveImage.whitelistRegex).concat('/i')}"
+								invalidFileMessage="#{_skyveImage.i18n['page.contentUpload.invalidFile']}"
 								uploadIcon="fa fa-upload"
 								cancelIcon="fa fa-ban" />
 				<!-- This button is moved into the upload button bar on document load -->

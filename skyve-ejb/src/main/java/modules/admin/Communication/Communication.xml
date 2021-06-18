@@ -181,13 +181,6 @@
 			<description>admin.communication.batch.description</description>
 			<length>14</length>
 		</text>
-
-		<inverseMany name="subscriptions">
-			<displayName>admin.communication.subscriptions.displayName</displayName>
-			<documentName>Subscription</documentName>
-			<referenceName>communication</referenceName>
-		</inverseMany>
-		
 	</attributes>
 	<conditions>
 		<condition name="showBatches">

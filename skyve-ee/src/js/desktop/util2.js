@@ -14,6 +14,14 @@ isc.RPCManager.handleError = function (response, request) {
 
 	return this.Super("handleError", arguments);
 };
+// Remove popup login so CSRF Tokens are purged by a full page refresh
+isc.RPCManager.addClassMethods({
+	// callback from smart client login system
+	loginRequired: function(transactionNum, rpcRequest, rpcResponse) {
+		window.location.assign(SKYVE.Util.CONTEXT_URL);
+	}
+});
+
 Date.setShortDisplayFormat("toEuropeanShortDate");
 Date.setNormalDisplayFormat("toEuropeanShortDate");
 Date.setInputFormat("DMY");
@@ -243,7 +251,11 @@ isc.BizUtil.addClassMethods({
 				(type == 'datetime') || 
 				(type == 'bizDate') ||
 				(type == 'bizTime') ||
-				type.startsWith('DD_');
+				type.startsWith('DD_MM') ||
+				type.startsWith('MM_DD') ||
+				type.startsWith('MMM_DD') ||
+				type.startsWith('HH_MI') ||
+				type.startsWith('HH24_MI');
 	},
 	
 	// Change something like [{name: 'poo', operator: 'equals', value 'wee'}] filter params to 

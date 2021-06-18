@@ -43,7 +43,9 @@
 				<!-- static utility functions -->
 				<file name="util2.js" />
 				<!-- enable callback on smart client's RPC system to login -->
+<!--
 				<file name="reloginFlow.js" />
+-->
 				<!-- basic bizhub types and their editors -->
 				<file name="types.js" />
 				<!-- bizhub modal windows -->

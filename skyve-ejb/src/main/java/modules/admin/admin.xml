@@ -17,6 +17,7 @@
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
+		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -68,17 +69,11 @@
 		<role name="Anonymous">
 			<description>admin.adminRoles.anonymous.description</description>
 			<privileges>
-				<document name="Communication" permission="_R__G"/>
-				<document name="CommunicationTemplate" permission="_R__G"/>
-				<document name="Configuration" permission="_R__C" />				
-				<document name="DocumentNumber" permission="CRU_C" />
-				<document name="Generic" permission="CRUDG"/>
 				<document name="SelfRegistration" permission="_____">
 					<action name="Register" />
 				</document>
 				<document name="SelfRegistrationActivation" permission="_____"/>
-				<document name="Subscription" permission="CRUDG"/>
-				<document name="User" permission="_R__C" />				
+				<document name="Subscription" permission="_____"/>
 			</privileges>
 		</role>
 		<role name="AppUser">
@@ -301,7 +296,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Generic" permission="CRUDG"/>
-				<document name="Job" permission="CRUDC" />
+				<document name="Job" permission="CRUDC">
+					<action name="CancelJob" />
+				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
 					<action name="Refresh" />
@@ -495,14 +492,10 @@
 		</group>
 		<list document="Snapshot" name="admin.adminMenu.snapshots.list.displayName">
 			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list document="Tag" name="admin.adminMenu.tags.list.displayName">
 			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
@@ -732,11 +725,19 @@
 			<description>Communications</description>
 			<columns>
 				<column binding="description" sortOrder="ascending" />
-				<column binding="documentName" />
 				<column binding="subject" />
+				<column binding="systemUse"/>
 				<column binding="template.bizKey"/>
 			</columns>
 		</query>
+		<query name="qCommunicationsForTemplate" documentName="Communication">
+			<description>Communication Templates</description>
+			<columns>
+				<column binding="description" sortOrder="ascending" />
+				<column binding="subject" />
+				<column binding="systemUse"/>
+			</columns>
+		</query>		
 		<query name="qCommunicationTemplate" documentName="CommunicationTemplate">
 			<description>Communication Templates</description>
 			<columns>

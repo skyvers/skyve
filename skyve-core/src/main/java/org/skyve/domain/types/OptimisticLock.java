@@ -2,7 +2,9 @@ package org.skyve.domain.types;
 
 import java.io.Serializable;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -14,7 +16,8 @@ public class OptimisticLock implements Serializable {
 	private static final long serialVersionUID = -188896815713122L;
 
 	private static final String LOCK_TIMESTAMP_FORMAT = "yyyyMMddHHmmssSSS";
-
+	private static final TimeZone LOCK_TIMEZONE = TimeZone.getTimeZone("UTC");
+	
 	private String lockUsername;
 
 	private Date lockTimestamp;
@@ -48,7 +51,9 @@ public class OptimisticLock implements Serializable {
 		
 		this.lockUsername = lockString.substring(17);
 		try {
-			this.lockTimestamp = CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT).parse(lockString.substring(0, 17));
+			SimpleDateFormat format = CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT);
+			format.setTimeZone(LOCK_TIMEZONE);
+			this.lockTimestamp = format.parse(lockString.substring(0, 17));
 		}
 		catch (ParseException e) {
 			throw new DomainException("Exception parsing " + lockString, e);
@@ -60,7 +65,9 @@ public class OptimisticLock implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT).format(lockTimestamp) + lockUsername;
+		SimpleDateFormat format = CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT);
+		format.setTimeZone(LOCK_TIMEZONE);
+		return format.format(lockTimestamp) + lockUsername;
 	}
 
 	/**

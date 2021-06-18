@@ -8,6 +8,7 @@
 	<iconStyleClass>fa fa-user</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
+	<bizKey expression="User List"/>
 	<attributes>
 		<collection name="userInvitationGroups" type="aggregation">
 			<displayName>User Invitation Groups</displayName>

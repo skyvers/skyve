@@ -85,7 +85,6 @@
 		<script type="text/javascript" src="prime/skyve-min.js"></script>
 
 		<script type="text/javascript">
-			<!--
 			function testMandatoryFields(form) {
 				if($('.ui.form').form('is valid')) {
 					var hidden = document.createElement('input');
@@ -136,7 +135,6 @@
 			    });
 			    SKYVE.Util.setTouchCookie();
 			});
-			-->
 		</script>
 	</head>
 	<body onload="document.forms['loginForm'].elements['<%=(customer == null) ? customerFieldName : userFieldName%>'].focus()">
@@ -209,7 +207,7 @@
 		                    <div class="ui left icon input">
 	                    	<% if(allowRegistration) { %>
 	                    		<i class="envelope icon"></i>
-	                    		<input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.email.label", locale)%>">
+	                    		<input type="text" inputmode="email" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.email.label", locale)%>">
 	                    	<% } else { %>
 		                        <i class="user icon"></i>
 		                        <input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.user.label", locale)%>">

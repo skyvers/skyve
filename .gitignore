@@ -1,3 +1,7 @@
 org.eclipse.core.resources.prefs
 org.eclipse.jdt.core.prefs
+<<<<<<< HEAD
 .idea
+=======
+skyve-war/.settings
+>>>>>>> refs/heads/master

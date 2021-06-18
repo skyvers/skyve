@@ -125,7 +125,7 @@
 		    	</div>
 		    	
 		    	<% if (postback) { %>
-			    	<form class="ui large form">
+			    	<div class="ui large form">
 			            <div class="ui segment">
 			            	<div class="ui header">
 			            		<%=Util.i18n("page.requestPasswordReset.complete.banner", locale)%>
@@ -135,7 +135,7 @@
 			            	</div>
 			            	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 			            </div>
-			        </form>
+			        </div>
 		    	<% } else { %>
 		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 			    		<div class="ui segment">

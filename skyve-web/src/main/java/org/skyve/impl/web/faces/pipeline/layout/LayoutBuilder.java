@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 
 public abstract class LayoutBuilder extends AbstractFacesBuilder {
@@ -75,6 +76,8 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												boolean widgetRequired,
 												String widgetInvisible,
 												String widgetHelpText);
+	
+	public abstract UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature);
 	
 	/**
 	 * 

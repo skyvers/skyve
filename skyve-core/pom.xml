@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>7.1.0-SNAPSHOT</version>
+		<version>7.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-core</artifactId>
 
@@ -54,7 +54,11 @@
 			<artifactId>generex</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>net.gcardone.junidecode</groupId>
+			<artifactId>junidecode</artifactId>
+ 			<scope>compile</scope>
+ 		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>

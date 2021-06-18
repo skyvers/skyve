@@ -73,6 +73,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -695,11 +696,11 @@ class ViewJSONManipulator extends ViewVisitor {
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
 					binding.endsWith(Bean.ORDINAL_NAME)) {
 //UtilImpl.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
-				BindUtil.populateProperty(user, 
-											targetBean, 
-											binding, 
-											values.get(valueKey), 
-											true);
+				Object value = values.get(valueKey);
+				if (value instanceof String) {
+					value = OWASP.unescapeHtmlChars((String) value);
+				}
+				BindUtil.populateProperty(user, targetBean, binding, value, true);
 			}
 		}
 		catch (MetaDataException e) {
@@ -1112,6 +1113,24 @@ class ViewJSONManipulator extends ViewVisitor {
 			addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
 			addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 		}
+	}
+
+	@Override
+	public void visitContentSignature(ContentSignature signature,
+										boolean parentVisible, 
+										boolean parentEnabled) {
+		// TODO not implemented for SC yet - use ContentImage
+		if (parentVisible && visible(signature)) {
+			if ((! forApply) || (forApply && parentEnabled)) {
+				addBinding(signature.getBinding(), true, false, Sanitisation.text);
+			}
+		}
+		addCondition(signature.getInvisibleConditionName());
+		addCondition(signature.getDisabledConditionName());
+		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
+		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
+		addBinding(Bean.USER_ID, false, false, Sanitisation.text);
 	}
 
 	@Override
@@ -1572,7 +1591,8 @@ class ViewJSONManipulator extends ViewVisitor {
 						parentEnabled && 
 						visitedDataWidgetHasEditableColumns && 
 						(! Boolean.FALSE.equals(column.getEditable())))) {
-				addBinding(column.getBinding(), true, ! Boolean.FALSE.equals(column.getEscape()), column.getSanitise());
+				// Note that HTML escaping is taken care by SC client-side for data grid columns
+				addBinding(column.getBinding(), true, false, column.getSanitise());
 			}
 		}
 	}

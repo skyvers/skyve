@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.security.SecureRandom;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
+import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageException;
@@ -18,6 +21,8 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -58,6 +63,22 @@ public class SmartClientSnapServlet extends HttpServlet {
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
+    	// Send CSRF Token as a response header (must be done before getting the writer)
+		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
+		Integer newCsrfToken = currentCsrfToken;
+		String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
+		// If this is a mutating request, we'll definitely need a new CSRF Token
+		if ("L".equals(action)) {
+			if (newCsrfToken == null) {
+				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			}
+		}
+		else {
+			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+		}
+    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
+
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
@@ -72,10 +93,10 @@ public class SmartClientSnapServlet extends HttpServlet {
 					}
 	
 					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
-					String action = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("a")));
 					String snapId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("i")));
 					String snapName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
-					String snapshot = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("s")));
+					// Dont sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
+					String snapshot = Util.processStringValue(request.getParameter("s"));
 					String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 
 					String moduleName = null;
@@ -87,24 +108,35 @@ public class SmartClientSnapServlet extends HttpServlet {
 						queryName = tokens[1];
 					}
 
+					HttpSession session = request.getSession();
+
 					if ("L".equals(action)) {
 						list(snapId, menuButtonId, moduleName, queryName, sb);
 					}
 					else if ("U".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						update(snapId, snapshot);
 					}
 					else if ("N".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+
 						snapId = create(moduleName, queryName, snapName, snapshot);
 						sb.append("{bizId:'");
 						sb.append(snapId);
 						sb.append("'}");
 					}
 					else if ("D".equals(action)) {
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+
 						delete(snapId);
 					}
 
 					pw.append(sb);
 					pw.flush();
+					
+					// Replace CSRF token
+					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();

@@ -215,7 +215,7 @@
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
 			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa fa-toggle-left" />
-		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.trucate.confirm"
+		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncate.confirm"
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" />
 		<action className="TruncateAuditLog" displayName="admin.dataMaintenance.actions.truncateLog.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncateLog.confirm" 
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" disabled="jobCommenced" />
@@ -236,7 +236,7 @@
 		
 		<!-- Only required for migration from legacy versions -->
 		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" visible="false" />
-		<action className="MigrateContent" displayName="admin.dataMaintenance.actions.migrateContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.acitons.migrateContent.confirm" visible="false" />
+		<action className="MigrateContent" displayName="admin.dataMaintenance.actions.migrateContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.migrateContent.confirm" visible="false" />
 		<action className="MigrateContentFiles" displayName="admin.dataMaintenance.actions.migrateContentFiles.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.migrateContentFiles.confirm" visible="false" />
 	</actions>
 </view>

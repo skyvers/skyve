@@ -1,6 +1,6 @@
 package org.skyve.impl.script;
 
-import static org.skyve.impl.script.SkyveScriptInterpreter.toTitleCase;
+import static org.skyve.impl.bind.BindUtil.toTitleCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;

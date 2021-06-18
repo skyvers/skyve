@@ -166,7 +166,7 @@
 						<button action="DownloadResults"/>
 					</item>
 					<item>
-						<blurb>
+						<blurb escape="false">
 							<![CDATA[
 								<pre>
 									{results}
@@ -180,7 +180,7 @@
 				<column />
 				<row>
 					<item>
-						<blurb>
+						<blurb escape="false">
 							<![CDATA[
 								<pre>
 									{results}

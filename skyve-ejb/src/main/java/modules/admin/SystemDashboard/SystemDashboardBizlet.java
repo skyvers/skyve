@@ -65,9 +65,28 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 				: formatStringValueHTML(valDisabled,
 						Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured.suggestion")));
 		bean.getStatus().add(schedulerEnabled);
+		
+		// available disk space alarm enabled
+		Generic availableDiskSpaceAlarmScheduled = Generic.newInstance();
+		availableDiskSpaceAlarmScheduled.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.availableDiskSpaceAlarmScheduled")));
+		if (jobScheduler) {
+			availableDiskSpaceAlarmScheduled.setText5001(formatBooleanHTML(ConfigurationExtension.validAvailableDiskSpaceAlarmSchedule(), valTrue, valFalse,
+					Util.i18n("admin.systemDashboard.status.itemLabel.availableDiskSpaceAlarm.suggestion")));
+		} else {
+			availableDiskSpaceAlarmScheduled.setText5001(formatStringValueHTML(valUnavailable,
+					Util.i18n("admin.systemDashboard.status.itemLabel.availableDiskSpaceAlarm.suggestion")));
+		}
+		bean.getStatus().add(availableDiskSpaceAlarmScheduled);
 
-		// self registration activated
 		ConfigurationExtension config = Configuration.newInstance();
+		// current available disk space 
+		Generic availableDiskSpace = Generic.newInstance();
+		Generic diskSpaceSummary = config.diskSpaceSummary();
+		availableDiskSpace.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.availableDiskSpaceMB")));
+		availableDiskSpace.setText5001(formatStringValueHTML(Long.toString(diskSpaceSummary.getLongInteger1()), ""));
+		bean.getStatus().add(availableDiskSpace);
+		
+		// self registration activated
 		Generic selfRegConfigured = Generic.newInstance();
 		selfRegConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.selfRegistrationConfigured")));
 		selfRegConfigured.setText5001((config.validSelfRegistration() ? formatBooleanHTML(true, valTrue, valFalse, "")

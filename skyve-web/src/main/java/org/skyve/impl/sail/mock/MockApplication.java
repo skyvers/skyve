@@ -77,6 +77,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectmanycheckbox.SelectManyCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
+import org.primefaces.component.signature.Signature;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
@@ -139,7 +140,13 @@ public class MockApplication extends Application {
 			return new DataList();
 		}
 		else if (DataTable.COMPONENT_TYPE.equals(componentType)) {
-			return new DataTable();
+			return new DataTable() {
+				@Override
+				protected FacesContext getFacesContext() {
+			    	// work around FacesContext.getCurrentInstance().
+					return new MockFacesContext();
+				}
+			};
 		}
 		else if (DefaultCommand.COMPONENT_TYPE.equals(componentType)) {
 			return new DefaultCommand();
@@ -178,7 +185,13 @@ public class MockApplication extends Application {
 			return new HtmlOutputText();
 		}
 		else if (HtmlPanelGrid.COMPONENT_TYPE.equals(componentType)) {
-			return new HtmlPanelGrid();
+			return new HtmlPanelGrid() {
+			    @Override
+				public String getClientId() {
+			    	// work around FacesContext.getCurrentInstance().
+			    	return getId();
+			    }
+			};
 		}
 		else if (HtmlPanelGroup.COMPONENT_TYPE.equals(componentType)) {
 			// Override getClientId() as Map components need DIV client IDs to attach Javascript to.
@@ -305,6 +318,9 @@ public class MockApplication extends Application {
 		}
 		else if (View.COMPONENT_TYPE.equals(componentType)) {
 			return new View();
+		}
+		else if (Signature.COMPONENT_TYPE.equals(componentType)) {
+			return new Signature();
 		}
 		throw new FacesException("MockApplication.createComponent() does not cater for componentType " + componentType);
 	}

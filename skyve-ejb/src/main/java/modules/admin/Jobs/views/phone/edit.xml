@@ -5,7 +5,6 @@
 		<boundColumn binding="startTime" title="Start Time" />
 		<boundColumn binding="displayName" title="Name" />
 		<boundColumn binding="percentComplete" title="Percent Complete" />
-		<boundColumn binding="log" title="Log" />
 	</dataGrid>
 	<actions>
 		<action className="Refresh" displayName="Refresh" relativeIconFileName="shared/icons/Globe.gif" />

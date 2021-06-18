@@ -304,7 +304,7 @@ public class SkyveScriptInterpreter {
 						moduleName = BindUtil.toJavaInstanceIdentifier(moduleTitle).toLowerCase();
 					} else {
 						moduleName = text.getLiteral().toLowerCase();
-						moduleTitle = toTitleCase(moduleName);
+						moduleTitle = Binder.toTitleCase(moduleName);
 					}
 
 					currentModule.setName(moduleName);
@@ -330,7 +330,7 @@ public class SkyveScriptInterpreter {
 						documentName = BindUtil.toJavaTypeIdentifier(singularAlias);
 					} else {
 						documentName = text.getLiteral().trim();
-						singularAlias = toTitleCase(documentName);
+						singularAlias = Binder.toTitleCase(documentName);
 					}
 
 					if (documentName != null) {
@@ -583,7 +583,7 @@ public class SkyveScriptInterpreter {
 				name = BindUtil.toJavaInstanceIdentifier(displayName);
 			} else {
 				name = attributeName;
-				displayName = toTitleCase(name);
+				displayName = Binder.toTitleCase(name);
 			}
 
 			Field field = null;
@@ -922,7 +922,7 @@ public class SkyveScriptInterpreter {
 			String moduleName = null, moduleTitle = null;
 
 			moduleName = defaultModule;
-			moduleTitle = toTitleCase(moduleName);
+			moduleTitle = Binder.toTitleCase(moduleName);
 
 			currentModule.setName(moduleName);
 			currentModule.setTitle(moduleTitle);
@@ -1200,44 +1200,5 @@ public class SkyveScriptInterpreter {
 		}
 
 		return parts;
-	}
-
-	/**
-	 * Fashion a title case identifier from the given string.
-	 * 
-	 * @param string The string to convert
-	 * @return A title case string. First letter of each word upper cased with spaces between words.
-	 */
-	public static String toTitleCase(String string) {
-		String javaIdentifierName = BindUtil.toJavaTypeIdentifier(string);
-		StringBuilder sb = new StringBuilder(javaIdentifierName.length() + 5);
-
-		for (int i = 0, l = javaIdentifierName.length(); i < l; i++) {
-			char ch = javaIdentifierName.charAt(i);
-			if (Character.isUpperCase(ch)) {
-				boolean nextCharLowerCase = false;
-				boolean prevCharLowerCase = false;
-				int nextIndex = i + 1;
-				int prevIndex = i - 1;
-				if (nextIndex < l) {
-					char nextChar = javaIdentifierName.charAt(nextIndex);
-					nextCharLowerCase = Character.isLowerCase(nextChar);
-				}
-				if (prevIndex >= 0) {
-					char prevChar = javaIdentifierName.charAt(prevIndex);
-					prevCharLowerCase = Character.isLowerCase(prevChar);
-				}
-
-				// if the previous char was upper case then don't add a space
-				if ((prevCharLowerCase || nextCharLowerCase) && (i > 0)) {
-					sb.append(' ');
-				}
-				sb.append(ch);
-			} else {
-				sb.append(ch);
-			}
-		}
-
-		return sb.toString();
 	}
 }

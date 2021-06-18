@@ -69,8 +69,23 @@ public class FacesUtil {
 		}
 	}
 	
+	// Use this only when there may be no faces context (ie view has expired)
+	// otherwise should use FacesContext.getCurrentInstance().getExternalContext().redirect();
+	public static String xmlPartialRedirect(String url) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+		sb.append("<partial-response><redirect url=\"").append(url.replace("&", "&amp;")).append("\"/></partial-response>");
+		return sb.toString();
+	}
+
     public static boolean isAjax(HttpServletRequest request) {
         return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+    }
+    
+	private static final String PRIMEFACES_IGNORE_AUTO_UPDATE = "primefaces.ignoreautoupdate";
+	
+    public static boolean isIgnoreAutoUpdate() {
+    	return Boolean.TRUE.toString().equals(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(PRIMEFACES_IGNORE_AUTO_UPDATE));
     }
     
     public static void jsRedirect(String url) {

@@ -72,6 +72,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -1579,6 +1580,32 @@ public class FacesViewRenderer extends ViewRenderer {
 						null,
 						null,
 						null);
+	}
+
+	@Override
+	public void renderFormContentSignature(ContentSignature signature) {
+		String title = getCurrentWidgetLabel();
+		boolean required = isCurrentWidgetRequired();
+		Form currentForm = getCurrentForm();
+		UIComponent c = lb.contentSignatureLayout(null, signature);
+        addComponent(title, 
+        				false, 
+        				signature.getInvisibleConditionName(), 
+        				getCurrentWidgetHelp(),
+        				c, 
+        				signature.getPixelWidth(), 
+        				null, 
+        				null,
+        				null,
+        				null,
+        				null,
+        				null);
+        cb.addContentSignature(null,
+        						c,
+								signature,
+								(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+								title,
+								required);
 	}
 
 	@Override

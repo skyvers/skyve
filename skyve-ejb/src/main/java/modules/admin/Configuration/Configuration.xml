@@ -136,6 +136,14 @@
 			<displayName>admin.configuration.association.startup.displayName</displayName>
 			<documentName>Startup</documentName>
 		</association>
+		<integer name="availableDiskSpaceAlarmLevelPercentage" >
+			<displayName>admin.configuration.availableDiskSpaceAlarmLevelPercentage.displayName</displayName>
+			<description>admin.configuration.availableDiskSpaceAlarmLevel.description</description>
+		</integer>
+		<longInteger name="availableDiskSpaceAlarmLevelMB" >
+			<displayName>admin.configuration.availableDiskSpaceAlarmLevelMB.displayName</displayName>
+			<description>admin.configuration.availableDiskSpaceAlarmLevel.description</description>
+		</longInteger> 
 	</attributes>
 	<conditions>
 		<condition name="emailConfigured">
@@ -157,6 +165,13 @@
 			<expression>
 				<![CDATA[
 					modules.admin.Configuration.ConfigurationExtension.validBackupConfiguration()
+				]]>
+			</expression>
+		</condition>
+		<condition name="availableDiskSpaceAlarmConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validAvailableDiskSpaceAlarmSchedule()
 				]]>
 			</expression>
 		</condition>

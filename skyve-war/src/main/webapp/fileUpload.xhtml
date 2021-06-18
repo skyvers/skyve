@@ -36,7 +36,11 @@
 				<h:inputHidden id="_c" value="#{_skyveUpload.context}" />
 				<h:inputHidden id="_b" value="#{_skyveUpload.binding}" />
 				<h:inputHidden id="_a" value="#{_skyveUpload.action}" />
-				<p:fileUpload listener="#{_skyveUpload.handleFileUpload}" 
+				<p:fileUpload listener="#{_skyveUpload.handleFileUpload}"
+								sizeLimit="#{_skyveUpload.maximumSizeInBytes}"
+								invalidSizeMessage="#{_skyveUpload.i18n['page.fileUpload.sizeLimit']}"
+								allowTypes="#{'/'.concat(_skyveUpload.whitelistRegex).concat('/i')}"
+								invalidFileMessage="#{_skyveUpload.i18n['page.fileUpload.invalidFile']}"
 								update="problems" 
 								oncomplete="if (top.isc) { top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH'); }" />
 			    <p:growl id="messages" showDetail="true" escape="false">

@@ -75,15 +75,24 @@ isc.BizGrid.addMethods({
 					"Do you want to delete/remove the selected rows?",
 					function(value) {
 						if (value) {
-							var dsRequest = {};
+							var requestProperties = {};
+							if (me._b) { // is a data grid
+								requestProperties.params = {};
+							} else { // is a list grid
+								requestProperties.params = {_csrf: me._csrf}
+							}
 							
 							if (me._view) {
 								var instance = me._view.gather(false);
-								dsRequest.params = {_c: instance._c};
+								requestProperties.params._c = instance._c;
 							}
 							
-							// There are no DSCallback arguments here even though they are documented.
-							me.grid.removeSelectedData(function() {
+							me.grid.removeSelectedData(function(dsResponse, data, dsRequest) {
+								if (dsResponse) { // is a list grid
+									// Assign the CSRF Token from the response header
+									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+								}
+
 								me.grid.selectionChanged(null, false);
 								me._eventRowNum = null;
 								me._eventColumnNum = null;
@@ -101,7 +110,7 @@ isc.BizGrid.addMethods({
 									}
 								}
 							},
-							dsRequest);
+							requestProperties);
 						}
 					}
 				);
@@ -331,16 +340,17 @@ isc.BizListGrid.addMethods({
 			},
 			click: function() {
 				if (me.grid.anySelected()) {
+					if (me.grid.saveRequestProperties) {} else {
+						me.grid.saveRequestProperties = {};
+					}
+					if (me.grid.saveRequestProperties.params) {} else {
+						me.grid.saveRequestProperties.params = {};
+					}
+					me.grid.saveRequestProperties.params._csrf = me._csrf;
+
 					// Ensure that embedded list grids use their parent view's conversation to edit data
 					// in the same way as when zooming in
 					if (me._view) { // this is an embedded list grid
-						if (me.grid.saveRequestProperties) {} else {
-							me.grid.saveRequestProperties = {};
-						}
-						if (me.grid.saveRequestProperties.params) {} else {
-							me.grid.saveRequestProperties.params = {};
-						}
-
 						var instance = me._view.gather(false); // don't validate
 						if (config && config.contConv) {
 							if (instance._changed || me._view._vm.valuesHaveChanged()) {
@@ -358,10 +368,7 @@ isc.BizListGrid.addMethods({
 						me.grid.startEditing(me._eventRowNum, me._eventColNum);
 					}
 					else {
-						if (me.grid.saveRequestProperties && me.grid.saveRequestProperties.params) {
-							delete me.grid.saveRequestProperties.params._c;
-						}
-
+						delete me.grid.saveRequestProperties.params._c;
 						me.grid.startEditing(me._eventRowNum, me._eventColNum);
 					}
 				}
@@ -610,7 +617,7 @@ isc.BizListGrid.addMethods({
 		    title: "No Snapshot",
 		    menu: snapMenu,
 		    click: function() {
-		    	var params = {a: 'L', ID: snapMenuButton.ID, d: me._dataSource.ID};
+		    	var params = {a: 'L', ID: snapMenuButton.ID, d: me._dataSource.ID, _csrf: me._csrf};
 		    	if (me.snapId) {
 		    		params.i = me.snapId;
 		    	} 
@@ -622,7 +629,12 @@ isc.BizListGrid.addMethods({
 					params: params,
 					actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 					callback: function(rpcResponse, data, rpcRequest) {
-						snapMenu.setData(data);
+						if (rpcResponse.status >= 0) { // success
+							// Assign the CSRF Token from the response header
+							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+							snapMenu.setData(data);
+						}
 					}
 				});
 
@@ -643,6 +655,7 @@ isc.BizListGrid.addMethods({
 							params: {a: 'N', 
 										n: value, 
 										d: me._dataSource.ID, 
+										_csrf: me._csrf,
 										s: {criteria: me._advancedFilter.toggleButton.selected ?
 														me._advancedFilter.getCriteria() :
 														me.grid.getFilterEditorCriteria(true),
@@ -653,8 +666,13 @@ isc.BizListGrid.addMethods({
 												summaryType: me.summaryType}},
 							actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 							callback: function(rpcResponse, data, rpcRequest) {
-								me.snapId = data.bizId;
-								snapMenuButton.setTitle(value);
+								if (rpcResponse.status >= 0) { // success
+									// Assign the CSRF Token from the response header
+									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+									me.snapId = data.bizId;
+									snapMenuButton.setTitle(value);
+								}
 							}
 						});
 					}
@@ -711,6 +729,7 @@ isc.BizListGrid.addMethods({
 				httpMethod: 'POST',
 				params: {a: 'U', 
 							i: snapId,
+							_csrf: me._csrf,
 							s: {criteria: me._advancedFilter.toggleButton.selected ?
 											me._advancedFilter.getCriteria() :
 											me.grid.getFilterEditorCriteria(true),
@@ -719,7 +738,13 @@ isc.BizListGrid.addMethods({
 									sortState: me.grid.getSortState(),
 									groupState: me.grid.getGroupState(),
 									summaryType: me.summaryType}},
-				actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap'
+				actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
+				callback: function(rpcResponse, data, rpcRequest) {
+					if (rpcResponse.status >= 0) { // success
+						// Assign the CSRF Token from the response header
+						me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+					}
+				}
 			});
 		};
 
@@ -733,10 +758,15 @@ isc.BizListGrid.addMethods({
 									evalResult: true,
 									useSimpleHttp: true,
 									httpMethod: 'POST',
-									params: {a: 'D', i: snapId},
+									params: {a: 'D', i: snapId, _csrf: me._csrf},
 									actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 									callback: function(rpcResponse, data, rpcRequest) {
-										snapMenuButton.setSnap(null, 'No Snapshot', null);
+										if (rpcResponse.status >= 0) { // success
+											// Assign the CSRF Token from the response header
+											me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+											snapMenuButton.setSnap(null, 'No Snapshot', null);
+										}
 									}
 								});
 							}
@@ -762,7 +792,7 @@ isc.BizListGrid.addMethods({
 		    title: "No Tag",
 		    menu: tagsMenu,
 		    click: function() {
-		    	var params = {a: 'L', ID: tagsMenuButton.ID};
+		    	var params = {a: 'L', ID: tagsMenuButton.ID, _csrf: me._csrf};
 		    	if (me.tagId) {
 		    		params.t = me.tagId;
 		    	} 
@@ -774,7 +804,12 @@ isc.BizListGrid.addMethods({
 					params: params,
 					actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 					callback: function(rpcResponse, data, rpcRequest) {
-						tagsMenu.setData(data);
+						if (rpcResponse.status >= 0) { // success
+							// Assign the CSRF Token from the response header
+							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+							tagsMenu.setData(data);
+						}
 					}
 				});
 				this.Super('click', arguments);
@@ -791,12 +826,17 @@ isc.BizListGrid.addMethods({
 							evalResult: true,
 							useSimpleHttp: true,
 							httpMethod: 'POST',
-							params: {a: 'N', n: value, ID: tagsMenuButton.ID},
+							params: {a: 'N', n: value, ID: tagsMenuButton.ID, _csrf: me._csrf},
 							actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 							callback: function(rpcResponse, data, rpcRequest) {
-								me.tagId = data.bizId;
-								tagsMenuButton.setTitle(value);
-								me.refresh();
+								if (rpcResponse.status >= 0) { // success
+									// Assign the CSRF Token from the response header
+									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+									me.tagId = data.bizId;
+									tagsMenuButton.setTitle(value);
+									me.refresh();
+								}
 							}
 						});
 					}
@@ -866,7 +906,7 @@ isc.BizListGrid.addMethods({
 		};
 
 		var privateTagOp = function(tagId, action) {
-			var params = {a: action, t: tagId};
+			var params = {a: action, t: tagId, _csrf: me._csrf};
 			if (action == 'T' || action == 'U') {
 				params.d = me._dataSource.ID;
 				var criteria = getAllCriteria();
@@ -884,10 +924,15 @@ isc.BizListGrid.addMethods({
 				params: params,
 				actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 				callback: function(rpcResponse, data, rpcRequest) {
-					if (action == 'D') {
-						tagsMenuButton.setTag(null, 'No Tag');
+					if (rpcResponse.status >= 0) { // success
+						// Assign the CSRF Token from the response header
+						me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+						if (action == 'D') {
+							tagsMenuButton.setTag(null, 'No Tag');
+						}
+						me.refresh();
 					}
-					me.refresh();
 				}
 			});
 		};
@@ -1162,8 +1207,14 @@ isc.BizListGrid.addMethods({
 				}
 			},
 			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
-				if (me.bizEdited) {
-					me.bizEdited();
+				if (dsResponse.status >= 0) { // success
+					// Assign the CSRF Token from the response header
+					me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
+					// Call the edited callback if available
+					if (me.bizEdited) {
+						me.bizEdited();
+					}
 				}
 			},
 			// override to put summaryRow etc into the request parameters
@@ -1187,6 +1238,9 @@ isc.BizListGrid.addMethods({
 					requestProperties.params = {};
 				}
 				
+				if (me._csrf) {
+					requestProperties.params._csrf = me._csrf;
+				}
 				if (config.isTree) {} else {
 					requestProperties.params._summary = me.summaryType;
 				}
@@ -1234,6 +1288,9 @@ isc.BizListGrid.addMethods({
 					if (dsResponse.context && 
 							(dsResponse.context.operationType == 'fetch') && 
 							(dsResponse.status == isc.RPCResponse.STATUS_SUCCESS)) {
+						// Assign the CSRF Token from the response header
+						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+						
 						// Ensure the summary grid fields match what will be in the data grid
 						var fields = [{
 							name: "bizFlagComment", 
@@ -1548,7 +1605,14 @@ isc.BizListGrid.addMethods({
 									else {
 										record.bizTagged = 'TAG';
 									}
-									me.grid.updateData(record, '', {showPrompt: false, params: {_tagId: me.tagId}});
+									me.grid.updateData(record, 
+														function(dsResponse, data, dsRequest) {
+															if (dsResponse.status >= 0) { // success
+																// Assign the CSRF Token from the response header
+																me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+															}
+														},
+														{showPrompt: false, params: {_tagId: me.tagId, _csrf: me._csrf}});
 								}
 								else {
 									isc.warn('Select or create a tag first from the tags menu in the list toolbar');
@@ -1650,12 +1714,18 @@ isc.BizListGrid.addMethods({
 					var commentField = me._flagForm.getField('bizFlagComment');
 					if (commentField.getValue() != '') {
 						commentField.setValue('');
-						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-							if (dsResponse.status >= 0) { // success
-								me._flagForm.reset(); // ensure form is not dirty before hiding it
-								me._flagDialog.hide();
-							}
-						});
+						me._flagForm.saveData(
+							function(dsResponse, data, dsRequest) {
+								if (dsResponse.status >= 0) { // success
+									// Assign the CSRF Token from the response header
+									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+
+									me._flagForm.reset(); // ensure form is not dirty before hiding it
+									me._flagDialog.hide();
+								}
+							},
+							{params: {'_csrf' : me._csrf}}
+						);
 					}
 				}
 			},
@@ -1666,12 +1736,18 @@ isc.BizListGrid.addMethods({
 				endRow: true,
 				click: function() {
 					if (me._flagForm.validate(true)) {
-						me._flagForm.saveData(function(dsResponse, data, dsRequest) {
-							if (dsResponse.status >= 0) { // success
-								me._flagForm.reset(); // ensure form is not dirty before hiding it
-								me._flagDialog.hide();
-							}
-						});
+						me._flagForm.saveData(
+							function(dsResponse, data, dsRequest) {
+								if (dsResponse.status >= 0) { // success
+									// Assign the CSRF Token from the response header
+									me._csrf = dsResponse.httpHeaders['x-csrf-token'];
+	
+									me._flagForm.reset(); // ensure form is not dirty before hiding it
+									me._flagDialog.hide();
+								}
+							},
+							{params: {'_csrf' : me._csrf}}
+						);
 					}
 				}
 			}

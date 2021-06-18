@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,5 +77,29 @@ public class UtilImplTest {
 		
 		assertThat(environment, is(notNullValue()));
 		assertThat(environment.get("customer"), is(notNullValue()));
+	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testUnidecode() {
+		Assert.assertEquals("descricao", UtilImpl.unidecode("descrição"));
+		Assert.assertEquals("tache", UtilImpl.unidecode("tâche"));
+		Assert.assertEquals("opcoes", UtilImpl.unidecode("opções"));
+		Assert.assertEquals("endereco", UtilImpl.unidecode("endereço"));
+		Assert.assertEquals("LocalDeInstalacao", UtilImpl.unidecode("LocalDeInstalação"));
+		Assert.assertEquals("kayttaja", UtilImpl.unidecode("käyttäjä"));
+		Assert.assertEquals("flagObbligatorieta", UtilImpl.unidecode("flagObbligatorietà"));
+		Assert.assertEquals("namenserganzung", UtilImpl.unidecode("namensergänzung"));
+		Assert.assertEquals("prenom", UtilImpl.unidecode("prénom"));
+		Assert.assertEquals("data", UtilImpl.unidecode("дата"));
+		Assert.assertEquals("prioritat", UtilImpl.unidecode("priorität"));
+		Assert.assertEquals("Hebergement", UtilImpl.unidecode("Hébergement"));
+		Assert.assertEquals("filDactualite", UtilImpl.unidecode("filDactualité"));
+		Assert.assertEquals("capacite", UtilImpl.unidecode("capacité"));
+		Assert.assertEquals("endereco", UtilImpl.unidecode("endereço"));
+		Assert.assertEquals("escritorio", UtilImpl.unidecode("escritório"));
+		Assert.assertEquals("noRecu", UtilImpl.unidecode("noReçu"));
+		Assert.assertEquals("yeuCauTuyenDung", UtilImpl.unidecode("yêuCầuTuyểnDụng"));
+		Assert.assertEquals("heureDarrivee", UtilImpl.unidecode("heureDarrivée"));
 	}
 }

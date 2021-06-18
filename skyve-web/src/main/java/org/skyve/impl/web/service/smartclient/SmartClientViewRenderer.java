@@ -67,6 +67,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -1264,6 +1265,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			
 			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
 			def.setPixelWidth(column.getPixelWidth());
+			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
 			code.append('{').append(def.toJavascript()).append("},");
 
 			SmartClientLookupDefinition lookup = def.getLookup();
@@ -1444,6 +1446,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		editable(link.getEditable(), code);
 	}
 	
+	@Override
+	public void renderFormContentSignature(ContentSignature signature) {
+		// TODO not implemented for SC yet - use a ContentImage for now
+		preProcessFormItem(signature, "bizContentImage");
+		size(signature, null, code);
+		disabled(signature.getDisabledConditionName(), code);
+		invisible(signature.getInvisibleConditionName(), code);
+		editable(Boolean.TRUE, code);
+	}
+
 	@Override
 	public void renderBoundColumnHTML(HTML html) {
 		dataWidgetColumnInputWidget = html;

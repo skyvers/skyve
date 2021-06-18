@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -604,6 +605,20 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, required);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent addContentSignature(UIComponent component,
+											UIComponent layout,
+											ContentSignature signature,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, required);
 		}
 		return result;
 	}

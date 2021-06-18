@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -68,6 +69,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -679,6 +681,43 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+		String binding = signature.getBinding();
+		String signatureIdentifier = "ContentSignature " + binding;
+		validateBinding(dataWidgetBinding, 
+							binding,
+							true,
+							false,
+							false,
+							true,
+							signatureIdentifier,
+							AttributeType.content,
+							AttributeType.image);
+		validateConditionName(signature.getDisabledConditionName(), signatureIdentifier);
+		validateConditionName(signature.getInvisibleConditionName(), signatureIdentifier);
+		validateSize(signature, signatureIdentifier);
+		
+		String colour = signature.getRgbHexBackgroundColour();
+		if (colour != null) {
+			try {
+				Color.decode(colour);
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				throw new MetaDataException(signatureIdentifier + " in " + viewIdentifier + " has an invalid value for rgbHexBackgroundColour of " + colour + " (Should be formatted as #RRGGBB)");
+			}
+		}
+		colour = signature.getRgbHexForegroundColour();
+		if (colour != null) {
+			try {
+				Color.decode(colour);
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				throw new MetaDataException(signatureIdentifier + " in " + viewIdentifier + " has an invalid value for rgbHexForegroundColour of " + colour + " (Should be formatted as #RRGGBB)");
+			}
+		}
+	}
+
+	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		visitDataWidget(grid, "DataGrid");
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, dataWidgetIdentifier, AttributeType.id);
@@ -806,7 +845,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
-		validateBinding(null,
+		validateBinding(dataWidgetBinding,
 							geometry.getBinding(),
 							true,
 							false,

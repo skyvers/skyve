@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
 public class NoOpLayoutBuilder extends LayoutBuilder {
 	@Override
@@ -119,6 +120,11 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 		// do nothing
 	}
 
+	@Override
+	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+		return component;
+	}
+	
 	@Override
 	public UIComponent addToContainer(UIComponent component, 
 										Container viewContainer,

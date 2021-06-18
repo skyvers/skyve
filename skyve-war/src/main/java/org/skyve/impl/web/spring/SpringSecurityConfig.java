@@ -109,6 +109,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
+				.successHandler(new SkyveAuthenticationSuccessHandler())
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())

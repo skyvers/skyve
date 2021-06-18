@@ -3,6 +3,7 @@ package org.skyve.job;
 import java.util.Collection;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class TestJob extends IteratingJob<String> {
 
 	private List<String> elements;

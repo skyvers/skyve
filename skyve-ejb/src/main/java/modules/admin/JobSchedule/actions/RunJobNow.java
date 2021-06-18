@@ -1,11 +1,9 @@
 package modules.admin.JobSchedule.actions;
 
-import modules.admin.domain.JobSchedule;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -16,11 +14,19 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.JobSchedule;
+
 public class RunJobNow implements ServerSideAction<JobSchedule> {
 	private static final long serialVersionUID = -1037253249182913062L;
 
 	@Override
 	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {
+
+		// validate that a job is selected
+		if (bean.getJobName() == null) {
+			throw new ValidationException(JobSchedule.jobNamePropertyName,
+					Util.i18n("admin.jobSchedule.jobName.displayName") + " is required");
+		}
 
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();

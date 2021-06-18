@@ -57,7 +57,7 @@
 		    		<%@include file="fragments/logo.html" %>
 		    	</div>
 		    	
-		        <form class="ui large form">
+		        <div class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
 		            		<%=Util.i18n("page.logout.banner", locale)%>
@@ -68,7 +68,7 @@
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.banner", locale)%></a>
 						<% } %>
 		            </div>
-		        </form>
+		        </div>
 		    </div>
 		</div>
 	</body>

@@ -88,7 +88,8 @@
 				</row>
 				<row>
 					<item colspan="3">
-						<default binding="body" />
+		            	<!-- using a textarea in responsive because the quill editor does not allow html source to be edited -->
+						<textArea binding="body" />						
 					</item>
 				</row>
 				<row>

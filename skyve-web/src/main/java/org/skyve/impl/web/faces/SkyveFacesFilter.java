@@ -1,10 +1,10 @@
 package org.skyve.impl.web.faces;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.logging.Level;
 
 import javax.faces.application.ViewExpiredException;
-import javax.faces.context.FacesContext;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.cache.StateUtil;
+import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -67,6 +68,7 @@ public class SkyveFacesFilter implements Filter {
                             FilterChain chain)
     throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) resp;
 		
     	try {
 	        String pathToTest = request.getServletPath();
@@ -97,15 +99,26 @@ public class SkyveFacesFilter implements Filter {
 	        }
 	        
 	        if (request.getUserPrincipal() == null) { // not logged in
-                HttpServletResponse response = (HttpServletResponse) resp;
                 // NB Can't use the referer header as if we traverse a data grid, 
                 // the URL does not represent all of the state required to perform a get and redisplay the page.
                 // This is because part of the state is temporarily saved in the session.
                 // String redirect = WebUtil.getRefererHeader(request);
                 String redirect = Util.getSkyveContextUrl() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
-                FacesContext.getCurrentInstance().getExternalContext().redirect(redirect);
-            }
+
+                // Can't use FacesContext.getCurrentInstance().getExternalContext().redirect() here coz the faces context could be gone
+				if (FacesUtil.isAjax(request)) {
+					response.setContentType(MimeType.xml.toString());
+			        response.setCharacterEncoding(Util.UTF8);
+					try (PrintWriter pw = response.getWriter()) {
+						pw.print(FacesUtil.xmlPartialRedirect(redirect));
+					}
+					response.flushBuffer();
+				}
+				else {
+					response.sendRedirect(redirect);
+				}
+	        }
             else {
         		chain.doFilter(req, resp);
             }
@@ -126,13 +139,24 @@ public class SkyveFacesFilter implements Filter {
             	uri = expiredURI;
             }
             
-            FacesContext.getCurrentInstance().getExternalContext().redirect(Util.getSkyveContextUrl() + uri);
+            // Can't use FacesContext.getCurrentInstance().getExternalContext().redirect() here coz the faces context could be gone
+			if (FacesUtil.isAjax(request)) {
+				response.setContentType(MimeType.xml.toString());
+		        response.setCharacterEncoding(Util.UTF8);
+				try (PrintWriter pw = response.getWriter()) {
+					pw.print(FacesUtil.xmlPartialRedirect(Util.getSkyveContextUrl() + uri));
+				}
+				response.flushBuffer();
+			}
+			else {
+				response.sendRedirect(Util.getSkyveContextUrl() + uri);
+			}
         }
 		finally {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesFilter - DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) StateUtil.logSessionAndConversationsStats();
+			if (UtilImpl.FACES_TRACE) StateUtil.logStateStats();
 		}
     }
 }

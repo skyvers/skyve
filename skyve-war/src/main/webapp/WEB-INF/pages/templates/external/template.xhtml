@@ -31,11 +31,13 @@
 			
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
+				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
+				PrimeFaces.env.touch=false;
 				SKYVE.Util.setTouchCookie();
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
-			<ui:insert name="head" />
+			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body>
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
@@ -122,7 +124,7 @@
 													icon="fa fa-check" />
 							</p:confirmDialog>
 							
-							<ui:insert name="body" />
+							<ui:insert name="templateBody" />
 						</td>
 					</tr>
 				</tbody>

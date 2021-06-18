@@ -60,6 +60,17 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
+			<description>Boolean value to indicate whether to prepend the component id as a naming container would</description>
+			<name>prependId</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>enctype</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
 			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
 			<name>rendered</name>
 			<required>false</required>

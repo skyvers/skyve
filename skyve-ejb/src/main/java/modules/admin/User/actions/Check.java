@@ -4,16 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import modules.admin.User.UserExtension;
-import modules.admin.domain.Contact;
-import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.UserCandidateContact;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -23,11 +21,23 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.User.UserExtension;
+import modules.admin.domain.Contact;
+import modules.admin.domain.Contact.ContactType;
+import modules.admin.domain.User;
+import modules.admin.domain.UserCandidateContact;
+
 public class Check implements ServerSideAction<UserExtension> {
 	private static final long serialVersionUID = -4667349358677521637L;
 
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
+		// validate required fields
+		if (adminUser.getSearchContactName() == null && adminUser.getSearchEmail() == null) {
+			throw new ValidationException(
+					new Message(new String[] { User.searchContactNamePropertyName, User.searchEmailPropertyName },
+							"admin.user.actions.check.required"));
+		}
 		
 		adminUser.setContact(null);
 		
@@ -82,6 +92,10 @@ public class Check implements ServerSideAction<UserExtension> {
 		}
 		
 		if (candidateContacts.isEmpty()) {
+			if(webContext != null) {
+				webContext.growl(MessageSeverity.info, "admin.user.actions.check.noResults");
+			}
+			
 			Contact contact = Contact.newInstance();
 			contact.setName(adminUser.getSearchContactName());
 			contact.setEmail1(adminUser.getSearchEmail());

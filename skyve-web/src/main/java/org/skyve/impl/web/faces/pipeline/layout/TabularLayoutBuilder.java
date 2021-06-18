@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.component.UIComponent;
+import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.column.Column;
@@ -18,6 +19,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
 public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
@@ -246,6 +248,20 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		col.getChildren().add(formItemComponent);
 	}
 	
+	@Override
+	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+		if (component != null) {
+			return component;
+		}
+
+		// Signature Grid
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(2);
+		setInvisible(result, signature.getInvisibleConditionName(), null);
+		return result;
+	}
+
 	@Override
 	public UIComponent addToContainer(UIComponent component,
 										Container viewContainer,

@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -77,6 +78,7 @@ public class FormItem implements DecoratedMetaData {
 	@XmlElementRefs({@XmlElementRef(type = DefaultWidget.class),
 						@XmlElementRef(type = ContentImage.class),
 						@XmlElementRef(type = ContentLink.class), 
+						@XmlElementRef(type = ContentSignature.class),
 						@XmlElementRef(type = Button.class),
 						@XmlElementRef(type = DialogButton.class),
 						@XmlElementRef(type = Geometry.class),

@@ -72,7 +72,7 @@
 		    		<%@include file="fragments/logo.html" %>
 		    	</div>
 		    	
-		        <form class="ui large form">
+		        <div class="ui large form">
 		            <div class="ui segment">
 		            	<% if(postback) { %>
 		            	<div class="ui header">
@@ -90,7 +90,7 @@
 		            	<% } %>
 		            	<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 		            </div>
-		        </form>
+		        </div>
 		    </div>
 		</div>
 	</body>

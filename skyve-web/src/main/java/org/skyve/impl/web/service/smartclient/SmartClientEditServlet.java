@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.SortedMap;
@@ -15,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
 import org.skyve.cache.StateUtil;
@@ -86,12 +88,28 @@ public class SmartClientEditServlet extends HttpServlet {
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
-        response.setContentType(MimeType.json.toString());
+		response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(Util.UTF8);
         response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
+
+    	// Send CSRF Token as a response header (must be done before getting the writer)
+		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
+		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
+		Integer newCsrfToken = currentCsrfToken;
+		String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
+		// If this is a mutating request, we'll definitely need a new CSRF Token
+		if (Operation.fetch.toString().equals(operationType)) {
+			if (newCsrfToken == null) {
+				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			}
+		}
+		else {
+			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+		}
+    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
+
 		try (PrintWriter pw = response.getWriter()) {
-	    	String operationType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("_operationType")));
 	        if (operationType == null) {
 	        	pw.append("{}");
 	        	return;
@@ -103,9 +121,9 @@ public class SmartClientEditServlet extends HttpServlet {
 				try {
 					// Start or continue a smartclient conversation
 					AbstractWebContext webContext = null;
-			        String key = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        if (key != null) {
-			        	webContext = StateUtil.getCachedConversation(key, request, response);
+			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
+			        if (webId != null) {
+			        	webContext = StateUtil.getCachedConversation(webId, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();
@@ -147,10 +165,10 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	String source = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.SOURCE_NAME)));
 			    	String editIdCounter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER)));
 			    	String createIdCounter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER)));
-	
+
 			    	SortedMap<String, Object> parameters = collectRequestParameters(request);
 					
-					String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
+					String bizId = OWASP.sanitise(Sanitisation.text, (String) parameters.get(Bean.DOCUMENT_ID));
 					
 					// the bean in the web context - the conversation context
 			    	Bean contextBean = webContext.getCurrentBean();
@@ -206,6 +224,8 @@ public class SmartClientEditServlet extends HttpServlet {
 														user.getName());
 					}
 	
+					HttpSession session = request.getSession();
+					
 					// we have a user defined action to run
 					String actionName = webContext.getAction();
 					if ((actionName != null) && 
@@ -217,6 +237,9 @@ public class SmartClientEditServlet extends HttpServlet {
 						if ((editIdCounter == null) || (createIdCounter == null)) {
 							throw new ServletException("Request is malformed");
 						}
+
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						
 						apply(webContext,
 			                    user,
 								customer, 
@@ -269,6 +292,9 @@ public class SmartClientEditServlet extends HttpServlet {
 							if ((editIdCounter == null) || (createIdCounter == null)) {
 								throw new ServletException("Request is malformed");
 							}
+
+							SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+							
 							apply(webContext,
 				                    user, 
 									customer, 
@@ -291,6 +317,9 @@ public class SmartClientEditServlet extends HttpServlet {
 							break;
 						case remove:
 							UtilImpl.LOGGER.info("REMOVE with binding " + formBinding);
+
+							SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+
 							PersistentBean beanToDelete = (PersistentBean) processBean;
 							Bizlet<PersistentBean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
 							remove(webContext,
@@ -305,6 +334,9 @@ public class SmartClientEditServlet extends HttpServlet {
 						default:
 						}
 					}
+
+					// Replace CSRF token
+					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -654,6 +686,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
     		}
     	}
+
 		try {
 			StringBuilder message = new StringBuilder(256);
 	    	message.append("{\"response\":{\"status\":0,\"startRow\":0,\"endRow\":0,\"totalRows\":1,\"data\":[");
@@ -972,7 +1005,16 @@ public class SmartClientEditServlet extends HttpServlet {
 												beanToRender.isCreated() ? 
 													ViewType.edit.toString() : 
 													ViewType.create.toString());
-		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, redirectUrl, pw);
+		pumpOutResponse(webContext,
+							user,
+							formModule,
+							formDocument,
+							renderView,
+							beanToRender,
+							editIdCounter,
+							createIdCounter,
+							redirectUrl,
+							pw);
 	}
 
 	private static void pumpOutResponse(AbstractWebContext webContext,
@@ -998,6 +1040,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																	createIdCounter,
 																	false);
 		manipulator.visit();
+
 		try {
 			result.append("{\"response\":{\"status\":0,\"data\":");
 			result.append(manipulator.toJSON(webContext, redirectUrl));

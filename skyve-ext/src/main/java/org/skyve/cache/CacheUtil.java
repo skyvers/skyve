@@ -65,7 +65,13 @@ public class CacheUtil {
 				UtilImpl.LOGGER.info("Create the conversation cache with config " + UtilImpl.CONVERSATION_CACHE);
 				CacheUtil.createEHCache(UtilImpl.CONVERSATION_CACHE);
 			}
-			
+
+			// Create the CSRF Token cache
+			if (UtilImpl.CSRF_TOKEN_CACHE != null) {
+				UtilImpl.LOGGER.info("Create the CSRF token cache with config " + UtilImpl.CSRF_TOKEN_CACHE);
+				CacheUtil.createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
+			}
+
 			// Create the app caches
 			for (CacheConfig<? extends Serializable, ? extends Serializable> config : UtilImpl.APP_CACHES) {
 				UtilImpl.LOGGER.info("Create app cache with config " + config);

@@ -302,7 +302,7 @@
 		<condition name="selfRegistrationEnabledAndUserNotActivated" usage="view">
 			<description>True when User Self-Registration is enabled and the User has not been activated.</description>
 			<expression>
-				<![CDATA[(org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (getActivated().equals(Boolean.FALSE)))]]>
+				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && Boolean.FALSE.equals(getActivated())]]>
 			</expression>
 		</condition>
 		<condition name="canActivateUser" usage="view">

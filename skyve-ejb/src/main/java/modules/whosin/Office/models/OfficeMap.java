@@ -3,10 +3,6 @@ package modules.whosin.Office.models;
 import java.util.ArrayList;
 import java.util.List;
 
-import modules.whosin.domain.Office;
-import modules.whosin.domain.Staff;
-import modules.whosin.domain.Staff.Status;
-
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.metadata.view.model.map.MapFeature;
@@ -15,6 +11,10 @@ import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.model.map.MapResult;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+
+import modules.whosin.domain.Office;
+import modules.whosin.domain.Staff;
+import modules.whosin.domain.Staff.Status;
 
 public class OfficeMap extends MapModel<Office> {
 	private static final long serialVersionUID = 7880044512360465355L;
@@ -38,7 +38,7 @@ public class OfficeMap extends MapModel<Office> {
 				MapFeature feature = new MapFeature();
 				feature.setGeometry(office.getBoundary());
 				feature.setFillColour("#FFFF00"); //yellow
-				feature.setFillOpacity("0.8");
+				feature.setFillOpacity(Float.valueOf(0.8f));
 				feature.setStrokeColour("#BDB76B"); //dark khaki
 				item.getFeatures().add(feature);
 

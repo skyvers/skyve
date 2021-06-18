@@ -218,6 +218,9 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				bean.getContact().setBizDataGroupId(bean.getDataGroup().getBizId());
 			}
 		}
+		
+		// user must be saved to be visible within the users own User-scope
+		bean.setBizUserId(bean.getBizId());
 	}
 
 	/**

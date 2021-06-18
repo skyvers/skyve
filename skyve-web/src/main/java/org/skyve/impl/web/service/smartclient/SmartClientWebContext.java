@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
+import org.skyve.util.Util;
 
 public final class SmartClientWebContext extends ViewWebContext {
 	private static final long serialVersionUID = 7657798607012186366L;
@@ -35,7 +36,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 		}
 		Map<String, String> item = new TreeMap<>();
 		item.put("severity", severity.toString());
-		item.put("summary", message);
+		item.put("summary", Util.i18n(message));
 		growls.add(item);
 	}
 	
@@ -46,7 +47,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 		}
 		Map<String, String> item = new TreeMap<>();
 		item.put("severity", severity.toString());
-		item.put("summary", message);
+		item.put("summary", Util.i18n(message));
 		messages.add(item);
 	}
 	

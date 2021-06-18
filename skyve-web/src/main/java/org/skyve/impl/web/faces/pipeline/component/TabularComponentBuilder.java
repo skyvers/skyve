@@ -57,6 +57,7 @@ import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
+import org.primefaces.component.signature.Signature;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
@@ -106,6 +107,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -2006,6 +2008,178 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
+	 *				<h:panelGrid id="one" columns="2">
+	 *					<p:signature id="one_signature" style="width:400px;height:200px" rendered="#{empty skyve.currentBean['image']}" />
+	 *					<p:graphicImage id="one_image" style="width:400px;height:200px;border:1px gray" rendered="#{not empty skyve.currentBean['image']}" />
+	 *					<h:panelGrid columns="1">
+	 *						<p:commandButton id="one_sign" value="Sign" icon="fa fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_client" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_server" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
+	 *					</h:panelGrid>
+	 *				</h:panelGrid>
+	 * See LayoutBuilder.contentSignatureLayout() for the outer panel grid.
+	 */
+	@Override
+	public UIComponent addContentSignature(UIComponent component,
+											UIComponent layout,
+											ContentSignature signature,
+											String formDisabledConditionName,
+											String title,
+											boolean required) {
+		if (component != null) {
+			return component;
+		}
+
+		String binding = signature.getBinding();
+		Integer pixelWidth = signature.getPixelWidth();
+		if (pixelWidth == null) {
+			pixelWidth = Integer.valueOf(400);
+		}
+		Integer pixelHeight = signature.getPixelHeight();
+		if (pixelHeight == null) {
+			pixelHeight = Integer.valueOf(200);
+		}
+
+		String id = layout.getId();
+		String clientId = layout.getClientId();
+		List<UIComponent> toAddTo = layout.getChildren();
+
+		// Signature
+		Signature signatureComponent = (Signature) input(Signature.COMPONENT_TYPE, null, binding, title, required, null, null);
+		signatureComponent.setValueExpression("value", null);
+		setId(signatureComponent, id + "_signature");
+		signatureComponent.setGuideline(false);
+		String rgbHexBackgroundColour = signature.getRgbHexBackgroundColour();
+		signatureComponent.setBackgroundColor((rgbHexBackgroundColour == null) ? "#FFFFFF" : rgbHexBackgroundColour);
+		String rgbHexForegroundColour = signature.getRgbHexForegroundColour();
+		signatureComponent.setColor((rgbHexForegroundColour == null) ? "#000000" : rgbHexForegroundColour);
+		StringBuilder sb = new StringBuilder(32);
+		sb.append("width:").append(pixelWidth);
+		sb.append("px;height:").append(pixelHeight).append("px");
+		signatureComponent.setStyle(sb.toString());
+
+		// Set signature rendered
+		sb.setLength(0);
+		sb.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");
+		signatureComponent.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
+
+		// Set signature readonly
+		String disabledConditionName = signature.getDisabledConditionName();
+		if (disabledConditionName != null) {
+			if (formDisabledConditionName == null) {
+				signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(disabledConditionName, null));
+			}
+			else {
+				signatureComponent.setValueExpression("readonly", createOredValueExpressionFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+			}
+		}
+		else if (formDisabledConditionName != null) {
+			signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(formDisabledConditionName, null));
+		}
+
+		toAddTo.add(signatureComponent);
+		
+		// Image
+		HtmlPanelGroup contentImage = contentGraphicImage(pixelWidth, null, null, pixelHeight, null, binding);
+
+		// Set image rendered
+		sb.setLength(0);
+		sb.append("#{not empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");
+		contentImage.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
+
+		toAddTo.add(contentImage);
+		
+		// The buttons
+		HtmlPanelGrid grid = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(grid, null);
+		grid.setColumns(1);
+		toAddTo.add(grid);
+		toAddTo = grid.getChildren();
+
+		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue("Sign");
+		button.setIcon("fa fa-upload");
+		button.setTitle("Submit Signature");
+		button.setStyle("width:75px");
+		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		button.setProcess("@this");
+		button.setUpdate(id);
+		// action
+		sb.setLength(0);
+		sb.append("#{").append(managedBeanName).append(".sign('").append(clientId).append("','").append(binding).append("',");
+		sb.append(pixelWidth).append(',').append(pixelHeight);
+		if (rgbHexBackgroundColour == null) {
+			sb.append(",null,");
+		}
+		else {
+			sb.append(",'").append(rgbHexBackgroundColour).append("',");
+		}
+		if (rgbHexForegroundColour == null) {
+			sb.append("null)}");
+		}
+		else {
+			sb.append('\'').append(rgbHexForegroundColour).append("')}");
+		}
+		button.setActionExpression(ef.createMethodExpression(elc,
+																sb.toString(),
+																null,
+																new Class[] {String.class, String.class, Integer.class, Integer.class, String.class, String.class}));
+		// rendered
+		sb.setLength(0);
+		sb.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");
+		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
+		// onstart
+		sb.setLength(0);
+		sb.append("if(SKYVE.PF.getById('").append(clientId).append("_signature').signature('isEmpty')){SKYVE.PF.onPushMessage([{type:'g',severity:'error',message:'Create your signature first'}]);return false}");
+		button.setOnstart(sb.toString());
+		
+		toAddTo.add(button);
+
+		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue("Clear");
+		button.setIcon("fa fa-trash");
+		button.setTitle("Clear Signature");
+		button.setStyle("width:75px");
+		button.setType("button");
+		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		// onclick
+		sb.setLength(0);
+		sb.append("SKYVE.PF.getById('").append(clientId).append("_signature').signature('clear')");
+		button.setOnclick(sb.toString());
+		// rendered
+		sb.setLength(0);
+		sb.append("#{empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");
+		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
+
+		toAddTo.add(button);
+
+		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue("Clear");
+		button.setIcon("fa fa-trash");
+		button.setTitle("Clear Signature");
+		button.setStyle("width:75px");
+		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		button.setProcess("@this");
+		button.setUpdate(id);
+		// action
+		sb.setLength(0);
+		sb.append("#{").append(managedBeanName).append(".clear('").append(binding).append("')}");
+		button.setActionExpression(ef.createMethodExpression(elc, sb.toString(), null, STRING));
+		// rendered
+		sb.setLength(0);
+		sb.append("#{not empty ").append(managedBeanName).append(".currentBean['").append(binding).append("']}");
+		button.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
+
+		toAddTo.add(button);
+		
+		// This is only returned to short circuit any component builder chains
+		return signatureComponent;
+	}
+
+	/**
 	 * Add the buttons and overlays etc
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
@@ -2057,6 +2231,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			dialog.setModal(true);
 			dialog.setResponsive(true);
 			dialog.setFitViewport(true);
+			dialog.setHeader("Image Upload");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
 			// clear the iframe src on hide so there is no flash next open
 			dialog.setOnHide("SKYVE.PF.contentOverlayOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
 			panel = dialog;
@@ -2071,6 +2247,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
 			overlay.setStyle("width:50%;height:300px");
+			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
 			panel = overlay;
@@ -3452,6 +3629,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		outputText.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		result.getChildren().add(outputText);
 
+		expression = String.format("#{(empty %s.currentBean['%s']) ? 'return false' : null}", managedBeanName, binding);
+		result.setValueExpression("onclick", ef.createValueExpression(elc, expression, String.class));
+
 		result.setTarget("_blank");
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, null);
@@ -3571,8 +3751,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String var = BindUtil.sanitiseBinding(binding) + "Row";
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
+		// Sanitisation and escaping is done in the list model
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.relaxed));
+									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class, false, Sanitisation.none));
 		result.setValueExpression("itemValue",
 									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class, false, Sanitisation.none));
 		result.setConverter(new AssociationAutoCompleteConverter());

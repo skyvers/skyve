@@ -13,7 +13,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
-import org.skyve.web.SortParameter;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
@@ -25,6 +24,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.web.SortParameter;
 
 public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	private static final long serialVersionUID = -4488883647065013017L;
@@ -124,7 +124,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 		
 		SortParameter[] sorts = getSortParameters();
-		if (sorts != null) {
+		if (sorts != null && sorts.length > 0) {
 			OrderingImpl[] order = new OrderingImpl[sorts.length];
 			int i = 0;
 			for (SortParameter sort : sorts) {

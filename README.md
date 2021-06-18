@@ -1,11 +1,16 @@
-# Skyve
+[![Logo][skyve-logo]][skyve-url]
+
+Welcome to Skyve!
 
 This repository is the Java implementation of the Skyve framework specification.
 
 ### Contents
 
 * [What is Skyve](#what-is-skyve)
+* [Contributing](#contributing)
 * [Getting Started](#getting-started)
+  * [Skyve Tutorial](#skyve-tutorial)
+  * [User Guide](#user-guide)
   * [Development Guide](#development-guide)
   * [Skyve Cookbook](#skyve-cookbook) 
 * [Creating a new Skyve project](#creating-a-new-skyve-project)
@@ -17,10 +22,6 @@ This repository is the Java implementation of the Skyve framework specification.
    * [Simple Example](#simple-example)
  * [Skyve Maven commands](#skyve-maven-commands)
  * [Updating Skyve version](#updating-skyve-version)
- * [Configuring Spring Security](#configuring-spring-security)
-   * [MSSQL](#mssql)
-   * [MySQL](#mysql)
-   * [H2](#h2)
 
 ## What is Skyve?
 
@@ -34,15 +35,29 @@ Skyve also provides sophisticated validation and a high-level API so that you ca
 
 At any time, branch out into "traditional" development without restriction, but will all the benefits of the API and integrated platform.
 
-Skyve supports spatial concepts natively with MySQL, SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
+Skyve supports spatial concepts natively with MySQL (and MariaDB), SQL Server, Postgres and H2 - Oracle is in beta. Otherwise, pretty much anything supported by Hibernate should work (but we haven’t tested them all!).
 
 For more details on the framework and its capabilities, please check out the platform homepage - [www.skyve.org](https://skyve.org/).
 
 Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer a range of support agreements if required. Or use it for free, no obligation.
 
+## Contributing
+
+We welcome new contributions to the project, however small. Please refer to our [contribution guidelines](https://github.com/skyvers/skyve/blob/master/CONTRIBUTING.md) for information about contributing to Skyve.
+
+## Questions
+
+If you've found a bug or want to request a new feature, please create a [GitHub Issue](https://github.com/skyvers/skyve/issues/new/choose).
+
+If you need help getting started with or extending Skyve, please reach out on [Slack](https://join.slack.com/t/skyveframework/shared_invite/enQtNDMwNTcyNzE0NzI2LTRkMWUxZDBlZmFlMmJkMjQzYWMzYWQxMmQzYWQ1ZTdlODNkNjRlYzVhYjFmMmQ4NTlhYWY4MjNhMGVkZGNlMjY). Someone from the community or a Skyve developer will be happy to assist. Or use the [skyve tag on StackOverflow](https://stackoverflow.com/tags/skyve) and ask for help there.
+
 ## Getting Started
 
-In addition to the [Skyve platform website](https://skyve.org/) which hosts a fully functional demo and training videos, there is also a comprehensive development guide as well as a cookbook.
+The [Skyve platform website](https://skyve.org/) which hosts training videos, links to a comprehensive development guide, Skyve tutorial as well as a cookbook.
+
+### Skyve Tutorial
+
+[This tutorial](https://skyvers.github.io/Aged-care/) walks through building a sample application using Foundry and no-code, setting up your development environment and building upon it with low-code, and finally some more advanced logic with code.
 
 ### User Guide
 
@@ -58,24 +73,44 @@ The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://g
 
 ## Creating a new Skyve project
 
-### Before you start
+We recommend starting your Skyve experience with Skyve Foundry - https://foundry.skyve.org/foundry.
 
-* Install a Java 8 JDK for your operating system.
-* Install Eclipse or an alternative Java based Integrated Development Environment.
-* Install JBoss Wildfly - Our instructions are for Wildfly-10.1.0.Final. You may use other versions and other application servers if you're familiar with configuration (we've tested up to Wildfly 15).
+Skyve Foundry provides a point and click project creator: you can quickly declare the data model for your project, deploy and test your project using Skyve Foundry's Free Trial server.
 
-These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
+Once your foundry project is created, you can use the collaboration feature to connect Skyve Foundry to a secure git code repository, then continue making changes using both Skyve Foundry, or in your own preferred Integrated Development Environment (IDE) (Eclipse, IntelliJ etc) on your local development infrastructure.
+
+Using Skyve Foundry to create your project will not prevent you deploying the application you create to your own infrastructure if preferred, but it will enable you to quicky deploy and test your application. You can also export your project at any time.
 
 ### Overview
-(Note - these steps are demonstrated in detail in the video on the help-tab of the Skyve project creator or here - https://youtu.be/jcwk6pFnErg)
-1. Use the Project Creator to create a new Skyve project download and receive the link to the file via email. 
+
+1. Create your project with Skyve Foundry, or by using the Skyve project creator.
+ a. for Skyve Foundry - create a new git repository project (via github or gitlab etc) and set the in repository URL on the collaboration tab in Skyve Foundry, then push your project to the repository (video steps are available at https://youtu.be/G3OQu5PeUn8)
+ b. for the project creator, create a new Skyve project download and receive the link to the file via email  (video steps are available at https://youtu.be/DkdJ7ROYoxc)
 2. Import the project as a maven project and run the Generate Domain run configuration.
 3. Configure your application instance properties `.json` file and data source `-ds.xml` files and place them into the Wildfly deployment folder. In the `.json` settings file, you will need to (at a minimum) specify the location for Skyve to store 'content' and specify an environment identifier string to be able to get it with a bootstrap credential (also specified in the `.json` file)
 4. Sign into your application at `localhost:8080/<projectName>` with your bootstrap credentials and begin using the no-code application.
 
 ### Detailed Instructions
 
-#### Creating the Project
+### Before you start
+
+These instructions assume the use of Eclipse with the JBoss Server Tools plugin installed, and Wildfly as the application server.
+
+* Install a Java 11+ JDK for your operating system.
+* Install Eclipse or an alternative Java based Integrated Development Environment.
+* Install JBoss Wildfly - Our instructions are for Wildfly 20+ - you may be able to use older versions and other application servers if you're familiar with configuration.
+
+### Creating your project using Skyve Foundry
+* Go to https://foundry.skyve.org/foundry and register for an account
+* Sign in with your account
+* On the Describe tab, enter a name and description for your application
+* On the Design tab, create documents and attributes
+* On the Customise tab, upload your logo and icons and select from available themes
+* On the Deploy tab, enter a password for a setup user account, then deploy your application
+* On the Collaboration tab, enter the URL for your git code repository and push your project to the repository. You can then pull your project to your local development environment.
+Video instructions are available using the "How to get started" icon in the title bar of Skyve Foundry
+
+#### Creating your project using the Skyve project creatorr
 * Go to https://foundry.skyve.org/foundry/project.xhtml
 * Enter a valid email address
 * Enter project name
@@ -96,13 +131,15 @@ These instructions assume the use of Eclipse with the JBoss Server Tools plugin 
 
 #### Configure the application server and database
 * To configure Wildfly to deploy your application:
-	* Copy the contents of the deployments folder to `wildfly/standalone/deployments/`
-		* The project root contains a data source file (projectName-ds.xml) and a json instance settings file (projectName.json).
+	* Copy the project configuration files to `wildfly/standalone/deployments/`
+		* The project root contains a data source file (`projectName-ds.xml`) and a json instance settings file (`projectName.json`).
 		* The datasource file declares the data source connection name to the nominated database engine. The JDBC connection string and associated credentials settings must be valid for the selected database engine. Skyve will create all required tables, so an empty database is required. For an H2 database, this will specify the path to the database file's location.
 		* The json settings file contains the settings specific to the application instance and includes credentials for a boostrap user to get your started.
-		* You will need to configure the `content: { directory:` path within your JSON to be a valid directory on your filesystem. This is where any uploaded files will be stored and indexed by Elastic Search.
-	* If you selected a database engine other than H2, you'll need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you'll need to modify the projectName-ds.xml file in the deployments folder accordingly.
-		- You'll also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
+		* You will need to configure the `content: { directory:` path within your JSON to be a valid directory on your filesystem. This is where any uploaded files will be stored and indexed by Elastic Search. Create a new directory in your file system at this path, Skyve will not create this for you.
+    * You will need to create an `addins` directory either within your content directory (where Skyve will look by default), or configure `addins: { directory:` within your `projectName.json` to the location of the addins directory.
+    * Copy `skyve-content.zip` from your project target directory into your addins directory (if not present in target, this can be triggered by performing a maven compile or maven install)
+	* If you selected a database engine other than H2, you will need to create a schema (MySQL) or database name (MSSQL) matching your specified projectName. If you want to use a different database or schema name, you will need to modify the `projectName-ds.xml` file in the deployments folder accordingly.
+		- You may also need to configure Wildfly appropriately - for example, for MSSQL, you'll need to place the `sqljdbc42.jar` and `sqljdbc_auth.dll` into `\wildfly\modules\system\layers\base\com\microsoft\sqlserver\main\`
 	* To deploy your application, right-click the Wildfly server node in the Eclipse server window and add your project. Then start the server using the start tool on the Server window toolbar.
 
 #### Sign in
@@ -326,34 +363,5 @@ These instructions apply to projects created using the [Creating a new Skyve Pro
 - Deploy your project locally and sanity check everything still works correctly
 - When satisified, commit the changes to your project
 
-## Configuring Spring Security
-If you used the Skyve Project Creator with the correct database dialect selected, the spring security settings will already be correct. However, if you are manually changing dialect, you will need to review and modify the spring security settings at `WEB-INF/spring/security.xml` within the `<authentication-provider>` tag.
-
-Modify the sql statements to reflect your chosen dialect.
-
-### MSSQL
-```
-<jdbc-user-service data-source-ref="dataSource"
-                    users-by-username-query="select bizCustomer + '/' + userName, password, case when inactive = 1 then 0 else 1 end from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
-                    authorities-by-username-query="select bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
-                    group-authorities-by-username-query="select bizCustomer + '/' + userName, bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
-                    role-prefix="none" />
-```
-
-### MySQL
-```
-<jdbc-user-service data-source-ref="dataSource"
-                    users-by-username-query="select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
-                    authorities-by-username-query="select concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
-                    group-authorities-by-username-query="select concat(bizCustomer, '/', userName), concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?"
-                    role-prefix="none" />
-```
-		    
-### H2
-```
-<jdbc-user-service data-source-ref="dataSource" 
-		users-by-username-query="select bizCustomer || '/' || userName, password, not ifNull(inactive, false) from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-		authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-		group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-		role-prefix="none" />
-```			
+[skyve-logo]: https://images.squarespace-cdn.com/content/5bac80be16b6407444b95a0c/1604036522472-OMV89LAE4GYP8JV9OC1C/skyve-logo-black.png?content-type=image%2Fpng
+[skyve-url]: https://www.skyve.org/

@@ -35,7 +35,11 @@ public class Next implements ServerSideAction<UserExtension> {
 			UserBizlet.validateUserContact(adminUser, e);
 			
 			// propose a new username
-			adminUser.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(adminUser));
+			if(adminUser.getContact()!=null && adminUser.getContact().getEmail1()!=null) {
+				adminUser.setUserName(adminUser.getContact().getEmail1());
+			} else {
+				adminUser.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(adminUser));
+			}
 			adminUser.setWizardState(WizardState.confirmUserNameAndPassword);
 			
 		} else if(WizardState.confirmUserNameAndPassword.equals(adminUser.getWizardState())){
