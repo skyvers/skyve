@@ -290,9 +290,15 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
 			else if (text) {
+				if (value != null) {
+					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
+				}
 				indent().append("text(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
 			}
 			else if (_input) {
+				if (value != null) {
+					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
+				}
 				indent().append("_input(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
 			}
 			else if (selectOne) {
