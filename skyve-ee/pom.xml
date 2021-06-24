@@ -273,32 +273,6 @@
 			<scope>import</scope>
 			<type>pom</type>
 		</dependency>
-		<!-- html reports and html to pdf conversion -->
-		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
-			<version>${freemarker.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-core</artifactId>
-			<version>${flying-saucer.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-pdf</artifactId>
-			<version>${flying-saucer.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-swt</artifactId>
-			<version>${flying-saucer.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.cronutils</groupId>
-			<artifactId>cron-utils</artifactId>
-			<version>9.0.1</version>
-		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>

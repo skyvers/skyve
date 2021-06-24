@@ -17,9 +17,9 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.CommunicationUtil;
 import org.skyve.web.WebContext;
 
-import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;

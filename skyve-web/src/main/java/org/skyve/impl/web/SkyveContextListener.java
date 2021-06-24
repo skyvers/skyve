@@ -85,6 +85,8 @@ public class SkyveContextListener implements ServletContextListener {
 				}
 			}
 			
+			EXT.getReporting().startup();
+			
 			JobScheduler.init();
 			
 			// Set up the session cookie
@@ -652,7 +654,12 @@ public class SkyveContextListener implements ServletContextListener {
 		try {
 			try {
 				try {
-					JobScheduler.dispose();
+					try {
+						JobScheduler.dispose();
+					}
+					finally {
+						EXT.getReporting().shutdown();
+					}
 				}
 				finally {
 					// Ensure the caches are destroyed even in the event of other failures first

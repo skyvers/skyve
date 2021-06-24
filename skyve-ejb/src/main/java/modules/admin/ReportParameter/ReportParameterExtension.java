@@ -3,6 +3,7 @@ package modules.admin.ReportParameter;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
@@ -94,11 +95,11 @@ public class ReportParameterExtension extends ReportParameter {
 					Binder.createCompoundBinding(Binder.createIndexedBinding(ReportTemplate.parametersPropertyName, index),
 							ReportParameter.reportInputValuePropertyName),
 					String.format("Value for parameter '%s' is required.", this.getName())));
-		} else if (ReportParameter.Type.date == this.getType() && this.getReportInputValue() != null) {
+		} else if (Type.date == this.getType() && this.getReportInputValue() != null) {
 			Converter<DateOnly> dateConverter = CORE.getCustomer().getDefaultDateConverter();
 			try {
 				dateConverter.fromDisplayValue(this.getReportInputValue());
-			} catch (Exception ex) {
+			} catch (@SuppressWarnings("unused") Exception ex) {
 				String expectedDateFormat = "dd-mmm-yyyy";
 				if (dateConverter instanceof DD_MM_YYYY) {
 					expectedDateFormat = DD_MM_YYYY.PATTERN;
@@ -117,20 +118,20 @@ public class ReportParameterExtension extends ReportParameter {
 								this.getReportInputValue(),
 								expectedDateFormat)));
 			}
-		} else if (ReportParameter.Type.integer == this.getType() && this.getReportInputValue() != null) {
+		} else if (Type.integer == this.getType() && this.getReportInputValue() != null) {
 			try {
 				Integer.parseInt(this.getReportInputValue());
-			} catch (NumberFormatException nfe) {
+			} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
 				e.getMessages().add(new Message(
 						Binder.createCompoundBinding(Binder.createIndexedBinding(ReportTemplate.parametersPropertyName, index),
 								ReportParameter.reportInputValuePropertyName),
 						String.format("Could not parse numerical value '%s'. Expected a whole number.",
 								this.getReportInputValue())));
 			}
-		} else if (ReportParameter.Type.longInteger == this.getType() && this.getReportInputValue() != null) {
+		} else if (Type.longInteger == this.getType() && this.getReportInputValue() != null) {
 			try {
 				Long.parseLong(this.getReportInputValue());
-			} catch (NumberFormatException nfe) {
+			} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
 				e.getMessages().add(new Message(
 						Binder.createCompoundBinding(Binder.createIndexedBinding(ReportTemplate.parametersPropertyName, index),
 								ReportParameter.reportInputValuePropertyName),

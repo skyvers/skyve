@@ -1,9 +1,6 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
@@ -16,10 +13,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Report Parameter
@@ -35,7 +30,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public abstract class ReportParameter extends AbstractPersistentBean implements ChildBean<ReportTemplateExtension> {
+public abstract class ReportParameter extends AbstractPersistentBean implements ChildBean<ReportTemplateExtension>, org.skyve.domain.app.admin.ReportParameter {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -89,87 +84,6 @@ public abstract class ReportParameter extends AbstractPersistentBean implements 
 
 	/** @hidden */
 	public static final String formattedInputValuePropertyName = "formattedInputValue";
-
-	/**
-	 * Parameter Type
-	 * <br/>
-	 * The data type of this parameter
-	 **/
-	@XmlEnum
-	public static enum Type implements Enumeration {
-		text("text", "Text"),
-		integer("integer", "Integer"),
-		longInteger("long", "Long Integer"),
-		date("date", "Date");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues;
-
-		private Type(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toDescription() {
-			return description;
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static Type fromCode(String code) {
-			Type result = null;
-
-			for (Type value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static Type fromDescription(String description) {
-			Type result = null;
-
-			for (Type value : values()) {
-				if (value.description.equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Type[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Type value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
-			return domainValues;
-		}
-	}
 
 	/**
 	 * Parameter Name

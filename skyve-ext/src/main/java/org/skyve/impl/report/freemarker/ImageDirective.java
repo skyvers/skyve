@@ -1,4 +1,4 @@
-package services.report.freemarker;
+package org.skyve.impl.report.freemarker;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,6 @@ import freemarker.template.TemplateScalarModel;
  * </p>
  */
 public class ImageDirective implements TemplateDirectiveModel {
-
 	private static final String PARAM_FILENAME = "filename";
 	private static final String PARAM_MODULE = "module";
 	private static final String PARAM_ALT = "alt";
@@ -60,10 +59,8 @@ public class ImageDirective implements TemplateDirectiveModel {
 	private static final String PARAM_STYLE = "style";
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-			throws TemplateException, IOException {
-
+	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
 		}
@@ -86,130 +83,117 @@ public class ImageDirective implements TemplateDirectiveModel {
 				classParam = null,
 				styleParam = null;
 
-		Iterator paramIter = params.entrySet().iterator();
+		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
-			Map.Entry ent = (Map.Entry) paramIter.next();
+			Map.Entry<?, ?> ent = (Map.Entry<?, ?>) paramIter.next();
 
 			String paramName = (String) ent.getKey();
 			TemplateModel paramValue = (TemplateModel) ent.getValue();
 
 			if (paramName.equals(PARAM_FILENAME)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_FILENAME));
 				}
 				filenameParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_MODULE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_MODULE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_MODULE));
 				}
 				moduleParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_ALT)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_ALT)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_ALT));
 				}
 				altParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_HEIGHT)) {
+			}
+			else if (paramName.equals(PARAM_HEIGHT)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					heightParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
-					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
-			} else if (paramName.equals(PARAM_WIDTH)) {
+				else if (paramValue instanceof TemplateNumberModel) {
+					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				}
+				else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
+				}
+			}
+			else if (paramName.equals(PARAM_WIDTH)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					widthParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
-					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
 				}
-			} else if (paramName.equals(PARAM_CLASS)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+				else if (paramValue instanceof TemplateNumberModel) {
+					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				}
+				else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
+				}
+			}
+			else if (paramName.equals(PARAM_CLASS)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_CLASS));
 				}
 				classParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_STYLE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_STYLE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_STYLE));
 				}
 				styleParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else {
-				throw new TemplateModelException(
-						"Unsupported parameter: " + paramName);
+			}
+			else {
+				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 		}
 
 		// do the actual directive execution
-		Writer out = env.getOut();
-		if (filenameParam != null) {
-			File resourceFile = CORE.getRepository().findResourceFile(filenameParam, CORE.getCustomer().getName(), moduleParam);
-			if (resourceFile != null && resourceFile.exists()) {
-				// encode file to base64
-				byte[] fileContent = Files.readAllBytes(resourceFile.toPath());
-
-				String mimeType = parseMimeTypeFromFilename(filenameParam);
-
-				StringBuilder s = new StringBuilder();
-				s.append(String.format("<img src='data:%s;base64,%s'",
-						mimeType,
-						Base64.getEncoder().encodeToString(fileContent)));
-
-				if (altParam != null) {
-					s.append(" alt='").append(altParam).append("'");
+		try (Writer out = env.getOut()) {
+			if (filenameParam != null) {
+				File resourceFile = CORE.getRepository().findResourceFile(filenameParam, CORE.getCustomer().getName(), moduleParam);
+				if (resourceFile != null && resourceFile.exists()) {
+					// encode file to base64
+					byte[] fileContent = Files.readAllBytes(resourceFile.toPath());
+	
+					MimeType mimeType = MimeType.fromFileName(filenameParam);
+					if (mimeType == null) {
+						throw new TemplateModelException("File type not found: " + filenameParam);
+					}
+	
+					StringBuilder s = new StringBuilder();
+					s.append("<img src='data:").append(mimeType.toString()).append(";base64,");
+					s.append(Base64.getEncoder().encodeToString(fileContent)).append('\'');
+	
+					if (altParam != null) {
+						s.append(" alt='").append(altParam).append("'");
+					}
+	
+					if (heightParam != null) {
+						s.append(" height='").append(heightParam).append("'");
+					}
+	
+					if (widthParam != null) {
+						s.append(" width='").append(widthParam).append("'");
+					}
+	
+					if (classParam != null) {
+						s.append(" class='").append(classParam).append("'");
+					}
+	
+					if (styleParam != null) {
+						s.append(" style='").append(styleParam).append("'");
+					}
+	
+					s.append(" />");
+	
+					// System.out.println("@img output: " + s.toString());
+	
+					out.write(s.toString());
 				}
-
-				if (heightParam != null) {
-					s.append(" height='").append(heightParam).append("'");
+				else {
+					throw new TemplateModelException("File not found: " + filenameParam);
 				}
-
-				if (widthParam != null) {
-					s.append(" width='").append(widthParam).append("'");
-				}
-
-				if (classParam != null) {
-					s.append(" class='").append(classParam).append("'");
-				}
-
-				if (styleParam != null) {
-					s.append(" style='").append(styleParam).append("'");
-				}
-
-				s.append(" />");
-
-				// System.out.println("@img output: " + s.toString());
-
-				out.write(s.toString());
-			} else {
-				throw new TemplateModelException("File not found: " + filenameParam);
 			}
 		}
-	}
-
-	/**
-	 * Guesses the mime type from the specified filename's extension.
-	 * 
-	 * @param filename The filename supplied to the directive
-	 * @return The mime type of the file
-	 * @throws TemplateModelException
-	 */
-	private String parseMimeTypeFromFilename(String filename) throws TemplateModelException {
-		String ext = filename.substring(filename.lastIndexOf(".") + 1);
-
-		if (ext.contentEquals("png")) {
-			return MimeType.png.toString();
-		} else if (ext.contentEquals("jpg") || ext.contentEquals("jpeg")) {
-			return MimeType.jpeg.toString();
-		} else if (ext.contentEquals("gif")) {
-			return MimeType.gif.toString();
-		} else if (ext.contentEquals(MimeType.bitmap.getStandardFileSuffix())) {
-			return MimeType.bitmap.toString();
-		} else if (ext.contentEquals(MimeType.tiff.getStandardFileSuffix())) {
-			return MimeType.tiff.toString();
-		}
-
-		throw new TemplateModelException("Unsupported file type: " + ext);
 	}
 }

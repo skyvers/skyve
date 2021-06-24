@@ -1,4 +1,4 @@
-package modules.admin.Communication;
+package org.skyve.util;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -12,11 +12,17 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.CommunicationTemplate;
+import org.skyve.domain.app.admin.Subscription;
+import org.skyve.domain.app.admin.Communication;
+import org.skyve.domain.app.admin.Communication.FormatType;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.util.TimeUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
@@ -25,23 +31,9 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
-import org.skyve.util.FileUtil;
-import org.skyve.util.Mail;
-import org.skyve.util.MailAttachment;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import modules.admin.ModulesUtil;
-import modules.admin.Communication.actions.GetResults;
-import modules.admin.Configuration.ConfigurationExtension;
-import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.FormatType;
-import modules.admin.domain.CommunicationTemplate;
-import modules.admin.domain.Subscription;
-
 public class CommunicationUtil {
-
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
@@ -73,6 +65,38 @@ public class CommunicationUtil {
 		FILE, SMTP;
 	}
 
+	public static class CommunicationCalendarItem {
+		private String googleCalendarLink;
+		private String yahooCalendarLink;
+		private byte[] icsFileAttachment;
+		
+		public String getGoogleCalendarLink() {
+			return googleCalendarLink;
+		}
+		public void setGoogleCalendarLink(String googleCalendarLink) {
+			this.googleCalendarLink = googleCalendarLink;
+		}
+		public String getYahooCalendarLink() {
+			return yahooCalendarLink;
+		}
+		public void setYahooCalendarLink(String yahooCalendarLink) {
+			this.yahooCalendarLink = yahooCalendarLink;
+		}
+		public byte[] getIcsFileAttachment() {
+			return icsFileAttachment;
+		}
+		public void setIcsFileAttachment(byte[] icsFileAttachment) {
+			this.icsFileAttachment = icsFileAttachment;
+		}
+		public CommunicationCalendarItem(String googleCalendarLink, String yahooCalendarLink, byte[] icsFileAttachment) {
+			this.googleCalendarLink = googleCalendarLink;
+			this.yahooCalendarLink = yahooCalendarLink;
+			this.icsFileAttachment = icsFileAttachment;
+		}
+		public CommunicationCalendarItem() {
+		}
+	}
+
 	/**
 	 * actionCommunicationRequest
 	 * 
@@ -99,7 +123,7 @@ public class CommunicationUtil {
 
 		// augment communication specific beans to always include the
 		// communication itself, and the current admin user
-		modules.admin.domain.User adminUser = ModulesUtil.currentAdminUser();
+		org.skyve.domain.app.admin.User adminUser = pers.retrieve(org.skyve.domain.app.admin.User.MODULE_NAME, org.skyve.domain.app.admin.User.DOCUMENT_NAME, user.getId());
 		List<Bean> beanList = new ArrayList<>();
 		if (specificBeans != null && specificBeans.length > 0) {
 			Collections.addAll(beanList, specificBeans);
@@ -110,7 +134,7 @@ public class CommunicationUtil {
 		String sendFromExpression = communication.getSendFrom();
 		String sendFrom = null;
 		if (sendFromExpression == null) {
-			sendFrom = ConfigurationExtension.defaultSMTPSender();
+			sendFrom = UtilImpl.SMTP_SENDER;
 		} else {
 			// resolve binding expression
 			sendFrom = Binder.formatMessage(sendFromExpression, specificBeans);
@@ -196,10 +220,14 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (communication.getFormatType()) {
 					case email:
-						EXT.writeMail(
-								new Mail().addTo(sendToAddresses).addCC(ccToAddresses).addBCC(bcc).from(sendFrom).subject(emailSubject).body(htmlEnclose(emailBody.toString()))
-										.attach(attachments),
-								fos);
+						EXT.writeMail(new Mail().addTo(sendToAddresses)
+													.addCC(ccToAddresses)
+													.addBCC(bcc)
+													.from(sendFrom)
+													.subject(emailSubject)
+													.body(htmlEnclose(emailBody.toString()))
+													.attach(attachments),
+										fos);
 						resultingFilePath = filePath;
 						break;
 					default:
@@ -220,8 +248,13 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (communication.getFormatType()) {
 				case email:
-					EXT.sendMail(
-							new Mail().addTo(sendToAddresses).addCC(ccToAddresses).addBCC(bcc).from(sendFrom).subject(emailSubject).body(emailBody.toString()).attach(attachments));
+					EXT.sendMail(new Mail().addTo(sendToAddresses)
+											.addCC(ccToAddresses)
+											.addBCC(bcc)
+											.from(sendFrom)
+											.subject(emailSubject)
+											.body(emailBody.toString())
+											.attach(attachments));
 
 					if (webContext != null) {
 						webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
@@ -407,16 +440,20 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	public static void sendSimpleBeanCommunication(String sendTo, String subject, String body, ResponseMode responseMode, FormatType formatType, Bean... beans) throws Exception {
-		Communication c = Communication.newInstance();
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(Communication.MODULE_NAME);
+		Document d = m.getDocument(c, Communication.DOCUMENT_NAME);
+		Communication bean = d.newInstance(u);
 
-		c.setDescription("Simple Bean Communication");
-		c.setSendTo(sendTo);
-		c.setSubject(subject);
-		c.setBody(body);
-		c.setFormatType(formatType);
-		c.setSystemUse(Boolean.TRUE);
+		bean.setDescription("Simple Bean Communication");
+		bean.setSendTo(sendTo);
+		bean.setSubject(subject);
+		bean.setBody(body);
+		bean.setFormatType(formatType);
+		bean.setSystemUse(Boolean.TRUE);
 
-		send(c, RunMode.ACTION, responseMode, null, beans);
+		send(bean, RunMode.ACTION, responseMode, null, beans);
 	}
 
 	/**
@@ -431,11 +468,16 @@ public class CommunicationUtil {
 		Communication result = getSystemCommunicationByDescription(description);
 		if (result == null) {
 			// create a basic default system email
-			result = Communication.newInstance();
+			User u = CORE.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule(Communication.MODULE_NAME);
+			Document d = m.getDocument(c, Communication.DOCUMENT_NAME);
+			result = d.newInstance(u);
+
 			result.setDescription(description);
 			result.setFormatType(FormatType.email);
 			result.setSystemUse(Boolean.TRUE);
-			result.setSendFrom(ConfigurationExtension.defaultSMTPSender());
+			result.setSendFrom(UtilImpl.SMTP_SENDER);
 			result.setSendTo(sendToExpression);
 			result.setCcTo(ccExpression);
 			result.setSubject(defaultSubject);
@@ -511,11 +553,11 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Communication kickOffJob(Communication bean) throws Exception {
+	public static <T extends Communication> T kickOffJob(T bean) throws Exception {
 
-		Communication communication = bean;
+		T communication = bean;
 
-		String results = GetResults.getResults(communication);
+		String results = getResults(communication);
 
 		// save this communication if it has not been saved yet
 		if (communication.isNotPersisted()) {
@@ -537,6 +579,50 @@ public class CommunicationUtil {
 		communication.originalValues().remove(Communication.resultsPropertyName);
 
 		return communication;
+	}
+
+	public static String getResults(Communication bean) throws Exception {
+
+		// validate required fields
+		if (bean.getModuleName() == null) {
+			throw new ValidationException(
+					new Message(Communication.moduleNamePropertyName, "A module must be selected for results."));
+		}
+		if (bean.getDocumentName() == null) {
+			throw new ValidationException(
+					new Message(Communication.documentNamePropertyName, "A document must be selected for results."));
+		}
+		if (bean.getTag() == null) {
+			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
+		}
+
+		long count = bean.getTag().countDocument(bean.getModuleName(), bean.getDocumentName());
+
+		StringBuilder results = new StringBuilder();
+		results.append(count).append(" communications for ");
+		results.append(bean.getDocumentName());
+
+		if (bean.getActionType() != null) {
+			results.append(" will be ");
+			switch (bean.getActionType()) {
+			case saveForBulkSend:
+				results.append("created as a batch for download.");
+				break;
+
+			case sendImmediately:
+				results.append("sent immediately.");
+				break;
+
+			case testBindingsAndOutput:
+				results.append("tested.");
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		return results.toString();
 	}
 
 	/**

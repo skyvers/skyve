@@ -10,28 +10,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.job.Job;
 import org.skyve.util.Binder;
+import org.skyve.util.CommunicationUtil;
 import org.skyve.util.MailAttachment;
 
 import freemarker.template.Template;
-import modules.admin.Communication.CommunicationUtil;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
-import services.report.ReportService;
 
 public class ReportJob extends Job {
-
 	private static final long serialVersionUID = 5330288443923536041L;
 
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL = "SYSTEM Scheduled Report";
@@ -40,9 +38,6 @@ public class ReportJob extends Job {
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_BODY = String.format("Hi {%s}, <br /><br />" +
 					"Please find attached your copy of a scheduled report.",
 			Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName));
-
-	@Inject
-	private ReportService reportService;
 
 	@Override
 	public void execute() throws Exception {
@@ -55,7 +50,7 @@ public class ReportJob extends Job {
 		final ReportTemplate report = CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, getBean().getBizId());
 
 		// TODO: Diverge from Jasper
-		Template template = reportService.getTemplate(report.getTemplateName());
+		Template template = EXT.getReporting().getFreemarkerTemplate(report.getTemplateName());
 
 		Map<String, Object> root = new HashMap<>();
 
@@ -64,28 +59,33 @@ public class ReportJob extends Job {
 
 		// put all the datasets into the root
 		for (ReportDatasetExtension dataset : report.getDatasets()) {
-			switch (dataset.getDatasetType()) {
-				case bizQL:
-					List<Bean> results = dataset.executeQuery();
-					if (results != null) {
-						root.put(dataset.getDatasetName(), results);
-					}
-					break;
-				case SQL:
-					List<DynaBean> sqlResults = dataset.executeSQLQuery();
-					if (sqlResults != null) {
-						root.put(dataset.getDatasetName(), sqlResults);
-					}
-					break;
-				case constant:
-					root.put(dataset.getDatasetName(), dataset.getQuery());
-					break;
-				case classValue:
-					List<DynaBean> beanResults = dataset.executeClass();
-					if (beanResults != null) {
-						root.put(dataset.getDatasetName(), beanResults);
-					}
-					break;
+			DatasetType type = dataset.getDatasetType();
+			if (type != null) {
+				switch (type) {
+					case bizQL:
+						List<Bean> results = dataset.executeQuery();
+						if (results != null) {
+							root.put(dataset.getDatasetName(), results);
+						}
+						break;
+					case SQL:
+						List<DynaBean> sqlResults = dataset.executeSQLQuery();
+						if (sqlResults != null) {
+							root.put(dataset.getDatasetName(), sqlResults);
+						}
+						break;
+					case constant:
+						root.put(dataset.getDatasetName(), dataset.getQuery());
+						break;
+					case classValue:
+						List<DynaBean> beanResults = dataset.executeClass();
+						if (beanResults != null) {
+							root.put(dataset.getDatasetName(), beanResults);
+						}
+						break;
+					default:
+						throw new IllegalStateException(type + " is not catered for");
+				}
 			}
 		}
 
@@ -102,7 +102,7 @@ public class ReportJob extends Job {
 				reportAttachment = new MailAttachment(String.format("%s.csv", report.getName()), reportBytes, MimeType.csv);
 			} else if (ReportTemplate.OutputFormat.PDF == report.getOutputFormat()) {
 				try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-					reportService.generatePDFFromHTML(inputStream, out);
+					EXT.getReporting().generateFreemarkerPDFFromHTML(inputStream, out);
 					reportAttachment = new MailAttachment(String.format("%s.pdf", report.getName()), out.toByteArray(), MimeType.pdf);
 				}
 			} else {

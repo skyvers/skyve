@@ -11,6 +11,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.skyve.report.Reporting;
 
 @ApplicationScoped
 public class SkyveCDIProducer implements Serializable {
@@ -44,5 +45,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static AddInManager getAddInManager() {
 		return new AddInManagerInjectable();
+	}
+
+	@Produces
+	public static Reporting getReporting() {
+		return new ReportingInjectable();
 	}
 }

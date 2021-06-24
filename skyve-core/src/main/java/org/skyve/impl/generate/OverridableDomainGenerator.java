@@ -57,6 +57,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
@@ -1403,17 +1404,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// 2) The enumeration is a reference to a definition elsewhere - in this case, forExt is true
 				// and the enumeration is not defined in the enumeration target vanilla document
 				Enumeration target = enumeration.getTarget();
-				Document targetDocument = target.getOwningDocument();
-				boolean requiresExtension = forExt &&
-												(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
-				if (requiresExtension) {
-					contents.append(repository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
+				String implementingEnumClassName = target.getImplementingEnumClassName();
+				if (implementingEnumClassName != null) {
+					contents.append(implementingEnumClassName);
 				}
-				contents.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
-				if (requiresExtension) {
-					contents.append("Ext");
+				else {
+					Document targetDocument = target.getOwningDocument();
+					boolean requiresExtension = forExt &&
+													(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
+					if (requiresExtension) {
+						contents.append(repository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
+					}
+					contents.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
+					if (requiresExtension) {
+						contents.append("Ext");
+					}
+					contents.append('$').append(enumeration.toJavaIdentifier());
 				}
-				contents.append('$').append(enumeration.toJavaIdentifier());
 				contents.append("</param>\n");
 				contents.append(indentation).append("\t\t\t</type>\n");
 				contents.append(indentation).append("\t\t</property>\n");
@@ -1877,10 +1884,31 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else if (attribute instanceof Enumeration) {
 					// Find the maximum code length
 					Enumeration enumeration = (Enumeration) attribute;
-					for (EnumeratedValue value : enumeration.getValues()) {
-						int valueLength = value.getCode().length();
-						if (valueLength > length) {
-							length = valueLength;
+					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
+					if (implementingEnumClassName != null) { // hand-coded implementation
+						// Load the class and find the longest code domain value
+						try {
+							Class<org.skyve.domain.types.Enumeration> enumerationClass = repository.getEnum(enumeration);
+							@SuppressWarnings("unchecked")
+							List<DomainValue> values = (List<DomainValue>) enumerationClass.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
+							for (DomainValue value : values) {
+								int valueLength = value.getCode().length();
+								if (valueLength > length) {
+									length = valueLength;
+								}
+							}
+						}
+						catch (Exception e) {
+							throw new MetaDataException("Cannot determine length of enumeration values for implementing class " + implementingEnumClassName, e);
+						}
+					}
+					else { // generated implementation
+						// Find the longest code domain value in the metadata
+						for (EnumeratedValue value : enumeration.getValues()) {
+							int valueLength = value.getCode().length();
+							if (valueLength > length) {
+								length = valueLength;
+							}
 						}
 					}
 				}
@@ -2964,27 +2992,40 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				AttributeType type = attribute.getAttributeType();
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
-				String propertySimpleClassName;
+				String propertySimpleClassName = null;
 				if (attribute instanceof Enumeration) {
 					Enumeration enumeration = (Enumeration) attribute;
-					propertySimpleClassName = enumeration.toJavaIdentifier();
-
-					if (enumeration.getAttributeRef() != null) { // this is a reference
-						if (enumeration.getDocumentRef() != null) { // references a different document
-							StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
-							fullyQualifiedEnumName.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
-							fullyQualifiedEnumName.append('.').append(enumeration.toJavaIdentifier());
-							imports.add(fullyQualifiedEnumName.toString());
+					
+					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
+					if (implementingEnumClassName != null) { // hand-coded implementation
+						// cater for inner classes
+						implementingEnumClassName = implementingEnumClassName.replace('$', '.');
+						final String finalClassName = implementingEnumClassName;
+						if (document.getInterfaces().stream().noneMatch(i -> finalClassName.startsWith(i.getInterfaceName() + '.'))) {
+							imports.add(finalClassName);
 						}
+						propertySimpleClassName = implementingEnumClassName.substring(implementingEnumClassName.lastIndexOf('.') + 1);
 					}
-					else {
-						imports.add("org.skyve.domain.types.Enumeration");
-						imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
-						imports.add("java.util.List");
-						imports.add("java.util.ArrayList");
-						imports.add("javax.xml.bind.annotation.XmlEnum");
-
-						appendEnumDefinition(enumeration, propertySimpleClassName, enums);
+					else { // generated implementation
+						propertySimpleClassName = enumeration.toJavaIdentifier();
+	
+						if (enumeration.getAttributeRef() != null) { // this is a reference
+							if (enumeration.getDocumentRef() != null) { // references a different document
+								StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
+								fullyQualifiedEnumName.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
+								fullyQualifiedEnumName.append('.').append(propertySimpleClassName);
+								imports.add(fullyQualifiedEnumName.toString());
+							}
+						}
+						else { // this is an inline definition
+							imports.add("org.skyve.domain.types.Enumeration");
+							imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
+							imports.add("java.util.List");
+							imports.add("java.util.ArrayList");
+							imports.add("javax.xml.bind.annotation.XmlEnum");
+	
+							appendEnumDefinition(enumeration, propertySimpleClassName, enums);
+						}
 					}
 				}
 				else if (attribute instanceof Reference) {

@@ -43,7 +43,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public abstract class ReportTemplate extends AbstractPersistentBean {
+public abstract class ReportTemplate extends AbstractPersistentBean implements org.skyve.domain.app.admin.ReportTemplate {
 	/**
 	 * For Serialization
 	 * @hidden

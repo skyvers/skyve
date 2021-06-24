@@ -509,12 +509,12 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	private String sail;
 
 	/**
-	 * Login Customer
+	 * Sign In Customer
 	 **/
 	private String sailLoginCustomer;
 
 	/**
-	 * Login Password
+	 * Sign In Password
 	 **/
 	private String sailLoginPassword;
 

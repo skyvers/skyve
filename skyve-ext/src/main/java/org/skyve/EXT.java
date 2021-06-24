@@ -1,14 +1,12 @@
 package org.skyve;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -25,7 +23,6 @@ import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.content.MimeType;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -41,10 +38,9 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.MailUtil;
-import org.skyve.impl.util.ReportParameters;
-import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -61,7 +57,7 @@ import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.report.ReportFormat;
+import org.skyve.report.Reporting;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
@@ -72,9 +68,6 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * The central factory for creating all objects required in skyve ext.
@@ -446,87 +439,13 @@ public class EXT {
 	}
 	
 	/**
-	 * 
-	 * @param user
-	 * @param document
-	 * @param reportName
-	 * @param parameters
-	 * @param bean
-	 * @param format
-	 * @param out
-	 * @return
-	 * @throws Exception
+	 * Get a reporting service.
+	 * @return	A reporting service.
 	 */
-	public static JasperPrint runBeanReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out) throws Exception {
-		return ReportUtil.runBeanReport(user, document, reportName, parameters, bean, format, out);
+	public static Reporting getReporting() {
+		return DefaultReporting.get();
 	}
-
-	/**
-	 * 
-	 * @param user
-	 * @param document
-	 * @param reportName
-	 * @param parameters
-	 * @param format
-	 * @param out
-	 * @return
-	 * @throws Exception
-	 */
-	public static JasperPrint runSQLReport(User user, Document document, String reportName, Map<String, Object> parameters, ReportFormat format, OutputStream out) throws Exception {
-		return ReportUtil.runSQLReport(user, document, reportName, parameters, format, out);
-	}
-
-	/**
-	 * 
-	 * @param user
-	 * @param document
-	 * @param reportName
-	 * @param parameters
-	 * @param bean
-	 * @param format
-	 * @param out
-	 * @return
-	 * @throws Exception
-	 */
-	public static JasperPrint runReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out) throws Exception {
-		return ReportUtil.runReport(user, document, reportName, parameters, bean, format, out);
-	}
-
-	/**
-	 *
-	 * @param user
-	 * @param reportParameters
-	 * @param format
-	 * @param out
-	 * @return
-	 * @throws Exception
-	 */
-	public static List<JasperPrint> runReport(User user, List<ReportParameters> reportParameters, ReportFormat format, OutputStream out) throws Exception {
-		return ReportUtil.runReport(user, reportParameters, format, out);
-	}
-
-	/**
-	 *
-	 * @param jasperPrint
-	 * @param format
-	 * @param out
-	 * @throws JRException
-	 */
-	public static void runReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out) throws Exception {
-		ReportUtil.runReport(jasperPrint, format, out);
-	}
-
-	/**
-	 *
-	 * @param jasperPrintList
-	 * @param format
-	 * @param out
-	 * @throws JRException
-	 */
-	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out) throws Exception {
-		ReportUtil.runReport(jasperPrintList, format, out);
-	}
-
+	
 	/**
 	 * Get a JDBC connection from the skyve data store definition. 
 	 * Skyve uses a container provided JNDI data source or driver/url/user/pass combinationfor connections. 
@@ -622,64 +541,6 @@ public class EXT {
 				result.setAttachmentMimeType(content.getMimeType());
 			}
 		}
-
-		return result;
-	}
-
-	/**
-	 * Returns a mail attachment from a Jasper report as a PDF
-	 * 
-	 * @param reportModuleName
-	 * @param reportDocumentName
-	 * @param reportName
-	 * @param parameters
-	 */
-	public static MailAttachment getMailAttachmentFromReport(String reportModuleName,
-																String reportDocumentName,
-																String reportName,
-																Map<String, Object> parameters)
-	throws Exception {
-		MailAttachment result = new MailAttachment();
-
-		Persistence persistence = CORE.getPersistence();
-		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Document document = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		EXT.runSQLReport(user, document, reportName, parameters, ReportFormat.pdf, out);
-		byte[] reportBytes = out.toByteArray();
-
-		result.setAttachmentFileName(reportName);
-		result.setAttachment(reportBytes);
-		result.setAttachmentMimeType(MimeType.pdf);
-
-		return result;
-	}
-
-	/**
-	 * Returns a mail attachment from a Jasper report as a PDF
-	 *
-	 * @param reportParameters
-	 */
-	public static MailAttachment getMailAttachmentFromReport(List<ReportParameters> reportParameters) throws Exception {
-		if (reportParameters.isEmpty()) {
-			throw new IllegalArgumentException("There must be at least 1 report to generate.");
-		}
-
-		MailAttachment result = new MailAttachment();
-
-		Persistence persistence = CORE.getPersistence();
-		User user = persistence.getUser();
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		EXT.runReport(user, reportParameters, ReportFormat.pdf, out);
-		byte[] reportBytes = out.toByteArray();
-
-		result.setAttachmentFileName(reportParameters.get(0).getReportName());
-		result.setAttachment(reportBytes);
-		result.setAttachmentMimeType(MimeType.pdf);
 
 		return result;
 	}

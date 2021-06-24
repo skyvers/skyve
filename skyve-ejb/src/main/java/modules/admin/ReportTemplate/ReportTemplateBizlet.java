@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
@@ -26,7 +27,6 @@ import org.skyve.web.WebContext;
 import modules.admin.JobSchedule.JobScheduleBizlet;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
-import modules.admin.domain.ReportDataset.DatasetType;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.ReportType;
 
@@ -156,7 +156,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllHours(SELECTED_CODE);
 				for (int i = 0, l = 24; i < l; i++) {
-					Binder.set(bean, "hour" + i, hours.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, "hour" + i, hours.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -171,7 +171,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllDays(SELECTED_CODE);
 				for (int i = 1, l = 32; i < l; i++) {
-					Binder.set(bean, "day" + i, days.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, "day" + i, days.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -180,7 +180,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllMonths(SELECTED_CODE);
 				for (int i = 1, l = 13; i < l; i++) {
-					Binder.set(bean, "month" + i, months.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, "month" + i, months.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 
@@ -189,7 +189,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			} else {
 				bean.setAllWeekdays(SELECTED_CODE);
 				for (int i = 1, l = 8; i < l; i++) {
-					Binder.set(bean, "weekday" + i, weekdays.contains(new Integer(i)) ? Boolean.TRUE : Boolean.FALSE);
+					Binder.set(bean, "weekday" + i, weekdays.contains(Integer.valueOf(i)) ? Boolean.TRUE : Boolean.FALSE);
 				}
 			}
 		}
@@ -387,7 +387,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	/**
 	 * Returns a list of document name domain values for the specified module name.
 	 */
-	private List<DomainValue> getDocumentsForModule(final String moduleName) {
+	private static List<DomainValue> getDocumentsForModule(final String moduleName) {
 		List<DomainValue> results = new ArrayList<>();
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(moduleName);
@@ -407,7 +407,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	 * @param bean The ReportTemplate to validate
 	 * @param e The ValidationException any errors will be added to
 	 */
-	private void validateReportParameters(ReportTemplateExtension bean, ValidationException e) {
+	private static void validateReportParameters(ReportTemplateExtension bean, ValidationException e) {
 		// skip validation for jasper reports
 		if (bean.getReportType() == ReportType.jasper) {
 			return;

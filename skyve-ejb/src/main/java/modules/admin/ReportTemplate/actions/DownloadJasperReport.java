@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.util.ReportUtil;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -66,14 +66,14 @@ public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension
 					break;
 				case integer:
 					if (param.getReportInputValue() != null) {
-						jasperParams.put(param.getName(), Integer.parseInt(param.getReportInputValue()));
+						jasperParams.put(param.getName(), Integer.getInteger(param.getReportInputValue()));
 					} else {
-						jasperParams.put(param.getName(), param.getNumericalDefaultValue().intValue());
+						jasperParams.put(param.getName(), Integer.valueOf(param.getNumericalDefaultValue().intValue()));
 					}
 					break;
 				case longInteger:
 					if (param.getReportInputValue() != null) {
-						jasperParams.put(param.getName(), Long.parseLong(param.getReportInputValue()));
+						jasperParams.put(param.getName(), Long.getLong(param.getReportInputValue()));
 					} else {
 						jasperParams.put(param.getName(), param.getNumericalDefaultValue());
 					}
@@ -90,13 +90,13 @@ public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			// return the correct output format
 			if (ReportTemplate.OutputFormat.CSV == bean.getOutputFormat()) {
-				ReportUtil.runBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.csv,
+				EXT.getReporting().runJasperBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.csv,
 						baos);
 				return new Download(String.format("%s.csv", bean.getName()), new ByteArrayInputStream(baos.toByteArray()),
 						MimeType.csv);
 			}
 
-			ReportUtil.runBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.pdf, baos);
+			EXT.getReporting().runJasperBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.pdf, baos);
 			return new Download(String.format("%s.pdf", bean.getName()), new ByteArrayInputStream(baos.toByteArray()),
 					MimeType.pdf);
 		}

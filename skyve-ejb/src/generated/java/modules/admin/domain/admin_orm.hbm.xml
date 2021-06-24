@@ -66,7 +66,7 @@
 		<property name="attachmentFileName3" length="250" />
 		<property name="formatType" length="5">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
+				<param name="enumClass">org.skyve.domain.app.admin.Communication$FormatType</param>
 			</type>
 		</property>
 		<property name="systemUse" />
@@ -77,10 +77,6 @@
 		<property name="calendarEndTime" type="DateTime" />
 		<property name="calendarDescriptionExpression" length="500" />
 		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_template"/>
-		<bag name="subscriptions" inverse="true">
-			<key column="communication_id" />
-			<one-to-many entity-name="adminSubscription" />
-		</bag>
 		<filter name="adminCommunicationNoneFilter" condition="1=0"/>
 		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminCommunicationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -416,7 +412,7 @@
 		<property name="datasetName" length="50" />
 		<property name="datasetType" length="8">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.ReportDataset$DatasetType</param>
+				<param name="enumClass">org.skyve.domain.app.admin.ReportDataset$DatasetType</param>
 			</type>
 		</property>
 		<property name="query" type="text" />
@@ -441,7 +437,7 @@
 		<property name="description" length="100" />
 		<property name="type" length="7">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.ReportParameter$Type</param>
+				<param name="enumClass">org.skyve.domain.app.admin.ReportParameter$Type</param>
 			</type>
 		</property>
 		<property name="required" />
@@ -546,7 +542,7 @@
 		<property name="declined" />
 		<property name="formatType" length="5">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
+				<param name="enumClass">org.skyve.domain.app.admin.Communication$FormatType</param>
 			</type>
 		</property>
 		<property name="preferredReceiverIdentifier" length="254" />
@@ -556,7 +552,7 @@
 		<filter name="adminSubscriptionUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.admin.domain.Tag" table="ADM_Tag" entity-name="adminTag">
+	<class name="modules.admin.Tag.TagExtension" table="ADM_Tag" entity-name="adminTag">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

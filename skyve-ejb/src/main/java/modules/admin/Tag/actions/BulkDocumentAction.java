@@ -1,6 +1,7 @@
 package modules.admin.Tag.actions;
 
 import modules.admin.Tag.TagDefaultAction;
+import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
@@ -16,19 +17,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class BulkDocumentAction implements ServerSideAction<Tag> {
-	/**
-	 * For Serialization
-	 */
+public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult<Tag> execute(Tag tag, WebContext webContext)
+	public ServerSideActionResult<TagExtension> execute(TagExtension tag, WebContext webContext)
 	throws Exception {
-		
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
 		Customer customer= user.getCustomer();

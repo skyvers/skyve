@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Tag.TagExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -61,7 +62,7 @@ public class Tagged extends AbstractPersistentBean {
 	 * <br/>
 	 * The tag
 	 **/
-	private Tag tag = null;
+	private TagExtension tag = null;
 
 	@Override
 	@XmlTransient
@@ -162,7 +163,7 @@ public class Tagged extends AbstractPersistentBean {
 	 * {@link #tag} accessor.
 	 * @return	The value.
 	 **/
-	public Tag getTag() {
+	public TagExtension getTag() {
 		return tag;
 	}
 
@@ -171,7 +172,7 @@ public class Tagged extends AbstractPersistentBean {
 	 * @param tag	The new value.
 	 **/
 	@XmlElement
-	public void setTag(Tag tag) {
+	public void setTag(TagExtension tag) {
 		if (this.tag != tag) {
 			preset(tagPropertyName, tag);
 			this.tag = tag;

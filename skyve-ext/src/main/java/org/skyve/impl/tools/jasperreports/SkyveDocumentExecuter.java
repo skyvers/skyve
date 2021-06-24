@@ -1,7 +1,7 @@
 package org.skyve.impl.tools.jasperreports;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.jasperreports.SkyveDataSource;
+import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;

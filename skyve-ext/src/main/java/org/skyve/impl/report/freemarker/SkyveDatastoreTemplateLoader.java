@@ -1,20 +1,25 @@
-package services.report.freemarker;
+package org.skyve.impl.report.freemarker;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.template.TemplateNotFoundException;
-import modules.admin.ModulesUtil;
-import modules.admin.domain.ReportTemplate;
 
 public class SkyveDatastoreTemplateLoader implements TemplateLoader {
-
 	/**
 	 * Retrieves the associated template for a given id.
 	 *
@@ -48,14 +53,13 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	public long getLastModified(Object templateSource) {
 		// retrieve the bizlock
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
-		q.getFilter().addEquals(ReportTemplate.DOCUMENT_ID, ((ReportTemplate) templateSource).getBizId());
-		q.addBoundProjection(ReportTemplate.LOCK_NAME);
+		q.getFilter().addEquals(Bean.DOCUMENT_ID, ((Bean) templateSource).getBizId());
+		q.addBoundProjection(PersistentBean.LOCK_NAME);
 		OptimisticLock bizLock = q.scalarResult(OptimisticLock.class);
 
 		if (bizLock != null) {
 			return bizLock.getTimestamp().toInstant().toEpochMilli();
 		}
-
 		return Long.MAX_VALUE;
 	}
 
@@ -77,7 +81,16 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	 */
 	@Override
 	public String toString() {
-		return String.format("%s (user: %s, table: %s)", this.getClass().getSimpleName(), CORE.getUser().getName(),
-				ModulesUtil.getPersistentIdentifier(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME));
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(ReportTemplate.MODULE_NAME);
+		Document d = m.getDocument(c, ReportTemplate.DOCUMENT_NAME);
+		Persistent p = d.getPersistent();
+		String pid = (p == null) ? null : p.getPersistentIdentifier();
+
+		StringBuilder result = new StringBuilder(128);
+		result.append(this.getClass().getSimpleName()).append(" (user: ").append(u.getName());
+		result.append(", table: ").append(pid).append(')');
+		return result.toString();
 	}
 }

@@ -48,7 +48,7 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	private String userName;
 
 	/**
-	 * Login Date/Time
+	 * Sign In Date/Time
 	 **/
 	private DateTime loginDateTime;
 

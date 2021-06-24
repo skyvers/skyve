@@ -2,12 +2,12 @@ package modules.admin.Configuration;
 
 import java.util.List;
 
+import org.skyve.domain.app.admin.Communication;
 import org.skyve.job.Job;
+import org.skyve.util.CommunicationUtil;
+import org.skyve.util.CommunicationUtil.ResponseMode;
+import org.skyve.util.CommunicationUtil.RunMode;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
-import modules.admin.Communication.CommunicationUtil.RunMode;
-import modules.admin.domain.Communication;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 

@@ -1,7 +1,8 @@
 package util;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
+
 import static org.junit.Assume.assumeTrue;
 
 import java.util.ArrayList;

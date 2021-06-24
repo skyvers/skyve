@@ -23,14 +23,14 @@ import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
-import org.skyve.impl.jasperreports.ReportDesignParameters;
-import org.skyve.impl.jasperreports.ReportDesignParameters.ColumnAlignment;
-import org.skyve.impl.jasperreports.ReportDesignParameters.ReportColumn;
-import org.skyve.impl.jasperreports.ReportDesignParameters.ReportStyle;
-import org.skyve.impl.jasperreports.SkyveDataSource;
+import org.skyve.impl.report.jasperreports.JasperReportUtil;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters.ColumnAlignment;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportColumn;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportStyle;
+import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
@@ -158,7 +158,7 @@ public class ReportServlet extends HttpServlet {
 
 				final Map<String, Object> parameters = getParameters(request);
 				parameters.put(JasperReportRenderer.DESIGN_SPEC_PARAMETER_NAME, designSpecification);
-				jasperPrint = ReportUtil.runReport(reportRenderer.getReport(),
+				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(),
 						user,
 						document,
 						parameters,
@@ -171,8 +171,8 @@ public class ReportServlet extends HttpServlet {
 					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
-					final ListModel<Bean> listModel = ReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
-					jasperPrint = ReportUtil.runReport(user,
+					final ListModel<Bean> listModel = JasperReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
+					jasperPrint = JasperReportUtil.runReport(user,
 							document,
 							reportName,
 							getParameters(request),
@@ -187,7 +187,7 @@ public class ReportServlet extends HttpServlet {
 						bean = AbstractPersistence.get().retrieve(document, id);
 					}
 
-					jasperPrint = ReportUtil.runReport(user,
+					jasperPrint = JasperReportUtil.runReport(user,
 							document,
 							reportName,
 							getParameters(request),
@@ -470,7 +470,7 @@ public class ReportServlet extends HttpServlet {
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ReportFormat format = ReportFormat.valueOf((String) values.get("reportFormat"));
-				ReportUtil.runReport(jasperPrint, format, baos);
+				JasperReportUtil.runReport(jasperPrint, format, baos);
 
 				pumpOutReportFormat(baos.toByteArray(),
 										jasperPrint,

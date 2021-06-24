@@ -10,8 +10,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.Job;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.CommunicationUtil;
+import org.skyve.util.CommunicationUtil.ResponseMode;
 
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 
@@ -99,7 +100,7 @@ public class ProcessCommunicationForTagJob extends Job {
 				// send email notification for completion of Job
 				try {
 					CommunicationUtil.sendFailSafeSystemCommunication(CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_NOTIFICATION, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT, CommunicationBizlet.SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY, ResponseMode.SILENT, null, communication);
-				} catch (Exception e) {
+				} catch (@SuppressWarnings("unused") Exception e) {
 					log.add("The job completed successfully, but the final notification could not be sent.");
 				}
 			}

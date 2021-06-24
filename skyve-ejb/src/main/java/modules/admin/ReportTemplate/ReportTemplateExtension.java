@@ -3,6 +3,7 @@ package modules.admin.ReportTemplate;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -18,7 +19,6 @@ import com.cronutils.parser.CronParser;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
-import modules.admin.domain.ReportDataset.DatasetType;
 import modules.admin.domain.ReportTemplate;
 
 public class ReportTemplateExtension extends ReportTemplate {
@@ -49,7 +49,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 	public String getScheduleDescription() {
 		try {
 			return CronDescriptor.instance().describe(new CronParser(cronDefinition).parse(getCronExpression()));
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
 	}
@@ -139,13 +139,13 @@ public class ReportTemplateExtension extends ReportTemplate {
 		addDatasetsElement(titleDataset);
 	}
 
-	private String generateTableDetailRow(final String attributeBinding) {
+	private static String generateTableDetailRow(final String attributeBinding) {
 		return String.format("\t\t\t\t\t<td>\n"
 				+ "\t\t\t\t\t\t<@format bean=bean binding=\"%s\" />\n"
 				+ "\t\t\t\t\t</td>\n", attributeBinding);
 	}
 
-	private String generateTableHeaderRow(String displayName) {
+	private static String generateTableHeaderRow(String displayName) {
 		return String.format("\t\t\t\t\t<th>%s</th>\n", displayName);
 	}
 

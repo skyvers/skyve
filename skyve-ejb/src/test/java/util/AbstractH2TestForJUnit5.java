@@ -53,6 +53,7 @@ public class AbstractH2TestForJUnit5
 
 
     @BeforeAll
+	@SuppressWarnings("resource")
 	public static void setUp() {
         // init the cache once
         UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
@@ -75,7 +76,8 @@ public class AbstractH2TestForJUnit5
 		}
 	}
 
-    @BeforeEach
+	@BeforeEach
+    @SuppressWarnings("static-method")
     public void beforeBase() throws Exception {
         AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
         AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
@@ -101,7 +103,8 @@ public class AbstractH2TestForJUnit5
         persistence.save(adminUser);
     }
 
-    @AfterEach
+	@AfterEach
+    @SuppressWarnings("static-method")
     public void afterBase() {
         final AbstractPersistence persistence = AbstractPersistence.get();
         persistence.rollback();

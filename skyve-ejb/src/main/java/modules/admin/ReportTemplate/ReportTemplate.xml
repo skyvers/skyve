@@ -18,6 +18,9 @@
 	<bizKey>
 		return getName() != null ? String.format("Report - %s", getName()) : "New Report Template";
 	</bizKey>
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportTemplate</interface>
+	</implements>
 	<attributes>
 		<text name="name" required="true">
 			<displayName>Name</displayName>

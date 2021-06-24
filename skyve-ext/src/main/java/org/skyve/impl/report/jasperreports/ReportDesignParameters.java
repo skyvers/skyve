@@ -1,4 +1,4 @@
-package org.skyve.impl.jasperreports;
+package org.skyve.impl.report.jasperreports;
 
 import java.util.ArrayList;
 import java.util.List;

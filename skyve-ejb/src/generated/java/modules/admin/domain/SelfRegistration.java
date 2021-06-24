@@ -67,12 +67,12 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	private String confirmPassword;
 
 	/**
-	 * Login Url
+	 * Sign In URL
 	 **/
 	private String loginUrl;
 
 	/**
-	 * Login Message
+	 * Sign In Message
 	 * <br/>
 	 * Transient field to allow login message to be overridden
 	 **/

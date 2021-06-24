@@ -12,10 +12,10 @@ import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.CommunicationUtil;
+import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.DataMaintenance.RefreshOption;
@@ -86,7 +86,7 @@ public class RefreshDocumentTuplesJob extends Job {
 						}
 						pers.begin();
 					}
-					catch (Exception e) {
+					catch (@SuppressWarnings("unused") Exception e) {
 						log.add(String.format("%s - %s failed for id: %s",
 												sb.toString(),
 												dm.getRefreshOption().toDescription(),

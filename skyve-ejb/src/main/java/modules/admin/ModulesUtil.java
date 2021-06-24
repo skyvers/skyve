@@ -39,9 +39,9 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.CommunicationUtil;
 import org.skyve.util.Time;
 
-import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserList.UserListUtil;
@@ -651,7 +651,7 @@ public class ModulesUtil {
 																  CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 			} catch (Exception e) {
-				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation");
+				throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.invitation", e);
 			}
 		}
 		return newUser;

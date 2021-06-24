@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<document name="Communication" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<document name="Communication"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<persistent name="ADM_Communication" />
 	<singularAlias>Communication</singularAlias>
 	<pluralAlias>Communications</pluralAlias>
 	<iconStyleClass>fa fa-envelope</iconStyleClass>
 	<bizKey expression="{description}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.Communication</interface>
+	</implements>
 	<attributes>
 		<text name="description" required="true">
 			<displayName>admin.communication.description.displayName</displayName>
@@ -106,19 +111,11 @@
 			<description>admin.communication.attachmentFileName3.description</description>
 			<length>250</length>
 		</text>
-		<enum name="actionType" trackChanges="false" persistent="false">
+		<enum name="actionType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$ActionType" trackChanges="false" persistent="false">
 			<displayName>admin.communicaiton.actionType.displayName</displayName>
-			<values>
-				<value code="save" description="Save for bulk send" />
-				<value code="send" description="Send Immediately" />
-				<value code="test" description="Test bindings and output" />
-			</values>
 		</enum>
-		<enum name="formatType">
+		<enum name="formatType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$FormatType">
 			<displayName>admin.communication.formatType.displayName</displayName>
-			<values>
-				<value code="email" />
-			</values>
 		</enum>
 		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false" audited="false">
 			<displayName>admin.communication.selectedBatchTimestampFolderName.displayName</displayName>

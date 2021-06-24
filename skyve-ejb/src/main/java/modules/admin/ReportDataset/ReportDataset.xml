@@ -13,22 +13,19 @@
 	<iconStyleClass>fa fa-table</iconStyleClass>
 	<parentDocument>ReportTemplate</parentDocument>
 	<bizKey expression="Query - {parent.name} {datasetType}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportDataset</interface>
+	</implements>
 	<attributes>
 		<text name="datasetName" required="true">
 			<displayName>Dataset Name</displayName>
 			<description>The name this dataset will be made available to within the report definition.</description>
 			<length>50</length>
 		</text>
-		<enum name="datasetType" required="true">
+		<enum name="datasetType" required="true" implementingEnumClassName="org.skyve.domain.app.admin.ReportDataset$DatasetType">
 			<displayName>Dataset Type</displayName>
 			<description>The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.</description>
 			<defaultValue>bizQL</defaultValue>
-			<values>
-				<value code="BizQL"/>
-				<value code="SQL"/>
-				<value code="Constant"/>
-				<value code="Class"/>
-			</values>
 		</enum>
 		<memo name="query" required="true">
 			<displayName>Query</displayName>

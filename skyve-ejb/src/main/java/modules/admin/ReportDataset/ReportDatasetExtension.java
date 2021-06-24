@@ -14,11 +14,14 @@ import javax.enterprise.inject.spi.CDI;
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.script.SkyveScriptInterpreter;
+import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.persistence.BizQL;
+import org.skyve.util.Binder;
 import org.skyve.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportParameter;
-import modules.admin.domain.ReportParameter.Type;
-import services.report.BeanReportDataset;
 import services.report.SqlQueryUtil;
 
 public class ReportDatasetExtension extends ReportDataset {
@@ -62,7 +63,7 @@ public class ReportDatasetExtension extends ReportDataset {
 			}
 
 			// parse and check for parameters
-			Set<String> namedParameters = new HashSet<String>();
+			Set<String> namedParameters = new HashSet<>();
 
 			Pattern pattern = Pattern.compile(NAMED_PARAMETER_PATTERN);
 			Matcher matcher = pattern.matcher(getQuery());
@@ -128,7 +129,7 @@ public class ReportDatasetExtension extends ReportDataset {
 			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Class.forName(getQuery());
 			if (reportClass != null) {
 				BeanReportDataset dataset = CDI.current().select(reportClass).get();
-				return dataset.getResults(getParent().getParameters());
+				return dataset.getResults((List<? extends org.skyve.domain.app.admin.ReportParameter>) getParent().getParameters());
 
 			}
 		} catch (Exception e) {
@@ -167,15 +168,15 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							bql.putParameter(param.getName(), Integer.parseInt(param.getReportInputValue()));
+							bql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
 						} else {
 							bql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
-									: param.getNumericalDefaultValue().intValue()));
+									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
 						}
 						break;
 					case longInteger:
 						if (param.getReportInputValue() != null) {
-							bql.putParameter(param.getName(), Long.parseLong(param.getReportInputValue()));
+							bql.putParameter(param.getName(), Long.getLong(param.getReportInputValue()));
 						} else {
 							bql.putParameter(param.getName(), param.getNumericalDefaultValue());
 						}
@@ -227,15 +228,15 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							sqlParams.put(param.getName(), Integer.parseInt(param.getReportInputValue()));
+							sqlParams.put(param.getName(), Integer.getInteger(param.getReportInputValue()));
 						} else {
 							sqlParams.put(param.getName(), (param.getNumericalDefaultValue() == null ? null
-									: param.getNumericalDefaultValue().intValue()));
+									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
 						}
 						break;
 					case longInteger:
 						if (param.getReportInputValue() != null) {
-							sqlParams.put(param.getName(), Long.parseLong(param.getReportInputValue()));
+							sqlParams.put(param.getName(), Long.getLong(param.getReportInputValue()));
 						} else {
 							sqlParams.put(param.getName(), param.getNumericalDefaultValue());
 						}
@@ -288,7 +289,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						bql.putParameter(param.getName(),
-								(param.getNumericalTestValue() == null ? null : param.getNumericalTestValue().intValue()));
+								(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 						break;
 					case longInteger:
 						bql.putParameter(param.getName(), param.getNumericalTestValue());
@@ -329,7 +330,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						sqlParams.put(param.getName(),
-								(param.getNumericalTestValue() == null ? null : param.getNumericalTestValue().intValue()));
+								(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 						break;
 					case longInteger:
 						sqlParams.put(param.getName(), param.getNumericalTestValue());
@@ -389,12 +390,14 @@ public class ReportDatasetExtension extends ReportDataset {
 								// add/subtract years
 								replacementDate = Time.addYearsToNew(replacementDate, countModifier);
 								break;
+							default:
+								throw new IllegalStateException(periodModifier + " is not catered for");
 						}
 					}
 
 					// String dateString = String.format("'%s'", SQL_DATE_FORMAT.format(replacementDate));
 					String dateParameterName = String.format(DATE_PARAMETER_STRING_FORMAT,
-							DATE_PARAMETER_DATE_FORMAT.format(new DateTime()), dateCount);
+							DATE_PARAMETER_DATE_FORMAT.format(new DateTime()), Integer.valueOf(dateCount));
 
 					// check it hasn't already been replaced
 					if (query.contains(dateExpression)) {
@@ -428,10 +431,10 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * @param parameterName The name of the new parameter
 	 * @return The new parameter with the name and description defaulted
 	 */
-	ReportParameterExtension createNewParameter(String parameterName) {
+	static ReportParameterExtension createNewParameter(String parameterName) {
 		ReportParameterExtension newParam = ReportParameter.newInstance();
 		newParam.setName(parameterName);
-		newParam.setDescription(SkyveScriptInterpreter.toTitleCase(parameterName));
+		newParam.setDescription(Binder.toTitleCase(parameterName));
 
 		// if the parameter name ends with "date", presume the type to be date
 		if (parameterName.endsWith("Date")) {

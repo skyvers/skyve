@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.admin.Tag.TagExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.DataMaintenance.EvictOption;
 import org.skyve.CORE;
@@ -28,7 +29,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class Tag extends AbstractPersistentBean {
+public abstract class Tag extends AbstractPersistentBean implements org.skyve.domain.app.admin.Tag {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -475,7 +476,7 @@ public class Tag extends AbstractPersistentBean {
 	 * <br/>
 	 * The other tag to use for the combination.
 	 **/
-	private Tag operandTag = null;
+	private TagExtension operandTag = null;
 
 	/**
 	 * Tagged
@@ -521,7 +522,7 @@ public class Tag extends AbstractPersistentBean {
 		return Tag.DOCUMENT_NAME;
 	}
 
-	public static Tag newInstance() {
+	public static TagExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -926,7 +927,7 @@ public class Tag extends AbstractPersistentBean {
 	 * {@link #operandTag} accessor.
 	 * @return	The value.
 	 **/
-	public Tag getOperandTag() {
+	public TagExtension getOperandTag() {
 		return operandTag;
 	}
 
@@ -935,7 +936,7 @@ public class Tag extends AbstractPersistentBean {
 	 * @param operandTag	The new value.
 	 **/
 	@XmlElement
-	public void setOperandTag(Tag operandTag) {
+	public void setOperandTag(TagExtension operandTag) {
 		if (this.operandTag != operandTag) {
 			this.operandTag = operandTag;
 		}

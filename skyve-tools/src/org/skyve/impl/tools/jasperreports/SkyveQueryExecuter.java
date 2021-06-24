@@ -1,10 +1,10 @@
 package org.skyve.impl.tools.jasperreports;
 
 import org.skyve.CORE;
-import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;

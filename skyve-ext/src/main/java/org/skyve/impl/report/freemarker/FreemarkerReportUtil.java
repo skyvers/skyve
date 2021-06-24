@@ -1,4 +1,4 @@
-package services.report;
+package org.skyve.impl.report.freemarker;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,12 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Singleton;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.domain.app.admin.ReportParameter;
+import org.skyve.domain.app.admin.ReportParameter.Type;
+import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
@@ -30,6 +33,7 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -49,104 +53,87 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.OrMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.HTMLOutputFormat;
-import freemarker.core.ParseException;
 import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
-import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateNotFoundException;
-import modules.admin.ReportDataset.ReportDatasetExtension;
-import modules.admin.ReportParameter.ReportParameterExtension;
-import modules.admin.domain.ReportParameter;
-import modules.admin.domain.ReportTemplate;
-import modules.admin.domain.ReportTemplate.OutputFormat;
-import services.report.freemarker.ContentDirective;
-import services.report.freemarker.DescriptionDirective;
-import services.report.freemarker.DisplayNameDirective;
-import services.report.freemarker.DynamicImageDirective;
-import services.report.freemarker.FormatDirective;
-import services.report.freemarker.ImageDirective;
-import services.report.freemarker.ResourceDirective;
-import services.report.freemarker.SkyveDatastoreTemplateLoader;
-import services.report.freemarker.SqlFormatDirective;
 
-@Singleton
-public class ReportService {
-
-	private Configuration cfg;
+public final class FreemarkerReportUtil {
+	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;
 
-	private Configuration getInstance() throws IOException, TemplateModelException {
-		if (cfg == null) {
-			// Create your Configuration instance, and specify if up to what FreeMarker
-			// version (here 2.3.29) do you want to apply the fixes that are not 100%
-			// backward-compatible. See the Configuration JavaDoc for details.
-			cfg = new Configuration(Configuration.VERSION_2_3_29);
+	private FreemarkerReportUtil() {
+		// disallow instantiation
+	}
 
-			// Specify the source where the template files come from
-			ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "/modules");
-			ClassTemplateLoader ctl2 = new ClassTemplateLoader(getClass(), "/templates");
-			SkyveDatastoreTemplateLoader sdtl = new SkyveDatastoreTemplateLoader();
+	public static void init() {
+		// Create your Configuration instance, and specify if up to what FreeMarker
+		// version (here 2.3.29) do you want to apply the fixes that are not 100%
+		// backward-compatible. See the Configuration JavaDoc for details.
+		cfg = new Configuration(Configuration.VERSION_2_3_29);
 
-			// Define a multi-template loader in the order we want templates discovered
-			MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { sdtl, ctl, ctl2 });
-			cfg.setTemplateLoader(mtl);
+		// Specify the source where the template files come from
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		ClassTemplateLoader ctl = new ClassTemplateLoader(cl, "/modules");
+		ClassTemplateLoader ctl2 = new ClassTemplateLoader(cl, "/templates");
+		SkyveDatastoreTemplateLoader sdtl = new SkyveDatastoreTemplateLoader();
 
-			// From here we will set the settings recommended for new projects. These
-			// aren't the defaults for backward compatibilty.
+		// Use a resolver based on the context class loader
+		resolver = new PathMatchingResourcePatternResolver(cl);
 
-			// Set the preferred charset template files are stored in. UTF-8 is
-			// a good choice in most applications:
-			cfg.setDefaultEncoding("UTF-8");
+		// Define a multi-template loader in the order we want templates discovered
+		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { sdtl, ctl, ctl2 });
+		cfg.setTemplateLoader(mtl);
 
-			// Sets how errors will appear.
-			// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
-			// cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-			cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+		// From here we will set the settings recommended for new projects. These
+		// aren't the defaults for backward compatibilty.
 
-			// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
-			cfg.setLogTemplateExceptions(false);
+		// Set the preferred charset template files are stored in. UTF-8 is
+		// a good choice in most applications:
+		cfg.setDefaultEncoding("UTF-8");
 
-			// Wrap unchecked exceptions thrown during template processing into TemplateException-s:
-			cfg.setWrapUncheckedExceptions(true);
+		// Sets how errors will appear.
+		// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is better.
+		// cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 
-			// Do not fall back to higher scopes when reading a null loop variable:
-			cfg.setFallbackOnNullLoopVariable(false);
+		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
+		cfg.setLogTemplateExceptions(false);
 
-			// associate all templates with the HTML extension to the HTML output format
-			TemplateConfiguration tcHTML = new TemplateConfiguration();
-			tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+		// Wrap unchecked exceptions thrown during template processing into TemplateException-s:
+		cfg.setWrapUncheckedExceptions(true);
 
-			cfg.setTemplateConfigurations(
-					new ConditionalTemplateConfigurationFactory(new OrMatcher(
-							new FileExtensionMatcher("html"),
-							new FileExtensionMatcher("htm")),
-							tcHTML));
+		// Do not fall back to higher scopes when reading a null loop variable:
+		cfg.setFallbackOnNullLoopVariable(false);
 
-			// define shared variables for custom directives
-			cfg.setSharedVariable("content", new ContentDirective());
-			cfg.setSharedVariable("description", new DescriptionDirective());
-			cfg.setSharedVariable("displayName", new DisplayNameDirective());
-			cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
-			cfg.setSharedVariable("format", new FormatDirective());
-			cfg.setSharedVariable("image", new ImageDirective());
-			cfg.setSharedVariable("resource", new ResourceDirective());
-			cfg.setSharedVariable("sqlformat", new SqlFormatDirective());
+		// associate all templates with the HTML extension to the HTML output format
+		TemplateConfiguration tcHTML = new TemplateConfiguration();
+		tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
 
-			// define alias skyve date formats
-			// Map<String, TemplateDateFormatFactory> customDateFormats = new HashMap<String, TemplateDateFormatFactory>();
+		cfg.setTemplateConfigurations(
+				new ConditionalTemplateConfigurationFactory(new OrMatcher(
+						new FileExtensionMatcher("html"),
+						new FileExtensionMatcher("htm")),
+						tcHTML));
 
-			// TODO read the format string out of the customer selected converter
-			// customDateFormats.put("skyveDate", new AliasTemplateDateFormatFactory("dd-MMM-yyyy"));
-			// customDateFormats.put("skyveDateTime", new AliasTemplateDateFormatFactory("dd-MMM-yyyy hh:mm"));
-			// customDateFormats.put("skyveTimestamp", new AliasTemplateDateFormatFactory("dd-MMM-yyyy HH:mm:ss a"));
-			// cfg.setCustomDateFormats(customDateFormats);
-		}
+		// define shared variables for custom directives
+		cfg.setSharedVariable("content", new ContentDirective());
+		cfg.setSharedVariable("description", new DescriptionDirective());
+		cfg.setSharedVariable("displayName", new DisplayNameDirective());
+		cfg.setSharedVariable("dynamicImage", new DynamicImageDirective());
+		cfg.setSharedVariable("format", new FormatDirective());
+		cfg.setSharedVariable("image", new ImageDirective());
+		cfg.setSharedVariable("resource", new ResourceDirective());
+		cfg.setSharedVariable("sqlformat", new SqlFormatDirective());
 
-		return cfg;
+		// define alias skyve date formats
+		// Map<String, TemplateDateFormatFactory> customDateFormats = new HashMap<String, TemplateDateFormatFactory>();
+
+		// TODO read the format string out of the customer selected converter
+		// customDateFormats.put("skyveDate", new AliasTemplateDateFormatFactory("dd-MMM-yyyy"));
+		// customDateFormats.put("skyveDateTime", new AliasTemplateDateFormatFactory("dd-MMM-yyyy hh:mm"));
+		// customDateFormats.put("skyveTimestamp", new AliasTemplateDateFormatFactory("dd-MMM-yyyy HH:mm:ss a"));
+		// cfg.setCustomDateFormats(customDateFormats);
 	}
 
 	/**
@@ -158,8 +145,8 @@ public class ReportService {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
-	public String createBeanReport(final Bean bean, final String reportName, final Map<String, Object> reportParameters)
-			throws Exception {
+	public static String createBeanReport(final Bean bean, final String reportName, final Map<String, Object> reportParameters)
+	throws Exception {
 		// retrieve the report template
 		Template template = getBeanReport(bean, reportName);
 
@@ -185,8 +172,10 @@ public class ReportService {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception
 	 */
-	public File createBeanReportPDF(final Bean bean, final String reportName, final Map<String, Object> reportParameters,
-			final String reportFilename) throws Exception {
+	public static File createBeanReportPDF(final Bean bean,
+											final String reportName,
+											final Map<String, Object> reportParameters,
+											final String reportFilename) throws Exception {
 		// retrieve the report template
 		Template template = getBeanReport(bean, reportName);
 
@@ -203,7 +192,7 @@ public class ReportService {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
-	public String createReport(final String templateName, final Map<String, Object> reportParameters) throws Exception {
+	public static String createReport(final String templateName, final Map<String, Object> reportParameters) throws Exception {
 		// retrieve the report template
 		Template template = getTemplate(templateName);
 
@@ -229,8 +218,8 @@ public class ReportService {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception
 	 */
-	public File createReportPDF(final String templateName, final Map<String, Object> reportParameters, final String reportFilename)
-			throws Exception {
+	public static File createReportPDF(final String templateName, final Map<String, Object> reportParameters, final String reportFilename)
+	throws Exception {
 		// retrieve the report template
 		Template template = getTemplate(templateName);
 
@@ -251,15 +240,18 @@ public class ReportService {
 	 * @return A download to be returned from a {@link DownloadAction}
 	 * @throws Exception
 	 */
-	public Download downloadReport(final String reportName, final Map<String, Object> reportParameters,
-			final ReportTemplate.OutputFormat format, final String downloadFilename) throws Exception {
+	public static Download downloadReport(final String reportName,
+											final Map<String, Object> reportParameters,
+											final ReportFormat format,
+											final String downloadFilename)
+	throws Exception {
 		final String reportOutput = runReport(reportName, reportParameters);
 
 		// convert merged report output from String to an InputStream
 		InputStream inputStream = new ByteArrayInputStream(reportOutput.getBytes(Charset.forName("UTF-8")));
 
 		// if CSV, return the stream
-		if (format == OutputFormat.CSV) {
+		if (format == ReportFormat.csv) {
 			return new Download(String.format("%s.csv", downloadFilename), inputStream, MimeType.csv);
 		}
 
@@ -276,12 +268,13 @@ public class ReportService {
 	 * 
 	 * @param in An input stream containing the source HTML
 	 * @param outputFile The file to write the resulting PDF file to
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws DocumentException
+	 * @throws Exception
 	 */
-	public void generatePDFFromHTML(InputStream in, File outputFile) throws FileNotFoundException, IOException, DocumentException {
-		generatePDFFromHTML(in, new FileOutputStream(outputFile));
+	public static void generatePDFFromHTML(InputStream in, File outputFile)
+	throws Exception {
+		try (OutputStream out = new FileOutputStream(outputFile)) {
+			generatePDFFromHTML(in, out);
+		}
 	}
 
 	/**
@@ -289,35 +282,22 @@ public class ReportService {
 	 *
 	 * @param in An input stream containing the source HTML
 	 * @param outputStream The outputStream to write the resulting PDF to
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws DocumentException
+	 * @throws Exception
 	 */
-	public void generatePDFFromHTML(InputStream in, OutputStream outputStream) throws FileNotFoundException, IOException, DocumentException {
-		try {
-			ITextRenderer renderer = new ITextRenderer();
-			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
-			callback.setSharedContext(renderer.getSharedContext());
-			renderer.getSharedContext().setUserAgentCallback(callback);
+	public static void generatePDFFromHTML(InputStream in, OutputStream outputStream)
+	throws Exception {
+		ITextRenderer renderer = new ITextRenderer();
+		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
+		callback.setSharedContext(renderer.getSharedContext());
+		renderer.getSharedContext().setUserAgentCallback(callback);
 
-			loadFonts(renderer);
+		loadFonts(renderer);
 
-			org.w3c.dom.Document doc = XMLResource.load(in).getDocument();
+		org.w3c.dom.Document doc = XMLResource.load(in).getDocument();
 
-			renderer.setDocument(doc, "/");
-			renderer.layout();
-			renderer.createPDF(outputStream);
-
-			outputStream.close();
-		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
-		}
+		renderer.setDocument(doc, "/");
+		renderer.layout();
+		renderer.createPDF(outputStream);
 	}
 
 	/**
@@ -325,15 +305,11 @@ public class ReportService {
 	 * 
 	 * @param url The path to the HTML file on the filesystem
 	 * @param outputFile The file to write the resulting PDF file to
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws DocumentException
+	 * @throws Exception
 	 */
-	public void generatePDFFromHTML(String url, File outputFile) throws FileNotFoundException, IOException, DocumentException {
-		OutputStream os = null;
-		try {
-			os = new FileOutputStream(outputFile);
-
+	public static void generatePDFFromHTML(String url, File outputFile)
+	throws Exception {
+		try (OutputStream os = new FileOutputStream(outputFile)) {
 			/* standard approach
 			ITextRenderer renderer = new ITextRenderer();
 			renderer.setDocument(url);
@@ -353,30 +329,19 @@ public class ReportService {
 			renderer.setDocument(doc, url);
 			renderer.layout();
 			renderer.createPDF(os);
-
-			os.close();
-			os = null;
-		} finally {
-			if (os != null) {
-				try {
-					os.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
 		}
 	}
 
-	public Template getBeanReport(final Bean bean, final String reportName)
-			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateModelException {
+	public static Template getBeanReport(final Bean bean, final String reportName)
+	throws Exception {
 		final String templateName = String.format("%s/%s/reports/%s", bean.getBizModule(), bean.getBizDocument(), reportName);
-		return getInstance().getTemplate(templateName);
+		return cfg.getTemplate(templateName);
 	}
 
-	public Template getTemplate(final String templateName)
-			throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateModelException {
+	public static Template getTemplate(final String templateName)
+	throws Exception {
 		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		Template t = getInstance().getTemplate(templateName);
+		Template t = cfg.getTemplate(templateName);
 		CORE.getPersistence().resetDocumentPermissionScopes();
 		return t;
 	}
@@ -391,18 +356,19 @@ public class ReportService {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
-	public String runReport(final String reportName, final Map<String, Object> reportParameters) throws Exception {
+	public static String runReport(final String reportName, final Map<String, Object> reportParameters)
+	throws Exception {
 		// get the report template with the specified name
 		ReportTemplate reportTemplate = retrieveReportTemplate(reportName);
 
 		Map<String, Object> root = new HashMap<>();
 
 		// if any parameters were passed in, overwrite any with the same name in the template
-		List<ReportParameterExtension> parameters = reportTemplate.getParameters();
+		List<? extends ReportParameter> parameters = reportTemplate.getParameters();
 		if (reportParameters != null) {
-			for (ReportParameterExtension param : parameters) {
+			for (ReportParameter param : parameters) {
 				if (reportParameters.containsKey(param.getName())) {
-					if (ReportParameter.Type.date == param.getType()) {
+					if (Type.date == param.getType()) {
 						Converter<DateOnly> dateConverter = CORE.getCustomer().getDefaultDateConverter();
 						DateOnly date = (DateOnly) reportParameters.get(param.getName());
 						param.setReportInputValue(dateConverter.toDisplayValue(date));
@@ -417,29 +383,34 @@ public class ReportService {
 		root.put("reportParameters", parameters);
 
 		// put all the datasets into the root
-		for (ReportDatasetExtension dataset : reportTemplate.getDatasets()) {
-			switch (dataset.getDatasetType()) {
-				case bizQL:
-					List<Bean> results = dataset.executeQuery();
-					if (results != null) {
-						root.put(dataset.getDatasetName(), results);
-					}
-					break;
-				case SQL:
-					List<DynaBean> sqlResults = dataset.executeSQLQuery();
-					if (sqlResults != null) {
-						root.put(dataset.getDatasetName(), sqlResults);
-					}
-					break;
-				case constant:
-					root.put(dataset.getDatasetName(), dataset.getQuery());
-					break;
-				case classValue:
-					List<DynaBean> beanResults = dataset.executeClass();
-					if (beanResults != null) {
-						root.put(dataset.getDatasetName(), beanResults);
-					}
-					break;
+		for (ReportDataset dataset : reportTemplate.getDatasets()) {
+			DatasetType type = dataset.getDatasetType();
+			if (type != null) {
+				switch (type) {
+					case bizQL:
+						List<Bean> results = dataset.executeQuery();
+						if (results != null) {
+							root.put(dataset.getDatasetName(), results);
+						}
+						break;
+					case SQL:
+						List<DynaBean> sqlResults = dataset.executeSQLQuery();
+						if (sqlResults != null) {
+							root.put(dataset.getDatasetName(), sqlResults);
+						}
+						break;
+					case constant:
+						root.put(dataset.getDatasetName(), dataset.getQuery());
+						break;
+					case classValue:
+						List<DynaBean> beanResults = dataset.executeClass();
+						if (beanResults != null) {
+							root.put(dataset.getDatasetName(), beanResults);
+						}
+						break;
+					default:
+						throw new IllegalStateException(type + " is not catered for");
+				}
 			}
 		}
 
@@ -453,8 +424,8 @@ public class ReportService {
 		}
 	}
 
-	private File createReport(final Template template, final Map<String, Object> reportParameters, final String reportFilename)
-			throws IOException, TemplateException, DocumentException {
+	private static File createReport(final Template template, final Map<String, Object> reportParameters, final String reportFilename)
+	throws Exception {
 		if (template != null) {
 			try (StringWriter sw = new StringWriter()) {
 				template.process(reportParameters, sw);
@@ -484,11 +455,6 @@ public class ReportService {
 	 * @throws IOException
 	 */
 	private static List<Resource> getFontResources() throws IOException {
-		if (resolver == null) {
-			ClassLoader classLoader = ReportService.class.getClassLoader();
-			resolver = new PathMatchingResourcePatternResolver(classLoader);
-		}
-
 		return Arrays.asList(resolver.getResources("classpath:fonts/*.ttf"));
 	}
 
@@ -499,11 +465,6 @@ public class ReportService {
 	 * @throws IOException
 	 */
 	private static List<Resource> getUnicodeFontResources() throws IOException {
-		if (resolver == null) {
-			ClassLoader classLoader = ReportService.class.getClassLoader();
-			resolver = new PathMatchingResourcePatternResolver(classLoader);
-		}
-
 		return Arrays.asList(resolver.getResources("classpath:fonts/unicode/*.ttf"));
 	}
 
@@ -522,7 +483,8 @@ public class ReportService {
 							File f = r.getFile();
 							renderer.getFontResolver().addFont(f.toString(), true);
 							Util.LOGGER.info("Loaded font for PDF: " + r.getFilename());
-						} catch (DocumentException | IOException e) {
+						}
+						catch (DocumentException | IOException e) {
 							Util.LOGGER.warning("Error loading font file: " + r.getFilename());
 							e.printStackTrace();
 						}
@@ -536,12 +498,14 @@ public class ReportService {
 							// required to load unicode fonts
 							renderer.getFontResolver().addFont(f.toString(), BaseFont.IDENTITY_H, true);
 							Util.LOGGER.info("Loaded unicode font for PDF: " + r.getFilename());
-						} catch (DocumentException | IOException e) {
+						}
+						catch (DocumentException | IOException e) {
 							Util.LOGGER.warning("Error loading unicode font file: " + r.getFilename());
 							e.printStackTrace();
 						}
 					});
-		} catch (FileNotFoundException fnfe) {
+		}
+		catch (FileNotFoundException fnfe) {
 			// fonts directory not defined or empty
 			Util.LOGGER.warning("Error loading fonts for report: " + fnfe.getMessage());
 		}
@@ -556,7 +520,7 @@ public class ReportService {
 	 * @param templateName The name of the report template to retrieve
 	 * @return The ReportTemplate, if one is found
 	 */
-	private ReportTemplate retrieveReportTemplate(final String templateName) {
+	private static ReportTemplate retrieveReportTemplate(final String templateName) {
 		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
 		q.getFilter().addEquals(ReportTemplate.templateNamePropertyName, templateName);
@@ -575,6 +539,7 @@ public class ReportService {
 			super(outputDevice);
 		}
 
+		@Override
 		protected InputStream resolveAndOpenStream(String uri) {
 			InputStream is = super.resolveAndOpenStream(uri);
 			return is;

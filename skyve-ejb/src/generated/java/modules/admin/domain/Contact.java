@@ -21,7 +21,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public class Contact extends AbstractPersistentBean {
+public class Contact extends AbstractPersistentBean implements org.skyve.domain.app.admin.Contact {
 	/**
 	 * For Serialization
 	 * @hidden

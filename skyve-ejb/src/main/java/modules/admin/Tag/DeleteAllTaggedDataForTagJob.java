@@ -16,8 +16,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.PushMessage;
 
-import modules.admin.domain.Tag;
-
 public class DeleteAllTaggedDataForTagJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
 
@@ -31,7 +29,7 @@ public class DeleteAllTaggedDataForTagJob extends Job {
 
 		List<String> log = getLog();
 
-		Tag tag = (Tag) getBean();
+		TagExtension tag = (TagExtension) getBean();
 		log.add("Started Delete All Tagged Data Job at " + new Date());
 
 		// get relevant document to action

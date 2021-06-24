@@ -327,7 +327,6 @@ public final class TagUtil {
 		}
 		
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public Iterator<Bean> iterator() {
 			return new TaggedIterator(taggedIterator);
 		}
@@ -339,7 +338,6 @@ public final class TagUtil {
 	 * @return	The beans (a scrolled set).  Each bean is loaded into 1st level cache so beware.
 	 * @throws Exception
 	 */
-	@SuppressWarnings("synthetic-access")
 	public static Iterable<Bean> iterateTagged(String tagId)
 	throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();

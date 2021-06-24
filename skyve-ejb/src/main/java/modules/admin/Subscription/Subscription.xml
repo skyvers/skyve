@@ -23,6 +23,9 @@
 	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{communication.description} for {receiverIdentifier}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.Subscription</interface>
+	</implements>
 	<attributes>
 		<association name="communication" type="aggregation" required="true">
 			<displayName>admin.subscription.association.communication.displayName</displayName>

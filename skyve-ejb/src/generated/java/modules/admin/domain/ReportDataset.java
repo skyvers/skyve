@@ -1,9 +1,6 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -13,9 +10,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Report Dataset
@@ -28,7 +23,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public abstract class ReportDataset extends AbstractPersistentBean implements ChildBean<ReportTemplateExtension> {
+public abstract class ReportDataset extends AbstractPersistentBean implements ChildBean<ReportTemplateExtension>, org.skyve.domain.app.admin.ReportDataset {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -52,87 +47,6 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
-
-	/**
-	 * Dataset Type
-	 * <br/>
-	 * The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.
-	 **/
-	@XmlEnum
-	public static enum DatasetType implements Enumeration {
-		bizQL("BizQL", "BizQL"),
-		SQL("SQL", "SQL"),
-		constant("Constant", "Constant"),
-		classValue("Class", "Class");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues;
-
-		private DatasetType(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toDescription() {
-			return description;
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static DatasetType fromCode(String code) {
-			DatasetType result = null;
-
-			for (DatasetType value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static DatasetType fromDescription(String description) {
-			DatasetType result = null;
-
-			for (DatasetType value : values()) {
-				if (value.description.equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				DatasetType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (DatasetType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
-			return domainValues;
-		}
-	}
 
 	/**
 	 * Dataset Name

@@ -1,10 +1,10 @@
 package modules.admin.Subscription;
 
+import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
-import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.Subscription;
 
 public class SubscriptionFactory {

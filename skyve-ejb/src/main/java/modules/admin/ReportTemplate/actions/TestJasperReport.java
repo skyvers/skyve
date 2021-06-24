@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.document.Document;
@@ -83,7 +83,7 @@ public class TestJasperReport extends DownloadAction<ReportTemplate> {
 					jasperParams.put(param.getName(), param.getDateTestValue());
 					break;
 				case integer:
-					jasperParams.put(param.getName(), param.getNumericalTestValue().intValue());
+					jasperParams.put(param.getName(), Integer.valueOf(param.getNumericalTestValue().intValue()));
 					break;
 				case longInteger:
 					jasperParams.put(param.getName(), param.getNumericalTestValue());
@@ -96,12 +96,12 @@ public class TestJasperReport extends DownloadAction<ReportTemplate> {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			// return the correct output format
 			if (ReportTemplate.OutputFormat.CSV == bean.getOutputFormat()) {
-				ReportUtil.runBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.csv, baos);
+				EXT.getReporting().runJasperBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.csv, baos);
 				return new Download(String.format("%s.csv", bean.getName()), new ByteArrayInputStream(baos.toByteArray()),
 						MimeType.csv);
 			}
 
-			ReportUtil.runBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.pdf, baos);
+			EXT.getReporting().runJasperBeanReport(user, document, bean.getReportName(), jasperParams, null, ReportFormat.pdf, baos);
 			return new Download(String.format("%s.pdf", bean.getName()), new ByteArrayInputStream(baos.toByteArray()),
 					MimeType.pdf);
 		}

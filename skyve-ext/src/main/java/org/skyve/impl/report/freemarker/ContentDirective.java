@@ -1,4 +1,4 @@
-package services.report.freemarker;
+package org.skyve.impl.report.freemarker;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -63,10 +63,8 @@ public class ContentDirective implements TemplateDirectiveModel {
 	private static final String PARAM_STYLE = "style";
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-			throws TemplateException, IOException {
-
+	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
 		}
@@ -90,9 +88,9 @@ public class ContentDirective implements TemplateDirectiveModel {
 				classParam = null,
 				styleParam = null;
 
-		Iterator paramIter = params.entrySet().iterator();
+		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
-			Map.Entry ent = (Map.Entry) paramIter.next();
+			Map.Entry<?, ?> ent = (Map.Entry<?, ?>) paramIter.next();
 
 			String paramName = (String) ent.getKey();
 			TemplateModel paramValue = (TemplateModel) ent.getValue();
@@ -100,56 +98,65 @@ public class ContentDirective implements TemplateDirectiveModel {
 			if (paramName.equals(PARAM_BEAN)) {
 				// unwrap to try get the skyve object
 				Object beanObj = DeepUnwrap.permissiveUnwrap(paramValue);
-				if (!(beanObj instanceof Bean)) {
+				if (! (beanObj instanceof Bean)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a Skyve bean.", PARAM_BEAN));
 				}
 				beanParam = (Bean) beanObj;
-			} else if (paramName.equals(PARAM_MODULE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_MODULE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_MODULE));
 				}
 				moduleParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_DOCUMENT)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_DOCUMENT)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_DOCUMENT));
 				}
 				documentParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_ATTRIBUTE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_ATTRIBUTE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_ATTRIBUTE));
 				}
 				attributeParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_HEIGHT)) {
+			}
+			else if (paramName.equals(PARAM_HEIGHT)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					heightParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
-					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
-			} else if (paramName.equals(PARAM_WIDTH)) {
+				else if (paramValue instanceof TemplateNumberModel) {
+					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				}
+				else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
+				}
+			}
+			else if (paramName.equals(PARAM_WIDTH)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					widthParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
-					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
 				}
-			} else if (paramName.equals(PARAM_CLASS)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+				else if (paramValue instanceof TemplateNumberModel) {
+					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
+				}
+				else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
+				}
+			}
+			else if (paramName.equals(PARAM_CLASS)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_CLASS));
 				}
 				classParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_STYLE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_STYLE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_STYLE));
 				}
 				styleParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else {
-				throw new TemplateModelException(
-						"Unsupported parameter: " + paramName);
+			}
+			else {
+				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 		}
 
@@ -167,47 +174,42 @@ public class ContentDirective implements TemplateDirectiveModel {
 		}
 
 		// do the actual directive execution
-		Writer out = env.getOut();
-		if (beanParam != null && moduleParam != null && documentParam != null && attributeParam != null) {
-			try (ContentManager cm = EXT.newContentManager()) {
-				String content = (String) Binder.get(beanParam, attributeParam);
-				if (content != null) {
-					AttachmentContent ac = cm.get(content);
-					byte[] fileBytes = ac.getContentBytes();
+		try (Writer out = env.getOut(); ContentManager cm = EXT.newContentManager()) {
+			String content = (String) Binder.get(beanParam, attributeParam);
+			if (content != null) {
+				AttachmentContent ac = cm.get(content);
+				byte[] fileBytes = ac.getContentBytes();
 
-					StringBuilder s = new StringBuilder();
-					s.append(String.format("<img src='data:%s;base64,%s'",
-							ac.getMimeType().toString(),
-							Base64.getEncoder().encodeToString(fileBytes)));
+				StringBuilder s = new StringBuilder();
+				s.append("<img src='data:").append(ac.getMimeType().toString());
+				s.append(";base64,").append(Base64.getEncoder().encodeToString(fileBytes)).append('\'');
 
-					if (attributeParam != null) {
-						s.append(" alt='").append(attributeParam).append("'");
-					}
+				s.append(" alt='").append(attributeParam).append("'");
 
-					if (heightParam != null) {
-						s.append(" height='").append(heightParam).append("'");
-					}
-
-					if (widthParam != null) {
-						s.append(" width='").append(widthParam).append("'");
-					}
-
-					if (classParam != null) {
-						s.append(" class='").append(classParam).append("'");
-					}
-
-					if (styleParam != null) {
-						s.append(" style='").append(styleParam).append("'");
-					}
-
-					s.append(" />");
-
-					// System.out.println("@content output: " + s.toString());
-					out.write(s.toString());
+				if (heightParam != null) {
+					s.append(" height='").append(heightParam).append("'");
 				}
-			} catch (Exception e) {
-				throw new TemplateModelException("Error retrieving content: " + attributeParam, e);
+
+				if (widthParam != null) {
+					s.append(" width='").append(widthParam).append("'");
+				}
+
+				if (classParam != null) {
+					s.append(" class='").append(classParam).append("'");
+				}
+
+				if (styleParam != null) {
+					s.append(" style='").append(styleParam).append("'");
+				}
+
+				s.append(" />");
+
+				// System.out.println("@content output: " + s.toString());
+				out.write(s.toString());
 			}
+		}
+		catch (Exception e) {
+			throw new TemplateModelException("Error retrieving content: " + attributeParam, e);
 		}
 	}
 }

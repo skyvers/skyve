@@ -23,7 +23,7 @@ import org.skyve.metadata.module.Module;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "enum")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
-			propOrder = {"xmlTypeName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
+			propOrder = {"xmlTypeName", "xmlImplementingEnumClassName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
 public class Enumeration extends ConstrainableField {
 	private static final long serialVersionUID = -8699424041011741395L;
 
@@ -80,7 +80,10 @@ public class Enumeration extends ConstrainableField {
 		setAttributeType(AttributeType.enumeration);
 	}
 	
+	// The generated enum type name if the name determined is not appropriate
 	private String typeName;
+	// The implementing enum class name if we want to replace the generated class with a specialised hand-written class
+	private String implementingEnumClassName;
 	private List<EnumeratedValue> values = new ArrayList<>();
 	private String moduleRef;
 	private String documentRef;
@@ -105,9 +108,23 @@ public class Enumeration extends ConstrainableField {
 	
 	@XmlAttribute(name = "typeName")
 	public void setXmlTypeName(String typeName) {
-		this.typeName = typeName;
+		this.typeName = UtilImpl.processStringValue(typeName);
 	}
 	
+	@XmlTransient
+	public String getImplementingEnumClassName() {
+		return getTarget().implementingEnumClassName;
+	}
+
+	public String getXmlImplementingEnumClassName() {
+		return implementingEnumClassName;
+	}
+	
+	@XmlAttribute(name = "implementingEnumClassName")
+	public void setXmlImplementingEnumClassName(String implementingEnumClassName) {
+		this.implementingEnumClassName = UtilImpl.processStringValue(implementingEnumClassName);
+	}
+
 	public Document getOwningDocument() {
 		return owningDocument;
 	}
@@ -156,7 +173,7 @@ public class Enumeration extends ConstrainableField {
 	}
 	
 	public String toJavaIdentifier() {
-		String result = getTarget().typeName;
+		String result = getTypeName();
 
 		if (result == null) {
 			result = BindUtil.toJavaTypeIdentifier(getTarget().getName());

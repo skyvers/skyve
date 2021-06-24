@@ -1,4 +1,4 @@
-package services.report.freemarker;
+package org.skyve.impl.report.freemarker;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -7,7 +7,11 @@ import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -19,7 +23,8 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
 
 /**
- * FreeMarker user-defined directive that performs a Skyve display format on the specified value.
+ * FreeMarker user-defined directive that retrieves the display name from the metadata for
+ * the specified Skyve attribute.
  *
  * <p>
  * <b>Directive info</b>
@@ -28,8 +33,8 @@ import freemarker.template.utility.DeepUnwrap;
  * <p>
  * Directive parameters:
  * <ul>
- * <li><code>bean</code>: The bean which the attribute to format belongs to
- * <li><code>binding</code>: The attribute name to format, can be a compound binding
+ * <li><code>bean</code>: The bean which the attribute to get the display name belongs to
+ * <li><code>binding</code>: The attribute name to retrieve the display name for, can be a compound binding
  * </ul>
  * <p>
  * Loop variables: None
@@ -37,18 +42,16 @@ import freemarker.template.utility.DeepUnwrap;
  * Directive nested content: No
  * 
  * <p>
- * Usage: <code><@format bean=fund binding="dateEff" /></code>.
+ * Usage: <code><@displayName bean=fund binding="dateEff" /></code>.
  * </p>
  */
-public class FormatDirective implements TemplateDirectiveModel {
-
+public class DisplayNameDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_BEAN = "bean";
 	private static final String PARAM_NAME_BINDING = "binding";
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-			throws TemplateException, IOException {
+	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
 		}
@@ -66,9 +69,9 @@ public class FormatDirective implements TemplateDirectiveModel {
 		Bean beanParam = null;
 		String bindingParam = null;
 
-		Iterator paramIter = params.entrySet().iterator();
+		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
-			Map.Entry ent = (Map.Entry) paramIter.next();
+			Map.Entry<?, ?> ent = (Map.Entry<?, ?>) paramIter.next();
 
 			String paramName = (String) ent.getKey();
 			TemplateModel paramValue = (TemplateModel) ent.getValue();
@@ -76,27 +79,47 @@ public class FormatDirective implements TemplateDirectiveModel {
 			if (paramName.equals(PARAM_NAME_BEAN)) {
 				// unwrap to try get the skyve object
 				Object beanObj = DeepUnwrap.permissiveUnwrap(paramValue);
-				if (!(beanObj instanceof Bean)) {
+				if (! (beanObj instanceof Bean)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a Skyve bean.", PARAM_NAME_BEAN));
 				}
 				beanParam = (Bean) beanObj;
-			} else if (paramName.equals(PARAM_NAME_BINDING)) {
+			}
+			else if (paramName.equals(PARAM_NAME_BINDING)) {
 				if (!(paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_BINDING));
 				}
 				bindingParam = ((TemplateScalarModel) paramValue)
 						.getAsString();
-			} else {
-				throw new TemplateModelException(
-						"Unsupported parameter: " + paramName);
+			}
+			else {
+				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 		}
 
 		// do the actual directive execution
-		Writer out = env.getOut();
-		if (beanParam != null && bindingParam != null) {
-			out.write(Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam));
+		try (Writer out = env.getOut()) {
+			if (beanParam != null && bindingParam != null) {
+				String displayName = getDisplayName(beanParam, bindingParam);
+				if (displayName != null) {
+					out.write(displayName);
+				}
+			}
 		}
 	}
 
+	/**
+	 * Get the attribute display name from the metadata
+	 * 
+	 * @param bean The bean
+	 * @param fullyQualifiedPropertyName The compound binding to the required attribute
+	 * @return The display name of the attribute
+	 */
+	private static String getDisplayName(final Bean bean, final String fullyQualifiedPropertyName) {
+		final Customer customer = CORE.getCustomer();
+		final Module module = customer.getModule(bean.getBizModule());
+		final Document document = module.getDocument(customer, bean.getBizDocument());
+		final TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, fullyQualifiedPropertyName);
+
+		return tmd.getAttribute().getDisplayName();
+	}
 }

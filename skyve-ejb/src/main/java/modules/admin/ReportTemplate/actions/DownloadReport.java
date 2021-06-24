@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.commons.beanutils.DynaBean;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.Util;
@@ -27,14 +27,9 @@ import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
-import services.report.ReportService;
 
 public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
-
 	private static final long serialVersionUID = -3424661104239448743L;
-
-	@Inject
-	private transient ReportService reportService;
 
 	@Override
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
@@ -49,7 +44,7 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 			throw e;
 		}
 
-		Template template = reportService.getTemplate(bean.getTemplateName());
+		Template template = EXT.getReporting().getFreemarkerTemplate(bean.getTemplateName());
 
 		Map<String, Object> root = new HashMap<>();
 
@@ -58,28 +53,33 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 
 		// put all the datasets into the root
 		for (ReportDatasetExtension dataset : bean.getDatasets()) {
-			switch (dataset.getDatasetType()) {
-				case bizQL:
-					List<Bean> results = dataset.executeQuery();
-					if (results != null) {
-						root.put(dataset.getDatasetName(), results);
-					}
-					break;
-				case SQL:
-					List<DynaBean> sqlResults = dataset.executeSQLQuery();
-					if (sqlResults != null) {
-						root.put(dataset.getDatasetName(), sqlResults);
-					}
-					break;
-				case constant:
-					root.put(dataset.getDatasetName(), dataset.getQuery());
-					break;
-				case classValue:
-					List<DynaBean> beanResults = dataset.executeClass();
-					if (beanResults != null) {
-						root.put(dataset.getDatasetName(), beanResults);
-					}
-					break;
+			DatasetType type = dataset.getDatasetType();
+			if (type != null) {
+				switch (type) {
+					case bizQL:
+						List<Bean> results = dataset.executeQuery();
+						if (results != null) {
+							root.put(dataset.getDatasetName(), results);
+						}
+						break;
+					case SQL:
+						List<DynaBean> sqlResults = dataset.executeSQLQuery();
+						if (sqlResults != null) {
+							root.put(dataset.getDatasetName(), sqlResults);
+						}
+						break;
+					case constant:
+						root.put(dataset.getDatasetName(), dataset.getQuery());
+						break;
+					case classValue:
+						List<DynaBean> beanResults = dataset.executeClass();
+						if (beanResults != null) {
+							root.put(dataset.getDatasetName(), beanResults);
+						}
+						break;
+					default:
+						throw new IllegalStateException(type + " is not catered for");
+				}
 			}
 		}
 
@@ -110,8 +110,10 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
 		pdfFile.deleteOnExit();
 		
-		reportService.generatePDFFromHTML(inputStream, pdfFile);
+		EXT.getReporting().generateFreemarkerPDFFromHTML(inputStream, pdfFile);
 		
-		return new Download(String.format("%s.pdf", bean.getName()), new FileInputStream(pdfFile), MimeType.pdf);
+		try (InputStream in = new FileInputStream(pdfFile)) {
+			return new Download(String.format("%s.pdf", bean.getName()), in, MimeType.pdf);
+		}
 	}
 }

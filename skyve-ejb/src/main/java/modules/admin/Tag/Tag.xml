@@ -8,6 +8,9 @@
 	<pluralAlias>Tags</pluralAlias>
 	<iconStyleClass>fa fa-tag</iconStyleClass>
 	<bizKey expression="Tag {name}"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.Tag</interface>
+	</implements>
 	<attributes>
 		<text name="name" required="true">
 			<displayName>admin.tag.name.displayName</displayName>

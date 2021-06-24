@@ -1,4 +1,4 @@
-package services.report.freemarker;
+package org.skyve.impl.report.freemarker;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -55,7 +55,6 @@ import freemarker.template.utility.DeepUnwrap;
  * </p>
  */
 public class DynamicImageDirective implements TemplateDirectiveModel {
-
 	private static final String PARAM_NAME_BEAN = "bean";
 	private static final String PARAM_NAME_IMAGE = "image";
 	private static final String PARAM_NAME_DOCUMENT = "document";
@@ -64,10 +63,8 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 	private static final String PARAM_WIDTH = "width";
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-			throws TemplateException, IOException {
-
+	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
 		}
@@ -89,75 +86,81 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 				widthParam = null;
 		Bean beanParam = null;
 
-		Integer width = Integer.valueOf(300),
-				height = Integer.valueOf(300);
+		int width = 300,
+			height = 300;
 
-		Iterator paramIter = params.entrySet().iterator();
+		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
-			Map.Entry ent = (Map.Entry) paramIter.next();
+			Map.Entry<?, ?> ent = (Map.Entry<?, ?>) paramIter.next();
 
 			String paramName = (String) ent.getKey();
 			TemplateModel paramValue = (TemplateModel) ent.getValue();
 
 			if (paramName.equals(PARAM_NAME_IMAGE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_IMAGE));
 				}
 				imageParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_NAME_DOCUMENT)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_NAME_DOCUMENT)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_DOCUMENT));
 				}
 				documentParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_NAME_MODULE)) {
-				if (!(paramValue instanceof TemplateScalarModel)) {
+			}
+			else if (paramName.equals(PARAM_NAME_MODULE)) {
+				if (! (paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_MODULE));
 				}
 				moduleParam = ((TemplateScalarModel) paramValue).getAsString();
-			} else if (paramName.equals(PARAM_NAME_BEAN)) {
+			}
+			else if (paramName.equals(PARAM_NAME_BEAN)) {
 				// unwrap to try get the skyve object
 				Object beanObj = DeepUnwrap.permissiveUnwrap(paramValue);
-				if (!(beanObj instanceof Bean)) {
+				if (! (beanObj instanceof Bean)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a Skyve bean.", PARAM_NAME_BEAN));
 				}
 				beanParam = (Bean) beanObj;
-			} else if (paramName.equals(PARAM_HEIGHT)) {
+			}
+			else if (paramName.equals(PARAM_HEIGHT)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					heightParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
+				}
+				else if (paramValue instanceof TemplateNumberModel) {
 					heightParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
+				}
+				else {
 					throw new TemplateModelException(
 							String.format("The '%s' parameter must be a String or an Integer.", PARAM_HEIGHT));
 				}
 
 				try {
 					height = Integer.parseInt(heightParam);
-				} catch (NumberFormatException nfe) {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter (%s) is not a valid height integer value", PARAM_HEIGHT,
-									heightParam));
 				}
-			} else if (paramName.equals(PARAM_WIDTH)) {
+				catch (NumberFormatException nfe) {
+					throw new TemplateModelException(String.format("The '%s' parameter (%s) is not a valid height integer value", PARAM_HEIGHT, heightParam), nfe);
+				}
+			}
+			else if (paramName.equals(PARAM_WIDTH)) {
 				if (paramValue instanceof TemplateScalarModel) {
 					widthParam = ((TemplateScalarModel) paramValue).getAsString();
-				} else if (paramValue instanceof TemplateNumberModel) {
+				}
+				else if (paramValue instanceof TemplateNumberModel) {
 					widthParam = ((TemplateNumberModel) paramValue).getAsNumber().toString();
-				} else {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
+				}
+				else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String or an Integer.", PARAM_WIDTH));
 				}
 
 				try {
 					width = Integer.parseInt(widthParam);
-				} catch (NumberFormatException nfe) {
-					throw new TemplateModelException(
-							String.format("The '%s' parameter (%s) is not a valid width integer value", PARAM_WIDTH,
-									widthParam));
 				}
-			} else {
-				throw new TemplateModelException(
-						"Unsupported parameter: " + paramName);
+				catch (NumberFormatException nfe) {
+					throw new TemplateModelException(String.format("The '%s' parameter (%s) is not a valid width integer value", PARAM_WIDTH, widthParam), nfe);
+				}
+			}
+			else {
+				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 		}
 
@@ -179,18 +182,16 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 		Module module = customer.getModule(moduleParam);
 
 		if (module == null) {
-			throw new TemplateModelException(
-					"Module '" + moduleParam + "' could not be found. Please check the spelling and update the markup.");
+			throw new TemplateModelException("Module '" + moduleParam + "' could not be found. Please check the spelling and update the markup.");
 		}
 		Document document = module.getDocument(customer, documentParam);
 		if (document == null) {
-			throw new TemplateModelException(
-					"Document '" + documentParam + "' could not be found. Please check the spelling and update the markup.");
+			throw new TemplateModelException("Document '" + documentParam + "' could not be found. Please check the spelling and update the markup.");
 		}
 
 		DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageParam);
 		try {
-			BufferedImage image = dynamicImage.getImage(beanParam, width.intValue(), height.intValue(), CORE.getUser());
+			BufferedImage image = dynamicImage.getImage(beanParam, width, height, CORE.getUser());
 
 			try {
 				ImageFormat format = dynamicImage.getFormat();
@@ -204,33 +205,36 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 				byte[] bytes = baos.toByteArray();
 
 				// do the actual directive execution
-				Writer out = env.getOut();
-				if (bytes.length > 0) {
-					// encode file to base64
-					StringBuilder s = new StringBuilder();
-					s.append(String.format("<img src='data:%s;base64,%s'",
-							format.getMimeType().toString(),
-							Base64.getEncoder().encodeToString(bytes)));
-
-					if (heightParam != null) {
-						s.append(" height='").append(heightParam).append("'");
+				try (Writer out = env.getOut()) {
+					if (bytes.length > 0) {
+						// encode file to base64
+						StringBuilder s = new StringBuilder();
+						s.append(String.format("<img src='data:%s;base64,%s'",
+								format.getMimeType().toString(),
+								Base64.getEncoder().encodeToString(bytes)));
+	
+						if (heightParam != null) {
+							s.append(" height='").append(heightParam).append("'");
+						}
+	
+						if (widthParam != null) {
+							s.append(" width='").append(widthParam).append("'");
+						}
+	
+						s.append(" />");
+	
+						System.out.println("@dynamicImage output: " + s.toString());
+	
+						out.write(s.toString());
 					}
-
-					if (widthParam != null) {
-						s.append(" width='").append(widthParam).append("'");
-					}
-
-					s.append(" />");
-
-					System.out.println("@dynamicImage output: " + s.toString());
-
-					out.write(s.toString());
 				}
-
-			} catch (Exception e) {
-				image.flush();
 			}
-		} catch (Exception e) {
+			catch (Exception e) {
+				image.flush();
+				throw e;
+			}
+		}
+		catch (Exception e) {
 			throw new TemplateModelException("Error retrieving the dynamic image", e);
 		}
 	}

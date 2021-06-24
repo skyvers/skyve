@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -24,15 +25,10 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.CommunicationTemplate;
 import modules.admin.domain.Tag;
 
 public class CommunicationBizlet extends Bizlet<Communication> {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7404508611264793559L;
 
 	public static final String SYSTEM_COMMUNICATION_JOB_NOTIFICATION = "SYSTEM Communication Job Notification";

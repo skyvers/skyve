@@ -18,6 +18,9 @@
 	<pluralAlias>Report Parameters</pluralAlias>
 	<parentDocument>ReportTemplate</parentDocument>
 	<bizKey expression="Parameter - {name}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportParameter</interface>
+	</implements>
 	<attributes>
 		<text name="name" required="true">
 			<displayName>Parameter Name</displayName>
@@ -30,15 +33,9 @@
 				they run the report to assist them in providing a value.</description>
 			<length>100</length>
 		</text>
-		<enum name="type" required="true">
+		<enum name="type" required="true" implementingEnumClassName="org.skyve.domain.app.admin.ReportParameter$Type">
 			<displayName>Parameter Type</displayName>
 			<description>The data type of this parameter</description>
-			<values>
-				<value code="text" description="Text"/>
-				<value code="integer" description="Integer"/>
-				<value code="long" description="Long Integer"/>
-				<value code="date" description="Date"/>
-			</values>
 		</enum>
 		<boolean name="required" required="true">
 			<displayName>Required</displayName>

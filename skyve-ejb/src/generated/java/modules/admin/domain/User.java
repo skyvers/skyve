@@ -38,7 +38,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  */
 @XmlType
 @XmlRootElement
-public abstract class User extends AbstractPersistentBean {
+public abstract class User extends AbstractPersistentBean implements org.skyve.domain.app.admin.User {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -341,7 +341,7 @@ public abstract class User extends AbstractPersistentBean {
 	/**
 	 * Home Module
 	 * <br/>
-	 * The module displayed when the user first logs in.
+	 * The module displayed when the user first signs in.
 	 **/
 	private String homeModule;
 

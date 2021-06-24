@@ -16,7 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
-import org.skyve.impl.jasperreports.ReportDesignParameters;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;

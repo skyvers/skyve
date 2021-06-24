@@ -6,21 +6,17 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-import modules.admin.domain.Tag;
+import modules.admin.Tag.TagExtension;
 
-public class Clear implements ServerSideAction<Tag> {
-	/**
-	 * For Serialization
-	 */
+public class Clear implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext)
+	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)
 	throws Exception {
-		
 		//clear tagged values
 		StringBuilder deleteSQL = new StringBuilder();
 		deleteSQL.append("delete from ADM_Tagged where tag_id = ");

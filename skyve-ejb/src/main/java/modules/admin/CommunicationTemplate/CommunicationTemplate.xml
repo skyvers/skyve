@@ -5,6 +5,9 @@
     <pluralAlias>Communication Templates</pluralAlias>
     <iconStyleClass>fa fa-envelope-open-o</iconStyleClass>
     <bizKey expression="{name}"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.CommunicationTemplate</interface>
+	</implements>
     <attributes>
         <text required="true" name="name">
             <displayName>admin.communicationTemplate.name.displayName</displayName>

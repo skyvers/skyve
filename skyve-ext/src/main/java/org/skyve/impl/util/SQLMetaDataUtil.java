@@ -270,6 +270,54 @@ public class SQLMetaDataUtil {
 		return result;
 	}
 	
+	public static List<Bean> retrieveAllReportSchedulesForAllCustomers() throws Exception {
+		List<Bean> result = new ArrayList<>();
+
+		// Principal -> User
+		Map<String, User> users = new TreeMap<>();
+
+		AbstractRepository repository = AbstractRepository.get();
+		Module admin = repository.getModule(null, "admin");
+		String ADM_ReportTemplate = admin.getDocument(null, "ReportTemplate").getPersistent().getPersistentIdentifier();
+		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
+
+		StringBuilder sql = new StringBuilder(256);
+		sql.append("select s.bizId, s.bizCustomer, s.name, s.startTime, s.endTime, s.cronExpression, s.scheduled,  u.userName from ");
+		sql.append(ADM_ReportTemplate).append(" s left join ").append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId").append(" order by u.bizCustomer");
+
+		try (SQLDataAccess da = EXT.newSQLDataAccess()) {
+			List<Object[]> rows = da.newSQL(sql.toString()).tupleResults();
+			for (Object[] row : rows) {
+				User user = null;
+				if (row[7] != null) {
+					StringBuilder userPrincipalBuilder = new StringBuilder(128);
+					userPrincipalBuilder.append(row[1]); // bizCustomer
+					userPrincipalBuilder.append('/').append(row[7]); // userName
+					String userPrincipal = userPrincipalBuilder.toString();
+					user = users.get(userPrincipal);
+					if (user == null) {
+						user = repository.retrieveUser(userPrincipal);
+						users.put(userPrincipal, user);
+					}
+				}
+
+				Map<String, Object> properties = new TreeMap<>();
+				properties.put(Bean.DOCUMENT_ID, row[0]); // bizId
+				properties.put("name", row[2]);
+				properties.put("startTime", row[3]);
+				properties.put("endTime", row[4]);
+				properties.put("cronExpression", row[5]);
+				properties.put("scheduled", row[6]);
+				properties.put("user", user);
+
+				MapBean reportSchedule = new MapBean("admin", "ReportTemplate", properties);
+				result.add(reportSchedule);
+			}
+		}
+
+		return result;
+	}
+
 	public static String retrievePublicUserName(String customerName) {
 		String result = null;
 		

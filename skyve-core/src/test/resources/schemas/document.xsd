@@ -420,6 +420,7 @@
           </xs:element>
         </xs:sequence>
         <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="implementingEnumClassName" type="xs:string"/>
         <xs:attribute name="moduleRef" type="xs:string"/>
         <xs:attribute name="documentRef" type="xs:string"/>
         <xs:attribute name="attributeRef" type="xs:string"/>

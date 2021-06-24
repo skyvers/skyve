@@ -15,7 +15,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class CommunicationTemplate extends AbstractPersistentBean {
+public class CommunicationTemplate extends AbstractPersistentBean implements org.skyve.domain.app.admin.CommunicationTemplate {
 	/**
 	 * For Serialization
 	 * @hidden

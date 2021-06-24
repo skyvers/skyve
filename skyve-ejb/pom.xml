@@ -200,28 +200,6 @@
 			<artifactId>reactive-streams</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
-		<!-- html reports and html to pdf conversion -->
-		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-pdf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-swt</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.cronutils</groupId>
-			<artifactId>cron-utils</artifactId>
-		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>

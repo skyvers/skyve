@@ -358,6 +358,12 @@ public final class BindUtil {
 						result = temp;
 					}
 				}
+				else if (value instanceof Enumeration) {
+					convert(type, ((Enumeration) value).toCode());
+				}
+				else { // hopefully value is an enum
+					convert(type, value.toString());
+				}
 			}
 		}
 
@@ -491,7 +497,7 @@ public final class BindUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	static synchronized String toDisplay(Customer customer, 
+	public static synchronized String toDisplay(Customer customer, 
 													@SuppressWarnings("rawtypes") Converter converter, 
 													List<DomainValue> domainValues, 
 													Object value) {

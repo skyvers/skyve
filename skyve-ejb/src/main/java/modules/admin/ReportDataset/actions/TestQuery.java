@@ -17,10 +17,13 @@ import org.apache.commons.beanutils.LazyDynaMap;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.domain.app.admin.ReportParameter;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.BizQL;
@@ -32,8 +35,6 @@ import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
-import modules.admin.domain.ReportDataset.DatasetType;
-import services.report.BeanReportDataset;
 import services.report.SqlQueryService;
 
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
@@ -68,7 +69,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 								break;
 							case integer:
 								bql.putParameter(param.getName(),
-										(param.getNumericalTestValue() == null ? null : param.getNumericalTestValue().intValue()));
+										(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 								break;
 							case longInteger:
 								bql.putParameter(param.getName(), param.getNumericalTestValue());
@@ -105,7 +106,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 								break;
 							case integer:
 								sqlParams.put(param.getName(),
-										(param.getNumericalTestValue() == null ? null : param.getNumericalTestValue().intValue()));
+										(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 								break;
 							case longInteger:
 								sqlParams.put(param.getName(), param.getNumericalTestValue());
@@ -119,7 +120,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 				ReportParameterExtension.logParameterValues(sqlParams);
 
 				List<DynaBean> results = sqlService.retrieveDynamicResults(bean.getQuery(), sqlParams);
-				LOG.info("Returned {} results", results.size());
+				LOG.info("Returned {} results", Integer.valueOf(results.size()));
 
 				for (DynaBean result : results) {
 					LazyDynaMap map = (LazyDynaMap) result;
@@ -136,13 +137,15 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 				if (reportClass != null) {
 					BeanReportDataset dataset = CDI.current().select(reportClass).get();
 					StringBuilder queryResults = new StringBuilder(5120);
-					for (DynaBean result : dataset.getResults(bean.getParent().getParameters())) {
+					@SuppressWarnings("unchecked")
+					List<? extends ReportParameter> parameters = (List<? extends ReportParameter>) bean.getParent().getParameters();
+					for (DynaBean result : dataset.getResults(parameters)) {
 						if (result instanceof DynaClass) {
 							DynaClass dynaClass = (DynaClass) result;
 							printDynaClass(queryResults, result, dynaClass);
 						} else if (result instanceof LazyDynaBean) {
 							LazyDynaBean ldb = (LazyDynaBean) result;
-							DynaClass dynaClass = (DynaClass) ldb.getDynaClass();
+							DynaClass dynaClass = ldb.getDynaClass();
 							printDynaClass(queryResults, result, dynaClass);
 						} else {
 							queryResults.append(result.toString());
@@ -159,7 +162,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 		return new ServerSideActionResult<>(bean);
 	}
 
-	private void trapException(ReportDataset bean, Exception e) throws Exception {
+	private static void trapException(ReportDataset bean, Exception e) throws Exception {
 		if (e.getClass() == ValidationException.class) {
 			throw e;
 		}
@@ -169,14 +172,14 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 		bean.setResults(sw.toString());
 	}
 
-	private void printDynaClass(StringBuilder queryResults, DynaBean result, DynaClass dynaClass) {
+	private static void printDynaClass(StringBuilder queryResults, DynaBean result, DynaClass dynaClass) {
 		for (DynaProperty prop : dynaClass.getDynaProperties()) {
 			queryResults.append(prop.getName() + " : " + result.get(prop.getName()))
 					.append(", ");
 		}
 	}
 
-	private void validate(ReportDataset bean) {
+	private static void validate(ReportDataset bean) {
 		// check if the query has an parameters
 		if (DatasetType.bizQL == bean.getDatasetType() || DatasetType.SQL == bean.getDatasetType()) {
 			if (bean.getQuery().matches(":\\w+")) {

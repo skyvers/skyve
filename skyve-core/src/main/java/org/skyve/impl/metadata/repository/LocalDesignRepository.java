@@ -693,15 +693,24 @@ public class LocalDesignRepository extends AbstractRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) {
-		// No enum overriding, but there might be referencing
-		String encapulatingClasNameForEnumeration = getEncapsulatingClassNameForEnumeration(enumeration);
-		
-		StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
-		fullyQualifiedEnumName.append(encapulatingClasNameForEnumeration);
-		fullyQualifiedEnumName.append('$').append(enumeration.toJavaIdentifier());
+		String fullyQualifiedEnumName = null;
 
+		String implementingEnumClassName = enumeration.getImplementingEnumClassName();
+		if (implementingEnumClassName != null) { // hand-coded enum implementation
+			fullyQualifiedEnumName = implementingEnumClassName;
+		}
+		else { // generated implementation
+			// No enum overriding, but there might be referencing
+			String encapulatingClasNameForEnumeration = getEncapsulatingClassNameForEnumeration(enumeration);
+	
+			StringBuilder sb = new StringBuilder(64);
+			sb.append(encapulatingClasNameForEnumeration);
+			sb.append('$').append(enumeration.toJavaIdentifier());
+			fullyQualifiedEnumName= sb.toString();
+		}
+		
 		try {
-			return (Class<Enumeration>) Class.forName(fullyQualifiedEnumName.toString(), true, Thread.currentThread().getContextClassLoader());
+			return (Class<Enumeration>) Class.forName(fullyQualifiedEnumName, true, Thread.currentThread().getContextClassLoader());
 		}
 		catch (Exception e) {
 			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName.toString(), e);

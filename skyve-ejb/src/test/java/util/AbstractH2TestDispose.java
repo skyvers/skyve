@@ -18,7 +18,7 @@ import org.skyve.persistence.Persistence;
  * An example of when to extend this base class is if the code under test is
  * performing its own commits, which will not be able to be rolled back.
  */
-public class AbstractH2TestDispose extends AbstractH2Test {
+public abstract class AbstractH2TestDispose extends AbstractH2Test {
 
 	@Before
 	@SuppressWarnings("static-method")

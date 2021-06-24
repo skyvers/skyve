@@ -3,17 +3,17 @@ package modules.admin.Communication.actions;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.Communication.ActionType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.util.CommunicationUtil;
 import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil;
-import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.ActionType;
 import modules.admin.domain.Contact;
 
 public class TestSend implements ServerSideAction<Communication> {

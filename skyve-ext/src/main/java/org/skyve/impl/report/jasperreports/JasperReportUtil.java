@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.impl.report.jasperreports;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -10,9 +10,10 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.ReportParameters;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -48,11 +49,10 @@ import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 
-public final class ReportUtil {
-	private ReportUtil() {
+public final class JasperReportUtil {
+	private JasperReportUtil() {
 		// disallow instantiation
 	}
-
 	public static JasperPrint runBeanReport(User user,
 												Document document,
 												String reportName,

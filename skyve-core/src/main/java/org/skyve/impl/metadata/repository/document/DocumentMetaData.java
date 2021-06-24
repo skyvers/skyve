@@ -655,12 +655,14 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						enumeration.setRepository(repository);
 						
 						// Enumeration can be defined inline (ie a new one) or
-						// a reference (module, document, attribute) to another definition
+						// a reference (module, document, attribute) to another definition or
+						// as an external Enumeration (java enum) implementation class.
 						String moduleRef = enumeration.getModuleRef();
 						String documentRef = enumeration.getDocumentRef();
 						String attributeRef = enumeration.getAttributeRef();
 						List<EnumeratedValue> values = enumeration.getXmlValues();
 						
+						// Reference
 						if ((moduleRef != null) || (documentRef != null) || (attributeRef != null)) { // reference
 							if (attributeRef == null) {
 								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
@@ -678,11 +680,24 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
 																" is defined as a reference to another enum but has [typeName] defined.");
 							}
-						}
-						else { // definition
-							if (values.isEmpty()) {
+							if (enumeration.getXmlImplementingEnumClassName() != null) {
 								throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
-																" has no [values] defined.");
+																" is defined as a reference to another enum but has [implementingEnumClassName] defined.");
+							}
+						}
+						else {
+							String implementingEnumClassName = enumeration.getXmlImplementingEnumClassName();
+							if (implementingEnumClassName != null) { // implementing
+								if (! values.isEmpty()) {
+									throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+																	" is defined with an [implementingEnumClassName] but has [values] defined.");
+								}
+							}
+							else { // definition
+								if (values.isEmpty()) {
+									throw new MetaDataException(metaDataName + " : Enumeration " + attribute.getName() + 
+																	" has no [values] defined.");
+								}
 							}
 						}
 						enumeration.setOwningDocument(result);

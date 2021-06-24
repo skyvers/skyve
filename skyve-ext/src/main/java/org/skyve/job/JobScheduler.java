@@ -45,6 +45,9 @@ import org.skyve.web.BackgroundTask;
 
 public class JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
+	private static final String REPORT_JOB_CLASS_NAME = "modules.admin.ReportTemplate.jobs.ReportJob";
+
+	public static final String REPORTS_GROUP = "REPORTS GROUP";
 
 	public static void init() {
 		SchedulerFactory sf = new StdSchedulerFactory();
@@ -55,7 +58,7 @@ public class JobScheduler {
 		catch (SchedulerException e) {
 			throw new IllegalStateException("Could not start scheduler", e);
 		}
-		
+
 		try {
 			// Add metadata jobs
 			AbstractRepository repository = AbstractRepository.get();
@@ -63,7 +66,7 @@ public class JobScheduler {
 				Module module = repository.getModule(null, moduleName);
 				addJobs(module);
 			}
-	
+
 			// Add triggers if this Skyve instance is able to schedule jobs
 			if (UtilImpl.JOB_SCHEDULER) {
 				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers().stream()
@@ -72,8 +75,17 @@ public class JobScheduler {
 				for (Bean jobSchedule : jobSchedules) {
 					scheduleJob(jobSchedule, (User) BindUtil.get(jobSchedule, "user"));
 				}
+
+				// Add report triggers
+				final List<Bean> reportSchedules = SQLMetaDataUtil.retrieveAllReportSchedulesForAllCustomers();
+				for (Bean reportSchedule : reportSchedules) {
+					addReportJob((String) BindUtil.get(reportSchedule, "name"));
+					if (Boolean.TRUE.equals(BindUtil.get(reportSchedule, "scheduled"))) {
+						scheduleReport(reportSchedule, (User) BindUtil.get(reportSchedule, "user"));
+					}
+				}
 			}
-			
+
 			scheduleInternalJobs();
 		}
 		catch (Exception e) {
@@ -100,6 +112,15 @@ public class JobScheduler {
 
 			JOB_SCHEDULER.addJob(detail, false);
 		}
+	}
+
+	public static void addReportJob(String reportName) throws Exception {
+		@SuppressWarnings("unchecked")
+		Class<? extends Job> jobClass = (Class<? extends Job>) Thread.currentThread().getContextClassLoader().loadClass(REPORT_JOB_CLASS_NAME);
+		// remain in store even when no triggers are using it
+		JobDetail detail = JobBuilder.newJob(jobClass).withIdentity(reportName, REPORTS_GROUP).storeDurably().build();
+
+		JOB_SCHEDULER.addJob(detail, true);
 	}
 
 	private static void scheduleInternalJobs()
@@ -349,6 +370,96 @@ public class JobScheduler {
 		JOB_SCHEDULER.unscheduleJob(new TriggerKey(jobSchedule.getBizId(), customer.getName()));
 	}
 
+	public static void scheduleReport(Bean reportSchedule, User user) throws Exception {
+		String bizId = (String) BindUtil.get(reportSchedule, Bean.DOCUMENT_ID);
+		String reportName = (String) BindUtil.get(reportSchedule, "name");
+
+		Customer customer = user.getCustomer();
+
+		Date sqlStartTime = (Date) BindUtil.get(reportSchedule, "startTime");
+		DateTime startTime = (sqlStartTime == null) ? null : new DateTime(sqlStartTime.getTime());
+		Date sqlEndTime = (Date) BindUtil.get(reportSchedule, "endTime");
+		DateTime endTime = (sqlEndTime == null) ? null : new DateTime(sqlEndTime.getTime());
+		String cronExpression = (String) BindUtil.get(reportSchedule, "cronExpression");
+		
+		TriggerBuilder<CronTrigger> tb = TriggerBuilder.newTrigger()
+														.withIdentity(bizId, customer.getName())
+														.forJob(reportName, REPORTS_GROUP)
+														.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression));
+
+		if (startTime != null) {
+			tb.startAt(startTime);
+		}
+		if (endTime != null) {
+			tb.endAt(endTime);
+		}
+
+		scheduleReport((String) BindUtil.get(reportSchedule, "name"), reportSchedule, user, tb.build(), null);
+	}
+
+	private static void scheduleReport(String jobName,
+									   Bean parameter,
+									   User user,
+									   Trigger trigger,
+									   Integer sleepAtEndInSeconds) throws Exception {
+		Trigger mutableTrigger = trigger;
+		
+		// Add the job data
+		JobDataMap map = mutableTrigger.getJobDataMap();
+		map.put(AbstractSkyveJob.DISPLAY_NAME_JOB_PARAMETER_KEY, jobName);
+		map.put(AbstractSkyveJob.BEAN_JOB_PARAMETER_KEY, parameter);
+		map.put(AbstractSkyveJob.USER_JOB_PARAMETER_KEY, user);
+		if (sleepAtEndInSeconds != null) {
+			map.put(AbstractSkyveJob.SLEEP_JOB_PARAMETER_KEY, sleepAtEndInSeconds);
+		}
+
+		StringBuilder trace = new StringBuilder(128);
+
+		// check end time
+		Date currentTime = new Date();
+		Date triggerEndTime = mutableTrigger.getEndTime(); 
+		Date firstFireTime = mutableTrigger.getFireTimeAfter(currentTime);
+
+		if ((triggerEndTime != null) && triggerEndTime.before(currentTime)) {
+			trace.append("No scheduling required (end time = ").append(triggerEndTime).append(" of ");
+		}
+		else {
+			// Set the first fire time (if job is scheduled and recurring)
+			if (firstFireTime != null) {
+				trace.append("Scheduled execution of ");
+				mutableTrigger = mutableTrigger.getTriggerBuilder().startAt(firstFireTime).build();
+			}
+			else {
+				trace.append("Immediate execution of ");
+			}
+
+			// schedule
+			try {
+				JOB_SCHEDULER.scheduleJob(mutableTrigger);
+			}
+			catch (@SuppressWarnings("unused") ObjectAlreadyExistsException e) {
+				throw new ValidationException(new Message("You are already running job " + jobName +
+						".  Look in the jobs list for more information."));
+			}
+		}
+
+		JobKey jobKey = mutableTrigger.getJobKey();
+		trace.append(jobKey.getGroup()).append('.').append(jobKey.getName());
+		trace.append(": ").append(jobName).append(" with trigger ");
+		TriggerKey key = mutableTrigger.getKey();
+		trace.append(key.getGroup() + '/' + key.getName());
+		if (firstFireTime != null) {
+			trace.append(" first at ").append(firstFireTime);
+		}
+		UtilImpl.LOGGER.info(trace.toString());
+	}
+
+	public static void unscheduleReport(Bean reportSchedule, Customer customer) throws Exception {
+		if (JOB_SCHEDULER != null) {
+			JOB_SCHEDULER.unscheduleJob(new TriggerKey(reportSchedule.getBizId(), customer.getName()));
+		}
+	}
+
 	public static List<JobDescription> getCustomerRunningJobs()
 	throws Exception {
 		User user = AbstractPersistence.get().getUser();
@@ -374,7 +485,7 @@ public class JobScheduler {
 
 		return result;
 	}
-	
+
 	public static boolean cancelJob(String instanceId) throws SchedulerException {
 		return JOB_SCHEDULER.interrupt(instanceId);
 	}

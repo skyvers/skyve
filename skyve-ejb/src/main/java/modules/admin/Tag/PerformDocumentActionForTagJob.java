@@ -20,12 +20,11 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.CommunicationUtil;
+import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.PushMessage;
 
-import modules.admin.Communication.CommunicationUtil;
-import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance.EvictOption;
-import modules.admin.domain.Tag;
 
 public class PerformDocumentActionForTagJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -40,7 +39,7 @@ public class PerformDocumentActionForTagJob extends Job {
 
 		List<String> log = getLog();
 
-		Tag tag = (Tag) getBean();
+		TagExtension tag = (TagExtension) getBean();
 		log.add("Started Document Action for Tagged Items Job at " + new Date());
 
 		if (tag.getDocumentAction() != null) {

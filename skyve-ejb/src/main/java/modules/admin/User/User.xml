@@ -10,6 +10,9 @@
 	<bizKey >
 		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
 	</bizKey>
+	<implements>
+		<interface>org.skyve.domain.app.admin.User</interface>
+	</implements>
 	<attributes>
 		<text name="userName" required="true">
 			<documentation>

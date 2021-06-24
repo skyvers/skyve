@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.Communication.CommunicationExtension;
-import modules.admin.domain.Communication.FormatType;
 import org.skyve.CORE;
+import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
@@ -31,7 +31,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class Subscription extends AbstractPersistentBean {
+public class Subscription extends AbstractPersistentBean implements org.skyve.domain.app.admin.Subscription {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -149,19 +149,8 @@ public class Subscription extends AbstractPersistentBean {
 	public void setCommunication(CommunicationExtension communication) {
 		if (this.communication != communication) {
 			preset(communicationPropertyName, communication);
-			CommunicationExtension oldCommunication = this.communication;
 			this.communication = communication;
-			if ((communication != null) && (communication.getSubscriptionsElementById(getBizId()) == null)) {
-				communication.getSubscriptions().add(this);
-			}
-			if (oldCommunication != null) {
-				oldCommunication.getSubscriptions().remove(this);
-			}
 		}
-	}
-
-	public void nullCommunication() {
-		this.communication = null;
 	}
 
 	/**
