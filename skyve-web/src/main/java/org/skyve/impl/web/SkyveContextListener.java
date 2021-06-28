@@ -23,7 +23,6 @@ import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.addin.DefaultAddInManager;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.CacheUtil;
@@ -31,6 +30,7 @@ import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.impl.addin.DefaultAddInManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
@@ -54,7 +54,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		CacheUtil.init();
 		try {
-			DefaultAddInManager.get().start();
+			DefaultAddInManager.get().startup();
 			
 			// ensure that the schema is created before trying to init the job scheduler
 			AbstractPersistence p = null;
@@ -683,7 +683,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		finally {
 			// Ensure the add-in manager is stopped
-			DefaultAddInManager.get().stop();
+			DefaultAddInManager.get().shutdown();
 		}
 	}
 

@@ -17,6 +17,16 @@ public class AddInManagerInjectable implements AddInManager, Serializable {
 	private static final long serialVersionUID = 3294370979190313613L;
 
 	@Override
+	public void startup() {
+		EXT.getAddInManager().startup();
+	}
+
+	@Override
+	public void shutdown() {
+		EXT.getAddInManager().shutdown();
+	}
+
+	@Override
 	public <T extends Object> T getExtension(Class<T> type) {
 		return EXT.getAddInManager().getExtension(type);
 	}

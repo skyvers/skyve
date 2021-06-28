@@ -1,4 +1,4 @@
-package org.skyve.addin;
+package org.skyve.impl.addin;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
+import org.skyve.addin.AddInManager;
 import org.skyve.impl.util.UtilImpl;
 
 public class DefaultAddInManager implements AddInManager {
@@ -21,7 +22,8 @@ public class DefaultAddInManager implements AddInManager {
 		return INSTANCE;
 	}
 	
-	public void start() {
+	@Override
+	public void startup() {
 		if (UtilImpl.ADDINS_DIRECTORY == null) {
 			UtilImpl.LOGGER.info("Add-Ins directory = " + UtilImpl.CONTENT_DIRECTORY + "addins/");
 			plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.CONTENT_DIRECTORY, "addins"));
@@ -45,7 +47,8 @@ public class DefaultAddInManager implements AddInManager {
 		}
 	}
 	
-	public void stop() {
+	@Override
+	public void shutdown() {
 		if (plugInManager != null) {
 			plugInManager.stopPlugins();
 			plugInManager = null;
