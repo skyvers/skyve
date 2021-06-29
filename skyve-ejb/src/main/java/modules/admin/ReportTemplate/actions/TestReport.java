@@ -116,8 +116,9 @@ public class TestReport extends DownloadAction<ReportTemplate> {
 
 		EXT.getReporting().generateFreemarkerPDFFromHTML(inputStream, pdfFile);
 
-		try (InputStream in = new FileInputStream(pdfFile)) {
+		/*try (InputStream in = new FileInputStream(pdfFile)) {
 			return new Download(String.format("%s.pdf", bean.getName()), in, MimeType.pdf);			
-		}
+		}*/
+		return new Download(String.format("%s.pdf", bean.getName()), new FileInputStream(pdfFile), MimeType.pdf);
 	}
 }
