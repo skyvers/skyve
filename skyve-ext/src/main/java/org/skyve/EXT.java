@@ -40,14 +40,13 @@ import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
+import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.SQLMetaDataUtil;
-import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobDescription;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
@@ -58,6 +57,7 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
+import org.skyve.tag.TagManager;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
@@ -250,161 +250,13 @@ public class EXT {
 	}
 
 	/**
-	 * Tag 1 bean.
-	 * 
-	 * @param tagId
-	 *            Tag the bean against this tag.
-	 * @param bean
-	 *            The bean to be tagged.
-	 * @throws Exception
+	 * For tag operations.
+	 * @return A tag manager
 	 */
-	public static void tag(String tagId, Bean bean) throws Exception {
-		TagUtil.tag(tagId, bean);
+	public static TagManager getTagManager() {
+		return DefaultTagManager.get();
 	}
-
-	/**
-	 * Tag 1 bean.
-	 * 
-	 * @param tagId
-	 *            Tag the bean against this tag.
-	 * @param taggedModuleName
-	 *            The module name of the bean to be tagged.
-	 * @param taggedDocumentName
-	 *            The document name of the bean to be tagged.
-	 * @param taggedBizId
-	 *            The bizId of the bean to be tagged.
-	 * @throws Exception
-	 */
-	public static void tag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
-		TagUtil.tag(tagId, taggedModuleName, taggedDocumentName, taggedBizId);
-	}
-
-	/**
-	 * Remove the bean from this tag.
-	 * 
-	 * @param tagId
-	 *            The tag.
-	 * @param bean
-	 *            The bean to untag.
-	 * @throws Exception
-	 */
-	public static void untag(String tagId, Bean bean) throws Exception {
-		TagUtil.untag(tagId, bean);
-	}
-
-	/**
-	 * Remove the bean from this tag.
-	 * 
-	 * @param tagId
-	 *            The tag.
-	 * @param taggedModuleName
-	 *            The module name of the bean to be untagged.
-	 * @param taggedDocumentName
-	 *            The document name of the bean to be untagged.
-	 * @param taggedBizId
-	 *            The bizId of the bean to be untagged.
-	 * @throws Exception
-	 */
-	public static void untag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
-		TagUtil.untag(tagId, taggedModuleName, taggedDocumentName, taggedBizId);
-	}
-
-	/**
-	 * Create a tag.
-	 * 
-	 * @param tagName
-	 *            The name of the tag.
-	 * @param visible
-	 *            Whether the tag should be shown throughout the skyve UI.
-	 * @return The tagId of the created tag.
-	 * @throws Exception
-	 */
-	public static String createTag(String tagName, boolean visible) throws Exception {
-		return TagUtil.create(tagName, visible);
-	}
-
-	/**
-	 * Retrieve the tagId of the named tag.
-	 * 
-	 * @param tagName
-	 *            The name of the tag to retrieve.
-	 * @return The corresponding tagId
-	 * @throws Exception
-	 */
-	public static String getTagId(String tagName) throws Exception {
-		return TagUtil.getTagId(tagName);
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public static List<DomainValue> getTags() throws Exception {
-		return TagUtil.getTags();
-	}
-
-	/**
-	 * Delete a tag.
-	 * 
-	 * @param tagId
-	 *            The tagId of the tag to delete.
-	 * @throws Exception
-	 */
-	public static void deleteTag(String tagId) throws Exception {
-		TagUtil.delete(tagId);
-	}
-
-	/**
-	 * Tag a bunch of beans.
-	 * 
-	 * @param tagId
-	 *            The tag to use.
-	 * @param beans
-	 *            The beans to tag.
-	 * @throws Exception
-	 */
-	public static void tag(String tagId, Iterable<Bean> beans) throws Exception {
-		TagUtil.tag(tagId, beans);
-	}
-
-	/**
-	 * Untag (remove) a bunch of beans.
-	 * 
-	 * @param tagId
-	 *            The tag to remove from.
-	 * @param beans
-	 *            The beans to untag.
-	 * @throws Exception
-	 */
-	public static void untag(String tagId, Iterable<Bean> beans) throws Exception {
-		TagUtil.untag(tagId, beans);
-	}
-
-	/**
-	 * Clear any beans related to the given tag.
-	 * 
-	 * @param tagId
-	 *            the given tag
-	 * @throws Exception
-	 */
-	public static void clearTag(String tagId) throws Exception {
-		TagUtil.clear(tagId);
-	}
-
-	/**
-	 * Iterate over the tagged beans.
-	 * 
-	 * @param tagId
-	 *            The tag to iterate.
-	 * @return The beans (a scrolled set). Each bean is loaded into 1st level
-	 *         cache so beware.
-	 * @throws Exception
-	 */
-	public static Iterable<Bean> iterateTagged(String tagId) throws Exception {
-		return TagUtil.iterateTagged(tagId);
-	}
-
+	
 	/**
 	 * Generate an image of a chart.
 	 * @param data

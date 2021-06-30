@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.cache.StateUtil;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -38,7 +39,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
@@ -1399,7 +1399,7 @@ public class SmartClientListServlet extends HttpServlet {
 								PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		TagUtil.tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
 		pw.append(returnTagUpdateMessage(customer,
@@ -1417,7 +1417,7 @@ public class SmartClientListServlet extends HttpServlet {
 								PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		TagUtil.untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
 		pw.append(returnTagUpdateMessage(customer, 

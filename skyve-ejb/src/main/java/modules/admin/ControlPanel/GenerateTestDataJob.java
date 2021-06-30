@@ -13,6 +13,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.tag.TagManager;
 import org.skyve.util.Binder;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.PushMessage;
@@ -45,6 +46,7 @@ public class GenerateTestDataJob extends CancellableJob {
 		int failed = 0;
 		int size = bean.getTestDocumentNames().size() * bean.getTestNumberToGenerate().intValue();
 		
+		TagManager tm = EXT.getTagManager();
 		for (ModuleDocument docName : bean.getTestDocumentNames()) {
 			for (int i = 0; i < bean.getTestNumberToGenerate().intValue(); i++) {
 				try {
@@ -54,7 +56,7 @@ public class GenerateTestDataJob extends CancellableJob {
 					PersistentBean newTestDataItem = db.build(module, document);
 					pers.save(document, newTestDataItem);
 					if (Boolean.TRUE.equals(bean.getTestTagGeneratedData())) {
-						EXT.tag(tag.getBizId(), module.getName(), document.getName(), newTestDataItem.getBizId());
+						tm.tag(tag.getBizId(), module.getName(), document.getName(), newTestDataItem.getBizId());
 					}
 
 					log.add(Binder.formatMessage("Succesfully created {moduleName}.{documentName} ", docName)

@@ -19,6 +19,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.skyve.tag.TagManager;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
@@ -68,6 +69,7 @@ public class PerformDocumentActionForTagJob extends Job {
 			int size = beans.size();
 			int processed = 0;
 			Iterator<Bean> it = beans.iterator();
+			TagManager tm = EXT.getTagManager();
 			while (it.hasNext()) {
 				PersistentBean pb = (PersistentBean) it.next();
 
@@ -97,12 +99,12 @@ public class PerformDocumentActionForTagJob extends Job {
 						}
 						// remove successfully validated beans
 						if (Boolean.TRUE.equals(tag.getUnTagSuccessful())) {
-							EXT.untag(tag.getBizId(), pb);
+							tm.untag(tag.getBizId(), pb);
 						}
 
 						if (TagDefaultAction.tagDelete.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							// remove from tag and delete
-							EXT.untag(tag.getBizId(), pb);
+							tm.untag(tag.getBizId(), pb);
 							pers.delete(pb);
 						} else if (TagDefaultAction.tagValidate.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							BeanValidator.validateBeanAgainstDocument(document, pb);

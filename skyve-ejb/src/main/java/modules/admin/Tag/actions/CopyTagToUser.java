@@ -5,6 +5,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
+import org.skyve.tag.TagManager;
 import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagExtension;
@@ -26,7 +27,8 @@ public class CopyTagToUser implements ServerSideAction<TagExtension> {
 			Persistence pers = CORE.getPersistence();
 			pers.upsertBeanTuple(newTag);
 			
-			EXT.tag(newTag.getBizId(), EXT.iterateTagged(bean.getBizId()));
+			TagManager tm = EXT.getTagManager();
+			tm.tag(newTag.getBizId(), tm.iterate(bean.getBizId()));
 		}
 		return new ServerSideActionResult<>(bean);
 	}

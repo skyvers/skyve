@@ -7,6 +7,9 @@
 	<singularAlias>Tagged</singularAlias>
 	<pluralAlias>Tagged</pluralAlias>
 	<bizKey expression="Tagged Item"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.Tagged</interface>
+	</implements>
 	<attributes>
 		<text name="taggedModule">
 			<displayName>Tagged Module</displayName>

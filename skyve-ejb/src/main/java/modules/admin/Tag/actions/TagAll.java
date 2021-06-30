@@ -28,7 +28,7 @@ public class TagAll implements ServerSideAction<TagExtension> {
 		DocumentQuery q = pers.newDocumentQuery(bean.getUploadModuleName(), bean.getUploadDocumentName());
 		
 		List<Bean> beans = q.projectedResults();
-		EXT.tag(bean.getBizId(), beans);
+		EXT.getTagManager().tag(bean.getBizId(), beans);
 		
 		bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
 		bean.setTotalTagged(Long.valueOf(bean.count()));

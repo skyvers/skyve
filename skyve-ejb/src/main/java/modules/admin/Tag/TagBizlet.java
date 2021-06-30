@@ -6,7 +6,6 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.TagUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -18,6 +17,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+import org.skyve.tag.TagManager;
 import org.skyve.web.WebContext;
 
 import modules.admin.Jobs.JobsBizlet;
@@ -26,7 +26,6 @@ import modules.admin.domain.Tag.FilterAction;
 import modules.admin.domain.Tag.FilterOperator;
 
 public class TagBizlet extends Bizlet<TagExtension> {
-
 	private static final long serialVersionUID = -927602139528710862L;
 
 	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
@@ -35,7 +34,6 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, TagExtension bean) throws Exception {
-
 		Persistence pers = CORE.getPersistence();
 		List<DomainValue> result = new ArrayList<>();
 
@@ -107,7 +105,6 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 	@Override
 	public TagExtension preExecute(ImplicitActionName actionName, TagExtension bean, Bean parentBean, WebContext webContext) throws Exception {
-		
 		if (ImplicitActionName.Edit.equals(actionName)) {
 			if (bean.getUploadModuleName() == null) {
 				Module homeModule = CORE.getUser().getCustomer().getHomeModule();
@@ -134,7 +131,8 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			bean.setCopyToUserTagName(bean.getName());
 			
 			//set counters
-			bean.setOperandTagCount(Long.valueOf(bean.getOperandTag().count()));
+			TagExtension operandTag = bean.getOperandTag();
+			bean.setOperandTagCount(Long.valueOf((operandTag == null) ? 0L : operandTag.count()));
 			bean.setUploadTagged(Long.valueOf(bean.countDocument(bean.getUploadModuleName(), bean.getUploadDocumentName())));
 			bean.setTotalTagged(Long.valueOf(bean.count()));
 
@@ -142,7 +140,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 		}
 
 		if (ImplicitActionName.Delete.equals(actionName)) {
-			TagUtil.clear(bean.getBizId());
+			EXT.getTagManager().clear(bean.getBizId());
 		}
 
 		return bean;
@@ -150,7 +148,6 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-
 		List<DomainValue> result = new ArrayList<>();
 
 		Customer customer = CORE.getUser().getCustomer();
@@ -171,20 +168,17 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	 * @param object
 	 */
 	public static void union(TagExtension subject, TagExtension object) throws Exception {
-
 		if (subject != null && object != null) {
-
-			// no dialect insensitive way to use SQL for creating new UUIDs for
-			// new records
+			// no dialect insensitive way to use SQL for creating new UUIDs for new records
 			// add tagged items from object tag to subject tag
-			// EXT function deals with duplicates
-			for (Bean bean : EXT.iterateTagged(object.getBizId())) {
-				EXT.tag(subject.getBizId(), bean);
+			// TagManager function deals with duplicates
+			TagManager tm = EXT.getTagManager();
+			for (Bean bean : tm.iterate(object.getBizId())) {
+				tm.tag(subject.getBizId(), bean);
 			}
 			subject.setUploadTagged(Long.valueOf(subject.countDocument(subject.getUploadModuleName(), subject.getUploadDocumentName())));
 			subject.setTotalTagged(Long.valueOf(subject.count()));
 		}
-
 	}
 
 	/**
@@ -196,7 +190,6 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	 * @throws Exception
 	 */
 	public static void intersect(TagExtension subject, TagExtension object) throws Exception {
-
 		if (subject != null && object != null) {
 			Persistence pers = CORE.getPersistence();
 
@@ -231,11 +224,11 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	 * @throws Exception
 	 */
 	public static void except(TagExtension subject, TagExtension object) throws Exception {
-
 		if (subject != null && object != null) {
-			for (Bean bean : EXT.iterateTagged(object.getBizId())) {
-				// EXT method handles if this bean was not tagged
-				EXT.untag(subject.getBizId(), bean);
+			TagManager tm = EXT.getTagManager();
+			for (Bean bean : tm.iterate(object.getBizId())) {
+				// TagManager method handles if this bean was not tagged
+				tm.untag(subject.getBizId(), bean);
 			}
 			subject.setUploadTagged(Long.valueOf(subject.countDocument(subject.getUploadModuleName(), subject.getUploadDocumentName())));
 			subject.setTotalTagged(Long.valueOf(subject.count()));
@@ -260,7 +253,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			Document document = module.getDocument(customer, documentName);
 
 			if (tag != null) {
-				for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
+				for (Bean bean : EXT.getTagManager().iterate(tag.getBizId())) {
 					if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
 						// need to check that this is only done for documents of the selected type
 						beans.add(bean);

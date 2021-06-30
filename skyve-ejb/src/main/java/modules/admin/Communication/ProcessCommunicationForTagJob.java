@@ -10,6 +10,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.Job;
 import org.skyve.persistence.Persistence;
+import org.skyve.tag.TagManager;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 
@@ -26,14 +27,12 @@ public class ProcessCommunicationForTagJob extends Job {
 
 	@Override
 	public void execute() throws Exception {
-
 		List<String> log = getLog();
 
 		Communication communication = (Communication) getBean();
 		Persistence pers = CORE.getPersistence();
 		
 		if (communication.getActionType() != null) {
-
 			// get relevant document to action
 			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 			StringBuilder sb = new StringBuilder();
@@ -45,6 +44,7 @@ public class ProcessCommunicationForTagJob extends Job {
 			int size = beans.size();
 			int processed = 0;
 			Iterator<Bean> it = beans.iterator();
+			TagManager tm = EXT.getTagManager();
 			while (it.hasNext()) {
 				PersistentBean pb = (PersistentBean) it.next();
 
@@ -59,7 +59,7 @@ public class ProcessCommunicationForTagJob extends Job {
 						sb.append("\n Saved OK");
 
 						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
-							EXT.untag(communication.getTag().getBizId(), pb);
+							tm.untag(communication.getTag().getBizId(), pb);
 						}
 						break;
 					case testBindingsAndOutput:
@@ -72,7 +72,7 @@ public class ProcessCommunicationForTagJob extends Job {
 						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, pb);
 						sb.append("\n Sent OK");
 						if (Boolean.TRUE.equals(communication.getUnTagSuccessful())) {
-							EXT.untag(communication.getTag().getBizId(), pb);
+							tm.untag(communication.getTag().getBizId(), pb);
 						}
 						break;
 					default:

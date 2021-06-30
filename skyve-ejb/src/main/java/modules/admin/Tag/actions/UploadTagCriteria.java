@@ -65,10 +65,10 @@ public class UploadTagCriteria extends UploadAction<TagExtension> {
 			for (Bean bean : beansToTag) {
 	
 				if (FilterAction.tagRecordsThatMatch.equals(tag.getFilterAction())) {
-					EXT.tag(tag.getBizId(), bean);
+					EXT.getTagManager().tag(tag.getBizId(), bean);
 				} else if (FilterAction.unTagRecordsThatMatch.equals(tag.getFilterAction())) {
 					// remove the tagged record
-					EXT.untag(tag.getBizId(), bean);
+					EXT.getTagManager().untag(tag.getBizId(), bean);
 				}
 			}
 			tag.setUploaded(Long.valueOf(loader.getDataIndex()));

@@ -15,13 +15,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
@@ -35,6 +35,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.tag.TagManager;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
@@ -98,6 +99,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					String dataSourceName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 		
 					HttpSession session = request.getSession();
+					TagManager tm = EXT.getTagManager();
 
 					if ("L".equals(action)) {
 						list(tagId, menuButtonId, sb);
@@ -116,7 +118,7 @@ public class SmartClientTagServlet extends HttpServlet {
 																			bean,
 																			user,
 																			customer)) {
-							TagUtil.tag(tagId, iterable);
+							tm.tag(tagId, iterable);
 						}
 					}
 					else if ("U".equals(action)) {
@@ -133,18 +135,18 @@ public class SmartClientTagServlet extends HttpServlet {
 																			bean,
 																			user,
 																			customer)) {
-							TagUtil.untag(tagId, iterable);
+							tm.untag(tagId, iterable);
 						}
 					}
 					else if ("C".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 						
-						TagUtil.clear(tagId);
+						tm.clear(tagId);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 						
-						tagId = TagUtil.create(tagName, true);
+						tagId = tm.create(tagName, true);
 						sb.append("{bizId:'");
 						sb.append(tagId);
 						sb.append("'}");
@@ -152,7 +154,7 @@ public class SmartClientTagServlet extends HttpServlet {
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 						
-						TagUtil.delete(tagId);
+						tm.delete(tagId);
 					}
 
 					pw.append(sb);
@@ -200,7 +202,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	    sb.append("{title:'No Tag',click:\"").append(menuButtonId).append(".setTag(null,'No Tag')\"},");
 	    sb.append("{isSeparator:true}");
 
-        for (DomainValue value : TagUtil.getTags()) {
+        for (DomainValue value : EXT.getTagManager().getTags()) {
         	String escapedCode = SmartClientGenerateUtils.processString(value.getCode());
         	String escapedDescription = SmartClientGenerateUtils.processString(value.getDescription());
         	

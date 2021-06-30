@@ -166,9 +166,11 @@ public class DefaultReporting implements Reporting {
 		Customer customer = user.getCustomer();
 		Document document = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		EXT.getReporting().runJasperSQLReport(user, document, reportName, parameters, ReportFormat.pdf, out);
-		byte[] reportBytes = out.toByteArray();
+		byte[] reportBytes = null;
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			EXT.getReporting().runJasperSQLReport(user, document, reportName, parameters, ReportFormat.pdf, out);
+			reportBytes = out.toByteArray();
+		}
 
 		result.setAttachmentFileName(reportName);
 		result.setAttachment(reportBytes);
@@ -189,11 +191,12 @@ public class DefaultReporting implements Reporting {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		EXT.getReporting().runJasperReport(user, reportParameters, ReportFormat.pdf, out);
-		byte[] reportBytes = out.toByteArray();
-
+		byte[] reportBytes = null;
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+			EXT.getReporting().runJasperReport(user, reportParameters, ReportFormat.pdf, out);
+			reportBytes = out.toByteArray();
+		}
+		
 		result.setAttachmentFileName(reportParameters.get(0).getReportName());
 		result.setAttachment(reportBytes);
 		result.setAttachmentMimeType(MimeType.pdf);
