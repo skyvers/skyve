@@ -1,11 +1,8 @@
 package modules.admin.ReportTemplate.actions;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -31,6 +28,7 @@ public class ExportReportSpecification extends DownloadAction<ReportTemplate> {
 
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
+		// nothing to do here
 	}
 
 	@Override
@@ -51,10 +49,7 @@ public class ExportReportSpecification extends DownloadAction<ReportTemplate> {
 		
 		json = JSON.marshall(CORE.getCustomer(), copy);
 		
-		// write the output string to an input stream
-		InputStream inputStream = new ByteArrayInputStream(json.toString().getBytes(Charset.forName("UTF-8")));
-
-		return new Download(String.format("%s.json", bean.getName()), inputStream, MimeType.json);
+		return new Download(String.format("%s.json", bean.getName()), json, MimeType.json);
 	}
 
 }

@@ -1,11 +1,7 @@
 package modules.admin.ReportTemplate.actions;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -18,6 +14,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -91,13 +88,9 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 
 	@Override
 	public Download download(ReportTemplateExtension bean, WebContext webContext) throws Exception {
-
-		// write the output string to an input stream
-		InputStream inputStream = new ByteArrayInputStream(bean.getResults().getBytes(Charset.forName("UTF-8")));
-
 		// return the correct report type
 		if (ReportTemplate.OutputFormat.CSV == bean.getOutputFormat()) {
-			return new Download(String.format("%s.csv", bean.getName()), inputStream, MimeType.csv);
+			return new Download(String.format("%s.csv", bean.getName()), bean.getResults(), MimeType.csv);
 		}
 
 		// html report download
@@ -110,10 +103,8 @@ public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
 		File pdfFile = tempDir.resolve(String.format("%s.pdf", bean.getName())).toFile();
 		pdfFile.deleteOnExit();
 		
-		EXT.getReporting().generateFreemarkerPDFFromHTML(inputStream, pdfFile);
+		EXT.getReporting().generateFreemarkerPDFFromHTML(bean.getResults(), pdfFile);
 		
-		try (InputStream in = new FileInputStream(pdfFile)) {
-			return new Download(String.format("%s.pdf", bean.getName()), in, MimeType.pdf);
-		}
+		return new Download(String.format("%s.pdf", bean.getName()), pdfFile, MimeType.pdf);
 	}
 }

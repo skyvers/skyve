@@ -1,12 +1,10 @@
 package modules.admin.ControlPanel.actions;
 
-import java.io.ByteArrayInputStream;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
@@ -30,7 +28,7 @@ public class DownloadResults extends DownloadAction<ControlPanelExtension> {
 		String results = bean.getUnescapedResults();
 		bean.setResults(null);
 		
-		Download result = new Download(FILE_TITLE, new ByteArrayInputStream(results.getBytes(Util.UTF8)), MimeType.richtext);
+		Download result = new Download(FILE_TITLE, results, MimeType.richtext);
 		return result;
 	}
 

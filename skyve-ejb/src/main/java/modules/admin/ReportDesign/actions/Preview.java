@@ -10,6 +10,7 @@ import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -19,7 +20,6 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.web.WebContext;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 
 
 
-		return new Download(reportName, new ByteArrayInputStream(baos.toByteArray()), MimeType.pdf);
+		return new Download(reportName, baos.toByteArray(), MimeType.pdf);
 	}
 
 }

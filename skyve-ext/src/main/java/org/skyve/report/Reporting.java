@@ -10,8 +10,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.metadata.controller.ApplicationContextListener;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
-import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.util.MailAttachment;
@@ -129,7 +129,16 @@ public interface Reporting extends ApplicationContextListener {
 	 * @throws Exception
 	 */
 	void generateFreemarkerPDFFromHTML(InputStream in, File outputFile) throws Exception;
-	
+
+	/**
+	 * Generates a PDF from a HTML file
+	 * 
+	 * @param html The source HTML
+	 * @param outputFile The file to write the resulting PDF file to
+	 * @throws Exception
+	 */
+	void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception;
+
 	/**
 	 * Generates a PDF from a HTML file
 	 * 
@@ -137,7 +146,7 @@ public interface Reporting extends ApplicationContextListener {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception
 	 */
-	void generateFreemarkerPDFFromHTML(String url, File outputFile) throws Exception;
+	void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception;
 
 	/**
 	 * Generates a PDF from a HTML file
@@ -147,6 +156,15 @@ public interface Reporting extends ApplicationContextListener {
 	 * @throws Exception
 	 */
 	void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception;
+
+	/**
+	 * Generates a PDF from a HTML file
+	 *
+	 * @param html The source HTML
+	 * @param outputStream The outputStream to write the resulting PDF to
+	 * @throws Exception
+	 */
+	void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception;
 
 	/**
 	 * Creates a new Freemarker report and returns the merged output as a String, ready to be processed further.

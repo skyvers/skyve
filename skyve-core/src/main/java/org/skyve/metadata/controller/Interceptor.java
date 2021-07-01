@@ -8,8 +8,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.controller.DownloadAction.Download;
-import org.skyve.metadata.controller.UploadAction.UploadedFile;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.web.WebContext;
@@ -231,7 +229,7 @@ public abstract class Interceptor implements MetaData {
 	public boolean beforeUploadAction(Document document, 
 										String actionName,
 										Bean bean, 
-										UploadedFile file, 
+										Upload upload, 
 										WebContext webContext)
 	throws Exception {
 		return false;
@@ -241,7 +239,7 @@ public abstract class Interceptor implements MetaData {
 	public void afterUploadAction(Document document,
 									String actionName,
 									Bean bean, 
-									UploadedFile file, 
+									Upload upload, 
 									WebContext webContext)
 	throws Exception {
 		// no-op

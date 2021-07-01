@@ -12,7 +12,7 @@ import javax.enterprise.inject.Alternative;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.ReportParameters;
-import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
@@ -122,13 +122,23 @@ public class ReportingInjectable implements Reporting, Serializable {
 	}
 
 	@Override
-	public void generateFreemarkerPDFFromHTML(String url, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception {
+		EXT.getReporting().generateFreemarkerPDFFromHTML(html, outputFile);
+	}
+
+	@Override
+	public void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(url, outputFile);
 	}
 
 	@Override
 	public void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(in, out);
+	}
+
+	@Override
+	public void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception {
+		EXT.getReporting().generateFreemarkerPDFFromHTML(html, out);
 	}
 
 	@Override

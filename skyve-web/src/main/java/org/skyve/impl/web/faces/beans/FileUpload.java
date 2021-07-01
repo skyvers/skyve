@@ -31,7 +31,9 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
+import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -143,28 +145,30 @@ public class FileUpload extends AbstractUpload {
 			catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 			}
-			try{
-				@SuppressWarnings("resource")
-				UploadAction.UploadedFile bizFile = 
-						new UploadAction.UploadedFile(FilenameUtils.getName(file.getFileName()),
-														file.getInputStream(),
-														mimeType);
-				boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
-				if (! vetoed) {
-					bean = uploadAction.upload(bean, bizFile, exception, webContext);
-					if (binding == null) {
-						webContext.setCurrentBean(bean);
+			
+			try (WebFileInputStream in = new WebFileInputStream(file.getInputStream())) {
+				try {
+					Upload upload = new Upload(FilenameUtils.getName(file.getFileName()), in, mimeType);
+					boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, upload, webContext);
+					if (! vetoed) {
+						bean = uploadAction.upload(bean, upload, exception, webContext);
+						if (binding == null) {
+							webContext.setCurrentBean(bean);
+						}
+						else {
+							BindUtil.set(currentBean, binding, bean);
+						}
+						
+						customer.interceptAfterUploadAction(document, action, bean, upload, webContext);
+						
+						// throw if we have errors found, to ensure rollback
+						if (exception.hasErrors()) {
+							throw exception;
+						}
 					}
-					else {
-						BindUtil.set(currentBean, binding, bean);
-					}
-					
-					customer.interceptAfterUploadAction(document, action, bean, bizFile, webContext);
-					
-					// throw if we have errors found, to ensure rollback
-					if (exception.hasErrors()) {
-						throw exception;
-					}
+				}
+				finally {
+					in.processed(); // ensure close is called on the in stream here
 				}
 			}
 			catch (UploadException e) {

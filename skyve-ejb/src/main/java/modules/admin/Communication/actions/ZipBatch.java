@@ -2,6 +2,7 @@ package modules.admin.Communication.actions;
 
 import java.io.File;
 
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;

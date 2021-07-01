@@ -1,10 +1,7 @@
 package modules.admin.ReportTemplate.actions;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
 import org.skyve.content.MimeType;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.web.WebContext;
 
@@ -21,25 +18,22 @@ public class DownloadTemplate extends DownloadAction<ReportTemplate> {
 
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
+		// nothing to do here
 	}
 
 	@Override
 	public Download download(ReportTemplate bean, WebContext webContext) throws Exception {
-
-		// write the output string to an input stream
-		InputStream inputStream = new ByteArrayInputStream(bean.getTemplate().getBytes(Charset.forName("UTF-8")));
-
 		// return XML for Jasper reports
 		if (bean.getReportType() == ReportType.jasper) {
-			return new Download(String.format("%s Template.xml", bean.getName()), inputStream, MimeType.xml);
+			return new Download(String.format("%s Template.xml", bean.getName()), bean.getTemplate(), MimeType.xml);
 		}
 
 		// return TXT for Freemarker CSV reports
 		if (ReportTemplate.OutputFormat.CSV == bean.getOutputFormat()) {
-			return new Download(String.format("%s Template.txt", bean.getName()), inputStream, MimeType.plain);
+			return new Download(String.format("%s Template.txt", bean.getName()), bean.getTemplate(), MimeType.plain);
 		}
 		
 		// return HTML for Freemarker PDF reports
-		return new Download(String.format("%s Template.html", bean.getName()), inputStream, MimeType.html);
+		return new Download(String.format("%s Template.html", bean.getName()), bean.getTemplate(), MimeType.html);
 	}
 }

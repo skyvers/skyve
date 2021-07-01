@@ -24,10 +24,10 @@ import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
-import org.skyve.metadata.controller.UploadAction.UploadedFile;
+import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
@@ -747,11 +747,11 @@ public class CustomerImpl implements Customer {
 	public boolean interceptBeforeUploadAction(Document document,
 												String actionName,
 												Bean bean,
-												UploadedFile file,
+												Upload upload,
 												WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeUploadAction(document, actionName, bean, file, webContext)) {
+			if (interceptor.getInterceptor(this).beforeUploadAction(document, actionName, bean, upload, webContext)) {
 				return true;
 			}
 		}
@@ -761,11 +761,11 @@ public class CustomerImpl implements Customer {
 	public void interceptAfterUploadAction(Document document,
 											String actionName,
 											Bean bean,
-											UploadedFile file,
+											Upload upload,
 											WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterUploadAction(document, actionName, bean, file, webContext);
+			interceptor.getInterceptor(this).afterUploadAction(document, actionName, bean, upload, webContext);
 		}
 	}
 	

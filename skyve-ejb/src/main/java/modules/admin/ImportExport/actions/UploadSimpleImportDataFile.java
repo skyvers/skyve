@@ -10,6 +10,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bizport.POISheetLoader;
+import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -24,17 +25,14 @@ import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExportColumn;
 
 public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -8154709480999519405L;
 
 	@Override
 	public ImportExportExtension upload(ImportExportExtension importExport,
-			UploadedFile file,
-			UploadException exception,
-			WebContext webContext)
-			throws Exception {
+											Upload upload,
+											UploadException exception,
+											WebContext webContext)
+	throws Exception {
 
 		ImportExportExtension bean = importExport;
 
@@ -48,7 +46,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 				File importFile = new File(String.format("%s%s%s",
 						bean.baseFolder(),
 						File.separator,
-						file.getFileName()));
+						upload.getFileName()));
 
 				// and save temporary copy of file
 				File import_directory = new File(bean.baseFolder());
@@ -63,10 +61,10 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 						throw new Exception("The previous upload of this file can't be removed.");
 					}
 				}
-				try (InputStream is = file.getInputStream()) {
+				try (InputStream is = upload.getInputStream()) {
 					Files.copy(is, Paths.get(importFile.getAbsolutePath()));
 				}
-				bean.setImportFileName(file.getFileName());
+				bean.setImportFileName(upload.getFileName());
 				bean.setImportFileAbsolutePath(importFile.getAbsolutePath());
 
 				bean = loadColumnsFromFile(bean, exception);

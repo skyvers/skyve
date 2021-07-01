@@ -2,6 +2,8 @@ package org.skyve.impl.web;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -21,8 +23,9 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
-import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -79,16 +82,37 @@ public class DownloadServlet extends HttpServlet {
 			        	byte[] bytes = null;
 						if (! vetoed) {
 							result = downloadAction.download(bean, webContext);
-							customer.interceptAfterDownloadAction(document, resourceName, bean, result, webContext);
+							WebFileInputStream stream = result.getInputStream();
+							try {
+								customer.interceptAfterDownloadAction(document, resourceName, bean, result, webContext);
 	
-							try (BufferedInputStream bis = new BufferedInputStream(result.getInputStream())) {
-								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-									bytes = new byte[1024]; // 1K
-									int bytesRead = 0;
-									while ((bytesRead = bis.read(bytes)) > 0) {
-										baos.write(bytes, 0, bytesRead);
+								bytes = result.getBytes();
+								if (bytes == null) {
+									File file = result.getFile();
+									if (file != null) {
+										try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+												in.transferTo(out);
+												bytes = baos.toByteArray();
+											}
+										}
 									}
-									bytes = baos.toByteArray();
+								}
+								if (bytes == null) {
+									if (stream != null) {
+										try (BufferedInputStream in = new BufferedInputStream(stream)) {
+											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+												in.transferTo(out);
+												bytes = baos.toByteArray();
+											}
+										}
+									}
+								}
+							}
+							finally {
+								if (stream != null) {
+									stream.processed();
+									stream.close();
 								}
 							}
 						}

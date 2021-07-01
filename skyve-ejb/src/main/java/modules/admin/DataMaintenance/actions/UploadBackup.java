@@ -1,6 +1,7 @@
 package modules.admin.DataMaintenance.actions;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -8,6 +9,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.backup.ExternalBackup;
+import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -19,7 +21,7 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 	private static final long serialVersionUID = -7270254238606857719L;
 
 	@Override
-	public DataMaintenance upload(final DataMaintenance bean, final UploadedFile file,
+	public DataMaintenance upload(final DataMaintenance bean, final Upload upload,
 			final UploadException exception, final WebContext webContext) throws Exception {
 
 		// create the backup upload file
@@ -27,12 +29,12 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 				Util.getContentDirectory(),
 				CORE.getUser().getCustomerName(),
 				File.separator,
-				file.getFileName()));
+				upload.getFileName()));
 
 		// check that a backup with this filename doesn't already exist
 		if(backup.exists()) {
 			exception.addError(new Problem(
-					String.format("A backup with the name %s already exists.", file.getFileName()), null));
+					String.format("A backup with the name %s already exists.", upload.getFileName()), null));
 			throw exception;
 		}
 
@@ -45,7 +47,9 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 		}
 
 		// copy the input file to the backup location
-		Files.copy(file.getInputStream(), Paths.get(backup.getAbsolutePath()));
+		try (InputStream in = upload.getInputStream()) {
+			Files.copy(in, Paths.get(backup.getAbsolutePath()));
+		}
 		if(backup.exists()) {
 			Util.LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
 		}

@@ -29,8 +29,8 @@ import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
-import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
@@ -248,19 +248,18 @@ public final class FreemarkerReportUtil {
 		final String reportOutput = runReport(reportName, reportParameters);
 
 		// convert merged report output from String to an InputStream
-		InputStream inputStream = new ByteArrayInputStream(reportOutput.getBytes(Charset.forName("UTF-8")));
+		byte[] content = reportOutput.getBytes(Util.UTF8);
 
 		// if CSV, return the stream
 		if (format == ReportFormat.csv) {
-			return new Download(String.format("%s.csv", downloadFilename), inputStream, MimeType.csv);
+			return new Download(String.format("%s.csv", downloadFilename), content, MimeType.csv);
 		}
 
 		// convert to PDF (writing to PDF requires an OutputStream)
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		generatePDFFromHTML(inputStream, baos);
-		InputStream pdfInputStream = new ByteArrayInputStream(baos.toByteArray());
+		generatePDFFromHTML(new ByteArrayInputStream(content), baos);
 
-		return new Download(String.format("%s.pdf", downloadFilename), pdfInputStream, MimeType.pdf);
+		return new Download(String.format("%s.pdf", downloadFilename), baos.toByteArray(), MimeType.pdf);
 	}
 
 	/**

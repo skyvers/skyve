@@ -3,7 +3,6 @@ package org.skyve.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +31,7 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.skyve.content.MimeType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.metadata.controller.Download;
 import org.skyve.web.WebContext;
 
 /**
@@ -60,21 +59,11 @@ public class FileUtil {
 	public static final byte[] getFileBytes(InputStream inputStream) throws IOException {
 		byte[] bytes = null;
 
-		InputStream stream = inputStream;
-		try {
-			try (BufferedInputStream bis = new BufferedInputStream(stream)) {
-				try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-					byte[] temp = new byte[1024]; // 1K
-					int bytesRead = 0;
-					while ((bytesRead = bis.read(temp)) > 0) {
-						baos.write(temp, 0, bytesRead);
-					}
-					bytes = baos.toByteArray();
-				}
+		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				bis.transferTo(baos);
+				bytes = baos.toByteArray();
 			}
-		} finally {
-			stream.close();
-			stream = null;
 		}
 
 		return bytes;
@@ -192,7 +181,7 @@ public class FileUtil {
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream(20480)) {
 			File backupDir = new File(directoryPath);
 			createZipArchive(backupDir, out);
-			return new Download(zipName, new ByteArrayInputStream(out.toByteArray()), MimeType.zip);
+			return new Download(zipName, out.toByteArray(), MimeType.zip);
 		}
 	}
 	

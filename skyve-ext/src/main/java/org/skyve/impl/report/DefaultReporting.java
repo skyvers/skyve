@@ -1,5 +1,6 @@
 package org.skyve.impl.report;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -14,7 +15,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.report.freemarker.FreemarkerReportUtil;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
 import org.skyve.impl.util.ReportParameters;
-import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
@@ -22,6 +23,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
 import org.skyve.report.Reporting;
 import org.skyve.util.MailAttachment;
+import org.skyve.util.Util;
 
 import freemarker.template.Template;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -95,15 +97,29 @@ public class DefaultReporting implements Reporting {
 	public void generateFreemarkerPDFFromHTML(InputStream in, File outputFile) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(in, outputFile);
 	}
-	
+
 	@Override
-	public void generateFreemarkerPDFFromHTML(String url, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception {
+		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(Util.UTF8))) {
+			FreemarkerReportUtil.generatePDFFromHTML(in, outputFile);
+		}
+	}
+
+	@Override
+	public void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(url, outputFile);
 	}
 
 	@Override
 	public final void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(in, out);
+	}
+
+	@Override
+	public final void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception {
+		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(Util.UTF8))) {
+			FreemarkerReportUtil.generatePDFFromHTML(in, out);
+		}
 	}
 
 	@Override

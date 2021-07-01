@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.FileUtil;

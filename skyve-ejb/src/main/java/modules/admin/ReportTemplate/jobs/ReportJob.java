@@ -94,7 +94,6 @@ public class ReportJob extends Job {
 
 			// write the output string to an input stream
 			final byte[] reportBytes = sw.toString().getBytes(StandardCharsets.UTF_8);
-			final InputStream inputStream = new ByteArrayInputStream(reportBytes);
 
 			final MailAttachment reportAttachment;
 			// return the correct report type
@@ -102,8 +101,10 @@ public class ReportJob extends Job {
 				reportAttachment = new MailAttachment(String.format("%s.csv", report.getName()), reportBytes, MimeType.csv);
 			} else if (ReportTemplate.OutputFormat.PDF == report.getOutputFormat()) {
 				try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-					EXT.getReporting().generateFreemarkerPDFFromHTML(inputStream, out);
-					reportAttachment = new MailAttachment(String.format("%s.pdf", report.getName()), out.toByteArray(), MimeType.pdf);
+					try (final InputStream in = new ByteArrayInputStream(reportBytes)) {
+						EXT.getReporting().generateFreemarkerPDFFromHTML(in, out);
+						reportAttachment = new MailAttachment(String.format("%s.pdf", report.getName()), out.toByteArray(), MimeType.pdf);
+					}
 				}
 			} else {
 				throw new RuntimeException("Unsupported format.");

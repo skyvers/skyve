@@ -12,6 +12,7 @@ import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.DataFileField;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.bizport.POISheetLoader;
+import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.web.WebContext;
 
@@ -23,16 +24,16 @@ public class UploadTagCriteria extends UploadAction<TagExtension> {
 
 	@Override
 	public TagExtension upload(TagExtension tag,
-								UploadedFile file,
+								Upload upload,
 								UploadException exception,
 								WebContext webContext)
 	throws Exception {
-		if (!file.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
+		if (! upload.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
 			exception.addError(new Problem("Only " + MimeType.xlsx.name() + " files are supported", null));
 			throw exception;
 		}
 
-		try (InputStream is = file.getInputStream()) {
+		try (InputStream is = upload.getInputStream()) {
 			POISheetLoader loader = new POISheetLoader(is, 0, tag.getUploadModuleName(), tag.getUploadDocumentName(), exception);
 			loader.setActivityType(LoaderActivityType.FIND);
 			if (Boolean.TRUE.equals(tag.getFileHasHeaders())) {

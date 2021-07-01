@@ -1,6 +1,5 @@
 package modules.admin.ControlPanel.actions;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.UUID;
@@ -9,10 +8,10 @@ import javax.tools.JavaFileObject;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.FileUtil;
 import org.skyve.util.RuntimeCompiler;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
@@ -46,7 +45,7 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 											RuntimeCompiler.COMPILE_PATH + "test.jar")) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(2048);
 				FileUtil.createJarArchive(outputFolder, out);
-				return new Download("sail.jar", new ByteArrayInputStream(out.toByteArray()), MimeType.gzip);
+				return new Download("sail.jar", out.toByteArray(), MimeType.gzip);
 			}
 			throw new DomainException("Something went wrong. The compiler returned a false.");
 		}
@@ -56,7 +55,7 @@ public class DownloadSAIL extends DownloadAction<ControlPanelExtension> {
 				msg = "Something went wrong. The compiler threw a " + e.getClass();
 			}
 			msg = sailSource + "\n" + msg;
-			result = new Download("sail.txt", new ByteArrayInputStream(msg.getBytes(Util.UTF8)), MimeType.plain);
+			result = new Download("sail.txt", msg, MimeType.plain);
 		}
 		finally {
 			if (outputFolder != null) {
