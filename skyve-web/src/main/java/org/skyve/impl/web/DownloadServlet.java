@@ -83,16 +83,16 @@ public class DownloadServlet extends HttpServlet {
 						if (! vetoed) {
 							result = downloadAction.download(bean, webContext);
 							WebFileInputStream stream = result.getInputStream();
-							try {
+							try { // ensure stream is always closed
 								customer.interceptAfterDownloadAction(document, resourceName, bean, result, webContext);
 	
 								bytes = result.getBytes();
 								if (bytes == null) {
 									File file = result.getFile();
 									if (file != null) {
-										try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+										try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
 											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-												in.transferTo(out);
+												bis.transferTo(baos);
 												bytes = baos.toByteArray();
 											}
 										}
@@ -100,9 +100,9 @@ public class DownloadServlet extends HttpServlet {
 								}
 								if (bytes == null) {
 									if (stream != null) {
-										try (BufferedInputStream in = new BufferedInputStream(stream)) {
+										try (BufferedInputStream bis = new BufferedInputStream(stream)) {
 											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-												in.transferTo(out);
+												bis.transferTo(baos);
 												bytes = baos.toByteArray();
 											}
 										}
