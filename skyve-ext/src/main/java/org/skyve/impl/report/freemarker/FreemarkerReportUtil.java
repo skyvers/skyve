@@ -309,13 +309,6 @@ public final class FreemarkerReportUtil {
 	public static void generatePDFFromHTML(String url, File outputFile)
 	throws Exception {
 		try (OutputStream os = new FileOutputStream(outputFile)) {
-			/* standard approach
-			ITextRenderer renderer = new ITextRenderer();
-			renderer.setDocument(url);
-			renderer.layout();
-			renderer.createPDF(os);
-			*/
-
 			ITextRenderer renderer = new ITextRenderer();
 			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
 			callback.setSharedContext(renderer.getSharedContext());

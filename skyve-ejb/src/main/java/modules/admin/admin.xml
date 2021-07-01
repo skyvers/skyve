@@ -129,7 +129,7 @@
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
-				<document name="ReportTemplate" permission="_R__C">
+				<document name="ReportTemplate" permission="_RU_C">
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>
@@ -473,8 +473,8 @@
 		</group>
 		<group name="Reports">
 			<list name="Reports" query="qEnabledReports">
-				<role name="DevOps"/>
-				<role name="SecurityAdministrator"/>
+				<uxui name="external" />
+				<role name="BasicUser"/>
 			</list>
 			<edit name="Report Manager" document="ReportManager">
 				<uxui name="desktop" />
