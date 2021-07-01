@@ -1,5 +1,9 @@
 package util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +24,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
+import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture;
 
 import modules.WeldMarker;
@@ -27,8 +32,7 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 
 
-public class AbstractH2TestForJUnit5
-{
+public class AbstractH2TestForJUnit5 {
     protected static final String USER = "TestUser";
     protected static final String PASSWORD = "TestPassword0!";
     protected static final String CUSTOMER = "bizhub";
@@ -56,7 +60,8 @@ public class AbstractH2TestForJUnit5
 	@SuppressWarnings("resource")
 	public static void setUp() {
         // init the cache once
-        UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
+		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
+
         if (CacheUtil.isUnInitialised()) {
             CacheUtil.init();
         }
@@ -70,9 +75,15 @@ public class AbstractH2TestForJUnit5
     }
 
 	@AfterAll
-	public static void tearDown() {
+	public static void tearDown() throws IOException {
 		if (weld != null) {
 			weld.shutdown();
+		}
+
+		// clean up any temporary content directories after shutdown
+		File contentDir = new File(UtilImpl.CONTENT_DIRECTORY);
+		if (contentDir.exists()) {
+			FileUtil.delete(contentDir);
 		}
 	}
 
