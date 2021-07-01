@@ -1,5 +1,9 @@
 package util;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.junit.After;
@@ -20,6 +24,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
+import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.WeldMarker;
@@ -50,10 +55,9 @@ public abstract class AbstractH2Test {
 	}
 
 	@BeforeClass
-	@SuppressWarnings("resource")
 	public static void beforeClass() throws Exception {
 		// init the cache once
-		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
+		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
 		if (CacheUtil.isUnInitialised()) {
 			CacheUtil.init();
 		}
@@ -67,14 +71,19 @@ public abstract class AbstractH2Test {
 	}
 	
 	@AfterClass
-	public static void afterClass() throws Exception {
+	public static void afterClass() throws IOException {
 		if (weld != null) {
 			weld.shutdown();
+		}
+
+		// clean up any temporary content directories after shutdown
+		File contentDir = new File(UtilImpl.CONTENT_DIRECTORY);
+		if (contentDir.exists()) {
+			FileUtil.delete(contentDir);
 		}
 	}
 
 	@Before
-	@SuppressWarnings("static-method")
 	public void beforeBase() throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
@@ -101,7 +110,6 @@ public abstract class AbstractH2Test {
 	}
 
 	@After
-	@SuppressWarnings("static-method")
 	public void afterBase() {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();
