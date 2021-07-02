@@ -50,7 +50,7 @@ import org.skyve.impl.util.UtilImpl;
  */
 public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
-	public void init() throws Exception {
+	public void startup() {
 		// nothing to do here
 	}
 
@@ -60,14 +60,14 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 		// nothing to do here
 	}
 
 	@Override
 	public void put(BeanContent content) throws Exception {
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteElasticContentManagerServer.PUT_BEAN_FUNCTION_NAME))) {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.PUT_BEAN_FUNCTION_NAME))) {
 				s.setString(1, StateUtil.encode64(content));
 				s.execute();
 			}
@@ -76,8 +76,8 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteElasticContentManagerServer.PUT_ATTACHMENT_FUNCTION_NAME))) {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteContentManagerServer.PUT_ATTACHMENT_FUNCTION_NAME))) {
 				s.registerOutParameter(1, Types.VARCHAR);
 				s.setString(2, StateUtil.encode64(content));
 				s.setBoolean(3, index);
@@ -94,13 +94,13 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	}
 	
 	@Override
-	public AttachmentContent get(String id) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		AttachmentContent result = null;
 
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?)", JDBCRemoteElasticContentManagerServer.GET_ATTACHMENT_FUNCTION_NAME))) {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?)", JDBCRemoteContentManagerServer.GET_ATTACHMENT_FUNCTION_NAME))) {
 				s.registerOutParameter(1, Types.CLOB);
-				s.setString(2, id);
+				s.setString(2, contentId);
 				s.execute();
 				
 				String payload = s.getString(1);
@@ -114,19 +114,19 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	}
 
 	@Override
-	public void remove(BeanContent content) throws Exception {
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteElasticContentManagerServer.REMOVE_BEAN_FUNCTION_NAME))) {
-				s.setString(1, StateUtil.encode64(content));
+	public void removeBean(String bizId) throws Exception {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.REMOVE_BEAN_FUNCTION_NAME))) {
+				s.setString(1, bizId);
 				s.execute();
 			}
 		}
 	}
 
 	@Override
-	public void remove(String contentId) throws Exception {
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteElasticContentManagerServer.REMOVE_ATTACHMENT_FUNCTION_NAME))) {
+	public void removeAttachment(String contentId) throws Exception {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.REMOVE_ATTACHMENT_FUNCTION_NAME))) {
 				s.setString(1, contentId);
 				s.execute();
 			}
@@ -137,8 +137,8 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	public SearchResults google(String search, int maxResults) throws Exception {
 		SearchResults result = null;
 
-		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteElasticContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteElasticContentManagerServer.GOOGLE_SEARCH_FUNCTION_NAME))) {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteContentManagerServer.GOOGLE_SEARCH_FUNCTION_NAME))) {
 				s.registerOutParameter(1, Types.CLOB);
 				s.setString(2, search);
 				s.setInt(3, maxResults);

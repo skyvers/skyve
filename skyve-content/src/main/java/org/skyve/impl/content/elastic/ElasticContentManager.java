@@ -101,13 +101,13 @@ public class ElasticContentManager extends AbstractContentManager {
 	}
 	
 	@Override
-	public void init() throws Exception {
+	public void startup() {
 //		ElasticUtil.prepareIndex(client, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
 //		ElasticUtil.prepareIndex(client, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 //		ElasticUtil.close(node);
 	}
 
@@ -319,7 +319,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public AttachmentContent get(String contentId) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -406,7 +406,7 @@ return null;
 	}
 
 	@Override
-	public void remove(BeanContent content) {
+	public void removeBean(String bizId) {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + content.getBizId() + ")");
 		client.prepareDelete(BEAN_INDEX_NAME,
@@ -416,7 +416,7 @@ return null;
 	}
 
 	@Override
-	public void remove(String contentId) throws IOException {
+	public void removeAttachment(String contentId) throws IOException {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove(" + contentId + ")");
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,

@@ -28,7 +28,8 @@ import org.skyve.util.Util;
  * @author sandsm01
  */
 public class ContentGarbageCollectionJob implements Job {
-	private Set<String> orphanedContentIds = new TreeSet<>();
+	private Set<String> orphanedAttachmentContentIds = new TreeSet<>();
+	private Set<String> orphanedBeanBizIds = new TreeSet<>();
 	
 	@Override
 	public void execute(JobExecutionContext context)
@@ -62,7 +63,7 @@ public class ContentGarbageCollectionJob implements Job {
 								
 								// check if we have a record
 								String attributeName = result.getAttributeName();
-								if (attributeName != null) { // attachment
+								if (result.isAttachment()) { // attachment
 									sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
 		
 									query = p.newSQL(sql.toString());
@@ -76,7 +77,12 @@ public class ContentGarbageCollectionJob implements Job {
 								
 								if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
 								if (query.scalarResults(Integer.class).isEmpty()) {
-									orphanedContentIds.add(result.getContentId());
+									if (result.isAttachment()) {
+										orphanedAttachmentContentIds.add(result.getContentId());
+									}
+									else {
+										orphanedBeanBizIds.add(result.getBizId());
+									}
 								}
 							}
 						}
@@ -86,10 +92,21 @@ public class ContentGarbageCollectionJob implements Job {
 						}
 					}
 					
-					for (String contentId : orphanedContentIds) {
+					for (String contentId : orphanedAttachmentContentIds) {
 						try { // don't stop trying to remove content
-							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove content with ID " + contentId);
-							cm.remove(contentId);
+							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with contentId " + contentId);
+							cm.removeAttachment(contentId);
+						}
+						catch (Exception e) {
+							Util.LOGGER.warning("ContentGarbageCollectionJob remove problem..." + e.getLocalizedMessage());
+							if (UtilImpl.CONTENT_TRACE) Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
+						}
+					}
+
+					for (String bizId : orphanedBeanBizIds) {
+						try { // don't stop trying to remove content
+							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
+							cm.removeBean(bizId);
 						}
 						catch (Exception e) {
 							Util.LOGGER.warning("ContentGarbageCollectionJob remove problem..." + e.getLocalizedMessage());

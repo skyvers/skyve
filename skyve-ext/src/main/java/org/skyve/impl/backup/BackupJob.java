@@ -262,7 +262,7 @@ public class BackupJob extends CancellableJob {
 																value = stringValue;
 																AttachmentContent content = null;
 																try {
-																	content = cm.get(stringValue);
+																	content = cm.getAttachment(stringValue);
 																	if (content == null) {
 																		problem = true;
 																		problems.write(String.format("Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",

@@ -13,6 +13,11 @@ import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.util.FileUtil;
 
+/**
+ * Represents an attachment stored in a content document attribute.
+ * The contentId is the unique identifier used to get and manipulate this content.
+ * @author mike
+ */
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
 
@@ -20,7 +25,7 @@ public class AttachmentContent extends Content {
 	private String contentId;
 	private String fileName;
 	private String contentType;
-	protected Date lastModified;
+	private Date lastModified;
 	private transient File file;
 	private byte[] bytes;
 
@@ -68,6 +73,20 @@ public class AttachmentContent extends Content {
 		}
 	}
 
+	/**
+	 * Bytes filename mime type constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param mimeType
+	 * @param bytes
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -90,6 +109,19 @@ public class AttachmentContent extends Content {
 		this.bytes = bytes;
 	}
 
+	/**
+	 * Bytes mime type constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param mimeType
+	 * @param bytes
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -111,6 +143,19 @@ public class AttachmentContent extends Content {
 		this.bytes = bytes;
 	}
 
+	/**
+	 * Bytes filename constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param bytes
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -132,6 +177,20 @@ public class AttachmentContent extends Content {
 		this.bytes = bytes;
 	}
 	
+	/**
+	 * File filename mime type constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param mimeType
+	 * @param file
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -154,6 +213,19 @@ public class AttachmentContent extends Content {
 		this.file = file;
 	}
 	
+	/**
+	 * File mime type constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param mimeType
+	 * @param file
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -175,6 +247,19 @@ public class AttachmentContent extends Content {
 		this.file = file;
 	}
 	
+	/**
+	 * File filename constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param file
+	 */
 	public AttachmentContent(String bizCustomer, 
 								String bizModule, 
 								String bizDocument, 
@@ -196,10 +281,17 @@ public class AttachmentContent extends Content {
 		this.file = file;
 	}
 
+	/**
+	 * The simple (not compound) attribute name for this attachment.
+	 */
 	public final String getAttributeName() {
 		return attributeName;
 	}
 	
+	/**
+	 * The contentId unique identifier within the content repository.
+	 * @return	a unique identifier or null if this has not yet been put in the content repository.
+	 */
 	public final String getContentId() {
 		return contentId;
 	}
@@ -208,14 +300,26 @@ public class AttachmentContent extends Content {
 		this.contentId = contentId;
 	}
 
+	/**
+	 * Name of the originating file this content came from.
+	 * @return
+	 */
 	public final String getFileName() {
 		return fileName;
 	}
 
+	/**
+	 * The mime type of this content
+	 * @return
+	 */
 	public final MimeType getMimeType() {
 		return (contentType == null) ? null : MimeType.fromContentType(contentType);
 	}
 	
+	/**
+	 * The content type of this content - usually matches mime type but may be a variant.
+	 * @return
+	 */
 	public final String getContentType() {
 		return contentType;
 	}
@@ -224,6 +328,10 @@ public class AttachmentContent extends Content {
 		this.contentType = contentType;
 	}
 	
+	/**
+	 * The date/time of last modification.
+	 * @return
+	 */
 	public final Date getLastModified() {
 		return lastModified;
 	}
@@ -233,6 +341,7 @@ public class AttachmentContent extends Content {
 	}
 
 	/**
+	 * The content stream.
 	 * NB This must be closed by the caller.
 	 */
 	public final InputStream getContentStream() {
@@ -248,6 +357,11 @@ public class AttachmentContent extends Content {
 		}
 	}
 	
+	/**
+	 * The content bytes.
+	 * @return
+	 * @throws IOException
+	 */
 	public final byte[] getContentBytes() throws IOException {
 		if (bytes == null) {
 			try (InputStream is = getContentStream()) {

@@ -42,20 +42,20 @@ public class ContentManagerImpl extends AbstractContentManager {
 
 	@Override
 	@SuppressWarnings("resource")
-	public AttachmentContent get(String id) throws Exception {
-		return delegate().get(id);
+	public AttachmentContent getAttachment(String contentId) throws Exception {
+		return delegate().getAttachment(contentId);
 	}
 
 	@Override
 	@SuppressWarnings("resource")
-	public void remove(BeanContent content) throws Exception {
-		delegate().remove(content);
+	public void removeBean(String bizId) throws Exception {
+		delegate().removeBean(bizId);
 	}
 
 	@Override
 	@SuppressWarnings("resource")
-	public void remove(String contentId) throws Exception {
-		delegate().remove(contentId);
+	public void removeAttachment(String contentId) throws Exception {
+		delegate().removeAttachment(contentId);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class ContentManagerImpl extends AbstractContentManager {
 
 	@Override
 	@SuppressWarnings({"resource", "unchecked"})
-	public void init() throws Exception {
+	public void startup() {
 		if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS != null) {
 				try {
@@ -101,13 +101,13 @@ public class ContentManagerImpl extends AbstractContentManager {
 				}
 			}
 		}
-		delegate().init();
+		delegate().startup();
 	}
 
 	@Override
 	@SuppressWarnings("resource")
-	public void dispose() throws Exception {
-		delegate().dispose();
+	public void shutdown() {
+		delegate().shutdown();
 	}
 
 	@Override

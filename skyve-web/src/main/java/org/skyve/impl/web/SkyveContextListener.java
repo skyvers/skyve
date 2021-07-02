@@ -673,10 +673,10 @@ public class SkyveContextListener implements ServletContextListener {
 				AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
 				try {
 					cm.close();
-					cm.dispose();
+					cm.shutdown();
 				}
 				catch (Exception e) {
-					UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
+					UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
 					e.printStackTrace();
 				}
 			}

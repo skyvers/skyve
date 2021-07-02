@@ -28,7 +28,7 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.job.ContentGarbageCollectionJob;
-import org.skyve.impl.job.ContentInitJob;
+import org.skyve.impl.job.ContentStartupJob;
 import org.skyve.impl.job.EvictStateJob;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -126,13 +126,13 @@ public class JobScheduler {
 	private static void scheduleInternalJobs()
 	throws Exception {
 		// initialise the CMS in a 1 shot immediate job
-		JobDetail detail = JobBuilder.newJob(ContentInitJob.class)
-										.withIdentity("CMS Init", Scheduler.DEFAULT_GROUP)
+		JobDetail detail = JobBuilder.newJob(ContentStartupJob.class)
+										.withIdentity("CMS Startup", Scheduler.DEFAULT_GROUP)
 										.storeDurably(false)
 										.build();
 		Trigger trigger = TriggerBuilder.newTrigger()
 											.forJob(detail)
-											.withIdentity("CMS Init trigger", Scheduler.DEFAULT_GROUP)
+											.withIdentity("CMS Startup trigger", Scheduler.DEFAULT_GROUP)
 											.startNow()
 											.build();
 		JOB_SCHEDULER.scheduleJob(detail, trigger);

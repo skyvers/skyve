@@ -49,15 +49,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		}
 	}
 	
-	public abstract void init() throws Exception;
-	public abstract void dispose() throws Exception;
 	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
-	
-	@Override
-	public final void put(AttachmentContent attachment) 
-	throws Exception {
-		put(attachment, true);
-	}
 	
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.
@@ -174,12 +166,12 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File dir = new File(path);
 		if (! dir.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + path + ") - Dir DNE");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + path + ") - Dir DNE");
 			return null;
 		}
 		File metaFile = new File(dir, META_JSON);
 		if (! metaFile.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + metaFile.getPath() + ") - Meta File DNE");
 			return null;
 		}
 		@SuppressWarnings("unchecked")
@@ -187,7 +179,7 @@ public abstract class AbstractContentManager implements ContentManager {
 
 		File file = new File(dir, CONTENT);
 		if (! file.exists()) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + file.getPath() + ") - File DNE");
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + file.getPath() + ") - File DNE");
 			return null;
 		}
 		
@@ -221,7 +213,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		result.setLastModified(lastModified);
 		result.setContentType(contentType);
 		result.setContentId(contentId);
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.get(" + contentId + "): exists");
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("AbstractContentManager.get(" + contentId + "): exists");
 
 		return result;
 	}

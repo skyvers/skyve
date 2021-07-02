@@ -60,7 +60,7 @@ final class BackupUtil {
 							String databasePassword) 
 	throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
-		AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;//ElasticContentManager.class;
+		AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);
 		UtilImpl.DATA_STORE = new DataStore(databaseJdbcDriver, 
@@ -79,7 +79,7 @@ final class BackupUtil {
 		try (ContentManager cm = EXT.newContentManager()) {
 			@SuppressWarnings("resource")
 			AbstractContentManager acm = (AbstractContentManager) cm;
-			acm.init();
+			acm.startup();
 			Thread.sleep(2000);
 		}
 	}
@@ -88,7 +88,7 @@ final class BackupUtil {
 		try (ContentManager cm = EXT.newContentManager()) {
 			@SuppressWarnings("resource")
 			AbstractContentManager acm = (AbstractContentManager) cm;
-			acm.dispose();
+			acm.shutdown();
 			Thread.sleep(2000);
 		}
 		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();

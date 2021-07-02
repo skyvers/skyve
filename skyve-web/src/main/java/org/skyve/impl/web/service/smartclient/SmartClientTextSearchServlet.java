@@ -103,17 +103,16 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 		                    url.append("&i=").append(bizId);
 				            row.put("data", url.toString());
 		
-				            String attributeName = result.getAttributeName();
-				            if (attributeName == null) { // bean content
-				            	row.put("content", null);
-				            }
-				            else { // attachment content
+				            if (result.isAttachment()) {
 					            url.setLength(0);
 			                    url.append("content?_doc=");
 			                    url.append(moduleName).append('.').append(documentName);
 			                    url.append("&_n=").append(result.getContentId());
-			                    url.append("&_b=").append(attributeName);
+			                    url.append("&_b=").append(result.getAttributeName());
 					            row.put("content", url.toString());
+				            }
+				            else {
+				            	row.put("content", null);
 				            }
 				            message.append(JSON.marshall(customer, row)).append(',');
 						}

@@ -25,7 +25,7 @@ public class GetContentFileNameAction extends FacesAction<String> {
 		String fileName = "&lt;Empty&gt;";
 		if (contentId != null) {
 			try (ContentManager cm = EXT.newContentManager()) {
-				AttachmentContent content = cm.get(contentId);
+				AttachmentContent content = cm.getAttachment(contentId);
 				if (content != null) {
 					fileName = content.getFileName();
 				}

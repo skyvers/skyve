@@ -35,7 +35,7 @@ import org.skyve.impl.content.AbstractContentManager;
  */
 public abstract class AbstractEJBRemoteContentManagerClient extends AbstractContentManager {
 	@Override
-	public void init() throws Exception {
+	public void startup() {
 		// nothing to do here
 	}
 
@@ -45,7 +45,7 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 		// nothing to do here
 	}
 
@@ -64,21 +64,21 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	}
 
 	@Override
-	public AttachmentContent get(String id) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		EJBRemoteContentManagerServer server = obtainServer();
-		return server.get(id);
+		return server.getAttachment(contentId);
 	}
 
 	@Override
-	public void remove(BeanContent content) throws Exception {
+	public void removeBean(String bizId) throws Exception {
 		EJBRemoteContentManagerServer server = obtainServer();
-		server.remove(content);
+		server.removeBean(bizId);
 	}
 
 	@Override
-	public void remove(String contentId) throws Exception {
+	public void removeAttachment(String contentId) throws Exception {
 		EJBRemoteContentManagerServer server = obtainServer();
-		server.remove(contentId);
+		server.removeAttachment(contentId);
 	}
 
 	@Override

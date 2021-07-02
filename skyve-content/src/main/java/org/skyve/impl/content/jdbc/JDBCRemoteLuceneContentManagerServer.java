@@ -1,17 +1,17 @@
 package org.skyve.impl.content.jdbc;
 
-import org.skyve.impl.content.elastic.ElasticContentManager;
+import org.skyve.impl.content.lucene.LuceneContentManager;
 
 /**
  * See {@link JDBCRemoteContentManagerServer}.
  * Change the following line...
  * <pre>
  * // Skyve content manager class
- * contentManagerClass: "org.skyve.impl.content.jdbc.JDBCRemoteElasticContentManagerServer"},
+ * contentManagerClass: "org.skyve.impl.content.jdbc.JDBCRemoteLuceneContentManagerServer"},
  * </pre>
  * @author mike
  */
-public class JDBCRemoteElasticContentManagerServer extends ElasticContentManager {
+public class JDBCRemoteLuceneContentManagerServer extends LuceneContentManager {
 	@Override
 	public void startup() {
 		JDBCRemoteContentManagerServer.startup();

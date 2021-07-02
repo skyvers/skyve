@@ -52,21 +52,23 @@ public class LuceneContentIterable implements ContentIterable {
 					SearchResult result = new SearchResult();
 					result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
 					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					String contentId = document.get(AbstractContentManager.CONTENT_ID);
-					result.setContentId(contentId);
+					result.setContentId(document.get(AbstractContentManager.CONTENT_ID));
 					String bizId = document.get(Bean.DOCUMENT_ID);
-					if (contentId == null) { // bean content
-						result.setBizId(bizId.substring(0, bizId.length() - 1));
-					}
-					else { // attachment content
+					if (result.isAttachment()) { // attachment content
 						result.setBizId(bizId);
 					}
-					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
-					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
-					result.setExcerpt(document.get(AbstractContentManager.CONTENT));
-					result.setLastModified(TimeUtil.parseISODate(document.get(AbstractContentManager.LAST_MODIFIED)));
+					else { // bean content
+						result.setBizId(bizId.substring(0, bizId.length() - 1)); // remove the '~'
+					}
 					result.setModuleName(document.get(Bean.MODULE_KEY));
+					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
+					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
+					result.setBizUserId(document.get(Bean.USER_ID));
+					result.setExcerpt(document.get(AbstractContentManager.CONTENT));
+					String lastModified = document.get(AbstractContentManager.LAST_MODIFIED);
+					if (lastModified != null) {
+						result.setLastModified(TimeUtil.parseISODate(lastModified));
+					}
 					return result;
 				}
 				catch (Exception e) {

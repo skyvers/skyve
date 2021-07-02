@@ -177,7 +177,7 @@ public class ContentDirective implements TemplateDirectiveModel {
 		try (Writer out = env.getOut(); ContentManager cm = EXT.newContentManager()) {
 			String content = (String) Binder.get(beanParam, attributeParam);
 			if (content != null) {
-				AttachmentContent ac = cm.get(content);
+				AttachmentContent ac = cm.getAttachment(content);
 				byte[] fileBytes = ac.getContentBytes();
 
 				StringBuilder s = new StringBuilder();

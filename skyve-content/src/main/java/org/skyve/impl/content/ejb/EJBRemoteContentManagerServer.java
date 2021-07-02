@@ -63,11 +63,11 @@ public interface EJBRemoteContentManagerServer {
 	 */
 	public String put(AttachmentContent content, boolean index) throws Exception;
 
-	public AttachmentContent get(String id) throws Exception;
+	public AttachmentContent getAttachment(String contentId) throws Exception;
 	
-	public void remove(BeanContent content) throws Exception;
+	public void removeBean(String bizId) throws Exception;
 	
-	public void remove(String contentId) throws Exception;
+	public void removeAttachment(String contentId) throws Exception;
 	
 	public SearchResults google(String search, int maxResults) throws Exception;
 }

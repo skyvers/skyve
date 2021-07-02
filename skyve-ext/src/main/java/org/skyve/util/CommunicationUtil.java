@@ -715,7 +715,7 @@ public class CommunicationUtil {
 
 			// Attachment 1
 			if (communication.getAttachmentFileName1() != null && communication.getAttachment1() != null) {
-				AttachmentContent content1 = cm.get(communication.getAttachment1());
+				AttachmentContent content1 = cm.getAttachment(communication.getAttachment1());
 				byte[] fileBytes1 = content1.getContentBytes();
 				String attachmentName1 = (communication.getAttachmentFileName1() == null ? "attachment" : communication.getAttachmentFileName1());
 				ma1 = new MailAttachment(attachmentName1, fileBytes1, content1.getMimeType());
@@ -723,7 +723,7 @@ public class CommunicationUtil {
 
 			// Attachment 2
 			if (communication.getAttachmentFileName2() != null && communication.getAttachment2() != null) {
-				AttachmentContent content2 = cm.get(communication.getAttachment2());
+				AttachmentContent content2 = cm.getAttachment(communication.getAttachment2());
 				byte[] fileBytes2 = content2.getContentBytes();
 				String attachmentName2 = (communication.getAttachmentFileName2() == null ? "attachment" : communication.getAttachmentFileName2());
 				ma2 = new MailAttachment(attachmentName2, fileBytes2, content2.getMimeType());
@@ -731,7 +731,7 @@ public class CommunicationUtil {
 
 			// Attachment 3
 			if (communication.getAttachmentFileName3() != null && communication.getAttachment3() != null) {
-				AttachmentContent content3 = cm.get(communication.getAttachment3());
+				AttachmentContent content3 = cm.getAttachment(communication.getAttachment3());
 				byte[] fileBytes3 = content3.getContentBytes();
 				String attachmentName3 = (communication.getAttachmentFileName3() == null ? "attachment" : communication.getAttachmentFileName3());
 				ma3 = new MailAttachment(attachmentName3, fileBytes3, content3.getMimeType());

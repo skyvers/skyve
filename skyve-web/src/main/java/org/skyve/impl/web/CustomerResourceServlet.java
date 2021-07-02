@@ -225,7 +225,7 @@ public class CustomerResourceServlet extends HttpServlet {
 							(customer != null) && 
 							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
 						cm = EXT.newContentManager();
-						content = cm.get(resourceFileName);
+						content = cm.getAttachment(resourceFileName);
 					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {

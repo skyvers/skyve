@@ -22,18 +22,18 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 	
 	@Override
-	public AttachmentContent get(String id) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		// no-op
 		return null;
 	}
 
 	@Override
-	public void remove(BeanContent content) throws Exception {
+	public void removeBean(String bizId) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void remove(String contentId) throws Exception {
+	public void removeAttachment(String contentId) throws Exception {
 		// no-op
 	}
 
@@ -70,12 +70,12 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public void init() throws Exception {
+	public void startup() {
 		// no-op
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 		// no-op
 	}
 }

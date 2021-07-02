@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * A class used to generate a dynamic image of a content image.
@@ -31,14 +32,16 @@ public class ContentImageForReport {
 		}
 
 		try (ContentManager cm = EXT.newContentManager()) {
-			final AttachmentContent content = cm.get(contentId);
+			final AttachmentContent content = cm.getAttachment(contentId);
 
 			if (content != null) {
-				return Thumbnails.of(content.getContentStream())
-						.width(imageWidth)
-						.height(imageHeight)
-						.keepAspectRatio(true)
-						.asBufferedImage();
+				try (InputStream in = content.getContentStream()) {
+					return Thumbnails.of(in)
+							.width(imageWidth)
+							.height(imageHeight)
+							.keepAspectRatio(true)
+							.asBufferedImage();
+				}
 			}
 			
 			logger.warn("Content with ID {} does not exist in the repository, returning blank image.", contentId);

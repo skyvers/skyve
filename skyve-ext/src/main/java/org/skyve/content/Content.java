@@ -31,26 +31,55 @@ abstract class Content implements Serializable {
 		this.bizId = bizId;
 	}
 
+	/**
+	 * Get the bizCustomer for the data.
+	 * This is used to restrict visibility of searched documents.
+	 * @return
+	 */
 	public final String getBizCustomer() {
 		return bizCustomer;
 	}
 
+	/**
+	 * Get the bizDataGroup for the data.
+	 * This is used to restrict visibility of searched documents.
+	 * @return
+	 */
 	public final String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
+	/**
+	 * Get the bizDocument for the data.
+	 * This is used to restrict visibility of searched documents.
+	 * @return
+	 */
 	public final String getBizDocument() {
 		return bizDocument;
 	}
 
+	/**
+	 * Get the bizModule for the data.
+	 * This is used to restrict visibility of searched documents.
+	 * @return
+	 */
 	public final String getBizModule() {
 		return bizModule;
 	}
 
+	/**
+	 * Get the bizUserId for the data.
+	 * This is used to restrict visibility of searched documents.
+	 * @return
+	 */
 	public final String getBizUserId() {
 		return bizUserId;
 	}
 
+	/**
+	 * The bizId of the related bean.
+	 * @return
+	 */
 	public final String getBizId() {
 		return bizId;
 	}

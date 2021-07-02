@@ -378,11 +378,11 @@ public class EXT {
 	 * @param attachmentName
 	 * @throws Exception
 	 */
-	public static MailAttachment getMailAttachmentFromContent(String beanContent, String attachmentName) throws Exception {
+	public static MailAttachment getMailAttachmentFromContent(String contentId, String attachmentName) throws Exception {
 		MailAttachment result = new MailAttachment();
 		try (ContentManager cm = EXT.newContentManager()) {
-			if (beanContent != null) {
-				AttachmentContent content = cm.get(beanContent);
+			if (contentId != null) {
+				AttachmentContent content = cm.getAttachment(contentId);
 				if (content == null) {
 					throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
 				}

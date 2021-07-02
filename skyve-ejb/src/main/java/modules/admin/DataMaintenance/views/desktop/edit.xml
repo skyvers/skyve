@@ -348,6 +348,7 @@
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
 		<action className="ReindexContent" displayName="admin.dataMaintenance.actions.reindexContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindexContent.confirm"
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" />
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
 			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa fa-toggle-left" />
 		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.trucate.confirm"
@@ -369,7 +370,6 @@
 		<upload className="UploadBackup" displayName="admin.dataMaintenance.actions.uploadBackup.displayName" inActionPanel="false" />
 		
 		<!-- Only required for migration from legacy versions -->
-		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" visible="false" />
 		<action className="MigrateContent" displayName="admin.dataMaintenance.actions.migrateContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.acitons.migrateContent.confirm" visible="false" />
 		<action className="MigrateContentFiles" displayName="admin.dataMaintenance.actions.migrateContentFiles.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.migrateContentFiles.confirm" visible="false" />
 	</actions>

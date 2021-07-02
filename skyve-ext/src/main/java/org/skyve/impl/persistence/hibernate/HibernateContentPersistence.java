@@ -22,7 +22,7 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 		if (cm == null) {
 			cm = EXT.newContentManager();
 		}
-		cm.remove(new BeanContent(bean));
+		cm.removeBean(bean.getBizId());
 	}
 
 	@Override
@@ -48,6 +48,6 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 		if (cm == null) {
 			cm = EXT.newContentManager();
 		}
-		cm.remove(contentId);
+		cm.removeAttachment(contentId);
 	}
 }

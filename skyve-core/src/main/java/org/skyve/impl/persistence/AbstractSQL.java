@@ -15,7 +15,6 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
-import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.persistence.AbstractSQL;
 import org.skyve.impl.util.UtilImpl;
 

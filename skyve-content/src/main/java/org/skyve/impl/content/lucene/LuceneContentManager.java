@@ -1,5 +1,6 @@
 package org.skyve.impl.content.lucene;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -67,38 +68,48 @@ public class LuceneContentManager extends FileSystemContentManager {
 	private static IndexWriter writer;
 	
 	@Override
-	public void init() throws Exception {
-		directory = FSDirectory.open(Paths.get(UtilImpl.CONTENT_DIRECTORY, CLUSTER_NAME));
-		analyzer = new EnglishAnalyzer();
-		IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-		iwc.setRAMBufferSizeMB(128.0);
-		writer = new IndexWriter(directory, iwc);
+	public void startup() {
+		try {
+			directory = FSDirectory.open(Paths.get(UtilImpl.CONTENT_DIRECTORY, CLUSTER_NAME));
+			analyzer = new EnglishAnalyzer();
+			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+			iwc.setRAMBufferSizeMB(128.0);
+			writer = new IndexWriter(directory, iwc);
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Could not startup Lucene content manager", e);
+		}
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 		try {
-			if (writer != null) {
-				if (writer.isOpen()) {
-					writer.close();
-				}
-				writer = null;
-			}
-		}
-		finally {
 			try {
-				if (analyzer != null) {
-					analyzer.close();
-					analyzer = null;
+				if (writer != null) {
+					if (writer.isOpen()) {
+						writer.close();
+					}
+					writer = null;
 				}
 			}
 			finally {
-				if (directory != null) {
-					directory.close();
-					directory = null;
+				try {
+					if (analyzer != null) {
+						analyzer.close();
+						analyzer = null;
+					}
+				}
+				finally {
+					if (directory != null) {
+						directory.close();
+						directory = null;
+					}
 				}
 			}
+		}
+		catch (IOException e) {
+			throw new IllegalStateException("Could not shutdown Lucene content manager", e);
 		}
 	}
 	
@@ -220,7 +231,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			}
 		}
 
-		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.put(): " + bizId);
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
 		document.add(new StringField(CONTENT_ID, contentId, Store.YES));
@@ -229,9 +240,9 @@ public class LuceneContentManager extends FileSystemContentManager {
 	}
 	
 	@Override
-	public AttachmentContent get(String contentId) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
-			return super.get(contentId);
+			return super.getAttachment(contentId);
 		}
 
 		try (IndexReader attachmentReader = DirectoryReader.open(directory)) {
@@ -290,14 +301,14 @@ public class LuceneContentManager extends FileSystemContentManager {
 	}
 	
 	@Override
-	public void remove(BeanContent content) throws Exception {
-		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, content.getBizId() + BEAN_CONTENT_SUFFIX));
+	public void removeBean(String bizId) throws Exception {
+		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, bizId + BEAN_CONTENT_SUFFIX));
 	}
 	
 	@Override
-	public void remove(String contentId) throws Exception {
+	public void removeAttachment(String contentId) throws Exception {
 		writer.deleteDocuments(new Term(CONTENT_ID, contentId));
-		super.remove(contentId);
+		super.removeAttachment(contentId);
 	}
 	
 	@Override

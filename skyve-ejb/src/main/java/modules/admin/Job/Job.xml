@@ -30,6 +30,7 @@
 		</text>
 		<memo name="log">
 			<displayName>Log</displayName>
+			<index>none</index>
 		</memo>
 		<id name="beanBizId">
 			<displayName>Bean Biz Id</displayName>

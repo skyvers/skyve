@@ -70,7 +70,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 										if (! resultSet.wasNull()) {
 											AttachmentContent content;
 											try {
-												content = cm.get(stringValue);
+												content = cm.getAttachment(stringValue);
 												if (content == null) {
 													trace = String.format("Error reindexing content %s for field name %s for table %s - content does not exist",
 																			stringValue, name, table.name);

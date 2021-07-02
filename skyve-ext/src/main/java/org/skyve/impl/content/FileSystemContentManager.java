@@ -45,7 +45,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public AttachmentContent get(String contentId) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -55,12 +55,12 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public void remove(BeanContent content) throws Exception {
+	public void removeBean(String bizId) throws Exception {
 		// nothing to do here
 	}
 
 	@Override
-	public void remove(String contentId) throws Exception {
+	public void removeAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder path = new StringBuilder(128);
 			path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -140,12 +140,12 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public void init() throws Exception {
+	public void startup() {
 		// do nothing
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void shutdown() {
 		// do nothing
 	}
 

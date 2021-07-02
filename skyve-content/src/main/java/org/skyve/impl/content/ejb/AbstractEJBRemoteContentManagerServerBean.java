@@ -37,23 +37,23 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 
 	@Override
-	public AttachmentContent get(String id) throws Exception {
+	public AttachmentContent getAttachment(String contentId) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
-			return cm.get(id);
+			return cm.getAttachment(contentId);
 		}
 	}
 
 	@Override
-	public void remove(BeanContent content) throws Exception {
+	public void removeBean(String bizId) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
-			cm.remove(content);
+			cm.removeBean(bizId);
 		}
 	}
 
 	@Override
-	public void remove(String contentId) throws Exception {
+	public void removeAttachment(String contentId) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
-			cm.remove(contentId);
+			cm.removeAttachment(contentId);
 		}
 	}
 	

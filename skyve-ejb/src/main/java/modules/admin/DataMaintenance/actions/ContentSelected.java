@@ -24,7 +24,7 @@ public class ContentSelected implements ServerSideAction<DataMaintenance> {
 		}
 		else {
 			try (ContentManager cm = EXT.newContentManager()) {
-				AttachmentContent ac = cm.get(selectedContentId);
+				AttachmentContent ac = cm.getAttachment(selectedContentId);
 				if (ac == null) { // bean content, not attachment content
 					bean.setContentLink(null);
 				}

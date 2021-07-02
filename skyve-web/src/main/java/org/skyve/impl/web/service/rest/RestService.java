@@ -342,7 +342,7 @@ public class RestService {
 		
 		try {
 			try (ContentManager cm = EXT.newContentManager()) {
-				AttachmentContent content = cm.get(contentId);
+				AttachmentContent content = cm.getAttachment(contentId);
 				
 				if (content == null) {
 					UtilImpl.LOGGER.info(request.getRequestURI() + " not found");
