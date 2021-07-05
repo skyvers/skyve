@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.inject.spi.CDI;
-import javax.inject.Inject;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
@@ -35,15 +34,12 @@ import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
-import services.report.SqlQueryService;
+import services.report.SqlQueryUtil;
 
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
 	private static final long serialVersionUID = 8850955374877208367L;
 	private static final Logger LOG = LoggerFactory.getLogger(TestQuery.class);
-
-	@Inject
-	private transient SqlQueryService sqlService;
 
 	@Override
 	public ServerSideActionResult<ReportDatasetExtension> execute(ReportDatasetExtension bean, WebContext webContext)
@@ -119,7 +115,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
 				ReportParameterExtension.logParameterValues(sqlParams);
 
-				List<DynaBean> results = sqlService.retrieveDynamicResults(bean.getQuery(), sqlParams);
+				List<DynaBean> results = SqlQueryUtil.retrieveDynamicResults(bean.getQuery(), sqlParams);
 				LOG.info("Returned {} results", Integer.valueOf(results.size()));
 
 				for (DynaBean result : results) {
@@ -137,8 +133,8 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 				if (reportClass != null) {
 					BeanReportDataset dataset = CDI.current().select(reportClass).get();
 					StringBuilder queryResults = new StringBuilder(5120);
-					@SuppressWarnings("unchecked")
 					List<? extends ReportParameter> parameters = (List<? extends ReportParameter>) bean.getParent().getParameters();
+
 					for (DynaBean result : dataset.getResults(parameters)) {
 						if (result instanceof DynaClass) {
 							DynaClass dynaClass = (DynaClass) result;
