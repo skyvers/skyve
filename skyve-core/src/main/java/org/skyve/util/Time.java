@@ -149,6 +149,8 @@ public class Time {
 
 	/**
 	 * Returns the Financial Year in which this date exists.
+	 * 
+	 * Note: this only applies for locales where the financial year begins on July 1.
 	 */
 	public static final int getFinancialYear(Date date) {
 		return TimeUtil.getFinancialYear(date);
@@ -156,6 +158,8 @@ public class Time {
 
 	/**
 	 * Returns the Financial Year String in which this date exists.
+	 * 
+	 * Note: this only applies for locales where the financial year begins on July 1.
 	 */
 	public static final String getFinancialYearString(Date date) {
 		return TimeUtil.getFinancialYearString(date);

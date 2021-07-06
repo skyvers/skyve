@@ -92,6 +92,7 @@ public abstract class AbstractH2Test {
 		UtilImpl.DDL_SYNC = true;
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;
+		UtilImpl.JOB_SCHEDULER = false;
 
 		AbstractRepository.set(new LocalDesignRepository());
 

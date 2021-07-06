@@ -214,7 +214,7 @@ public class TimeUtil {
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
 
-		if (month <= 5) {
+		if (month <= Calendar.JUNE) {
 			year--;
 		}
 
