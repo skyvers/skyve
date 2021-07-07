@@ -1,6 +1,6 @@
 package modules.admin.SystemDashboard;
 
-import org.skyve.cache.StateUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.util.Util;

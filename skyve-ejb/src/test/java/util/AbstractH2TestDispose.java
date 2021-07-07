@@ -3,7 +3,7 @@ package util;
 import org.junit.After;
 import org.junit.Before;
 import org.skyve.CORE;
-import org.skyve.cache.CacheUtil;
+import org.skyve.EXT;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.persistence.Persistence;
 
@@ -23,9 +23,7 @@ public abstract class AbstractH2TestDispose extends AbstractH2Test {
 	@Before
 	@SuppressWarnings("static-method")
 	public void before() throws Exception {
-		if (CacheUtil.isUnInitialised()) {
-			CacheUtil.init();
-		}
+		EXT.getCaching().startup();
 	}
 
 	@After

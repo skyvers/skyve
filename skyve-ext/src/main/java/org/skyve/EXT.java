@@ -20,6 +20,7 @@ import org.jfree.chart.JFreeChart;
 import org.skyve.addin.AddInManager;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
+import org.skyve.cache.Caching;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.dataaccess.sql.SQLDataAccess;
@@ -34,6 +35,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
+import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
@@ -296,6 +298,14 @@ public class EXT {
 	 */
 	public static Reporting getReporting() {
 		return DefaultReporting.get();
+	}
+	
+	/**
+	 * Get a cache manager
+	 * @ return A cache manager
+	 */
+	public static Caching getCaching() {
+		return DefaultCaching.get();
 	}
 	
 	/**

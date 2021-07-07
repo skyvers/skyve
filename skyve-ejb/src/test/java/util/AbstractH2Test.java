@@ -11,7 +11,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.skyve.EXT;
-import org.skyve.cache.CacheUtil;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -55,12 +54,11 @@ public abstract class AbstractH2Test {
 	}
 
 	@BeforeClass
+	@SuppressWarnings("resource")
 	public static void beforeClass() throws Exception {
-		// init the cache once
+		// startup the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
-		if (CacheUtil.isUnInitialised()) {
-			CacheUtil.init();
-		}
+		EXT.getCaching().startup();
 		
 		// init injection
 		weld = new Weld();
@@ -84,6 +82,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@Before
+	@SuppressWarnings("static-method")
 	public void beforeBase() throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
@@ -111,6 +110,7 @@ public abstract class AbstractH2Test {
 	}
 
 	@After
+	@SuppressWarnings("static-method")
 	public void afterBase() {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.rollback();

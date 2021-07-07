@@ -5,11 +5,11 @@ import java.sql.Connection;
 import java.sql.Types;
 
 import org.skyve.EXT;
-import org.skyve.cache.StateUtil;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResults;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 

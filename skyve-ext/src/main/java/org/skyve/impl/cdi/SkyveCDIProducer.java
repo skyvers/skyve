@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
 import org.skyve.addin.AddInManager;
+import org.skyve.cache.Caching;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
@@ -50,5 +51,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static Reporting getReporting() {
 		return new ReportingInjectable();
+	}
+
+	@Produces
+	public static Caching getCaching() {
+		return new CachingInjectable();
 	}
 }

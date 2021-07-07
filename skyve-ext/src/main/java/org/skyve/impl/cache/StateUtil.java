@@ -1,4 +1,4 @@
-package org.skyve.cache;
+package org.skyve.impl.cache;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,6 +23,9 @@ import org.ehcache.Cache.Entry;
 import org.ehcache.core.statistics.CacheStatistics;
 import org.ehcache.core.statistics.TierStatistics;
 import org.hibernate.internal.util.SerializationHelper;
+import org.skyve.EXT;
+import org.skyve.cache.CacheTier;
+import org.skyve.cache.Caching;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -33,7 +36,7 @@ public class StateUtil {
 	}
 
 	private static Cache<String, byte[]> getConversations() {
-		return CacheUtil.getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
+		return EXT.getCaching().getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
 	public static void cacheConversation(AbstractWebContext webContext)
@@ -91,7 +94,7 @@ public class StateUtil {
 
 	@SuppressWarnings("rawtypes")
 	private static Cache<String, TreeSet> getTokens() {
-		return CacheUtil.getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
+		return EXT.getCaching().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
 	public static void clearTokens(HttpSession session) {
@@ -158,23 +161,24 @@ public class StateUtil {
 	}
 	
 	private static void logCacheStats(String cacheName, String cacheDescription) {
-		CacheStatistics statistics = CacheUtil.getEHCacheStatistics(cacheName);
+		Caching caching = EXT.getCaching();
+		CacheStatistics statistics = caching.getEHCacheStatistics(cacheName);
 		if (statistics != null) {
 			StringBuilder log = new StringBuilder(64);
-			TierStatistics tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OnHeap);
+			TierStatistics tier = caching.getEHTierStatistics(statistics, CacheTier.OnHeap);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count in heap memory = ").append(tier.getMappings());
 				UtilImpl.LOGGER.info(log.toString());
 				log.setLength(0);
 			}
-			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.OffHeap);
+			tier = caching.getEHTierStatistics(statistics, CacheTier.OffHeap);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count/MB in off-heap memory = ").append(tier.getMappings());
 				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);
 				UtilImpl.LOGGER.info(log.toString());
 				log.setLength(0);
 			}
-			tier = CacheUtil.getEHTierStatistics(statistics, CacheTier.Disk);
+			tier = caching.getEHTierStatistics(statistics, CacheTier.Disk);
 			if (tier != null) {
 				log.append(cacheDescription).append(" Count/MB on disk = ").append(tier.getMappings());
 				log.append('/').append((long) (tier.getOccupiedByteSize() / 1024.0 / 1024.0 * 10.0) / 10.0);

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyve.EXT;
-import org.skyve.cache.CacheUtil;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -62,9 +61,7 @@ public class AbstractH2TestForJUnit5 {
         // init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
 
-        if (CacheUtil.isUnInitialised()) {
-            CacheUtil.init();
-        }
+        EXT.getCaching().startup();
 
         // init injection
         weld = new Weld();

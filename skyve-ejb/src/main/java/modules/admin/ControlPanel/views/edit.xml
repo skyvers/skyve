@@ -361,7 +361,7 @@
 		<action className="CacheStats" displayName="admin.controlPanel.actions.cacheStats.actionName" clientValidation="false" inActionPanel="false" />
 		<action className="EvictSelectedCache" displayName="admin.controlPanel.actions.evictSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
 		<action className="StopOrStartSelectedCache" displayName="admin.controlPanel.actions.stopOrStartSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
-		<action className="EvictFromCache" displayName="admin.controlPanel.actions.evictFromCache.actionName" />
+		<action className="EvictFromCache" displayName="admin.controlPanel.actions.evictFromCache.actionName" confirm="Are you sure?" />
 		<action className="SwapCustomer" displayName="admin.controlPanel.actions.swapCustomer.actionName" inActionPanel="false" />
 		<action className="ExecuteQuery" displayName="admin.controlPanel.actions.executeQuery.actionName" inActionPanel="false" />
 		<action className="GenerateMenuSAIL" displayName="admin.controlPanel.actions.generateMenuSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateMenuSail.toolTip" />

@@ -1,7 +1,7 @@
 package org.skyve.impl.web;
 
-import org.skyve.cache.StateUtil;
 import org.skyve.domain.Bean;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.job.JobScheduler;
 import org.skyve.web.BackgroundTask;
 

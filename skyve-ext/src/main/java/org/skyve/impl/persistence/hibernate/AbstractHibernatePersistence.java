@@ -59,7 +59,6 @@ import org.hibernate.tool.schema.TargetType;
 import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.skyve.EXT;
-import org.skyve.cache.CacheUtil;
 import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
@@ -379,7 +378,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 	
 	public static void logSecondLevelCacheStats(String cacheName) {
-		CacheStatisticsMXBean bean = CacheUtil.getJCacheStatisticsMXBean(cacheName);
+		CacheStatisticsMXBean bean = EXT.getCaching().getJCacheStatisticsMXBean(cacheName);
 		if (bean != null) {
 			UtilImpl.LOGGER.info("HIBERNATE SHARED CACHE:- " + cacheName + " => " + bean.getCacheGets() + " gets : " + bean.getCachePuts() + " puts : " + bean.getCacheHits() + " hits : " + bean.getCacheMisses() + " misses : " + bean.getCacheRemovals() + " removals : " + bean.getCacheEvictions() + " evictions");
 		}

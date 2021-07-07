@@ -3,7 +3,7 @@ package org.skyve.impl.job;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.skyve.cache.StateUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.util.Util;
 
 /**

@@ -2,8 +2,11 @@ package modules.admin.ControlPanel.actions;
 
 import java.io.Serializable;
 
+import javax.cache.Cache;
+
+import org.skyve.EXT;
 import org.skyve.cache.CacheConfig;
-import org.skyve.cache.CacheUtil;
+import org.skyve.cache.Caching;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.domain.messages.MessageSeverity;
@@ -24,28 +27,33 @@ public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelEx
 		String cacheName = bean.getSelectedCache();
 		boolean found = false;
 		if (cacheName != null) {
+			final Caching caching = EXT.getCaching();
+
 			for (CacheConfig<? extends Serializable, ? extends Serializable> c : UtilImpl.APP_CACHES) {
 				String appCacheName = c.getName();
 				if (cacheName.equals(appCacheName)) {
 					found = true;
 					if (c instanceof EHCacheConfig<?, ?>) {
-						if (CacheUtil.getEHCache(cacheName, c.getKeyClass(), c.getValueClass()) == null) {
-							CacheUtil.createEHCache((EHCacheConfig<? extends Serializable, ? extends Serializable>) c);
+						if (caching.getEHCache(cacheName, c.getKeyClass(), c.getValueClass()) == null) {
+							caching.createEHCache((EHCacheConfig<? extends Serializable, ? extends Serializable>) c);
 							
 							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been started");
 						}
 						else {
-							CacheUtil.removeEHCache(cacheName);
+							caching.removeEHCache(cacheName);
 							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been stopped");
 						}
 					}
 					else if (c instanceof JCacheConfig<?, ?>) {
-						if (CacheUtil.getJCache(cacheName, c.getKeyClass(), c.getValueClass()) == null) {
-							CacheUtil.createJCache((JCacheConfig<? extends Serializable, ? extends Serializable>) c);
+						@SuppressWarnings("resource")
+						Cache<?, ?> cache = caching.getJCache(cacheName, c.getKeyClass(), c.getValueClass());
+						if (cache == null) {
+							@SuppressWarnings({ "resource", "unused" })
+							Cache<?, ?> created = caching.createJCache((JCacheConfig<? extends Serializable, ? extends Serializable>) c);
 							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been started");
 						}
 						else {
-							CacheUtil.destroyJCache(cacheName);
+							caching.destroyJCache(cacheName);
 							webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been stopped");
 						}
 					}
