@@ -9,16 +9,16 @@ import org.pf4j.PluginWrapper;
 import org.skyve.addin.AddInManager;
 import org.skyve.impl.util.UtilImpl;
 
-public class DefaultAddInManager implements AddInManager {
-	private static final DefaultAddInManager INSTANCE = new DefaultAddInManager();
+public class PF4JAddInManager implements AddInManager {
+	private static final PF4JAddInManager INSTANCE = new PF4JAddInManager();
 
 	private PluginManager plugInManager;
 
-	private DefaultAddInManager() {
+	private PF4JAddInManager() {
 		// nothing to see here
 	}
 
-	public static DefaultAddInManager get() {
+	public static PF4JAddInManager get() {
 		return INSTANCE;
 	}
 	

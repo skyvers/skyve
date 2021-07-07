@@ -30,7 +30,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.addin.DefaultAddInManager;
+import org.skyve.impl.addin.PF4JAddInManager;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
@@ -369,7 +369,7 @@ public class EXT {
 	@SuppressWarnings("resource")
 	public static ContentManager newContentManager() {
 		final ContentManager result = (AbstractContentManager.IMPLEMENTATION_CLASS == null) ?
-										DefaultAddInManager.get().getExtension(ContentManager.class) :
+										PF4JAddInManager.get().getExtension(ContentManager.class) :
 										AbstractContentManager.get();
 		if (result == null) {
 			throw new DomainException("No content manager addin detected and \"factories.contentManagerClass\" is not defined in the Skyve configuration");
@@ -378,7 +378,7 @@ public class EXT {
 	}
 
 	public static AddInManager getAddInManager() {
-		return DefaultAddInManager.get();
+		return PF4JAddInManager.get();
 	}
 
 	/**
