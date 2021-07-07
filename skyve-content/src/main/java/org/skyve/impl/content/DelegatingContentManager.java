@@ -10,7 +10,7 @@ import org.skyve.impl.content.lucene.LuceneContentManager;
 import org.skyve.impl.util.UtilImpl;
 
 @Extension(points = {ContentManager.class})
-public class ContentManagerImpl extends AbstractContentManager {
+public class DelegatingContentManager extends AbstractContentManager {
 	private AbstractContentManager delegate;
 	
 	private AbstractContentManager delegate() {
