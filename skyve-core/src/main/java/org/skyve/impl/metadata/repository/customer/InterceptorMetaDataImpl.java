@@ -7,7 +7,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Interceptor;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.InterceptorMetaData;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor")
@@ -31,10 +30,10 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	}
 
 	@Override
-	public Interceptor getInterceptor(Customer customer) {
+	public Interceptor getInterceptor() {
 		if (interceptor == null) {
 			try {
-				interceptor = (Interceptor) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();
+				interceptor = (Interceptor) Thread.currentThread().getContextClassLoader().loadClass(className).getDeclaredConstructor().newInstance();
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not instantiate interceptor class " + className, e);

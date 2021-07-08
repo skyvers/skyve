@@ -31,6 +31,7 @@ import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -106,6 +107,11 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new FacesException(e);
 			}
 
+			AbstractRepository repository = AbstractRepository.get();
+			for (String customerName : repository.getAllCustomerNames()) {
+				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+				internalCustomer.notifyStartup();
+			}
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -654,7 +660,16 @@ public class SkyveContextListener implements ServletContextListener {
 			try {
 				try {
 					try {
-						EXT.getJobScheduler().shutdown();
+						try {
+							AbstractRepository repository = AbstractRepository.get();
+							for (String customerName : repository.getAllCustomerNames()) {
+								CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+								internalCustomer.notifyShutdown();
+							}
+						}
+						finally {
+							EXT.getJobScheduler().shutdown();
+						}
 					}
 					finally {
 						EXT.getReporting().shutdown();

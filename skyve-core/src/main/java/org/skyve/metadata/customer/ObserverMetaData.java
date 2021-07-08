@@ -1,17 +1,17 @@
 package org.skyve.metadata.customer;
 
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.controller.Interceptor;
+import org.skyve.metadata.controller.Observer;
 
 /**
  * 
  */
-public interface InterceptorMetaData extends MetaData {
+public interface ObserverMetaData extends MetaData {
 	/**
 	 * 
 	 * @return
 	 */
 	public String getClassName();
 	
-	public Interceptor getInterceptor();
+	public Observer getObserver();
 }

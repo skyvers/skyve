@@ -9,7 +9,7 @@ import java.util.Map;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.impl.util.ReportParameters;
-import org.skyve.metadata.controller.ApplicationContextListener;
+import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.model.document.Document;
@@ -20,7 +20,7 @@ import freemarker.template.Template;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 
-public interface Reporting extends ApplicationContextListener {
+public interface Reporting extends Observer {
 	/**
 	 * 
 	 * @param user

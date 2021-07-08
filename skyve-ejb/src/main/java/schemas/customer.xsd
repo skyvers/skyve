@@ -25,6 +25,13 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="observers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="observer" type="tns:observer" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="JFreeChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="primeFacesChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -100,6 +107,11 @@
   </xs:complexType>
 
   <xs:complexType name="interceptor">
+    <xs:sequence/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="observer">
     <xs:sequence/>
     <xs:attribute name="className" type="xs:string" use="required"/>
   </xs:complexType>

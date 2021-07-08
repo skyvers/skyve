@@ -12,6 +12,7 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
@@ -95,6 +96,11 @@ public class CustomerInjectable implements Customer {
 	@Override
 	public Collection<InterceptorMetaData> getInterceptors() {
 		return CORE.getCustomer().getInterceptors();
+	}
+
+	@Override
+	public Collection<ObserverMetaData> getObservers() {
+		return CORE.getCustomer().getObservers();
 	}
 
 	@Override

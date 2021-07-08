@@ -28,6 +28,7 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.Upload;
+import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
@@ -105,6 +106,8 @@ public class CustomerImpl implements Customer {
 	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
+	private Map<String, ObserverMetaData> observers = new LinkedHashMap<>();
+	private List<ObserverMetaData> reversedObservers = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
 
 	private String jFreeChartPostProcessorClassName;
@@ -285,6 +288,20 @@ public class CustomerImpl implements Customer {
 	@Override
 	public java.util.Collection<InterceptorMetaData> getInterceptors() {
 		return Collections.unmodifiableCollection(interceptors.values());
+	}
+
+	public boolean putObserver(ObserverMetaData observer) {
+		boolean result = (observers.put(observer.getClassName(), observer) == null);
+		if (result) {
+			reversedObservers.add(0, observer);
+		}
+		return result;
+	}
+	
+
+	@Override
+	public java.util.Collection<ObserverMetaData> getObservers() {
+		return Collections.unmodifiableCollection(observers.values());
 	}
 
 	public void setHomeModuleName(String homeModuleName) {
@@ -476,9 +493,21 @@ public class CustomerImpl implements Customer {
 		return result;
 	}
 	
+	public void notifyStartup() {
+		for (ObserverMetaData observer : observers.values()) {
+			observer.getObserver().startup();
+		}
+	}
+
+	public void notifyShutdown() {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().shutdown();
+		}
+	}
+
 	public boolean interceptBeforeNewInstance(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeNewInstance(bean)) {
+			if (interceptor.getInterceptor().beforeNewInstance(bean)) {
 				return true;
 			}
 		}
@@ -487,13 +516,13 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterNewInstance(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterNewInstance(bean);
+			interceptor.getInterceptor().afterNewInstance(bean);
 		}
 	}
 	
 	public boolean interceptBeforeValidate(Bean bean, ValidationException e) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeValidate(bean, e)) {
+			if (interceptor.getInterceptor().beforeValidate(bean, e)) {
 				return true;
 			}
 		}
@@ -502,13 +531,13 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterValidate(Bean bean, ValidationException e) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterValidate(bean, e);
+			interceptor.getInterceptor().afterValidate(bean, e);
 		}
 	}
 	
 	public boolean interceptBeforeGetConstantDomainValues(String attributeName) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeGetConstantDomainValues(attributeName)) {
+			if (interceptor.getInterceptor().beforeGetConstantDomainValues(attributeName)) {
 				return true;
 			}
 		}
@@ -517,13 +546,13 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterGetConstantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterGetConstantDomainValues(attributeName, result);
+			interceptor.getInterceptor().afterGetConstantDomainValues(attributeName, result);
 		}
 	}
 
 	public boolean interceptBeforeGetVariantDomainValues(String attributeName) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeGetVariantDomainValues(attributeName)) {
+			if (interceptor.getInterceptor().beforeGetVariantDomainValues(attributeName)) {
 				return true;
 			}
 		}
@@ -532,13 +561,13 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterGetVariantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterGetVariantDomainValues(attributeName, result);
+			interceptor.getInterceptor().afterGetVariantDomainValues(attributeName, result);
 		}
 	}
 
 	public boolean interceptBeforeGetDynamicDomainValues(String attributeName, Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeGetDynamicDomainValues(attributeName, bean)) {
+			if (interceptor.getInterceptor().beforeGetDynamicDomainValues(attributeName, bean)) {
 				return true;
 			}
 		}
@@ -547,14 +576,14 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterGetDynamicDomainValues(String attributeName, Bean bean, List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterGetDynamicDomainValues(attributeName, bean, result);
+			interceptor.getInterceptor().afterGetDynamicDomainValues(attributeName, bean, result);
 		}
 	}
 
 	public boolean interceptBeforeComplete(String attributeName, String value, Bean bean)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeComplete(attributeName, value, bean)) {
+			if (interceptor.getInterceptor().beforeComplete(attributeName, value, bean)) {
 				return true;
 			}
 		}
@@ -564,13 +593,13 @@ public class CustomerImpl implements Customer {
 	public void interceptAfterComplete(String attributeName, String value, Bean bean, List<String> result)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterComplete(attributeName, value, bean, result);
+			interceptor.getInterceptor().afterComplete(attributeName, value, bean, result);
 		}
 	}
 
 	public boolean interceptBeforeSave(Document document, PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeSave(document, bean)) {
+			if (interceptor.getInterceptor().beforeSave(document, bean)) {
 				return true;
 			}
 		}
@@ -579,13 +608,13 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterSave(Document document, PersistentBean result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterSave(document, result);
+			interceptor.getInterceptor().afterSave(document, result);
 		}
 	}
 	
 	public boolean interceptBeforePreSave(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePreSave(bean)) {
+			if (interceptor.getInterceptor().beforePreSave(bean)) {
 				return true;
 			}
 		}
@@ -594,13 +623,13 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterPreSave(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPreSave(bean);
+			interceptor.getInterceptor().afterPreSave(bean);
 		}
 	}
 	
 	public boolean interceptBeforePostSave(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePostSave(bean)) {
+			if (interceptor.getInterceptor().beforePostSave(bean)) {
 				return true;
 			}
 		}
@@ -609,13 +638,13 @@ public class CustomerImpl implements Customer {
 
 	public void interceptAfterPostSave(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPostSave(bean);
+			interceptor.getInterceptor().afterPostSave(bean);
 		}
 	}
 
 	public boolean interceptBeforeDelete(Document document, PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeDelete(document, bean)) {
+			if (interceptor.getInterceptor().beforeDelete(document, bean)) {
 				return true;
 			}
 		}
@@ -624,13 +653,13 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterDelete(Document document, PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterDelete(document, bean);
+			interceptor.getInterceptor().afterDelete(document, bean);
 		}
 	}
 
 	public boolean interceptBeforePreDelete(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePreDelete(bean)) {
+			if (interceptor.getInterceptor().beforePreDelete(bean)) {
 				return true;
 			}
 		}
@@ -639,13 +668,13 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterPreDelete(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPreDelete(bean);
+			interceptor.getInterceptor().afterPreDelete(bean);
 		}
 	}
 
 	public boolean interceptBeforePostLoad(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePostLoad(bean)) {
+			if (interceptor.getInterceptor().beforePostLoad(bean)) {
 				return true;
 			}
 		}
@@ -654,14 +683,14 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterPostLoad(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPostLoad(bean);
+			interceptor.getInterceptor().afterPostLoad(bean);
 		}
 	}
 	
 	public boolean interceptBeforePreExecute(ImplicitActionName actionName, Bean bean, Bean parentBean, WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePreExecute(actionName, bean, parentBean, webContext)) {
+			if (interceptor.getInterceptor().beforePreExecute(actionName, bean, parentBean, webContext)) {
 				return true;
 			}
 		}
@@ -674,14 +703,14 @@ public class CustomerImpl implements Customer {
 											WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPreExecute(actionName, result, parentBean, webContext);
+			interceptor.getInterceptor().afterPreExecute(actionName, result, parentBean, webContext);
 		}
 	}
 
 	public boolean interceptBeforePreRerender(String source, Bean bean, WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforePreRerender(source, bean, webContext)) {
+			if (interceptor.getInterceptor().beforePreRerender(source, bean, webContext)) {
 				return true;
 			}
 		}
@@ -693,7 +722,7 @@ public class CustomerImpl implements Customer {
 											WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterPreRerender(source, result, webContext);
+			interceptor.getInterceptor().afterPreRerender(source, result, webContext);
 		}
 	}
 
@@ -703,7 +732,7 @@ public class CustomerImpl implements Customer {
 													WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeServerSideAction(document, actionName, bean, webContext)) {
+			if (interceptor.getInterceptor().beforeServerSideAction(document, actionName, bean, webContext)) {
 				return true;
 			}
 		}
@@ -716,7 +745,7 @@ public class CustomerImpl implements Customer {
 												WebContext webContext) 
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterServerSideAction(document, actionName, result, webContext);
+			interceptor.getInterceptor().afterServerSideAction(document, actionName, result, webContext);
 		}
 	}
 
@@ -726,7 +755,7 @@ public class CustomerImpl implements Customer {
 													WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeDownloadAction(document, actionName, bean, webContext)) {
+			if (interceptor.getInterceptor().beforeDownloadAction(document, actionName, bean, webContext)) {
 				return true;
 			}
 		}
@@ -740,7 +769,7 @@ public class CustomerImpl implements Customer {
 												WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterDownloadAction(document, actionName, bean, download, webContext);
+			interceptor.getInterceptor().afterDownloadAction(document, actionName, bean, download, webContext);
 		}
 	}
 
@@ -751,7 +780,7 @@ public class CustomerImpl implements Customer {
 												WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeUploadAction(document, actionName, bean, upload, webContext)) {
+			if (interceptor.getInterceptor().beforeUploadAction(document, actionName, bean, upload, webContext)) {
 				return true;
 			}
 		}
@@ -765,7 +794,7 @@ public class CustomerImpl implements Customer {
 											WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterUploadAction(document, actionName, bean, upload, webContext);
+			interceptor.getInterceptor().afterUploadAction(document, actionName, bean, upload, webContext);
 		}
 	}
 	
@@ -775,7 +804,7 @@ public class CustomerImpl implements Customer {
 													UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeBizImportAction(document, actionName, bizPortable, problems)) {
+			if (interceptor.getInterceptor().beforeBizImportAction(document, actionName, bizPortable, problems)) {
 				return true;
 			}
 		}
@@ -788,14 +817,14 @@ public class CustomerImpl implements Customer {
 												UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterBizImportAction(document, actionName, bizPortable, problems);
+			interceptor.getInterceptor().afterBizImportAction(document, actionName, bizPortable, problems);
 		}
 	}
 
 	public boolean interceptBeforeBizExportAction(Document document, String actionName, WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
-			if (interceptor.getInterceptor(this).beforeBizExportAction(document, actionName, webContext)) {
+			if (interceptor.getInterceptor().beforeBizExportAction(document, actionName, webContext)) {
 				return true;
 			}
 		}
@@ -808,7 +837,7 @@ public class CustomerImpl implements Customer {
 												WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
-			interceptor.getInterceptor(this).afterBizExportAction(document, actionName, result, webContext);
+			interceptor.getInterceptor().afterBizExportAction(document, actionName, result, webContext);
 		}
 	}
 }

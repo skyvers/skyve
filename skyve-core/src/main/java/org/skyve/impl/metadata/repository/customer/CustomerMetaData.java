@@ -42,6 +42,7 @@ import org.skyve.util.Util;
 							"modules", 
 							"roles",
 							"interceptors",
+							"observers",
 							"JFreeChartPostProcessorClassName",
 							"primeFacesChartPostProcessorClassName"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
@@ -58,6 +59,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
+	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
 	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
 
@@ -155,6 +157,12 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
 		return interceptors;
+	}
+
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observers")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observer", required = true)
+	public List<ObserverMetaDataImpl> getObservers() {
+		return observers;
 	}
 
 	public String getJFreeChartPostProcessorClassName() {
@@ -287,6 +295,20 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 				}
 				if (! result.putInterceptor(interceptor)) {
 					throw new MetaDataException(metaDataName + " : Duplicate interceptor " + value);
+				}
+			}
+		}
+
+		// Populate Observers
+		List<ObserverMetaDataImpl> repositoryObservers = getObservers();
+		if (repositoryObservers != null) {
+			for (ObserverMetaDataImpl observer : repositoryObservers) {
+				value = observer.getClassName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [className] for an observer is required");
+				}
+				if (! result.putObserver(observer)) {
+					throw new MetaDataException(metaDataName + " : Duplicate observer " + value);
 				}
 			}
 		}

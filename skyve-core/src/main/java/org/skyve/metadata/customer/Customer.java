@@ -92,6 +92,12 @@ public interface Customer extends NamedMetaData {
 	 * 
 	 * @return
 	 */
+	public Collection<ObserverMetaData> getObservers();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public UIResources getUiResources();
 	
 	/**
