@@ -20,7 +20,6 @@ import org.skyve.addin.AddInManager;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.cache.Caching;
-import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
@@ -60,7 +59,6 @@ import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
-import org.skyve.util.MailAttachment;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -324,32 +322,6 @@ public class EXT {
 		return PF4JAddInManager.get();
 	}
 
-	/**
-	 * Returns a mail attachment from bean content attribute
-	 * 
-	 * @param beanContent
-	 * @param attachmentName
-	 * @throws Exception
-	 */
-	public static MailAttachment getMailAttachmentFromContent(String contentId, String attachmentName) throws Exception {
-		MailAttachment result = new MailAttachment();
-		try (ContentManager cm = EXT.newContentManager()) {
-			if (contentId != null) {
-				AttachmentContent content = cm.getAttachment(contentId);
-				if (content == null) {
-					throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
-				}
-				byte[] fileBytes = content.getContentBytes();
-
-				result.setAttachmentFileName(attachmentName);
-				result.setAttachment(fileBytes);
-				result.setAttachmentMimeType(content.getMimeType());
-			}
-		}
-
-		return result;
-	}
-	
 	// NB Not a CDI provider as it is auto-closeable 
 	public static SQLDataAccess newSQLDataAccess() {
 		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
