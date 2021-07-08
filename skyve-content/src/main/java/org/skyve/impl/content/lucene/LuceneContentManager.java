@@ -51,7 +51,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.FileSystemContentManager;
-import org.skyve.impl.content.TextExtractorImpl;
+import org.skyve.impl.content.TikaTextExtractor;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
@@ -181,7 +181,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 
 		Document document = new Document();
 		if (index) {
-			TextExtractor extractor = new TextExtractorImpl();
+			TextExtractor extractor = new TikaTextExtractor();
 			String text = extractor.extractTextFromContent(attachment);
 			if (text != null) {
 				document.add(new TextField(CONTENT, text, Store.YES)); // needs to be stored for excerpt generation

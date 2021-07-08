@@ -30,7 +30,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		Module module = customer.getModule(DataMaintenance.MODULE_NAME);
 		JobMetaData job = module.getJob("jTruncateAuditLog");
 		
-		EXT.runOneShotJob(job, bean, user);
+		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 	
 		bean.setAuditResponse("Job commenced.");
 		

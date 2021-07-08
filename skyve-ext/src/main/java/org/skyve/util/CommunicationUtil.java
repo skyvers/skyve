@@ -570,7 +570,7 @@ public class CommunicationUtil {
 		Module module = customer.getModule(Communication.MODULE_NAME);
 		JobMetaData job = module.getJob("jProcessCommunicationsForTag");
 
-		EXT.runOneShotJob(job, communication, user);
+		EXT.getJobScheduler().runOneShotJob(job, communication, user);
 
 		StringBuilder sb = new StringBuilder(results);
 		sb.append("\nThe job has been commenced - check Admin->Jobs for the log.");

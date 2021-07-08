@@ -8,6 +8,7 @@ import javax.enterprise.inject.Produces;
 
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
@@ -56,5 +57,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static Caching getCaching() {
 		return new CachingInjectable();
+	}
+
+	@Produces
+	public static JobScheduler getJobScheduler() {
+		return new JobSchedulerInjectable();
 	}
 }

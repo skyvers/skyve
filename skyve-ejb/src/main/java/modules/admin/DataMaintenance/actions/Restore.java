@@ -34,15 +34,14 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		
 		boolean restoreAlreadyRunning = false;
 		try {
-			List<JobDescription> runningJobs = EXT.getCustomerRunningJobs();
+			List<JobDescription> runningJobs = EXT.getJobScheduler().getCustomerRunningJobs();
 			for (JobDescription jd : runningJobs) {
 				if (job.getDisplayName().equals(jd.getName())) {
 					restoreAlreadyRunning = true;
 					break;
 				}
 			}
-		} catch (Exception e) {
-			
+		} catch (@SuppressWarnings("unused") Exception e) {
 			throw new ValidationException(new Message(Util.i18n("admin.dataMaintenance.actions.restore.cannotDetectRunningJobsException")));
 		}
 
@@ -70,7 +69,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, msg));
 		}
 		
-		EXT.runOneShotJob(job, bean, u);
+		EXT.getJobScheduler().runOneShotJob(job, bean, u);
 		webContext.growl(MessageSeverity.info, Util.i18n("admin.dataMaintenance.actions.restore.restoreJobCommenced"));
 
 		return new ServerSideActionResult<>(bean);

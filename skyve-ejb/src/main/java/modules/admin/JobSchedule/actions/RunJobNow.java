@@ -49,7 +49,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		JobMetaData job = module.getJob(parts[1]);
 
 		// run as the current user
-		EXT.runOneShotJob(job, bean, user);
+		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 
 		// Used to update the UI.
 		bean.setJobScheduledImmediately(Boolean.TRUE);

@@ -27,7 +27,7 @@ public class JobsBizlet extends Bizlet<Jobs> {
 		List<Job> runningJobs = jobs.getRunningJobs();
 		runningJobs.clear();
 		
-		for (JobDescription jd : EXT.getCustomerRunningJobs()) {
+		for (JobDescription jd : EXT.getJobScheduler().getCustomerRunningJobs()) {
 			// the job could be finished but the thread is still sleeping waiting for the last UI poll
 			if (jd.getStatus() == null) { // not finished
 				Job job = Job.newInstance();

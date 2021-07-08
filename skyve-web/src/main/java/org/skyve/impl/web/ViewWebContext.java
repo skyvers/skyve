@@ -1,8 +1,8 @@
 package org.skyve.impl.web;
 
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.job.JobScheduler;
 import org.skyve.web.BackgroundTask;
 
 /**
@@ -24,11 +24,11 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	@Override
 	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception {
 		cacheConversation();
-		JobScheduler.runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
 	}
 
 	@Override
 	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) throws Exception {
-		JobScheduler.runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
 	}
 }

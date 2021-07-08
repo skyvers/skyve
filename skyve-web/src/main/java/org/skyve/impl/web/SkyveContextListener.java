@@ -40,7 +40,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
-import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
@@ -87,7 +86,7 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			EXT.getReporting().startup();
 			
-			JobScheduler.init();
+			EXT.getJobScheduler().startup();
 			
 			// Set up the session cookie
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();
@@ -477,7 +476,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 
 		// Can't load the class here as it may not be available to this class loader - it could be in the add-in.
-		// So we load it in the init method.		
+		// So we load it in the startup method.		
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
@@ -655,7 +654,7 @@ public class SkyveContextListener implements ServletContextListener {
 			try {
 				try {
 					try {
-						JobScheduler.dispose();
+						EXT.getJobScheduler().shutdown();
 					}
 					finally {
 						EXT.getReporting().shutdown();

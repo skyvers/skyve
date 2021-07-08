@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.quartz.CronExpression;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -330,15 +331,16 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 		Customer customer = CORE.getUser().getCustomer();
 		
 		// Re-schedule the job
-		JobScheduler.unscheduleJob(bean, customer);
+		JobScheduler jobScheduler = EXT.getJobScheduler();
+		jobScheduler.unscheduleJob(bean, customer);
 		if (! Boolean.TRUE.equals(bean.getDisabled())) {
-			JobScheduler.scheduleJob(bean, bean.getRunAs().toMetaDataUser());
+			jobScheduler.scheduleJob(bean, bean.getRunAs().toMetaDataUser());
 		}
 	}
 	
 	@Override
 	public void preDelete(JobSchedule bean) throws Exception {
-		JobScheduler.unscheduleJob(bean, CORE.getUser().getCustomer());
+		EXT.getJobScheduler().unscheduleJob(bean, CORE.getUser().getCustomer());
 	}
 
 	@Override

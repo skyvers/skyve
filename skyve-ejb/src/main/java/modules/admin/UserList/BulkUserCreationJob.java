@@ -100,7 +100,7 @@ public class BulkUserCreationJob extends Job {
 		Module module = customer.getModule(UserList.MODULE_NAME);
 		JobMetaData job = module.getJob("jBulkUserCreation");
 
-		EXT.runOneShotJob(job, bean, user);
+		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 
 		webContext.growl(MessageSeverity.info, "The creation job has started - check job log for detailed results");
 	}

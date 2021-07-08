@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
@@ -199,19 +200,21 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	public void preDelete(ReportTemplateExtension bean) throws Exception {
 		super.preDelete(bean);
 		if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.getScheduled())) {
-			JobScheduler.unscheduleReport(bean, CORE.getUser().getCustomer());
+			EXT.getJobScheduler().unscheduleReport(bean, CORE.getUser().getCustomer());
 		}
 	}
 
 	@Override
 	public void preSave(ReportTemplateExtension bean) throws Exception {
+		JobScheduler jobScheduler = EXT.getJobScheduler();
+		
 		// update the templateName if not set or needs to be changed
 		if (bean.getTemplateName() == null || bean.originalValues().containsKey(ReportTemplate.namePropertyName)) {
 			bean.setTemplateName(String.format("%s.%s", bean.getName(), FREEMARKER_HTML_TEMPLATE_EXTENSION));
 		}
 
 		if (UtilImpl.JOB_SCHEDULER && (bean.isNotPersisted() || bean.originalValues().containsKey(ReportTemplate.namePropertyName))) {
-			JobScheduler.addReportJob(bean.getName());
+			jobScheduler.addReportJob(bean.getName());
 		}
 
 		// update the scheduling if enabled
@@ -292,17 +295,17 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 
 			if (UtilImpl.JOB_SCHEDULER) {
 				// Re-schedule the job
-				JobScheduler.unscheduleReport(bean, customer);
+				jobScheduler.unscheduleReport(bean, customer);
 
 				// Determine the job schedule user
 				StringBuilder userPrincipal = new StringBuilder(128);
 				userPrincipal.append(customer.getName());
 				userPrincipal.append('/').append(bean.getRunAs().getUserName());
 				User user = CORE.getRepository().retrieveUser(userPrincipal.toString());
-				JobScheduler.scheduleReport(bean, user);
+				jobScheduler.scheduleReport(bean, user);
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {
-			JobScheduler.unscheduleReport(bean, customer);
+			jobScheduler.unscheduleReport(bean, customer);
 		}
 
 		super.preSave(bean);

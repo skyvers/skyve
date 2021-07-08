@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -39,6 +38,7 @@ import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
+import org.skyve.impl.job.QuartzJobScheduler;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
@@ -46,11 +46,9 @@ import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.job.JobDescription;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -189,68 +187,13 @@ public class EXT {
 	}
 	
 	/**
-	 * Run a job once. The job disappears from the Scheduler once it is run and
-	 * a record of the run in placed in admin.Job. User must look in admin to
-	 * see if job was successful.
-	 * 
-	 * @param job
-	 *            The job to run
-	 * @param bean
-	 *            The job parameter - can be null.
-	 * @param user
-	 *            The user to run the job as.
-	 * 
-	 * @throws Exception
-	 *             Anything.
+	 * For Scheduling Jobs, Background Tasks and Reports.
+	 * @return A JobScheduler
 	 */
-	public static void runOneShotJob(JobMetaData job, Bean parameter, User user) throws Exception {
-		JobScheduler.runOneShotJob(job, parameter, user);
+	public static JobScheduler getJobScheduler() {
+		return QuartzJobScheduler.get();
 	}
-
-	/**
-	 * Extra parameter gives polling UIs the chance to display the results of
-	 * the job.
-	 * 
-	 * @param job
-	 *            The job to run
-	 * @param parameter
-	 *            The job parameter - can be null.
-	 * @param user
-	 *            The user to run the job as.
-	 * @param sleepAtEndInSeconds
-	 *            Set this 5 secs higher than the polling time of the UI
-	 * @throws Exception
-	 */
-	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) throws Exception {
-		JobScheduler.runOneShotJob(job, parameter, user, sleepAtEndInSeconds);
-	}
-
-	/**
-	 * Run a job once at a certain date and time. 
-	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
-	 * User must look in admin to see if job was successful.
-	 * 
-	 * @param job The job to run
-	 * @param parameter 	The job parameter - can be null.
-	 * @param user	The user to run the job as.
-	 * @param when	The date/time to run the job at.
-	 * 
-	 * @throws Exception Anything.
-	 */
-	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
-	throws Exception {
-		JobScheduler.scheduleOneShotJob(job, parameter, user, when);
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public static List<JobDescription> getCustomerRunningJobs() throws Exception {
-		return JobScheduler.getCustomerRunningJobs();
-	}
-
+	
 	/**
 	 * For tag operations.
 	 * @return A tag manager

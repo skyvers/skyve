@@ -16,7 +16,7 @@ import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 
 @Extension(points = {TextExtractor.class})
-public class TextExtractorImpl implements TextExtractor {
+public class TikaTextExtractor implements TextExtractor {
 	private static final Tika TIKA = new Tika();
 	
 	@Override

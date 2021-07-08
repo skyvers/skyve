@@ -24,7 +24,7 @@ public class Reindex implements ServerSideAction<DataMaintenance> {
 		Module m = c.getModule(DataMaintenance.MODULE_NAME);
 		
 		JobMetaData job = m.getJob("jReindex");
-		EXT.runOneShotJob(job, bean, u);
+		EXT.getJobScheduler().runOneShotJob(job, bean, u);
 		webContext.growl(MessageSeverity.info, "Reindex Job has been started");
 		return new ServerSideActionResult<>(bean);
 	}

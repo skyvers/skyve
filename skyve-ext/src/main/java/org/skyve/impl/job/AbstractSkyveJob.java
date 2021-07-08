@@ -23,6 +23,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	private static final long serialVersionUID = -1272267642792331001L;
@@ -138,6 +139,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setAsyncThread(true);
 			persistence.begin();
 			BeanProvider.injectFields(this);
+			Util.LOGGER.info("Execute job " + displayName);
 			execute();
 			if (status == null) { // status could be cancelled here
 				status = JobStatus.complete;

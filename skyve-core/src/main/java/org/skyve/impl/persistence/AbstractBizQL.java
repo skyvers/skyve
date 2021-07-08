@@ -4,12 +4,9 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
-import org.skyve.impl.persistence.AbstractBizQL;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.AbstractQuery;
-import org.skyve.impl.util.UtilImpl;
 
 public class AbstractBizQL extends AbstractQuery implements BizQL {
 	private String query;

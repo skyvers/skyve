@@ -1,2 +1,2 @@
-org.skyve.impl.content.ContentManagerImpl
-org.skyve.impl.content.TextExtractorImpl
+org.skyve.impl.content.DelegatingContentManager
+org.skyve.impl.content.TikaTextExtractor

@@ -31,7 +31,7 @@ public class GenerateTestData implements ServerSideAction<ControlPanelExtension>
 		Module m = customer.getModule(ControlPanel.MODULE_NAME);
 		JobMetaData job = m.getJob("jGenerateTestData");
 
-		EXT.runOneShotJob(job, bean, CORE.getUser());
+		EXT.getJobScheduler().runOneShotJob(job, bean, CORE.getUser());
 		EXT.push(new PushMessage().user(CORE.getUser()).rerender());
 
 		return new ServerSideActionResult<>(bean);

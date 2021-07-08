@@ -32,7 +32,7 @@ public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 		Module module = customer.getModule(Tag.MODULE_NAME);
 		JobMetaData job = module.getJob("jPerformDocumentActionForTag");
 
-		EXT.runOneShotJob(job, tag, user);
+		EXT.getJobScheduler().runOneShotJob(job, tag, user);
 		
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("Perform action: ");
