@@ -348,7 +348,7 @@ public class JFreeChartGenerator {
 		}
 		if (postProcessor != null) {
 			try {
-				JFreeChartPostProcessor instance = (JFreeChartPostProcessor) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).newInstance();
+				JFreeChartPostProcessor instance = (JFreeChartPostProcessor) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).getDeclaredConstructor().newInstance();
 				instance.process(chart);
 			}
 			catch (Exception e) {

@@ -80,6 +80,46 @@ public class EXT {
 	}
 
 	/**
+	 * For Scheduling Jobs, Background Tasks and Reports.
+	 * @return A JobScheduler
+	 */
+	public static JobScheduler getJobScheduler() {
+		return QuartzJobScheduler.get();
+	}
+	
+	/**
+	 * For tag operations.
+	 * @return A tag manager
+	 */
+	public static TagManager getTagManager() {
+		return DefaultTagManager.get();
+	}
+	
+	/**
+	 * Get a reporting service.
+	 * @return	A reporting service.
+	 */
+	public static Reporting getReporting() {
+		return DefaultReporting.get();
+	}
+	
+	/**
+	 * Get a cache manager
+	 * @ return A cache manager
+	 */
+	public static Caching getCaching() {
+		return DefaultCaching.get();
+	}
+	
+	/**
+	 * Get an add-in manager
+	 * @ return An add-in manager
+	 */
+	public static AddInManager getAddInManager() {
+		return PF4JAddInManager.get();
+	}
+
+	/**
 	 * New file factory method for creating a BizPort excel workbook.
 	 * 
 	 * @return The new workbook.
@@ -185,22 +225,6 @@ public class EXT {
 	}
 	
 	/**
-	 * For Scheduling Jobs, Background Tasks and Reports.
-	 * @return A JobScheduler
-	 */
-	public static JobScheduler getJobScheduler() {
-		return QuartzJobScheduler.get();
-	}
-	
-	/**
-	 * For tag operations.
-	 * @return A tag manager
-	 */
-	public static TagManager getTagManager() {
-		return DefaultTagManager.get();
-	}
-	
-	/**
 	 * Generate an image of a chart.
 	 * @param data
 	 * @param pixelWidth
@@ -231,22 +255,6 @@ public class EXT {
 	 */
 	public static JFreeChartGenerator newChartGenerator(ChartData data, int pixelWidth, int pixelHeight) {
 		return new JFreeChartGenerator(data, pixelWidth, pixelHeight);
-	}
-	
-	/**
-	 * Get a reporting service.
-	 * @return	A reporting service.
-	 */
-	public static Reporting getReporting() {
-		return DefaultReporting.get();
-	}
-	
-	/**
-	 * Get a cache manager
-	 * @ return A cache manager
-	 */
-	public static Caching getCaching() {
-		return DefaultCaching.get();
 	}
 	
 	/**
@@ -316,10 +324,6 @@ public class EXT {
 			throw new DomainException("No content manager addin detected and \"factories.contentManagerClass\" is not defined in the Skyve configuration");
 		}
 		return result;
-	}
-
-	public static AddInManager getAddInManager() {
-		return PF4JAddInManager.get();
 	}
 
 	// NB Not a CDI provider as it is auto-closeable 
