@@ -10,7 +10,7 @@
 		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
-		<h:head>
+		<h:head id="head">
 	        <f:facet name="first">
 	            <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 	        </f:facet>
@@ -66,7 +66,7 @@
 			</style>
 			<ui:insert name="templateHead" />
 		</h:head>
-		<h:body class="is-preload">
+		<h:body id="body" class="is-preload">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<p:ajaxStatus onstart="$('#busy').css({display:'block',top:$(window).scrollTop()+($(window).height()/2)-25});" oncomplete="$('#busy').css({display:'none'})"/>

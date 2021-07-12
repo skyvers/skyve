@@ -11,7 +11,7 @@
 		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{bean.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
-		<h:head>
+		<h:head id="head">
 			<f:facet name="first">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
             	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
@@ -45,7 +45,7 @@
 			<ui:insert name="templateHead" />
 		</h:head>
 	
-		<h:body styleClass="main-body layout-compact">
+		<h:body id="body" styleClass="main-body layout-compact">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light' : 'layout-wrapper layout-menu-light'}">
