@@ -205,4 +205,11 @@ public class UserExtension extends User {
 		}
 	}
 
+	/**
+	 * Whether the currently logged in user is this user
+	 * @return
+	 */
+	public boolean owningUser() {
+		return CORE.getPersistence().getUser().getId().equals(getBizId());
+	}
 }
