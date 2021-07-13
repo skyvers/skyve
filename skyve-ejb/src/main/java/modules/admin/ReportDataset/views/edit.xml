@@ -49,7 +49,7 @@
         		<blurb visible="typeClass">
         			<![CDATA[
         				<span style="font-size: 90%; color: #444;">
-        					Fully qualified name of the class which returns the dataset. E.g. <code>modules.admin.Example.ExampleDataset</code>.
+        					{i18n:admin.reportDataset.edit.typeClass.hint}
         				</span>
         			]]>
         		</blurb>

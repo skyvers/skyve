@@ -8,12 +8,11 @@
 					<![CDATA[
 						<div style="width:100%; text-align:center">
 							<h4 style="margin: 2px auto;">
-								<p>Congratulations {user.contact.name}! Your account is now active.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a> with the email address {user.contact.email1}.</p>
+								{i18n:admin.selfRegistrationActivation.pleaseSignIn}
 							</h4>
 						</div>
 						<div style="width:100%; text-align:center; text-size: 120%;">
-							<a href="{loginUrl}">Sign in</a>
+							{i18n:admin.selfRegistrationActivation.signInLink}
 						</div>
 					]]>
 				</blurb>
@@ -28,8 +27,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								<p>Welcome {user.contact.name} - you have already activated your account.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a>.</p>
+								{i18n:admin.selfRegistrationActivation.alreadyActivated}
 							</strong>
 						</div>
 					]]>
@@ -45,8 +43,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								<p>Sorry, that code is no longer valid.</p>
-								<p>Please <a href="{loginUrl}">Sign in</a> or Register again to request a new activation email.</p>
+								{i18n:admin.selfRegistrationActivation.noLongerValid}
 							</strong>
 						</div>
 					]]>
@@ -62,8 +59,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								<p>Sorry, that link is not recognised. Please check the link and try again.</p>
-								<p>Return to <a href="{loginUrl}">Sign in</a>.</p>
+								{i18n:admin.selfRegistrationActivation.notRecognised}
 							</strong>
 						</div>
 					]]>

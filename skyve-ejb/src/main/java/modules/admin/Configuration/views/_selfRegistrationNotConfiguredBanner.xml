@@ -15,7 +15,7 @@
 									<ul>
 										<li role="alert" aria-atomic="true">
 											<span class="ui-messages-warn-detail">
-												Self-registration has been enabled - please ensure that email is configured and a self-registration group is chosen
+												{i18n:admin.configuration.selfRegistration.enabledWarning}
 											</span>
 										</li>
 									</ul>

@@ -15,7 +15,7 @@
 									<ul>
 										<li role="alert" aria-atomic="true">
 											<span class="ui-messages-warn-detail">
-												It looks like you haven't scheduled the available disk space alarm.
+												{i18n:admin.configuration.availableDiskSpaceAlarmLevel.notConfiguredWarning}
 											</span>
 										</li>
 									</ul>
