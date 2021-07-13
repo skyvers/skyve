@@ -2,12 +2,14 @@ package modules.test;
 
 import java.util.List;
 
+import org.apache.commons.beanutils.DynaBean;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -16,6 +18,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
@@ -428,6 +431,43 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			sql.putParameter("param", null, type);
 			results = sql.beanResults();
 			Assert.assertEquals(0, results.size());
+		}
+	}
+
+	@Test
+	public void testSQLDyna() throws Exception {
+		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
+			String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
+			sda.newSQL("delete from " + persistentIdentifier).execute();
+	
+			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
+			aap = p.save(aap);
+			aap = Util.constructRandomInstance(u, m, aapd, 1);
+			aap = p.save(aap);
+			aap = Util.constructRandomInstance(u, m, aapd, 1);
+			aap = p.save(aap);
+			p.commit(false);
+	
+			DynaBean bean = sda.newSQL("select bizId from " + persistentIdentifier).dynaResult();
+			Assert.assertNotNull("bizId should not be null", Binder.get(bean, Bean.DOCUMENT_ID.toLowerCase()));
+
+			List<DynaBean> beans = sda.newSQL("select bizId from " + persistentIdentifier).dynaResults();
+			Assert.assertEquals("Requires some data", 3, beans.size());
+			for (DynaBean thisBean : beans) {
+				Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+			}
+
+			try (AutoClosingIterable<DynaBean> i = sda.newSQL("select bizId from " + persistentIdentifier).dynaIterable()) {
+				boolean exists = false;
+				for (DynaBean thisBean : i) {
+					Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+					exists = true;
+				}
+				Assert.assertTrue("Requires some data", exists);
+			}
+
+			beans = sda.newSQL("select bizId from " + persistentIdentifier + " where bizId = :bizId").putParameter(Bean.DOCUMENT_ID, "test", false).dynaResults();
+			Assert.assertEquals("Should be no matches", 0, beans.size());
 		}
 	}
 }

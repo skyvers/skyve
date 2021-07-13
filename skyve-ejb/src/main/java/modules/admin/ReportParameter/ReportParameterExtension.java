@@ -1,9 +1,6 @@
 package modules.admin.ReportParameter;
 
-import java.util.Map;
-
 import org.skyve.CORE;
-import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
@@ -13,7 +10,6 @@ import org.skyve.domain.types.converters.date.DD_MM_YYYY;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 
 import modules.admin.domain.ReportParameter;
 import modules.admin.domain.ReportTemplate;
@@ -151,19 +147,5 @@ public class ReportParameterExtension extends ReportParameter {
 		if (Boolean.TRUE.equals(this.getRequired()) && this.getTestValueString() == null) {
 			e.getMessages().add(new Message(String.format("A test value for parameter '%s' is required.", this.getName())));
 		}
-	}
-
-	/**
-	 * Log a Map of parameter values for debugging
-	 * 
-	 * @param params
-	 */
-	public static void logParameterValues(Map<String, Object> params) {
-		StringBuilder parameterValues = new StringBuilder();
-		parameterValues.append("\nParameters:");
-		for (String k : params.keySet()) {
-			parameterValues.append("\n\t").append(k).append(" = \t").append((params.get(k)==null?"null":params.get(k).toString()));
-		}
-		Util.LOGGER.fine(parameterValues.toString());
 	}
 }

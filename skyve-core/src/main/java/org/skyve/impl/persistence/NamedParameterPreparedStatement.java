@@ -1,4 +1,4 @@
-package org.skyve.impl.dataaccess.sql;
+package org.skyve.impl.persistence;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -352,5 +352,9 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	
 	public void setQueryTimeout(int seconds) throws SQLException {
 		statement.setQueryTimeout(seconds);
+	}
+	
+	public boolean isClosed() throws SQLException {
+		return statement.isClosed();
 	}
 }

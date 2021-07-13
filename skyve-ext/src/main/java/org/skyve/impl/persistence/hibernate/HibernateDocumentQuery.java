@@ -8,8 +8,6 @@ import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.HibernateQueryDelegate;
 
 public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	private HibernateQueryDelegate delegate;

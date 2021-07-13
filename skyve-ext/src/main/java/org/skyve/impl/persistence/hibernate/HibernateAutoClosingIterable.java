@@ -120,7 +120,6 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	}
 
 	@Override
-	@SuppressWarnings("synthetic-access")
 	public Iterator<T> iterator() {
 		Iterator<T> i = new HibernateIterator<>(moduleName, documentName, results, aliases);
 

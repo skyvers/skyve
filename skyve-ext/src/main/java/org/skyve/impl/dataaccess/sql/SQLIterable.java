@@ -1,6 +1,6 @@
 package org.skyve.impl.dataaccess.sql;
 
-import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
@@ -11,17 +11,14 @@ import java.util.Iterator;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.TimeoutException;
-import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.NamedParameterPreparedStatement;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -38,164 +35,19 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	SQLIterable(Document document,
 					SQLDataAccessImpl dataAccess,
 					SQLDataAccessSQL sql,
-					Class<T> scalarType,
-					int timeoutInSeconds) {
+					Class<T> scalarType) {
 		this.document = document;
 		this.dataAccess = dataAccess;
 		this.scalarType = scalarType;
 		try {
-			ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), sql.toQueryString());
-
-			if (timeoutInSeconds > 0) {
-				ps.setQueryTimeout(timeoutInSeconds);
-			}
-			else {
-				AbstractPersistence p = AbstractPersistence.get();
-				if (p.isAsyncThread()) {
-					int timeout = dataAccess.dataStore.getAsyncConnectionTimeoutInSeconds();
-					if (timeout > 0) {
-						ps.setQueryTimeout(timeout);
-					}
-				}
-				else {
-					int timeout = dataAccess.dataStore.getOltpConnectionTimeoutInSeconds();
-					if (timeout > 0) {
-						ps.setQueryTimeout(timeout);
-					}
-				}
-			}
-			
-			for (String name : sql.getParameterNames()) {
-				Object value = sql.getParameter(name);
-				AttributeType type = sql.getParameterType(name);
-
-				if (AttributeType.bool.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.BOOLEAN);
-					}
-					else {
-						ps.setBoolean(name, ((Boolean) value).booleanValue());
-					}
-				}
-				else if (AttributeType.colour.equals(type) ||
-							AttributeType.content.equals(type) ||
-							AttributeType.image.equals(type) ||
-							AttributeType.enumeration.equals(type) ||
-							AttributeType.text.equals(type) ||
-							AttributeType.id.equals(type) ||
-							AttributeType.association.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.VARCHAR);
-					}
-					else {
-						if (value instanceof Bean) {
-							ps.setString(name, ((Bean) value).getBizId());
-						}
-						else if (value instanceof Enumeration) {
-							ps.setString(name, ((Enumeration) value).toCode());
-						}
-						else {
-							ps.setString(name, (String) value);
-						}
-					}
-				}
-				else if (AttributeType.markup.equals(type) ||
-							AttributeType.memo.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.LONGVARCHAR);
-					}
-					else {
-						ps.setString(name, (String) value);
-					}
-				}
-				else if (AttributeType.date.equals(type)) {
-					if (value == null) {
-						ps.setNull(name,Types.DATE);
-					}
-					else {
-						ps.setDate(name, new java.sql.Date(((Date) value).getTime()));
-					}
-				}
-				else if (AttributeType.dateTime.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.TIMESTAMP);
-					}
-					else {
-						ps.setTimestamp(name, new java.sql.Timestamp(((Date) value).getTime()));
-					}
-				}
-				else if (AttributeType.decimal10.equals(type) ||
-							AttributeType.decimal2.equals(type) ||
-							AttributeType.decimal5.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.DECIMAL);
-					}
-					else {
-						if (value instanceof BigDecimal) {
-							ps.setBigDecimal(name, (BigDecimal) value);
-						}
-						else if (value instanceof Decimal) {
-							ps.setBigDecimal(name, ((Decimal) value).bigDecimalValue());
-						}
-						else {
-							ps.setBigDecimal(name, new BigDecimal(((Number) value).toString()));
-						}
-					}
-				}
-				else if (AttributeType.geometry.equals(type)) {
-					SkyveDialect dialect = dataAccess.getDialect();
-					if (value == null) {
-						ps.setNull(name, dialect.getGeometrySqlType());
-					}
-					else {
-						if (dialect.getGeometrySqlType() == Types.ARRAY) {
-							ps.setBytes(name, (byte[]) dialect.convertToPersistedValue((Geometry) value));
-						}
-						else {
-							ps.setObject(name, dialect.convertToPersistedValue((Geometry) value));
-						}
-					}
-				}
-				else if (AttributeType.integer.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.INTEGER);
-					}
-					else {
-						ps.setInt(name, ((Number) value).intValue());
-					}
-				}
-				else if (AttributeType.longInteger.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.NUMERIC);
-					}
-					else {
-						ps.setLong(name,  ((Number) value).longValue());
-					}
-				}
-				else if (AttributeType.time.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.TIME);
-					}
-					else {
-						ps.setTime(name, new java.sql.Time(((Date) value).getTime()));
-					}
-				}
-				else if (AttributeType.timestamp.equals(type)) {
-					if (value == null) {
-						ps.setNull(name, Types.TIMESTAMP);
-					}
-					else {
-						ps.setTimestamp(name, new java.sql.Timestamp(((Date) value).getTime()));
-					}
-				}
-				else {
-					ps.setObject(name, value);
-				}
-			}
+			@SuppressWarnings("resource")
+			Connection c = dataAccess.getConnection();
+			ps = new NamedParameterPreparedStatement(c, sql.toQueryString());
+			sql.prepareStatement(ps, dataAccess.dataStore, dataAccess.getDialect());
 			rs = ps.executeQuery();
 		}
-		catch (SQLTimeoutException e) {
-			throw new TimeoutException(e);
+		catch (TimeoutException e) {
+			throw e;
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -206,7 +58,6 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	}
 	
 	@Override
-	@SuppressWarnings("synthetic-access")
 	public Iterator<T> iterator() {
 		return new SQLIterator<>();
 	}
@@ -236,7 +87,6 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 		// This isn't exactly right because this hasNext() implementation has the side effect of moving on a record
 		// This shouldn't matter because it should be used in an iterator for loop
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public boolean hasNext() {
 			boolean hasNext = false;
 			
@@ -261,7 +111,6 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 		}
 
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public Z next() {
 			if (document != null) { // bean select
 				return nextBean();
@@ -277,7 +126,6 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			throw new IllegalStateException("Cannot remove from SQLIterator");
 		}
 
-		@SuppressWarnings("synthetic-access")
 		private Z nextBean() {
 			try {
 				Z result = document.newInstance(CORE.getUser());
@@ -366,7 +214,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			}
 		}
 		
-		@SuppressWarnings({"synthetic-access", "unchecked"})
+		@SuppressWarnings("unchecked")
 		Z nextScalar() {
 			try {
 				return (Z) BindUtil.convert(scalarType, rs.getObject(1));
@@ -376,7 +224,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			}
 		}
 		
-		@SuppressWarnings({"synthetic-access", "unchecked"})
+		@SuppressWarnings("unchecked")
 		Z nextTuple() {
 			try {
 				int columnCount = rs.getMetaData().getColumnCount();

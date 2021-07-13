@@ -20,6 +20,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.persistence.BizQL;
+import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
 import org.slf4j.Logger;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportParameter;
-import services.report.SqlQueryUtil;
 
 public class ReportDatasetExtension extends ReportDataset {
 
@@ -122,13 +122,14 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * 
 	 * @return The list of beans from the class dataset
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public List<DynaBean> executeClass() {
 		try {
+			@SuppressWarnings("unchecked")
 			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Class.forName(getQuery());
 			if (reportClass != null) {
 				BeanReportDataset dataset = CDI.current().select(reportClass).get();
-				return dataset.getResults((List<? extends org.skyve.domain.app.admin.ReportParameter>) getParent().getParameters());
+				return dataset.getResults(getParent().getParameters());
 
 			}
 		} catch (Exception e) {
@@ -144,6 +145,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * @return The list of beans from the query
 	 * @throws Exception
 	 */
+	@Override
 	public List<Bean> executeQuery() throws Exception {
 		if (DatasetType.bizQL != getDatasetType()) {
 			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.bizQL.toDescription()));
@@ -204,13 +206,13 @@ public class ReportDatasetExtension extends ReportDataset {
 	 * 
 	 * @return The list of beans from the query
 	 */
+	@Override
 	public List<DynaBean> executeSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
 			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toDescription()));
 		}
 
-		// put any parameters
-		final Map<String, Object> sqlParams = new HashMap<>();
+		final SQL sql = CORE.getPersistence().newSQL(getQuery());
 		
 		// put any parameters
 		for (ReportParameterExtension param : getParent().getParameters()) {
@@ -220,39 +222,37 @@ public class ReportDatasetExtension extends ReportDataset {
 						if (param.getReportInputValue() != null) {
 							DateOnly date = CORE.getCustomer().getDefaultDateConverter()
 									.fromDisplayValue(param.getReportInputValue());
-							sqlParams.put(param.getName(), date);
+							sql.putParameter(param.getName(), date);
 						} else {
-							sqlParams.put(param.getName(), param.getDateDefaultValue());
+							sql.putParameter(param.getName(), param.getDateDefaultValue());
 						}
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							sqlParams.put(param.getName(), Integer.getInteger(param.getReportInputValue()));
+							sql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
 						} else {
-							sqlParams.put(param.getName(), (param.getNumericalDefaultValue() == null ? null
+							sql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
 									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
 						}
 						break;
 					case longInteger:
 						if (param.getReportInputValue() != null) {
-							sqlParams.put(param.getName(), Long.getLong(param.getReportInputValue()));
+							sql.putParameter(param.getName(), Long.getLong(param.getReportInputValue()));
 						} else {
-							sqlParams.put(param.getName(), param.getNumericalDefaultValue());
+							sql.putParameter(param.getName(), param.getNumericalDefaultValue());
 						}
 						break;
 					default:
 						if (param.getReportInputValue() != null) {
-							sqlParams.put(param.getName(), param.getReportInputValue());
+							sql.putParameter(param.getName(), param.getReportInputValue(), false);
 						} else {
-							sqlParams.put(param.getName(), param.getTextDefaultValue());
+							sql.putParameter(param.getName(), param.getTextDefaultValue(), false);
 						}
 				}
 			}
 		}
 		
-		ReportParameterExtension.logParameterValues(sqlParams);
-
-		return SqlQueryUtil.retrieveDynamicResults(getQuery(), sqlParams);
+		return sql.dynaResults();
 	}
 
 	/**
@@ -318,31 +318,28 @@ public class ReportDatasetExtension extends ReportDataset {
 			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toDescription()));
 		}
 
-		// put any parameters
-		final Map<String, Object> sqlParams = new HashMap<>();
+		final SQL sql = CORE.getPersistence().newSQL(getQuery());
 		
 		for (ReportParameterExtension param : getParent().getParameters()) {
 			if (containsParameter(param)) {
 				switch (param.getType()) {
 					case date:
-						sqlParams.put(param.getName(), param.getDateTestValue());
+						sql.putParameter(param.getName(), param.getDateTestValue());
 						break;
 					case integer:
-						sqlParams.put(param.getName(),
+						sql.putParameter(param.getName(),
 								(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 						break;
 					case longInteger:
-						sqlParams.put(param.getName(), param.getNumericalTestValue());
+						sql.putParameter(param.getName(), param.getNumericalTestValue());
 						break;
 					default:
-						sqlParams.put(param.getName(), param.getTextTestValue());
+						sql.putParameter(param.getName(), param.getTextTestValue(), false);
 				}
 			}
 		}
 		
-		ReportParameterExtension.logParameterValues(sqlParams);
-
-		return SqlQueryUtil.retrieveDynamicResults(getQuery(), sqlParams);
+		return sql.dynaResults();
 	}
 
 	/**
