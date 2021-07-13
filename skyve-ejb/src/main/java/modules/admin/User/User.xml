@@ -280,10 +280,10 @@
 				<![CDATA[((UserExtension) this).owningUser()]]>
 			</expression>
 		</condition>
-		<condition name="canManageDetails">
+		<condition name="accessDenied">
 			<description>Whether the current user is allowed to manage this user's details</description>
 			<expression>
-				<![CDATA[isOwningUser() || isSecurityAdministrator()]]>
+				<![CDATA[!isOwningUser() && !isSecurityAdministrator()]]>
 			</expression>
 		</condition>
 		<condition name="designer">

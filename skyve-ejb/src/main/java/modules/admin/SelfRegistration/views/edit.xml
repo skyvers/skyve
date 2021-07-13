@@ -2,23 +2,20 @@
 <view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox widgetId="postRegister" border="true" visible="registrationComplete">
-		<blurb >
+		<blurb escape="false">
 			<![CDATA[
 				<div style="text-align: center">
-					<strong>Thanks for registering! Your activation email should be in your Inbox now.</strong>
-					<br/><br/>
-					<p>Click the link in your activation email to activate your new account and sign in.</p>
-					<p>If you did not receive the email, please check your spam folder.</p>
+					{i18n:admin.selfRegistration.postRegister}
 				</div>
 			]]>
 		</blurb>
 	</vbox>
 	<vbox border="false" shrinkWrap="height" widgetId="doRegister" invisible="registrationComplete">
 		<vbox border="true" shrinkWrap="height">
-			<blurb>
+			<blurb escape="false">
 				<![CDATA[
 					<div style="width:100%;text-align:center">
-						<strong style="margin: 2px auto;">If you are an existing user, please <a href="{loginUrl}">Sign in</a>.</strong>
+						<strong style="margin: 2px auto;">{i18n:admin.selfRegistration.existingUserSignIn}<a href="{loginUrl}">{i18n:page.login.submit.label}</a>.</strong>
 					</div>
 				]]>
 			</blurb>
@@ -54,20 +51,6 @@
 					<button action="Register"/>
 				</item>
 			</row>
-			<!--
-			<row>
-				<item>
-					<spacer/>
-				</item>
-				<item colspan="2">
-					<blurb>
-						<![CDATA[
-							By registering, you agree with our <a href="<insert your terms of use page here>" target="_blank"> Terms of Use</a>.
-						]]>
-					</blurb>
-				</item>
-			</row>
-			 -->
 		</form>
 	</vbox>
 	<actions>

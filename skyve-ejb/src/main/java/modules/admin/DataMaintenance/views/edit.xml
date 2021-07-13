@@ -158,7 +158,7 @@
 						<item>
 							<blurb>
 									<![CDATA[
-										<span style="white-space:pre-wrap"><i>{instructionHint}</i></span>
+										<span style="white-space:pre-wrap"><em>{instructionHint}</em></span>
 									]]>
 								</blurb>
 						</item>

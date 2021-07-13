@@ -24,13 +24,10 @@
 		<column responsiveWidth="6" />
 		<row>
         	<item colspan="3">
-        		<blurb visible="typeJasper">
+        		<blurb visible="typeJasper" escape="false">
         			<![CDATA[
         				<span style="line-height: 1.5">
-	        				Entering Jasper markup is currently not supported, but you are able to link to an 
-	        				existing Jasper report located in your application source directory.<br/>
-	        				Jasper bean reports run from a Report Template need to have an <code>_id</code> 
-	        				parameter defined.
+	        				{i18n:admin.reportTemplate.edit.markupHint} 
         				</span>
         			]]>
         		</blurb>

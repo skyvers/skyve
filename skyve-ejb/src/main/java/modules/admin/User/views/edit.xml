@@ -2,11 +2,11 @@
 <view title="{bizKey}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	
-	<vbox visible="notCanManageDetails">
+	<vbox visible="accessDenied">
 		<component name="_validationAccessDeniedWarning" document="Configuration"/>
 	</vbox>	
 
-	<tabPane visible="canManageDetails">
+	<tabPane visible="notAccessDenied">
 		<tab title="admin.user.profile.tabTitle">
 			<form border="true" percentageWidth="70" responsiveWidth="12">
 				<column percentageWidth="20" responsiveWidth="3" />

@@ -15,7 +15,7 @@
 									<ul>
 										<li role="alert" aria-atomic="true">
 											<span class="ui-messages-warn-detail">
-												It looks like you haven't configured backup retention settings. Backups may not be running.
+												{i18n:admin.configuration.backupRetention.notConfiguredWarning}
 											</span>
 										</li>
 									</ul>

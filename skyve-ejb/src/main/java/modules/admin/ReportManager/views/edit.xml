@@ -7,7 +7,7 @@
 			<item>
 				<blurb>
 	  				<![CDATA[
-	  				<p>Select the Report Configurations to include in your export, or upload a zip of Report Configurations.</p>
+	  				<p>{i18n:admin.reportManager.edit.instruction}</p>
 	  				]]>
 	  			</blurb>
 			</item>

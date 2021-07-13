@@ -56,7 +56,7 @@
 						</item>
 						<item>
 							<blurb>
-								<![CDATA[<i>{totalTagged} records.</i>]]>
+								<![CDATA[<em>{totalTagged} {i18n:admin.systemDashboard.edit.totalTaggedRecordsDescription}</em>]]>
 							</blurb>
 						</item>
 					</row>
@@ -79,7 +79,7 @@
 						</item>
 						<item>
 							<blurb>
-								<![CDATA[<i>{operandTagCount} records.</i>]]>
+								<![CDATA[<em>{operandTagCount} {i18n:admin.systemDashboard.edit.operandTagCountRecordsDescription}</em>]]>
 							</blurb>
 						</item>
 					</row>
@@ -95,7 +95,7 @@
 						</item>
 						<item colspan="2">
 							<blurb>
-								<![CDATA[<i>{combinationExplanation}</i>]]>
+								<![CDATA[<em>{combinationExplanation}</em>]]>
 							</blurb>
 						</item>
 					</row>

@@ -39,8 +39,7 @@
 			<item colspan="4">
 				<blurb>
 					<![CDATA[
-						<span style="font-size: 90%; color: #666666;">Note: for security reasons, the following password 
-						settings must be configured from the application settings file.</span>
+						<span style="font-size: 90%; color: #666666;">{i18n:admin.configuration.general.securityNote}</span>
 					]]>
 				</blurb>
 			</item>
@@ -66,17 +65,31 @@
 	<!-- test email has a different component for desktop and external -->
 	<component name="_testEmail" />
 	<vbox border="true" borderTitle="admin.configuration.edit.general.testEmail.borderTitle" shrinkWrap="height" invisible="emailConfigured">
-		<blurb pixelHeight="20">
-			<![CDATA[<em>Email must be configured before Test Email can be used.</em>]]>
-		</blurb>
+		<form>
+			<column/>
+			<row>
+				<item>
+					<blurb pixelHeight="20">
+						<![CDATA[<em>{admin.configuration.email.notConfiguredWarning}</em>]]>
+					</blurb>
+				</item>
+			</row>
+		</form>
 	</vbox>
 	
 	<!-- password reset has a different component for desktop and external -->
 	<component name="_passwordReset" />
 	<vbox border="true" borderTitle="admin.configuration.edit.general.passwordReset.borderTitle" shrinkWrap="height" invisible="emailConfigured">
-		<blurb pixelHeight="20">
-			<![CDATA[<em>Email must be configured before Password Reset can be customised.</em>]]>
-		</blurb>
+		<form>
+			<column/>
+			<row>
+				<item>
+					<blurb pixelHeight="20">
+						<![CDATA[<em>{admin.configuration.edit.general.passwordReset.emailNotConfigured}</em>]]>
+					</blurb>
+				</item>
+			</row>
+		</form>
 	</vbox>
 	
 	<form border="true" borderTitle="admin.configuration.edit.general.userSelfRegistration.borderTitle">
