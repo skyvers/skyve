@@ -36,10 +36,10 @@
 			</item>
 		</row>
 		<row>
-			<item colspan="4">
+			<item colspan="4" align="centre">
 				<blurb>
 					<![CDATA[
-						<span style="font-size: 90%; color: #666666;">{i18n:admin.configuration.general.securityNote}</span>
+						<span style="color: #666666;">{i18n:admin.configuration.general.securityNote}</span>
 					]]>
 				</blurb>
 			</item>
@@ -93,18 +93,18 @@
 	</vbox>
 	
 	<form border="true" borderTitle="admin.configuration.edit.general.userSelfRegistration.borderTitle">
-		<column responsiveWidth="3"/>
-		<column responsiveWidth="1"/>
-		<column />
-		<column responsiveWidth="3"/>
-		<column responsiveWidth="1"/>
+		<column/>
+		<column/>
+		<column/>
 		<row>
 			<item showLabel="true" label="User Self-Registration Enabled">
-				<blurb>{i18n:startup.accountAllowUserSelfRegistration}</blurb>
+				<blurb>
+					<![CDATA[<em>{startup.accountAllowUserSelfRegistration}</em>]]>
+				</blurb>
 			</item>
 		</row>
 		<row>
-			<item colspan="2">
+			<item>
 				<default binding="userSelfRegistrationGroup" />
 			</item>
 		</row>
