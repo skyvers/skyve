@@ -114,7 +114,6 @@
 			</item>
 		</row>
 	</form>
-	
 	<form border="true" borderTitle="admin.configuration.edit.general.anonymousPublicUser.borderTitle">
 		<column responsiveWidth="3"/>
 		<column />
@@ -125,7 +124,6 @@
 			</item>
 		</row>
 	</form>
-	
 	<form border="true" borderTitle="admin.configuration.edit.general.availableDiskSpaceAlarmLevel.borderTitle">
 		<column responsiveWidth="3"/>
 		<column />
@@ -140,5 +138,4 @@
 			</item>
 		</row>
 	</form>
-	
 </view>
