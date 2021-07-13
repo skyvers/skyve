@@ -350,7 +350,7 @@
 					<column />
 					<row>
 						<item>
-							<blurb><![CDATA[<em>Adding API keys not supported for complex configuration - modify the project configuration directly.</em>]]></blurb>
+							<blurb><![CDATA[<em>{i18n:admin.controlPanel.edit.startupConfiguration.addApiKey.complexConfigurationNotSupportedWarning}</em>]]></blurb>
 						</item>
 					</row>
 				</form>

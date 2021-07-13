@@ -33,7 +33,7 @@
 						</item>
 						<item>
 							<blurb textAlignment="left">
-									<![CDATA[admin.importExport.edit.configureOptions.blurb1]]>
+									<![CDATA[<em>{i18n:admin.importExport.edit.configureOptions.blurb1}</em>]]>
 								</blurb>
 						</item>
 					</row>
@@ -96,7 +96,7 @@
 								<spacer />
 							</item>
 							<item>
-								<blurb><![CDATA[admin.importExport.edit.configureOptions.blurb2]]></blurb>
+								<blurb escape="false"><![CDATA[<strong><em>{importFileName}</em></strong>{i18n:admin.importExport.edit.configureOptions.blurb2}]]></blurb>
 							</item>
 							<item>
 								<button pixelWidth="200" action="ClearImport" />

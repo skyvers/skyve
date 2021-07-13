@@ -274,6 +274,18 @@
 				<![CDATA[isUserInRole("admin","SecurityAdministrator")]]>
 			</expression>
 		</condition>
+		<condition name="owningUser">
+			<description>Whether the current user is this user</description>
+			<expression>
+				<![CDATA[((UserExtension) this).owningUser()]]>
+			</expression>
+		</condition>
+		<condition name="accessDenied">
+			<description>Whether the current user is allowed to manage this user's details</description>
+			<expression>
+				<![CDATA[!isOwningUser() && !isSecurityAdministrator()]]>
+			</expression>
+		</condition>
 		<condition name="designer">
 			<description>Designer</description>
 			<expression>
@@ -305,7 +317,7 @@
 		<condition name="selfRegistrationEnabledAndUserNotActivated" usage="view">
 			<description>True when User Self-Registration is enabled and the User has not been activated.</description>
 			<expression>
-				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && Boolean.FALSE.equals(getActivated())]]>
+				<![CDATA[isSelfRegistrationEnabled() && Boolean.FALSE.equals(getActivated()) && isSecurityAdministrator()]]>
 			</expression>
 		</condition>
 		<condition name="canActivateUser" usage="view">

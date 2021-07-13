@@ -15,7 +15,7 @@
 									<ul>
 										<li role="alert" aria-atomic="true">
 											<span class="ui-messages-warn-detail">
-												It looks like you haven't set up a valid email configuration. You may not be able to send emails.
+												{i18n:admin.configuration.email.notConfiguredWarning}
 											</span>
 										</li>
 									</ul>

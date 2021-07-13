@@ -34,9 +34,7 @@
 				<blurb>
 					<![CDATA[
 						 <span style="line-height: 1.5">
-							 Jasper allows pixel-perfect PDF reports to be created, but requires an IDE plugin or 
-							 Jasper Studio to create and edit.<br/> 
-							 Freemarker is suitable for most reports and can be edited with a standard text editor.
+							 {i18n:admin.reportTemplate.edit.reportTypeHint}
 						 </span>
 					]]>
 				</blurb>

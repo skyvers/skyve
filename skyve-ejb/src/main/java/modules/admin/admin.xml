@@ -115,7 +115,9 @@
 				The role is for a typical office situation where users collaborate within the "Customer" scope on key application areas.
 				
 				For example, shared contact management, common document number serials 
-				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.			
+				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.
+				
+				BasicUser can know of the existence of other users and refer to them, but cannot change their user record.			
 			</documentation>
 			<description>admin.adminRoles.basicUser.description</description>
 			<privileges>

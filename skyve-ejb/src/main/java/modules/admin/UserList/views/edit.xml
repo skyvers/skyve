@@ -12,7 +12,7 @@
 					<column />
 					<row>
 						<item>
-							<blurb>admin.userList.edit.blurb1</blurb>
+							<blurb>{i18n:admin.userList.edit.blurb1}</blurb>
 						</item>
 					</row>
 				</form>
@@ -23,7 +23,7 @@
 					<column />
 					<row>
 						<item>
-							<blurb>admin.userList.edit.blurb2</blurb>
+							<blurb>{i18n:admin.userList.edit.blurb2}</blurb>
 						</item>
 					</row>
 				</form>

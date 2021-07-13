@@ -91,6 +91,7 @@
 	        		<spacer visible="mapTypeGmap" />
 	        	</item>
 	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.mapTypeGmap.obtainGoogleKey}-->
 	        		<blurb visible="mapTypeGmap">
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888; word-wrap: break-word;">
@@ -134,6 +135,7 @@
 	        		<spacer />
 	        	</item>
 	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.recaptcha.seeDevGuide}-->
 	        		<blurb>
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888;">
@@ -161,6 +163,7 @@
 	        		<spacer visible="notSingleTenant" />
 	        	</item>
 	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.selfRegistrationDisabledForMultiTenant}-->
 	        		<blurb visible="notSingleTenant">* Self-registration cannot be enabled for multi-tenant applications. Please specify a customer in your application json file.</blurb>
 	        	</item>
 	        </row>
@@ -169,6 +172,7 @@
 	        		<spacer />
 	        	</item>
 	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.selfRegistrationRequiresEmailConfiguration}-->
 	        		<blurb>
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888;">

@@ -46,7 +46,7 @@
 					</item>
 					<item colspan="3">
 						<blurb>	
-							<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document, or the user who runs the communication.</i></font>]]>
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.sendTo.hint}</em></font>]]>
 						</blurb>
 					</item>
 				</row>
@@ -66,7 +66,7 @@
 					</item>
 					<item colspan="3">
 						<blurb visible="emailType">	
-							<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.emailType.hint}</em></font>]]>
 						</blurb>
 					</item>
 				</row>
@@ -81,8 +81,7 @@
 					</item>
 					<item colspan="3">
 						<blurb>	
-							<![CDATA[<font color="green"><i>Email body can use bindings relative to the selected module document.
-							For images, either include a link to the image, or paste the encoded image into the Source view.</i></font>]]>
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.body.hint}</em></font>]]>
 						</blurb>
 					</item>
 				</row>
