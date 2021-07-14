@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence.hibernate;
 
+import java.sql.ResultSet;
 import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.List;
 import javax.persistence.QueryTimeoutException;
 
 import org.hibernate.query.NativeQuery;
+import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
 import org.hibernate.type.BigDecimalType;
 import org.hibernate.type.BooleanType;
@@ -30,7 +32,10 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.persistence.AbstractSQL;
+import org.skyve.impl.persistence.DynaIterable;
+import org.skyve.impl.persistence.NamedParameterPreparedStatement;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
@@ -180,6 +185,44 @@ class HibernateSQL extends AbstractSQL {
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
+		}
+	}
+
+	@Override
+	public List<DynaBean> dynaResults() {
+		try {
+			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(persistence.getConnection(), toQueryString())) {
+				prepareStatement(ps, UtilImpl.DATA_STORE, AbstractHibernatePersistence.getDialect());
+				try (ResultSet rs = ps.executeQuery()) {
+					return dynaList(rs);
+				}
+			}
+		}
+		catch (TimeoutException e) {
+			throw e;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+
+	@Override
+	@SuppressWarnings("resource")
+	public AutoClosingIterable<DynaBean> dynaIterable() {
+		try {
+			return new DynaIterable(persistence.getConnection(), this, UtilImpl.DATA_STORE, AbstractHibernatePersistence.getDialect());
+		}
+		catch (TimeoutException e) {
+			throw e;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
 		}
 	}
 

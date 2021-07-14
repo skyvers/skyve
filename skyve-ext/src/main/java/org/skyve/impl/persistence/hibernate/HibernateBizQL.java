@@ -7,8 +7,6 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractBizQL;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.HibernateQueryDelegate;
 
 public class HibernateBizQL extends AbstractBizQL {
 	private HibernateQueryDelegate delegate;

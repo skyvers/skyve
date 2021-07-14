@@ -1,5 +1,8 @@
 package org.skyve.persistence;
 
+import java.util.List;
+
+import org.apache.commons.beanutils.DynaBean;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -30,4 +33,9 @@ public interface SQL extends BeanQuery, ScalarQuery, TupleQuery, DMLQuery {
 	
 	public int getTimeoutInSeconds();
 	public void setTimeoutInSeconds(int timeoutInSeconds);
+	
+	public List<DynaBean> dynaResults();
+	public DynaBean dynaResult();
+	public DynaBean retrieveDyna();
+	public AutoClosingIterable<DynaBean> dynaIterable();
 }

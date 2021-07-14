@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.OptimisticLockException;
@@ -18,8 +20,10 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
@@ -950,5 +954,39 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		Polygon poly = new GeometryFactory().createPolygon(new Coordinate[] {new Coordinate(-180, -360), new Coordinate(-180, 360), new Coordinate(180, 360), new Coordinate(180, -360), new Coordinate(-180, -360)});
 		q.getFilter().addContains(AllAttributesPersistent.geometryPropertyName, poly);
 		q.beanResults();
+	}
+
+	@Test
+	public void testSQLDyna() throws Exception {
+		String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
+		p.newSQL("delete from " + persistentIdentifier).execute();
+		
+		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
+		aap = p.save(aap);
+		aap = Util.constructRandomInstance(u, m, aapd, 1);
+		aap = p.save(aap);
+		aap = Util.constructRandomInstance(u, m, aapd, 1);
+		aap = p.save(aap);
+
+		DynaBean bean = p.newSQL("select bizId from " + persistentIdentifier).dynaResult();
+		Assert.assertNotNull("bizId should not be null", Binder.get(bean, Bean.DOCUMENT_ID.toLowerCase()));
+
+		List<DynaBean> beans = p.newSQL("select bizId from " + persistentIdentifier).dynaResults();
+		Assert.assertNotEquals("Requires some data", 0, beans.size());
+		for (DynaBean thisBean : beans) {
+			Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+		}
+
+		try (AutoClosingIterable<DynaBean> i = p.newSQL("select bizId from " + persistentIdentifier).dynaIterable()) {
+			boolean exists = false;
+			for (DynaBean thisBean : i) {
+				Assert.assertNotNull("bizId should not be null", Binder.get(thisBean, Bean.DOCUMENT_ID.toLowerCase()));
+				exists = true;
+			}
+			Assert.assertTrue("Requires some data", exists);
+		}
+
+		beans = p.newSQL("select bizId from " + persistentIdentifier + " where bizId = :bizId").putParameter(Bean.DOCUMENT_ID, "test", false).dynaResults();
+		Assert.assertEquals("Should be no matches", 0, beans.size());
 	}
 }

@@ -50,6 +50,7 @@ class HibernateQueryDelegate {
 		drivingDocumentName = query.getDrivingDocumentName();
 		
 
+		@SuppressWarnings("resource")
 		Query<T> result = persistence.getSession().createQuery(queryString);
 		if (firstResult >= 0) {
 			result.setFirstResult(firstResult);
@@ -186,6 +187,7 @@ class HibernateQueryDelegate {
 	
 	int execute(AbstractQuery query) {
 		try {
+			@SuppressWarnings("resource")
 			Query<?> hibernateQuery = persistence.getSession().createQuery(query.toQueryString());
 	
 			timeoutQuery(hibernateQuery, query.getTimeoutInSeconds(), persistence.isAsyncThread());

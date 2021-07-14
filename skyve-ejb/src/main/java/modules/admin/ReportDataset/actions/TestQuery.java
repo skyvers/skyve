@@ -2,7 +2,6 @@ package modules.admin.ReportDataset.actions;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +25,7 @@ import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.BizQL;
+import org.skyve.persistence.SQL;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,6 @@ import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
-import services.report.SqlQueryUtil;
 
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
@@ -92,30 +91,28 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 		} else if (DatasetType.SQL == bean.getDatasetType()) {
 			StringBuilder queryResults = new StringBuilder(5120);
 			try {
-				Map<String, Object> sqlParams = new HashMap<>();
+				final SQL sql = CORE.getPersistence().newSQL(bean.getQuery());
 
 				for (ReportParameterExtension param : bean.getParent().getParameters()) {
 					if (bean.containsParameter(param)) {
 						switch (param.getType()) {
 							case date:
-								sqlParams.put(param.getName(), param.getDateTestValue());
+								sql.putParameter(param.getName(), param.getDateTestValue());
 								break;
 							case integer:
-								sqlParams.put(param.getName(),
+								sql.putParameter(param.getName(),
 										(param.getNumericalTestValue() == null ? null : Integer.valueOf(param.getNumericalTestValue().intValue())));
 								break;
 							case longInteger:
-								sqlParams.put(param.getName(), param.getNumericalTestValue());
+								sql.putParameter(param.getName(), param.getNumericalTestValue());
 								break;
 							default:
-								sqlParams.put(param.getName(), param.getTextTestValue());
+								sql.putParameter(param.getName(), param.getTextTestValue(), false);
 						}
 					}
 				}
 
-				ReportParameterExtension.logParameterValues(sqlParams);
-
-				List<DynaBean> results = SqlQueryUtil.retrieveDynamicResults(bean.getQuery(), sqlParams);
+				List<DynaBean> results = sql.dynaResults();
 				LOG.info("Returned {} results", Integer.valueOf(results.size()));
 
 				for (DynaBean result : results) {
@@ -133,7 +130,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 				if (reportClass != null) {
 					BeanReportDataset dataset = CDI.current().select(reportClass).get();
 					StringBuilder queryResults = new StringBuilder(5120);
-					List<? extends ReportParameter> parameters = (List<? extends ReportParameter>) bean.getParent().getParameters();
+					List<? extends ReportParameter> parameters = bean.getParent().getParameters();
 
 					for (DynaBean result : dataset.getResults(parameters)) {
 						if (result instanceof DynaClass) {

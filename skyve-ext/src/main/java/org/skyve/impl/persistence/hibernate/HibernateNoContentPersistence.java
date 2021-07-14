@@ -2,7 +2,6 @@ package org.skyve.impl.persistence.hibernate;
 
 import org.skyve.content.BeanContent;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 
 public class HibernateNoContentPersistence extends AbstractHibernatePersistence {
 	private static final long serialVersionUID = 2357146148341285353L;
