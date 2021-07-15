@@ -1344,6 +1344,25 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * Whether the current user is allowed to manage this user's details
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isAccessDenied() {
+		return (!isOwningUser() && !isSecurityAdministrator());
+	}
+
+	/**
+	 * {@link #isAccessDenied} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotAccessDenied() {
+		return (! isAccessDenied());
+	}
+
+	/**
 	 * Allows administrators to manually activate users when User Self-Registration is enabled.
 	 *
 	 * @return The condition
@@ -1517,6 +1536,25 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * Whether the current user is this user
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isOwningUser() {
+		return (((UserExtension) this).owningUser());
+	}
+
+	/**
+	 * {@link #isOwningUser} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotOwningUser() {
+		return (! isOwningUser());
+	}
+
+	/**
 	 * Security Administrator
 	 *
 	 * @return The condition
@@ -1561,7 +1599,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	@XmlTransient
 	public boolean isSelfRegistrationEnabledAndUserNotActivated() {
-		return (org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && Boolean.FALSE.equals(getActivated()));
+		return (isSelfRegistrationEnabled() && Boolean.FALSE.equals(getActivated()) && isSecurityAdministrator());
 	}
 
 	/**

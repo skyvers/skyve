@@ -42,4 +42,8 @@ public class CommunicationExtension extends Communication {
 		return CORE.getDateFormat(BATCH_FORMAT).format(batchDateTime);
 	}
 
+	@Override
+	public void setTemplate(org.skyve.domain.app.admin.CommunicationTemplate template) {
+		setTemplate((modules.admin.domain.CommunicationTemplate) template);
+	}
 }

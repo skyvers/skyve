@@ -208,7 +208,7 @@ public interface Communication extends PersistentBean {
 	void setSendToOverride(String sendToOverride);
 	void setCcTo(String ccTo);
 	void setCcToOverride(String ccToOverride);
-	void setMonitorBcc(String monitorBcc);
+	void setMonitorBcc(Boolean monitorBcc);
 	void setSubject(String subject);
 	void setBody(String body);
 	void setResults(String results);
@@ -226,5 +226,4 @@ public interface Communication extends PersistentBean {
 	void setCalendarEndTime(DateTime calendarEndTime);
 	void setCalendarDescriptionExpression(String calendarDescriptionExpression);
 	void setTemplate(CommunicationTemplate communicationTemplate);
-	
 }
