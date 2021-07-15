@@ -97,11 +97,7 @@ public class PerformDocumentActionForTagJob extends Job {
 								pb = (PersistentBean) result.getBean();
 							}
 						}
-						// remove successfully validated beans
-						if (Boolean.TRUE.equals(tag.getUnTagSuccessful())) {
-							tm.untag(tag.getBizId(), pb);
-						}
-
+						
 						if (TagDefaultAction.tagDelete.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							// remove from tag and delete
 							tm.untag(tag.getBizId(), pb);
@@ -112,6 +108,11 @@ public class PerformDocumentActionForTagJob extends Job {
 							pers.upsertBeanTuple(pb);
 						} else {
 							pers.save(pb);
+						}
+						
+						// untag successfully processed beans
+						if (Boolean.TRUE.equals(tag.getUnTagSuccessful())) {
+							tm.untag(tag.getBizId(), pb);
 						}
 						
 						pers.commit(false);
