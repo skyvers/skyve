@@ -41,11 +41,11 @@
 		</memo>
 	</attributes>
 	<conditions>
-		<condition name="typeQuery" usage="view">
-			<description>True when the dataset type is a BizQL or SQL, used to show the parameters datagrid</description>
+		<condition name="typeClass" usage="view">
+			<description>True when the dataset type is a class, used to hide the results ouput</description>
 			<expression>
 				<![CDATA[
-					DatasetType.bizQL == getDatasetType() || DatasetType.SQL == getDatasetType()
+					DatasetType.classValue == getDatasetType()
 				]]>
 			</expression>
 		</condition>
@@ -57,11 +57,19 @@
 				]]>
 			</expression>
 		</condition>
-		<condition name="typeClass" usage="view">
-			<description>True when the dataset type is a class, used to hide the results ouput</description>
+		<condition name="typeQuery" usage="view">
+			<description>True when the dataset type is a BizQL or SQL, used to show the parameters datagrid</description>
 			<expression>
 				<![CDATA[
-					DatasetType.classValue == getDatasetType()
+					DatasetType.bizQL == getDatasetType() || DatasetType.SQL == getDatasetType()
+				]]>
+			</expression>
+		</condition>
+		<condition name="typeSqlQuery" usage="view">
+			<description>True when the dataset type is SQL, used to show help to the user</description>
+			<expression>
+				<![CDATA[
+					DatasetType.SQL == getDatasetType()
 				]]>
 			</expression>
 		</condition>

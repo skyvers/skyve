@@ -249,6 +249,25 @@ public abstract class ReportDataset extends AbstractPersistentBean implements Ch
 		return (! isTypeQuery());
 	}
 
+	/**
+	 * True when the dataset type is SQL, used to show help to the user
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isTypeSqlQuery() {
+		return (DatasetType.SQL == getDatasetType());
+	}
+
+	/**
+	 * {@link #isTypeSqlQuery} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotTypeSqlQuery() {
+		return (! isTypeSqlQuery());
+	}
+
 	@Override
 	public ReportTemplateExtension getParent() {
 		return parent;

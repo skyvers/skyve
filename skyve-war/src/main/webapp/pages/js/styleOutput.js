@@ -4,57 +4,47 @@
  * 
  * @param scVar The smart client variable assigned to the form containing the input textArea, e.g. 'v1'
  * @param binding The binding of the input textArea, e.g. 'template'
- * @param outputElementSelector The CSS selector to the output element, e.g. '#output'
+ * @param languageMimeType The syntax highlighting language mime type, e.g. 'text/html'
  * 
- * @see https://www.horuskol.net/blog/2020-03-05/live-code-highlighting-in-the-browser-with-vanilla-javascript/
- * @see https://github.com/highlightjs/highlight.js/blob/master/LICENSE
+ * @see https://codemirror.net/LICENSE
  */
-function styleOutput(scVar, binding, outputElementSelector) {
-	SKYVE.Util.loadCSS('pages/css/report-style.css?v=' + SKYVE.Util.v, function() {
-		SKYVE.Util.loadCSS('pages/css/highlight-9.18.1-vs2015.css?v=' + SKYVE.Util.v, function() {
-			SKYVE.Util.loadJS('pages/js/highlight.pack-9.18.1.js?v=' + SKYVE.Util.v, function() {
-				var templateId = null;
-				if(scVar.items) {
-					for(var i=0, l=scVar.items.length; i < l; i++) {
-						var item = scVar.items[i];
-						if(item.name === binding) {
-							// grab the SC id for this field
-							// console.log('item', item);
-							if(item['$14y']) {
-								templateId = item['$14y'];
-							}
-							break;
-						}
-					}
-				}
-				
-				if(templateId !== null) {
-					var el = document.querySelector('#'+templateId);
-					// console.log('#'+templateId, el);
-					if(el) {
-						el.className = el.className + " input";
-						el.setAttribute("aria-controls", "code-highlighter");
-						el.setAttribute("autocapitalize", "off");
-						el.setAttribute("spellcheck", "false");
-						
-						const codeInput = el;
-						const codeOutput = document.querySelector(outputElementSelector);
-						
-						// initialise the highlighted output with whatever is in the input
-						codeOutput.textContent = codeInput.value;
-						hljs.highlightBlock(codeOutput);
-						
-						codeInput.addEventListener('input', (event) => {
-						  codeOutput.textContent = codeInput.value;
-						  hljs.highlightBlock(codeOutput);
+ function styleOutput(scVar, binding, languageMimeType) {
+	SKYVE.Util.loadCSS('pages/css/cm/codemirror.css?v=' + SKYVE.Util.v, function() {
+		SKYVE.Util.loadCSS('pages/css/cm/base16-dark.css?v=' + SKYVE.Util.v, function() {
+			SKYVE.Util.loadJS('pages/js/cm/codemirror.js?v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('pages/js/cm/css/css.js?v=' + SKYVE.Util.v, function() {
+					SKYVE.Util.loadJS('pages/js/cm/htmlmixed/htmlmixed.js?v=' + SKYVE.Util.v, function() {
+						SKYVE.Util.loadJS('pages/js/cm/sql/sql.js?v=' + SKYVE.Util.v, function() {
+							SKYVE.Util.loadJS('pages/js/cm/xml/xml.js?v=' + SKYVE.Util.v, function() {
+								var templates = document.getElementsByName(binding);
+								var templateElement = undefined;
+
+								if(templates && templates.length > 0 
+										&& "textarea" === templates[0].nodeName.toLowerCase()) {
+									templateElement = templates[0];
+								}
+								
+								if(templateElement) {
+									// console.log('templateElement', templateElement.id);
+									templateElement.setAttribute("autocapitalize", "off");
+									templateElement.setAttribute("spellcheck", "false");
+
+									// codemirror configuration
+									var editor = CodeMirror.fromTextArea(templateElement, {
+										mode: languageMimeType,
+										lineNumbers: true,
+										theme: "base16-dark"
+									});
+									editor.setSize(600, null);
+
+									editor.on('change', () => {
+										editor.save();
+									});
+								}
+							});
 						});
-						
-						codeInput.addEventListener('scroll', (event) => {
-						  codeOutput.scrollTop = codeInput.scrollTop;
-						  codeOutput.scrollLeft = codeInput.scrollLeft;
-						});
-					}
-				}
+					});
+				});
 			});
 		});
 	});
