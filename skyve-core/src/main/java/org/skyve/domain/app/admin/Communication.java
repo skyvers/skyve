@@ -199,13 +199,31 @@ public interface Communication extends PersistentBean {
 	Tag getTag();
 	ActionType getActionType();
 	
+	void setActionType(ActionType actionType);
 	void setDescription(String description);
 	void setFormatType(FormatType formatType);
 	void setSystemUse(Boolean systemUse);
 	void setSendFrom(String sendFrom);
 	void setSendTo(String sendTo);
+	void setSendToOverride(String sendToOverride);
 	void setCcTo(String ccTo);
+	void setCcToOverride(String ccToOverride);
+	void setMonitorBcc(Boolean monitorBcc);
 	void setSubject(String subject);
 	void setBody(String body);
 	void setResults(String results);
+	void setAttachment1(String attachment1);
+	void setAttachmentFileName1(String attachmentFileName1);
+	void setAttachment2(String attachment2);
+	void setAttachmentFileName2(String attachmentFileName2);
+	void setAttachment3(String attachment3);
+	void setAttachmentFileName3(String attachmentFileName3);
+	void setUnsubscribeUrl(String unsubscribeUrl);
+	
+	void setIncludeCalendar(Boolean includeCalendar);
+	void setCalendarTitleExpression(String calendarTitleExpression);
+	void setCalendarStartTime(DateTime calendarStartTime);
+	void setCalendarEndTime(DateTime calendarEndTime);
+	void setCalendarDescriptionExpression(String calendarDescriptionExpression);
+	void setTemplate(CommunicationTemplate communicationTemplate);
 }
