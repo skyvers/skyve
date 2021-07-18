@@ -40,6 +40,18 @@ public class ContentGarbageCollectionJob implements Job {
 			try {
 				try (ContentManager cm = EXT.newContentManager()) {
 					for (SearchResult result : cm.all()) {
+						// Protect against unbounded GC operations
+						if (result.isAttachment()) {
+							if (orphanedAttachmentContentIds.size() > 10000) {
+								continue; // can't break here as we need to ensure the iterable is closed
+							}
+						}
+						else {
+							if (orphanedBeanBizIds.size() > 10000) {
+								continue; // can't break here as we need to ensure the iterable is closed
+							}
+						}
+						
 						try { // don't stop trying to detect removed content
 							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: FOUND customer=" + result.getCustomerName() + 
 																				" : module=" + result.getModuleName() + 
@@ -102,6 +114,7 @@ public class ContentGarbageCollectionJob implements Job {
 							if (UtilImpl.CONTENT_TRACE) Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
+					orphanedAttachmentContentIds.clear();
 
 					for (String bizId : orphanedBeanBizIds) {
 						try { // don't stop trying to remove content
@@ -113,6 +126,7 @@ public class ContentGarbageCollectionJob implements Job {
 							if (UtilImpl.CONTENT_TRACE) Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
+					orphanedBeanBizIds.clear();
 				}
 			}
 			finally {
