@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
@@ -84,22 +85,22 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 
 	@Override
-	public String getStringFieldValue(int index, boolean blankAsNull) throws Exception {
+	public String getStringFieldValue(int index, boolean blankAsNull) {
 		return getStringValueFromCell(index, blankAsNull);
 	}
 
 	@Override
-	public Date getDateFieldValue(int index) throws Exception {
+	public Date getDateFieldValue(int index) {
 		return getDateValueFromCell(index);
 	}
 
 	@Override
-	public Double getNumericFieldValue(int index, boolean emptyAsZero) throws Exception {
+	public Double getNumericFieldValue(int index, boolean emptyAsZero) {
 		return getNumericValueFromCell(index, emptyAsZero);
 	}
 
 	@Override
-	public void nextData() throws Exception {
+	public void nextData() {
 		// handle first call
 		if (rowLoaded) {
 			++dataIndex;
@@ -109,13 +110,13 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public boolean hasNextData() throws Exception {
+	public boolean hasNextData() {
 		// POI appears to always find next rows
 		return true;
 	}
 
 	@Override
-	public boolean isNoData() throws Exception {
+	public boolean isNoData() {
 		if (row == null) {
 			return true;
 		}
@@ -138,7 +139,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public String getWhere(int index) throws Exception {
+	public String getWhere(int index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Sheet ").append(sheet.getSheetName());
 		where.append(" Row ").append((dataIndex + 1));
@@ -154,7 +155,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return the numeric value
 	 */
-	private Double getNumericValueFromCell(int col, boolean emptyAsZero) throws Exception {
+	private Double getNumericValueFromCell(int col, boolean emptyAsZero) {
 		Double result = Double.valueOf(0);
 
 		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
@@ -184,7 +185,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 			}
-			throw new Exception("The " + getPOICellTypeDescription(cell) + " value '" + raw + "' is not numeric.");
+			throw new DomainException("The " + getPOICellTypeDescription(cell) + " value '" + raw + "' is not numeric.");
 		}
 
 		return result;
@@ -197,7 +198,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return The String Value of the cell
 	 */
-	private String getStringValueFromCell(int col, boolean blankAsNull) throws Exception {
+	private String getStringValueFromCell(int col, boolean blankAsNull) {
 		String result = null;
 
 		if (row != null) {
@@ -251,7 +252,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return The Date Value of the cell
 	 */
-	private Date getDateValueFromCell(int col) throws Exception {
+	private Date getDateValueFromCell(int col) {
 		Date result = null;
 		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		try {
@@ -273,7 +274,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				if(converter!=null){
 					problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
 				}
-				throw new Exception(problem.toString());
+				throw new DomainException(problem.toString());
 			}
 		}
 

@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
@@ -143,8 +144,10 @@ public abstract class AbstractDataFileLoader {
 
 	protected List<DataFileField> fields; // maintain order
 
-	public AbstractDataFileLoader(LoaderActivityType activityType, UploadException exception,
-			String moduleName, String documentName) throws Exception {
+	public AbstractDataFileLoader(LoaderActivityType activityType,
+									UploadException exception,
+									String moduleName,
+									String documentName) {
 		this.activityType = activityType;
 		this.exception = exception;
 
@@ -223,9 +226,8 @@ public abstract class AbstractDataFileLoader {
 	 * Add a field to the list of expected fields, constructed from the supplied binding
 	 * 
 	 * @param binding
-	 * @throws Exception
 	 */
-	public void addField(String binding) throws Exception {
+	public void addField(String binding) {
 		String fixedBinding = binding;
 		if (binding != null && binding.startsWith("{") && binding.endsWith("}")) {
 			fixedBinding = binding.substring(1, binding.length() - 1);
@@ -238,9 +240,8 @@ public abstract class AbstractDataFileLoader {
 	 * Add a field to the list of expected fields
 	 * 
 	 * @param dff
-	 * @throws Exception
 	 */
-	public void addField(DataFileField field) throws Exception {
+	public void addField(DataFileField field) {
 		if (field.getIndex() == null) {
 			field.setIndex(fields.size());
 		}
@@ -256,12 +257,12 @@ public abstract class AbstractDataFileLoader {
 	 * @param required
 	 * @param converter
 	 */
-	public void addField(String binding, LoadAction loadAction, boolean required, Converter<?> converter) throws Exception {
+	public void addField(String binding, LoadAction loadAction, boolean required, Converter<?> converter) {
 		DataFileField field = new DataFileField(binding, loadAction, required, fields.size(), converter);
 		fields.add(finaliseField(field));
 	}
 
-	private DataFileField finaliseField(DataFileField field) throws Exception {
+	private DataFileField finaliseField(DataFileField field) {
 		if (field.getBinding() != null) {
 			// default inferred load action
 			if (field.getBinding().indexOf('.') > 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
@@ -317,7 +318,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param bindings
 	 */
-	public void addFields(String... bindings) throws Exception {
+	public void addFields(String... bindings) {
 
 		for (String binding : bindings) {
 			addField(binding);
@@ -349,9 +350,8 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param moduleName
 	 * @param documentName
-	 * @throws Exception
 	 */
-	public void setDocumentContext(String moduleName, String documentName) throws Exception {
+	public void setDocumentContext(String moduleName, String documentName) {
 		this.moduleName = moduleName;
 		module = customer.getModule(moduleName);
 		this.documentName = documentName;
@@ -362,24 +362,20 @@ public abstract class AbstractDataFileLoader {
 	 * Whether the file has another data or row to load
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	abstract boolean hasNextData() throws Exception;
+	abstract boolean hasNextData();
 
 	/**
 	 * Retrieves or moves to the next data or row
-	 * 
-	 * @throws Exception
 	 */
-	abstract void nextData() throws Exception;
+	abstract void nextData();
 
 	/**
 	 * If the data or row has no values to process
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	abstract boolean isNoData() throws Exception;
+	abstract boolean isNoData();
 
 	/**
 	 * Get a string value from the field at index
@@ -387,9 +383,8 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @param emptyAsNull
 	 * @return
-	 * @throws Exception
 	 */
-	abstract String getStringFieldValue(int index, boolean emptyAsNull) throws Exception;
+	abstract String getStringFieldValue(int index, boolean emptyAsNull);
 
 	/**
 	 * Get a numeric value from the field at index
@@ -397,27 +392,24 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @param emptyAsZero
 	 * @return
-	 * @throws Exception
 	 */
-	abstract Double getNumericFieldValue(int index, boolean emptyAsZero) throws Exception;
+	abstract Double getNumericFieldValue(int index, boolean emptyAsZero);
 
 	/**
 	 * Get a date value from the field at index
 	 * 
 	 * @param index
 	 * @return
-	 * @throws Exception
 	 */
-	abstract Date getDateFieldValue(int index) throws Exception;
+	abstract Date getDateFieldValue(int index);
 
 	/**
 	 * Describes the value location
 	 * 
 	 * @param fieldIndex
 	 * @return
-	 * @throws Exception
 	 */
-	private String getWhere(Integer index) throws Exception {
+	private String getWhere(Integer index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Row ").append((dataIndex + 1));
 		if (index != null) {
@@ -432,9 +424,8 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @param index
 	 * @return
-	 * @throws Exception
 	 */
-	public String getWhere(int index) throws Exception {
+	public String getWhere(int index) {
 		return getWhere(Integer.valueOf(index));
 	}
 
@@ -442,9 +433,8 @@ public abstract class AbstractDataFileLoader {
 	 * Describes the value location
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	public String getWhere() throws Exception {
+	public String getWhere() {
 		return getWhere(null);
 	}
 
@@ -452,9 +442,8 @@ public abstract class AbstractDataFileLoader {
 	 * Provide a specific debug of the fields parsed in the current data or row
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	public String debugData() throws Exception {
+	public String debugData() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Row ").append(dataIndex);
 		if (!isNoData()) {
@@ -475,9 +464,8 @@ public abstract class AbstractDataFileLoader {
 	 * @param field
 	 * @param loadValue
 	 * @return
-	 * @throws Exception
 	 */
-	public void lookupBean(Bean contextBean, DataFileField field, Object loadValue, StringBuilder what) throws Exception {
+	public void lookupBean(Bean contextBean, DataFileField field, Object loadValue, StringBuilder what) {
 
 		if (loadValue != null) {
 
@@ -541,7 +529,7 @@ public abstract class AbstractDataFileLoader {
 						what.append("The value '").append(loadValue).append("'");
 						what.append(" doesn't match the existing value of '").append(resultValue).append("'.");
 
-						throw new Exception(what.toString());
+						throw new DomainException(what.toString());
 					}
 				} else {
 					// for FIND OR CREATE_FIND, if the bean is found - set the reference
@@ -585,7 +573,7 @@ public abstract class AbstractDataFileLoader {
 				what.append(" '").append(loadValue.toString()).append("'");
 				what.append(" doesn't match any existing ").append(drivingDoc.getLocalisedPluralAlias()).append(".");
 
-				throw new Exception(what.toString());
+				throw new DomainException(what.toString());
 			}
 		}
 	}
@@ -599,10 +587,8 @@ public abstract class AbstractDataFileLoader {
 	 * If the load activity is create, the bean will be a new bean constructed using the values encountered.
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Bean> T beanResult() throws Exception {
+	public <T extends Bean> T beanResult() {
 
 		if (debugMode) {
 			Util.LOGGER.info(debugData());
@@ -610,16 +596,21 @@ public abstract class AbstractDataFileLoader {
 
 		// assume no values loaded
 		if (document == null) {
-			throw new Exception("The loader has not been initialised correctly - check that you set the document context for the loader.");
+			throw new IllegalStateException("The loader has not been initialised correctly - check that you set the document context for the loader.");
 		}
 
 		// for general find
 		DocumentQuery qFind = pers.newDocumentQuery(moduleName, documentName);
 
 		Object operand = null;
-		Bean result = null;
+		T result = null;
 		if (LoaderActivityType.CREATE_ALL.equals(activityType) || LoaderActivityType.CREATE_FIND.equals(activityType)) {
-			result = document.newInstance(user);
+			try {
+				result = document.newInstance(user);
+			}
+			catch (Exception e) {
+				throw new DomainException("Cannot create a new instance of " + documentName, e);
+			}
 		}
 		StringBuilder what = new StringBuilder(64);
 		StringBuilder debugFilter = new StringBuilder(64);
@@ -953,19 +944,15 @@ public abstract class AbstractDataFileLoader {
 			}
 		}
 
-		return (T) result;
-
+		return result;
 	}
 
 	/**
 	 * Returns a list of beans corresponding to the values encountered in the file
 	 * 
 	 * @return
-	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Bean> List<T> beanResults() throws Exception {
-
+	public <T extends Bean> List<T> beanResults() {
 		while (hasNextData()) {
 			nextData();
 			if (isNoData()) {
@@ -975,7 +962,7 @@ public abstract class AbstractDataFileLoader {
 				break;
 			}
 
-			Bean result = beanResult();
+			T result = beanResult();
 			if (result == null) {
 				if (debugMode) {
 					Util.LOGGER.info(getWhere() + " Null bean result after load. ");
@@ -993,6 +980,8 @@ public abstract class AbstractDataFileLoader {
 			exception.addWarning(prob);
 		}
 
-		return (List<T>) results;
+		@SuppressWarnings("unchecked")
+		List<T> result = (List<T>) results;
+		return result;
 	}
 }

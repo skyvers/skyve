@@ -131,7 +131,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 
 	@Override
 	public void materialise() {
-		workbook = ooxmlFormat ? new XSSFWorkbook() : new HSSFWorkbook();
+		Workbook newWorkbook = ooxmlFormat ? new XSSFWorkbook() : new HSSFWorkbook();
+		workbook = newWorkbook;
 
 		setupWorkbookInfrastructure();
 
@@ -239,14 +240,15 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @throws Exception
 	 */
 	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) throws Exception {
-
+		@SuppressWarnings("resource")
+		XSSFWorkbook workbook = sheet.getWorkbook();
 
 		//microsoft counts from 1 not 0 - so offset rows and columns by 1 to be consistent when inspecting the resulting sheet
-		XSSFCellStyle style = sheet.getWorkbook().createCellStyle();
+		XSSFCellStyle style = workbook.createCellStyle();
 		style.setBorderTop(BorderStyle.DOUBLE); // double lines border
 		style.setBorderBottom(BorderStyle.THIN); // single line border
 
-		XSSFFont font = sheet.getWorkbook().createFont();
+		XSSFFont font = workbook.createFont();
 		font.setFontHeightInPoints((short) 15);
 		font.setBold(true);
 		style.setFont(font);
@@ -280,8 +282,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 			case NUMERIC:
 			default:
 				if (value instanceof Date) {
-					CellStyle cellStyle = sheet.getWorkbook().createCellStyle();
-					CreationHelper createHelper = sheet.getWorkbook().getCreationHelper();
+					CellStyle cellStyle = workbook.createCellStyle();
+					CreationHelper createHelper = workbook.getCreationHelper();
 					if(value instanceof DateOnly) {
 						cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yyyy"));
 					} else {
