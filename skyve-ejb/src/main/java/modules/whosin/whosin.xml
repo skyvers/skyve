@@ -9,6 +9,7 @@
 	<documents>
 		<document ref="Office" />
 		<document ref="Staff" defaultQueryName="qStaff"/>
+		<document ref="StaffQualification"/>
 		<document ref="MyStatus" />
 
 		<document ref="Contact" moduleRef="admin" />
@@ -19,7 +20,10 @@
 			<description>Manages offices and staff.</description>
 			<privileges>
 				<document name="Office" permission="CRUDC" />
-				<document name="Staff" permission="CRUDC" />
+				<document name="Staff" permission="CRUDC" >
+					<action name="UploadQualifications"/>
+				</document>
+				<document name="StaffQualification" permission="CRUDC" />
 				<document name="MyStatus" permission="_____" />
 			</privileges>
 		</role>
@@ -27,7 +31,10 @@
 			<description>A staff member.</description>
 			<privileges>
 				<document name="Office" permission="_R__C" />
-				<document name="Staff" permission="_RU_C" />
+				<document name="Staff" permission="_RU_C" >
+					<action name="UploadQualifications"/>
+				</document>
+				<document name="StaffQualification" permission="CRUDC" />
 				<document name="MyStatus" permission="_____" >
 					<action name="UpdateMyStatus"/>
 				</document>				

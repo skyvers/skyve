@@ -19,6 +19,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
@@ -38,6 +39,7 @@ import org.skyve.persistence.Persistence;
 			A filter parameter is used in the view to ensure a Staff member can't be assigned as reporting to themselves.
  * 
  * @depend - - - Status
+ * @navcomposed 1 qualifications 0..n StaffQualification
  * @navhas n contact 0..1 Contact
  * @navhas n baseOffice 0..1 Office
  * @navhas n reportsTo 0..1 Staff
@@ -87,6 +89,9 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 
 	/** @hidden */
 	public static final String reportsToPropertyName = "reportsTo";
+
+	/** @hidden */
+	public static final String qualificationsPropertyName = "qualifications";
 
 	/**
 	 * Status
@@ -224,6 +229,11 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * Reports To
 	 **/
 	private Staff reportsTo = null;
+
+	/**
+	 * Qualifications
+	 **/
+	private List<StaffQualification> qualifications = new ChangeTrackingArrayList<>("qualifications", this);
 
 	private String bizParentId;
 
@@ -457,6 +467,73 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 			preset(reportsToPropertyName, reportsTo);
 			this.reportsTo = reportsTo;
 		}
+	}
+
+	/**
+	 * {@link #qualifications} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<StaffQualification> getQualifications() {
+		return qualifications;
+	}
+
+	/**
+	 * {@link #qualifications} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public StaffQualification getQualificationsElementById(String bizId) {
+		return getElementById(qualifications, bizId);
+	}
+
+	/**
+	 * {@link #qualifications} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setQualificationsElementById(String bizId, StaffQualification element) {
+		setElementById(qualifications, element);
+	}
+
+	/**
+	 * {@link #qualifications} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addQualificationsElement(StaffQualification element) {
+		boolean result = qualifications.add(element);
+		element.setParent(this);
+		return result;
+	}
+
+	/**
+	 * {@link #qualifications} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addQualificationsElement(int index, StaffQualification element) {
+		qualifications.add(index, element);
+		element.setParent(this);
+	}
+
+	/**
+	 * {@link #qualifications} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeQualificationsElement(StaffQualification element) {
+		boolean result = qualifications.remove(element);
+		element.setParent(null);
+		return result;
+	}
+
+	/**
+	 * {@link #qualifications} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public StaffQualification removeQualificationsElement(int index) {
+		StaffQualification result = qualifications.remove(index);
+		result.setParent(null);
+		return result;
 	}
 
 	@Override

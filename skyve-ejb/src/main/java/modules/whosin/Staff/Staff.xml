@@ -65,5 +65,10 @@
 			<documentName>Staff</documentName>
 			<queryName>qStaff</queryName>
 		</association>
+		<collection type="child" name="qualifications">
+			<displayName>Qualifications</displayName>
+			<documentName>StaffQualification</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 </document>
