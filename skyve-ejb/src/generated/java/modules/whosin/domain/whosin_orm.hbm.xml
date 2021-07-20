@@ -58,10 +58,40 @@
 		</property>
 		<property name="dueBack" type="DateTime" />
 		<property name="demoData" />
+		<bag name="qualifications" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="whosinStaffQualification" />
+		</bag>
 		<filter name="whosinStaffNoneFilter" condition="1=0"/>
 		<filter name="whosinStaffCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="whosinStaffDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="whosinStaffUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.whosin.domain.StaffQualification" table="WHO_StaffQualification" entity-name="whosinStaffQualification">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="whosinStaff" column="parent_id" insert="false" update="false" foreign-key="FK_WHO_StaffQualification_parent" />
+		<property name="type" length="12">
+			<type name="Enum">
+				<param name="enumClass">modules.whosin.domain.StaffQualification$Type</param>
+			</type>
+		</property>
+		<property name="name" length="200" />
+		<property name="issuingOrganisation" length="200" />
+		<property name="description" type="text" />
+		<property name="dateAttained" type="DateOnly" />
+		<property name="dateExpiry" type="DateOnly" />
+		<filter name="whosinStaffQualificationNoneFilter" condition="1=0"/>
+		<filter name="whosinStaffQualificationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="whosinStaffQualificationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="whosinStaffQualificationUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<filter-def name="whosinOfficeNoneFilter" />
@@ -82,6 +112,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="whosinStaffUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinStaffQualificationNoneFilter" />
+	<filter-def name="whosinStaffQualificationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinStaffQualificationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinStaffQualificationUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 </hibernate-mapping>
