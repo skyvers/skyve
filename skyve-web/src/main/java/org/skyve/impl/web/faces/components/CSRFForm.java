@@ -9,11 +9,13 @@ import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIOutput;
 import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.component.autoupdate.AutoUpdateListener;
+import org.primefaces.component.outputpanel.OutputPanel;
 import org.skyve.util.Util;
 
 @FacesComponent(CSRFForm.COMPONENT_TYPE)
@@ -41,16 +43,21 @@ public class CSRFForm extends HtmlForm {
 	    	}
 	    	
 			// Add hidden csrfToken
-			// <h:outputText style="display:none" escape="false" value="&lt;input type=&quot;hidden&quot; name=&quot;csrfToken&quot; value=&quot;#{fspView.csrfToken}&quot;/&gt;">
+			// <p:outputPanel id="<formId>_csrfToken" style="display:none" layout="inline" deferred="false">
+	    	// 		<input type="hidden" name="csrfToken" value="#{fspView.csrfToken}"/>
 			// 		<p:autoUpdate />
-			// </h:outputText>
-	    	HtmlOutputText text = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-	    	text.setStyle("display:none");
-	    	text.setEscape(false);
+			// </p:outputPanel>
+	    	OutputPanel panel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
+	    	panel.setId(getId() + "_csrfToken");
+	    	panel.setStyle("display:none");
+	    	panel.setLayout("inline");
+	    	panel.setDeferred(false);
+	    	UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 	    	text.setValueExpression("value", ef.createValueExpression(elc, "<input type=\"hidden\" name=\"csrfToken\" value=\"#{" + managedBeanName + ".csrfToken}\"/>", String.class));
-	        AutoUpdateListener.subscribe(text);
+	    	panel.getChildren().add(text);
+	        AutoUpdateListener.subscribe(panel);
 	
-			children.add(0, text);
+			children.add(0, panel);
 		}
 		super.encodeBegin(context);
 	}
