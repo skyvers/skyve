@@ -11,7 +11,6 @@ import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
 import javax.faces.component.html.HtmlForm;
-import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.component.autoupdate.AutoUpdateListener;
@@ -31,7 +30,7 @@ public class CSRFForm extends HtmlForm {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		List<UIComponent> children = getChildren();
-		if (children.isEmpty() || (! (children.get(0) instanceof HtmlOutputText))) {
+		if (children.isEmpty() || (! (children.get(0) instanceof OutputPanel))) {
 			FacesContext fc = FacesContext.getCurrentInstance();
 			Application a = fc.getApplication();
 			ExpressionFactory ef = a.getExpressionFactory();
