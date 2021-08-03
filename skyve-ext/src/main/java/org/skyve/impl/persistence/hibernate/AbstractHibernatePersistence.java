@@ -816,13 +816,13 @@ t.printStackTrace();
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
-										Document parentDocument,
-										Relation parentRelation,
+										Document owningDocument,
+										Relation owningRelation,
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((parentRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 			
@@ -884,13 +884,13 @@ t.printStackTrace();
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
-										Document parentDocument,
-										Relation parentRelation,
+										Document owningDocument,
+										Relation owningRelation,
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((parentRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 				
@@ -935,13 +935,13 @@ t.printStackTrace();
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
-										Document parentDocument,
-										Relation parentRelation,
+										Document owningDocument,
+										Relation owningRelation,
 										Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((parentRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 				
@@ -963,8 +963,18 @@ t.printStackTrace();
 					ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 
 					if (persistentName != null) { // persistent
-						checkUniqueConstraints(document, bean);
-
+						if (owningRelation == null) { // top level
+							checkUniqueConstraints(document, bean);
+						}
+						else {
+							boolean persistentRelation = owningRelation.isPersistent();
+							// Don't check the unique constraints if the relation is not persistent
+							// and the instance will not be persisted by reachability - ie the bean is transient too
+							if (persistentRelation || ((! persistentRelation) && bean.isPersisted())) {
+								checkUniqueConstraints(document, bean);
+							}
+						}
+						
 						// Re-evaluate the bizKey after all events have fired
 						// as the bizKey may be dependent on values that have mutated  
 						// NB - We do unconditionally as the bizKey may be dependent on child or related
