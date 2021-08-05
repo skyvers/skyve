@@ -389,7 +389,7 @@ public class Binder {
 	 * @param document	The document to start at (with respect to)
 	 * @param binding	The binding expression.
 	 * @return	The document and attribute that the binding expression points to.
-	 * 			The document is never null whereas the attribute can be null if'
+	 * 			The document is never null whereas the attribute can be null if
 	 * 			the binding expression ultimately resolves to an implicit attribute
 	 * 			like bizKey or bizId or the like.
 	 */

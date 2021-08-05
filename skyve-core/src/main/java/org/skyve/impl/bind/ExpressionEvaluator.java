@@ -37,6 +37,8 @@ public abstract class ExpressionEvaluator {
 	
 	static {
 		evaluators.put(BindingExpressionEvaluator.PREFIX, DEFAULT_EVALUATOR);
+		evaluators.put(DisplayNameExpressionEvaluator.PREFIX, new DisplayNameExpressionEvaluator());
+		evaluators.put(DescriptionExpressionEvaluator.PREFIX, new DescriptionExpressionEvaluator());
 		evaluators.put(ELExpressionEvaluator.PREFIX, new ELExpressionEvaluator());
 		evaluators.put(I18NExpressionEvaluator.PREFIX, new I18NExpressionEvaluator());
 		evaluators.put(RoleExpressionEvaluator.PREFIX, new RoleExpressionEvaluator());

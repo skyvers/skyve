@@ -264,6 +264,8 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{bean: text }", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{bean : text }", bean));
+		Assert.assertEquals("Text", Binder.formatMessage("{disp:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{desc:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:stash['text']}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:user.attributes['text']}", bean));
@@ -301,6 +303,8 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean:text}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean: text }"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{bean : text }"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{disp:text}"));
+		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{desc:text}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:bean.text}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:stash['text']}"));
 		Assert.assertTrue(BindUtil.messageExpressionsAreValid(c, m, aapd, "{el:user.attributes['text']}"));
