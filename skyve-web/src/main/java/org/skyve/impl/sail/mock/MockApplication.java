@@ -84,6 +84,7 @@ import org.primefaces.component.steps.Steps;
 import org.primefaces.component.sticky.Sticky;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.impl.web.faces.components.Conversation;
@@ -294,6 +295,9 @@ public class MockApplication extends Application {
 		}
 		else if (TabView.COMPONENT_TYPE.equals(componentType)) {
 			return new TabView();
+		}
+		else if (TextEditor.COMPONENT_TYPE.equals(componentType)) {
+			return new TextEditor();
 		}
 		else if (Toolbar.COMPONENT_TYPE.equals(componentType)) {
 			return new Toolbar();
