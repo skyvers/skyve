@@ -33,12 +33,12 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	protected String emptyThumbnailRelativeFile;
 	protected HorizontalAlignment align;
 	
-	SmartClientQueryColumnDefinition(User user,
-										Customer customer, 
-										Module module, 
-										Document document, 
-										MetaDataQueryColumn column,
-										boolean runtime) {
+	protected SmartClientQueryColumnDefinition(User user,
+												Customer customer, 
+												Module module, 
+												Document document, 
+												MetaDataQueryColumn column,
+												boolean runtime) {
 		super(user,
 				customer, 
 				module,

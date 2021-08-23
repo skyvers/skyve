@@ -24,13 +24,13 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
     protected Integer pixelWidth;
     protected String defaultValueJavascriptExpression;
 
-    SmartClientDataGridFieldDefinition(User user,
-    									Customer customer, 
-                                        Module module, 
-                                        Document document, 
-                                        InputWidget widget,
-                                        String dataGridBindingOverride,
-                                        boolean runtime) {
+    protected SmartClientDataGridFieldDefinition(User user,
+			    									Customer customer, 
+			                                        Module module, 
+			                                        Document document, 
+			                                        InputWidget widget,
+			                                        String dataGridBindingOverride,
+			                                        boolean runtime) {
 		super(user,
 				customer,
 				module,

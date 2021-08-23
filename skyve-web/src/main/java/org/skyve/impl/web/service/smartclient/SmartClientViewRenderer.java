@@ -1245,22 +1245,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
 			if (binding == null) { // column bound to collection for the grid
-				def = SmartClientViewRenderer.getDataGridField(user,
-																customer,
-																module, 
-																document, 
-																dataWidgetColumnInputWidget, 
-																dataWidgetBinding,
-																true);
+				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, true);
 			} 
 			else {
-				def = SmartClientViewRenderer.getDataGridField(user,
-																customer,
-																module, 
-																dataWidgetDocument, 
-																dataWidgetColumnInputWidget, 
-																null,
-																true);
+				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, true);
 			}
 
 			def.setTitle(title);
@@ -2829,12 +2817,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
 															String typeOverride) {
-		SmartClientFieldDefinition def = SmartClientViewRenderer.getField(user,
-																			customer,
-																			module,
-																			document,
-																			widget,
-																			true);
+		SmartClientFieldDefinition def = getField(document, widget, true);
 		if (typeOverride != null) {
 			def.setType(typeOverride);
 		}
@@ -2869,29 +2852,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * bindingOverride is used when a Datagrid has a lookupDescription which has no binding.
 	 * That is, the lookupDescription is for the entire dataGrid entity.
 	 * 
-	 * @param customer
-	 * @param module
 	 * @param document
 	 * @param widget	The widget metadata to use to define the smart client form field
 	 * @param bindingOverride	If defined, specifies a different binding to use.
 	 * @return
 	 */
-	public static SmartClientFieldDefinition getField(User user,
-														Customer customer, 
-														Module module, 
-														Document document, 
-														InputWidget widget,
-														boolean runtime) {
+	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, 
+												InputWidget widget,
+												boolean runtime) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime);
 	}
 	
-    public static SmartClientDataGridFieldDefinition getDataGridField(User user,
-    																	Customer customer, 
-                                                                        Module module, 
-                                                                        Document document, 
-                                                                        InputWidget widget,
-                                                                        String dataGridBinding,
-                                                                        boolean runtime) {
+	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
+    															InputWidget widget,
+    															String dataGridBinding,
+    															boolean runtime) {
     	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, runtime);
     }
 
