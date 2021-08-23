@@ -1239,6 +1239,7 @@ public class ModulesUtil {
 			q.getFilter().addLike(attributeName, value + "%");
 		}
 		q.addBoundProjection(attributeName, attributeName);
+		q.addBoundOrdering(attributeName);
 		q.setDistinct(true);
 		return q.scalarResults(String.class);
 	}
