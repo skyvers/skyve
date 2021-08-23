@@ -135,7 +135,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
-class ViewJSONManipulator extends ViewVisitor {
+public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
@@ -276,14 +276,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
-	ViewJSONManipulator(User user,
-							Module module, 
-							Document document, 
-							View view,
-							Bean bean,
-							int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
-							int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
-							boolean forApply) {
+	protected ViewJSONManipulator(User user,
+									Module module, 
+									Document document, 
+									View view,
+									Bean bean,
+									int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
+									int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
+									boolean forApply) {
 		super((CustomerImpl) user.getCustomer(),
 				(ModuleImpl) module,
 				(DocumentImpl) document,

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -37,6 +39,37 @@ import org.skyve.web.UserAgentType;
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		
+		String rendererParam = Util.processStringValue(config.getInitParameter("renderer"));
+		if (rendererParam != null) {
+			try {
+				RENDERER_CLASS = (Class<? extends SmartClientViewRenderer>) Thread.currentThread().getContextClassLoader().loadClass(rendererParam);
+			}
+			catch (Exception e) {
+				throw new ServletException("Cannot load SmartClient renderer " + rendererParam, e);
+			}
+		}
+	}
+	
+	private static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+		if (RENDERER_CLASS == null) {
+			return new SmartClientViewRenderer(user, module, document, view, noCreateView);
+		}
+		
+		try {
+			return (SmartClientViewRenderer) RENDERER_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, Boolean.valueOf(noCreateView));
+		}
+		catch (Exception e) {
+			throw new DomainException("Cannot instantiate SmartClient renderer " + RENDERER_CLASS, e);
+		}
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -92,16 +125,16 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
-					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, true);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, true);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 				}
 				else {
-					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, false);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, false);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 	
-					renderer = new SmartClientViewRenderer(user, module, document, createView, false);
+					renderer = newRenderer(user, module, document, createView, false);
 					renderer.visit();
 					createString = renderer.getCode().toString();
 				}

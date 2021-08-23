@@ -133,7 +133,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
 
-	public SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+	protected SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
 		super(user, module, document, view);
 		this.noCreateView = noCreateView;
 	}
