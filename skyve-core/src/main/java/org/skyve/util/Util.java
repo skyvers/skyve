@@ -352,4 +352,27 @@ public class Util {
 	public static String getResourceUrl(String resourceFileName) {
 		return getResourceUrl(null, null, resourceFileName);
 	}
+	
+    public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, int width, int height) {
+        String contentUrl = getContentUrl(bizModule, bizDocument, binding, contentId);
+        
+        StringBuilder sb = new StringBuilder(128);
+        
+        sb.append("<a href='").append(contentUrl).append("'>");
+        sb.append(getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height)).append("</a>");
+        
+        return sb.toString();
+    }
+    
+    public static String getContentImageUrl(String bizModule, String bizDocument, String binding, String contentId, int width, int height) {
+    	StringBuilder sb = new StringBuilder(128);
+    	
+    	sb.append("<img src='");
+    	sb.append(getContentUrl(bizModule, bizDocument, binding, contentId));
+    	sb.append("&_w=").append(width);
+    	sb.append("&_h=").append(height);
+    	sb.append("'/>");
+        
+    	return sb.toString();
+    }
 }
