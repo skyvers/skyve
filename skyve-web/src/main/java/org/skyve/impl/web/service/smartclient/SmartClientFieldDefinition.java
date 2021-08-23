@@ -22,12 +22,12 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	private HorizontalAlignment textAlign;
 	private String helpText;
 
-	SmartClientFieldDefinition(User user,
-								Customer customer, 
-								Module module, 
-								Document document, 
-								InputWidget widget,
-								boolean runtime) {
+	protected SmartClientFieldDefinition(User user,
+											Customer customer, 
+											Module module, 
+											Document document, 
+											InputWidget widget,
+											boolean runtime) {
 		super(user, customer, module, document, widget, null, runtime);
 		Attribute attribute = target.getAttribute();
 		if (attribute != null) {

@@ -10,7 +10,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
@@ -49,8 +48,8 @@ import org.skyve.util.Binder.TargetMetaData;
  *           ]
  */
 public final class ComparisonJSONManipulator {
-	private UserImpl user;
 	private CustomerImpl customer;
+	private SmartClientViewRenderer renderer;
 	private ComparisonComposite root;
 
 	private static final String PARENT_KEY = "parent";
@@ -75,11 +74,11 @@ public final class ComparisonJSONManipulator {
 	private static final String DELETED_ICON = "icons/comparisonDeleted.png";
 	private static final String UPDATED_ICON = "icons/comparisonUpdated.png";
 
-	public ComparisonJSONManipulator(UserImpl user,
-													CustomerImpl customer,
-													ComparisonComposite root) {
-		this.user = user;
+	public ComparisonJSONManipulator(CustomerImpl customer, 
+										SmartClientViewRenderer renderer,
+										ComparisonComposite root) {
 		this.customer = customer;
+		this.renderer = renderer;
 		this.root = root;
 	}
 
@@ -173,7 +172,7 @@ public final class ComparisonJSONManipulator {
 						propertyWidget.setBinding(propertyName);
 					}
 					
-					SmartClientDataGridFieldDefinition field = SmartClientViewRenderer.getField(user, customer, module, nodeDocument, propertyWidget, true);
+					SmartClientDataGridFieldDefinition field = renderer.getField(nodeDocument, propertyWidget, true);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
 					String editorType = field.getEditorType();

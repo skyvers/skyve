@@ -31,14 +31,14 @@ public class SmartClientLookupDefinition {
     private boolean canCreate = true;
     private boolean canUpdate = true;
     
-	SmartClientLookupDefinition(boolean bindingToDataGrid,
-    								User user,
-    								Customer customer,
-    								Module module,
-    								Document document,
-    								Relation relation,
-    								LookupDescription lookup,
-    								boolean runtime) {
+	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
+		    								User user,
+		    								Customer customer,
+		    								Module module,
+		    								Document document,
+		    								Relation relation,
+		    								LookupDescription lookup,
+		    								boolean runtime) {
         this.bindingToDataGrid = bindingToDataGrid;
         String queryName = (lookup == null) ? null : lookup.getQuery();
         // Use reference query name if none provided in lookup
