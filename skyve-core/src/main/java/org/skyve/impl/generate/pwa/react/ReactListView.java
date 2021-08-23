@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientQueryColumnDefinition;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -98,12 +96,13 @@ class ReactListView extends ReactComponent {
 						(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
 					continue;
 				}
-				SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(u, c, module, document, column, false);
+// TODO Fix				SmartClientQueryColumnDefinition def = SmartClientGenerateUtils.getQueryColumn(u, c, module, document, column, false);
 				String columnName = column.getBinding();
 				if (columnName == null) {
 					columnName = column.getName();
 				}
-	            fw.append("\t\t\t\t<Column field=\"").append(def.getName()).append("\" header=\"").append(def.getTitle()).append("\" />\n");
+				fw.append("\t\t\t\t<Column field=\"").append(columnName).append("\" header=\"").append(column.getDisplayName()).append("\" />\n");
+// TODO Fix	            fw.append("\t\t\t\t<Column field=\"").append(def.getName()).append("\" header=\"").append(def.getTitle()).append("\" />\n");
 			}
 		}
 		fw.write("\t\t\t</DataTable>\n");

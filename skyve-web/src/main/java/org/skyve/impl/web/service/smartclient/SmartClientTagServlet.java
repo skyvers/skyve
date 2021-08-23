@@ -20,7 +20,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -181,7 +180,7 @@ public class SmartClientTagServlet extends HttpServlet {
 		    	}
 		    	else {
 			    	pw.append("The tag operation was unsuccessful: ");
-			    	pw.append(SmartClientGenerateUtils.processString(t.getMessage()));
+			    	pw.append(OWASP.escapeJsString(t.getMessage()));
 		    	}
 		    	pw.append("');");
 		    	pw.flush();
@@ -203,8 +202,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	    sb.append("{isSeparator:true}");
 
         for (DomainValue value : EXT.getTagManager().getTags()) {
-        	String escapedCode = SmartClientGenerateUtils.processString(value.getCode());
-        	String escapedDescription = SmartClientGenerateUtils.processString(value.getDescription());
+        	String escapedCode = OWASP.escapeJsString(value.getCode());
+        	String escapedDescription = OWASP.escapeJsString(value.getDescription());
         	
         	// tag select menu
             sb.append(",{title:'").append(escapedDescription).append("',icon:'icons/tag.png',click:function(){");

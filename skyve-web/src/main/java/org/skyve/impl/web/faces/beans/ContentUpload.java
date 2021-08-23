@@ -18,7 +18,6 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -154,7 +153,7 @@ public class ContentUpload extends AbstractUpload {
 			js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterContentUpload('").append(sanitisedContentBinding);
 			js.append("','").append(contentId).append("','");
 			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
-			js.append(SmartClientGenerateUtils.processString(content.getFileName(), false, false)).append("')}}");
+			js.append(OWASP.escapeJsString(content.getFileName(), false, false)).append("')}}");
 			PrimeFaces.current().executeScript(js.toString());
 		}
 		catch (Exception e) {

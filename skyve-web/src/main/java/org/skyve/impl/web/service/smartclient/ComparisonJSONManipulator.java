@@ -7,11 +7,9 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.MetaDataException;
@@ -19,11 +17,13 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 import org.skyve.util.Binder.TargetMetaData;
 
 /**
@@ -173,7 +173,7 @@ public final class ComparisonJSONManipulator {
 						propertyWidget.setBinding(propertyName);
 					}
 					
-					SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, propertyWidget, true);
+					SmartClientDataGridFieldDefinition field = SmartClientViewRenderer.getField(user, customer, module, nodeDocument, propertyWidget, true);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
 					String editorType = field.getEditorType();
@@ -185,7 +185,7 @@ public final class ComparisonJSONManipulator {
 						item.put(LENGTH_KEY, length);
 		            }
 		            if ((attribute != null) && DomainType.constant.equals(attribute.getDomainType())) {
-			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(customer, nodeDocument, attribute, true);
+			            Map<String, String> valueMap = getConstantDomainValueMap(customer, nodeDocument, attribute, true);
 			            if (valueMap != null) {
 							item.put(VALUE_MAP_KEY, valueMap);
 			            }
@@ -238,6 +238,23 @@ public final class ComparisonJSONManipulator {
 			result.add(item);
 		}
 
+		return result;
+	}
+
+	private static Map<String, String> getConstantDomainValueMap(CustomerImpl customer,
+																	Document document,
+																	Attribute attribute,
+																	boolean runtime) {
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, 
+																				DomainType.constant, 
+																				attribute, 
+																				null,
+																				runtime);
+		Map<String, String> result = new TreeMap<>(); 
+		for (DomainValue value : values) {
+			result.put(value.getCode(), OWASP.escapeJsString(value.getDescription()));
+		}
+		
 		return result;
 	}
 

@@ -11,7 +11,6 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -24,6 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
+import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -36,6 +36,7 @@ import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.OWASP;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
@@ -351,21 +352,21 @@ public class Desktop extends Harness {
 				result.append(menuModule.getName());
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(menuModule.getLocalisedTitle()));
+				result.append(OWASP.escapeJsString(menuModule.getLocalisedTitle()));
 				result.append("',");
 			}
 			
 			@Override
 			public void renderMenuRoot(Menu menu, Module menuModule) {
 				result.append("root:{name:'");
-				result.append(SmartClientGenerateUtils.processString(menuModule.getName()));
+				result.append(OWASP.escapeJsString(menuModule.getName()));
 				result.append("',sub:[");
 			}
 			
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
 				result.append("{desc:'");
-				result.append(SmartClientGenerateUtils.processString(group.getLocalisedName()));
+				result.append(OWASP.escapeJsString(group.getLocalisedName()));
 				result.append("', sub:[");
 			}
 			
@@ -486,7 +487,7 @@ public class Desktop extends Harness {
 				if ((icon16 != null) || (iconStyleClass != null)) {
 					result.append("<span> &nbsp;</span>");
 				}
-				result.append(SmartClientGenerateUtils.processString(name)).append('\'');
+				result.append(OWASP.escapeJsString(name)).append('\'');
 				if (config != null) {
 					result.append(",config:").append(config);
 				}
@@ -536,7 +537,7 @@ public class Desktop extends Harness {
 				String homeDocumentName = module.getHomeDocumentName();
 				if (homeDocumentName != null) {
 					MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
-					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 			}
 			
@@ -572,23 +573,23 @@ public class Desktop extends Harness {
 				
 				if (queryName != null) { // its a query
 					query = module.getMetaDataQuery(queryName);
-					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 				else {
 					if (modelName != null) { // its a model
 						Document document = module.getDocument(customer, documentName);
-						SmartClientGenerateUtils.appendDataSourceDefinition(user, 
-																				customer, 
-																				module, 
-																				document,
-																				modelName,
-																				true,
-																				dataSources, 
-																				visitedQueryNames);
+						SmartClientViewRenderer.appendDataSourceDefinition(user, 
+																			customer, 
+																			module, 
+																			document,
+																			modelName,
+																			true,
+																			dataSources, 
+																			visitedQueryNames);
 					}
 					else {
 						query = module.getDocumentDefaultQuery(customer, documentName);
-						SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+						SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 					}
 				}
 			}

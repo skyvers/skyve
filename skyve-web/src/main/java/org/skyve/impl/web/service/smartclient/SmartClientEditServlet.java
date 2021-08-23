@@ -32,7 +32,6 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -398,7 +397,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	
             String message = t.getMessage();
             if (message != null) {
-                pw.append(SmartClientGenerateUtils.processString(message)).append('"');
+                pw.append(OWASP.escapeJsString(message)).append('"');
             }
             else {
                 pw.append("no error message...\"");
@@ -412,7 +411,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
 	    	pw.append("<li>");
-	        pw.append(SmartClientGenerateUtils.processString(m.getText()));
+	        pw.append(OWASP.escapeJsString(m.getText()));
 	        pw.append("</li>");
     	}
     	pw.append("</ul>");
@@ -437,7 +436,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    			sb.append("An error has occurred");
 	    		}
 	    		else {
-		    		sb.append(SmartClientGenerateUtils.processString(m.getText()));
+		    		sb.append(OWASP.escapeJsString(m.getText()));
 	    		}
 	    		sb.append("\",");
 	    	}

@@ -1,14 +1,15 @@
 package org.skyve.impl.web.service.smartclient;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeMap;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
-import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
@@ -97,11 +98,13 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
@@ -109,8 +112,11 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.OWASP;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class SmartClientViewRenderer extends ViewRenderer {
@@ -228,7 +234,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("',title:'");
 		}
 
-		code.append(SmartClientGenerateUtils.processString(title));
+		code.append(OWASP.escapeJsString(title));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 		disabled(tab.getDisabledConditionName(), code);
@@ -683,7 +689,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
-		code.append(SmartClientGenerateUtils.processString(label)).append("',");
+		code.append(OWASP.escapeJsString(label)).append("',");
 		disabled(button.getDisabledConditionName(), code);
 		invisible(button.getInvisibleConditionName(), code);
 	}
@@ -692,7 +698,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderDialogButton(String label, DialogButton button) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-		code.append(SmartClientGenerateUtils.processString(label));
+		code.append(OWASP.escapeJsString(label));
 		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
@@ -852,7 +858,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title == null) {
 			title = value;
 		}
-		title = SmartClientGenerateUtils.processString(title);
+		title = OWASP.escapeJsString(title);
 		code.append("endRow:false");
 		if (title != null) {
 			code.append(",title:'").append(title).append('\'');
@@ -868,7 +874,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		if (binding == null) {
-			code.append("defaultValue:'").append(SmartClientGenerateUtils.processString(value, false, false));
+			code.append("defaultValue:'").append(OWASP.escapeJsString(value, false, false));
 		}
 		else {
 			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
@@ -914,7 +920,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 		if (binding == null) {
-			code.append("value:'").append(SmartClientGenerateUtils.processString(value, false, false));
+			code.append("value:'").append(OWASP.escapeJsString(value, false, false));
 		}
 		else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
@@ -1020,13 +1026,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
-			dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
 			code.insert(0, ds);
 		}
 		else {
 			if (modelName != null) { // its a model
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, 
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, 
 																					customer, 
 																					module, 
 																					document,
@@ -1039,7 +1045,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			else {
 				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
 				code.insert(0, ds);
 			}
 		}
@@ -1052,7 +1058,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(title)).append("',");
+			code.append(OWASP.escapeJsString(title)).append("',");
 		}
 		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
@@ -1197,7 +1203,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String title = widget.getLocalisedTitle();
 		if (title != null) {
 			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(title)).append("',");
+			code.append(OWASP.escapeJsString(title)).append("',");
 		}
 		if ((relation instanceof Collection) && 
 				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
@@ -1239,22 +1245,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
 			if (binding == null) { // column bound to collection for the grid
-				def = SmartClientGenerateUtils.getDataGridField(user,
-																	customer,
-																	module, 
-																	document, 
-																	dataWidgetColumnInputWidget, 
-																	dataWidgetBinding,
-																	true);
+				def = SmartClientViewRenderer.getDataGridField(user,
+																customer,
+																module, 
+																document, 
+																dataWidgetColumnInputWidget, 
+																dataWidgetBinding,
+																true);
 			} 
 			else {
-				def = SmartClientGenerateUtils.getDataGridField(user,
-																	customer,
-																	module, 
-																	dataWidgetDocument, 
-																	dataWidgetColumnInputWidget, 
-																	null,
-																	true);
+				def = SmartClientViewRenderer.getDataGridField(user,
+																customer,
+																module, 
+																dataWidgetDocument, 
+																dataWidgetColumnInputWidget, 
+																null,
+																true);
 			}
 
 			def.setTitle(title);
@@ -1272,14 +1278,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (lookup != null) {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
-				SmartClientGenerateUtils.appendDataSourceDefinition(user,
-																		customer, 
-																		lookup.getQuery(),
-																		optionDataSource,
-																		(Lookup) dataWidgetColumnInputWidget, 
-																		false,
-																		ds,
-																		null);
+				SmartClientViewRenderer.appendDataSourceDefinition(user,
+																	customer, 
+																	lookup.getQuery(),
+																	optionDataSource,
+																	(Lookup) dataWidgetColumnInputWidget, 
+																	false,
+																	ds,
+																	null);
 				code.insert(0, ds);
 			}
 			dataWidgetColumnInputWidget = null;
@@ -1296,7 +1302,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("{name:'_").append(formatCounter++);
 		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 		
-		code.append((title == null) ? " " : SmartClientGenerateUtils.processString(title)).append('\'');
+		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
 			code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
@@ -1439,7 +1445,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormContentLink(String value, ContentLink link) {
 		preProcessFormItem(link, "bizContentLink");
 		if (value != null) {
-			code.append("value:'").append(SmartClientGenerateUtils.processString(value)).append("',");
+			code.append("value:'").append(OWASP.escapeJsString(value)).append("',");
 		}
 		disabled(link.getDisabledConditionName(), code);
 		invisible(link.getInvisibleConditionName(), code);
@@ -1479,11 +1485,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append('\'');
 		if (candidatesHeading != null) {
 			code.append(",candidatesHeading:'");
-			code.append(SmartClientGenerateUtils.processString(candidatesHeading)).append('\'');
+			code.append(OWASP.escapeJsString(candidatesHeading)).append('\'');
 		}
 		if (membersHeading != null) {
 			code.append(",membersHeading:'");
-			code.append(SmartClientGenerateUtils.processString(membersHeading)).append('\'');
+			code.append(OWASP.escapeJsString(membersHeading)).append('\'');
 		}
 		if ((relation instanceof Collection) && 
 				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
@@ -1550,14 +1556,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
-		SmartClientGenerateUtils.appendDataSourceDefinition(user,
-																customer,
-																query,
-																optionDataSource,
-																lookup,
-																false,
-																ds,
-																null);
+		SmartClientViewRenderer.appendDataSourceDefinition(user,
+															customer,
+															query,
+															optionDataSource,
+															lookup,
+															false,
+															ds,
+															null);
 		code.insert(0, ds);
 	}
 	
@@ -2636,7 +2642,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
 			builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 			if (title != null) {
-				builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(title));
+				builder.append("groupTitle:'&nbsp;&nbsp;").append(OWASP.escapeJsString(title));
 				builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 			}
 			if (definedPixelPadding == null) {
@@ -2745,7 +2751,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (iconStyleClass != null) {
 			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span> &nbsp;</span>");
 		}
-		result.append(SmartClientGenerateUtils.processString(label)).append("',tabIndex:999,");
+		result.append(OWASP.escapeJsString(label)).append("',tabIndex:999,");
 		if ((iconStyleClass == null) && (iconUrl != null)) {
 			result.append("icon:'../").append(iconUrl).append("',");
 		}
@@ -2755,10 +2761,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(disabledConditionName, result);
 		invisible(invisibleConditionName, result);
 		if (toolTip != null) {
-			result.append("tooltip:'").append(SmartClientGenerateUtils.processString(toolTip)).append("',");
+			result.append("tooltip:'").append(OWASP.escapeJsString(toolTip)).append("',");
 		}
 		if (confirmationText != null) {
-			result.append("confirm:'").append(SmartClientGenerateUtils.processString(confirmationText)).append("',");
+			result.append("confirm:'").append(OWASP.escapeJsString(confirmationText)).append("',");
 		}
 		appendParameters(parameters, result);
 		result.append("_view:view})");
@@ -2823,7 +2829,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	
 	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
 															String typeOverride) {
-		SmartClientFieldDefinition def = SmartClientGenerateUtils.getField(user,
+		SmartClientFieldDefinition def = SmartClientViewRenderer.getField(user,
 																			customer,
 																			module,
 																			document,
@@ -2846,5 +2852,332 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(',');
 
 		return def;
+	}
+	
+	public static SmartClientQueryColumnDefinition getQueryColumn(User user,
+																	Customer customer,
+																	Module module,
+																	Document document,
+																	MetaDataQueryColumn column,
+																	boolean runtime) {
+		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime);
+	}
+
+	/**
+	 * Get the smart client field definition given the widget/binding.
+	 * If bindingOverride is defined, it will be used to determine the field to use.
+	 * bindingOverride is used when a Datagrid has a lookupDescription which has no binding.
+	 * That is, the lookupDescription is for the entire dataGrid entity.
+	 * 
+	 * @param customer
+	 * @param module
+	 * @param document
+	 * @param widget	The widget metadata to use to define the smart client form field
+	 * @param bindingOverride	If defined, specifies a different binding to use.
+	 * @return
+	 */
+	public static SmartClientFieldDefinition getField(User user,
+														Customer customer, 
+														Module module, 
+														Document document, 
+														InputWidget widget,
+														boolean runtime) {
+		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime);
+	}
+	
+    public static SmartClientDataGridFieldDefinition getDataGridField(User user,
+    																	Customer customer, 
+                                                                        Module module, 
+                                                                        Document document, 
+                                                                        InputWidget widget,
+                                                                        String dataGridBinding,
+                                                                        boolean runtime) {
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, runtime);
+    }
+
+    /**
+     * Appends a data source definition from a document list model.
+     * @param user
+     * @param customer
+     * @param owningModule
+     * @param owningDocument
+     * @param modelName
+     * @param config	Whether to create a partial config data source defn for the menu items
+     * @param toAppendTo	definition is appended to this
+     * @param visitedQueryNames
+     * @return	The ID for the query definition generated.
+     */
+	public static String appendDataSourceDefinition(User user,
+														Customer customer,
+														Module owningModule,
+														Document owningDocument,
+														String modelName,
+														boolean config,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) {
+		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName, true);
+		Document drivingDocument = model.getDrivingDocument();
+		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
+
+		return appendDataSourceDefinition(user, 
+											customer,
+											owningModule.getName(),
+											owningDocument,
+											drivingDocumentModule,
+											drivingDocument,
+											null,
+											false,
+											modelName,
+											model.getLocalisedDescription(),
+											model.getColumns(),
+											null, 
+											null, 
+											config, 
+											toAppendTo, 
+											visitedQueryNames);
+	}
+	
+	/**
+     * Appends a data source definition from a module query.
+     * @param customer
+     * @param query
+     * @param dataSourceIDOverride	ID of created data source if mandated
+     * @param hiddenBindings	Extra bindings to include in the data source - not mandatory
+     * @param config	Whether to create a partial config data source defn for the menu items
+     * @param toAppendTo	definition is appended to this
+     * @param visitedQueryNames
+     * @return	The ID for the query definition generated.
+     */
+	public static String appendDataSourceDefinition(User user,
+														Customer customer,
+														MetaDataQueryDefinition query,
+														String dataSourceIDOverride,
+														Lookup forLookup,
+														boolean config,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) {
+		String documentName = query.getDocumentName();
+		Module documentModule = query.getDocumentModule(customer);
+		Module owningModule = query.getOwningModule();
+		Document drivingDocument = documentModule.getDocument(customer, documentName);
+		return appendDataSourceDefinition(user, 
+											customer, 
+											owningModule.getName(), 
+											drivingDocument,
+											documentModule, 
+											drivingDocument, 
+											query.getName(), 
+											query.isAggregate(),
+											null, 
+											query.getLocalisedDescription(),
+											query.getColumns(),
+											dataSourceIDOverride, 
+											forLookup, 
+											config, 
+											toAppendTo, 
+											visitedQueryNames);
+	}
+	
+	@SuppressWarnings("null")
+	private static String appendDataSourceDefinition(User user,
+														Customer customer,
+														String owningModuleName,
+														Document owningDocument,
+														Module drivingDocumentModule,
+														Document drivingDocument,
+														String queryName,
+														boolean aggregateQuery,
+														String modelName,
+														String description,
+														List<MetaDataQueryColumn> columns,
+														String dataSourceIDOverride,
+														Lookup forLookup,
+														// indicates that this is for configuration in the harness page
+														boolean config,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) {
+		// dataSourceId -> defn
+		Map<String, String> childDataSources = new TreeMap<>();
+		
+		String drivingDocumentName = drivingDocument.getName();
+		String dataSourceId = null;
+		if (dataSourceIDOverride != null) {
+			dataSourceId = dataSourceIDOverride;
+		}
+		else if (queryName != null) {
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(queryName).toString();
+		}
+		else if (modelName != null) {
+			// NB 4 tokens, not 3
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(owningDocument.getName()).append("__").append(modelName).toString();
+		}
+		if (visitedQueryNames == null) {
+			toAppendTo.append("if(window.").append(dataSourceId);
+			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',");
+			toAppendTo.append("operationBindings:[{operationType:'fetch',dataProtocol:'postParams'},");
+			toAppendTo.append("{operationType:'update',dataProtocol:'postParams'},");
+			toAppendTo.append("{operationType:'add',dataProtocol:'postParams'},");
+			toAppendTo.append("{operationType:'remove',dataProtocol:'postParams'}],");
+		}
+		else {
+			if (visitedQueryNames.contains(dataSourceId)) {
+				return dataSourceId;
+			}
+			toAppendTo.append('{');
+		}
+		toAppendTo.append("ID:'").append(dataSourceId);
+		toAppendTo.append("',modoc:'");
+		toAppendTo.append(drivingDocumentModule.getName());
+		toAppendTo.append('.');
+		toAppendTo.append(drivingDocumentName);
+
+		String icon = drivingDocument.getIconStyleClass();
+		if (icon != null) {
+			toAppendTo.append("',fontIcon:'").append(icon);
+		}
+		else {
+			String icon32 = drivingDocument.getIcon32x32RelativeFileName();
+			if (icon32 != null) {
+				toAppendTo.append("',icon:'").append(icon32);
+			}
+		}
+
+		if (! config) {
+			// ensure all filtering is server-side
+			// this enables the summary row to always stay in sync and
+			// lookups to drop down with the same criteria but load from the server
+			// NB _drop is set to true in bizLookupDescription.showPicker() JS.
+			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
+			toAppendTo.append(",_drop:false");
+			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
+			toAppendTo.append(",criteriaPolicy:'dropOnChange");
+		}
+		toAppendTo.append("',aggregate:").append(aggregateQuery);
+		toAppendTo.append(",canCreate:").append(user.canCreateDocument(drivingDocument));
+		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
+		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
+		toAppendTo.append(",title:'");
+		toAppendTo.append(OWASP.escapeJsString(description));
+		toAppendTo.append("',fields:[");
+
+		if (! config) {
+			toAppendTo.append("{name:'bizTagged',title:'");
+			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.tag"), false, true));
+			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
+			toAppendTo.append("{name:'bizFlagComment',title:'");
+			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.flag"), false, true));
+			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
+		}
+		
+		if (drivingDocumentName.equals(drivingDocument.getParentDocumentName())) { // hierarchical
+			toAppendTo.append("{name:'bizParentId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
+			toAppendTo.append(dataSourceId).append(".bizId'},");
+		}
+		
+		List<String> hiddenBindingsList = new ArrayList<>();
+		if (forLookup instanceof LookupDescription) {
+			hiddenBindingsList.add(((LookupDescription) forLookup).getDescriptionBinding());
+		}
+		if (forLookup != null) {
+			List<FilterParameter> filterParameters = forLookup.getFilterParameters();
+			if (filterParameters != null) {
+				for (FilterParameter parameter : filterParameters) {
+					hiddenBindingsList.add(parameter.getFilterBinding());
+				}
+			}
+			List<Parameter> parameters = forLookup.getParameters();
+			if (parameters != null) {
+				for (Parameter parameter : parameters) {
+					hiddenBindingsList.add(parameter.getName());
+				}
+			}
+		}
+		
+		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
+		
+		for (MetaDataQueryColumn column : columns) {
+			if ((column instanceof MetaDataQueryProjectedColumn) && 
+					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+				continue;
+			}
+
+			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
+			toAppendTo.append('{').append(def.toJavascript()).append("},");
+
+			// define the minimum fixed cell height for the grid (dataSource) based on any content image columns
+			Integer pixelHeight = def.getPixelHeight();
+			if (pixelHeight != null) {
+				int h = pixelHeight.intValue();
+				if (h > cellHeight) {
+					cellHeight = h;
+				}
+			}
+
+			SmartClientLookupDefinition lookup = def.getLookup();
+			if (lookup != null) {
+				// Add lookup description data source field
+				toAppendTo.append("{name:'");
+				boolean bindingToDataGrid = lookup.isBindingToDataGrid();
+	        	if (! bindingToDataGrid) {
+	        		toAppendTo.append(def.getName()).append('_');
+	        	}
+	        	toAppendTo.append(lookup.getDisplayField()).append("',type:'text',hidden:'true'},");
+
+				StringBuilder childDataSourceDefinition = new StringBuilder(512);
+				String childDataSourceId = appendDataSourceDefinition(user,
+																		customer,
+																		lookup.getQuery(),
+																		lookup.getOptionDataSource(),
+																		null,
+																		config,
+																		childDataSourceDefinition,
+																		visitedQueryNames);
+				childDataSources.put(childDataSourceId, childDataSourceDefinition.toString());
+			}
+			
+			if (hiddenBindingsList != null) {
+				hiddenBindingsList.remove(column.getBinding());
+			}
+		}
+		
+		if (! config) {
+			// for filtering
+			toAppendTo.append("{name: 'operator', type: 'text', hidden: true},");
+			toAppendTo.append("{name: 'criteria', type: 'text', hidden: true},");
+
+			// standard for all rows
+			toAppendTo.append("{name: 'bizId', primaryKey: true, hidden: true},");
+			toAppendTo.append("{name:'bizLock', hidden: true},");
+		}
+		
+		for (String hiddenBinding : hiddenBindingsList) {
+			toAppendTo.append("{name:'").append(BindUtil.sanitiseBinding(hiddenBinding));
+			toAppendTo.append("',type:'text',hidden:true},");
+		}
+
+		if (toAppendTo.charAt(toAppendTo.length() - 1) == ',') { // if we have a comma then we at least have a field in the data source
+			toAppendTo.setLength(toAppendTo.length() - 1); // remove the last field comma
+		}
+		toAppendTo.append("]");
+		
+		// Add cellHeight if applicable
+		if (cellHeight > 0) {
+			toAppendTo.append(",cellHeight:").append(cellHeight);
+		}
+		
+		if (visitedQueryNames == null) {
+			toAppendTo.append("});}\n");
+		}
+		else {
+			toAppendTo.append("},\n");
+			visitedQueryNames.add(dataSourceId);
+		}
+		
+		// Add any child datasources found
+		for (String childDataSourceDefinition : childDataSources.values()) {
+			toAppendTo.append(childDataSourceDefinition).append('\n');
+		}
+		
+		return dataSourceId;
 	}
 }
