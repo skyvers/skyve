@@ -2,7 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
-class ViewBinding {
+public class ViewBinding {
 	private boolean mutable = false;
 	private boolean escape = false;
 	private Sanitisation sanitise;
@@ -37,15 +37,15 @@ class ViewBinding {
 		}
 	}
 	
-	boolean isMutable() {
+	public boolean isMutable() {
 		return mutable;
 	}
 	
-	boolean isEscape() {
+	public boolean isEscape() {
 		return escape;
 	}
 	
-	Sanitisation getSanitise() {
+	public Sanitisation getSanitise() {
 		return sanitise;
 	}
 }
