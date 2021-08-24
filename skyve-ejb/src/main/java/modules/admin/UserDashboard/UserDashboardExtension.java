@@ -90,11 +90,6 @@ public class UserDashboardExtension extends UserDashboard {
 			createTilesRecent(recentUpdates(currentUser), Operation.update, 1, "Recent by me");
 		}
 
-		// favourite for the most common record saved by anyone (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			createTilesCommon(popularUpdates(null), Operation.update, 1, "Popular by everyone");
-		}
-
 		if (tiles.size() < TILE_COUNT_LIMIT) {
 			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
 		}
