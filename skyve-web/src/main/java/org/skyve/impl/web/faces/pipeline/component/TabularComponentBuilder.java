@@ -82,7 +82,7 @@ import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
+import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
@@ -1502,7 +1502,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			StringBuilder style = new StringBuilder(64);
 			Integer pixelWidth = queryColumn.getPixelWidth();
 			if (pixelWidth == null) {
-				pixelWidth = SmartClientGenerateUtils.determineDefaultColumnWidth(attributeType);
+				pixelWidth = ViewGenerator.determineDefaultColumnWidth(attributeType);
 			}
 
 			String value = null;
@@ -1566,7 +1566,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			HorizontalAlignment alignment = queryColumn.getAlignment();
 			if (alignment == null) {
-				alignment = SmartClientGenerateUtils.determineDefaultColumnAlignment(attributeType);
+				alignment = ViewGenerator.determineDefaultColumnAlignment(attributeType);
 			}
 			if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
 				style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");

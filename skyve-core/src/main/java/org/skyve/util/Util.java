@@ -316,6 +316,29 @@ public class Util {
 	public static String getDocumentUrl(Bean bean) {
 		return getDocumentUrl(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
+	
+	/**
+	 * Constructs a HTML anchor for the document instance
+	 *  
+	 * @param bizModule - the module of the document instance
+	 * @param bizDocument - the document
+	 * @param bizId - the bizId of the instance
+	 * @param targetNewWindow - whether the target value for the anchor is a new window
+	 * @param anchorMarkup - the html markup value (usually text) of the anchor 
+	 * @return - the constructed URL as a String
+	 */
+	public static String getDocumentAnchorUrl(String bizModule, String bizDocument, String bizId, boolean targetNewWindow, String anchorMarkup) {
+		StringBuilder result = new StringBuilder(128);
+		
+		result.append("<a href='").append(getDocumentUrl(bizModule, bizDocument, bizId));
+		 if(targetNewWindow) {
+	        	result.append(" target='_blank'");
+        }
+        result.append(">");
+        result.append(anchorMarkup).append("</a>");		
+		
+		return result.toString();
+	}
 
 	public static String getGridUrl(String bizModule, String queryName) {
 		StringBuilder result = new StringBuilder(128);
@@ -352,4 +375,71 @@ public class Util {
 	public static String getResourceUrl(String resourceFileName) {
 		return getResourceUrl(null, null, resourceFileName);
 	}
+	
+    /**
+     * Constructs a HTML image URL for the given content item
+     * (If the content item is not an image type, the content servlet returns a file type thumbnail)
+     * 
+	 * @param bizModule - the module of the document containing the content
+	 * @param bizDocument - the document containing the content
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param width - the width of the image in pixels
+	 * @param height - the height of the image in pixels
+	 * @return - the constructed URL as a String
+     */
+    public static String getContentImageUrl(String bizModule, String bizDocument, String binding, String contentId, int width, int height) {
+    	StringBuilder result = new StringBuilder(128);
+    	
+    	result.append("<img src='");
+    	result.append(getContentUrl(bizModule, bizDocument, binding, contentId));
+    	result.append("&_w=").append(width);
+    	result.append("&_h=").append(height);
+    	result.append("'/>");
+        
+    	return result.toString();
+    }
+
+	/**
+	 * Constructs an HTML anchor URL for the given content item
+	 *  
+	 * @param bizModule - the module of the document containing the content
+	 * @param bizDocument - the document containing the content
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param targetNewWindow - whether the target value for the anchor is a new window
+	 * @param anchorMarkup - the html markup value (usually text) of the anchor 
+	 * @return - the constructed URL as a String
+	 */	
+    public static String getContentAnchorUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, String anchorMarkup) {
+        String contentUrl = getContentUrl(bizModule, bizDocument, binding, contentId);
+        
+        StringBuilder result = new StringBuilder(128);
+        
+        result.append("<a href='").append(contentUrl).append("'");
+        if(targetNewWindow) {
+        	result.append(" target='_blank'");
+        }
+        result.append(">");
+        result.append(anchorMarkup).append("</a>");
+        
+        return result.toString();
+    }
+	
+	/**
+	 * Constructs an HTML anchor with image URL for the given content item
+	 *  
+	 * @param bizModule - the module of the document containing the content
+	 * @param bizDocument - the document containing the content
+	 * @param binding - the binding name of the content attribute
+	 * @param contentId - the value of the content attribute (a String id of the item in the content store) 
+	 * @param targetNewWindow - whether the target value for the anchor is a new window
+	 * @param width - the width of the image in pixels
+	 * @param height - the height of the image in pixels
+	 * @return - the constructed URL as a String
+	 */
+    public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, int width, int height) {
+    	return getContentAnchorUrl(bizModule, bizDocument, binding, contentId, targetNewWindow, getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
+    }
+
 }

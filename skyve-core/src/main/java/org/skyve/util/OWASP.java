@@ -90,6 +90,28 @@ public class OWASP {
 		}
 		return result;
 	}
+	
+	public static String escapeJsString(String value) {
+		return escapeJsString(value, true, true);
+	}
+	
+	public static String escapeJsString(String value, boolean escapeDoubleQuotes, boolean escapeNewLines) {
+		if (value == null) {
+			return null;
+		}
+
+		String result = value.replace("\\", "\\\\").replace("'", "\\'");
+		if (escapeDoubleQuotes) {
+			result = result.replace("\"", "&quot;");
+		}
+		if (escapeNewLines) {
+			result = result.replace("\n", "<br/>");
+		}
+		else {
+			result = result.replace("\n", "");
+		}
+		return result;
+	}
 
 	public static String sanitiseAndEscapeHtml(Sanitisation sanitise, String html) {
 		String result = sanitise(sanitise, html);

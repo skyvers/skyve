@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                        
+                                                            
+    
     
     
     
@@ -13,7 +14,8 @@
     
     
     <wb-module deploy-name="skyve-ear-8.0.0-SNAPSHOT">
-                                                                                                                
+                                                                                                                        
+        
         
         
         
@@ -27,7 +29,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                
+                                                                                                                        
+        
         
         
         
@@ -75,6 +78,36 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="junidecode-0.4.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/gcardone/junidecode/junidecode/0.4.1/junidecode-0.4.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="encoder-1.2.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/owasp/encoder/encoder/1.2.3/encoder-1.2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="owasp-java-html-sanitizer-20200713.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/googlecode/owasp-java-html-sanitizer/owasp-java-html-sanitizer/20200713.1/owasp-java-html-sanitizer-20200713.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="guava-27.1-jre.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/guava/27.1-jre/guava-27.1-jre.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="failureaccess-1.0.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jsr305-3.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="checker-qual-2.5.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="error_prone_annotations-2.2.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="j2objc-annotations-1.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="animal-sniffer-annotations-1.17.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="hibernate-core-5.4.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-core/5.4.3.Final/hibernate-core-5.4.3.Final.jar">
@@ -317,39 +350,6 @@
         <dependent-module archiveName="javax.el-3.0.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/glassfish/javax.el/3.0.0/javax.el-3.0.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="encoder-1.2.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/owasp/encoder/encoder/1.2.3/encoder-1.2.3.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="owasp-java-html-sanitizer-20200713.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/googlecode/owasp-java-html-sanitizer/owasp-java-html-sanitizer/20200713.1/owasp-java-html-sanitizer-20200713.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="guava-27.1-jre.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/guava/27.1-jre/guava-27.1-jre.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="failureaccess-1.0.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="jsr305-3.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="checker-qual-2.5.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="error_prone_annotations-2.2.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="j2objc-annotations-1.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="animal-sniffer-annotations-1.17.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="json-sanitizer-1.2.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/mikesamuel/json-sanitizer/1.2.3/json-sanitizer-1.2.3.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="asm-5.0.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/ow2/asm/asm/5.0.4/asm-5.0.4.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -428,7 +428,8 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                            
+                                                                                                                    
+    
     
     
     
@@ -442,7 +443,8 @@
     
     
     </wb-module>
-                                                    
+                                                        
+
 
 
 

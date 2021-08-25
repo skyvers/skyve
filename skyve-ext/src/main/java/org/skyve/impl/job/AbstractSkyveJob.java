@@ -57,6 +57,10 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		this.percentComplete = percentComplete;
 	}
 
+	public final void setPercentComplete(int totalProcessed, int totalSize) {
+		setPercentComplete((int) (((float) totalProcessed) / ((float) totalSize) * 100F));
+	}
+
 	public final Timestamp getStartTime() {
 		return startTime;
 	}

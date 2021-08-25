@@ -19,7 +19,6 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -156,7 +155,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 		    	}
 		    	else {
 			    	pw.append("The snapshot operation was unsuccessful: ");
-			    	pw.append(SmartClientGenerateUtils.processString(t.getMessage()));
+			    	pw.append(OWASP.escapeJsString(t.getMessage()));
 		    	}
 		    	pw.append("');");
 		    	pw.flush();
@@ -192,8 +191,8 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    q.addBoundOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
 
 	    for (Bean bean : q.projectedResults()) {
-        	String escapedCode = SmartClientGenerateUtils.processString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
-        	String escapedDescription = SmartClientGenerateUtils.processString((String) BindUtil.get(bean, SNAPSHOT_NAME_PROPERTY_NAME));
+        	String escapedCode = OWASP.escapeJsString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
+        	String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, SNAPSHOT_NAME_PROPERTY_NAME));
         	String snapshot = (String) BindUtil.get(bean, SNAPSHOT_SNAPSHOT_PROPERTY_NAME);
 
         	// snap select menu

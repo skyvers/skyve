@@ -100,7 +100,7 @@ public class Proxy {
 	 * @param proxiedTransient
 	 * @return	The proxy instance.
 	 */
-	@SuppressWarnings({"unchecked", "synthetic-access"})
+	@SuppressWarnings({"unchecked"})
 	private static <T extends Object> T of(T proxied, ProxyDelegate<T> delegate, boolean proxiedTransient) {
 		if (Proxy.isProxy(proxied)) {
 			throw new IllegalArgumentException("proxied argument is a Proxy");
@@ -144,7 +144,7 @@ public class Proxy {
 										
 		// Instantiate and set
 		try {
-			T proxy = proxyClass.newInstance();
+			T proxy = proxyClass.getDeclaredConstructor().newInstance();
 			proxyClass.getDeclaredField(PROXIED_FIELD_NAME).set(proxy, proxied);
 			proxyClass.getDeclaredField(DELEGATE_FIELD_NAME).set(proxy, delegate);
 			return proxy;

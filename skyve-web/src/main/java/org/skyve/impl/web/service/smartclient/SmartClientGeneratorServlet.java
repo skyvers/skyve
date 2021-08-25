@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,9 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -38,6 +39,37 @@ import org.skyve.web.UserAgentType;
  */
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+	private static Class<? extends SmartClientViewRenderer> RENDERER_CLASS = null;
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		
+		String rendererParam = Util.processStringValue(config.getInitParameter("renderer"));
+		if (rendererParam != null) {
+			try {
+				RENDERER_CLASS = (Class<? extends SmartClientViewRenderer>) Thread.currentThread().getContextClassLoader().loadClass(rendererParam);
+			}
+			catch (Exception e) {
+				throw new ServletException("Cannot load SmartClient renderer " + rendererParam, e);
+			}
+		}
+	}
+	
+	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+		if (RENDERER_CLASS == null) {
+			return new SmartClientViewRenderer(user, module, document, view, noCreateView);
+		}
+		
+		try {
+			return (SmartClientViewRenderer) RENDERER_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, Boolean.valueOf(noCreateView));
+		}
+		catch (Exception e) {
+			throw new DomainException("Cannot instantiate SmartClient renderer " + RENDERER_CLASS, e);
+		}
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest request,
@@ -93,16 +125,16 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
-					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, true);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, true);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 				}
 				else {
-					SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, editView, false);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, false);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 	
-					renderer = new SmartClientViewRenderer(user, module, document, createView, false);
+					renderer = newRenderer(user, module, document, createView, false);
 					renderer.visit();
 					createString = renderer.getCode().toString();
 				}
@@ -117,33 +149,33 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				if (iconStyleClass == null) {
 					iconStyleClass = document.getIconStyleClass();
 					if (iconStyleClass != null) {
-						pw.append("',_editFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+						pw.append("',_editFontIcon:'").append(OWASP.escapeJsString(iconStyleClass));
 					}
 					else {
 						String icon32 = editView.getIcon32x32RelativeFileName();
 						if (icon32 == null) {
 							icon32 = document.getIcon32x32RelativeFileName();
 							if (icon32 != null) {
-								pw.append("',_editIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+								pw.append("',_editIcon:'").append(OWASP.escapeJsString(icon32));
 							}
 						}
 						else { 
-							pw.append("',_editIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+							pw.append("',_editIcon:'").append(OWASP.escapeJsString(icon32));
 						}
 					}
 				}
 				else {
-					pw.append("',_editFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+					pw.append("',_editFontIcon:'").append(OWASP.escapeJsString(iconStyleClass));
 				}
 
 				String help = editView.getHelpRelativeFileName();
 				if (help != null) {
-					pw.append("',_editHelpFile:'").append(SmartClientGenerateUtils.processString(help));
+					pw.append("',_editHelpFile:'").append(OWASP.escapeJsString(help));
 				}
 				else {
 					help = editView.getHelpURL();
 					if (help != null) {
-						pw.append("',_editHelpURL:'").append(SmartClientGenerateUtils.processString(help));
+						pw.append("',_editHelpURL:'").append(OWASP.escapeJsString(help));
 					}
 				}
 
@@ -152,37 +184,37 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				if (iconStyleClass == null) {
 					iconStyleClass = document.getIconStyleClass();
 					if (iconStyleClass != null) {
-						pw.append("',_createFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+						pw.append("',_createFontIcon:'").append(OWASP.escapeJsString(iconStyleClass));
 					}
 					else {
 						String icon32 = createView.getIcon32x32RelativeFileName();
 						if (icon32 == null) {
 							icon32 = document.getIcon32x32RelativeFileName();
 							if (icon32 != null) {
-								pw.append("',_createIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+								pw.append("',_createIcon:'").append(OWASP.escapeJsString(icon32));
 							}
 						}
 						else { 
-							pw.append("',_createIcon:'").append(SmartClientGenerateUtils.processString(icon32));
+							pw.append("',_createIcon:'").append(OWASP.escapeJsString(icon32));
 						}
 					}
 				}
 				else {
-					pw.append("',_createFontIcon:'").append(SmartClientGenerateUtils.processString(iconStyleClass));
+					pw.append("',_createFontIcon:'").append(OWASP.escapeJsString(iconStyleClass));
 				}
 
 				help = createView.getHelpRelativeFileName();
 				if (help != null) {
-					pw.append("',_createHelpFile:'").append(SmartClientGenerateUtils.processString(help));
+					pw.append("',_createHelpFile:'").append(OWASP.escapeJsString(help));
 				}
 				else {
 					help = createView.getHelpURL();
 					if (help != null) {
-						pw.append("',_createHelpURL:'").append(SmartClientGenerateUtils.processString(help));
+						pw.append("',_createHelpURL:'").append(OWASP.escapeJsString(help));
 					}
 				}
 				
-				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getLocalisedSingularAlias()));
+				pw.append("',_singular:'").append(OWASP.escapeJsString(document.getLocalisedSingularAlias()));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 

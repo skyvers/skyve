@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -135,7 +134,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
-class ViewJSONManipulator extends ViewVisitor {
+public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
@@ -276,14 +275,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
 
-	ViewJSONManipulator(User user,
-							Module module, 
-							Document document, 
-							View view,
-							Bean bean,
-							int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
-							int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
-							boolean forApply) {
+	protected ViewJSONManipulator(User user,
+									Module module, 
+									Document document, 
+									View view,
+									Bean bean,
+									int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
+									int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
+									boolean forApply) {
 		super((CustomerImpl) user.getCustomer(),
 				(ModuleImpl) module,
 				(DocumentImpl) document,
@@ -295,8 +294,8 @@ class ViewJSONManipulator extends ViewVisitor {
 		this.forApply = forApply;
 	}
 	
-	String toJSON(AbstractWebContext webContextToReference,
-					String redirectUrl) // to redirect the browser location when the response is processed
+	protected String toJSON(AbstractWebContext webContextToReference,
+								String redirectUrl) // to redirect the browser location when the response is processed
 	throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 
@@ -338,7 +337,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		return JSON.marshall(user.getCustomer(), result);
 	}
 	
-	private void constructJSONObjectFromBinding(ViewBindings bindings,
+	protected void constructJSONObjectFromBinding(ViewBindings bindings,
 													Map<String, Object> json,
 													String webId)
 	throws Exception {
@@ -375,7 +374,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addBindingsAndFormatValues(ViewBindings bindings,
+	protected void addBindingsAndFormatValues(ViewBindings bindings,
 												Bean aBean,
 												Map<String, Object> toAddTo,
 												String webId)
@@ -463,7 +462,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 */	
-	void applyJSON(String json, AbstractPersistence persistence, WebContext webContext) throws Exception {
+	protected void applyJSON(String json, AbstractPersistence persistence, WebContext webContext) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, json);
 
@@ -472,12 +471,12 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void applyJSON(ViewBindings bindings,
-							Document appliedToDoc,
-							Map<String, Object> values,
-							Bean appliedTo,
-							AbstractPersistence persistence,
-							WebContext webContext)
+	protected void applyJSON(ViewBindings bindings,
+								Document appliedToDoc,
+								Map<String, Object> values,
+								Bean appliedTo,
+								AbstractPersistence persistence,
+								WebContext webContext)
 	throws Exception {
 //UtilImpl.LOGGER.info("FQ BINDING PREFIX = " + bindings.getFullyQualifiedBindingPrefix());
 
@@ -627,7 +626,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	private void applyJSONProperties(ViewBindings bindings,
+	protected void applyJSONProperties(ViewBindings bindings,
 										Document documentToApply,
 										Map<String, Object> valuesToApply,
 										Bean beanToApplyTo,
@@ -643,12 +642,12 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void applyJSONProperty(Document startingDocument,
-									String binding, 
-									Map<String, Object> values, 
-									Bean targetBean,
-									AbstractPersistence persistence,
-									WebContext webContext) 
+	protected void applyJSONProperty(Document startingDocument,
+										String binding, 
+										Map<String, Object> values, 
+										Bean targetBean,
+										AbstractPersistence persistence,
+										WebContext webContext) 
 	throws Exception {
 		String valueKey = BindUtil.sanitiseBinding(binding);
 		if (! values.containsKey(valueKey)) {
@@ -709,7 +708,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
+	protected void addBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
 		addBinding(binding, mutable, escape, sanitise, false);
 	}
 
@@ -724,7 +723,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	private void addFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
+	protected void addFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
 		if (valueTemplate != null) {
 			String currentBindingPrefix = currentBindings.getBindingPrefix();
 			String formatKey = (currentBindingPrefix == null) ? "" : currentBindingPrefix;
@@ -738,7 +737,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	private void addCondition(String condition) {
+	protected void addCondition(String condition) {
 		if ((condition != null) && (! condition.equals("true")) && (! condition.equals("false"))) {
 			addBinding(condition, false, false, Sanitisation.none, true);
 		}
@@ -1838,8 +1837,8 @@ class ViewJSONManipulator extends ViewVisitor {
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
 					comparisons.put(referenceName, 
-										new ComparisonJSONManipulator((UserImpl) user, 
-																		customer,
+										new ComparisonJSONManipulator(customer,
+																		SmartClientGeneratorServlet.newRenderer(user, module, document, view, true),
 																		root).toJSONStructure());
 				}
 				else if (forApply && 

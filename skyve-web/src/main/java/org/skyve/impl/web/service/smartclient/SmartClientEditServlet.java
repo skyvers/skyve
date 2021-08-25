@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
@@ -32,7 +34,6 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -71,6 +72,44 @@ import org.skyve.util.Util;
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	private static Class<? extends SmartClientViewRenderer> MANIPULATOR_CLASS = null;
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		
+		String rendererParam = Util.processStringValue(config.getInitParameter("manipulator"));
+		if (rendererParam != null) {
+			try {
+				MANIPULATOR_CLASS = (Class<? extends SmartClientViewRenderer>) Thread.currentThread().getContextClassLoader().loadClass(rendererParam);
+			}
+			catch (Exception e) {
+				throw new ServletException("Cannot load SmartClient renderer " + rendererParam, e);
+			}
+		}
+	}
+	
+	private static ViewJSONManipulator newManipulator(User user,
+														Module module, 
+														Document document, 
+														View view,
+														Bean bean,
+														int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
+														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
+														boolean forApply) {
+		if (MANIPULATOR_CLASS == null) {
+			return new ViewJSONManipulator(user, module, document, view, bean, editIdCounter, createIdCounter, forApply);
+		}
+
+		try {
+			return (ViewJSONManipulator) MANIPULATOR_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, bean, Integer.valueOf(editIdCounter), Integer.valueOf(createIdCounter), Boolean.valueOf(forApply));
+		}
+		catch (Exception e) {
+			throw new DomainException("Cannot instantiate SmartClient JSON manipulator " + MANIPULATOR_CLASS, e);
+		}
+	}
+	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
@@ -398,7 +437,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	
             String message = t.getMessage();
             if (message != null) {
-                pw.append(SmartClientGenerateUtils.processString(message)).append('"');
+                pw.append(OWASP.escapeJsString(message)).append('"');
             }
             else {
                 pw.append("no error message...\"");
@@ -412,7 +451,7 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
 	    	pw.append("<li>");
-	        pw.append(SmartClientGenerateUtils.processString(m.getText()));
+	        pw.append(OWASP.escapeJsString(m.getText()));
 	        pw.append("</li>");
     	}
     	pw.append("</ul>");
@@ -437,7 +476,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    			sb.append("An error has occurred");
 	    		}
 	    		else {
-		    		sb.append(SmartClientGenerateUtils.processString(m.getText()));
+		    		sb.append(OWASP.escapeJsString(m.getText()));
 	    		}
 	    		sb.append("\",");
 	    	}
@@ -690,18 +729,18 @@ public class SmartClientEditServlet extends HttpServlet {
 		try {
 			StringBuilder message = new StringBuilder(256);
 	    	message.append("{\"response\":{\"status\":0,\"startRow\":0,\"endRow\":0,\"totalRows\":1,\"data\":[");
-			ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
-																		processModule, 
-																		processDocument, 
-																		processDocument.getView(uxui, 
-																									customer, 
-																									processBean.isCreated() ? 
-																										ViewType.edit.toString() : 
-																										ViewType.create.toString()),
-																		processBean,
-																		editIdCounter,
-																		createIdCounter,
-																		false);
+			ViewJSONManipulator manipulator = newManipulator(user, 
+																processModule, 
+																processDocument, 
+																processDocument.getView(uxui, 
+																							customer, 
+																							processBean.isCreated() ? 
+																								ViewType.edit.toString() : 
+																								ViewType.create.toString()),
+																processBean,
+																editIdCounter,
+																createIdCounter,
+																false);
 			manipulator.visit();
 
 			webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
@@ -844,18 +883,18 @@ public class SmartClientEditServlet extends HttpServlet {
 		String mutableCustomActionName = customActionName;
 		if (! ServletConstants.PUSH_ACTION_NAME.equals(mutableCustomActionName)) {
 			// Apply the JSON values
-	    	ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
-																		formModule, 
-																		formDocument, 
-																		formDocument.getView(uxui, 
-																								customer, 
-																								formBean.isCreated() ? 
-																									ViewType.edit.toString() : 
-																									ViewType.create.toString()),
-																		formBean, 
-																		editIdCounter,
-																		createIdCounter,
-																		true);
+	    	ViewJSONManipulator manipulator = newManipulator(user, 
+																formModule, 
+																formDocument, 
+																formDocument.getView(uxui, 
+																						customer, 
+																						formBean.isCreated() ? 
+																							ViewType.edit.toString() : 
+																							ViewType.create.toString()),
+																formBean, 
+																editIdCounter,
+																createIdCounter,
+																true);
 			manipulator.visit();
 			manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 		}
@@ -1031,14 +1070,14 @@ public class SmartClientEditServlet extends HttpServlet {
 		StringBuilder result = new StringBuilder(256);
 		// Need to make a new JSON manipulator here to visit the view for the response
 		// as conditions may have changed since applying changes to the bean
-		ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
-																	formModule, 
-																	formDocument, 
-																	formView,
-																	formBean,
-																	editIdCounter,
-																	createIdCounter,
-																	false);
+		ViewJSONManipulator manipulator = newManipulator(user, 
+															formModule, 
+															formDocument, 
+															formView,
+															formBean,
+															editIdCounter,
+															createIdCounter,
+															false);
 		manipulator.visit();
 
 		try {
