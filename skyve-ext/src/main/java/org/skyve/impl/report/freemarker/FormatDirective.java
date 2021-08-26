@@ -5,11 +5,13 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
 import freemarker.core.Environment;
+import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateDirectiveBody;
 import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
@@ -43,7 +45,9 @@ import freemarker.template.utility.DeepUnwrap;
 public class FormatDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_BEAN = "bean";
 	private static final String PARAM_NAME_BINDING = "binding";
-
+	private static final String PARAM_ESCAPE = "escape";
+	
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 	throws TemplateException, IOException {
@@ -63,6 +67,7 @@ public class FormatDirective implements TemplateDirectiveModel {
 		// process the parameters
 		Bean beanParam = null;
 		String bindingParam = null;
+		boolean escapeParam = true;
 
 		Iterator<?> paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
@@ -80,21 +85,35 @@ public class FormatDirective implements TemplateDirectiveModel {
 				beanParam = (Bean) beanObj;
 			}
 			else if (paramName.equals(PARAM_NAME_BINDING)) {
-				if (! (paramValue instanceof TemplateScalarModel)) {
+				if (!(paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_BINDING));
 				}
 				bindingParam = ((TemplateScalarModel) paramValue).getAsString();
-			}
-			else {
+			} else if (paramName.equals(PARAM_ESCAPE)) {
+				if (paramValue instanceof TemplateBooleanModel) {
+					escapeParam = ((TemplateBooleanModel) paramValue).getAsBoolean();	
+				} else if(paramValue instanceof TemplateScalarModel) {
+					escapeParam = Boolean.parseBoolean(((TemplateScalarModel) paramValue).getAsString());
+				} else {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a boolean.", PARAM_ESCAPE));
+				}
+			} else {
 				throw new TemplateModelException("Unsupported parameter: " + paramName);
 			}
 		}
 
 		// do the actual directive execution
-		try (Writer out = env.getOut()) {
-			if (beanParam != null && bindingParam != null) {
-				out.write(Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam));
+		Writer out = env.getOut();
+		if (beanParam != null && bindingParam != null) {
+			String display = Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam);
+			if (escapeParam) {
+				display = StringEscapeUtils.escapeHtml4(display);
 			}
+
+			// replace /n with <br/>
+			display = display.replace("\n", "<br/>");
+
+			out.write(display);
 		}
 	}
 }
