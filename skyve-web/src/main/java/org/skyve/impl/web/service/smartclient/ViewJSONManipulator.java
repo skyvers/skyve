@@ -235,7 +235,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	private User user;
-	private Bean bean;
+	protected Bean bean;
 	// we are applying values, so don't include bindings for
 	// disabled widgets or lookup description bindings
 	private boolean forApply;
