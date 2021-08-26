@@ -92,7 +92,10 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 			}
 
 			if (value instanceof Bean) {
-				return Collections.singletonList(defendTransientBean((Bean) value));
+				// Note we can't use Collections.singletonList here as that is immutable and grid implementations may add a summary row to this list.
+				List<Bean> result = new ArrayList<>(1);
+				result.add((Bean) value);
+				return result;
 			}
 		}
 
