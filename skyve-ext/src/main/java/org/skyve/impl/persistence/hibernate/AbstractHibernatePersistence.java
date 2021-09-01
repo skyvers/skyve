@@ -2082,6 +2082,7 @@ public void doWorkOnConnection(Session session) {
 			query.append("update ").append(document.getPersistent().getPersistentIdentifier()).append(" set ");
 			query.append(PersistentBean.VERSION_NAME).append('=').append(PersistentBean.VERSION_NAME).append("+1");
 			query.append(',').append(PersistentBean.LOCK_NAME).append("=:").append(PersistentBean.LOCK_NAME);
+			query.append(',').append(PersistentBean.FLAG_COMMENT_NAME).append("=:").append(PersistentBean.FLAG_COMMENT_NAME);
 			query.append(',').append(Bean.CUSTOMER_NAME).append("=:").append(Bean.CUSTOMER_NAME);
 			query.append(',').append(Bean.DATA_GROUP_ID).append("=:").append(Bean.DATA_GROUP_ID);
 			query.append(',').append(Bean.USER_ID).append("=:").append(Bean.USER_ID);
@@ -2105,15 +2106,18 @@ public void doWorkOnConnection(Session session) {
 					continue;
 				}
 				else if (attribute instanceof Association) {
-					query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
-
-					// If this is an arc, add the type column to the insert
 					Association association = (Association) attribute;
-					String referencedDocumentName = association.getDocumentName();
-					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
-					Persistent referencedPersistent = referencedDocument.getPersistent();
-					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-						query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
+					// Exclude embedded associations
+					if (association.getType() != AssociationType.embedded) {
+						query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
+
+						// If this is an arc, add the type column to the insert
+						String referencedDocumentName = association.getDocumentName();
+						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+						Persistent referencedPersistent = referencedDocument.getPersistent();
+						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+							query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
+						}
 					}
 				}
 				else if (attribute instanceof Field) {
@@ -2127,12 +2131,12 @@ public void doWorkOnConnection(Session session) {
 			// Add the built ins
 			StringBuilder columns = new StringBuilder(128);
 			columns.append(Bean.DOCUMENT_ID).append(',').append(PersistentBean.VERSION_NAME).append(',');
-			columns.append(PersistentBean.LOCK_NAME).append(',').append(Bean.CUSTOMER_NAME).append(',');
-			columns.append(Bean.DATA_GROUP_ID).append(',').append(Bean.BIZ_KEY).append(',').append(Bean.USER_ID);
+			columns.append(PersistentBean.LOCK_NAME).append(',').append(Bean.BIZ_KEY).append(',').append(PersistentBean.FLAG_COMMENT_NAME).append(',');
+			columns.append(Bean.CUSTOMER_NAME).append(',').append(Bean.DATA_GROUP_ID).append(',').append(Bean.USER_ID);
 			StringBuilder values = new StringBuilder(128);
 			values.append(':').append(Bean.DOCUMENT_ID).append(",:").append(PersistentBean.VERSION_NAME).append(",:");
-			values.append(PersistentBean.LOCK_NAME).append(",:").append(Bean.CUSTOMER_NAME).append(",:");
-			values.append(Bean.DATA_GROUP_ID).append(",:").append(Bean.BIZ_KEY).append(",:").append(Bean.USER_ID);
+			values.append(PersistentBean.LOCK_NAME).append(",:").append(Bean.BIZ_KEY).append(",:").append(PersistentBean.FLAG_COMMENT_NAME).append(",:");
+			values.append(Bean.CUSTOMER_NAME).append(",:").append(Bean.DATA_GROUP_ID).append(",:").append(Bean.USER_ID);
 
 			// Add parent if required
 			if (parentDocumentName != null) {
@@ -2170,17 +2174,20 @@ public void doWorkOnConnection(Session session) {
 					continue;
 				}
 				else if (attribute instanceof Association) {
-					columns.append(',').append(attributeName).append("_id");
-					values.append(",:").append(attributeName).append("_id");
-
-					// If this is an arc, add the type column to the insert
 					Association association = (Association) attribute;
-					String referencedDocumentName = association.getDocumentName();
-					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
-					Persistent referencedPersistent = referencedDocument.getPersistent();
-					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-						columns.append(',').append(attributeName).append("_type");
-						values.append(",:").append(attributeName).append("_type");
+					// Exclude embedded associations
+					if (association.getType() != AssociationType.embedded) {
+						columns.append(',').append(attributeName).append("_id");
+						values.append(",:").append(attributeName).append("_id");
+	
+						// If this is an arc, add the type column to the insert
+						String referencedDocumentName = association.getDocumentName();
+						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+						Persistent referencedPersistent = referencedDocument.getPersistent();
+						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+							columns.append(',').append(attributeName).append("_type");
+							values.append(",:").append(attributeName).append("_type");
+						}
 					}
 				}
 				else if (attribute instanceof Field) {
@@ -2202,6 +2209,7 @@ public void doWorkOnConnection(Session session) {
 		if (! bean.isPersisted()) {
 			sql.putParameter(PersistentBean.VERSION_NAME, NEW_VERSION);
 		}
+		sql.putParameter(PersistentBean.FLAG_COMMENT_NAME, bean.getBizFlagComment(), true);
 		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId(), false);
 		sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
@@ -2235,23 +2243,26 @@ public void doWorkOnConnection(Session session) {
 
 			try {
 				if (attribute instanceof Association) {
-					String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
-					String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
-					sql.putParameter(columnName, (String) BindUtil.get(bean, binding), false);
-
-					// If this is an arc, add the type column to the insert
 					Association association = (Association) attribute;
-					String referencedDocumentName = association.getDocumentName();
-					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
-					Persistent referencedPersistent = referencedDocument.getPersistent();
-					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-						columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
-						Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
-						String value = null;
-						if (referencedBean != null) {
-							value = new StringBuilder(64).append(referencedBean.getBizModule()).append('.').append(referencedBean.getBizDocument()).toString();
+					// Exclude embedded associations
+					if (association.getType() != AssociationType.embedded) {
+						String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
+						String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
+						sql.putParameter(columnName, (String) BindUtil.get(bean, binding), false);
+	
+						// If this is an arc, add the type column to the insert
+						String referencedDocumentName = association.getDocumentName();
+						Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+						Persistent referencedPersistent = referencedDocument.getPersistent();
+						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+							columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
+							Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
+							String value = null;
+							if (referencedBean != null) {
+								value = new StringBuilder(64).append(referencedBean.getBizModule()).append('.').append(referencedBean.getBizDocument()).toString();
+							}
+							sql.putParameter(columnName, value, false);
 						}
-						sql.putParameter(columnName, value, false);
 					}
 				}
 				else if (attribute instanceof Enumeration) {

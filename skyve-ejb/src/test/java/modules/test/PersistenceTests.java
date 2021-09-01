@@ -989,4 +989,22 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		beans = p.newSQL("select bizId from " + persistentIdentifier + " where bizId = :bizId").putParameter(Bean.DOCUMENT_ID, "test", false).dynaResults();
 		Assert.assertEquals("Should be no matches", 0, beans.size());
 	}
+
+	@Test
+	public void testUpsertInsert() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test.setBizFlagComment("Something");
+
+		p.upsertBeanTuple(test.getComposedAssociation());
+		p.upsertBeanTuple(test.getAggregatedAssociation());
+		p.upsertBeanTuple(test);
+	}
+
+	@Test
+	public void testUpsertUpdate() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		test.setBizFlagComment("Something");
+		p.upsertBeanTuple(test);
+	}
 }
