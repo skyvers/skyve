@@ -13,6 +13,8 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private String description;
 
 	private String documentation;
+	
+	private int timeoutInSeconds = 0;
 
 	@Override
 	public Module getOwningModule() {
@@ -48,5 +50,14 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+
+	@Override
+	public int getTimeoutInSeconds() {
+		return timeoutInSeconds;
+	}
+
+	public void setTimeoutInSeconds(int timeoutInSeconds) {
+		this.timeoutInSeconds = timeoutInSeconds;
 	}
 }

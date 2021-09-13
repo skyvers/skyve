@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository.module;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -12,12 +13,13 @@ import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "abstractQuery",
-			propOrder = {"documentation", "description"})
+			propOrder = {"documentation", "description", "timeoutInSeconds"})
 public abstract class QueryMetaData extends NamedMetaData {
 	private static final long serialVersionUID = 3163827058170250318L;
 
 	private String documentation;
 	private String description;
+	private Integer timeoutInSeconds;
 
 	public String getDocumentation() {
 		return documentation;
@@ -41,5 +43,14 @@ public abstract class QueryMetaData extends NamedMetaData {
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
+	}
+
+	public Integer getTimeoutInSeconds() {
+		return timeoutInSeconds;
+	}
+
+	@XmlAttribute
+	public void setTimeoutInSeconds(Integer timeoutInSeconds) {
+		this.timeoutInSeconds = timeoutInSeconds;
 	}
 }

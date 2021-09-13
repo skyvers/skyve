@@ -86,6 +86,11 @@ public class QueryGenerator {
 					}
 					metaDataColumns.add(metaDataColumn);
 				}
+				
+				int timeoutInSeconds = documentQuery.getTimeoutInSeconds();
+				if (timeoutInSeconds > 0) {
+					documentQueryMetaData.setTimeoutInSeconds(Integer.valueOf(timeoutInSeconds));
+				}
 				metaDataQueries.add(documentQueryMetaData);
 			}
 			else if (query instanceof SQLDefinition) {
@@ -95,6 +100,10 @@ public class QueryGenerator {
 				sqlMetaData.setDescription(sql.getDescription());
 				sqlMetaData.setDocumentation(sql.getDocumentation());
 				sqlMetaData.setQuery(sql.getQuery());
+				int timeoutInSeconds = sql.getTimeoutInSeconds();
+				if (timeoutInSeconds > 0) {
+					sqlMetaData.setTimeoutInSeconds(Integer.valueOf(timeoutInSeconds));
+				}
 				metaDataQueries.add(sqlMetaData);
 			}
 			else if (query instanceof BizQLDefinition) {
@@ -104,6 +113,10 @@ public class QueryGenerator {
 				bizQLMetaData.setDescription(bizQL.getDescription());
 				bizQLMetaData.setDocumentation(bizQL.getDocumentation());
 				bizQLMetaData.setQuery(bizQL.getQuery());
+				int timeoutInSeconds = bizQL.getTimeoutInSeconds();
+				if (timeoutInSeconds > 0) {
+					bizQLMetaData.setTimeoutInSeconds(Integer.valueOf(timeoutInSeconds));
+				}
 				metaDataQueries.add(bizQLMetaData);
 			}
 		}

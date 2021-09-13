@@ -308,6 +308,7 @@
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified"/>
         </xs:sequence>
+        <xs:attribute name="timeoutInSeconds" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

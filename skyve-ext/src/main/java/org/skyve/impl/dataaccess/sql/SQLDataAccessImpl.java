@@ -9,6 +9,7 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
 
@@ -53,7 +54,10 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		return new SQLDataAccessSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		SQLDataAccessSQL result = new SQLDataAccessSQL(moduleName, documentName, sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 	
 	@Override
@@ -64,7 +68,10 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public SQL newNamedSQL(Document document, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
-		return new SQLDataAccessSQL(document, module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		SQLDataAccessSQL result = new SQLDataAccessSQL(document, sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
@@ -75,6 +82,9 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public SQL newNamedSQL(String moduleName, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		return new SQLDataAccessSQL(module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		SQLDataAccessSQL result = new SQLDataAccessSQL(sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 }

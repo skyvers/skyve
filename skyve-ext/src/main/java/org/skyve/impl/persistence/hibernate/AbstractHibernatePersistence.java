@@ -109,7 +109,9 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
@@ -2400,12 +2402,18 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public SQL newNamedSQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		return new HibernateSQL(module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
 	public SQL newNamedSQL(Module module, String queryName) {
-		return new HibernateSQL(module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
@@ -2421,13 +2429,19 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		return new HibernateSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		HibernateSQL result = new HibernateSQL(moduleName, documentName, sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
 	public SQL newNamedSQL(Document document, String queryName) {
 		Module module = user.getCustomer().getModule(document.getOwningModuleName());
-		return new HibernateSQL(document, module.getSQL(queryName).getQuery(), this);
+		SQLDefinition sql = module.getSQL(queryName);
+		HibernateSQL result = new HibernateSQL(document, sql.getQuery(), this);
+		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
@@ -2438,12 +2452,18 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public BizQL newNamedBizQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		return new HibernateBizQL(module.getBizQL(queryName).getQuery(), this);
+		BizQLDefinition bizql = module.getBizQL(queryName);
+		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
+		result.setTimeoutInSeconds(bizql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override
 	public BizQL newNamedBizQL(Module module, String queryName) {
-		return new HibernateBizQL(module.getBizQL(queryName).getQuery(), this);
+		BizQLDefinition bizql = module.getBizQL(queryName);
+		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
+		result.setTimeoutInSeconds(bizql.getTimeoutInSeconds());
+		return result;
 	}
 
 	@Override

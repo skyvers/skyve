@@ -613,6 +613,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			}
 		}
 		
+		result.setTimeoutInSeconds(getTimeoutInSeconds());
+
 		return result;
 	}
 	

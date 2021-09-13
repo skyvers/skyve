@@ -825,6 +825,11 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		query.setDescription(value);
 		query.setDocumentation(queryMetaData.getDocumentation());
 
+		Integer timeoutInSeconds = queryMetaData.getTimeoutInSeconds();
+		if (timeoutInSeconds != null) {
+			query.setTimeoutInSeconds(timeoutInSeconds.intValue());
+		}
+
 		query.setOwningModule(owningModule);
 		owningModule.putQuery(query);
 	}

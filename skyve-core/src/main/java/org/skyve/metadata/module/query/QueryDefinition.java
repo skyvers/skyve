@@ -29,4 +29,10 @@ public interface QueryDefinition extends NamedMetaData {
 	 * @return
 	 */
 	public String getDocumentation();
+	
+	/**
+	 * 0 means no timeout (ie defer to Skyve timeouts)
+	 * @return	query timeout in seconds
+	 */
+	public int getTimeoutInSeconds();
 }
