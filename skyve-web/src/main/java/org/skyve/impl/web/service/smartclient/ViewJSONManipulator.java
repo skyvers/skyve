@@ -78,7 +78,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -1934,35 +1933,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (visitingDataWidget) {
-			return;
-		}
-
-		if (parentVisible && visible(lookup)) {
-			if ((! forApply) || 
-					(forApply && parentEnabled && enabled(lookup))) {
-				addBinding(new StringBuilder(32).append(lookup.getBinding()).append('.').append(Bean.DOCUMENT_ID).toString(), true, false, Sanitisation.text);
-			}
-		}
-		addCondition(lookup.getDisabledConditionName());
-		addCondition(lookup.getInvisibleConditionName());
-		addCondition(lookup.getDisablePickConditionName());
-		addCondition(lookup.getDisableEditConditionName());
-		addCondition(lookup.getDisableAddConditionName());
-		addCondition(lookup.getDisableClearConditionName());
-	}
-
-	@Override
-	public void visitedLookup(Lookup lookup,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
 	public void visitPassword(Password password, 
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -2331,28 +2301,28 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup lookup,
+	public void visitOnPickedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup,
+	public void visitedOnPickedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup lookup,
+	public void visitOnClearedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup,
+	public void visitedOnClearedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here

@@ -56,7 +56,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -293,12 +292,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedLookupDescription(LookupDescription lookup,
 													boolean parentVisible,
 													boolean parentEnabled);
-	public abstract void visitLookup(Lookup lookup,
-										boolean parentVisible,
-										boolean parentEnabled);
-	public abstract void visitedLookup(Lookup lookup,
-										boolean parentVisible,
-										boolean parentEnabled);
 	public abstract void visitPassword(Password password,
 										boolean parentVisible,
 										boolean parentEnabled);
@@ -387,16 +380,16 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedOnSelectedEventHandler(Selectable selectable,
 														boolean parentVisible,
 														boolean parentEnabled);
-	public abstract void visitOnPickedEventHandler(Lookup lookup,
+	public abstract void visitOnPickedEventHandler(LookupDescription lookup,
 													boolean parentVisible,
 													boolean parentEnabled);
-	public abstract void visitedOnPickedEventHandler(Lookup lookup,
+	public abstract void visitedOnPickedEventHandler(LookupDescription lookup,
 														boolean parentVisible,
 														boolean parentEnabled);
-	public abstract void visitOnClearedEventHandler(Lookup lookup,
+	public abstract void visitOnClearedEventHandler(LookupDescription lookup,
 													boolean parentVisible,
 													boolean parentEnabled);
-	public abstract void visitedOnClearedEventHandler(Lookup lookup,
+	public abstract void visitedOnClearedEventHandler(LookupDescription lookup,
 														boolean parentVisible,
 														boolean parentEnabled);
 	public abstract void visitRerenderEventAction(RerenderEventAction rerender,
@@ -669,13 +662,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitFilterable(lookup, parentVisible, parentEnabled);
 			visitedLookupDescription(lookup, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof Lookup) {
-			Lookup lookup = (Lookup) widget;
-			visitLookup(lookup, parentVisible, parentEnabled);
-			visitLookupActions(lookup, parentVisible, parentEnabled);
-			visitFilterable(lookup, parentVisible, parentEnabled);
-			visitedLookup(lookup, parentVisible, parentEnabled);
-		}
 		else if (widget instanceof Password) {
 			Password password = (Password) widget;
 			visitPassword(password, parentVisible, parentEnabled);
@@ -915,7 +901,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
-	private void visitLookupActions(Lookup lookup,
+	private void visitLookupActions(LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		visitAddableActions(lookup, parentVisible, parentEnabled);

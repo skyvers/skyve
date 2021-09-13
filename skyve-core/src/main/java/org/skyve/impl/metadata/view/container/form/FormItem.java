@@ -32,7 +32,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -91,7 +90,6 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = ColourPicker.class), 
 						@XmlElementRef(type = Combo.class), 
 						@XmlElementRef(type = Radio.class),
-						@XmlElementRef(type = Lookup.class), 
 						@XmlElementRef(type = LookupDescription.class),
 						@XmlElementRef(type = Password.class), 
 						@XmlElementRef(type = RichText.class), 

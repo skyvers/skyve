@@ -75,7 +75,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -1270,7 +1269,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																	customer, 
 																	lookup.getQuery(),
 																	optionDataSource,
-																	(Lookup) dataWidgetColumnInputWidget, 
+																	(LookupDescription) dataWidgetColumnInputWidget, 
 																	false,
 																	ds,
 																	null);
@@ -1573,25 +1572,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// do nothing
 	}
 	
-	@Override
-	public void renderFormLookup(MetaDataQueryDefinition query,
-									boolean canCreate,
-									boolean canUpdate,
-									Lookup lookup) {
-		code.append("type:'blurb',defaultValue:'lookup ");
-		code.append(lookup.getBinding()).append("',");
-		disableLookupComponents(lookup, code);
-		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
-	}
-
-	@Override
-	public void renderedFormLookup(MetaDataQueryDefinition query,
-									boolean canCreate,
-									boolean canUpdate,
-									Lookup lookup) {
-		// do nothing
-	}
-
 	@Override
 	public void renderBoundColumnPassword(Password password) {
 		dataWidgetColumnInputWidget = password;
@@ -2389,22 +2369,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizPicked:function(form,item,value){var view=form._view;");
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizCleared:function(form,item,value){var view=form._view;");
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
 
@@ -2607,7 +2587,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private static void disableLookupComponents(Lookup lookup, StringBuilder builder) {
+	private static void disableLookupComponents(LookupDescription lookup, StringBuilder builder) {
 		String disabledCondition = lookup.getDisablePickConditionName();
 		if (disabledCondition != null) {
 			builder.append("disablePickConditionName:'").append(disabledCondition).append("',");
@@ -2927,7 +2907,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														Customer customer,
 														MetaDataQueryDefinition query,
 														String dataSourceIDOverride,
-														Lookup forLookup,
+														LookupDescription forLookup,
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
@@ -2966,7 +2946,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														String description,
 														List<MetaDataQueryColumn> columns,
 														String dataSourceIDOverride,
-														Lookup forLookup,
+														LookupDescription forLookup,
 														// indicates that this is for configuration in the harness page
 														boolean config,
 														StringBuilder toAppendTo,

@@ -74,7 +74,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
@@ -1196,39 +1195,6 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		String binding = lookup.getBinding();
-		String lookupIdentifier = "Lookup " + binding;
-		if (dataWidgetBinding != null) {
-			lookupIdentifier += " in " + dataWidgetIdentifier;
-		}
-		validateBinding(dataWidgetBinding,
-							binding,
-							true,
-							true,
-							false,
-							false,
-							lookupIdentifier,
-							AttributeType.association);
-		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
-		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
-		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
-		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
-		validateQueryName(lookup.getQuery(), lookupIdentifier);
-	}
-
-	@Override
-	public void visitedLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
@@ -2199,7 +2165,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup lookup,
+	public void visitOnPickedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getPickedActions(),
@@ -2208,14 +2174,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup,
+	public void visitedOnPickedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup lookup,
+	public void visitOnClearedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getClearedActions(),
@@ -2224,7 +2190,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup,
+	public void visitedOnClearedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here

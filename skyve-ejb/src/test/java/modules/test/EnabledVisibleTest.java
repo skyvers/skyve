@@ -18,7 +18,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
@@ -77,8 +77,8 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLookup() throws Exception {
-		Lookup lookup = new Lookup();
+	public void testLookupDescription() throws Exception {
+		LookupDescription lookup = new LookupDescription();
 		testVisible(lookup);
 		testEnabled(lookup);
 		testCondition(lookup, "disableEditConditionName", "enableEditConditionName");

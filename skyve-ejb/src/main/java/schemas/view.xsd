@@ -103,8 +103,6 @@
 
   <xs:element name="listRepeater" type="tns:listRepeater"/>
 
-  <xs:element name="lookup" type="tns:lookup"/>
-
   <xs:element name="lookupDescription" type="tns:lookupDescription"/>
 
   <xs:element name="lookupDescriptionColumn" type="tns:lookupDescriptionColumn"/>
@@ -461,7 +459,7 @@
 
   <xs:complexType name="lookupDescription">
     <xs:complexContent>
-      <xs:extension base="tns:lookup">
+      <xs:extension base="tns:inputWidget">
         <xs:sequence>
           <xs:element name="dropDown" form="qualified" minOccurs="0">
             <xs:complexType>
@@ -470,18 +468,6 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
-        </xs:sequence>
-        <xs:attribute name="descriptionBinding" type="xs:string" use="required"/>
-        <xs:attribute name="editable" type="xs:boolean"/>
-        <xs:attribute name="pixelWidth" type="xs:int"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="lookup">
-    <xs:complexContent>
-      <xs:extension base="tns:inputWidget">
-        <xs:sequence>
           <xs:element name="onPickedHandlers" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -534,6 +520,7 @@
           <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
+        <xs:attribute name="descriptionBinding" type="xs:string" use="required"/>
         <xs:attribute name="query" type="xs:string"/>
         <xs:attribute name="disableEdit" type="xs:string"/>
         <xs:attribute name="enableEdit" type="xs:string"/>
@@ -543,6 +530,8 @@
         <xs:attribute name="enableClear" type="xs:string"/>
         <xs:attribute name="disablePick" type="xs:string"/>
         <xs:attribute name="enablePick" type="xs:string"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1095,7 +1084,6 @@
         <xs:element ref="tns:colourPicker"/>
         <xs:element ref="tns:combo"/>
         <xs:element ref="tns:radio"/>
-        <xs:element ref="tns:lookup"/>
         <xs:element ref="tns:lookupDescription"/>
         <xs:element ref="tns:password"/>
         <xs:element ref="tns:richText"/>

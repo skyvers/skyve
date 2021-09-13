@@ -48,7 +48,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -1432,37 +1431,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 														boolean canUpdate,
 														String descriptionBinding,
 														LookupDescription lookup);
-
-	@Override
-	public final void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery(), lookup.showsLabelByDefault());
-		renderFormLookup(currentLookupQuery,
-							currentLookupCanCreate,
-							currentLookupCanUpdate,
-							lookup);
-	}
-
-	public abstract void renderFormLookup(MetaDataQueryDefinition query,
-											boolean canCreate,
-											boolean canUpdate,
-											Lookup lookup);
-
-	@Override
-	public final void visitedLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
-		renderedFormLookup(currentLookupQuery,
-							currentLookupCanCreate,
-							currentLookupCanUpdate,
-							lookup);
-
-		currentLookupQuery = null;
-		currentLookupCanCreate = false;
-		currentLookupCanUpdate = false;
-	}
-
-	public abstract void renderedFormLookup(MetaDataQueryDefinition query,
-												boolean canCreate,
-												boolean canUpdate,
-												Lookup lookup);
 
 	@Override
 	public final void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {

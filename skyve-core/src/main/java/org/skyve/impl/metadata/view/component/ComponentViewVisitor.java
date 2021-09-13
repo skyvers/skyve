@@ -63,7 +63,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -517,16 +516,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-		visitLookup(lookup, parentVisible, parentEnabled);
-	}
-
-	@Override
-	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-		// nothing to do here
-	}
-
-	@Override
-	public void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
 		bound(lookup);
 		disable(lookup);
 		invisible(lookup);
@@ -537,7 +526,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -703,22 +692,22 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		event(lookup.getPickedActions());
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		event(lookup.getClearedActions());
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 

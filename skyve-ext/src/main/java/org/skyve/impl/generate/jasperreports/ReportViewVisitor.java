@@ -59,7 +59,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -1098,11 +1097,6 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookup(Lookup arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.textField);
-	}
-
-	@Override
 	public void visitLookupDescription(LookupDescription arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.textField);
 	}
@@ -1138,7 +1132,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup arg0, boolean arg1, boolean arg2) {
+	public void visitOnClearedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
@@ -1156,7 +1150,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup arg0, boolean arg1, boolean arg2) {
+	public void visitOnPickedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
@@ -1403,12 +1397,6 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookup(Lookup arg0, boolean arg1, boolean arg2) {
-		// No action required
-
-	}
-
-	@Override
 	public void visitedLookupDescription(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
@@ -1433,7 +1421,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup arg0, boolean arg1, boolean arg2) {
+	public void visitedOnClearedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}
@@ -1451,7 +1439,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup arg0, boolean arg1, boolean arg2) {
+	public void visitedOnPickedEventHandler(LookupDescription arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}

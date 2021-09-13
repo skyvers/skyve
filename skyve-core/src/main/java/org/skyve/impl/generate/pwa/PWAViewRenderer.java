@@ -72,7 +72,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
-import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -1274,24 +1273,6 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormLookup(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate, Lookup lookup) {
-		RenderedComponent c = cr.label(null, "lookup"); // TODO lookup
-		addComponent(null, 
-						false, 
-						lookup.getInvisibleConditionName(), 
-						null,
-						c, 
-						null, 
-						null, 
-						null);
-	}
-
-	@Override
-	public void renderedFormLookup(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate, Lookup lookup) {
-		// do nothing
-	}
-
-	@Override
 	public void renderBoundColumnPassword(Password password) {
 		renderFormPassword(password);
 	}
@@ -1705,28 +1686,28 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(Lookup lookup,
+	public void visitOnPickedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		cr.addAjaxBehavior(eventSource, "itemSelect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getPickedActions());
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(Lookup lookup,
+	public void visitedOnPickedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(Lookup lookup,
+	public void visitOnClearedEventHandler(LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		cr.addAjaxBehavior(eventSource, "itemUnselect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getClearedActions());
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(Lookup lookup,
+	public void visitedOnClearedEventHandler(LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
