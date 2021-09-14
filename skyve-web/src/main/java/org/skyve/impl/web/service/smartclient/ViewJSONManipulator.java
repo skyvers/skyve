@@ -65,6 +65,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -949,7 +950,21 @@ public class ViewJSONManipulator extends ViewVisitor {
 		addCondition(action.getInvisibleConditionName());
 		addCondition(action.getDisabledConditionName());
 	}
-	
+
+	@Override
+	public void visitZoomIn(ZoomIn zoomIn,
+								boolean parentVisible,
+								boolean parentEnabled) {
+		if (parentVisible && visible(zoomIn)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addBinding(zoomIn.getBinding(), false, false, Sanitisation.none);
+			}
+		}
+		addCondition(zoomIn.getInvisibleConditionName());
+		addCondition(zoomIn.getDisabledConditionName());
+	}
+
 	@Override
 	public void visitGeometry(Geometry geometry,
 								boolean parentVisible,

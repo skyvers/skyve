@@ -62,6 +62,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -517,6 +518,24 @@ class ViewValidator extends ViewVisitor {
 		String buttonIdentifier = "A button " + button.getActionName();
 		validateActionName(actionName, buttonIdentifier);
 		validateSize(button, buttonIdentifier);
+	}
+
+	@Override
+	public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+		String binding = zoomIn.getBinding();
+		String zoomInIdentifier = "ZoomIn " + binding;
+		validateBinding(null,
+							binding,
+							true,
+							false,
+							false,
+							false,
+							zoomInIdentifier,
+							AttributeType.association,
+							AttributeType.inverseOne);
+		validateConditionName(zoomIn.getDisabledConditionName(), zoomInIdentifier);
+		validateConditionName(zoomIn.getInvisibleConditionName(), zoomInIdentifier);
+		validateSize(zoomIn, zoomInIdentifier);
 	}
 
 	@Override

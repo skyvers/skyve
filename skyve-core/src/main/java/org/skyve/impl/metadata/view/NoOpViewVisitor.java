@@ -35,6 +35,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -157,6 +158,11 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

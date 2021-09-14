@@ -189,6 +189,8 @@
 
   <xs:element name="view" type="tns:view"/>
 
+  <xs:element name="zoomIn" type="tns:zoomIn"/>
+
   <xs:element name="zoomOut" type="tns:zoomOutAction"/>
 
   <xs:complexType name="widgetReference">
@@ -687,6 +689,7 @@
         <xs:element ref="tns:form"/>
         <xs:element ref="tns:tabPane"/>
         <xs:element ref="tns:button"/>
+        <xs:element ref="tns:zoomIn"/>
         <xs:element ref="tns:chart"/>
         <xs:element ref="tns:map"/>
         <xs:element ref="tns:dynamicImage"/>
@@ -1073,6 +1076,7 @@
         <xs:element ref="tns:contentLink"/>
         <xs:element ref="tns:contentSignature"/>
         <xs:element ref="tns:button"/>
+        <xs:element ref="tns:zoomIn"/>
         <xs:element ref="tns:dialogButton"/>
         <xs:element ref="tns:geometry"/>
         <xs:element ref="tns:geometryMap"/>
@@ -1141,6 +1145,25 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="minPixelHeight" type="xs:int"/>
     <xs:attribute name="maxPixelHeight" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="zoomIn">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="displayName" type="xs:string" use="required"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+        <xs:attribute name="maxPixelHeight" type="xs:int"/>
+        <xs:attribute name="minPixelHeight" type="xs:int"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="pixelWidth" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="dialogButton">

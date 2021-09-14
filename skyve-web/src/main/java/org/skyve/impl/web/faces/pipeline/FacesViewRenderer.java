@@ -65,6 +65,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -711,6 +712,28 @@ public class FacesViewRenderer extends ViewRenderer {
 	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
+	    				null, 
+	    				null,
+	    				null,
+	    				null,
+	    				null,
+	    				null);
+	}
+
+	@Override
+	public void renderFormZoomIn(String label, ZoomIn zoomIn) {
+		renderZoomIn(label, zoomIn);
+	}
+
+	@Override
+	public void renderZoomIn(String label, ZoomIn zoomIn) {
+	    UIComponent bn = cb.label(null, "zoomIn " + label); // TODO dialog button
+	    addComponent(null, 
+	    				false, 
+	    				zoomIn.getInvisibleConditionName(), 
+	    				null,
+	    				bn, 
+	    				null, 
 	    				null, 
 	    				null,
 	    				null,

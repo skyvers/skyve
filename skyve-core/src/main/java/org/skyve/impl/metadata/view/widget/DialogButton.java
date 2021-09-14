@@ -75,7 +75,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	}
 
 	public String getLocalisedDisplayName() {
-		return Util.i18n(dialogName);
+		return Util.i18n(displayName);
 	}
 	
 	@XmlAttribute(required = true)

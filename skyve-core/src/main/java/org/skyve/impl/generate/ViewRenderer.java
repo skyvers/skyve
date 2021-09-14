@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -683,6 +684,21 @@ public abstract class ViewRenderer extends ViewVisitor {
 										String confirmationText,
 										char type,
 										Button button);
+
+	@Override
+	public final void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+		preProcessWidget(zoomIn.getBinding(), zoomIn.showsLabelByDefault());
+		String label = zoomIn.getLocalisedDisplayName();
+		if (currentFormItem != null) {
+			renderFormZoomIn(label, zoomIn);
+		}
+		else {
+			renderZoomIn(label, zoomIn);
+		}
+	}
+
+	public abstract void renderFormZoomIn(String label, ZoomIn zoomIn);
+	public abstract void renderZoomIn(String label, ZoomIn zoomIn);
 
 	@Override
 	public final void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {

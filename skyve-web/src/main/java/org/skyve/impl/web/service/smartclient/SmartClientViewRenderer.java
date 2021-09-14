@@ -60,6 +60,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -591,6 +592,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											button);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
+		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	}
+
+	@Override
+	public void renderFormZoomIn(String label, ZoomIn zoomIn) {
+		code.append("type:'blurb',defaultValue:'zoomIn ");
+		code.append(OWASP.escapeJsString(label)).append("',");
+		disabled(zoomIn.getDisabledConditionName(), code);
+		invisible(zoomIn.getInvisibleConditionName(), code);
+	}
+	
+		@Override
+	public void renderZoomIn(String label, ZoomIn zoomIn) {
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
+		code.append(OWASP.escapeJsString(label));
+		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 

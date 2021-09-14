@@ -47,6 +47,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -84,7 +85,6 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 
 public class ReportViewVisitor extends ViewVisitor {
-
 	public static final double TWIP_TO_PIXEL = 0.0666666667;
 	public static final double PIXEL_TO_TWIP = 15;
 
@@ -857,6 +857,11 @@ public class ReportViewVisitor extends ViewVisitor {
 	public void visitButton(Button arg0, boolean arg1, boolean arg2) {
 		// Not supported
 
+	}
+
+	@Override
+	public void visitZoomIn(ZoomIn arg0, boolean arg1, boolean arg2) {
+		// Not supported
 	}
 
 	@Override

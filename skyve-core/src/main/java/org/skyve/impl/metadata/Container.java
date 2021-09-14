@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
@@ -44,6 +45,7 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = Form.class),
 						@XmlElementRef(type = TabPane.class),
 						@XmlElementRef(type = Button.class),
+						@XmlElementRef(type = ZoomIn.class),
 						@XmlElementRef(type = Chart.class),
 						@XmlElementRef(type = MapDisplay.class),
 						@XmlElementRef(type = DynamicImage.class),

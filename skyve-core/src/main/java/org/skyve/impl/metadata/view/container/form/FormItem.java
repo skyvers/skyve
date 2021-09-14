@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
@@ -79,6 +80,7 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = ContentLink.class), 
 						@XmlElementRef(type = ContentSignature.class),
 						@XmlElementRef(type = Button.class),
+						@XmlElementRef(type = ZoomIn.class),
 						@XmlElementRef(type = DialogButton.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = GeometryMap.class),

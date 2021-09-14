@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -151,6 +152,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	// widgets
 	public abstract void visitButton(Button button,
+										boolean parentVisible,
+										boolean parentEnabled);
+	public abstract void visitZoomIn(ZoomIn zoomIn,
 										boolean parentVisible,
 										boolean parentEnabled);
 	public abstract void visitGeometry(Geometry geometry,
@@ -480,6 +484,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 		else if (widget instanceof Button) {
 			Button button = (Button) widget;
 			visitButton(button, parentVisible, parentEnabled);
+		}
+		else if (widget instanceof ZoomIn) {
+			ZoomIn zoomIn = (ZoomIn) widget;
+			visitZoomIn(zoomIn, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof Geometry) {
 			Geometry geometry = (Geometry) widget;
