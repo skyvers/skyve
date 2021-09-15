@@ -721,13 +721,21 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormZoomIn(String label, ZoomIn zoomIn) {
-		renderZoomIn(label, zoomIn);
+	public void renderFormZoomIn(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									ZoomIn zoomIn) {
+		renderZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 	}
 
 	@Override
-	public void renderZoomIn(String label, ZoomIn zoomIn) {
-	    UIComponent bn = cb.label(null, "zoomIn " + label); // TODO dialog button
+	public void renderZoomIn(String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								ZoomIn zoomIn) {
+	    UIComponent bn = cb.label(null, "zoomIn " + label);
 	    addComponent(null, 
 	    				false, 
 	    				zoomIn.getInvisibleConditionName(), 

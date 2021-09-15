@@ -472,12 +472,20 @@ public class PWAViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormZoomIn(String label, ZoomIn zoomIn) {
-		renderFormZoomIn(label, zoomIn);
+	public void renderFormZoomIn(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									ZoomIn zoomIn) {
+		renderFormZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 	}
 	
 	@Override
-	public void renderZoomIn(String label, ZoomIn zoomIn) {
+	public void renderZoomIn(String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								ZoomIn zoomIn) {
 //		String title = getCurrentWidgetLabel();
 //		boolean required = isCurrentWidgetRequired();
 		RenderedComponent c = cr.label(null, "zoomIn " + label); // TODO geometry

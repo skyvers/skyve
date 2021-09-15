@@ -596,19 +596,27 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormZoomIn(String label, ZoomIn zoomIn) {
-		code.append("type:'blurb',defaultValue:'zoomIn ");
-		code.append(OWASP.escapeJsString(label)).append("',");
+	public void renderFormZoomIn(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									ZoomIn zoomIn) {
+		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
+		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
+		code.append(zoomInCode).append("]}),");
 		disabled(zoomIn.getDisabledConditionName(), code);
 		invisible(zoomIn.getInvisibleConditionName(), code);
 	}
 	
 		@Override
-	public void renderZoomIn(String label, ZoomIn zoomIn) {
+	public void renderZoomIn(String label,
+								String iconUrl,
+								String iconStyleClass,
+								String toolTip,
+								ZoomIn zoomIn) {
+		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-		code.append(OWASP.escapeJsString(label));
-		code.append("'});\n");
+		code.append("var ").append(variable).append('=').append(zoomInCode).append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
@@ -2699,6 +2707,33 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
+	private String generateZoomIn(String label,
+									String iconUrl,
+									String iconStyleClass,
+									String toolTip,
+									ZoomIn zoomIn) {
+		StringBuilder result = new StringBuilder(128);
+		result.append("isc.BizZoomIn.create({binding:'");
+		result.append(BindUtil.sanitiseBinding(zoomIn.getBinding()));
+		result.append("',displayName:'");
+		if (iconStyleClass != null) {
+			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span> &nbsp;</span>");
+		}
+		result.append(OWASP.escapeJsString(label)).append("',tabIndex:999,");
+		if ((iconStyleClass == null) && (iconUrl != null)) {
+			result.append("icon:'../").append(iconUrl).append("',");
+		}
+		size(zoomIn, null, result);
+		disabled(zoomIn.getDisabledConditionName(), result);
+		invisible(zoomIn.getInvisibleConditionName(), result);
+		if (toolTip != null) {
+			result.append("tooltip:'").append(OWASP.escapeJsString(toolTip)).append("',");
+		}
+		result.append("_view:view})");
+		
+		return result.toString();
+	}
+
 	private String generateButton(String resourceName,
 									ImplicitActionName implicitName,
 									String label,
@@ -3048,10 +3083,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		List<String> hiddenBindingsList = new ArrayList<>();
-		if (forLookup instanceof LookupDescription) {
-			hiddenBindingsList.add(((LookupDescription) forLookup).getDescriptionBinding());
-		}
 		if (forLookup != null) {
+			hiddenBindingsList.add(forLookup.getDescriptionBinding());
 			List<FilterParameter> filterParameters = forLookup.getFilterParameters();
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {

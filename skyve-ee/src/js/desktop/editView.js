@@ -1659,6 +1659,75 @@ isc.BizButton.addMethods({
 	}
 });
 
+// Zoom In
+isc.ClassFactory.defineClass("BizZoomIn", "IButton");
+// binding: null - the name of the server side action to call
+// displayName: null - The display name
+// icon: null - The icon to display
+// tooltip: null - the tooltip to display
+//
+// _view: null - The view that this button belongs to
+isc.BizZoomIn.addMethods({
+	initWidget: function () {
+		this.autoFit = ! (arguments[0].width || arguments[0].height);
+		this.hasDisabledicon = false;
+		if (this.displayName) {
+			this.title = this.displayName;
+		}
+		
+		if (this.tooltip) {
+			this.canHover = true;
+			this.getHoverHTML = function() {
+				return this.tooltip;
+			};
+		}
+		
+		if (this.icon) {
+			this.showDisabledIcon = this.hasDisabledIcon;
+		}
+		
+		this.action = function() {
+			var me = this;
+			// Validate here so we can put out the zoom message if required
+			var instance = me._view.gather(true);
+			if (instance) {
+				// Get the view polymorphically
+				isc.BizUtil.getEditView(instance[me.binding + '_bizModule'], 
+										instance[me.binding + '_bizDocument'],
+										function(view) { // the view
+											// determine the view binding
+											var viewBinding = (me._view._b) ? me._view._b + '.' + me.binding : me.binding;
+											var fromRect = me.getPageRect();
+											
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to current form before zoom in
+												me._view.saveInstance(true, null, function() {
+													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+													view.editInstance(instance[me.binding],
+																		viewBinding,
+																		instance._c,
+																		false);
+												});
+											}
+											else {
+												isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+												view.editInstance(instance[me.binding],
+																	viewBinding,
+																	instance._c,
+																	false);
+											}
+										});
+			}
+			else {
+				isc.warn('You cannot zoom in until you fix the problems found');
+			}
+		};
+		
+        this.Super("initWidget", arguments);
+	}
+});
+
 // TODO dialog button
 
 // Container renderer

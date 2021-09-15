@@ -689,16 +689,32 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(zoomIn.getBinding(), zoomIn.showsLabelByDefault());
 		String label = zoomIn.getLocalisedDisplayName();
+		String relativeIconFileName = zoomIn.getRelativeIconFileName();
+		String iconUrl = (relativeIconFileName == null) ? null : iconToUrl(relativeIconFileName);
+		String iconStyleClass = zoomIn.getIconStyleClass();
+		if ((iconUrl == null) && (iconStyleClass == null)) {
+			iconStyleClass = "fa fa-chevron-right";
+		}
+		String toolTip = zoomIn.getLocalisedToolTip();
+		
 		if (currentFormItem != null) {
-			renderFormZoomIn(label, zoomIn);
+			renderFormZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		}
 		else {
-			renderZoomIn(label, zoomIn);
+			renderZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		}
 	}
 
-	public abstract void renderFormZoomIn(String label, ZoomIn zoomIn);
-	public abstract void renderZoomIn(String label, ZoomIn zoomIn);
+	public abstract void renderFormZoomIn(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											ZoomIn zoomIn);
+	public abstract void renderZoomIn(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										ZoomIn zoomIn);
 
 	@Override
 	public final void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {

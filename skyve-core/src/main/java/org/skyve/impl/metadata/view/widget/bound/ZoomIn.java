@@ -41,6 +41,9 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	private static final long serialVersionUID = 100210631435597022L;
 
 	private String displayName;
+	private String relativeIconFileName;
+	private String iconStyleClass;
+	private String toolTip;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
@@ -62,12 +65,43 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	}
 
 	public String getLocalisedDisplayName() {
-		return Util.i18n(displayName);
+		return Util.i18n((displayName == null) ? "Zoom In" : displayName);
 	}
 	
-	@XmlAttribute(required = true)
+	@XmlAttribute
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
+	}
+
+	public String getRelativeIconFileName() {
+		return relativeIconFileName;
+	}
+
+	@XmlAttribute(required = false)
+	public void setRelativeIconFileName(String relativeIconFileName) {
+		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
+	}
+
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlAttribute(required = false)
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
+	}
+
+	public String getToolTip() {
+		return toolTip;
+	}
+
+	public String getLocalisedToolTip() {
+		return Util.i18n(toolTip);
+	}
+	
+	@XmlAttribute(required = false)
+	public void setToolTip(String toolTip) {
+		this.toolTip = UtilImpl.processStringValue(toolTip);
 	}
 
 	@Override

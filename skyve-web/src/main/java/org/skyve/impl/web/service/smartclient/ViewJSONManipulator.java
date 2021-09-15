@@ -958,7 +958,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(zoomIn)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(zoomIn.getBinding(), false, false, Sanitisation.none);
+				String binding = zoomIn.getBinding();
+				addBinding(binding, false, false, Sanitisation.none);
+				// Add polymorphic data for opening the view
+				addBinding(Binder.createCompoundBinding(binding, Bean.MODULE_KEY), false, false, Sanitisation.none);
+				addBinding(Binder.createCompoundBinding(binding, Bean.DOCUMENT_KEY), false, false, Sanitisation.none);
 			}
 		}
 		addCondition(zoomIn.getInvisibleConditionName());
