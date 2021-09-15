@@ -1686,38 +1686,48 @@ isc.BizZoomIn.addMethods({
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
 		
+		// NB we can't disable the button based on the view's ValuesManager values as 
+		// scatter() processes the widgets and then sets the values
+		// this.setDisabled() override  can't use this._view._vm.getValue(this.binding)
+
 		this.action = function() {
 			var me = this;
 			// Validate here so we can put out the zoom message if required
 			var instance = me._view.gather(true);
 			if (instance) {
-				// Get the view polymorphically
-				isc.BizUtil.getEditView(instance[me.binding + '_bizModule'], 
-										instance[me.binding + '_bizDocument'],
-										function(view) { // the view
-											// determine the view binding
-											var viewBinding = (me._view._b) ? me._view._b + '.' + me.binding : me.binding;
-											var fromRect = me.getPageRect();
-											
-											if (instance._apply || me._view._vm.valuesHaveChanged()) {
-												delete instance._apply;
-												// apply changes to current form before zoom in
-												me._view.saveInstance(true, null, function() {
+				var bizId = instance[me.binding];
+				if (bizId) {
+					// Get the view polymorphically
+					isc.BizUtil.getEditView(instance[me.binding + '_bizModule'], 
+											instance[me.binding + '_bizDocument'],
+											function(view) { // the view
+												// determine the view binding
+												var viewBinding = (me._view._b) ? me._view._b + '.' + me.binding : me.binding;
+												var fromRect = me.getPageRect();
+												
+												if (instance._apply || me._view._vm.valuesHaveChanged()) {
+													delete instance._apply;
+													// apply changes to current form before zoom in
+													me._view.saveInstance(true, null, function() {
+														isc.WindowStack.popup(fromRect, "Edit", false, [view]);
+														view.editInstance(bizId,
+																			viewBinding,
+																			instance._c,
+																			false);
+													});
+												}
+												else {
 													isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-													view.editInstance(instance[me.binding],
+													view.editInstance(bizId,
 																		viewBinding,
 																		instance._c,
 																		false);
-												});
-											}
-											else {
-												isc.WindowStack.popup(fromRect, "Edit", false, [view]);
-												view.editInstance(instance[me.binding],
-																	viewBinding,
-																	instance._c,
-																	false);
-											}
-										});
+												}
+											});
+				}
+				else {
+					isc.warn('You cannot zoom in to an empty reference');
+				}
 			}
 			else {
 				isc.warn('You cannot zoom in until you fix the problems found');

@@ -602,8 +602,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String toolTip,
 									ZoomIn zoomIn) {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
-		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
-		code.append(zoomInCode).append("]}),");
+		code.append("type:'canvas',showTitle:false,width:1,canvas:");
+		code.append(zoomInCode).append(',');
 		disabled(zoomIn.getDisabledConditionName(), code);
 		invisible(zoomIn.getInvisibleConditionName(), code);
 	}
