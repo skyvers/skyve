@@ -6,16 +6,19 @@ public class ViewBinding {
 	private boolean mutable = false;
 	private boolean escape = false;
 	private Sanitisation sanitise;
+	private boolean instantiate; // Call BindUtil.instantiateAndGet()
 	
-	ViewBinding(boolean mutable, boolean escape, Sanitisation sanitise) {
+	ViewBinding(boolean mutable, boolean escape, Sanitisation sanitise, boolean instantiate) {
 		this.mutable = mutable;
 		this.escape = escape;
 		this.sanitise = sanitise;
+		this.instantiate = instantiate;
 	}
 	
 	void merge(@SuppressWarnings("hiding") boolean mutable,
 				@SuppressWarnings("hiding") boolean escape,
-				@SuppressWarnings("hiding") Sanitisation sanitise) {
+				@SuppressWarnings("hiding") Sanitisation sanitise,
+				@SuppressWarnings("hiding") boolean instantiate) {
 		// Set mutable - true trumps false
 		if (mutable && (! this.mutable)) {
 			this.mutable = mutable;
@@ -35,6 +38,11 @@ public class ViewBinding {
 				this.sanitise = sanitise;
 			}
 		}
+		
+		// Set instantiate - true trumps false
+		if (instantiate && (! this.instantiate)) {
+			this.instantiate = instantiate;
+		}
 	}
 	
 	public boolean isMutable() {
@@ -47,5 +55,9 @@ public class ViewBinding {
 	
 	public Sanitisation getSanitise() {
 		return sanitise;
+	}
+
+	public boolean isInstantiate() {
+		return instantiate;
 	}
 }

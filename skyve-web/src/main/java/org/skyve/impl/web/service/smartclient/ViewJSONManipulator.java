@@ -383,6 +383,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		for (String binding : bindings.getBindings()) {
 			ViewBinding viewBinding = bindings.getBinding(binding);
 			Object value = BindUtil.get(aBean, binding);
+			if ((value == null) && viewBinding.isInstantiate()) {
+				Module m = customer.getModule(aBean.getBizModule());
+				Document d = m.getDocument(customer, aBean.getBizDocument());
+				value = BindUtil.instantiateAndGet(user, m, d, aBean, binding);
+			}
 			boolean escape = viewBinding.isEscape();
 			Sanitisation sanitise = viewBinding.getSanitise();
 			// escape and sanitise string values if needed
@@ -709,17 +714,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	protected void addBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
-		addBinding(binding, mutable, escape, sanitise, false);
+		addBinding(binding, mutable, escape, sanitise, false, false);
 	}
 
+	
 	private void addBinding(String binding,
 								boolean mutable,
 								boolean escape,
 								Sanitisation sanitise,
+								boolean instantiate,
 								boolean noPrefix) {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
-			bindings.putBinding(binding, mutable, escape, (sanitise == null) ? Sanitisation.relaxed : sanitise);
+			bindings.putBinding(binding, mutable, escape, (sanitise == null) ? Sanitisation.relaxed : sanitise, instantiate);
 		}
 	}
 
@@ -739,7 +746,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	protected void addCondition(String condition) {
 		if ((condition != null) && (! condition.equals("true")) && (! condition.equals("false"))) {
-			addBinding(condition, false, false, Sanitisation.none, true);
+			addBinding(condition, false, false, Sanitisation.none, false, true);
 		}
 	}
 	
@@ -959,7 +966,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
 				String binding = zoomIn.getBinding();
-				addBinding(binding, false, false, Sanitisation.none);
+				addBinding(binding, false, false, Sanitisation.text, true, false);
 				// Add polymorphic data for opening the view
 				addBinding(Binder.createCompoundBinding(binding, Bean.MODULE_KEY), false, false, Sanitisation.none);
 				addBinding(Binder.createCompoundBinding(binding, Bean.DOCUMENT_KEY), false, false, Sanitisation.none);
@@ -1492,7 +1499,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addCondition(disableZoomConditionName);
 				addCondition(disableEditConditionName);
 				addCondition(disableRemoveConditionName);
-				addBinding(selectedIdBinding, true, false, Sanitisation.text, true);
+				addBinding(selectedIdBinding, true, false, Sanitisation.text, false, true);
 				
 				String gridBinding = widget.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
@@ -1881,7 +1888,7 @@ public class ViewJSONManipulator extends ViewVisitor {
         }
 
         for (ComparisonProperty property : node.getProperties()) {
-            currentBindings.putBinding(property.getName(), true, true, Sanitisation.none);
+            currentBindings.putBinding(property.getName(), true, true, Sanitisation.none, false);
         }
         
         for (ComparisonComposite child : node.getChildren()) {

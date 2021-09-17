@@ -65,8 +65,7 @@ public class ZoomInAction extends FacesAction<Void> {
 				Customer c = u.getCustomer();
 				Module m = c.getModule(parentBean.getBizModule());
 				Document d = m.getDocument(c, parentBean.getBizDocument());
-				BindUtil.instantiateAndGet(u, m, d, parentBean, sb.toString());
-				currentBean = ActionUtil.getTargetBeanForView(facesView);
+				currentBean = (Bean) BindUtil.instantiateAndGet(u, m, d, parentBean, sb.toString());
 			}
 
 			// Call the bizlet

@@ -10,7 +10,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class ViewBindings {
-	private static final ViewBinding MUTABLE_UNESCAPED_TEXT = new ViewBinding(true, false, Sanitisation.text);
+	private static final ViewBinding MUTABLE_UNESCAPED_TEXT = new ViewBinding(true, false, Sanitisation.text, false);
 	
 	private String bindingPrefix;
 
@@ -46,13 +46,13 @@ public class ViewBindings {
 		return getBindingPrefix();
 	}
 	
-	public void putBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
+	public void putBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise, boolean instantiate) {
 	    ViewBinding current = bindings.get(binding);
 	    if (current == null) {
-	        bindings.put(binding, new ViewBinding(mutable, escape, sanitise));
+	        bindings.put(binding, new ViewBinding(mutable, escape, sanitise, instantiate));
 	    }
 	    else {
-	    	current.merge(mutable, escape, sanitise);
+	    	current.merge(mutable, escape, sanitise, instantiate);
 	    }
 	}
 	
