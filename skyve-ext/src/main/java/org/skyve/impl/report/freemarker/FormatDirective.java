@@ -5,10 +5,10 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
+import org.skyve.util.OWASP;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateBooleanModel;
@@ -32,6 +32,7 @@ import freemarker.template.utility.DeepUnwrap;
  * <ul>
  * <li><code>bean</code>: The bean which the attribute to format belongs to
  * <li><code>binding</code>: The attribute name to format, can be a compound binding
+ * <li><code>escape</code>: Boolean (Optional), to explicitly turn off HTML escaping on (on by default)
  * </ul>
  * <p>
  * Loop variables: None
@@ -43,14 +44,15 @@ import freemarker.template.utility.DeepUnwrap;
  * </p>
  */
 public class FormatDirective implements TemplateDirectiveModel {
+
 	private static final String PARAM_NAME_BEAN = "bean";
 	private static final String PARAM_NAME_BINDING = "binding";
 	private static final String PARAM_ESCAPE = "escape";
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-	throws TemplateException, IOException {
+			throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
 		}
@@ -69,9 +71,9 @@ public class FormatDirective implements TemplateDirectiveModel {
 		String bindingParam = null;
 		boolean escapeParam = true;
 
-		Iterator<?> paramIter = params.entrySet().iterator();
+		Iterator paramIter = params.entrySet().iterator();
 		while (paramIter.hasNext()) {
-			Map.Entry<?, ?> ent = (Map.Entry<?, ?>) paramIter.next();
+			Map.Entry ent = (Map.Entry) paramIter.next();
 
 			String paramName = (String) ent.getKey();
 			TemplateModel paramValue = (TemplateModel) ent.getValue();
@@ -79,12 +81,11 @@ public class FormatDirective implements TemplateDirectiveModel {
 			if (paramName.equals(PARAM_NAME_BEAN)) {
 				// unwrap to try get the skyve object
 				Object beanObj = DeepUnwrap.permissiveUnwrap(paramValue);
-				if (! (beanObj instanceof Bean)) {
+				if (!(beanObj instanceof Bean)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a Skyve bean.", PARAM_NAME_BEAN));
 				}
 				beanParam = (Bean) beanObj;
-			}
-			else if (paramName.equals(PARAM_NAME_BINDING)) {
+			} else if (paramName.equals(PARAM_NAME_BINDING)) {
 				if (!(paramValue instanceof TemplateScalarModel)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_BINDING));
 				}
@@ -98,22 +99,24 @@ public class FormatDirective implements TemplateDirectiveModel {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a boolean.", PARAM_ESCAPE));
 				}
 			} else {
-				throw new TemplateModelException("Unsupported parameter: " + paramName);
+				throw new TemplateModelException(
+						"Unsupported parameter: " + paramName);
 			}
 		}
 
 		// do the actual directive execution
-		Writer out = env.getOut();
-		if (beanParam != null && bindingParam != null) {
-			String display = Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam);
-			if (escapeParam) {
-				display = StringEscapeUtils.escapeHtml4(display);
+		try (Writer out = env.getOut()) {
+			if (beanParam != null && bindingParam != null) {
+				String display = Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam);
+				if (escapeParam) {
+					display = OWASP.escapeHtml(display);
+				}
+
+				// replace /n with <br/>
+				display = display.replace("\n", "<br/>");
+
+				out.write(display);
 			}
-
-			// replace /n with <br/>
-			display = display.replace("\n", "<br/>");
-
-			out.write(display);
 		}
 	}
 }
