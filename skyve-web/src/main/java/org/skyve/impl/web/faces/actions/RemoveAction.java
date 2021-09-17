@@ -45,7 +45,7 @@ public class RemoveAction extends FacesAction<Void> {
 		Bean bean = facesView.getBean();
 		String viewBinding = facesView.getViewBinding();
 		if ((collectionName != null) && (elementBizId != null)) { // inline remove
-			Bean beanToRemove = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, collectionName, elementBizId);
+			Bean beanToRemove = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);
 
 			StringBuilder collectionBinding = new StringBuilder(32);
 			if (viewBinding != null) {

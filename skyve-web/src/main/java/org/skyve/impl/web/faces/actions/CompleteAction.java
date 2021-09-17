@@ -47,7 +47,7 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 	public List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Bean bean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+		Bean bean = ActionUtil.getTargetBeanForView(facesView);
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Document document = null;

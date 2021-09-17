@@ -31,7 +31,7 @@ public class RerenderAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("RerenderAction - EXECUTE RERENDER with source " + source + (validate ? " with" : " without") + " validation ");
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
 		// rerender can be called asynchronously with push notifications 
 		// and maybe the user is not on the same view, maybe not even the same type
 		// Maybe they were on an edit, now on a list view.

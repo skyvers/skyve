@@ -44,7 +44,7 @@ public class ExecuteDownloadAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION " + actionName + ((dataWidgetBinding != null) ? (" for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, dataWidgetBinding, elementBizId);
+		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, dataWidgetBinding, elementBizId);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());

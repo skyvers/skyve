@@ -42,7 +42,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteActionAction - EXECUTE ACTION " + actionName + ((collectionName != null) ? (" for grid " + collectionName + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, collectionName, elementBizId);
+		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());

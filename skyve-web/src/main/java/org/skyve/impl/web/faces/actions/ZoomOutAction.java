@@ -42,43 +42,49 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 
 		if (FacesAction.validateRequiredFields()) {
 			// Call the bizlet
-			Bean elementBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+			// Find the Collection/InverseMany element or association/inverseOne
+			Bean referenceBean = ActionUtil.getTargetBeanForView(facesView);
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
-			Module elementModule = customer.getModule(elementBean.getBizModule());
-			Document elementDocument = elementModule.getDocument(customer, elementBean.getBizDocument());
-			Bizlet<Bean> bizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
+			Module referenceModule = customer.getModule(referenceBean.getBizModule());
+			Document referenceDocument = referenceModule.getDocument(customer, referenceBean.getBizDocument());
+			Bizlet<Bean> bizlet = ((DocumentImpl) referenceDocument).getBizlet(customer);
 
 			WebContext webContext = facesView.getWebContext();
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 			if (! vetoed) {
 				if (bizlet != null) {
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + elementBean + ", null, " + webContext);
-					elementBean = bizlet.preExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
-					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + elementBean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + referenceBean + ", null, " + webContext);
+					referenceBean = bizlet.preExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + referenceBean);
 				}
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, elementBean, null, webContext);
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 
-				ValidationUtil.validateBeanAgainstDocument(elementDocument, elementBean);
+				ValidationUtil.validateBeanAgainstDocument(referenceDocument, referenceBean);
 				if (bizlet != null) {
-					ValidationUtil.validateBeanAgainstBizlet(bizlet, elementBean);
+					ValidationUtil.validateBeanAgainstBizlet(bizlet, referenceBean);
 				}
 				// Set the current bean back in the collection
-				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) elementBean);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) referenceBean);
 
-				// Sort the owning collection
+				// Sort the owning collection (if this is a collection element binding)
 				String viewBinding = facesView.getViewBinding();
+				// NB Is a collection element binding if the last "ElementById(" exists and is further towards
+				// the end of the binding than the last '.' (if that exists)
+				int lastDotIndex = viewBinding.lastIndexOf('.');
 				int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
-				String collectionBinding = viewBinding.substring(0, lastCollectionindex);
-				Bean currentBean = facesView.getWebContext().getCurrentBean();
-				Module currentModule = customer.getModule(currentBean.getBizModule());
-				Binder.sortCollectionByMetaData(currentBean,
-													customer,
-													currentModule,
-													currentModule.getDocument(customer, currentBean.getBizDocument()),
-													collectionBinding);
-
+				if ((lastCollectionindex >= 0) && (lastDotIndex < lastCollectionindex)) {
+					String collectionBinding = viewBinding.substring(0, lastCollectionindex);
+					Bean currentBean = facesView.getWebContext().getCurrentBean();
+					Module currentModule = customer.getModule(currentBean.getBizModule());
+					Binder.sortCollectionByMetaData(currentBean,
+														customer,
+														currentModule,
+														currentModule.getDocument(customer, currentBean.getBizDocument()),
+														collectionBinding);
+				}
+				
 				// now zoom out to owning view
 				zoomOut(facesView);
 			}

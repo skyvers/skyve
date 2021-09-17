@@ -608,7 +608,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(zoomIn.getInvisibleConditionName(), code);
 	}
 	
-		@Override
+	@Override
 	public void renderZoomIn(String label,
 								String iconUrl,
 								String iconStyleClass,

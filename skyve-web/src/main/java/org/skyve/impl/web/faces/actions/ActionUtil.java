@@ -28,9 +28,20 @@ public class ActionUtil {
 		// nothing to see here
 	}
 	
-    public static Bean getTargetBeanForViewAndCollectionBinding(FacesView<? extends Bean> facesView,
-    																String collectionName,
-    																String elementBizId)
+	public static Bean getTargetBeanForView(FacesView<? extends Bean> facesView)
+	throws Exception {
+		return getTargetBeanForViewAndReferenceBinding(facesView, null);
+	}
+
+	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView<? extends Bean> facesView,
+																String referenceBinding)
+	throws Exception {
+		return getTargetBeanForViewAndReferenceBinding(facesView, referenceBinding, null);
+	}
+
+	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView<? extends Bean> facesView,
+    															String referenceBinding,
+																String elementBizId)
     throws Exception {
     	Bean result = facesView.getBean();
     	
@@ -39,17 +50,22 @@ public class ActionUtil {
 	    	if (viewBinding != null) {
 	    		result = (Bean) Binder.get(result, viewBinding);
 	    	}
-			if (collectionName != null) {
-				result = Binder.getElementInCollection(result, collectionName, elementBizId);
+			if (referenceBinding != null) {
+				if (elementBizId != null) {
+					result = Binder.getElementInCollection(result, referenceBinding, elementBizId);
+				}
+				else {
+					result = (Bean) Binder.get(result, referenceBinding);
+				}
 			}
     	}
     	else {
-    		UtilImpl.LOGGER.warning("ActionUtil.getTargetBeanForViewAndCollectionBinding: FacesView.getBean() yields null");
+    		UtilImpl.LOGGER.warning("ActionUtil.getTargetBeanForViewAndReferenceBinding: FacesView.getBean() yields null");
     	}
     	
     	return result;
     }
-    
+
     static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView<T> facesView, String collectionName, T newValue)
 	throws Exception {
     	Bean bean = facesView.getBean();

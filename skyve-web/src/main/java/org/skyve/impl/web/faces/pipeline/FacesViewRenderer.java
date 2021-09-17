@@ -726,7 +726,9 @@ public class FacesViewRenderer extends ViewRenderer {
 									String iconStyleClass,
 									String toolTip,
 									ZoomIn zoomIn) {
-		renderZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
+		Form currentForm = getCurrentForm();
+		String formDisabledConditionName = (currentForm == null) ? null : currentForm.getDisabledConditionName();
+		renderZoomIn(label, iconStyleClass, toolTip, zoomIn, formDisabledConditionName);
 	}
 
 	@Override
@@ -735,19 +737,33 @@ public class FacesViewRenderer extends ViewRenderer {
 								String iconStyleClass,
 								String toolTip,
 								ZoomIn zoomIn) {
-	    UIComponent bn = cb.label(null, "zoomIn " + label);
-	    addComponent(null, 
-	    				false, 
-	    				zoomIn.getInvisibleConditionName(), 
-	    				null,
-	    				bn, 
-	    				null, 
-	    				null, 
-	    				null,
-	    				null,
-	    				null,
-	    				null,
-	    				null);
+		renderZoomIn(label, iconStyleClass, toolTip, zoomIn, null);
+	}
+	
+	protected void renderZoomIn(String label,
+									String iconStyleClass,
+									String toolTip,
+									ZoomIn zoomIn,
+									String formDisabledConditionName) {
+		UIComponent z = cb.zoomIn(null,
+									label,
+									iconStyleClass,
+									toolTip,
+									zoomIn,
+									formDisabledConditionName);
+		addComponent(null, 
+						false, 
+						zoomIn.getInvisibleConditionName(), 
+						null,
+						z, 
+						zoomIn.getPixelWidth(), 
+						null, 
+						null,
+						null,
+						null,
+						null,
+						null);
+		
 	}
 
 	@Override

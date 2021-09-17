@@ -101,6 +101,7 @@ import org.skyve.impl.metadata.view.widget.Link;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
@@ -260,6 +261,46 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		result.setValue(value);
 		return result;
+	}
+
+	@Override
+	public UIComponent zoomIn(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								ZoomIn zoomIn,
+								String formDisabledConditionName) {
+		if (component != null) {
+			return component;
+		}
+
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+
+		result.setValue(label);
+		result.setIcon(iconStyleClass);
+		result.setTitle(toolTip);
+
+		setSize(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelWidth(), null, null);
+		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
+		setDisabled(result, zoomIn.getDisabledConditionName(), formDisabledConditionName);
+		setId(result, null);
+
+		zoomInActionExpression(zoomIn.getBinding(), result);
+
+		Map<String, String> properties = zoomIn.getProperties();
+        String processOverride = properties.get(PROCESS_KEY);
+        String updateOverride = properties.get(UPDATE_KEY);
+		result.setProcess((processOverride == null) ? process : processOverride); // process the current form (by default)
+		result.setUpdate((updateOverride == null) ? update : updateOverride); // update all forms (by default)
+
+		return result;
+	}
+
+	protected void zoomInActionExpression(String referenceBinding, UICommand command) {
+		StringBuilder expression = new StringBuilder(64);
+		expression.append("#{").append(managedBeanName).append(".navigate('").append(referenceBinding).append("')}");
+		MethodExpression method = ef.createMethodExpression(elc, expression.toString(), null, STRING);
+		command.setActionExpression(method);
 	}
 
 	@Override

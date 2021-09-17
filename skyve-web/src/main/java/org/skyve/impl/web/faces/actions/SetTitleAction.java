@@ -27,7 +27,7 @@ public class SetTitleAction extends FacesAction<Void> {
 		if (facesView.getBean() != null) {
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
-			Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+			Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 			View view = targetDocument.getView(facesView.getUxUi().getName(), 

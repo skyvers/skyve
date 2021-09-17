@@ -280,7 +280,7 @@ public class FacesView<T extends Bean> extends Harness {
 		if (webContext != null) {
 			webContext.setCurrentBean(bean);
 		}
-		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForViewAndCollectionBinding(this, null, null), webContext);
+		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForView(this), webContext);
 	}
 
 	public BeanMapAdapter<T> getCurrentBean() {
@@ -355,6 +355,13 @@ public class FacesView<T extends Bean> extends Harness {
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
 		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
 		navigate(BindUtil.unsanitiseBinding(dataWidgetBinding).substring(0, dataWidgetBinding.length() - 3), bizId);
+	}
+	
+	// Called by ZoomIn widget
+	public void navigate(String referenceBinding) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + referenceBinding);
+		new ZoomInAction(this, referenceBinding).execute();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	public void add(String dataWidgetBinding, boolean inline) {

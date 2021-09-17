@@ -31,6 +31,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
@@ -120,6 +121,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	public abstract UIComponent spacer(UIComponent component, Spacer spacer);
 	
+	public abstract UIComponent zoomIn(UIComponent component,
+											String label,
+											String iconStyleClass,
+											String toolTip,
+											ZoomIn zoomIn, 
+											String formDisabledConditionName);
+
 	public abstract UIComponent actionButton(UIComponent component,
 												String dataWidgetBinding, 
 												String dataWidgetVar, 

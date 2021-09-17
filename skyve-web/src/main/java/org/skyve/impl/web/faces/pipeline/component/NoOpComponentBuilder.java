@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
@@ -86,6 +87,16 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent spacer(UIComponent component, Spacer spacer) {
+		return component;
+	}
+
+	@Override
+	public UIComponent zoomIn(UIComponent component, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										ZoomIn zoomIn,
+										String formDisabledConditionName) {
 		return component;
 	}
 

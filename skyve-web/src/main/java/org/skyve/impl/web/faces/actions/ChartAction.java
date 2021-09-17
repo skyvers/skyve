@@ -61,7 +61,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ChartAction - CHART " + model);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());

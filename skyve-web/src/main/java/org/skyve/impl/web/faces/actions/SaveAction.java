@@ -37,7 +37,7 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());

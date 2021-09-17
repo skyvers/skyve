@@ -35,7 +35,7 @@ public class DeleteAction extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("DeleteAction");
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		PersistentBean beanToDelete = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+		PersistentBean beanToDelete = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToDelete.getBizModule());
