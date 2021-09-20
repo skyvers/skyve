@@ -105,6 +105,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -518,6 +520,14 @@ class ViewValidator extends ViewVisitor {
 		String buttonIdentifier = "A button " + button.getActionName();
 		validateActionName(actionName, buttonIdentifier);
 		validateSize(button, buttonIdentifier);
+		
+		ActionShow show = button.getShow();
+		if (ActionShow.icon == show) {
+			Action action = view.getAction(actionName); // validated to exist above
+			if ((action.getIconStyleClass() == null) && (action.getRelativeIconFileName() == null)) {
+				throw new MetaDataException(buttonIdentifier + " in " + viewIdentifier + " is set to [show] an icon but " + actionName + " has no [iconStyleClass] or [relativeIconFileName] defined.");
+			}
+		}
 	}
 
 	@Override
@@ -536,6 +546,12 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(zoomIn.getDisabledConditionName(), zoomInIdentifier);
 		validateConditionName(zoomIn.getInvisibleConditionName(), zoomInIdentifier);
 		validateSize(zoomIn, zoomInIdentifier);
+		
+		if ((ActionShow.icon == zoomIn.getShow()) && 
+				(zoomIn.getIconStyleClass() == null) &&
+				(zoomIn.getRelativeIconFileName() == null)) {
+			throw new MetaDataException(zoomInIdentifier + " in " + viewIdentifier + " is set to [show] an icon but has no [iconStyleClass] or [relativeIconFileName] defined.");
+		}
 	}
 
 	@Override
@@ -1929,6 +1945,12 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
 		validateConditionName(action.getInvisibleConditionName(), actionIdentifier);
 		validateParameterBindings(action.getParameters(), actionIdentifier);
+		
+		if ((ActionShow.icon == action.getShow()) && 
+				(action.getIconStyleClass() == null) &&
+				(action.getRelativeIconFileName() == null)) {
+			throw new MetaDataException(actionIdentifier + " in " + viewIdentifier + " is set to [show] an icon but has no [iconStyleClass] or [relativeIconFileName] defined.");
+		}
 	}
 	
 	// validate the resource name which represents the class to load for ClassActions
