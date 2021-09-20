@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.Action.ActionShow;
 
 /**
  * If button width/height is not specified it sizes to fit it's contents - the label and icon.
@@ -29,6 +30,7 @@ import org.skyve.impl.util.XMLMetaData;
 							"pixelHeight",
 							"minPixelHeight",
 							"maxPixelHeight",
+							"show",
 							"properties"})
 public class Button implements AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -2344473519207771461L;
@@ -38,6 +40,7 @@ public class Button implements AbsoluteSize, ContentSpecifiedWidth, Constrainabl
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+	private ActionShow show;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -99,6 +102,15 @@ public class Button implements AbsoluteSize, ContentSpecifiedWidth, Constrainabl
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	public ActionShow getShow() {
+		return show;
+	}
+
+	@XmlAttribute
+	public void setShow(ActionShow show) {
+		this.show = show;
 	}
 
 	@Override

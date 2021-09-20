@@ -749,6 +749,7 @@
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
         <xs:attribute name="inActionPanel" type="xs:boolean"/>
+        <xs:attribute name="show" type="tns:actionShow"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1145,6 +1146,7 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="minPixelHeight" type="xs:int"/>
     <xs:attribute name="maxPixelHeight" type="xs:int"/>
+    <xs:attribute name="show" type="tns:actionShow"/>
   </xs:complexType>
 
   <xs:complexType name="zoomIn">
@@ -1164,6 +1166,7 @@
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="relativeIconFileName" type="xs:string"/>
+        <xs:attribute name="show" type="tns:actionShow"/>
         <xs:attribute name="toolTip" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -2026,6 +2029,14 @@
       <xs:enumeration value="previous"/>
       <xs:enumeration value="suggest"/>
       <xs:enumeration value="constrain"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="actionShow">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="icon"/>
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="both"/>
     </xs:restriction>
   </xs:simpleType>
 

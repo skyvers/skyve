@@ -150,6 +150,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -1031,7 +1032,12 @@ public class FacesViewRenderer extends ViewRenderer {
 			public void processActionReference(ActionReference reference) {
 				Action action = obtainActionForActionReference(reference, customer, module, document, dataWidgetBinding, cb.userAgentType);
 				if (action != null) {
-					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, link, action));
+					ActionShow show = action.getShow();
+					String iconStyleClass = action.getIconStyleClass();
+					if (ActionShow.text == show) {
+						iconStyleClass = null;
+					}
+					c.set(cb.actionLink(null, dataWidgetBinding, dataWidgetVar, value, iconStyleClass, action.getLocalisedToolTip(), action.getLocalisedConfirmationText(), link, action));
 				}
 			}
 		}.process(outerReference);
@@ -2347,9 +2353,12 @@ public class FacesViewRenderer extends ViewRenderer {
 					toolbarLayout.getChildren().add(cb.action(null,
 																dataWidgetBinding,
 																dataWidgetVar,
-																action,
+																label,
+																iconStyleClass,
+																toolTip,
+																confirmationText,
 																null,
-																label));
+																action));
 				}
 			}
 		}
@@ -2363,7 +2372,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.Add);
+//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Add);
 	}
 
 	@Override
@@ -2374,7 +2383,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type, 
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Remove);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Remove);
 	}
 
 	@Override
@@ -2385,7 +2394,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.ZoomOut);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
@@ -2396,7 +2405,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.Navigate);
+//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Navigate);
 	}
 
 	@Override
@@ -2407,7 +2416,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String confirmationText,
 								char type,
 								ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.OK);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.OK);
 	}
 
 	@Override
@@ -2418,7 +2427,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Save);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Save);
 	}
 
 	@Override
@@ -2429,7 +2438,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Cancel);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Cancel);
 	}
 
 	@Override
@@ -2440,7 +2449,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Delete);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Delete);
 	}
 
 	/**
@@ -2457,7 +2466,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Report);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Report);
 	}
 
 	@Override
@@ -2468,7 +2477,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.BizExport);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizExport);
 	}
 
 	@Override
@@ -2479,7 +2488,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.BizImport);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizImport);
 	}
 
 	@Override
@@ -2490,7 +2499,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Download);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Download);
 	}
 
 	@Override
@@ -2501,7 +2510,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(action, ImplicitActionName.Upload);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Upload);
 	}
 
 	@Override
@@ -2512,7 +2521,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-//		processImplicitAction(action, ImplicitActionName.New);
+//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.New);
 	}
 
 	@Override
@@ -2537,21 +2546,30 @@ public class FacesViewRenderer extends ViewRenderer {
 		// TODO implement
 	}
 
-	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
+	private void processImplicitAction(String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action,
+										ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
 					if (ImplicitActionName.Report.equals(name)) {
-						toolbarLayout.getChildren().add(cb.report(null, action));
+						toolbarLayout.getChildren().add(cb.report(null, label, iconStyleClass, toolTip, confirmationText, action));
 					}
 					else if (ImplicitActionName.Download.equals(name)) {
 						toolbarLayout.getChildren().add(cb.download(null,
 																		dataWidgetBinding,
 																		dataWidgetVar,
+																		label,
+																		iconStyleClass,
+																		toolTip,
+																		confirmationText,
 																		action));
 					}
 					else if (ImplicitActionName.Upload.equals(name)) {
-						toolbarLayout.getChildren().add(cb.upload(null, action));
+						toolbarLayout.getChildren().add(cb.upload(null, label, iconStyleClass, toolTip, confirmationText, action));
 					}
 					else {
 						String displayName = action.getLocalisedDisplayName();
@@ -2561,9 +2579,12 @@ public class FacesViewRenderer extends ViewRenderer {
 						toolbarLayout.getChildren().add(cb.action(null,
 																	dataWidgetBinding,
 																	dataWidgetVar,
-																	action,
+																	label,
+																	iconStyleClass,
+																	toolTip,
+																	confirmationText,
 																	name,
-																	displayName));
+																	action));
 					}
 				}
 			}

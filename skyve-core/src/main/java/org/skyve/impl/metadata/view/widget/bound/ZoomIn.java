@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
@@ -50,6 +51,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	private Integer maxPixelHeight;
 	private String disabledConditionName;
 	private String invisibleConditionName;
+	private ActionShow show;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -146,6 +148,15 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	public ActionShow getShow() {
+		return show;
+	}
+
+	@XmlAttribute
+	public void setShow(ActionShow show) {
+		this.show = show;
 	}
 
 	@Override

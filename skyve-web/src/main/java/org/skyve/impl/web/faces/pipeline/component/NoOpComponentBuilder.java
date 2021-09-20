@@ -449,23 +449,43 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String dataWidgetBinding,
 									String dataWidgetVar,
 									String value,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText, 
 									Link link,
 									Action action) {
 		return component;
 	}
 
 	@Override
-	public UIComponent report(UIComponent component, Action action) {
+	public UIComponent report(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		return component;
 	}
 
 	@Override
-	public UIComponent download(UIComponent component, String dataWidgetBinding, String dataWidgetVar, Action action) {
+	public UIComponent download(UIComponent component,
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									String label,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText, 
+									Action action) {
 		return component;
 	}
 
 	@Override
-	public UIComponent upload(UIComponent component, Action action) {
+	public UIComponent upload(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		return component;
 	}
 
@@ -473,9 +493,12 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
-								Action action,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
 								ImplicitActionName name,
-								String title) {
+								Action action) {
 		return component;
 	}
 }

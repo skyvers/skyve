@@ -484,27 +484,47 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	}
 
 	public abstract UIComponent actionLink(UIComponent component,
-											   String dataWidgetBinding,
-											   String dataWidgetVar,
-											   String value,
-											   Link link,
-											   Action action);
+											String dataWidgetBinding,
+											String dataWidgetVar,
+											String label,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											Link link,
+											Action action);
 
-	public abstract UIComponent report(UIComponent component, Action action);
+	public abstract UIComponent report(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action);
 	
 	public abstract UIComponent download(UIComponent component, 
 											String dataWidgetBinding,
 											String dataWidgetVar,
+											String label,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
 											Action action);
 	
-	public abstract UIComponent upload(UIComponent component, Action action);
+	public abstract UIComponent upload(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action);
 
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 
 										String dataWidgetVar,
-										Action action, 
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
 										ImplicitActionName name, 
-										String title);
+										Action action);
 	
 	static final Class<?>[] STRING = new Class<?>[] {String.class};
 	static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};

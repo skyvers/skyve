@@ -2591,11 +2591,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent actionLink(UIComponent component,
-								  String dataWidgetBinding,
-								  String dataWidgetVar,
-								  String value,
-								  Link link,
-								  Action action) {
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									String value,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
+									Link link,
+									Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -2605,12 +2608,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		ImplicitActionName name = action.getImplicitName();
 		if (ImplicitActionName.Download.equals(name)) {
 			return downloadLink(value,
-									action.getLocalisedToolTip(),
+									toolTip,
 									action.getName(),
 									dataWidgetBinding,
 									dataWidgetVar,
 									link.getPixelWidth(),
-									action.getLocalisedConfirmationText(),
+									confirmationText,
 									action.getDisabledConditionName(),
 									null,
 									action.getInvisibleConditionName(),
@@ -2619,7 +2622,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		return actionLink(value,
-							action.getLocalisedToolTip(),
+							toolTip,
 							null,
 							action.getName(),
 							false,
@@ -2628,7 +2631,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							link.getPixelWidth(),
 							null,
 							action.getClientValidation(),
-							action.getLocalisedConfirmationText(),
+							confirmationText,
 							action.getDisabledConditionName(),
 							null,
 							action.getInvisibleConditionName(),
@@ -2637,19 +2640,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent report(UIComponent component, Action action) {
+	public UIComponent report(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action) {
 		if (component != null) {
 			return component;
 		}
 
-		return reportButton(action.getLocalisedDisplayName(),
-								action.getIconStyleClass(),
-								action.getLocalisedToolTip(),
+		return reportButton(label,
+								iconStyleClass,
+								toolTip,
 								action.getParameters(),
 								null,
 								null,
 								action.getClientValidation(),
-								action.getLocalisedConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName());
@@ -2659,6 +2667,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent download(UIComponent component,
 									String dataWidgetBinding,
 									String dataWidgetVar,
+									String label,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText,
 									Action action) {
 		if (component != null) {
 			return component;
@@ -2666,15 +2678,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		Map<String, String> properties = action.getProperties();
 
-		return downloadButton(action.getLocalisedDisplayName(),
-								action.getIconStyleClass(),
-								action.getLocalisedToolTip(),
+		return downloadButton(label,
+								iconStyleClass,
+								toolTip,
 								dataWidgetBinding,
 								dataWidgetVar,
 								action.getName(),
 								null,
 								null,
-								action.getLocalisedConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -2683,19 +2695,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent upload(UIComponent component, Action action) {
+	public UIComponent upload(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action) {
 		if (component != null) {
 			return component;
 		}
 
-		return uploadButton(action.getLocalisedDisplayName(),
-								action.getIconStyleClass(),
-								action.getLocalisedToolTip(),
+		return uploadButton(label,
+								iconStyleClass,
+								toolTip,
 								action.getName(),
 								null,
 								null,
 								action.getClientValidation(),
-								action.getLocalisedConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName());
@@ -2705,17 +2722,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
-								Action action,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
 								ImplicitActionName name,
-								String title) {
+								Action action) {
 		if (component != null) {
 			return component;
 		}
 
 		Map<String, String> properties = action.getProperties();
-		return actionButton(title,
-								action.getIconStyleClass(),
-								action.getLocalisedToolTip(),
+		return actionButton(label,
+								iconStyleClass,
+								toolTip,
 								name,
 								action.getName(),
 								false,
@@ -2724,7 +2744,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								action.getClientValidation(),
-								action.getLocalisedConfirmationText(),
+								confirmationText,
 								action.getDisabledConditionName(),
 								null,
 								action.getInvisibleConditionName(),
@@ -3086,21 +3106,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (implicitActionName != null) {
 			switch (implicitActionName) {
 				case OK:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-check");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Save:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-save");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Delete:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-trash-o");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					// Add the standard confirmation text if none exists
 					if (confirmationText == null) {
@@ -3109,27 +3120,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					break;
 				case Add:
 				case New:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-plus");
-					}
 					break;
 				case ZoomOut:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-reply");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Cancel:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-chevron-left");
-					}
 					result.setType("button"); // stop the post
 					result.setOnclick("SKYVE.PF.popHistory(true)");
 					break;
 				case Remove:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-minus");
-					}
 					result.setImmediate(true);
 					// Add the standard confirmation text if none exists
 					if (confirmationText == null) {
@@ -3137,37 +3136,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					}
 					break;
 				case Edit:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-pencil");
-					}
 					break;
 				case Report:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-newspaper-o");
-					}
 					break;
 				case BizImport:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-cloud-download");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case BizExport:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-cloud-upload");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Download:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-download");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Upload:
-					if (iconStyleClass == null) {
-						result.setIcon("fa fa-upload");
-					}
 					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				default:

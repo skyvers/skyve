@@ -781,23 +781,31 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public UIComponent actionLink(UIComponent component,
-								  String dataWidgetBinding,
-								  String dataWidgetVar,
-								  String value,
-								  Link link,
-								  Action action) {
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									String value,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText, 
+									Link link,
+									Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.actionLink(result, dataWidgetBinding, dataWidgetVar, value, link, action);
+			result = builder.actionLink(result, dataWidgetBinding, dataWidgetVar, value, iconStyleClass, toolTip, confirmationText, link, action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent report(UIComponent component, Action action) {
+	public UIComponent report(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.report(result, action);
+			result = builder.report(result, label, iconStyleClass, toolTip, confirmationText, action);
 		}
 		return result;
 	}
@@ -806,19 +814,28 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent download(UIComponent component,
 									String dataWidgetBinding,
 									String dataWidgetVar,
+									String label,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText, 
 									Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.download(result, dataWidgetBinding, dataWidgetVar, action);
+			result = builder.download(result, dataWidgetBinding, dataWidgetVar, label, iconStyleClass, toolTip, confirmationText, action);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent upload(UIComponent component, Action action) {
+	public UIComponent upload(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.upload(result, action);
+			result = builder.upload(result, label, iconStyleClass, toolTip, confirmationText, action);
 		}
 		return result;
 	}
@@ -827,12 +844,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
-								Action action,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
 								ImplicitActionName name,
-								String title) {
+								Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.action(result, dataWidgetBinding, dataWidgetVar, action, name, title);
+			result = builder.action(result,
+										dataWidgetBinding,
+										dataWidgetVar,
+										label,
+										iconStyleClass,
+										toolTip,
+										confirmationText,
+										name,
+										action);
 		}
 		return result;
 	}

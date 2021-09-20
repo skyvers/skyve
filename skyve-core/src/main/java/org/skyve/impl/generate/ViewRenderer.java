@@ -79,6 +79,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -423,7 +424,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param action
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
-	private boolean preProcessAction(ImplicitActionName implicitName, Action action) {
+	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
 		// Note that the " " result is for SC
@@ -625,6 +626,16 @@ public abstract class ViewRenderer extends ViewVisitor {
 			}
 		}
 
+		// remove the icon state or label state if its not meant to be shown
+		ActionShow show = (showOverride == null) ? action.getShow() : showOverride;
+		if (ActionShow.text == show) {
+			relativeIconFileName = null;
+			actionIconStyleClass = null;
+		}
+		else if (ActionShow.icon == show) {
+			actionLabel = null;
+		}
+
 		actionIconUrl = iconToUrl(relativeIconFileName);
 		actionToolTip = action.getLocalisedToolTip();
 		if (actionConfirmationParam != null) {
@@ -641,7 +652,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public final void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
 		Action action = view.getAction(button.getActionName());
-		if (preProcessAction(action.getImplicitName(), action)) {
+		if (preProcessAction(action.getImplicitName(), action, button.getShow())) {
 			if (currentFormItem != null) {
 				renderFormButton(action,
 									actionLabel,
@@ -690,13 +701,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 		preProcessWidget(zoomIn.getBinding(), zoomIn.showsLabelByDefault());
 		String label = zoomIn.getLocalisedDisplayName();
 		String relativeIconFileName = zoomIn.getRelativeIconFileName();
-		String iconUrl = (relativeIconFileName == null) ? null : iconToUrl(relativeIconFileName);
 		String iconStyleClass = zoomIn.getIconStyleClass();
-		if ((iconUrl == null) && (iconStyleClass == null)) {
+		if ((relativeIconFileName == null) && (iconStyleClass == null)) {
 			iconStyleClass = "fa fa-chevron-right";
 		}
 		String toolTip = zoomIn.getLocalisedToolTip();
 		
+		// remove the icon state or label state if its not meant to be rendered
+		ActionShow show = zoomIn.getShow();
+		if (ActionShow.text == show) {
+			relativeIconFileName = null;
+			iconStyleClass = null;
+		}
+		else if (ActionShow.icon == show) {
+			label = null;
+		}
+		
+		String iconUrl = iconToUrl(relativeIconFileName);
 		if (currentFormItem != null) {
 			renderFormZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		}
@@ -1670,7 +1691,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitCustomAction(ActionImpl action) {
-		if (preProcessAction(null, action)) {
+		if (preProcessAction(null, action, null)) {
 			renderCustomAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1691,7 +1712,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitAddAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Add, action)) {
+		if (preProcessAction(ImplicitActionName.Add, action, null)) {
 			renderAddAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1712,7 +1733,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitRemoveAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Remove, action)) {
+		if (preProcessAction(ImplicitActionName.Remove, action, null)) {
 			renderRemoveAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1733,7 +1754,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitZoomOutAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.ZoomOut, action)) {
+		if (preProcessAction(ImplicitActionName.ZoomOut, action, null)) {
 			renderZoomOutAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1754,7 +1775,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitNavigateAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Navigate, action)) {
+		if (preProcessAction(ImplicitActionName.Navigate, action, null)) {
 			renderNavigateAction(actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
@@ -1775,7 +1796,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitOKAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.OK, action)) {
+		if (preProcessAction(ImplicitActionName.OK, action, null)) {
 			renderOKAction(actionLabel,
 							actionIconUrl,
 							actionIconStyleClass,
@@ -1796,7 +1817,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitSaveAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Save, action)) {
+		if (preProcessAction(ImplicitActionName.Save, action, null)) {
 			renderSaveAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1817,7 +1838,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitCancelAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Cancel, action)) {
+		if (preProcessAction(ImplicitActionName.Cancel, action, null)) {
 			renderCancelAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1838,7 +1859,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDeleteAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Delete, action)) {
+		if (preProcessAction(ImplicitActionName.Delete, action, null)) {
 			renderDeleteAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1859,7 +1880,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitReportAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Report, action)) {
+		if (preProcessAction(ImplicitActionName.Report, action, null)) {
 			renderReportAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1880,7 +1901,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitBizExportAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.BizExport, action)) {
+		if (preProcessAction(ImplicitActionName.BizExport, action, null)) {
 			renderBizExportAction(actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
@@ -1901,7 +1922,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitBizImportAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.BizImport, action)) {
+		if (preProcessAction(ImplicitActionName.BizImport, action, null)) {
 			renderBizImportAction(actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
@@ -1922,7 +1943,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitDownloadAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Download, action)) {
+		if (preProcessAction(ImplicitActionName.Download, action, null)) {
 			renderDownloadAction(actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
@@ -1943,7 +1964,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitUploadAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Upload, action)) {
+		if (preProcessAction(ImplicitActionName.Upload, action, null)) {
 			renderUploadAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1964,7 +1985,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitNewAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.New, action)) {
+		if (preProcessAction(ImplicitActionName.New, action, null)) {
 			renderNewAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -1985,7 +2006,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitEditAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Edit, action)) {
+		if (preProcessAction(ImplicitActionName.Edit, action, null)) {
 			renderEditAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
@@ -2006,7 +2027,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitPrintAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Print, action)) {
+		if (preProcessAction(ImplicitActionName.Print, action, null)) {
 			renderPrintAction(actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,

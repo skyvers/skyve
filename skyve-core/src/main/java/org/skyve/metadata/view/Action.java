@@ -19,16 +19,21 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * 
 	 */
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public enum RenderHint {
+	public enum ActionShow {
 		/**
-		 * 
+		 * Show icon only
 		 */
-		button,
+		icon,
 		
 		/**
-		 * 
+		 * Show text only
 		 */
-		tool;
+		text,
+		
+		/**
+		 * Show icon and text
+		 */
+		both;
 	}
 
 	/**
@@ -94,10 +99,10 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	public Boolean getInActionPanel();
 	
 	/**
-	 * 
+	 * Whether to show text or icon or both.
 	 * @return
 	 */
-	public RenderHint getRenderHint();
+	public ActionShow getShow();
 	
 	/**
 	 * 

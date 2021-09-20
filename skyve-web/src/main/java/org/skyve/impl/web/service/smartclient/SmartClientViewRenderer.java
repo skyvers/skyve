@@ -2715,11 +2715,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizZoomIn.create({binding:'");
 		result.append(BindUtil.sanitiseBinding(zoomIn.getBinding()));
-		result.append("',displayName:'");
-		if (iconStyleClass != null) {
-			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span> &nbsp;</span>");
+		if ((label != null) || (iconStyleClass != null)) {
+			result.append("',displayName:'");
+			if (iconStyleClass != null) {
+				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+			}
+			if (label != null) {
+				result.append("<span> &nbsp;</span>").append(OWASP.escapeJsString(label));
+			}
 		}
-		result.append(OWASP.escapeJsString(label)).append("',tabIndex:999,");
+		result.append("',tabIndex:999,");
 		if ((iconStyleClass == null) && (iconUrl != null)) {
 			result.append("icon:'../").append(iconUrl).append("',");
 		}
@@ -2768,11 +2773,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		result.append("',type:'");
 		result.append(type);
-		result.append("',displayName:'");
-		if (iconStyleClass != null) {
-			result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span> &nbsp;</span>");
+		if ((label != null) || (iconStyleClass != null)) {
+			result.append("',displayName:'");
+			if (iconStyleClass != null) {
+				result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+			}
+			if (label != null) {
+				result.append("<span> &nbsp;</span>").append(OWASP.escapeJsString(label));
+			}
 		}
-		result.append(OWASP.escapeJsString(label)).append("',tabIndex:999,");
+		result.append("',tabIndex:999,");
 		if ((iconStyleClass == null) && (iconUrl != null)) {
 			result.append("icon:'../").append(iconUrl).append("',");
 		}

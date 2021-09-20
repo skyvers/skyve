@@ -53,9 +53,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
-								Action action,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
 								ImplicitActionName name,
-								String title) {
+								Action action) {
 		if (component != null) {
 			if (name != null) {
 				context.put(name.toString(), component, name);
@@ -85,7 +88,14 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent download(UIComponent component, String dataWidgetBinding, String dataWidgetVar, Action action) {
+	public UIComponent download(UIComponent component,
+									String dataWidgetBinding,
+									String dataWidgetVar,
+									String label,
+									String iconStyleClass,
+									String toolTip,
+									String confirmationText, 
+									Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -112,7 +122,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent report(UIComponent component, Action action) {
+	public UIComponent report(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -137,7 +152,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent upload(UIComponent component, Action action) {
+	public UIComponent upload(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}

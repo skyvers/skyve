@@ -46,7 +46,7 @@ public class ActionImpl implements Action {
 	private String iconStyleClass;
 	private String confirmationText;
 	private Boolean inActionPanel = Boolean.TRUE;
-	private RenderHint renderHint;
+	private ActionShow show = ActionShow.both;
 	private String disabledConditionName;
 	private String invisibleConditionName;
 	private List<Parameter> parameters = new ArrayList<>();
@@ -156,12 +156,12 @@ public class ActionImpl implements Action {
 	}
 
 	@Override
-	public RenderHint getRenderHint() {
-		return renderHint;
+	public ActionShow getShow() {
+		return show;
 	}
 
-	public void setRenderHint(RenderHint renderHint) {
-		this.renderHint = renderHint;
+	public void setShow(ActionShow show) {
+		this.show = show;
 	}
 
 	@Override

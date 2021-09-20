@@ -1462,6 +1462,9 @@ isc.BizButton.addMethods({
 		if (this.displayName) {
 			this.title = this.displayName;
 		}
+		else {
+			this.title = null;
+		}
 		
 		if (this.tooltip) {
 			this.canHover = true;
@@ -1673,6 +1676,9 @@ isc.BizZoomIn.addMethods({
 		this.hasDisabledicon = false;
 		if (this.displayName) {
 			this.title = this.displayName;
+		}
+		else {
+			this.title = null;
 		}
 		
 		if (this.tooltip) {
