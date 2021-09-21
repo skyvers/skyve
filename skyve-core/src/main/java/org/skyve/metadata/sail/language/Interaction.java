@@ -30,6 +30,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
 import org.skyve.metadata.sail.language.step.interaction.actions.Ok;
 import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
 import org.skyve.metadata.sail.language.step.interaction.actions.Save;
+import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
@@ -112,6 +113,7 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = LookupDescriptionPick.class),
 						@XmlElementRef(type = LookupDescriptionNew.class),
 						@XmlElementRef(type = LookupDescriptionEdit.class),
+						@XmlElementRef(type = ZoomIn.class),
 						@XmlElementRef(type = DataGridNew.class),
 						@XmlElementRef(type = DataGridZoom.class),
 						@XmlElementRef(type = DataGridEdit.class),

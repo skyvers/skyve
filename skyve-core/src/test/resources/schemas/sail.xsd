@@ -87,6 +87,8 @@
 
   <xs:element name="userAgentType" type="tns:userAgentType"/>
 
+  <xs:element name="zoomIn" type="tns:zoomIn"/>
+
   <xs:element name="zoomOut" type="tns:zoomOut"/>
 
   <xs:complexType name="automation">
@@ -126,6 +128,7 @@
         <xs:element ref="tns:lookupDescriptionPick"/>
         <xs:element ref="tns:lookupDescriptionNew"/>
         <xs:element ref="tns:lookupDescriptionEdit"/>
+        <xs:element ref="tns:zoomIn"/>
         <xs:element ref="tns:dataGridNew"/>
         <xs:element ref="tns:dataGridZoom"/>
         <xs:element ref="tns:dataGridEdit"/>
@@ -309,6 +312,16 @@
     <xs:attribute name="binding" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="zoomIn">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="dataGridNew">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
@@ -445,6 +458,7 @@
               <xs:element ref="tns:lookupDescriptionPick"/>
               <xs:element ref="tns:lookupDescriptionNew"/>
               <xs:element ref="tns:lookupDescriptionEdit"/>
+              <xs:element ref="tns:zoomIn"/>
               <xs:element ref="tns:dataGridNew"/>
               <xs:element ref="tns:dataGridZoom"/>
               <xs:element ref="tns:dataGridEdit"/>

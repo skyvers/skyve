@@ -20,6 +20,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
 import org.skyve.metadata.sail.language.step.interaction.actions.Ok;
 import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
 import org.skyve.metadata.sail.language.step.interaction.actions.Save;
+import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
@@ -78,6 +79,8 @@ public interface Executor {
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu);
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit);
 
+	public void executeZoomIn(ZoomIn zoom);
+	
 	public void executeDataGridNew(DataGridNew nu);
 	public void executeDataGridZoom(DataGridZoom zoom);
 	public void executeDataGridEdit(DataGridEdit edit);

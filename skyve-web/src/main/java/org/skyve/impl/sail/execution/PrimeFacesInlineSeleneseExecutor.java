@@ -46,6 +46,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
 import org.skyve.metadata.sail.language.step.interaction.actions.Ok;
 import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
 import org.skyve.metadata.sail.language.step.interaction.actions.Save;
+import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
@@ -487,6 +488,28 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
+	@Override
+	public void executeZoomIn(ZoomIn zoom) {
+		button(zoom, "zoomIn", false, Boolean.TRUE.equals(zoom.getConfirm()), zoom.getTestSuccess());
+		
+		// Determine the Document of the edit view to push
+		PrimeFacesAutomationContext context = peek();
+		String binding = zoom.getBinding();
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
+		d = m.getDocument(c, newDocumentName);
+		String newModuleName = d.getOwningModuleName();
+		
+		// Push it
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(newModuleName);
+		push.setDocumentName(newDocumentName);
+		push.execute(this);
+	}
+	
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
