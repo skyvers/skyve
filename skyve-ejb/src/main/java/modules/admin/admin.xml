@@ -33,6 +33,8 @@
 		<document ref="DocumentCreator" />
 		<document ref="DocumentNumber" defaultQueryName="qDocumentNumbers"/>
 		<document ref="DownloadFolder" />
+		<document ref="DynamicEntity" />
+		<document ref="DynamicRelation" />
 		<document ref="Generic" />
 		<document ref="Group" />
 		<document ref="GroupRole" />
@@ -89,6 +91,8 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="CRUDU" />
+				<document name="DynamicEntity" permission="CRUDD" />
+				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG" />
 				<document name="ReportTemplate" permission="_R__C" />
 				<document name="User" permission="_RU_U" />
@@ -129,6 +133,8 @@
 				<document name="Configuration" permission="_R__C" />
 				<document name="Contact" permission="_RU_C" />
 				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="DynamicEntity" permission="CRUDD" />
+				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
 				<document name="ReportTemplate" permission="_RU_C">
@@ -343,6 +349,8 @@
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DownloadFolder" permission="CRUDC" />
+				<document name="DynamicEntity" permission="CRUDD" />
+				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
@@ -391,6 +399,8 @@
 				</document>
 				<document name="Contact" permission="_R__C" />
 				<document name="DocumentNumber" permission="_R__C" />
+				<document name="DynamicEntity" permission="_R__D" />
+				<document name="DynamicRelation" permission="_R__D" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
 				<document name="Snapshot" permission="CRUDU" />

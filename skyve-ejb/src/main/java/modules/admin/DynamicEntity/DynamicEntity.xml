@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DynamicEntity"
+				xmlns="http://www.skyve.org/xml/document"
+				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_DynamicEntity" />
+	<singularAlias>Dynamic Entity</singularAlias>
+	<pluralAlias>Dynamic Entities</pluralAlias>
+	<audited>false</audited>
+	<bizKey expression="{bizModule}.{bizDocument}#{bizId}" />
+	<attributes>
+		<text name="json" required="true">
+			<displayName>Name</displayName>
+			<length>30</length>
+		</text>
+	</attributes>
+</document>

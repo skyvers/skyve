@@ -246,6 +246,40 @@
 		<filter name="adminDocumentNumberUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.domain.DynamicEntity" table="ADM_DynamicEntity" entity-name="adminDynamicEntity">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="json" length="30" />
+		<filter name="adminDynamicEntityNoneFilter" condition="1=0"/>
+		<filter name="adminDynamicEntityCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDynamicEntityDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDynamicEntityUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DynamicRelation" table="ADM_DynamicRelation" entity-name="adminDynamicRelation">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="ownerId" length="36" />
+		<property name="relatedId" length="36" />
+		<property name="attributeName" length="500" />
+		<filter name="adminDynamicRelationNoneFilter" condition="1=0"/>
+		<filter name="adminDynamicRelationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDynamicRelationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDynamicRelationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.Group.GroupExtension" table="ADM_SecurityGroup" entity-name="adminGroup">
 		<cache usage="read-write" region="reference" />
 		<id name="bizId" length="36" />
@@ -826,6 +860,26 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminDocumentNumberUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityNoneFilter" />
+	<filter-def name="adminDynamicEntityCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationNoneFilter" />
+	<filter-def name="adminDynamicRelationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminGroupNoneFilter" />
