@@ -256,6 +256,10 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="json" length="30" />
+		<bag name="relations" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminDynamicRelation" />
+		</bag>
 		<filter name="adminDynamicEntityNoneFilter" condition="1=0"/>
 		<filter name="adminDynamicEntityCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDynamicEntityDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -271,7 +275,7 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="ownerId" length="36" />
+		<many-to-one name="parent" entity-name="adminDynamicEntity" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_DynamicRelation_parent" />
 		<property name="relatedId" length="36" />
 		<property name="attributeName" length="500" />
 		<filter name="adminDynamicRelationNoneFilter" condition="1=0"/>

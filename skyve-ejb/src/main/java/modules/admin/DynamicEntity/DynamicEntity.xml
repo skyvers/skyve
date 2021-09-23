@@ -13,5 +13,10 @@
 			<displayName>Name</displayName>
 			<length>30</length>
 		</text>
+		<collection name="relations" type="child">
+			<displayName>Relations</displayName>
+			<documentName>DynamicRelation</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 </document>

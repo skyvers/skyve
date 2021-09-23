@@ -7,11 +7,9 @@
 	<singularAlias>Dynamic Relation</singularAlias>
 	<pluralAlias>Dynamic Relations</pluralAlias>
 	<audited>false</audited>
-	<bizKey expression="{ownerId}.{relatedId}" />
+	<parentDocument>DynamicEntity</parentDocument>
+	<bizKey expression="{parent.bizModule}.{parent.bizDocument}.{attributeName}#{parent.bizId}->{relatedId}" />
 	<attributes>
-		<id name="ownerId" required="true">
-			<displayName>Owner ID</displayName>
-		</id>
 		<id name="relatedId" required="true">
 			<displayName>Related ID</displayName>
 		</id>

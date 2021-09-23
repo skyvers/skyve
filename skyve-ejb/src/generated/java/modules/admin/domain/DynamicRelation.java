@@ -5,17 +5,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Dynamic Relation
  * 
- * @stereotype "persistent"
+ * @stereotype "persistent child"
  */
 @XmlType
 @XmlRootElement
-public class DynamicRelation extends AbstractPersistentBean {
+public class DynamicRelation extends AbstractPersistentBean implements ChildBean<DynamicEntity> {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -29,18 +31,10 @@ public class DynamicRelation extends AbstractPersistentBean {
 	public static final String DOCUMENT_NAME = "DynamicRelation";
 
 	/** @hidden */
-	public static final String ownerIdPropertyName = "ownerId";
-
-	/** @hidden */
 	public static final String relatedIdPropertyName = "relatedId";
 
 	/** @hidden */
 	public static final String attributeNamePropertyName = "attributeName";
-
-	/**
-	 * Owner ID
-	 **/
-	private String ownerId;
 
 	/**
 	 * Related ID
@@ -51,6 +45,10 @@ public class DynamicRelation extends AbstractPersistentBean {
 	 * Attribute Name
 	 **/
 	private String attributeName;
+
+	private DynamicEntity parent;
+
+	private Integer bizOrdinal;
 
 	@Override
 	@XmlTransient
@@ -80,7 +78,7 @@ public class DynamicRelation extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("{ownerId}.{relatedId}", this);
+			return org.skyve.util.Binder.formatMessage("{parent.bizModule}.{parent.bizDocument}.{attributeName}#{parent.bizId}->{relatedId}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
@@ -91,24 +89,6 @@ public class DynamicRelation extends AbstractPersistentBean {
 	public boolean equals(Object o) {
 		return ((o instanceof DynamicRelation) && 
 					this.getBizId().equals(((DynamicRelation) o).getBizId()));
-	}
-
-	/**
-	 * {@link #ownerId} accessor.
-	 * @return	The value.
-	 **/
-	public String getOwnerId() {
-		return ownerId;
-	}
-
-	/**
-	 * {@link #ownerId} mutator.
-	 * @param ownerId	The new value.
-	 **/
-	@XmlElement
-	public void setOwnerId(String ownerId) {
-		preset(ownerIdPropertyName, ownerId);
-		this.ownerId = ownerId;
 	}
 
 	/**
@@ -145,5 +125,31 @@ public class DynamicRelation extends AbstractPersistentBean {
 	public void setAttributeName(String attributeName) {
 		preset(attributeNamePropertyName, attributeName);
 		this.attributeName = attributeName;
+	}
+
+	@Override
+	public DynamicEntity getParent() {
+		return parent;
+	}
+
+	@Override
+	@XmlElement
+	public void setParent(DynamicEntity parent) {
+		if (this.parent != parent) {
+			preset(ChildBean.PARENT_NAME, parent);
+			this.parent = parent;
+		}
+	}
+
+	@Override
+	public Integer getBizOrdinal() {
+		return bizOrdinal;
+	}
+
+	@Override
+	@XmlElement
+	public void setBizOrdinal(Integer bizOrdinal) {
+		preset(Bean.ORDINAL_NAME, bizOrdinal);
+		this.bizOrdinal =  bizOrdinal;
 	}
 }
