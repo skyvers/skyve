@@ -12,7 +12,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
-			propOrder = {"persistentBool", "requiredBool", "defaultValue", "index"})
+			propOrder = {"persistentBool", "dynamicBool", "requiredBool", "defaultValue", "index"})
 public abstract class Field extends AbstractAttribute {
 	private static final long serialVersionUID = -638312757619721424L;
 
@@ -23,6 +23,7 @@ public abstract class Field extends AbstractAttribute {
 
 	private boolean required;
 	private boolean persistent = true;
+	private boolean dynamic = false;
 	
 	/**
 	 * Whether this field has a textual or database index on it.
@@ -88,5 +89,23 @@ public abstract class Field extends AbstractAttribute {
 	@XmlAttribute(name = "persistent")
 	public void setPersistentBool(Boolean persistent) {
 		this.persistent = persistent.booleanValue();
+	}
+
+	public boolean isDynamic() {
+		return dynamic;
+	}
+
+	@XmlTransient
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
+	}
+
+	public Boolean getDynamicBool() {
+		return Boolean.valueOf(dynamic);
+	}
+
+	@XmlElement(name = "dynamic")
+	public void setDynamicBool(Boolean dynamic) {
+		this.dynamic = dynamic.booleanValue();
 	}
 }

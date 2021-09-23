@@ -78,6 +78,13 @@ public interface Model extends NamedMetaData {
 	public Persistent getPersistent();
 
 	/**
+	 * This document is dynamic.
+	 * 
+	 * @return
+	 */
+	public boolean isDynamic();
+
+	/**
 	 * 
 	 * @return
 	 */

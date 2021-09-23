@@ -30,6 +30,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private List<Attribute> attributes = new ArrayList<>();
 	private String singularAlias;
 	private Persistent persistent;
+	private boolean dynamic = false;
 	private Extends inherits;
 	private boolean abstractClass;
 	private String pluralAlias;
@@ -133,6 +134,15 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
+	}
+
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
+
+	public void setDynamic(boolean dynamic) {
+		this.dynamic = dynamic;
 	}
 
 	@Override

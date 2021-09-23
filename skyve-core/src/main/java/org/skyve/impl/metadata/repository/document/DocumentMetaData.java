@@ -84,6 +84,7 @@ import org.skyve.metadata.model.document.Relation;
 							"extends",
 							"abstract",
 							"persistent",
+							"dynamic",
 							"singularAlias", 
 							"pluralAlias",
 							"audited",
@@ -105,6 +106,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
 	private Persistent persistent;
+	private java.lang.Boolean dynamic;
 	private String singularAlias;
 	private String pluralAlias;
 	private String iconStyleClass;
@@ -145,6 +147,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
 	public void setPersistent(Persistent persistent) {
 		this.persistent = persistent;
+	}
+
+	public java.lang.Boolean getDynamic() {
+		return dynamic;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setDynamic(java.lang.Boolean dynamic) {
+		this.dynamic = dynamic;
 	}
 
 	public String getSingularAlias() {
@@ -301,6 +312,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		result.setExtends(getExtends());
 		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
+		boolean resultDynamic = java.lang.Boolean.TRUE.equals(getDynamic()) ? true : false;
+		result.setDynamic(resultDynamic);
 		value = getSingularAlias();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The document [singularAlias] is required");
@@ -359,7 +372,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				throw new MetaDataException(metaDataName + " : The document [bizKey] requires either some code or an expression defined.");
 			}
 		}
-		
+
 		if (bizKeyCode != null) {
 			result.setBizKeyMethodCode(bizKeyCode);
 		}
@@ -456,6 +469,10 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						field.setPersistent(false);
 					}
 
+					if (resultDynamic) {
+						field.setDynamic(true);
+					}
+					
 					if (attribute instanceof ConvertableField) {
 						ConvertableField convertableField = (ConvertableField) attribute;
 						ConverterName converterName = convertableField.getConverterName();
