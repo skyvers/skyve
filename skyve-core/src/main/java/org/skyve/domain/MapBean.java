@@ -7,11 +7,12 @@ import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractBean;
-import org.skyve.persistence.DocumentQuery;
 
 public class MapBean extends LazyDynaMap implements Bean {
 	private static final long serialVersionUID = 1L;
 
+	public static final String BEAN_PROPERTY_KEY = "bean";
+	
 	public MapBean(String bizModule, String bizDocument, Map<String, Object> properties) {
 		super(properties);
 		
@@ -79,7 +80,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 
 	@Override
 	public Map<String, Object> originalValues() {
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
+		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		if (bean == null) {
 			return new TreeMap<>();
 		}
@@ -89,7 +90,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 
 	@Override
 	public boolean isChanged() {
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
+		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		if (bean == null) {
 			return false;
 		}
@@ -104,7 +105,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 	
 	@Override
 	public boolean hasChanged() {
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
+		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		if (bean == null) {
 			return false;
 		}
@@ -140,7 +141,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 	@Override
 	public Object get(String propertyName) {
 		Object result = null;
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
+		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		
 		// Ensure "bizModule" returns the polymorphic value if appropriate
 		if ((bean != null) && Bean.MODULE_KEY.equals(propertyName)) {
@@ -198,7 +199,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 			result = super.get(propertyName, index);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
+			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}
@@ -221,7 +222,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 			result = super.get(propertyName, key);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
+			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}
@@ -242,7 +243,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 			super.set(propertyName, value);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
+			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}
@@ -261,7 +262,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 			super.set(propertyName, index, value);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
+			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}
@@ -282,7 +283,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 			super.set(propertyName, key, value);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
+			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}

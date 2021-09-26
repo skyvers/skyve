@@ -5,7 +5,6 @@ import java.util.Map;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.persistence.DocumentQuery;
 
 public class ListModelRow extends MapBean {
 	private static final long serialVersionUID = 477773812246146903L;
@@ -31,13 +30,13 @@ public class ListModelRow extends MapBean {
 	
 	private String bizLock;
 	public String getBizLock() {
-		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.LOCK_NAME);
 		}
 		return bizLock;
 	}
 	public void setBizLock(String bizLock) {
-		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.LOCK_NAME, bizLock);
 		}
 		else {
@@ -47,13 +46,13 @@ public class ListModelRow extends MapBean {
 	
 	private String bizTagged;
 	public String getBizTagged() {
-		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.TAGGED_NAME);
 		}
 		return bizTagged;
 	}
 	public void setBizTagged(String bizTagged) {
-		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.TAGGED_NAME, bizLock);
 		}
 		else {
@@ -63,13 +62,13 @@ public class ListModelRow extends MapBean {
 	
 	private String bizFlagComment;
 	public String getBizFlagComment() {
-		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.FLAG_COMMENT_NAME);
 		}
 		return bizFlagComment;
 	}
 	public void setBizFlagComment(String bizFlagComment) {
-		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.FLAG_COMMENT_NAME, bizLock);
 		}
 		else {
@@ -80,13 +79,13 @@ public class ListModelRow extends MapBean {
 	private String bizKey;
 	@Override
 	public String getBizKey() {
-		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(Bean.BIZ_KEY);
 		}
 		return bizKey;
 	}
 	public void setBizKey(String bizKey) {
-		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(DocumentQuery.THIS_ALIAS)) {
+		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(Bean.BIZ_KEY, bizLock);
 		}
 		else {

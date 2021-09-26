@@ -11,7 +11,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
@@ -141,7 +140,7 @@ public class BindTests extends AbstractSkyveTest {
 	public void testSimpleThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
 		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
 	}
@@ -152,7 +151,7 @@ public class BindTests extends AbstractSkyveTest {
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
 		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
@@ -161,7 +160,7 @@ public class BindTests extends AbstractSkyveTest {
 	public void testSimpleMapPropertyOverThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
 		map.put(AllAttributesPersistent.booleanFlagPropertyName, null);
 		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
 		Assert.assertFalse(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
@@ -173,7 +172,7 @@ public class BindTests extends AbstractSkyveTest {
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(DocumentQuery.THIS_ALIAS, aap);
+		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
 		map.put(binding, null);
 		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
 		Assert.assertFalse(Binder.get(bean, binding) instanceof Boolean);

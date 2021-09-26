@@ -62,7 +62,6 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -640,8 +639,8 @@ public final class BindUtil {
 						Bean realBean = bean;
 						if (bean instanceof MapBean) {
 							MapBean mapBean = (MapBean) bean;
-							if (mapBean.isProperty(DocumentQuery.THIS_ALIAS)) {
-								realBean = (Bean) mapBean.get(DocumentQuery.THIS_ALIAS);
+							if (mapBean.isProperty(MapBean.BEAN_PROPERTY_KEY)) {
+								realBean = (Bean) mapBean.get(MapBean.BEAN_PROPERTY_KEY);
 							}
 							else { // no THIS_ALIAS in this mapBean (maybe its a app coder's list model)
 								realBean = null;

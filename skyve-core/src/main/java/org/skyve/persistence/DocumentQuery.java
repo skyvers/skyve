@@ -2,6 +2,7 @@ package org.skyve.persistence;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.domain.MapBean;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Document;
@@ -13,7 +14,7 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	/**
 	 * 
 	 */
-	public static final String THIS_ALIAS = "bean";
+	public static final String THIS_ALIAS = MapBean.BEAN_PROPERTY_KEY;
 
 	/**
 	 * 
