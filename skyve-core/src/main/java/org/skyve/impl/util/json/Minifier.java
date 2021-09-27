@@ -29,8 +29,10 @@ public class Minifier {
 		COMMENT_CLOSERS = new ArrayList<>();
 		COMMENT_CLOSERS.add("*/");
 		COMMENT_INDICATORS.put("/*", COMMENT_CLOSERS);
-		STRING_CHARS.put('"', '"');
-		ESCAPE_CHARS.add('\\');
+		Character dq = Character.valueOf('"');
+		STRING_CHARS.put(dq, dq);
+		Character bs = Character.valueOf('\\');
+		ESCAPE_CHARS.add(bs);
 	}
 
 	/**

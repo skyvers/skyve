@@ -7,12 +7,8 @@ import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
-import org.skyve.impl.metadata.user.Privilege;
 
 public class RoleImpl implements Role {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -2841351233211789543L;
 
 	private Module owningModule;

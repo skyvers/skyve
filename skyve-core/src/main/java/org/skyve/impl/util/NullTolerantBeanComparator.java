@@ -2,7 +2,6 @@ package org.skyve.impl.util;
 
 import org.apache.commons.beanutils.BeanComparator;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.NullTolerantComparator;
 
 @SuppressWarnings("rawtypes")
 public class NullTolerantBeanComparator extends BeanComparator {
