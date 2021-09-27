@@ -8,7 +8,7 @@ public class MapFeature {
 	private boolean editable = false;
 	private String strokeColour;
 	private String fillColour;
-	private Float fillOpacity;
+	private float fillOpacity = 1.0f;
 	private String iconRelativeFilePath;
 	private Integer iconAnchorX;
 	private Integer iconAnchorY;
@@ -17,14 +17,14 @@ public class MapFeature {
 	}
 
 	public MapFeature(Geometry geometry,
-			boolean zoomable,
-			boolean editable,
-			String strokeColour,
-			String fillColour,
-			Float fillOpacity,
-			String iconRelativeFilePath,
-			Integer iconAnchorX,
-			Integer iconAnchorY) {
+						boolean zoomable,
+						boolean editable,
+						String strokeColour,
+						String fillColour,
+						float fillOpacity,
+						String iconRelativeFilePath,
+						Integer iconAnchorX,
+						Integer iconAnchorY) {
 		this.geometry = geometry;
 		this.zoomable = zoomable;
 		this.editable = editable;
@@ -85,17 +85,16 @@ public class MapFeature {
 	 * 
 	 * @param fillOpacity The fill opacity of the feature
 	 */
-	public void setFillOpacity(Float fillOpacity) {
-		if (fillOpacity != null) {
-			if (fillOpacity.floatValue() > 1.0) {
-				fillOpacity = 1.0f;
-			}
-			if (fillOpacity.floatValue() < 0.0) {
-				fillOpacity = 0.0f;
-			}
-
-			this.fillOpacity = fillOpacity;
+	public void setFillOpacity(float fillOpacity) {
+		float value = fillOpacity;
+		if (fillOpacity > 1.0f) {
+			value = 1.0f;
 		}
+		if (fillOpacity < 0.0f) {
+			value = 0.0f;
+		}
+
+		this.fillOpacity = value;
 	}
 
 	public String getIconRelativeFilePath() {
