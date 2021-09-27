@@ -42,6 +42,8 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -53,12 +55,14 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -1030,26 +1034,45 @@ public final class BindUtil {
 	 * Get a simple or compound <code>bean</code> property value.
 	 * 
 	 * @param bean The bean to get the property value from.
-	 * @param fullyQualifiedAttributeName The fully qualified name of a bean property, separating components with a '.'. 
-	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
+	 * @param binding The fully qualified name of a bean property, separating components with a '.'. 
+	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
-	public static Object get(Object bean, String fullyQualifiedPropertyName) {
+	public static Object get(Object bean, String binding) {
 		if (bean instanceof MapBean) {
-			return ((MapBean) bean).get(fullyQualifiedPropertyName);
+			return ((MapBean) bean).get(binding);
 		}
 
 		Object result = null;
 		Object currentBean = bean;
-		StringTokenizer tokenizer = new StringTokenizer(fullyQualifiedPropertyName, ".");
+		StringTokenizer tokenizer = new StringTokenizer(binding, ".");
 		while (tokenizer.hasMoreTokens()) {
-			String simplePropertyName = tokenizer.nextToken();
+			String simpleBinding = tokenizer.nextToken();
 			try {
-				result = PROPERTY_UTILS.getProperty(currentBean, simplePropertyName);
+				if (currentBean instanceof Bean) {
+					Bean b = (Bean) currentBean;
+					String attributeName = simpleBinding;
+					int braceIndex = simpleBinding.indexOf('[');
+					if (braceIndex < 0) {
+						braceIndex = simpleBinding.indexOf('(');
+					}
+					if (braceIndex >= 0) {
+						attributeName = simpleBinding.substring(0, braceIndex);
+					}
+					if (b.isDynamic(attributeName)) {
+						result = b.getDynamic(simpleBinding);
+					}
+					else {
+						result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+					}
+				}
+				else {
+					result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+				}
 			}
 			catch (Exception e) {
-				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + fullyQualifiedPropertyName + ")!");
-				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simplePropertyName + " from " + currentBean);
-				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simplePropertyName + 
+				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + binding + ")!");
+				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simpleBinding + " from " + currentBean);
+				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simpleBinding + 
 										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
 										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
 				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
@@ -1097,9 +1120,9 @@ public final class BindUtil {
 		return result;
 	}
 	
-	public static void convertAndSet(Object bean, String propertyName, Object value) {
-		Class<?> type = getPropertyType(bean, propertyName);
-		set(bean, propertyName, convert(type, value));
+	public static void convertAndSet(Object bean, String binding, Object value) {
+		Class<?> type = getPropertyType(bean, binding);
+		set(bean, binding, convert(type, value));
 	}
 
 	/**
@@ -1107,10 +1130,10 @@ public final class BindUtil {
 	 * 
 	 * @param bean The bean to set the property value in.
 	 * @param value The value to the bean property value to.
-	 * @param fullyQualifiedPropertyName The fully qualified name of a bean property, separating components with a '.'. 
-	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
+	 * @param binding The fully qualified name of a bean property, separating components with a '.'. 
+	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
-	public static void set(Object bean, String fullyQualifiedPropertyName, Object value) {
+	public static void set(Object bean, String binding, Object value) {
 		try {
 			Object valueToSet = value;
 			// empty strings to null
@@ -1119,11 +1142,11 @@ public final class BindUtil {
 			}
 	
 			if (bean instanceof MapBean) {
-				((MapBean) bean).set(fullyQualifiedPropertyName, valueToSet);
+				((MapBean) bean).set(binding, valueToSet);
 			}
 			else {
 				if (valueToSet != null) {
-					Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
+					Class<?> propertyType = BindUtil.getPropertyType(bean, binding);
 		
 					// if we are setting a String value to a non-string property then
 					// use an appropriate constructor or static valueOf()
@@ -1141,7 +1164,38 @@ public final class BindUtil {
 						valueToSet = valueToSet.toString();
 					} // if (we have a String property)
 				}
-				PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+				
+				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
+				String simpleBinding = binding;
+				Object penultimate = bean;
+				int lastDotIndex = binding.lastIndexOf('.');
+				if (lastDotIndex >= 0) {
+					penultimate = get(bean, binding.substring(0, lastDotIndex));
+					simpleBinding = binding.substring(lastDotIndex + 1);
+				}
+
+				// Set static and dynamic beans
+				if (penultimate instanceof Bean) {
+					Bean b = (Bean) penultimate;
+					String attributeName = simpleBinding;
+					int braceIndex = simpleBinding.indexOf('[');
+					if (braceIndex < 0) {
+						braceIndex = simpleBinding.indexOf('(');
+					}
+					if (braceIndex >= 0) {
+						attributeName = simpleBinding.substring(0, braceIndex);
+					}
+					if (b.isDynamic(attributeName)) {
+						b.setDynamic(simpleBinding, valueToSet);
+					}
+					else {
+						PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
+					}
+				}
+				// Set anything else
+				else {
+					PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -1153,18 +1207,110 @@ public final class BindUtil {
 		}
 	}
 
-	public static Class<?> getPropertyType(Object bean, String propertyName) {
+	public static Class<?> getPropertyType(Object bean, String binding) {
+		if (bean instanceof Bean) {
+			Bean b = (Bean) bean;
+
+			// NB true if a MapBean or where the binding is to a dynamic attribute name
+			boolean dynamic = b.isDynamic(binding);
+			if ((b instanceof MapBean) && (! dynamic)) {
+				throw new IllegalStateException(binding + " is not a property of " + bean);
+			}
+
+			int lastDotIndex = binding.lastIndexOf('.');
+
+			String attributeName = null;
+			if (lastDotIndex < 0) { // not compound binding
+				attributeName = binding;
+				// If not dynamic, remove any braces on the expression and re-test if its dynamic
+				if (! dynamic) {
+					int braceIndex = binding.lastIndexOf('[');
+					if (braceIndex < 0) {
+						braceIndex = binding.lastIndexOf('(');
+					}
+					if (braceIndex >= 0) {
+						attributeName = binding.substring(0, braceIndex);
+						dynamic = b.isDynamic(attributeName);
+					}
+				}
+			}
+			
+			if (dynamic) {
+				Object value = b.getDynamic(binding);
+				if (value == null) {
+					if (attributeName != null) { // not compound binding - possible attribute
+						// Get the property type via the document
+						Customer c = CORE.getCustomer();
+						Module m = c.getModule(b.getBizModule());
+						Document d = m.getDocument(c, b.getBizDocument());
+						final String an = attributeName;
+						Attribute a = d.getAllAttributes().stream().filter(aa -> an.equals(aa.getName())).findAny().orElse(null);
+						if (a != null) {
+							try {
+								// binding expression to Association or InverseOne
+								if ((a instanceof Association) || (a instanceof InverseOne)) {
+									d = m.getDocument(c, ((Reference) a).getDocumentName());
+									return ((DocumentImpl) d).getBeanClass(c);
+								}
+								// indexed or mapped binding expression to Collection or InverseMany
+								if ((! attributeName.equals(binding)) && 
+										((a instanceof Collection) || (a instanceof InverseMany))) {
+									d = m.getDocument(c, ((Reference) a).getDocumentName());
+									return ((DocumentImpl) d).getBeanClass(c);
+								}
+							}
+							catch (Exception e) {
+								throw new MetaDataException(e);
+							}
+							
+							return a.getAttributeType().getImplementingType();
+						}
+					}
+					
+					return Object.class;
+				}
+				return value.getClass();
+			}
+
+			// Could be a compound, indexed or mapped binding if we reach here
+			if (lastDotIndex >= 0) { // compound binding
+				// Navigate through static and dynamic beans as required to the penultimate object, then find the property type
+				Object penultimate = get(bean, binding.substring(0, lastDotIndex));
+				return getPropertyType(penultimate, binding.substring(lastDotIndex + 1));
+			}
+		}
+
 		try {
-			return PROPERTY_UTILS.getPropertyType(bean, propertyName);
+			return PROPERTY_UTILS.getPropertyType(bean, binding);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
 	}
 
-	public static boolean isMutable(Object bean, String propertyName) {
+	public static boolean isMutable(Object bean, String simplePropertyName) {
+		if (bean instanceof Bean) {
+			if (Bean.MODULE_KEY.equals(simplePropertyName) || Bean.DOCUMENT_KEY.equals(simplePropertyName) ||
+					Bean.CREATED_KEY.equals(simplePropertyName) || Bean.NOT_CREATED_KEY.equals(simplePropertyName) ||
+					Bean.CHANGED_KEY.equals(simplePropertyName) || Bean.NOT_CHANGED_KEY.equals(simplePropertyName) ||
+					Bean.PERSISTED_KEY.equals(simplePropertyName) || Bean.NOT_PERSISTED_KEY.equals(simplePropertyName) ||
+					Bean.BIZ_KEY.equals(simplePropertyName)) {
+				return false;
+			}
+			
+			Bean b = (Bean) bean;
+			boolean dynamic = b.isDynamic(simplePropertyName);
+			if ((b instanceof MapBean) && (! dynamic)) {
+				throw new IllegalStateException(simplePropertyName + " is not a property of " + bean);
+			}
+			
+			if (dynamic) {
+				return true;
+			}
+		}
+
 		try {
-			return (PROPERTY_UTILS.getWriteMethod(PROPERTY_UTILS.getPropertyDescriptor(bean, propertyName)) != null);
+			return (PROPERTY_UTILS.getWriteMethod(PROPERTY_UTILS.getPropertyDescriptor(bean, simplePropertyName)) != null);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
@@ -1276,11 +1422,11 @@ public final class BindUtil {
 
 	public static void populateProperty(User user, 
 											Bean bean, 
-											String propertyName, 
-											Object propertyValue, 
+											String bindingName, 
+											Object bindingValue, 
 											boolean fromSerializedFormat) {
-		String name = propertyName;
-		Object value = propertyValue;
+		String name = bindingName;
+		Object value = bindingValue;
 		
 		Customer customer = user.getCustomer();
 		Module beanModule = customer.getModule(bean.getBizModule());
@@ -1684,7 +1830,7 @@ public final class BindUtil {
 	public static String toJavaInstanceIdentifier(String string)
 	{
 		StringBuilder sb = new StringBuilder(string);
-		removeInvalidCharacters(sb);
+		removeOrReplaceInvalidCharacters(sb);
 		return Introspector.decapitalize(sb.toString());
 	}
 	
@@ -1782,7 +1928,7 @@ public final class BindUtil {
 		return sb.toString();
 	}
 
-	private static void removeInvalidCharacters(StringBuilder sb) {
+	private static void removeOrReplaceInvalidCharacters(StringBuilder sb) {
 		int i = 0;
 		boolean whiteSpaceOrUnderscore = false;
 		while (i < sb.length()) {

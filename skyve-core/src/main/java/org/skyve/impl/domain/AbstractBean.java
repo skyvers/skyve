@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.beanutils.LazyDynaMap;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.collection.spi.PersistentCollection;
@@ -27,6 +28,9 @@ public abstract class AbstractBean implements Bean {
 
 	// Holds the old (replaced) values when a setter is called.
 	private Map<String, Object> originalValues = new TreeMap<>();
+	
+	// Holds any dynamic attributes - lazily instatiated
+	private LazyDynaMap dynamic = null;
 	
 	/**
 	 * Take a copy of the old value before setting a new value.
@@ -246,6 +250,40 @@ public abstract class AbstractBean implements Bean {
 		return ! isCreated();
 	}
 
+	@Override
+	public boolean isDynamic(String attributeName) {
+		return (dynamic == null) ? false : dynamic.getMap().containsKey(attributeName);
+	}
+
+	@Override
+	public Object getDynamic(String simpleBinding) {
+		if (dynamic == null) {
+			return null;
+		}
+		return dynamic.get(simpleBinding);
+	}
+	
+	@Override
+	public void setDynamic(String simpleBinding, Object value) {
+		if (dynamic == null) {
+			dynamic = new LazyDynaMap();
+		}
+		dynamic.set(simpleBinding, value);
+	}
+	
+	@Override
+	public void setDynamic(Map<String, Object> dynamic) {
+		if (dynamic == null) {
+			this.dynamic = null;
+		}
+		else if (this.dynamic == null) {
+			this.dynamic = new LazyDynaMap(dynamic);
+		}
+		else {
+			this.dynamic.getMap().putAll(dynamic);
+		}
+	}
+	
 	/**
 	 * Compare this bean to another by bizId.
 	 */

@@ -204,8 +204,7 @@ public class JSONReader {
 			Document document = module.getDocument(customer, documentName);
 
 			// Create bean instance
-			Class<Bean> beanClass = ((DocumentImpl) document).getBeanClass(customer);
-			Bean result = beanClass.newInstance();
+			Bean result = ((DocumentImpl) document).newInstance(customer);
 
 			String propertyName = (String) read();
 			while (token != OBJECT_END) {
@@ -305,7 +304,7 @@ public class JSONReader {
 			read(); // should be a comma
 
 			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(className);
-			Object result = type.newInstance();
+			Object result = type.getDeclaredConstructor().newInstance();
 
 			String propertyName = (String) read();
 			while (token != OBJECT_END) {

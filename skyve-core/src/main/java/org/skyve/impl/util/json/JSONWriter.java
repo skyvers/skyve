@@ -164,7 +164,7 @@ public class JSONWriter {
 							Collection.class.isAssignableFrom(prop.getPropertyType()) ||
 							Iterator.class.equals(prop.getPropertyType()) || 
 							Iterable.class.equals(prop.getPropertyType()))) {
-					if (! accessor.isAccessible()) {
+					if (! accessor.canAccess(object)) {
 						accessor.setAccessible(true);
 					}
 					Object value = accessor.invoke(object, (Object[]) null);

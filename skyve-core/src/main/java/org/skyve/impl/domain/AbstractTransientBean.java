@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.TransientBean;
-import org.skyve.impl.domain.AbstractBean;
 
 @XmlType
 public abstract class AbstractTransientBean extends AbstractBean implements TransientBean {

@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
@@ -104,8 +105,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	@Override
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
-		Class<T> beanClass = getBeanClass(customer);
-		T result = beanClass.getConstructor().newInstance();
+		T result = newInstance(customer);
 		
 		// Inject any dependencies
 		result = BeanProvider.injectFields(result);
@@ -145,6 +145,10 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	@SuppressWarnings("unchecked")
 	public <T extends Bean> Class<T> getBeanClass(Customer customer)
 	throws ClassNotFoundException {
+		if (isDynamic()) {
+			return (Class<T>) MapBean.class;
+		}
+		
 		Class<T> result = null;
 		
 		String documentName = getName();
@@ -197,6 +201,33 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
+	/**
+	 * Instantiates a static compiled bean by default constructor or a MapBean.
+	 * This is not the normal bean newInstance() static factory method as it does not call the bizlet or interceptor etc.
+	 * This is akin the the vanilla Java default constructor (but also caters for dynamic documents)
+	 * @param <T>	The type of bean to produce.
+	 * @param customer	The customer.
+	 * @return	The bean.
+	 * @throws Exception
+	 */
+	public <T extends Bean> T newInstance(Customer customer) throws Exception {
+		T result = null;
+		
+		final Class<T> beanClass = getBeanClass(customer);
+		if (MapBean.class.equals(beanClass)) {
+			final Map<String, Object> p = new TreeMap<>();
+			getAllAttributes().forEach(a -> p.put(a.getName(), null));
+			@SuppressWarnings("unchecked")
+			T t = (T) new MapBean(getOwningModuleName(), getName(), p);
+			result = t;
+		}
+		else {
+			result = beanClass.getConstructor().newInstance();
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public UniqueConstraint getUniqueConstraint(String name) {
 		return (UniqueConstraint) getMetaData(name);

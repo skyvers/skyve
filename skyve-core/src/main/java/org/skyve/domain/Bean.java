@@ -196,4 +196,33 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @return
 	 */
 	public boolean isNotCreated();
+	
+	/**
+	 * Indicates if the attributeName references a dynamic attribute.
+	 * @param attributeName	The attribute name to test
+	 * @return	true if a dynamic attribute, otherwise false.
+	 */
+	public boolean isDynamic(String attributeName);
+
+	/**
+	 * Get a dynamic attribute value.
+	 * @param simpleBinding	A non-compound binding (can be indexed or mapped).
+	 * @return	The value.
+	 */
+	public Object getDynamic(String simpleBinding);
+	
+	/**
+	 * Set a dynamic attribute value.
+	 * @param simpleBinding	A non-compound binding (can be indexed or mapped).
+	 * @param value	The value.
+	 */
+	public void setDynamic(String simpleBinding, Object value);
+	
+	/**
+	 * Set the dynamic map if currently null
+	 * or merge into the current dynamic map if not
+	 * or set to null if parameter is null.
+	 * @param dynamic	The values to set or merge, or null to reset all dynamic values.
+	 */
+	public void setDynamic(Map<String, Object> dynamic);
 }

@@ -139,51 +139,51 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public Object get(String propertyName) {
+	public Object get(String binding) {
 		Object result = null;
 		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		
 		// Ensure "bizModule" returns the polymorphic value if appropriate
-		if ((bean != null) && Bean.MODULE_KEY.equals(propertyName)) {
+		if ((bean != null) && Bean.MODULE_KEY.equals(binding)) {
 			result = bean.getBizModule();
 		}
 		// Ensure "bizDocument" returns the polymorphic value if appropriate
-		else if ((bean != null) && Bean.DOCUMENT_KEY.equals(propertyName)) {
+		else if ((bean != null) && Bean.DOCUMENT_KEY.equals(binding)) {
 			result = bean.getBizDocument();
 		}
-		else if (isDynaProperty(propertyName)) {
-			result = values.get(propertyName);
+		else if (isDynaProperty(binding)) {
+			result = values.get(binding);
 		}
 		else {
 			if (bean == null) { // there is no "this" bean
 				// Check if there is any part of the compound binding present as a dyna property (largest binding first)
-				int dotIndex = propertyName.lastIndexOf('.');
+				int dotIndex = binding.lastIndexOf('.');
 				while (dotIndex > 0) { // compound binding
-					String bindingPart = propertyName.substring(0, dotIndex);
+					String bindingPart = binding.substring(0, dotIndex);
 					if (isDynaProperty(bindingPart)) {
 						try {
 							bean = (Bean) values.get(bindingPart);
 							if (bean != null) {
-								result = BindUtil.get(bean, propertyName.substring(dotIndex + 1));
+								result = BindUtil.get(bean, binding.substring(dotIndex + 1));
 							}
 							break;
 						}
 						catch (Exception e) {
-							throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+							throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 						}
 					}
 					dotIndex = bindingPart.lastIndexOf('.');
 				}
 				if (dotIndex < 0) { // simple binding
-					throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+					throw new IllegalArgumentException("Binding does not exist - " + binding);
 				}
 			}
 			else { // try getting the property out of the "this" bean
 				try {
-					result = BindUtil.get(bean, propertyName);
+					result = BindUtil.get(bean, binding);
 				}
 				catch (Exception e) {
-					throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+					throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 				}
 			}
 		}
@@ -192,22 +192,22 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public Object get(String propertyName, int index) {
+	public Object get(String binding, int index) {
 		Object result = null;
 		
-		if (isDynaProperty(propertyName)) {
-			result = super.get(propertyName, index);
+		if (isDynaProperty(binding)) {
+			result = super.get(binding, index);
 		}
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				throw new IllegalArgumentException("Binding does not exist - " + binding);
 			}
 			try {
-				result = BindUtil.get(bean, new StringBuilder(32).append(propertyName).append('[').append(index).append(']').toString());
+				result = BindUtil.get(bean, new StringBuilder(32).append(binding).append('[').append(index).append(']').toString());
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 			}
 		}
 		
@@ -215,22 +215,22 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public Object get(String propertyName, String key) {
+	public Object get(String binding, String key) {
 		Object result = null;
 		
-		if (isDynaProperty(propertyName)) {
-			result = super.get(propertyName, key);
+		if (isDynaProperty(binding)) {
+			result = super.get(binding, key);
 		}
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				throw new IllegalArgumentException("Binding does not exist - " + binding);
 			}
 			try {
-				result = BindUtil.get(bean, new StringBuilder(32).append(propertyName).append('(').append(key).append(')').toString());
+				result = BindUtil.get(bean, new StringBuilder(32).append(binding).append('(').append(key).append(')').toString());
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 			}
 		}
 
@@ -238,66 +238,91 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public void set(String propertyName, Object value) {
-		if (isDynaProperty(propertyName)) {
-			super.set(propertyName, value);
+	public void set(String binding, Object value) {
+		if (isDynaProperty(binding)) {
+			super.set(binding, value);
 		}
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				throw new IllegalArgumentException("Binding does not exist - " + binding);
 			}
 			try {
-				BindUtil.set(bean, propertyName, value);
+				BindUtil.set(bean, binding, value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 			}
 		}
 	}
 
 	@Override
-	public void set(String propertyName, int index, Object value) {
-		if (isDynaProperty(propertyName)) {
-			super.set(propertyName, index, value);
+	public void set(String binding, int index, Object value) {
+		if (isDynaProperty(binding)) {
+			super.set(binding, index, value);
 		}
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				throw new IllegalArgumentException("Binding does not exist - " + binding);
 			}
 			try {
 				BindUtil.set(bean, 
-								new StringBuilder(32).append(propertyName).append('[').append(index).append(']').toString(),
+								new StringBuilder(32).append(binding).append('[').append(index).append(']').toString(),
 								value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 			}
 		}
 	}
 
 	@Override
-	public void set(String propertyName, String key, Object value) {
-		if (isDynaProperty(propertyName)) {
-			super.set(propertyName, key, value);
+	public void set(String binding, String key, Object value) {
+		if (isDynaProperty(binding)) {
+			super.set(binding, key, value);
 		}
 		else {
 			Object bean = values.get(BEAN_PROPERTY_KEY);
 			if (bean == null) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
+				throw new IllegalArgumentException("Binding does not exist - " + binding);
 			}
 			try {
 				BindUtil.set(bean, 
-								new StringBuilder(32).append(propertyName).append('(').append(key).append(')').toString(),
+								new StringBuilder(32).append(binding).append('(').append(key).append(')').toString(),
 								value);
 			}
 			catch (Exception e) {
-				throw new IllegalArgumentException("Property name does not exist - " + propertyName, e);
+				throw new IllegalArgumentException("Binding does not exist - " + binding, e);
 			}
 		}
 	}
 
+	@Override
+	public boolean isDynamic(String attributeName) {
+		return isDynaProperty(attributeName);
+	}
+
+	@Override
+	public Object getDynamic(String simpleBinding) {
+		return get(simpleBinding);
+	}
+
+	@Override
+	public void setDynamic(String simpleBinding, Object value) {
+		set(simpleBinding, value);
+	}
+	
+	@Override
+	public void setDynamic(Map<String, Object> dynamic) {
+		if (dynamic == null) {
+			getMap().clear();
+		}
+		else {
+			getMap().putAll(dynamic);
+		}
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(128);
