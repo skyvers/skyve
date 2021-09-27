@@ -104,7 +104,7 @@ public abstract class Field extends AbstractAttribute {
 		return Boolean.valueOf(dynamic);
 	}
 
-	@XmlElement(name = "dynamic")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "dynamic")
 	public void setDynamicBool(Boolean dynamic) {
 		this.dynamic = dynamic.booleanValue();
 	}
