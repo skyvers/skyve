@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)

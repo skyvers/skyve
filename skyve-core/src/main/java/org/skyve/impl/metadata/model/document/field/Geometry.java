@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.impl.metadata.model.document.field.Field;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
