@@ -1,8 +1,7 @@
 package util;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -64,7 +64,14 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		int beanCount = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults().size();
 
 		CORE.getPersistence().save(b1);
-		CORE.getPersistence().save(b2);
+
+		try {
+			CORE.getPersistence().save(b2);
+		} catch (UniqueConstraintViolationException ucve) {
+			// try get a new bean2
+			b2 = getBean();
+			CORE.getPersistence().save(b2);
+		}
 
 		// perform the method under test
 		List<T> results = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults();
@@ -229,11 +236,16 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 				return;
 			}
 			
-			T uResult = CORE.getPersistence().save(result);
+			try {
+				T uResult = CORE.getPersistence().save(result);
 
-			// verify the results
-			assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
-					is(not(originalValue)));
+				// verify the results
+				assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
+						is(not(originalValue)));
+			} catch (UniqueConstraintViolationException ucve) {
+				// skip - factory did not generate unique input
+			}
+
 		} else {
 			Util.LOGGER.fine(String.format("Skipping update test for %s, no scalar attribute found", bean.getBizDocument()));
 		}
