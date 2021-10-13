@@ -667,6 +667,7 @@
 			<description>The list of all job schedule entries</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending" />
+				<column binding="scheduleString" sortable="false" filterable="false" editable="false"/>
 				<column binding="startTime" sortOrder="ascending" pixelWidth="150" />
 				<column binding="endTime" pixelWidth="150"/>
 				<column binding="disabled" pixelWidth="150"/>
