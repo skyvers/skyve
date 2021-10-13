@@ -1149,12 +1149,20 @@ isc.BizListGrid.addMethods({
 						me._eventRecord = record;
 						me._eventRowNum = rowNum;
 						me._eventColNum = colNum;
+						
 						if (config && config.isPickList) {
 							me.pick(me._lookup);
 						}
 						else {
 							if (me.showZoom && me.canZoom && (! me.aggregate)) {
-								me._zoomItem.click();
+								// blurry is set true in field blur event or grid select event
+								// if true, set it to the zoom item
+								if (me._view._blurry) {
+									me._view._blurry = me._zoomItem;
+								}
+								else {
+									me._zoomItem.click();
+								}
 							}
 						}
 					}
@@ -1199,6 +1207,15 @@ isc.BizListGrid.addMethods({
 				}
 				if (me.bizSelected) {
 					if (me.showZoom && me.canZoom && (! me.aggregate)) {
+						// if double click is enabled and we have a select event
+						// set blurry true and delay the bizSelected call for the double click delay time
+						// the bizSelected call and the zoom in call are serialized through the "blurry" method variants generated on the server JS
+						if (isc.RPCManager.requestsArePending()) { 
+							me._view._blurry = null;
+						}
+						else {
+							me._view._blurry = true;
+						}
 						me.delayCall('bizSelected', [], this.doubleClickDelay);
 					}
 					else {
@@ -1945,7 +1962,7 @@ isc.BizDataGrid.addMethods({
 				}
 			}
 		};
-		var zoomItem = {
+		me._zoomItem = {
 			title: "Zoom", 
 			icon: "../images/icons/zoom.gif",
 			click: function() {
@@ -1972,10 +1989,10 @@ isc.BizDataGrid.addMethods({
 														true, 
 														"<b>New</b> record.",
 														newItem.click);
-		me._zoomButton = isc.BizUtil.createImageButton(zoomItem.icon, 
+		me._zoomButton = isc.BizUtil.createImageButton(me._zoomItem.icon, 
 														true, 
 														"<b>Zoom</b> into record.",
-														zoomItem.click);
+														me._zoomItem.click);
 		me._zoomButton.setDisabled(true);
 		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
 														true,
@@ -1990,7 +2007,7 @@ isc.BizDataGrid.addMethods({
 				contextMenuData.add(newItem);
 			}
 			if (me.showZoom) {
-				contextMenuData.add(zoomItem);
+				contextMenuData.add(me._zoomItem);
 			}
 			if (me.showEdit) {
 				contextMenuData.add(editItem);
@@ -2145,7 +2162,6 @@ isc.BizDataGrid.addMethods({
 						me._eventRecord = record;
 						me._eventRowNum = rowNum;
 						me._eventColNum = colNum;
-						this.selectSingleRecord(record);
 						if (config.inline) {
 							if (me.canUpdate && me.canEdit && me.showEdit && (! me._disabled)) {
 								this.startEditing(rowNum, colNum, false);
@@ -2153,7 +2169,14 @@ isc.BizDataGrid.addMethods({
 						}
 						else {
 							if (me.canZoom && me.showZoom) {
-								me.zoom(false);
+								// blurry is set true in field blur event or grid select event
+								// if true, set it to the zoom item
+								if (me._view._blurry) {
+									me._view._blurry = me._zoomItem;
+								}
+								else {
+									me._zoomItem.click();
+								}
 							}
 						}
 					}
@@ -2191,6 +2214,15 @@ isc.BizDataGrid.addMethods({
 				}
 				if (me.bizSelected) {
 					if (me.showZoom && me.canZoom && config.editable) {
+						// if double click is enabled and we have a select event
+						// set blurry true and delay the bizSelected call for the double click delay time
+						// the bizSelected call and the zoom in call are serialized through the "blurry" method variants generated on the server JS
+						if (isc.RPCManager.requestsArePending()) { 
+							me._view._blurry = null;
+						}
+						else {
+							me._view._blurry = true;
+						}
 						me.delayCall('bizSelected', [], this.doubleClickDelay);
 					}
 					else {

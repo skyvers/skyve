@@ -423,6 +423,9 @@ isc.EditView.addMethods({
 					// delay the call, otherwise the _vm.saveData() callback function is not invoked
 					blurry.delayCall('action');
 				}
+				else if (blurry.click) {
+					blurry.click();
+				}
 			}
 		});
 		this._saved = true;
@@ -742,6 +745,9 @@ isc.EditView.addMethods({
 				if (blurry.action) {
 					// delay the call, otherwise the _vm.saveData() callback function is not invoked
 					blurry.delayCall('action');
+				}
+				else if (blurry.click) {
+					blurry.click();
 				}
 			}
 		});
