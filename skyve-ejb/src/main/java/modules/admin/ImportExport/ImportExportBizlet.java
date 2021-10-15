@@ -24,9 +24,6 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -3224886678815636057L;
 
 	@Override
@@ -57,7 +54,9 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
+					if (document.getPersistent() != null && document.getPersistent().getPersistentIdentifier() != null) {
+						result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
+					}
 				}
 			}
 			Collections.sort(result, new DomainValueSortByDescription());
@@ -93,8 +92,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 					List<ImportExportColumn> columns = generateColumns(bean);
 					for (ImportExportColumn c : columns) {
-						c.setParent(bean);
-						bean.getImportExportColumns().add(c);
+						bean.addImportExportColumnsElement(c);
 					}
 				}
 			}
@@ -116,7 +114,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		Module module = customer.getModule(bean.getModuleName());
 		Document document = module.getDocument(customer, bean.getDocumentName());
 
-		for (Attribute a : document.getAttributes()) {
+		for (Attribute a : document.getAllAttributes()) {
 			if (a.isPersistent()) {
 				// exclude unsupported types
 				switch (a.getAttributeType()) {
