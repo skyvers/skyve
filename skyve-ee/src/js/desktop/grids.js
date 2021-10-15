@@ -1157,7 +1157,7 @@ isc.BizListGrid.addMethods({
 							if (me.showZoom && me.canZoom && (! me.aggregate)) {
 								// blurry is set true in field blur event or grid select event
 								// if true, set it to the zoom item
-								if (me._view._blurry) {
+								if (me._view && me._view._blurry) {
 									me._view._blurry = me._zoomItem;
 								}
 								else {
@@ -1211,10 +1211,14 @@ isc.BizListGrid.addMethods({
 						// set blurry true and delay the bizSelected call for the double click delay time
 						// the bizSelected call and the zoom in call are serialized through the "blurry" method variants generated on the server JS
 						if (isc.RPCManager.requestsArePending()) { 
-							me._view._blurry = null;
+							if (me._view) {
+								me._view._blurry = null;
+							}
 						}
 						else {
-							me._view._blurry = true;
+							if (me._view) {
+								me._view._blurry = true;
+							}
 						}
 						me.delayCall('bizSelected', [], this.doubleClickDelay);
 					}
