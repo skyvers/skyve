@@ -475,6 +475,12 @@
 			<displayName>admin.jobSchedule.disabled.displayName</displayName>
 			<defaultValue>false</defaultValue>
 		</boolean>
+		
+		<!-- transient fields -->
+		<memo name="scheduleString" persistent="false">
+			<displayName>Schedule</displayName>
+			<transient>true</transient>
+		</memo>
 	</attributes>
 	<conditions>
 		<condition name="scheduledImmediately">

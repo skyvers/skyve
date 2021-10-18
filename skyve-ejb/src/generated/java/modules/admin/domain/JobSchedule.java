@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.JobSchedule.JobScheduleExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -21,7 +22,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
-public class JobSchedule extends AbstractPersistentBean {
+public abstract class JobSchedule extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -471,6 +472,9 @@ public class JobSchedule extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String disabledPropertyName = "disabled";
+
+	/** @hidden */
+	public static final String scheduleStringPropertyName = "scheduleString";
 
 	/**
 	 * Job To Run
@@ -1212,6 +1216,11 @@ public class JobSchedule extends AbstractPersistentBean {
 	 **/
 	private Boolean disabled = Boolean.valueOf(false);
 
+	/**
+	 * Schedule
+	 **/
+	private transient String scheduleString;
+
 	@Override
 	@XmlTransient
 	public String getBizModule() {
@@ -1224,7 +1233,7 @@ public class JobSchedule extends AbstractPersistentBean {
 		return JobSchedule.DOCUMENT_NAME;
 	}
 
-	public static JobSchedule newInstance() {
+	public static JobScheduleExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -3880,6 +3889,24 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	public void setDisabled(Boolean disabled) {
 		preset(disabledPropertyName, disabled);
 		this.disabled = disabled;
+	}
+
+	/**
+	 * {@link #scheduleString} accessor.
+	 * @return	The value.
+	 **/
+	public String getScheduleString() {
+		return scheduleString;
+	}
+
+	/**
+	 * {@link #scheduleString} mutator.
+	 * @param scheduleString	The new value.
+	 **/
+	@XmlElement
+	public void setScheduleString(String scheduleString) {
+		preset(scheduleStringPropertyName, scheduleString);
+		this.scheduleString = scheduleString;
 	}
 
 	/**
