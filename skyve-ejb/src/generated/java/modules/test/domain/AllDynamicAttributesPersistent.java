@@ -59,13 +59,64 @@ public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 	public static final String dynamicEmbeddedAssociationPropertyName = "dynamicEmbeddedAssociation";
 
 	/** @hidden */
+	public static final String booleanFlagPropertyName = "booleanFlag";
+
+	/** @hidden */
 	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+
+	/** @hidden */
+	public static final String colourPropertyName = "colour";
+
+	/** @hidden */
+	public static final String datePropertyName = "date";
+
+	/** @hidden */
+	public static final String dateTimePropertyName = "dateTime";
+
+	/** @hidden */
+	public static final String decimal10PropertyName = "decimal10";
+
+	/** @hidden */
+	public static final String decimal2PropertyName = "decimal2";
+
+	/** @hidden */
+	public static final String decimal5PropertyName = "decimal5";
+
+	/** @hidden */
+	public static final String enum3PropertyName = "enum3";
+
+	/** @hidden */
+	public static final String geometryPropertyName = "geometry";
+
+	/** @hidden */
+	public static final String idPropertyName = "id";
+
+	/** @hidden */
+	public static final String normalIntegerPropertyName = "normalInteger";
 
 	/** @hidden */
 	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
 
 	/** @hidden */
 	public static final String dynamicInverseAggregatedAssociationPropertyName = "dynamicInverseAggregatedAssociation";
+
+	/** @hidden */
+	public static final String longIntegerPropertyName = "longInteger";
+
+	/** @hidden */
+	public static final String markupPropertyName = "markup";
+
+	/** @hidden */
+	public static final String memoPropertyName = "memo";
+
+	/** @hidden */
+	public static final String textPropertyName = "text";
+
+	/** @hidden */
+	public static final String timePropertyName = "time";
+
+	/** @hidden */
+	public static final String timestampPropertyName = "timestamp";
 
 	/**
 	 * Aggregated Association

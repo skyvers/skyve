@@ -39,5 +39,9 @@
 		<integer name="derivedInteger" persistent="false" trackChanges="false">
 			<displayName>Derived Integer</displayName>
 		</integer>
+		<integer name="dynamicDerivedInteger">
+			<displayName>Dynamic Derived Integer</displayName>
+			<dynamic>true</dynamic>
+		</integer>
 	</attributes>
 </document>

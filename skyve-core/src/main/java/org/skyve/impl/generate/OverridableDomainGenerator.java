@@ -3023,15 +3023,22 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
-			// skip dynamic attributes
+			String name = attribute.getName();
+			boolean deprecated = attribute.isDeprecated();
+
+			// skip dynamic attributes (just generate the static final property name)
 			if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+				statics.append("\t/** @hidden */\n");
+				if (deprecated) {
+					statics.append("\t@Deprecated\n");
+				}
+				statics.append("\tpublic static final String ").append(name).append("PropertyName = \"");
+				statics.append(attribute.getName()).append("\";\n\n");
 				continue;
 			}
 
 			imports.add("javax.xml.bind.annotation.XmlElement");
 
-			String name = attribute.getName();
-			boolean deprecated = attribute.isDeprecated();
 			boolean tranzient = attribute.isTransient();
 			// Add if
 			// 1) not the bizKey attribute
@@ -3041,7 +3048,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// 3) Its an extension but the attribute DNE in the vanilla class OR its a customer class that is NOT an override
 			if ((! name.equals(Bean.BIZ_KEY)) &&
 					(((! overridden) && ((documentClass == null) || documentClass.attributes.containsKey(name))) ||
-						(overridden && (((documentClass != null) && (!documentClass.attributes.containsKey(name))) || (documentClass == null))))) {
+						(overridden && (((documentClass != null) && (! documentClass.attributes.containsKey(name))) || (documentClass == null))))) {
 				statics.append("\t/** @hidden */\n");
 				if (deprecated) {
 					statics.append("\t@Deprecated\n");

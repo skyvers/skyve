@@ -12,6 +12,9 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Dynamic Relation
+ * <br/>
+ * Represents a relation - ie a database joining table or foereign key (association or collection).
+			There can be multiple rows with the same attribute name for multiple cardinality relations.
  * 
  * @stereotype "persistent child"
  */
@@ -36,15 +39,30 @@ public class DynamicRelation extends AbstractPersistentBean implements ChildBean
 	/** @hidden */
 	public static final String attributeNamePropertyName = "attributeName";
 
+	/** @hidden */
+	public static final String ordinalPropertyName = "ordinal";
+
 	/**
 	 * Related ID
+	 * <br/>
+	 * The ID for the related dynamic entity (admin.DynamicEntity).
+				TODO Should it be an ID or just something associated that loads the whole thing?
 	 **/
 	private String relatedId;
 
 	/**
 	 * Attribute Name
+	 * <br/>
+	 * The attribute name of this relation.
 	 **/
 	private String attributeName;
+
+	/**
+	 * Ordinal
+	 * <br/>
+	 * For ordered collections (akin to the bizOrdinal)
+	 **/
+	private Integer ordinal;
 
 	private DynamicEntity parent;
 
@@ -125,6 +143,24 @@ public class DynamicRelation extends AbstractPersistentBean implements ChildBean
 	public void setAttributeName(String attributeName) {
 		preset(attributeNamePropertyName, attributeName);
 		this.attributeName = attributeName;
+	}
+
+	/**
+	 * {@link #ordinal} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getOrdinal() {
+		return ordinal;
+	}
+
+	/**
+	 * {@link #ordinal} mutator.
+	 * @param ordinal	The new value.
+	 **/
+	@XmlElement
+	public void setOrdinal(Integer ordinal) {
+		preset(ordinalPropertyName, ordinal);
+		this.ordinal = ordinal;
 	}
 
 	@Override

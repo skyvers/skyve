@@ -36,6 +36,9 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 	/** @hidden */
 	public static final String subclassIntegerPropertyName = "subclassInteger";
 
+	/** @hidden */
+	public static final String dynamicSubclassIntegerPropertyName = "dynamicSubclassInteger";
+
 	/**
 	 * Subclass Integer
 	 **/

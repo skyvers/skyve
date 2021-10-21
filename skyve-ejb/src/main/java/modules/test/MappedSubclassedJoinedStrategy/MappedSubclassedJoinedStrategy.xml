@@ -18,5 +18,9 @@
 		<integer name="subclassInteger">
 			<displayName>Subclass Integer</displayName>
 		</integer>
+		<integer name="dynamicSubclassInteger">
+			<displayName>Dynamic Subclass Integer</displayName>
+			<dynamic>true</dynamic>
+		</integer>
 	</attributes>
 </document>

@@ -12,6 +12,8 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
  * Dynamic Entity
+ * <br/>
+ * A JSON representation of scalar fields and embedded relations with a collection of related dynamic beans.
  * 
  * @navcomposed 1 relations 0..n DynamicRelation
  * @stereotype "persistent"

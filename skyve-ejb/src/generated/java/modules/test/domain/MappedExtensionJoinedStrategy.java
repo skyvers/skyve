@@ -55,6 +55,9 @@ public abstract class MappedExtensionJoinedStrategy extends MappedBase {
 	/** @hidden */
 	public static final String derivedIntegerPropertyName = "derivedInteger";
 
+	/** @hidden */
+	public static final String dynamicDerivedIntegerPropertyName = "dynamicDerivedInteger";
+
 	/**
 	 * Aggregated Association
 	 **/

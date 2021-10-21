@@ -3,6 +3,12 @@
 				xmlns="http://www.skyve.org/xml/document"
 				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Represents a relation - ie a database joining table or foereign key (association or collection).
+			There can be multiple rows with the same attribute name for multiple cardinality relations.
+		]]>
+	</documentation>
 	<persistent name="ADM_DynamicRelation" />
 	<singularAlias>Dynamic Relation</singularAlias>
 	<pluralAlias>Dynamic Relations</pluralAlias>
@@ -12,10 +18,23 @@
 	<attributes>
 		<id name="relatedId" required="true">
 			<displayName>Related ID</displayName>
+			<description>
+				The ID for the related dynamic entity (admin.DynamicEntity).
+				TODO Should it be an ID or just something associated that loads the whole thing?
+			</description>
 		</id>
 		<text name="attributeName" required="true">
 			<displayName>Attribute Name</displayName>
+			<description>
+				The attribute name of this relation.
+			</description>
 			<length>500</length>
 		</text>
+		<integer name="ordinal">
+			<displayName>Ordinal</displayName>
+			<description>
+				For ordered collections (akin to the bizOrdinal)
+			</description>
+		</integer>
 	</attributes>
 </document>

@@ -10,6 +10,7 @@ import org.skyve.persistence.Persistence;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
+import modules.test.domain.AllDynamicAttributesPersistent;
 import modules.test.domain.AnyDerived1;
 import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
@@ -34,6 +35,8 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Customer c;
 	protected Module m;
 	protected Document aapd;
+	protected Document adapd;
+	protected Document aadpd;
 	protected Document aarpd;
 	protected Document ad1;
 	protected Document ad2;
@@ -62,6 +65,8 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		c = u.getCustomer();
 		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
 		aapd = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
+		adapd = m.getDocument(c, AllDynamicAttributesPersistent.DOCUMENT_NAME);
+		aadpd = m.getDocument(c, AbstractSkyveTest.ALL_ATTRIBUTES_DYNAMIC_PERSISTENT_DOCUMENT_NAME);
 		aarpd = m.getDocument(c, AllAttributesRequiredPersistent.DOCUMENT_NAME);
 		ad1 = m.getDocument(c, AnyDerived1.DOCUMENT_NAME);
 		ad2 = m.getDocument(c, AnyDerived2.DOCUMENT_NAME);
