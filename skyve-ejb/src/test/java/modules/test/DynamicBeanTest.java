@@ -105,16 +105,32 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testBinder() throws Exception {
+	public void testBinderWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
-		testBinder(bean);
-		bean = Util.constructRandomInstance(u, m, aadpd, 2);
-		testBinder(bean);
+		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
+	}
+
+	@Test
+	public void testBinderWithDynamicDocument() throws Exception {
+		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
+		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
+	}
+
+	@Test
+	public void testBinderWithDynamicAttributesAndReferences() throws Exception {
+		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
+		testBinder(bean, "dynamicAggregatedAssociation", AllAttributesPersistent.aggregatedCollectionPropertyName);
+	}
+
+	@Test
+	public void testBinderWithDynamicDocumentAndReferences() throws Exception {
+		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
+		testBinder(bean, "dynamicAggregatedAssociation", "dynamicAggregatedCollection");
 	}
 
 	private static final Integer INTEGER = Integer.valueOf(Integer.MAX_VALUE);
 	
-	private static void testBinder(Bean bean) {
+	private static void testBinder(Bean bean, String associationPropertyName, String collectionPropertyName) {
 		// Simple scalar
 		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE);
 		Assert.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
@@ -122,48 +138,48 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Assert.assertEquals(INTEGER, Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName));
 
 		// Simple association
-		Binder.set(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, bean);
-		Assert.assertEquals(bean, Binder.get(bean, AllAttributesPersistent.aggregatedAssociationPropertyName));
+		Binder.set(bean, associationPropertyName, bean);
+		Assert.assertEquals(bean, Binder.get(bean, associationPropertyName));
 
 		// Simple collection
-		Assert.assertTrue(Binder.get(bean, AllAttributesPersistent.aggregatedCollectionPropertyName) instanceof List<?>);
+		Assert.assertTrue(Binder.get(bean, collectionPropertyName) instanceof List<?>);
 		
 		// Compound association to scalar
-		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.normalIntegerPropertyName);
+		String binding = Binder.createCompoundBinding(associationPropertyName, AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
 		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
 		
 		// Compound association to association
-		binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedAssociationPropertyName);
+		binding = Binder.createCompoundBinding(associationPropertyName, associationPropertyName);
 		Object oldValue = Binder.get(bean, binding);
 		Binder.set(bean, binding, bean);
 		Assert.assertEquals(bean, Binder.get(bean, binding));
 		Binder.set(bean, binding, oldValue);
 
 		// Compound association to collection
-		binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		binding = Binder.createCompoundBinding(associationPropertyName, collectionPropertyName);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof List<?>);
 
 		// Compound association to indexed
 		AllAttributesPersistent test = AllAttributesPersistent.newInstance();
-		binding = Binder.createIndexedBinding(Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName), 0);
+		binding = Binder.createIndexedBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), 0);
 		Binder.set(bean, binding, test);
 		Assert.assertEquals(test, Binder.get(bean, binding));
 
 		// Check set above via Compound association to Id
-		binding = Binder.createIdBinding(Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName), test.getBizId());
+		binding = Binder.createIdBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), test.getBizId());
 		Assert.assertEquals(test, Binder.get(bean, binding));
 		
 		// Indexed collection to scalar
-		binding = Binder.createCompoundBinding(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0), AllAttributesPersistent.normalIntegerPropertyName);
+		binding = Binder.createCompoundBinding(Binder.createIndexedBinding(collectionPropertyName, 0), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
 		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
 
 		// Id collection to scalar
 		@SuppressWarnings("unchecked")
-		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
 		String bizId = elements.get(1).getBizId();
-		binding = Binder.createCompoundBinding(Binder.createIdBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
+		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
 		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
 	}
