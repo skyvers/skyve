@@ -149,7 +149,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
 	protected abstract void putBeanContent(BeanContent content) throws Exception;
-	protected abstract void moveBeanContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
 	protected abstract void removeAttachmentContent(String contentId) throws Exception;
 	protected abstract void closeContent() throws Exception;
 	
@@ -1869,18 +1868,9 @@ t.printStackTrace();
 		Document document = module.getDocument(customer, beanToIndex.getBizDocument());
 		TextExtractor extractor = null; // lazily instantiated
 
-		String oldBizDataGroupId = beanToIndex.getBizDataGroupId();
-		String oldBizUserId = beanToIndex.getBizUserId();
 		for (int i = 0, l = propertyNames.length; i < l; i++) {
 			String propertyName = propertyNames[i];
-			if (oldState != null) { // an update
-				if (Bean.DATA_GROUP_ID.equals(propertyName)) {
-					oldBizDataGroupId = (String) oldState[i];
-				}
-				else if (Bean.USER_ID.equals(propertyName)) {
-					oldBizUserId = (String) oldState[i];
-				}
-			}
+
 			// NB use getMetaForBinding() to ensure that base document attributes are also retrieved
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 			Attribute attribute = target.getAttribute();
@@ -1932,19 +1922,6 @@ t.printStackTrace();
 						}
 					}
 				}
-			}
-		}
-
-		// Move the node if the user id or data group id has changed
-		if (oldState != null) { // an update
-			String bizDataGroupId = beanToIndex.getBizDataGroupId();
-			String bizUserId = beanToIndex.getBizUserId();
-
-			if (((bizDataGroupId == null) && (oldBizDataGroupId != null)) || // null to not null
-					((bizDataGroupId != null) && (! bizDataGroupId.equals(oldBizDataGroupId))) || // not the same
-					((bizUserId == null) && (oldBizUserId != null)) || // null to not null
-					((bizUserId != null) && (! bizUserId.equals(oldBizUserId)))) { // not the same
-				moveBeanContent(content, oldBizDataGroupId, oldBizUserId);
 			}
 		}
 
