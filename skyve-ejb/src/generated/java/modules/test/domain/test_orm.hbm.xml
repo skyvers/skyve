@@ -132,6 +132,60 @@
 		<filter name="testAllAttributesRequiredPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.AllDynamicAttributesPersistent" table="TEST_AllDynamicAttributesPersistent" entity-name="testAllDynamicAttributesPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllDynamicAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedAssociation"/>
+		<many-to-one name="composedAssociation" entity-name="testAllDynamicAttributesPersistent" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedAssociation"/>
+		<component name="embeddedAssociation">
+			<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="embedded_aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedAssociation"/>
+			<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="embedded_composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedAssociation"/>
+			<property name="booleanFlag" column="embedded_booleanFlag" />
+			<bag name="aggregatedCollection" table="TEST_AllDynamicAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+				<key column="owner_id" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_owner_id" />
+				<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
+			</bag>
+			<property name="colour" column="embedded_colour" />
+			<property name="date" type="DateOnly" column="embedded_date" />
+			<property name="dateTime" type="DateTime" column="embedded_dateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" column="embedded_decimal10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" column="embedded_decimal2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" column="embedded_decimal5" />
+			<property name="enum3" length="5" column="embedded_enum3">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.AllAttributesEmbedded$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" column="embedded_geometry" />
+			<property name="id" length="36" column="embedded_id" />
+			<property name="normalInteger" column="embedded_normalInteger" />
+			<property name="longInteger" column="embedded_longInteger" />
+			<property name="markup" type="text" column="embedded_markup" />
+			<property name="memo" type="text" column="embedded_memo" />
+			<property name="text" length="255" column="embedded_text" />
+			<property name="time" type="TimeOnly" column="embedded_time" />
+			<property name="timestamp" type="Timestamp" column="embedded_timestamp" />
+		</component>
+		<bag name="aggregatedCollection" table="TEST_AllDynamicAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
+		</bag>
+		<bag name="inverseAggregatedAssociation" inverse="true">
+			<key column="aggregatedAssociation_id" />
+			<one-to-many entity-name="testAllDynamicAttributesPersistent" />
+		</bag>
+		<filter name="testAllDynamicAttributesPersistentNoneFilter" condition="1=0"/>
+		<filter name="testAllDynamicAttributesPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testAllDynamicAttributesPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testAllDynamicAttributesPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 		<class name="modules.test.domain.AnyDerived1" table="TEST_AnyDerived1" entity-name="testAnyDerived1">
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
@@ -474,6 +528,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testAllAttributesRequiredPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllDynamicAttributesPersistentNoneFilter" />
+	<filter-def name="testAllDynamicAttributesPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllDynamicAttributesPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllDynamicAttributesPersistentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testAnyDerived1NoneFilter" />

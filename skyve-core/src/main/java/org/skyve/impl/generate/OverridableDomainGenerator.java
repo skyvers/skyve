@@ -171,6 +171,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			new ModuleDocumentVisitor() {
 				@Override
 				public void accept(Document document) throws Exception {
+					if (document.isDynamic()) {
+						return;
+					}
+
 					validateDocumentAttributeNames(document);
 					populatePropertyLengths(null, module, document, null);
 					String documentName = document.getName();
@@ -203,6 +207,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					new ModuleDocumentVisitor() {
 						@Override
 						public void accept(Document document) throws Exception {
+							if (document.isDynamic()) {
+								return;
+							}
+
 							String documentName = document.getName();
 							String modoc = new StringBuilder(64).append(moduleName).append('.').append(documentName).toString();
 							String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
@@ -351,6 +359,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		new ModuleDocumentVisitor() {
 			@Override
 			public void accept(Document document) throws Exception {
+				if (document.isDynamic()) {
+					return;
+				}
+				
 				String documentName = document.getName();
 				TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
 				DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
@@ -520,6 +532,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			new ModuleDocumentVisitor() {
 				@Override
 				public void accept(Document document) throws Exception {
+					if (document.isDynamic()) {
+						return;
+					}
+					
 					String documentName = document.getName();
 					String modoc = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
 					String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
@@ -995,6 +1011,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						throw new MetaDataException(String.format("The Collection %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
 																	collectionName, moduleName, documentName, referencedDocumentName));
 					}
+					// ignore collections of dynamic documents
+					if (referencedDocument.isDynamic()) {
+						continue;
+					}
 				}
 				// ignore transient attributes
 				else {
@@ -1228,6 +1248,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						throw new MetaDataException(String.format("The Association %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
 																	associationName, moduleName, documentName, referencedDocumentName));
 					}
+
+					// ignore an association to a dynamic document
+					if (referencedDocument.isDynamic()) {
+						continue;
+					}
 				}
 				// ignore transient attributes
 				else {
@@ -1365,6 +1390,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				Enumeration enumeration = (Enumeration) attribute;
+
+				// ignore dynamic attributes
+				if (enumeration.isDynamic()) {
+					continue;
+				}
 				String enumerationName = enumeration.getName();
 
 				// check column name length if required
@@ -1432,7 +1462,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				AbstractInverse inverse = (AbstractInverse) attribute;
-
+				
 				// determine the inverse target metadata
 				String inverseDocumentName = inverse.getDocumentName();
 				Document inverseDocument = module.getDocument(null, inverseDocumentName);
@@ -1442,6 +1472,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				InverseRelationship inverseRelationship = inverse.getRelationship();
 				Boolean cascade = inverse.getCascade();
 
+				// ignore an inverse to a dynamic document
+				if (inverseDocument.isDynamic()) {
+					continue;
+				}
+				
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
 					contents.append("\t\t<one-to-one name=\"").append(inverse.getName());
 
@@ -1515,6 +1550,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				Field field = (Field) attribute;
+
+				// ignore dynamic attributes
+				if (field.isDynamic()) {
+					continue;
+				}
+				
 				String fieldName = field.getName();
 				String fieldColumnName = columnName(moduleName, owningDocumentName, fieldName, columnPrefix, null, columnNames);
 
@@ -1563,6 +1604,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else if ((type == AttributeType.content) || (type == AttributeType.image)) {
 					contents.append("\" length=\"36");
 				}
+				
 				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
 				 * I don't think the JDBC recognizes CLOBs correctly as it
 				 * would insert through MySQL query browser.
@@ -1828,6 +1870,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		TreeMap<String, AttributeType> result = new TreeMap<>();
 
 		for (Attribute attribute : document.getAttributes()) {
+			// skip dynamic attributes
+			if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+				continue;
+			}
+			// skip bizKey
 			if (! attribute.getName().equals(Bean.BIZ_KEY)) {
 				result.put(attribute.getName(), attribute.getAttributeType());
 			}
@@ -1875,8 +1922,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			for (Attribute attribute : document.getAttributes()) {
 				// Note - do this for persistent and non-persistent attributes
-				// in case a persistent attribute references a non-persistent one
-				// (like enumerations do).
+				// in case a persistent attribute references a non-persistent one (like enumerations do).
+				// Include dynamic properties for the same reason
 				int length = Integer.MIN_VALUE;
 				if (attribute instanceof LengthField) {
 					length = ((LengthField) attribute).getLength();
@@ -2051,6 +2098,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								StringBuilder methods) {
 		String referenceClassName = reference.getDocumentName();
 		Document referenceDocument = owningModule.getDocument(customer, referenceClassName);
+		if (referenceDocument.isDynamic()) {
+			return;
+		}
+
 		String referencePackageName = referenceDocument.getOwningModuleName();
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
@@ -2398,8 +2449,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								StringBuilder attributes,
 								StringBuilder methods) {
 		String propertyClassName = inverse.getDocumentName();
+		Document propertyDocument = owningModule.getDocument(customer, propertyClassName);
+		if (propertyDocument.isDynamic()) {
+			return;
+		}
+		
 		String inverseReferenceName = inverse.getReferenceName();
-		String propertyPackageName = owningModule.getDocument(customer, propertyClassName).getOwningModuleName();
+		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = inverse.getName();
 		InverseRelationship relationship = inverse.getRelationship();
 		boolean toMany = (! InverseRelationship.oneToOne.equals(relationship));
@@ -2967,6 +3023,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
+			// skip dynamic attributes
+			if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+				continue;
+			}
+
 			imports.add("javax.xml.bind.annotation.XmlElement");
 
 			String name = attribute.getName();
@@ -2996,6 +3057,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (attribute instanceof Enumeration) {
 					Enumeration enumeration = (Enumeration) attribute;
 					
+					// skip dynamic attributes
+					if (enumeration.isDynamic()) {
+						continue;
+					}
+
 					String implementingEnumClassName = enumeration.getImplementingEnumClassName();
 					if (implementingEnumClassName != null) { // hand-coded implementation
 						// cater for inner classes
@@ -3527,7 +3593,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute instanceof Enumeration) {
 				Enumeration enumeration = (Enumeration) attribute;
-				contents.append(" * @depend - - - ").append(enumeration.toJavaIdentifier()).append('\n');
+				if (! enumeration.isDynamic()) {
+					contents.append(" * @depend - - - ").append(enumeration.toJavaIdentifier()).append('\n');
+				}
 			}
 		}
 
@@ -3819,6 +3887,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																		.append(" because it contains an underscore. Underscores are reserved for JSON serialisation.").toString());
 				}
 
+				// ignore dynamic attributes from here
+				if ((attribute instanceof Field) && ((Field) attribute).isDynamic()) {
+					continue;
+				}
+				
 				AttributeType type = attribute.getAttributeType();
 
 				if (document.getPersistent() == null || attribute.isPersistent() == false) {

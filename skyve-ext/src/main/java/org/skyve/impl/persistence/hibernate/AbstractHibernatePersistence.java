@@ -512,7 +512,8 @@ t.printStackTrace();
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
 				Persistent persistent = document.getPersistent();
-				if ((persistent != null) &&  // is persistent document
+				if ((! document.isDynamic()) && // is not dynamic
+						(persistent != null) &&  // is persistent document
 						(persistent.getName() != null) && // and has a persistent name
 						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
@@ -540,10 +541,12 @@ t.printStackTrace();
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
 				Persistent persistent = document.getPersistent();
-				if ((persistent != null) &&  // is persistent document
+				if ((! document.isDynamic()) && // is not dynamic
+						(persistent != null) &&  // is persistent document
 						(persistent.getName() != null) && // with a persistent name
 						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
+					
 					resetFilters(document);
 				}
 			}

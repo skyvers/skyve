@@ -104,7 +104,7 @@ public class UtilTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "synthetic-access" })
+	@SuppressWarnings("static-method")
 	public void testUTF8Length() {
 		Charset utf8 = Charset.forName("UTF-8");
 		AllCodepointsIterator iterator = new AllCodepointsIterator();

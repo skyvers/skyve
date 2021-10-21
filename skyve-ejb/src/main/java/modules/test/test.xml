@@ -4,9 +4,12 @@
 	<homeRef>list</homeRef>
 	<homeDocument>AllAttributesPersistent</homeDocument>
 	<documents>
+		<document ref="AllAttributesDynamicEmbedded" />
+		<document ref="AllAttributesDynamicPersistent" />
 		<document ref="AllAttributesPersistent" />
 		<document ref="AllAttributesEmbedded" />
 		<document ref="AllAttributesRequiredPersistent" />
+		<document ref="AllDynamicAttributesPersistent" />
 		<document ref="AnyBase" />
 		<document ref="AnyDerived1" />
 		<document ref="AnyDerived2" />

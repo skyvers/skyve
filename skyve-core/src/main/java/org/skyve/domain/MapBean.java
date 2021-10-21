@@ -330,7 +330,15 @@ public class MapBean extends LazyDynaMap implements Bean {
 		for (DynaProperty property : getDynaProperties()) {
 			String propertyName = property.getName();
 			result.append(propertyName).append(" = ");
-			result.append(get(propertyName)).append(' ');
+			Object value = get(propertyName);
+			// Stop infinite recursion on cyclic graphs
+			if (value instanceof MapBean) {
+				MapBean bean = (MapBean) value;
+				result.append("MapBean:").append(bean.getBizModule()).append(bean.getBizDocument()).append('#').append(bean.getBizId()).append(' ');
+			}
+			else {
+				result.append(value).append(' ');
+			}
 		}
 
 		return result.toString();

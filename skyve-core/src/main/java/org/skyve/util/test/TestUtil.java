@@ -393,22 +393,29 @@ public class TestUtil {
 	/**
 	 * Returns a random value from the enum class
 	 * 
-	 * @param clazz The enum class
+	 * @param type The enum class
 	 * @param currentValue The current int value of the enum so that it is not chosen again
-	 * @return A random enum constant
+	 * @return A random enum constant or null if this is a dynamic enum (with no class)
 	 */
-	public static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
+	public static <T extends Enum<?>> T randomEnum(Class<T> type, Integer currentValue) {
 		int x;
+		T[] constants = type.getEnumConstants();
+		if (constants == null) { // no enum values - maybe this is a dynamic enum
+			return null;
+		}
+
 		if (currentValue != null) {
 			int currentValueInt = currentValue.intValue();
 			do {
-				x = RANDOM.nextInt(clazz.getEnumConstants().length);
-			} while (x == currentValueInt);
-		} else {
-			x = RANDOM.nextInt(clazz.getEnumConstants().length);
+				x = RANDOM.nextInt(constants.length);
+			}
+			while (x == currentValueInt);
+		}
+		else {
+			x = RANDOM.nextInt(constants.length);
 		}
 
-		return clazz.getEnumConstants()[x];
+		return constants[x];
 	}
 
 	/**

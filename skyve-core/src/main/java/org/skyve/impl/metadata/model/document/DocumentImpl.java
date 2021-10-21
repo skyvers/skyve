@@ -10,16 +10,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.MapBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
 import org.skyve.impl.metadata.model.ModelImpl;
+import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
@@ -33,6 +38,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -213,16 +219,79 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> T newInstance(Customer customer) throws Exception {
 		T result = null;
 		
-		final Class<T> beanClass = getBeanClass(customer);
-		if (MapBean.class.equals(beanClass)) {
+		if (isDynamic()) {
 			final Map<String, Object> p = new TreeMap<>();
-			getAllAttributes().forEach(a -> p.put(a.getName(), null));
+			
+			// Bean
+			p.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
+			p.put(Bean.CUSTOMER_NAME, null);
+			p.put(Bean.DATA_GROUP_ID, null);
+			p.put(Bean.USER_ID, null);
+			
+			// PersistentBean
+			Persistent persistent = getPersistent();
+			if ((persistent != null) && persistent.getName() != null) {
+				p.put(PersistentBean.VERSION_NAME, null);
+				p.put(PersistentBean.LOCK_NAME, null);
+				p.put(PersistentBean.FLAG_COMMENT_NAME, null);
+			}
+			
+			if (parentDocumentName != null) {
+				String name = getName();
+				// HierarchicalBean
+				if (parentDocumentName.equals(name)) {
+					p.put(HierarchicalBean.PARENT_ID, null);
+				}
+				// ChildBean
+				else {
+					p.put(ChildBean.PARENT_NAME, null);
+					p.put(Bean.ORDINAL_NAME, null);
+				}
+			}
+			
+			getAllAttributes().forEach(a -> p.put(a.getName(), dynamicDefaultValue(a)));
+
 			@SuppressWarnings("unchecked")
 			T t = (T) new MapBean(getOwningModuleName(), getName(), p);
 			result = t;
 		}
 		else {
+			final Class<T> beanClass = getBeanClass(customer);
 			result = beanClass.getConstructor().newInstance();
+
+			Module m = customer.getModule(getOwningModuleName());
+
+			final T t = result;
+			getAllAttributes().forEach(a -> {
+				if (a instanceof Field) {
+					if (((Field) a).isDynamic()) {
+						t.setDynamic(a.getName(), dynamicDefaultValue(a));
+					}
+				}
+				else if (a instanceof Relation) {
+					Document d = m.getDocument(customer, ((Relation) a).getDocumentName());
+					if (d.isDynamic()) {
+						t.setDynamic(a.getName(), dynamicDefaultValue(a));
+					}
+				}
+			});
+		}
+		
+		return result;
+	}
+	
+	private static Object dynamicDefaultValue(Attribute attribute) {
+		Object result = null;
+		
+		if (attribute instanceof Field) {
+			Field field = (Field) attribute;
+			String defaultValue = field.getDefaultValue();
+			if (defaultValue != null) {
+				result = BindUtil.fromString(null, null, attribute.getAttributeType().getImplementingType(), defaultValue, true);
+			}
+		}
+		else if ((attribute instanceof Collection) || (attribute instanceof InverseMany)) {
+			result = new ArrayList<>();
 		}
 		
 		return result;

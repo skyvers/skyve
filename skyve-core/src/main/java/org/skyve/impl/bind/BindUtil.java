@@ -693,7 +693,7 @@ public final class BindUtil {
 	}
 
 	/**
-	 * Given a simple binding and an index, create a compound one. ie binding[index]
+	 * Given a multiple cardinality binding and an index, create an indexed one. ie binding[index]
 	 */
 	public static String createIndexedBinding(String binding, int index) {
 		StringBuilder result = new StringBuilder(64);
@@ -703,6 +703,17 @@ public final class BindUtil {
 		return result.toString();
 	}
 
+	/**
+	 * Given a multiple cardinality binding and a bizId, create an element one. ie bindingElementById(id)
+	 */
+	public static String createIdBinding(String binding, String bizId) {
+		StringBuilder result = new StringBuilder(64);
+
+		result.append(binding).append("ElementById(").append(bizId).append(')');
+
+		return result.toString();
+	}
+	
 	/**
 	 * Replace '.', '[' & ']' with '_' to make valid client identifiers.
 	 */
@@ -1038,7 +1049,7 @@ public final class BindUtil {
 	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
 	public static Object get(Object bean, String binding) {
-		if (bean instanceof MapBean) {
+		if ((bean instanceof MapBean) && ((MapBean) bean).isProperty(binding)) {
 			return ((MapBean) bean).get(binding);
 		}
 
@@ -1051,15 +1062,34 @@ public final class BindUtil {
 				if (currentBean instanceof Bean) {
 					Bean b = (Bean) currentBean;
 					String attributeName = simpleBinding;
+					boolean indexed = false;
 					int braceIndex = simpleBinding.indexOf('[');
 					if (braceIndex < 0) {
-						braceIndex = simpleBinding.indexOf('(');
+						braceIndex = simpleBinding.indexOf("ElementById(");
+					}
+					else {
+						indexed = true;
 					}
 					if (braceIndex >= 0) {
 						attributeName = simpleBinding.substring(0, braceIndex);
 					}
 					if (b.isDynamic(attributeName)) {
-						result = b.getDynamic(simpleBinding);
+						if (braceIndex < 0) {
+							result = b.getDynamic(attributeName);
+						}
+						else {
+							if (indexed) {
+								result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+							}
+							else { // by Id
+								@SuppressWarnings("unchecked")
+								List<? extends Bean> list = (List<? extends Bean>) PROPERTY_UTILS.getProperty(currentBean, attributeName);
+								if (list != null) {
+									String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1);
+									result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
+								}
+							}
+						}
 					}
 					else {
 						result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
@@ -1141,12 +1171,21 @@ public final class BindUtil {
 				valueToSet = null;
 			}
 	
-			if (bean instanceof MapBean) {
+			if ((bean instanceof MapBean) && ((MapBean) bean).isProperty(binding)) {
 				((MapBean) bean).set(binding, valueToSet);
 			}
 			else {
+				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
+				String simpleBinding = binding;
+				Object penultimate = bean;
+				int lastDotIndex = binding.lastIndexOf('.');
+				if (lastDotIndex >= 0) {
+					penultimate = get(bean, binding.substring(0, lastDotIndex));
+					simpleBinding = binding.substring(lastDotIndex + 1);
+				}
+
 				if (valueToSet != null) {
-					Class<?> propertyType = BindUtil.getPropertyType(bean, binding);
+					Class<?> propertyType = BindUtil.getPropertyType(penultimate, simpleBinding);
 		
 					// if we are setting a String value to a non-string property then
 					// use an appropriate constructor or static valueOf()
@@ -1165,28 +1204,51 @@ public final class BindUtil {
 					} // if (we have a String property)
 				}
 				
-				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
-				String simpleBinding = binding;
-				Object penultimate = bean;
-				int lastDotIndex = binding.lastIndexOf('.');
-				if (lastDotIndex >= 0) {
-					penultimate = get(bean, binding.substring(0, lastDotIndex));
-					simpleBinding = binding.substring(lastDotIndex + 1);
-				}
-
 				// Set static and dynamic beans
 				if (penultimate instanceof Bean) {
 					Bean b = (Bean) penultimate;
 					String attributeName = simpleBinding;
+					boolean indexed = true;
 					int braceIndex = simpleBinding.indexOf('[');
 					if (braceIndex < 0) {
-						braceIndex = simpleBinding.indexOf('(');
+						indexed = false;
+						braceIndex = simpleBinding.indexOf("ElementById(");
 					}
 					if (braceIndex >= 0) {
 						attributeName = simpleBinding.substring(0, braceIndex);
 					}
 					if (b.isDynamic(attributeName)) {
-						b.setDynamic(simpleBinding, valueToSet);
+						if (braceIndex < 0) {
+							b.setDynamic(simpleBinding, valueToSet);
+						}
+						else {
+							if (indexed) {
+								PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
+							}
+							else { // by Id
+								if (valueToSet instanceof Bean) {
+									@SuppressWarnings("unchecked")
+									List<Bean> list = (List<Bean>) PROPERTY_UTILS.getProperty(penultimate, attributeName);
+									if (list != null) {
+										String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1);
+										Bean result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
+										if (result != null) {
+											int index = list.indexOf(result);
+											list.set(index, (Bean) valueToSet);
+										}
+										else {
+											throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the element was not in the list");
+										}
+									}
+									else {
+										throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+									}
+								}
+								else {
+									throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but valueToSet should be a Bean");
+								}
+							}
+						}
 					}
 					else {
 						PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
@@ -1213,12 +1275,7 @@ public final class BindUtil {
 
 			// NB true if a MapBean or where the binding is to a dynamic attribute name
 			boolean dynamic = b.isDynamic(binding);
-			if ((b instanceof MapBean) && (! dynamic)) {
-				throw new IllegalStateException(binding + " is not a property of " + bean);
-			}
-
 			int lastDotIndex = binding.lastIndexOf('.');
-
 			String attributeName = null;
 			if (lastDotIndex < 0) { // not compound binding
 				attributeName = binding;
@@ -1226,7 +1283,7 @@ public final class BindUtil {
 				if (! dynamic) {
 					int braceIndex = binding.lastIndexOf('[');
 					if (braceIndex < 0) {
-						braceIndex = binding.lastIndexOf('(');
+						braceIndex = binding.indexOf("ElementById(");
 					}
 					if (braceIndex >= 0) {
 						attributeName = binding.substring(0, braceIndex);
@@ -1236,7 +1293,7 @@ public final class BindUtil {
 			}
 			
 			if (dynamic) {
-				Object value = b.getDynamic(binding);
+				Object value = get(b, binding);
 				if (value == null) {
 					if (attributeName != null) { // not compound binding - possible attribute
 						// Get the property type via the document
@@ -1305,6 +1362,9 @@ public final class BindUtil {
 			}
 			
 			if (dynamic) {
+				if (List.class.isAssignableFrom(BindUtil.getPropertyType(bean, simplePropertyName))) {
+					return false;
+				}
 				return true;
 			}
 		}

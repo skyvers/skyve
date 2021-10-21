@@ -96,10 +96,17 @@ public class Binder {
 	}
 
 	/**
-	 * Given a simple binding and an index, create a compound one. ie binding[index]
+	 * Given a multiple cardinality binding and an index, create an indexed one. ie binding[index]
 	 */
 	public static String createIndexedBinding(String binding, int index) {
 		return BindUtil.createIndexedBinding(binding, index);
+	}
+
+	/**
+	 * Given a multiple cardinality binding and a bizId, create an element one. ie bindingElementById(id)
+	 */
+	public static String createIdBinding(String binding, String bizId) {
+		return BindUtil.createIdBinding(binding, bizId);
 	}
 
 	/**
