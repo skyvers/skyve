@@ -10,9 +10,6 @@ import org.skyve.domain.TransientBean;
 
 @XmlType
 public abstract class AbstractTransientBean extends AbstractBean implements TransientBean {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6469229627937972374L;
 
 	private String bizId = UUID.randomUUID().toString();
@@ -73,5 +70,15 @@ public abstract class AbstractTransientBean extends AbstractBean implements Tran
 	@XmlElement
 	public void setBizUserId(String bizUserId) {
 		this.bizUserId = bizUserId;
+	}
+	
+	@Override
+	public boolean isPersisted() {
+		return false;
+	}
+
+	@Override
+	public boolean isNotPersisted() {
+		return true;
 	}
 }

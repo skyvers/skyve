@@ -1,9 +1,7 @@
 package org.skyve.impl.util;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -24,12 +22,8 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 									Relation owningRelation,
 									Bean visitedBean)
 	throws Exception {
-		// No use checking referential integrity on a bean that is not persisted as
-		// nothing will have referenced it yet.
-		Persistent persistent = visitedDocument.getPersistent();
-		if ((persistent != null) && 
-				(persistent.getName() != null) &&
-				CORE.getPersistence().isPersisted(visitedBean)) { // persistent document and persisted bean
+		// No use checking referential integrity on a bean that is not persisted as nothing will have referenced it yet.
+		if (visitedBean.isPersisted()) {
 			// check if top document or we have a persistent reference
 			boolean validate = (owningRelation == null) || owningRelation.isPersistent();
 
