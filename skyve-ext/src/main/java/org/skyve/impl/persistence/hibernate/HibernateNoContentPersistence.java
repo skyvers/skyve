@@ -22,14 +22,6 @@ public class HibernateNoContentPersistence extends AbstractHibernatePersistence 
 	}
 
 	@Override
-	protected void moveBeanContent(BeanContent content,
-									String oldBizDataGroupId,
-									String oldBizUserId)
-	throws Exception {
-		// no-op
-	}
-
-	@Override
 	protected void removeAttachmentContent(String contentId)
 	throws Exception {
 		// no-op

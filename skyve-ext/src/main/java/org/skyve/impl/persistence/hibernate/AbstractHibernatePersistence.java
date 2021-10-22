@@ -898,18 +898,17 @@ t.printStackTrace();
 					return false;
 				}
 				
-				// NOTE:- We only check if the document is a persistent document here,
+				// NOTE:- We only check if the bean is persisted here,
 				// not if the reference (if any) is persistent.
-				// We could have a transient reference to a persistent document and 
+				// We could have a transient reference to a persisted bean and 
 				// the save operation still needs to cascade persist any changes to the 
 				// persistent attributes in the referenced document.
-				Persistent persistent = document.getPersistent();
-				String persistentName = (persistent == null) ? null : persistent.getName();
 				try {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 
-					// persistent
-					if (persistentName != null) {
+					// If bean is persisted, call preSave as changes will be flushed
+					// If bean is transient, it wont persisted by reachability by hibernate
+					if (bean.isPersisted()) {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
@@ -1165,11 +1164,8 @@ t.printStackTrace();
 					return false;
 				}
 				
-				Persistent persistent = document.getPersistent();
-				String persistentName = (persistent == null) ? null : persistent.getName();
-				
-				// persistent for this bean graph
-				if (persistentName != null) {
+				// persisted for this bean graph
+				if (bean.isPersisted()) {
 					try {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePostSave(bean);

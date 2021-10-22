@@ -25,6 +25,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import modules.test.domain.NonPersistentAssociationToPersistent;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
 import util.AbstractH2TestTruncate;
@@ -53,6 +54,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Document messd;
 	protected Document msjsd;
 	protected Document msssd;
+	protected Document npatpd;
 	protected Document ucn;
 	protected Document ucnn;
 
@@ -82,6 +84,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
+		npatpd = m.getDocument(c, NonPersistentAssociationToPersistent.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 	}

@@ -34,15 +34,6 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	}
 
 	@Override
-	protected void moveBeanContent(BeanContent content,
-									String oldBizDataGroupId,
-									String oldBizUserId)
-	throws Exception {
-		// no-op
-		// We don't need to move nodes in ES as its not a file system hierarchy 
-	}
-
-	@Override
 	protected void removeAttachmentContent(String contentId)
 	throws Exception {
 		if (cm == null) {

@@ -466,6 +466,22 @@
 			<filter name="testMappedExtensionJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
+	<class name="modules.test.domain.NonPersistentAssociationToPersistent" table="TEST_NonPersistentAssociationToPersistent" entity-name="testNonPersistentAssociationToPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="255" />
+		<filter name="testNonPersistentAssociationToPersistentNoneFilter" condition="1=0"/>
+		<filter name="testNonPersistentAssociationToPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testNonPersistentAssociationToPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testNonPersistentAssociationToPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.test.domain.UniqueConstraintNonNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNonNullable">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -648,6 +664,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionJoinedStrategyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testNonPersistentAssociationToPersistentNoneFilter" />
+	<filter-def name="testNonPersistentAssociationToPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testNonPersistentAssociationToPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testNonPersistentAssociationToPersistentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testUniqueConstraintNonNullableNoneFilter" />

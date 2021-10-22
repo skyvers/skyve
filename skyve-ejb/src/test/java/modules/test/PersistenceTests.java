@@ -33,6 +33,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import modules.test.domain.NonPersistentAssociationToPersistent;
 
 public class PersistenceTests extends AbstractSkyveTestDispose {
 	@Test
@@ -1006,5 +1007,23 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 		test.setBizFlagComment("Something");
 		p.upsertBeanTuple(test);
+	}
+	
+	// Test the an unpersisted bean assigned to a non-persistent association is not persisted by reachability
+	@Test
+	public void testPersistThroughTransientAssociation() throws Exception {
+		NonPersistentAssociationToPersistent test = npatpd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Association");
+		test.setAssociation(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertFalse(test.getAssociation().isPersisted());
+
+		test.setAssociation(p.save(a));
+		
+		test = p.save(test);
 	}
 }

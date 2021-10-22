@@ -470,7 +470,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		return repository.getBizlet(customer, this, true);
+		return isDynamic() ? null : repository.getBizlet(customer, this, true);
 	}
 
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
