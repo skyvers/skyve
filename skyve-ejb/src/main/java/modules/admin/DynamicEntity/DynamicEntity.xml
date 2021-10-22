@@ -6,8 +6,12 @@
 	<documentation>
 		<![CDATA[
 			A JSON representation of scalar fields and embedded relations with a collection of related dynamic beans.
+			The Dynamic Entities are upserted with the same bizId as its static counterpart when there is a mix.
+			So this is manipulated outside of Hibernate O/R mapping.
 		]]>
 	</documentation>
+	<!-- Abstract so that Persistence cant be used with domain objects -->
+	<abstract>true</abstract>
 	<persistent name="ADM_DynamicEntity" />
 	<singularAlias>Dynamic Entity</singularAlias>
 	<pluralAlias>Dynamic Entities</pluralAlias>

@@ -15,12 +15,14 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  * <br/>
  * Represents a relation - ie a database joining table or foereign key (association or collection).
 			There can be multiple rows with the same attribute name for multiple cardinality relations.
+			The Dynamic Relations are upserted with the same bizId as its static counterpart when there is a mix.
+			So this is manipulated outside of Hibernate O/R mapping.
  * 
  * @stereotype "persistent child"
  */
 @XmlType
 @XmlRootElement
-public class DynamicRelation extends AbstractPersistentBean implements ChildBean<DynamicEntity> {
+public abstract class DynamicRelation extends AbstractPersistentBean implements ChildBean<DynamicEntity> {
 	/**
 	 * For Serialization
 	 * @hidden

@@ -15,6 +15,8 @@
 		<document ref="AnyDerived2" />
 		<document ref="ArcOneToMany" />
 		<document ref="ArcOneToOne" />
+		<document ref="DynamicMappedExtension" />
+		<document ref="DynamicMappedSubclassed" />
 		<document ref="Hierarchical" />
 		<document ref="InjectedDocument" />
 		<document ref="InverseManyToManyPersistent" />

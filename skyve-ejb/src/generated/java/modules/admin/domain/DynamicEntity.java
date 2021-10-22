@@ -14,13 +14,15 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * Dynamic Entity
  * <br/>
  * A JSON representation of scalar fields and embedded relations with a collection of related dynamic beans.
+			The Dynamic Entities are upserted with the same bizId as its static counterpart when there is a mix.
+			So this is manipulated outside of Hibernate O/R mapping.
  * 
  * @navcomposed 1 relations 0..n DynamicRelation
  * @stereotype "persistent"
  */
 @XmlType
 @XmlRootElement
-public class DynamicEntity extends AbstractPersistentBean {
+public abstract class DynamicEntity extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
