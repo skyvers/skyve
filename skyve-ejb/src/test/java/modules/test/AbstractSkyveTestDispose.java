@@ -25,7 +25,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import modules.test.domain.NonPersistentAssociationToPersistent;
+import modules.test.domain.Reachability;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
 import util.AbstractH2TestDispose;
@@ -43,6 +43,8 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Document ad2;
 	protected Document ao2m;
 	protected Document ao2o;
+	protected Document dmed;
+	protected Document dmsd;
 	protected Document hd;
 	protected Document id;
 	protected Document im2mpd;
@@ -53,7 +55,7 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Document messd;
 	protected Document msjsd;
 	protected Document msssd;
-	protected Document npatpd;
+	protected Document rd;
 	protected Document ucn;
 	protected Document ucnn;
 
@@ -74,6 +76,8 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		ad2 = m.getDocument(c, AnyDerived2.DOCUMENT_NAME);
 		ao2m = m.getDocument(c, ArcOneToMany.DOCUMENT_NAME);
 		ao2o = m.getDocument(c, ArcOneToOne.DOCUMENT_NAME);
+		dmed = m.getDocument(c, AbstractSkyveTest.DYNAMIC_MAPPED_EXTENSION_DOCUMENT_NAME);
+		dmsd = m.getDocument(c, AbstractSkyveTest.DYNAMIC_MAPPED_SUBCLASSED_DOCUMENT_NAME);
 		hd = m.getDocument(c, Hierarchical.DOCUMENT_NAME);
 		id = m.getDocument(c, InjectedDocument.DOCUMENT_NAME);
 		im2mpd = m.getDocument(c, InverseManyToManyPersistent.DOCUMENT_NAME);
@@ -84,7 +88,7 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
-		npatpd = m.getDocument(c, NonPersistentAssociationToPersistent.DOCUMENT_NAME);
+		rd = m.getDocument(c, Reachability.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 	}

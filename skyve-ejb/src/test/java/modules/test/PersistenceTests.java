@@ -33,7 +33,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import modules.test.domain.NonPersistentAssociationToPersistent;
+import modules.test.domain.Reachability;
 
 public class PersistenceTests extends AbstractSkyveTestDispose {
 	@Test
@@ -1009,21 +1009,115 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		p.upsertBeanTuple(test);
 	}
 	
-	// Test the an unpersisted bean assigned to a non-persistent association is not persisted by reachability
+	// Test an unpersisted bean assigned to a non-persistent aggregated association is not persisted by reachability
 	@Test
-	public void testPersistThroughTransientAssociation() throws Exception {
-		NonPersistentAssociationToPersistent test = npatpd.newInstance(u);
+	public void testPersistThroughTransientAggregatedAssociation() throws Exception {
+		Reachability test = rd.newInstance(u);
 		test.setText("Text");
 		AllAttributesPersistent a = aapd.newInstance(u);
 		a.setText("Association");
-		test.setAssociation(a);
+		test.setNonPersistentAggregatedAssociation(a);
 		test = p.save(test);
 		
 		Assert.assertFalse(a.isPersisted());
-		Assert.assertFalse(test.getAssociation().isPersisted());
+		Assert.assertFalse(test.getNonPersistentAggregatedAssociation().isPersisted());
+	}
 
-		test.setAssociation(p.save(a));
-		
+	// Test an unpersisted bean assigned to a non-persistent composed association is not persisted by reachability
+	@Test
+	public void testPersistThroughTransientComposedAssociation() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Association");
+		test.setNonPersistentComposedAssociation(a);
 		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertFalse(test.getNonPersistentComposedAssociation().isPersisted());
+	}
+	
+	// Test an unpersisted bean assigned to a persistent aggregated association is persisted by reachability
+	@Test
+	public void testPersistThroughPersistentAggregatedAssociation() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Association");
+		test.setPersistentAggregatedAssociation(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertTrue(test.getPersistentAggregatedAssociation().isPersisted());
+	}
+
+	// Test an unpersisted bean assigned to a persistent composed association is persisted by reachability
+	@Test
+	public void testPersistThroughPersistentComposedAssociation() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Association");
+		test.setPersistentComposedAssociation(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertTrue(test.getPersistentComposedAssociation().isPersisted());
+	}
+
+	// Test an unpersisted bean assigned to a non-persistent aggregated collection is not persisted by reachability
+	@Test
+	public void testPersistThroughTransientAggregatedCollection() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Collection");
+		test.getNonPersistentAggregatedCollection().add(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertFalse(test.getNonPersistentAggregatedCollection().get(0).isPersisted());
+	}
+
+	// Test an unpersisted bean assigned to a non-persistent composed collection is not persisted by reachability
+	@Test
+	public void testPersistThroughTransientComposedCollection() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Collection");
+		test.getNonPersistentComposedCollection().add(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertFalse(test.getNonPersistentComposedCollection().get(0).isPersisted());
+	}
+	
+	// Test an unpersisted bean assigned to a persistent aggregated collection is persisted by reachability
+	@Test
+	public void testPersistThroughPersistentAggregatedCollection() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Collection");
+		test.getPersistentAggregatedCollection().add(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertTrue(test.getPersistentAggregatedCollection().get(0).isPersisted());
+	}
+
+	// Test an unpersisted bean assigned to a persistent composed collection is persisted by reachability
+	@Test
+	public void testPersistThroughPersistentComposedCollection() throws Exception {
+		Reachability test = rd.newInstance(u);
+		test.setText("Text");
+		AllAttributesPersistent a = aapd.newInstance(u);
+		a.setText("Collection");
+		test.getPersistentComposedCollection().add(a);
+		test = p.save(test);
+		
+		Assert.assertFalse(a.isPersisted());
+		Assert.assertTrue(test.getPersistentComposedCollection().get(0).isPersisted());
 	}
 }

@@ -142,7 +142,7 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public void preMerge(Document document, Bean beanToSave) {
+	public void preMerge(Document document, PersistentBean beanToSave) {
 		CORE.getPersistence().preMerge(document, beanToSave);
 	}
 
@@ -189,7 +189,7 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public void postMerge(Document document, Bean beanToSave) {
+	public void postMerge(Document document, PersistentBean beanToSave) {
 		CORE.getPersistence().postMerge(document, beanToSave);
 	}
 

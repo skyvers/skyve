@@ -94,7 +94,7 @@ public interface Persistence extends Serializable {
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void preMerge(Document document, Bean beanToSave);
+	public void preMerge(Document document, PersistentBean beanToSave);
 	
 	/**
 	 * Merge and flush.
@@ -161,7 +161,7 @@ public interface Persistence extends Serializable {
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void postMerge(Document document, Bean beanToSave);
+	public void postMerge(Document document, PersistentBean beanToSave);
 	
 	/**
 	 * Execute the DML to synchronize the persistent context with the data store.

@@ -36,15 +36,31 @@ public abstract class DynamicEntity extends AbstractPersistentBean {
 	public static final String DOCUMENT_NAME = "DynamicEntity";
 
 	/** @hidden */
-	public static final String jsonPropertyName = "json";
+	public static final String moduleNamePropertyName = "moduleName";
+
+	/** @hidden */
+	public static final String documentNamePropertyName = "documentName";
+
+	/** @hidden */
+	public static final String fieldsPropertyName = "fields";
 
 	/** @hidden */
 	public static final String relationsPropertyName = "relations";
 
 	/**
-	 * Name
+	 * Module Name
 	 **/
-	private String json;
+	private String moduleName;
+
+	/**
+	 * Document Name
+	 **/
+	private String documentName;
+
+	/**
+	 * Fields
+	 **/
+	private String fields;
 
 	/**
 	 * Relations
@@ -93,21 +109,57 @@ public abstract class DynamicEntity extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #json} accessor.
+	 * {@link #moduleName} accessor.
 	 * @return	The value.
 	 **/
-	public String getJson() {
-		return json;
+	public String getModuleName() {
+		return moduleName;
 	}
 
 	/**
-	 * {@link #json} mutator.
-	 * @param json	The new value.
+	 * {@link #moduleName} mutator.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
-	public void setJson(String json) {
-		preset(jsonPropertyName, json);
-		this.json = json;
+	public void setModuleName(String moduleName) {
+		preset(moduleNamePropertyName, moduleName);
+		this.moduleName = moduleName;
+	}
+
+	/**
+	 * {@link #documentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getDocumentName() {
+		return documentName;
+	}
+
+	/**
+	 * {@link #documentName} mutator.
+	 * @param documentName	The new value.
+	 **/
+	@XmlElement
+	public void setDocumentName(String documentName) {
+		preset(documentNamePropertyName, documentName);
+		this.documentName = documentName;
+	}
+
+	/**
+	 * {@link #fields} accessor.
+	 * @return	The value.
+	 **/
+	public String getFields() {
+		return fields;
+	}
+
+	/**
+	 * {@link #fields} mutator.
+	 * @param fields	The new value.
+	 **/
+	@XmlElement
+	public void setFields(String fields) {
+		preset(fieldsPropertyName, fields);
+		this.fields = fields;
 	}
 
 	/**

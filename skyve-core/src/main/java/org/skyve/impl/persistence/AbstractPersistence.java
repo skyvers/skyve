@@ -5,11 +5,11 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
 public abstract class AbstractPersistence implements Persistence {
@@ -48,6 +48,8 @@ public abstract class AbstractPersistence implements Persistence {
 		this.asyncThread = asyncThread;
 	}
 
+	protected DynamicPersistence dynamicPersistence;
+	
 	/*
 	 * A place (thread-local as it's on persistence), where state can be placed for the duration of the conversation.
 	 * Bear in mind that this map is serialised and cached in the conversation.
@@ -92,7 +94,7 @@ public abstract class AbstractPersistence implements Persistence {
 
 	@Override
 	public final boolean isPersisted(Bean bean) {
-		return (bean instanceof AbstractPersistentBean) && (((PersistentBean) bean).getBizVersion() != null);
+		return (bean instanceof PersistentBean) && (((PersistentBean) bean).getBizVersion() != null);
 	}
 
 	public abstract void disposeAllPersistenceInstances();
@@ -101,10 +103,10 @@ public abstract class AbstractPersistence implements Persistence {
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
 
-	public abstract void postLoad(AbstractPersistentBean bean) throws Exception;
+	public abstract void postLoad(PersistentBean bean) throws Exception;
 
-	public abstract void preRemove(AbstractPersistentBean bean) throws Exception;
-	public abstract void postRemove(AbstractPersistentBean bean) throws Exception;
+	public abstract void preRemove(PersistentBean bean) throws Exception;
+	public abstract void postRemove(PersistentBean bean) throws Exception;
 
 	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean);
 

@@ -1170,7 +1170,7 @@ public class ModulesUtil {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			try {
-				persistence.preMerge(document, bean);
+				persistence.preMerge(document, (PersistentBean) bean);
 			} catch (DomainException e) {
 				loader.addError(customer, bean, e);
 			}

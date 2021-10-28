@@ -27,7 +27,7 @@
 		<document ref="MappedExtensionSingleStrategy" />
 		<document ref="MappedSubclassedJoinedStrategy" />
 		<document ref="MappedSubclassedSingleStrategy" />
-		<document ref="NonPersistentAssociationToPersistent" />
+		<document ref="Reachability" />
 		<document ref="UniqueConstraintNonNullable" />
 		<document ref="UniqueConstraintNullable" />
 	</documents>

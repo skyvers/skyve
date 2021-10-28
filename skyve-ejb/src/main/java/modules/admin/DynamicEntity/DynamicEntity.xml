@@ -18,10 +18,17 @@
 	<audited>false</audited>
 	<bizKey expression="{bizModule}.{bizDocument}#{bizId}" />
 	<attributes>
-		<text name="json" required="true">
-			<displayName>Name</displayName>
-			<length>30</length>
+		<text name="moduleName" required="true">
+			<displayName>Module Name</displayName>
+			<length>128</length>
 		</text>
+		<text name="documentName" required="true">
+			<displayName>Document Name</displayName>
+			<length>128</length>
+		</text>
+		<memo name="fields" required="true">
+			<displayName>Fields</displayName>
+		</memo>
 		<collection name="relations" type="child">
 			<displayName>Relations</displayName>
 			<documentName>DynamicRelation</documentName>

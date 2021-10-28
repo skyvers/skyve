@@ -20,6 +20,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.PersistentMapBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
@@ -224,16 +225,18 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			// Bean
 			p.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
+			p.put(Bean.BIZ_KEY, null);
 			p.put(Bean.CUSTOMER_NAME, null);
 			p.put(Bean.DATA_GROUP_ID, null);
 			p.put(Bean.USER_ID, null);
 			
 			// PersistentBean
 			Persistent persistent = getPersistent();
-			if ((persistent != null) && persistent.getName() != null) {
+			if (persistent != null) { // includes mapped strategy as these are generated to AbstractPersistentBen extensions
 				p.put(PersistentBean.VERSION_NAME, null);
 				p.put(PersistentBean.LOCK_NAME, null);
 				p.put(PersistentBean.FLAG_COMMENT_NAME, null);
+				p.put(PersistentBean.TAGGED_NAME, null);
 			}
 			
 			if (parentDocumentName != null) {
@@ -252,32 +255,36 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			getAllAttributes().forEach(a -> p.put(a.getName(), dynamicDefaultValue(a)));
 
 			@SuppressWarnings("unchecked")
-			T t = (T) new MapBean(getOwningModuleName(), getName(), p);
+			T t = (persistent == null) ?
+					(T) new MapBean(getOwningModuleName(), getName(), p) :
+					(T) new PersistentMapBean(getOwningModuleName(), getName(), p);
 			result = t;
 		}
 		else {
 			final Class<T> beanClass = getBeanClass(customer);
 			result = beanClass.getConstructor().newInstance();
-
-			Module m = customer.getModule(getOwningModuleName());
-
-			final T t = result;
-			getAllAttributes().forEach(a -> {
-				if (a instanceof Field) {
-					if (((Field) a).isDynamic()) {
-						t.setDynamic(a.getName(), dynamicDefaultValue(a));
-					}
-				}
-				else if (a instanceof Relation) {
-					Document d = m.getDocument(customer, ((Relation) a).getDocumentName());
-					if (d.isDynamic()) {
-						t.setDynamic(a.getName(), dynamicDefaultValue(a));
-					}
-				}
-			});
+			populateDynamicAttributeDefaults(customer, result);
 		}
 		
 		return result;
+	}
+	
+	public void populateDynamicAttributeDefaults(Customer customer, Bean bean) {
+		Module m = customer.getModule(getOwningModuleName());
+
+		getAllAttributes().forEach(a -> {
+			if (a instanceof Field) {
+				if (((Field) a).isDynamic()) {
+					bean.setDynamic(a.getName(), dynamicDefaultValue(a));
+				}
+			}
+			else if (a instanceof Relation) {
+				Document d = m.getDocument(customer, ((Relation) a).getDocumentName());
+				if (d.isDynamic()) {
+					bean.setDynamic(a.getName(), dynamicDefaultValue(a));
+				}
+			}
+		});
 	}
 	
 	private static Object dynamicDefaultValue(Attribute attribute) {

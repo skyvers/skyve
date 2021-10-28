@@ -36,6 +36,12 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 	public static final String DOCUMENT_NAME = "DynamicRelation";
 
 	/** @hidden */
+	public static final String relatedModuleNamePropertyName = "relatedModuleName";
+
+	/** @hidden */
+	public static final String relatedDocumentNamePropertyName = "relatedDocumentName";
+
+	/** @hidden */
 	public static final String relatedIdPropertyName = "relatedId";
 
 	/** @hidden */
@@ -45,10 +51,23 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 	public static final String ordinalPropertyName = "ordinal";
 
 	/**
+	 * Module Name
+	 * <br/>
+	 * Populated with the related document's module name if the dynamic relation is to a static document.
+	 **/
+	private String relatedModuleName;
+
+	/**
+	 * Document Name
+	 * <br/>
+	 * Populated with the related document's name if the dynamic relation is to a static document.
+	 **/
+	private String relatedDocumentName;
+
+	/**
 	 * Related ID
 	 * <br/>
-	 * The ID for the related dynamic entity (admin.DynamicEntity).
-				TODO Should it be an ID or just something associated that loads the whole thing?
+	 * The ID for the related dynamic entity (admin.DynamicEntity) OR a real entity.
 	 **/
 	private String relatedId;
 
@@ -62,7 +81,7 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 	/**
 	 * Ordinal
 	 * <br/>
-	 * For ordered collections (akin to the bizOrdinal)
+	 * Used for ordered collections (akin to bizOrdinal)
 	 **/
 	private Integer ordinal;
 
@@ -109,6 +128,42 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 	public boolean equals(Object o) {
 		return ((o instanceof DynamicRelation) && 
 					this.getBizId().equals(((DynamicRelation) o).getBizId()));
+	}
+
+	/**
+	 * {@link #relatedModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRelatedModuleName() {
+		return relatedModuleName;
+	}
+
+	/**
+	 * {@link #relatedModuleName} mutator.
+	 * @param relatedModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setRelatedModuleName(String relatedModuleName) {
+		preset(relatedModuleNamePropertyName, relatedModuleName);
+		this.relatedModuleName = relatedModuleName;
+	}
+
+	/**
+	 * {@link #relatedDocumentName} accessor.
+	 * @return	The value.
+	 **/
+	public String getRelatedDocumentName() {
+		return relatedDocumentName;
+	}
+
+	/**
+	 * {@link #relatedDocumentName} mutator.
+	 * @param relatedDocumentName	The new value.
+	 **/
+	@XmlElement
+	public void setRelatedDocumentName(String relatedDocumentName) {
+		preset(relatedDocumentNamePropertyName, relatedDocumentName);
+		this.relatedDocumentName = relatedDocumentName;
 	}
 
 	/**

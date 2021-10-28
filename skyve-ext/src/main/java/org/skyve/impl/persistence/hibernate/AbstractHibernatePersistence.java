@@ -69,6 +69,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
@@ -84,6 +85,7 @@ import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
@@ -145,6 +147,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
 		session.setHibernateFlushMode(FlushMode.MANUAL);
+		
+		dynamicPersistence = new RDBMSDynamicPersistence(this);
 	}
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
@@ -812,7 +816,7 @@ t.printStackTrace();
 	}
 	
 	// populate all implicit mandatory fields required
-	private void setMandatories(Document document, final Bean beanToSave) {
+	private void setMandatories(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 
 		new BeanVisitor(false, true, false) {
@@ -867,7 +871,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void preMerge(Document document, Bean beanToSave) {
+	public void preMerge(Document document, PersistentBean beanToSave) {
 		// set bizCustomer, bizLock & bizKey
 		setMandatories(document, beanToSave);
 		
@@ -878,8 +882,7 @@ t.printStackTrace();
 		firePreSaveEvents(customer, document, beanToSave);
 		validatePreMerge(customer, document, beanToSave);
 
-		// set bizCustomer, bizLock & bizKey again in case 
-		// more object hierarchy has been added during preSave()
+		// set bizCustomer, bizLock & bizKey again in case more object hierarchy has been added during preSave()
 		setMandatories(document, beanToSave);
 	}
 
@@ -898,17 +901,18 @@ t.printStackTrace();
 					return false;
 				}
 				
-				// NOTE:- We only check if the bean is persisted here,
-				// not if the reference (if any) is persistent.
+				// Persistent references will persist non-persisted (but persistent) beans, or cascade persisted beans.
+				// Transient references will NOT persist non-persisted (but persistent) beans, but changes are cascaded (by hibernate).
 				// We could have a transient reference to a persisted bean and 
 				// the save operation still needs to cascade persist any changes to the 
 				// persistent attributes in the referenced document.
 				try {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 
+					// If it is the top-level bean it is of course persistent since we are in preSave() here
 					// If bean is persisted, call preSave as changes will be flushed
-					// If bean is transient, it wont persisted by reachability by hibernate
-					if (bean.isPersisted()) {
+					// If bean is transient, it will be persisted by reachability by hibernate if it is a persistent reference
+					if ((owningRelation == null) || bean.isPersisted() || owningRelation.isPersistent()) {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
@@ -973,7 +977,7 @@ t.printStackTrace();
 							boolean persistentRelation = owningRelation.isPersistent();
 							// Don't check the unique constraints if the relation is not persistent
 							// and the instance will not be persisted by reachability - ie the bean is transient too
-							if (persistentRelation || ((! persistentRelation) && bean.isPersisted())) {
+							if (persistentRelation || bean.isPersisted()) {
 								checkUniqueConstraints(document, bean);
 							}
 						}
@@ -1147,7 +1151,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void postMerge(Document document, final Bean beanToSave) {
+	public void postMerge(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
 		new BeanVisitor(false, true, false) {
@@ -1204,12 +1208,12 @@ t.printStackTrace();
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
-										Document parentDocument,
-										Relation parentRelation,
+										Document owningDocument,
+										Relation owningRelation,
 										Bean bean) {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((parentRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 				
@@ -1241,18 +1245,46 @@ t.printStackTrace();
 								BindUtil.set(savedBean, attributeBinding, BindUtil.get(unmergedBean, attributeBinding));
 							}
 						}
+						
+						
+/* TODO
+
+Gotta merge all new static beans back into the graph.
+Gotta reinstate all transient dynamic attributes for each merged bean
+if we make a preSave call and bean is static and transient then add to flush.
+if we make a preSave call and bean is dynamic and transient then add to flush list.
+
+postLoad needs to load dynamic attributes from dynamic data store
+postInsert needs to apply flushed dynamic attributes too.
+
+projecting dyanmic attributes has to load the bean (like polymorphic does)
+
+
+
+							
+What do I do about persisted static associations and collections?
+//		Persistence by reachability
+//		
+//		Dynamic Bean
+//			need to persist any transient static domain shit.
+//		Static Bean with dyanmic attributes
+//			same as above for any dynamic attributes
+//Or do I say everything had better be persisted before hand!
+//
+//Need to get a list of shit to persist when persisting dynamic stuff - they need to be merged somehow.
+//
+//Gonna need something that copies from abstract bean coz we need the properties in the map
+//Maybe I need to set the map using API.
+//So postLoad() plus other points. newInstance the dynamic shit.
+//postLoad - dynamic row may not exist - so then just newInstance the dynamic shit as per DocumentImpl.
+*/
 					}
 				}
 				catch (Exception e) {
-					if (e instanceof DomainException) {
-						throw (DomainException) e;
+					if (e instanceof SkyveException) {
+						throw (SkyveException) e;
 					}
-					else if (e instanceof MetaDataException) {
-						throw (MetaDataException) e;
-					}
-					else {
-						throw new DomainException("replaceTransientProperties() cannot set transient property " + attributeBinding, e);
-					}
+					throw new DomainException("replaceTransientProperties() cannot set transient property " + attributeBinding, e);
 				}
 				return true;
 			}
@@ -1267,6 +1299,7 @@ t.printStackTrace();
 	 * @param bean
 	 */
 	private void checkUniqueConstraints(Document document, Bean bean) {
+// TODO - Work the dynamic something in here
 		String owningModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
@@ -1377,8 +1410,8 @@ t.printStackTrace();
 	 * The beanToDelete is used to detect the same event in preRemove.
 	 * 
 	 * Other beans that will be cascaded are put using 
-	 * entity name -> set of beans that are being deleted during the delete operation.
-	 * This attribute holds all beans being deleted during the delete operation, by entity name,
+	 * module.document -> set of beans that are being deleted during the delete operation.
+	 * This attribute holds all beans being deleted during the delete operation, by module.document,
 	 * so that when we check referential integrity, we can ensure that we do not include links to these beans
 	 * which will be deleted (by cascading) anyway.
 	 * 
@@ -1477,16 +1510,16 @@ t.printStackTrace();
 								(! AssociationType.composition.equals(type)))) {
 						String moduleName = ref.getModuleName();
 						String documentName = ref.getDocumentName();
-						String entityName = getDocumentEntityName(moduleName, documentName);
+						String modoc = new StringBuilder(64).append(moduleName).append('.').append(documentName).toString();
 						Module referenceModule = customer.getModule(moduleName);
 						Document referenceDocument = referenceModule.getDocument(customer, documentName);
 						Persistent persistent = document.getPersistent();
 						if (persistent != null) {
 							if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
-								checkMappedReference(bean, beansToBeCascaded, document, ref, entityName, referenceDocument);
+								checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, referenceDocument);
 							}
 							else {
-								checkTypedReference(bean, beansToBeCascaded, document, ref, entityName, referenceDocument);
+								checkTypedReference(bean, beansToBeCascaded, document, ref, modoc, referenceDocument);
 							}
 						}
 					}
@@ -1516,79 +1549,94 @@ t.printStackTrace();
 		}
 	}
 
-	private void checkTypedReference(PersistentBean bean, 
+	private void checkTypedReference(PersistentBean beanToDelete, 
 										Map<String, Set<Bean>> beansToBeCascaded,
-										Document document,
+										Document documentToDelete,
 										ExportedReference ref,
-										String entityName,
-										Document referenceDocument) {
+										String modoc,
+										Document referenceDocument)
+	throws ReferentialConstraintViolationException {
 		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
 			for (Document derivation : derivations) {
-				checkTypedReference(bean, beansToBeCascaded, document, ref, entityName, derivation);
+				checkTypedReference(beanToDelete, beansToBeCascaded, documentToDelete, ref, modoc, derivation);
 			}
 		}
 		else {
-			setFilters(referenceDocument, DocumentPermissionScope.global);
-			try {
-				StringBuilder queryString = new StringBuilder(64);
-				queryString.append("select bean from ");
-				// NB Don't ever change this to the entityName parameter as this method can be called recursively above.
-				//    The entityName is used to find cascaded beans to exclude from the integrity test
-				queryString.append(getDocumentEntityName(referenceDocument.getOwningModuleName(), referenceDocument.getName()));
-				queryString.append(" as bean");
-				if (ref.isCollection()) {
-					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-					queryString.append(" where :referencedBeanId member of bean.");
-					queryString.append(ref.getReferenceFieldName());
-				}
-				else {
-					queryString.append(" where bean.");
-					queryString.append(ref.getReferenceFieldName());
-					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-					queryString.append(".bizId = :referencedBeanId");
-				}
-				
-				Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(entityName);
-				if (theseBeansToBeCascaded != null) {
-					int i = 0;
-					for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-						// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-						queryString.append(" and bean.bizId != :deletedBeanId").append(i++);
-					}
-				}
-				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
+			Set<Bean> beansToBeExcluded = beansToBeCascaded.get(modoc);
+			
+			// This will be a dynamic reference (ie belongs to a dynamic document or refers to a dynamic document)
+			boolean referentialIntegrity = false;
+			if (referenceDocument.isDynamic() || documentToDelete.isDynamic()) {
+				referentialIntegrity = dynamicPersistence.hasReferentialIntegrity(documentToDelete, beanToDelete, ref, referenceDocument, beansToBeExcluded);
+			}
+			else {
+				referentialIntegrity = hasReferentialIntegrity(beanToDelete, ref, referenceDocument, beansToBeExcluded);
+			}
+			if (! referentialIntegrity) {
+				throw new ReferentialConstraintViolationException(documentToDelete.getLocalisedSingularAlias(), beanToDelete.getBizKey(), ref.getLocalisedDocumentAlias());
+			}
+		}
+	}
 	
-				Query<?> query = session.createQuery(queryString.toString());
-				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-
-				// Set timeout if applicable
-				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
-				if (timeout > 0) {
-					query.setTimeout(timeout);
-				}
-
+	private boolean hasReferentialIntegrity(Bean beanToDelete,
+												ExportedReference exportedReference,
+												Document referenceDocument,
+												Set<Bean> beansToBeExcluded) {
+		setFilters(referenceDocument, DocumentPermissionScope.global);
+		try {
+			StringBuilder queryString = new StringBuilder(64);
+			queryString.append("select bean from ");
+			queryString.append(getDocumentEntityName(referenceDocument.getOwningModuleName(), referenceDocument.getName()));
+			queryString.append(" as bean");
+			if (exportedReference.isCollection()) {
 				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-				query.setParameter("referencedBeanId", bean.getBizId(), StringType.INSTANCE);
-				if (theseBeansToBeCascaded != null) {
-					int i = 0;
-					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-						// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-						query.setParameter("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
-					}
-				}
-	
-				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
-					if (results.next()) {
-						throw new ReferentialConstraintViolationException(document.getLocalisedSingularAlias(), bean.getBizKey(), ref.getLocalisedDocumentAlias());
-					}
+				queryString.append(" where :referencedBeanId member of bean.");
+				queryString.append(exportedReference.getReferenceFieldName());
+			}
+			else {
+				queryString.append(" where bean.");
+				queryString.append(exportedReference.getReferenceFieldName());
+				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+				queryString.append(".bizId = :referencedBeanId");
+			}
+			
+			if (beansToBeExcluded != null) {
+				int i = 0;
+				for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : beansToBeExcluded) {
+					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+					queryString.append(" and bean.bizId != :deletedBeanId").append(i++);
 				}
 			}
-			finally {
-				resetFilters(referenceDocument);
+			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
+
+			Query<?> query = session.createQuery(queryString.toString());
+			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
+
+			// Set timeout if applicable
+			int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+			if (timeout > 0) {
+				query.setTimeout(timeout);
 			}
+
+			// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+			query.setParameter("referencedBeanId", beanToDelete.getBizId(), StringType.INSTANCE);
+			if (beansToBeExcluded != null) {
+				int i = 0;
+				for (Bean thisBeanToBeCascaded : beansToBeExcluded) {
+					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+					query.setParameter("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
+				}
+			}
+
+			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
+				return (! results.next());
+			}
+		}
+		finally {
+			resetFilters(referenceDocument);
 		}
 	}
 	
@@ -1596,14 +1644,14 @@ t.printStackTrace();
 										Map<String, Set<Bean>> beansToBeCascaded,
 										Document document,
 										ExportedReference ref,
-										String entityName,
+										String modoc,
 										Document referenceDocument) {
 		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
 			for (Document derivation : derivations) {
-				checkMappedReference(bean, beansToBeCascaded, document, ref, entityName, derivation);
+				checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, derivation);
 			}
 		}
 		else {
@@ -1619,7 +1667,7 @@ t.printStackTrace();
 				queryString.append("_id = :reference_id");
 			}
 			
-			Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(entityName);
+			Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(modoc);
 			if (theseBeansToBeCascaded != null) {
 				int i = 0;
 				for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
@@ -1745,7 +1793,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void postLoad(AbstractPersistentBean loadedBean)
+	public void postLoad(PersistentBean loadedBean)
 	throws Exception {
 		// Inject any dependencies
 		BeanProvider.injectFields(loadedBean);
@@ -1776,7 +1824,7 @@ t.printStackTrace();
 	private static void nullEmbeddedReferencesOnLoad(Customer customer,
 														Module module,
 														Document document,
-														AbstractPersistentBean loadedBean) {
+														PersistentBean loadedBean) {
 		for (Attribute attribute : document.getAllAttributes()) {
 			if (attribute instanceof Association) {
 				Association association = (Association) attribute;
@@ -1851,11 +1899,11 @@ t.printStackTrace();
 		}
 	}
 
-	public void index(AbstractPersistentBean beanToIndex,
-							String[] propertyNames,
-							Type[] propertyTypes,
-							Object[] oldState,
-							Object[] state)
+	public void index(PersistentBean beanToIndex,
+						String[] propertyNames,
+						Type[] propertyTypes,
+						Object[] oldState,
+						Object[] state)
 	throws Exception {
 		BeanContent content = new BeanContent(beanToIndex);
 		Map<String, String> properties = content.getProperties();
@@ -1928,7 +1976,7 @@ t.printStackTrace();
 
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@Override
-	public void preRemove(AbstractPersistentBean bean)
+	public void preRemove(PersistentBean bean)
 	throws Exception {
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
 
@@ -1955,16 +2003,15 @@ t.printStackTrace();
 			
 			private void add(Document documentToCascade, Bean beanToCascade) 
 			throws Exception {
-				String entityName = AbstractHibernatePersistence.this.getDocumentEntityName(documentToCascade.getOwningModuleName(),
-																								documentToCascade.getName());
-				Set<Bean> theseBeansToDelete = beansToDelete.get(entityName);
+				String modoc = new StringBuilder(64).append(documentToCascade.getOwningModuleName()).append('.').append(documentToCascade.getName()).toString();
+				Set<Bean> theseBeansToDelete = beansToDelete.get(modoc);
 				if (theseBeansToDelete == null) {
 					theseBeansToDelete = new TreeSet<>();
-					beansToDelete.put(entityName, theseBeansToDelete);
+					beansToDelete.put(modoc, theseBeansToDelete);
 				}
 				theseBeansToDelete.add(beanToCascade);
 
-				// Ensure that this bean is registered against any entity names defined in its base documents too
+				// Ensure that this bean is registered against any module.document defined in its base documents too
 				Extends inherits = documentToCascade.getExtends();
 				if (inherits != null) {
 					Document baseDocument = customer.getModule(documentToCascade.getOwningModuleName()).getDocument(customer, inherits.getDocumentName());
@@ -1995,7 +2042,7 @@ t.printStackTrace();
 												documentsVisited,
 												beansToDelete,
 												true);
-			((PersistentBean) bean).setBizLock(new OptimisticLock(user.getName(), new Date()));
+			bean.setBizLock(new OptimisticLock(user.getName(), new Date()));
 		}
 		catch (ValidationException e) {
 			for (Message message : e.getMessages()) {
@@ -2006,7 +2053,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void postRemove(AbstractPersistentBean loadedBean)
+	public void postRemove(PersistentBean loadedBean)
 	throws Exception {
 		removeBeanContent(loadedBean);
 	}

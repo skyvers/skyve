@@ -19,8 +19,8 @@ import org.hibernate.type.Type;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -33,13 +33,13 @@ public class HibernateListener implements PostUpdateEventListener,
 											PreUpdateEventListener,
 											InitializeCollectionEventListener {
 	private static final long serialVersionUID = -2075261951031625148L;
-
+// TODO Need to replicate these functions for dynamic beans
 	/**
 	 * Inject new bizLock
 	 */
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
-		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
+		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
 		Object[] state = event.getState();
 		
@@ -65,15 +65,25 @@ public class HibernateListener implements PostUpdateEventListener,
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
-		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
+		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
 		ClassMetadata cmd = ep.getClassMetadata();
 		String[] propertyNames = cmd.getPropertyNames();
 		Type[] propertyTypes = cmd.getPropertyTypes();
 		Object[] state = event.getState();
 
+		// Setup the new hibernate persisted instance returned
+		
+		// Re-inject
 		BeanProvider.injectFields(eventBean);
-
+		
+		// Add back all the dynamic attributes required
+		// NB These are set in AbstractHibernatePersistence.replaceTransientProperties() and TODO where are persistent ones added?
+		Customer c = persistence.getUser().getCustomer();
+		Module m = c.getModule(eventBean.getBizModule());
+		DocumentImpl d = (DocumentImpl) m.getDocument(c, eventBean.getBizDocument());
+		d.populateDynamicAttributeDefaults(c, eventBean);
+		
 		try {
 			persistence.index(eventBean, propertyNames, propertyTypes, null, state);
 		}
@@ -89,7 +99,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
-		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
+		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
 		ClassMetadata cmd = ep.getClassMetadata();
 		String[] propertyNames = cmd.getPropertyNames();
@@ -114,7 +124,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	throws HibernateException {
 		try {
 			AbstractPersistence persistence = AbstractPersistence.get();
-			AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getAffectedOwnerOrNull();
+			PersistentBean eventBean = (PersistentBean) event.getAffectedOwnerOrNull();
 
 			PersistentCollection list = event.getCollection();
 			Customer customer = persistence.getUser().getCustomer();

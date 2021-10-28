@@ -466,7 +466,7 @@
 			<filter name="testMappedExtensionJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
-	<class name="modules.test.domain.NonPersistentAssociationToPersistent" table="TEST_NonPersistentAssociationToPersistent" entity-name="testNonPersistentAssociationToPersistent">
+	<class name="modules.test.domain.Reachability" table="TEST_NonPersistentAssociationToPersistent" entity-name="testReachability">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -476,10 +476,20 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="text" length="255" />
-		<filter name="testNonPersistentAssociationToPersistentNoneFilter" condition="1=0"/>
-		<filter name="testNonPersistentAssociationToPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
-		<filter name="testNonPersistentAssociationToPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-		<filter name="testNonPersistentAssociationToPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+		<many-to-one name="persistentAggregatedAssociation" entity-name="testAllAttributesPersistent" column="persistentAggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentAggregatedAssociation"/>
+		<bag name="persistentAggregatedCollection" table="TEST_NonPersistentAssociationToPersistent_persistentAggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentAggregatedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentAggregatedCollection_element_id" column="element_id" />
+		</bag>
+		<many-to-one name="persistentComposedAssociation" entity-name="testAllAttributesPersistent" column="persistentComposedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_persistentComposedAssociation" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentComposedAssociation"/>
+		<bag name="persistentComposedCollection" table="TEST_NonPersistentAssociationToPersistent_persistentComposedCollection" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentComposedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_NonPersistentAssociationToPersistent_persistentComposedCollection_element_id" column="element_id" />
+		</bag>
+		<filter name="testReachabilityNoneFilter" condition="1=0"/>
+		<filter name="testReachabilityCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testReachabilityDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testReachabilityUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.test.domain.UniqueConstraintNonNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNonNullable">
@@ -666,14 +676,14 @@
 	<filter-def name="testMappedExtensionJoinedStrategyUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
-	<filter-def name="testNonPersistentAssociationToPersistentNoneFilter" />
-	<filter-def name="testNonPersistentAssociationToPersistentCustomerFilter">
+	<filter-def name="testReachabilityNoneFilter" />
+	<filter-def name="testReachabilityCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
 	</filter-def>
-	<filter-def name="testNonPersistentAssociationToPersistentDataGroupIdFilter">
+	<filter-def name="testReachabilityDataGroupIdFilter">
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
-	<filter-def name="testNonPersistentAssociationToPersistentUserIdFilter">
+	<filter-def name="testReachabilityUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testUniqueConstraintNonNullableNoneFilter" />

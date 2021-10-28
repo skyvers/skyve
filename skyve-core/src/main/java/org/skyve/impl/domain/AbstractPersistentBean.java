@@ -174,6 +174,7 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 		AbstractPersistence.get().preRemove(this);
 	}
 
+	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
 	@PostRemove
 	private void postRemove() throws Exception {
 		AbstractPersistence.get().postRemove(this);

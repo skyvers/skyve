@@ -20,11 +20,24 @@
 	<parentDocument>DynamicEntity</parentDocument>
 	<bizKey expression="{parent.bizModule}.{parent.bizDocument}.{attributeName}#{parent.bizId}->{relatedId}" />
 	<attributes>
+		<text name="relatedModuleName">
+			<displayName>Module Name</displayName>
+			<description>
+				Populated with the related document's module name if the dynamic relation is to a static document.
+			</description>
+			<length>128</length>
+		</text>
+		<text name="relatedDocumentName">
+			<displayName>Document Name</displayName>
+			<description>
+				Populated with the related document's name if the dynamic relation is to a static document.
+			</description>
+			<length>128</length>
+		</text>
 		<id name="relatedId" required="true">
 			<displayName>Related ID</displayName>
 			<description>
-				The ID for the related dynamic entity (admin.DynamicEntity).
-				TODO Should it be an ID or just something associated that loads the whole thing?
+				The ID for the related dynamic entity (admin.DynamicEntity) OR a real entity.
 			</description>
 		</id>
 		<text name="attributeName" required="true">
@@ -37,7 +50,7 @@
 		<integer name="ordinal">
 			<displayName>Ordinal</displayName>
 			<description>
-				For ordered collections (akin to the bizOrdinal)
+				Used for ordered collections (akin to bizOrdinal)
 			</description>
 		</integer>
 	</attributes>

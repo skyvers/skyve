@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.inject.Inject;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -39,7 +40,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 */
 	public T get(String bizId) {
 		final DocumentQuery query = getDocumentQuery();
-		query.getFilter().addEquals(PersistentBean.DOCUMENT_ID, bizId);
+		query.getFilter().addEquals(Bean.DOCUMENT_ID, bizId);
 		return query.beanResult();
 	}
 
@@ -65,8 +66,9 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 */
 	public long count() {
 		final DocumentQuery query = getDocumentQuery();
-		query.addAggregateProjection(AggregateFunction.Count, PersistentBean.DOCUMENT_ID, "count");
-		return query.scalarResult(Long.class);
+		query.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "count");
+		Long result = query.scalarResult(Long.class);
+		return (result == null) ? 0 : result.longValue();
 	}
 
 	/**

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Reachability"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Test persistence by reachability to inform when to call Bizlet events.
+		]]>
+	</documentation>
+	<persistent name="TEST_NonPersistentAssociationToPersistent" />
+	<singularAlias>NonPersistentAssociationToPersistent</singularAlias>
+	<pluralAlias>NonPersistentAssociationToPersistent</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>255</length>
+		</text>
+		<association name="nonPersistentAggregatedAssociation" type="aggregation" persistent="false">
+			<displayName>Non Persistent Aggregated Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<association name="persistentAggregatedAssociation" type="aggregation">
+			<displayName>Persistent Aggregated Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<collection name="nonPersistentAggregatedCollection" type="aggregation" persistent="false">
+			<displayName>Non Persistent Aggregated Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="persistentAggregatedCollection" type="aggregation">
+			<displayName>Persistent Aggregated Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<association name="nonPersistentComposedAssociation" type="composition" persistent="false">
+			<displayName>Non Persistent Composed Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<association name="persistentComposedAssociation" type="composition">
+			<displayName>Persistent Composed Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<collection name="nonPersistentComposedCollection" type="composition" persistent="false">
+			<displayName>Non Persistent Composed Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="persistentComposedCollection" type="composition">
+			<displayName>Persistent Composed Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

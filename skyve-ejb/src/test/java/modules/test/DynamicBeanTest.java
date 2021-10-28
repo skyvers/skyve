@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
+import org.skyve.domain.PersistentMapBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -16,6 +17,9 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
+import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
@@ -61,7 +65,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 	@Test
 	public void testGetAllAttributesDynamicPersistentClass() throws Exception {
-		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", MapBean.class, aadpd.newInstance(u).getClass());
+		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", PersistentMapBean.class, aadpd.newInstance(u).getClass());
 	}
 	
 	@Test
@@ -94,7 +98,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		String json = JSON.marshall(c, bean);
 		bean = (Bean) JSON.unmarshall(u, json);
 		Assert.assertEquals("JSON marshall/unmarshall problem", bizId, bean.getBizId());
-		Assert.assertEquals("JSON unmarshall document should create AllAtrributesPersistent", MapBean.class, bean.getClass());
+		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", PersistentMapBean.class, bean.getClass());
 
 		bean = Util.constructRandomInstance(u, m, adapd, 2);
 		bizId = bean.getBizId();
@@ -182,5 +186,33 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
 		Assert.assertEquals(INTEGER, Binder.get(bean, binding));
+	}
+	
+	@Test
+	public void testBenVisitorWithDynamicAttributes() throws Exception {
+		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
+		testBeanVisitor(adapd, bean);
+	}
+
+	@Test
+	public void testBeanVisitorWithDynamicDocument() throws Exception {
+		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
+		testBeanVisitor(aadpd, bean);
+	}
+
+	private void testBeanVisitor(Document document, Bean bean) throws Exception {
+		new BeanVisitor(false, false, false) {
+			@Override
+			protected boolean accept(String binding, Document visitedDocument, Document owningDocument, Relation owningRelation, Bean visitedBean) throws Exception {
+				return true;
+			}
+		}.visit(document, bean, c);
+
+		new BeanVisitor(false, true, false) {
+			@Override
+			protected boolean accept(String binding, Document visitedDocument, Document owningDocument, Relation owningRelation, Bean visitedBean) throws Exception {
+				return true;
+			}
+		}.visit(document, bean, c);
 	}
 }

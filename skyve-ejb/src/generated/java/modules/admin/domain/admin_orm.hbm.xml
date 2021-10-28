@@ -255,7 +255,9 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="json" length="30" />
+		<property name="moduleName" length="128" />
+		<property name="documentName" length="128" />
+		<property name="fields" type="text" />
 		<bag name="relations" cascade="all-delete-orphan">
 			<key column="parent_id" />
 			<one-to-many entity-name="adminDynamicRelation" />
@@ -276,6 +278,8 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<many-to-one name="parent" entity-name="adminDynamicEntity" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_DynamicRelation_parent" />
+		<property name="relatedModuleName" length="128" />
+		<property name="relatedDocumentName" length="128" />
 		<property name="relatedId" length="36" />
 		<property name="attributeName" length="500" />
 		<property name="ordinal" />
