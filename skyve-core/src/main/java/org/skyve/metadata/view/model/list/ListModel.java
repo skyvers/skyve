@@ -11,7 +11,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.web.SortParameter;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -23,8 +22,9 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
+import org.skyve.web.SortParameter;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -5786617076399299709L;
@@ -301,9 +301,20 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	throws Exception;
 	public abstract void remove(String bizId) throws Exception;
 	
-    public static void addEquals(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addEquals(binding, (String) value);
+	public static void addEquals(Filter filter, String binding, Object value) {
+		if (value instanceof String) {
+			// check if value is either bool or int as values with no valueBinding are
+			// passed in as String
+			if ("true".equals(value.toString()) || "false".equals(value.toString())) {
+				filter.addEquals(binding, "true".equals(value.toString()) ? true : false);
+			} else {
+				try {
+					Integer.parseInt(value.toString());
+					filter.addEquals(binding, Integer.valueOf(value.toString()));
+				} catch (Exception e) {
+					filter.addEquals(binding, (String) value);
+				}
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addEquals(binding, (Date) value);
@@ -317,9 +328,9 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     	else if (value instanceof Decimal) {
     		filter.addEquals(binding, (Decimal) value);
     	}
-    	else if (value instanceof Boolean) {
-    		filter.addEquals(binding, (Boolean) value);
-    	}
+		else if (value instanceof Boolean) {
+			filter.addEquals(binding, (Boolean) value);
+		}
     	else if (value instanceof Enum) {
     		filter.addEquals(binding, (Enum<?>) value);
     	}
@@ -333,7 +344,18 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addNotEquals(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-    		filter.addNotEquals(binding, (String) value);
+			// check if value is either bool or int as values with no valueBinding are
+			// passed in as String
+			if ("true".equals(value.toString()) || "false".equals(value.toString())) {
+				filter.addNotEquals(binding, "true".equals(value.toString()) ? true : false);
+			} else {
+				try {
+					Integer.parseInt(value.toString());
+					filter.addNotEquals(binding, Integer.valueOf(value.toString()));
+				} catch (Exception e) {
+					filter.addNotEquals(binding, (String) value);
+				}
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addNotEquals(binding, (Date) value);
@@ -363,7 +385,12 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addGreaterThan(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-    		filter.addGreaterThan(binding, (String) value);
+			try {
+				Integer.parseInt(value.toString());
+				filter.addGreaterThan(binding, Integer.valueOf(value.toString()));
+			} catch (Exception e) {
+				filter.addGreaterThan(binding, (String) value);
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addGreaterThan(binding, (Date) value);
@@ -384,7 +411,12 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-    		filter.addGreaterThanOrEqualTo(binding, (String) value);
+			try {
+				Integer.parseInt(value.toString());
+				filter.addGreaterThanOrEqualTo(binding, Integer.valueOf(value.toString()));
+			} catch (Exception e) {
+				filter.addGreaterThanOrEqualTo(binding, (String) value);
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addGreaterThanOrEqualTo(binding, (Date) value);
@@ -405,7 +437,12 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addLessThan(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-    		filter.addLessThan(binding, (String) value);
+			try {
+				Integer.parseInt(value.toString());
+				filter.addLessThan(binding, Integer.valueOf(value.toString()));
+			} catch (Exception e) {
+				filter.addLessThan(binding, (String) value);
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addLessThan(binding, (Date) value);
@@ -426,7 +463,12 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-    		filter.addLessThanOrEqualTo(binding, (String) value);
+			try {
+				Integer.parseInt(value.toString());
+				filter.addLessThanOrEqualTo(binding, Integer.valueOf(value.toString()));
+			} catch (Exception e) {
+				filter.addLessThanOrEqualTo(binding, (String) value);
+			}
     	}
     	else if (value instanceof Date) {
     		filter.addLessThanOrEqualTo(binding, (Date) value);
@@ -447,7 +489,13 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addBetween(Filter filter, String binding, Object start, Object end) {
     	if (start instanceof String) {
-    		filter.addBetween(binding, (String) start, (String) end);
+			try {
+				Integer.parseInt(start.toString());
+				Integer.parseInt(end.toString());
+				filter.addBetween(binding, Integer.valueOf(start.toString()), Integer.valueOf(end.toString()));
+			} catch (Exception e) {
+				filter.addBetween(binding, (String) start, (String) end);
+			}
     	}
     	else if (start instanceof Date) {
     		filter.addBetween(binding, (Date) start, (Date) end);
