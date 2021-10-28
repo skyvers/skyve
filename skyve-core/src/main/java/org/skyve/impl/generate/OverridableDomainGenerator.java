@@ -253,6 +253,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		ExtensionStrategy strategy = (persistent == null) ? null : persistent.getStrategy();
 		boolean mapped = (persistent == null) ? false : ExtensionStrategy.mapped.equals(strategy);
 		Document baseDocument = (inherits != null) ? module.getDocument(null, inherits.getDocumentName()) : null;
+
+		if ((baseDocument != null) && baseDocument.isDynamic() && (! document.isDynamic())) {
+			throw new MetaDataException("Document " + document.getName() + " cannot extend dynamic document " + baseDocument.getName() + " as it is not a dynamic document");
+		}
+		
 		if (persistent != null) {
 			if ((strategyToAssert != null) && (! mapped) && (! strategyToAssert.equals(strategy))) {
 				throw new MetaDataException("Document " + document.getName() +
