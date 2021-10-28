@@ -56,7 +56,7 @@
 								<onChangedHandlers>
 									<rerender clientValidation="false">
 										<properties>
-											<c:property key="update">configureOptions</c:property>
+											<c:property key="update">configureOptions,columns</c:property>
 										</properties>
 									</rerender>
 								</onChangedHandlers>

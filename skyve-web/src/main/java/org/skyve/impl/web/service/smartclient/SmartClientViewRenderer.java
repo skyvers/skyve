@@ -2246,7 +2246,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (getCurrentForm() != null) {
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
-		code.append(visitingOnBlur ? "view.doBlurryAction('" : "view.doAction('");
+		code.append(visitingAsync ? "view.doBlurryAction('" : "view.doAction('");
 		String name = action.getResourceName();
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (implicitName != null) {
@@ -2282,13 +2282,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("}},");
 	}
 
-	// indicates that we are blurring and we need to call special methods
+	// indicates that we are blurring or selecting and we need to call special methods
 	// to potentially serialize calls to button actions after editorExit.
-	private boolean visitingOnBlur = false;
+	private boolean visitingAsync = false;
 	
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
-		visitingOnBlur = true;
+		visitingAsync = true;
 		
 		// This fires before the BizButton action() method if a button was clicked
 		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
@@ -2301,7 +2301,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		code.append("}},");
-		visitingOnBlur = false;
+		visitingAsync = false;
 	}
 
 	// Used to sort out server-side events into the bizEditedForServer() method.
@@ -2381,6 +2381,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+		if ((dataWidgetVariable != null) || (listWidgetVariable != null)) {
+			visitingAsync = true;
+		}
 		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
@@ -2392,6 +2395,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
+		visitingAsync = false;
 	}
 
 	@Override
@@ -2422,7 +2426,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (getCurrentForm() != null) {
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
-		code.append(visitingOnBlur ? "view.rerenderBlurryAction(" : "view.rerenderAction(");
+		code.append(visitingAsync ? "view.rerenderBlurryAction(" : "view.rerenderAction(");
 		code.append(Boolean.FALSE.equals(rerender.getClientValidation()) ? "false,'" : "true,'");
 		code.append(source.getSource()).append("');");
 	}
