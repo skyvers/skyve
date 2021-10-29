@@ -109,6 +109,7 @@ public class ListGrid extends HtmlPanelGroup {
 										Boolean filterRendered,
 										ComponentBuilder componentBuilder) {
 		ListModel<? extends Bean> model = null;
+		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		String name = null;
 
 		User user = CORE.getUser();
@@ -124,15 +125,16 @@ public class ListGrid extends HtmlPanelGroup {
 			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 			queryModel.setQuery(query);
 			model = queryModel;
+			listGrid.setQueryName(queryName);
 			name = queryName;
 		}
 		else {
 			Document document = module.getDocument(customer, documentName);
 			model = CORE.getRepository().getListModel(customer, document, modelName, true);
+			listGrid.setModelName(modelName);
 			name = modelName;
 		}
 		
-		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		listGrid.setTitle(model.getDescription()); // no localisation here as listGrid.getLocalisedTitle() would be called
 		listGrid.setShowAdd(createRendered);
 		listGrid.setDisabledConditionName(String.valueOf(createDisabled));
