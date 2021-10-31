@@ -439,12 +439,30 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		this.bizKeyMethodCode = bizKeyMethodCode;
 	}
 
+	@Override
 	public String getBizKeyExpression() {
 		return bizKeyExpression;
 	}
 
 	public void setBizKeyExpression(String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
+	}
+	
+	@Override
+	public void setBizKey(PersistentBean bean) {
+		if (isDynamic()) {
+			String bizKey = null;
+			try {
+				bizKey = BindUtil.formatMessage(getBizKeyExpression(), bean);
+			}
+			catch (@SuppressWarnings("unused") Exception e) {
+				bizKey = "Unknown";
+			}
+			bean.setBizKey(UtilImpl.processStringValue(bizKey));
+		}
+		else {
+			bean.setBizKey(UtilImpl.processStringValue(bean.getBizKey()));
+		}
 	}
 	
 	@Override

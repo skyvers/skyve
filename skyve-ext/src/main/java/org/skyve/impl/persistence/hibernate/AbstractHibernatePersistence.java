@@ -69,7 +69,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
-import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
@@ -816,7 +815,7 @@ t.printStackTrace();
 	}
 	
 	// populate all implicit mandatory fields required
-	private void setMandatories(Document document, final PersistentBean beanToSave) {
+	private void setMandatories(Document document, final PersistentBean beanToSave, Map<PersistentBean, PersistentBean> beansToMerge) {
 		final Customer customer = user.getCustomer();
 
 		new BeanVisitor(false, true, false) {
@@ -853,7 +852,7 @@ t.printStackTrace();
 					// That means we can't rely on preUpdate event listener as preUpdate may not get fired if this 
 					// bean hasn't changed, but the related dependent bean has changed requiring the update to bizKey.
 					PersistentBean persistentBean = (PersistentBean) bean;
-					persistentBean.setBizKey(Util.processStringValue(persistentBean.getBizKey()));
+					document.setBizKey(persistentBean);
 
 					// This only sets the bizLock if the bean is about to be inserted
 					// If we set it here on update, we are making the bean dirty even if there
@@ -862,6 +861,18 @@ t.printStackTrace();
 					// Note:- This stops hibernate metadata validation from moaning
 					if (! bean.isPersisted()) {
 						persistentBean.setBizLock(new OptimisticLock(user.getName(), new Date()));
+
+						// Add non-dynamic (static) unpersisted (transient) beans reachable by persistent dynamic relations to the Set to persist later (excluding top-level).
+						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
+						if (beansToMerge != null) {
+							if ((owningRelation != null) && // not the top-level bean
+									(persistentBean != beanToSave) && // not a reference to the top level bean
+									(! document.isDynamic()) && // bean is not dynamic
+										owningRelation.isPersistent() && // persistent relation
+										owningDocument.isDynamic()) { // dynamic relation
+								beansToMerge.put(persistentBean, null);
+							}
+						}
 					}
 				}
 
@@ -872,8 +883,12 @@ t.printStackTrace();
 	
 	@Override
 	public void preMerge(Document document, PersistentBean beanToSave) {
+		preMerge(document, beanToSave, null);
+	}
+	
+	private void preMerge(Document document, PersistentBean beanToSave, Map<PersistentBean, PersistentBean> beansToMerge) {
 		// set bizCustomer, bizLock & bizKey
-		setMandatories(document, beanToSave);
+		setMandatories(document, beanToSave, null);
 		
 		// Validate all and sundry before touching the database
 		// Note that preSave events are all fired for the object graph and then validate for the graph is called.
@@ -883,7 +898,7 @@ t.printStackTrace();
 		validatePreMerge(customer, document, beanToSave);
 
 		// set bizCustomer, bizLock & bizKey again in case more object hierarchy has been added during preSave()
-		setMandatories(document, beanToSave);
+		setMandatories(document, beanToSave, beansToMerge);
 	}
 
 	private static void firePreSaveEvents(final Customer customer, Document document, final Bean beanToSave) {
@@ -988,8 +1003,7 @@ t.printStackTrace();
 						// beans and not just on properties in this bean.
 						// That means we can't rely on preUpdate event listener as preUpdate may not get fired if this 
 						// bean hasn't changed, but the related dependent bean has changed requiring the update to bizKey.
-						PersistentBean persistentBean = (PersistentBean) bean;
-						persistentBean.setBizKey(Util.processStringValue(persistentBean.getBizKey()));
+						document.setBizKey((PersistentBean) bean);
 					}
 				}
 				catch (ValidationException e) {
@@ -1013,44 +1027,6 @@ t.printStackTrace();
 	public final <T extends PersistentBean> T merge(Document document, T bean) {
 		return save(document, bean, false);
 	}
-	
-	@SuppressWarnings("unchecked")
-	private <T extends PersistentBean> T save(Document document, T bean, boolean flush) {
-		T result = null;
-		
-		try {
-			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
-			boolean vetoed = false;
-			
-			// We need to replace transient properties before calling postMerge as
-			// Bizlet.postSave() implementations could manipulate these transients for display after save.
-			try {
-				vetoed = internalCustomer.interceptBeforeSave(document, bean);
-				if (! vetoed) {
-					preMerge(document, bean);
-					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-					result = (T) session.merge(entityName, bean);
-					if (flush) {
-						em.flush();
-					}
-				}
-			}
-			finally {
-				if (result != null) { // only do if we got a result from the merge
-					replaceTransientProperties(document, result, bean);
-				}
-			}
-			if (! vetoed) {
-				postMerge(document, result);
-				internalCustomer.interceptAfterSave(document, result);
-			}
-		}
-		catch (Throwable t) {
-			treatPersistenceThrowable(t, OperationType.update, bean);
-		}
-
-		return result;
-	}
 
 	@Override
 	public final <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
@@ -1072,11 +1048,90 @@ t.printStackTrace();
 		return save(beans, false);
 	}
 
+	/**
+	 * This is a stack so that save operations called in preSave Bizlet methods will work correctly.
+	 * 
+	 * Non-dynamic (static/generated) beans that are not persisted and are reachable by persistent dynamic references
+	 * need to be merged and have the new hibernate object replace any transient references in the bean graph.
+	 * 
+	 * The top-level bean is not added to this set.
+	 * 
+	 * A new context is pushed onto the stack at the beginning of a save(T) or save(T...) operation.
+	 * This stack is popped and the Map variable is cleared at the end of the save operation.
+	 * See the finally blocks below.
+	 * 
+	 * The set of beans is merged in the guts of the save(T) or save(T...) methods.
+	 * This is a Map of the unmerged beans found in preMerge() that should be persisted to null.
+	 * Once they are merged, the merged bean is placed against each unmerged bean.
+	 */
+	private Stack<Map<PersistentBean, PersistentBean>> saveContext = new Stack<>();
+
+	@SuppressWarnings("unchecked")
+	private <T extends PersistentBean> T save(Document document, T bean, boolean flush) {
+		T result = null;
+		
+		Map<PersistentBean, PersistentBean> beansToMerge = null;
+		
+		try {
+			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
+			boolean vetoed = false;
+			
+			// We need to replace transient properties before calling postMerge as
+			// Bizlet.postSave() implementations could manipulate these transients for display after save.
+			try {
+				vetoed = internalCustomer.interceptBeforeSave(document, bean);
+				if (! vetoed) {
+					// Start a new save context
+					beansToMerge = new TreeMap<>();
+					saveContext.push(beansToMerge);
+					
+					preMerge(document, bean, beansToMerge);
+
+					// Merge the bean to save
+					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+					result = (T) session.merge(entityName, bean);
+
+					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
+					for (PersistentBean beanToMerge : beansToMerge.keySet()) {
+						entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
+						beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+					}
+					
+					if (flush) {
+						em.flush();
+					}
+				}
+			}
+			finally {
+				if (result != null) { // only do if we got a result from the merge
+					prepareMergedBean(document, result, bean, beansToMerge);
+				}
+			}
+			if (! vetoed) {
+				postMerge(document, result);
+				internalCustomer.interceptAfterSave(document, result);
+			}
+		}
+		catch (Throwable t) {
+			treatPersistenceThrowable(t, OperationType.update, bean);
+		}
+		finally {
+			if (beansToMerge != null) { // save context was pushed
+				beansToMerge.clear();
+				saveContext.pop();
+			}
+		}
+
+		return result;
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends PersistentBean> List<T> save(List<T> beans, boolean flush) {
 		List<T> results = new ArrayList<>();
 		PersistentBean currentBean = null; // used in exception handling
-		
+
+		Map<PersistentBean, PersistentBean> beansToMerge = null;
+
 		try {
 			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 			boolean vetoed = false;
@@ -1095,11 +1150,15 @@ t.printStackTrace();
 					}
 				}
 				if (! vetoed) {
+					// Start a new save context
+					beansToMerge = new TreeMap<>();
+					saveContext.push(beansToMerge);
+					
 					for (PersistentBean bean : beans) {
 						currentBean = bean; // for exception handling
 						Module m = internalCustomer.getModule(bean.getBizModule());
 						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
-						preMerge(d, bean);
+						preMerge(d, bean, beansToMerge);
 					}
 					
 					for (PersistentBean bean : beans) {
@@ -1110,6 +1169,13 @@ t.printStackTrace();
 						String entityName = getDocumentEntityName(d.getOwningModuleName(), d.getName());
 						results.add((T) session.merge(entityName, bean));
 					}
+					
+					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
+					for (PersistentBean beanToMerge : beansToMerge.keySet()) {
+						String entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
+						beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+					}
+
 					if (flush) {
 						em.flush();
 					}
@@ -1123,7 +1189,7 @@ t.printStackTrace();
 						PersistentBean bean = beans.get(i);
 						Module m = internalCustomer.getModule(bean.getBizModule());
 						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
-						replaceTransientProperties(d, result, bean);
+						prepareMergedBean(d, result, bean, beansToMerge);
 					}
 					i++;
 				}
@@ -1145,6 +1211,12 @@ t.printStackTrace();
 		}
 		catch (Throwable t) {
 			treatPersistenceThrowable(t, OperationType.update, currentBean);
+		}
+		finally {
+			if (beansToMerge != null) { // save context was pushed
+				beansToMerge.clear();
+				saveContext.pop();
+			}
 		}
 
 		return results;
@@ -1200,8 +1272,7 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 
-	@Override
-	public void replaceTransientProperties(Document document, final Bean savedBean, final Bean unmergedBean) {
+	private void prepareMergedBean(Document document, final PersistentBean mergedBean, final PersistentBean unmergedBean, Map<PersistentBean, PersistentBean> otherMergedBeans) {
 		Customer customer = user.getCustomer();
 
 		new BeanVisitor(false, true, false) {
@@ -1210,86 +1281,94 @@ t.printStackTrace();
 										@SuppressWarnings("hiding") Document document,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean bean) {
-				// Process an inverse if the inverse is specified as cascading.
+										Bean unmergedPart) {
+				
+				// Replace any bean that has been persisted by reachability but is the old unpersisted/detached version
+				if (unmergedPart.isPersisted()) {
+					if ((owningRelation != null) && (unmergedPart == unmergedBean) && (unmergedPart != mergedBean)) {
+						BindUtil.set(mergedBean, binding, mergedBean);
+					}
+					else if (otherMergedBeans.containsKey(unmergedPart)) {
+						PersistentBean otherMergedBean = otherMergedBeans.get(unmergedPart);
+						if (unmergedPart != otherMergedBean) {
+							BindUtil.set(mergedBean, binding, otherMergedBean);
+						}
+					}
+				}
+				
+				// Process an inverse only if the inverse is specified as cascading.
 				if ((owningRelation instanceof Inverse) && 
 						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 				
-				String attributeBinding = null;
-
-				try {
-					// set the transient attributes in the beanToSave
+				Bean mergedPart = (owningRelation == null) ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
+				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
+					BindUtil.set(mergedBean, binding, unmergedPart);
+				}
+				else {
+					// Reinstate any "biz" attributes lost when detached or persisted for the first time (some "biz" attributes are not used when embedded)
+					String bizCustomer = mergedPart.getBizCustomer();
+					if (bizCustomer == null) {
+						mergedPart.setBizCustomer(unmergedPart.getBizCustomer());
+					}
+					String bizDataGroupId = mergedPart.getBizDataGroupId();
+					if (bizDataGroupId == null) {
+						mergedPart.setBizDataGroupId(unmergedPart.getBizDataGroupId());
+					}
+					String bizUserId = mergedPart.getBizUserId();
+					if (bizUserId == null) {
+						mergedPart.setBizUserId(unmergedPart.getBizUserId());
+					}
+					if (mergedPart instanceof PersistentBean) {
+						PersistentBean unmergedPersistentBean = (PersistentBean) unmergedPart;
+						PersistentBean mergedPersistentBean = (PersistentBean) mergedPart;
+						String bizKey = mergedPersistentBean.getBizKey();
+						if (bizKey == null) {
+							mergedPersistentBean.setBizKey(unmergedPersistentBean.getBizKey());
+						}
+						String bizFlagComment = mergedPersistentBean.getBizFlagComment();
+						if (bizFlagComment == null) {
+							mergedPersistentBean.setBizFlagComment(unmergedPersistentBean.getBizFlagComment());
+						}
+					}
+					
+					// Reinstate the transient attributes in the mergedBean from the unmerged bean lost when detached or persisted for the first time.
 					for (Attribute attribute : document.getAllAttributes()) {
 						String attributeName = attribute.getName();
 						if ((! attribute.isPersistent()) && (! Bean.BIZ_KEY.equals(attributeName))) {
-							attributeBinding = attributeName;
-							if (binding.length() > 0) {
-								attributeBinding = new StringBuilder(64).append(binding).append('.').append(attributeName).toString();
-							}
 							if (attribute instanceof Collection) {
 								@SuppressWarnings("unchecked")
-								List<Bean> mergedCollection = (List<Bean>) BindUtil.get(savedBean, attributeBinding);
+								List<Bean> mergedCollection = (List<Bean>) BindUtil.get(mergedPart, attributeName);
 								@SuppressWarnings("unchecked")
-								List<Bean> transientCollection = (List<Bean>) BindUtil.get(unmergedBean, attributeBinding);
-
+								List<Bean> unmergedCollection = (List<Bean>) BindUtil.get(unmergedPart, attributeName);
+	
 								// ensure that we do not try to add the elements
 								// of a collection to itself
-								if (mergedCollection != transientCollection) {
+								if (mergedCollection != unmergedCollection) {
 									mergedCollection.clear();
-									mergedCollection.addAll(transientCollection);
+									mergedCollection.addAll(unmergedCollection);
 								}
 							}
 							else {
-								BindUtil.set(savedBean, attributeBinding, BindUtil.get(unmergedBean, attributeBinding));
+								BindUtil.set(mergedPart, attributeName, BindUtil.get(unmergedPart, attributeName));
 							}
 						}
-						
-						
-/* TODO
-
-Gotta merge all new static beans back into the graph.
-Gotta reinstate all transient dynamic attributes for each merged bean
-if we make a preSave call and bean is static and transient then add to flush.
-if we make a preSave call and bean is dynamic and transient then add to flush list.
-
-postLoad needs to load dynamic attributes from dynamic data store
-postInsert needs to apply flushed dynamic attributes too.
-
-projecting dyanmic attributes has to load the bean (like polymorphic does)
-
-
-
-							
-What do I do about persisted static associations and collections?
-//		Persistence by reachability
-//		
-//		Dynamic Bean
-//			need to persist any transient static domain shit.
-//		Static Bean with dyanmic attributes
-//			same as above for any dynamic attributes
-//Or do I say everything had better be persisted before hand!
-//
-//Need to get a list of shit to persist when persisting dynamic stuff - they need to be merged somehow.
-//
-//Gonna need something that copies from abstract bean coz we need the properties in the map
-//Maybe I need to set the map using API.
-//So postLoad() plus other points. newInstance the dynamic shit.
-//postLoad - dynamic row may not exist - so then just newInstance the dynamic shit as per DocumentImpl.
-*/
 					}
 				}
-				catch (Exception e) {
-					if (e instanceof SkyveException) {
-						throw (SkyveException) e;
-					}
-					throw new DomainException("replaceTransientProperties() cannot set transient property " + attributeBinding, e);
-				}
+				
 				return true;
 			}
 
 		}.visit(document, unmergedBean, customer);
+		
+		// Flush dynamic domain
+		if (document.getPersistent() != null) { // persistent
+			if (mergedBean.isPersisted()) {
+				dynamicPersistence.delete(customer, document, mergedBean);
+			}
+			dynamicPersistence.persist(customer, customer.getModule(document.getOwningModuleName()), document, mergedBean);
+		}
 	}
 
 	/**
@@ -1300,6 +1379,7 @@ What do I do about persisted static associations and collections?
 	 */
 	private void checkUniqueConstraints(Document document, Bean bean) {
 // TODO - Work the dynamic something in here
+Comment this method out to continue
 		String owningModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
@@ -1428,11 +1508,10 @@ What do I do about persisted static associations and collections?
 	@Override
 	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
-		Map<String, Set<Bean>> beansToDelete = new TreeMap<>();
+		Map<String, Set<Bean>> beansToDelete = null;
 		T beanToDelete = bean;
 		
 		if (isPersisted(beanToDelete)) {
-			boolean deleteContextPushed = false;
 			try {
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 				boolean vetoed = internalCustomer.interceptBeforeDelete(document, beanToDelete);
@@ -1445,9 +1524,9 @@ What do I do about persisted static associations and collections?
 					UtilImpl.populateFully(beanToDelete);
 	
 					// Push a new delete context on
+					beansToDelete = new TreeMap<>();
 					beansToDelete.put("", Collections.singleton(beanToDelete));
 					deleteContext.push(beansToDelete);
-					deleteContextPushed = true;
 					
 					// Call preDelete()
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
@@ -1476,8 +1555,8 @@ What do I do about persisted static associations and collections?
 				treatPersistenceThrowable(t, OperationType.update, beanToDelete);
 			}
 			finally {
-				beansToDelete.clear();
-				if (deleteContextPushed) {
+				if (beansToDelete != null) { // delete context was pushed
+					beansToDelete.clear();
 					deleteContext.pop();
 				}
 			}

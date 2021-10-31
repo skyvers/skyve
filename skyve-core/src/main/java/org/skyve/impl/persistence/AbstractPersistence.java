@@ -108,8 +108,6 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void preRemove(PersistentBean bean) throws Exception;
 	public abstract void postRemove(PersistentBean bean) throws Exception;
 
-	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean);
-
 	@Override
 	public final <T extends PersistentBean> T save(T bean) {
 		Customer customer = user.getCustomer();

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
@@ -20,6 +21,15 @@ public interface Document extends Model {
 	 * @throws Exception
 	 */
 	public <T extends Bean> T newInstance(User user) throws Exception;
+	
+	public String getBizKeyExpression();
+	
+	/**
+	 * Set the bizKey for static/dynamic beans.
+	 * 
+	 * @param bean
+	 */
+	public void setBizKey(PersistentBean bean);
 	
 	/**
 	 * 

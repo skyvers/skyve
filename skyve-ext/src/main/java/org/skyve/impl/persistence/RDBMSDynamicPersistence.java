@@ -17,7 +17,6 @@ import org.hibernate.type.StringType;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -25,6 +24,7 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
@@ -57,12 +57,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 										Relation owningRelation,
 										Bean visitedBean)
 			throws Exception {
-				if (visitedBean.isPersisted()) {
-					throw new DomainException(visitedBean + " is already persisted");
-				}
 				// TODO refine this rule possibly - transient reference to persisted bean and all that crap?
-				if (visitedDocument.getPersistent() != null) {
-					process(customer, module, document, (PersistentBean) visitedBean);
+				Persistent persistent = visitedDocument.getPersistent();
+				if ((persistent != null) && 
+						(persistent.getName() != null)) { // persistent document
+					process(customer, module, visitedDocument, (PersistentBean) visitedBean);
 				}
 				return true;
 			}
@@ -74,7 +73,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		final List<Reference> dynamicReferences = new ArrayList<>();
 		final boolean dynamicDocument = d.isDynamic();
 
-		for (Attribute a : d.getAttributes()) {
+		for (Attribute a : d.getAllAttributes()) {
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
 			if (a instanceof Field) {
@@ -108,6 +107,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	}
 
 	private void insertEntity(PersistentBean bean, String json) {
+		// Dynamic beans have no version set as they have not been through hibernate
+		if (bean.getBizVersion() == null) {
+			bean.setBizVersion(Integer.valueOf(0));
+		}
+
 		String insert = "insert into ADM_DynamicEntity (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, moduleName, documentName, fields) " +
 							"values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizFlagComment, :bizDataGroupId, :bizUserId, :moduleName, :documentName, :fields)";
 		SQL sql = persistence.newSQL(insert);

@@ -1279,7 +1279,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		
 		// Check the bizKey expression bindings, if defined
 		Module module = getModule(customer, document.getOwningModuleName());
-		String bizKeyExpression = ((DocumentImpl) document).getBizKeyExpression();
+		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
 			if (! BindUtil.messageExpressionsAreValid(customer, module, document, bizKeyExpression)) {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier);
