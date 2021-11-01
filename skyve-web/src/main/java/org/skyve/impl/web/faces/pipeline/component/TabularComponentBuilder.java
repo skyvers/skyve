@@ -1300,10 +1300,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					String binding = param.getValueBinding();
 					String value = param.getValue();
 
-					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					createUrlParams.append('&').append(name).append('=');
 					modelExpression.append("['").append(name).append("','");
 					modelExpression.append(param.getOperator()).append("','");
 					if (binding != null) {
+						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
 						Attribute targetAttribute = null;
 						try {
 							if (owningDocument != null) {
@@ -1324,7 +1325,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						modelExpression.append('{').append(binding).append("}'],");
 					}
 					else {
-						createUrlParams.append(binding).append("']}");
+						createUrlParams.append(value);
 						modelExpression.append(value).append("'],");
 					}
 				}

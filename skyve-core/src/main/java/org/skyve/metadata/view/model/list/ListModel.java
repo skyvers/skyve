@@ -5,16 +5,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -98,46 +105,16 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		if (filterParameters != null) {
 			for (FilterParameter param : filterParameters) {
 				String parameterName = param.getFilterBinding();
-				String parameterBinding = param.getValueBinding();
-				String parameterValue = param.getValue();
 	
-				// Determine the parameter value to use
-				Object value = null;
-				if (parameterBinding == null) {
-					if (parameterValue != null) {
-						// check for a surrogate binding
-						if (parameterValue.startsWith("{") && parameterValue.endsWith("}")) {
-							parameterBinding = parameterValue.substring(1, parameterValue.length() - 1);
-						}
-						else {
-							value = parameterValue;
-						}
-					}
-				}
-				if (parameterBinding != null) {
-					value = BindUtil.get(bean, parameterBinding);
-				}
-				if (value instanceof Bean) {
-					value = ((Bean) value).getBizId();
-				}
-	
-				// Determine the parameter name to use
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
-																		drivingModule, 
-																		drivingDocument, 
-																		parameterName);
-				if (target != null) {
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						if (AttributeType.association.equals(attribute.getAttributeType())) {
-							parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
-						}
-					}
-	    			else if (ChildBean.PARENT_NAME.equals(parameterName) || parameterName.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						parameterName = String.format("%s.%s", parameterName, Bean.DOCUMENT_ID);
-	    			}
-				}
-	
+				Pair<String, Object> parameter = processParameter(customer,
+																	drivingModule,
+																	drivingDocument,
+																	parameterName,
+																	param.getValueBinding(),
+																	param.getValue());
+				parameterName = parameter.getLeft();
+				Object value = parameter.getRight();
+				
 				// Add the filter to the model
 				switch (param.getOperator()) {
 					case equal:
@@ -250,33 +227,84 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		
 		if (parameters != null) {
 			for (Parameter param : parameters) {
-				String parameterName = param.getName();
-				String parameterBinding = param.getValueBinding();
-				String parameterValue = param.getValue();
-	
-				// Determine the parameter value to use
-				Object value = null;
-				if (parameterBinding == null) {
-					if (parameterValue != null) {
-						// check for a surrogate binding
-						if (parameterValue.startsWith("{") && parameterValue.endsWith("}")) {
-							parameterBinding = parameterValue.substring(1, parameterValue.length() - 1);
-						}
-						else {
-							value = parameterValue;
-						}
-					}
-				}
-				if (parameterBinding != null) {
-					value = BindUtil.get(bean, parameterBinding);
-				}
-				if (value instanceof Bean) {
-					value = ((Bean) value).getBizId();
-				}
-	
-				putParameter(parameterName, value);
+				Pair<String, Object> parameter = processParameter(customer,
+																	drivingModule,
+																	drivingDocument,
+																	param.getName(),
+																	param.getValueBinding(),
+																	param.getValue());
+				putParameter(parameter.getLeft(), parameter.getRight());
 			}
 		}
+	}
+	
+	private Pair<String, Object> processParameter(Customer c,
+													Module m,
+													Document d,
+													String name,
+													String binding,
+													String value) {
+		String newBinding = binding;
+
+		// The resulting parameter contents
+		String newName = name;
+		Object result = null;
+
+		// Determine the parameter value to use
+		if (newBinding == null) {
+			if (value != null) {
+				// check for a surrogate binding
+				if (value.startsWith("{") && value.endsWith("}")) {
+					newBinding = value.substring(1, value.length() - 1);
+				}
+				else {
+					result = value;
+				}
+			}
+		}
+		if (newBinding != null) {
+			result = BindUtil.get(bean, newBinding);
+		}
+		if (result instanceof Bean) {
+			result = ((Bean) result).getBizId();
+		}
+
+		if (result != null) {
+			// Determine the type and converter of the filtered attribute
+			Converter<?> converter = null;
+    		Class<?> type = null;
+
+    		// Determine the parameter name to use
+			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, name);
+			if (target != null) {
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					if (attribute instanceof Enumeration) {
+						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+					}
+					else if (attribute instanceof Field) {
+						type = attribute.getAttributeType().getImplementingType();
+					}
+					else if (attribute instanceof Association) {
+						newName = String.format("%s.%s", name, Bean.DOCUMENT_ID);
+					}
+					
+					if (attribute instanceof ConvertableField) {
+						ConvertableField field = (ConvertableField) attribute;
+						converter = field.getConverterForCustomer(c);
+					}
+				}
+    			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+					newName = String.format("%s.%s", name, Bean.DOCUMENT_ID);
+    			}
+			}
+
+			if (type != null) {
+				result = BindUtil.fromString(c, converter, type, result.toString(), false);
+			}
+		}
+		
+		return new ImmutablePair<>(newName, result);
 	}
 	
 	public abstract String getDescription();
@@ -303,19 +331,8 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	
 	public static void addEquals(Filter filter, String binding, Object value) {
 		if (value instanceof String) {
-			// check if value is either bool or int as values with no valueBinding are
-			// passed in as String
-			if ("true".equals(value.toString()) || "false".equals(value.toString())) {
-				filter.addEquals(binding, "true".equals(value.toString()) ? true : false);
-			} else {
-				try {
-					Integer.parseInt(value.toString());
-					filter.addEquals(binding, Integer.valueOf(value.toString()));
-				} catch (Exception e) {
-					filter.addEquals(binding, (String) value);
-				}
-			}
-    	}
+			filter.addEquals(binding, (String) value);
+		}
     	else if (value instanceof Date) {
     		filter.addEquals(binding, (Date) value);
     	}
@@ -344,19 +361,8 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addNotEquals(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-			// check if value is either bool or int as values with no valueBinding are
-			// passed in as String
-			if ("true".equals(value.toString()) || "false".equals(value.toString())) {
-				filter.addNotEquals(binding, "true".equals(value.toString()) ? true : false);
-			} else {
-				try {
-					Integer.parseInt(value.toString());
-					filter.addNotEquals(binding, Integer.valueOf(value.toString()));
-				} catch (Exception e) {
-					filter.addNotEquals(binding, (String) value);
-				}
-			}
-    	}
+			filter.addNotEquals(binding, (String) value);
+		}
     	else if (value instanceof Date) {
     		filter.addNotEquals(binding, (Date) value);
     	}
@@ -385,12 +391,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addGreaterThan(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-			try {
-				Integer.parseInt(value.toString());
-				filter.addGreaterThan(binding, Integer.valueOf(value.toString()));
-			} catch (Exception e) {
-				filter.addGreaterThan(binding, (String) value);
-			}
+    		filter.addGreaterThan(binding, (String) value);
     	}
     	else if (value instanceof Date) {
     		filter.addGreaterThan(binding, (Date) value);
@@ -411,12 +412,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-			try {
-				Integer.parseInt(value.toString());
-				filter.addGreaterThanOrEqualTo(binding, Integer.valueOf(value.toString()));
-			} catch (Exception e) {
-				filter.addGreaterThanOrEqualTo(binding, (String) value);
-			}
+    		filter.addGreaterThanOrEqualTo(binding, (String) value);
     	}
     	else if (value instanceof Date) {
     		filter.addGreaterThanOrEqualTo(binding, (Date) value);
@@ -437,12 +433,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addLessThan(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-			try {
-				Integer.parseInt(value.toString());
-				filter.addLessThan(binding, Integer.valueOf(value.toString()));
-			} catch (Exception e) {
-				filter.addLessThan(binding, (String) value);
-			}
+			filter.addLessThan(binding, (String) value);
     	}
     	else if (value instanceof Date) {
     		filter.addLessThan(binding, (Date) value);
@@ -463,12 +454,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
     	if (value instanceof String) {
-			try {
-				Integer.parseInt(value.toString());
-				filter.addLessThanOrEqualTo(binding, Integer.valueOf(value.toString()));
-			} catch (Exception e) {
-				filter.addLessThanOrEqualTo(binding, (String) value);
-			}
+			filter.addLessThanOrEqualTo(binding, (String) value);
     	}
     	else if (value instanceof Date) {
     		filter.addLessThanOrEqualTo(binding, (Date) value);
@@ -489,13 +475,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
     
     public static void addBetween(Filter filter, String binding, Object start, Object end) {
     	if (start instanceof String) {
-			try {
-				Integer.parseInt(start.toString());
-				Integer.parseInt(end.toString());
-				filter.addBetween(binding, Integer.valueOf(start.toString()), Integer.valueOf(end.toString()));
-			} catch (Exception e) {
-				filter.addBetween(binding, (String) start, (String) end);
-			}
+			filter.addBetween(binding, (String) start, (String) end);
     	}
     	else if (start instanceof Date) {
     		filter.addBetween(binding, (Date) start, (Date) end);

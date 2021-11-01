@@ -67,10 +67,10 @@ public class Binder {
 	 * @return
 	 */
 	public static Object fromString(Customer customer,
-													Converter<?> converter,
-													Class<?> type,
-													String stringValue,
-													boolean fromSerializedFormat) {
+										Converter<?> converter,
+										Class<?> type,
+										String stringValue,
+										boolean fromSerializedFormat) {
 		return BindUtil.fromString(customer, converter, type, stringValue, fromSerializedFormat);
 	}
 
