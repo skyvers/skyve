@@ -1279,7 +1279,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         // Write out getLazyDataModel call as the value
         StringBuilder modelExpression = new StringBuilder(128);
 		modelExpression.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
-		if (model instanceof DocumentQueryListModel) {
+		if (grid.getQueryName() != null) {
 			modelExpression.append(drivingDocumentName).append("','").append(modelName).append("',null,");
 		}
 		else {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="admin.jobSchedule.edit.title" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.jobSchedule.edit.title" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<form border="true" borderTitle="admin.jobSchedule.edit.jobDetails.borderTitle">
 		<column responsiveWidth="2"/>
@@ -27,16 +27,24 @@
 			</row>
 		</form>
 		<hbox>
-			<vbox border="true" borderTitle="admin.jobSchedule.edit.minutes.borderTitle" responsiveWidth="6">
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.minutes.borderTitle" responsiveWidth="6" widgetId="formMinutes">
 				<form>
 					<column />
 					<row>
 						<item showLabel="false">
-							<radio binding="allMinutes" />
+							<radio binding="allMinutes" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formMinutes</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
 						</item>
 					</row>
 				</form>
-				<form>
+				<form enabled="selectedMinutes">
 					<column responsiveWidth="1"/>
 					<column />
 					<column responsiveWidth="1"/>
@@ -253,16 +261,24 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="admin.jobSchedule.edit.hours.borderTitle" responsiveWidth="4">
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.hours.borderTitle" responsiveWidth="4" widgetId="formHours">
 				<form>
 					<column />
 					<row>
 						<item showLabel="false">
-							<radio binding="allHours" />
+							<radio binding="allHours" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formHours</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
 						</item>
 					</row>
 				</form>
-				<form>
+				<form enabled="selectedHours">
 					<column responsiveWidth="1"/>
 					<column />
 					<column responsiveWidth="1"/>
@@ -367,16 +383,24 @@
 			</vbox>
 			</hbox>
 			<hbox>
-			<vbox border="true" borderTitle="admin.jobSchedule.edit.days.borderTitle" responsiveWidth="4">
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.days.borderTitle" responsiveWidth="4" widgetId="formDays">
 				<form>
 					<column />
 					<row>
 						<item showLabel="false">
-							<radio binding="allDays" />
+							<radio binding="allDays" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formDays</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
 						</item>
 					</row>
 				</form>
-				<form>
+				<form enabled="selectedDays">
 					<column responsiveWidth="1"/>
 					<column />
 					<column responsiveWidth="1"/>
@@ -500,16 +524,24 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="admin.jobSchedule.edit.months.borderTitle" responsiveWidth="4">
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.months.borderTitle" responsiveWidth="4" widgetId="formMonths">
 				<form>
 					<column />
 					<row>
 						<item showLabel="false">
-							<radio binding="allMonths" />
+							<radio binding="allMonths" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formMonths</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>							
+							</radio>
 						</item>
 					</row>
 				</form>
-				<form>
+				<form enabled="selectedMonths">
 					<column responsiveWidth="1"/>
 					<column />
 					<row>
@@ -574,16 +606,24 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox border="true" borderTitle="admin.jobSchedule.edit.weekdays.borderTitle" responsiveWidth="4">
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.weekdays.borderTitle" responsiveWidth="4" widgetId="formWeekdays">
 				<form>
 					<column />
 					<row>
 						<item showLabel="false">
-							<radio binding="allWeekdays" />
+							<radio binding="allWeekdays" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formWeekdays</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
 						</item>
 					</row>
 				</form>
-				<form>
+				<form enabled="selectedWeekdays">
 					<column responsiveWidth="1"/>
 					<column />
 					<row>
