@@ -11,12 +11,12 @@ import modules.admin.domain.JobSchedule;
 public class JobScheduleExtension extends JobSchedule {
 
 	private static final long serialVersionUID = 1881085154489046318L;
-	private static final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
+	private static final CRON_DEFINITION cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
 		
 	@Override
 	public String getScheduleString() {
 		
-		return CronDescriptor.instance().describe(new CronParser(cronDefinition).parse(getCronExpression()));
+		return CronDescriptor.instance().describe(new CronParser(CRON_DEFINITION).parse(getCronExpression()));
 	}
 	
 }
