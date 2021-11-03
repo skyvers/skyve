@@ -1499,7 +1499,8 @@ isc.BizContentImageItem.addMethods({
 		this._img = isc.Img.create({
 			width: (config.width ? config.width : '100%'),
 			height: (config.height ? config.height : '100%'),
-			imageType: 'center',
+			imageType: 'stretch',
+			overflow: 'hidden',
 			isGroup: true,
 			styleName: 'bizhubRoundedBorder',
 			groupBorderCSS: '1px solid #bfbfbf',

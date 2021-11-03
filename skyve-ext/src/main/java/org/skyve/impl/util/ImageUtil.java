@@ -134,7 +134,20 @@ public class ImageUtil {
 	 * @throws IOException
 	 */
 	public static byte[] image(File file) throws IOException {
-		try (FileInputStream fis = new FileInputStream(file); BufferedInputStream bis = new BufferedInputStream(fis)) {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return image(fis);
+		}
+	}
+	
+	/**
+	 * Read the bytes from an image InputStream.
+	 * 
+	 * @param is	The input stream to read.
+	 * @return	the bytes.
+	 * @throws IOException
+	 */
+	public static byte[] image(InputStream is) throws IOException {
+		try (BufferedInputStream bis = new BufferedInputStream(is)) {
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				byte[] bytes = new byte[1024]; // 1K
 				int bytesRead = 0;
@@ -145,6 +158,7 @@ public class ImageUtil {
 			}
 		}
 	}
+	
 	
 	public static byte[] signature(String json,
 									int width,
